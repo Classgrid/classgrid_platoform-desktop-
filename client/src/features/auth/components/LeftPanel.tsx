@@ -6,7 +6,7 @@ export function LeftPanel() {
   return (
     <div className="brand-panel">
       <div className="logo-section">
-        <img src="/Classgrid.png" alt="Classgrid Logo" className="logo-img" />
+        <img src="/logos/logo.png" alt="Classgrid Logo" className="logo-img" />
         <div className="logo-text">
           <h1>Classgrid</h1>
           <p>Classgrid Classroom</p>
