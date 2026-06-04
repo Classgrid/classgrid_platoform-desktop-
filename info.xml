@@ -1,0 +1,69 @@
+# Stitch Design Flow & Strict Shadcn Rules
+
+====================================================================
+🚨 BIG NOTES: THE GREAT REBUILD 🚨
+====================================================================
+MANDATE: We are rebuilding ALL pages from SCRATCH (Except the Home Page).
+When opening Classgrid, the Home Page is good. From that point on, EVERYTHING is rebuilt.
+
+THE STRICT 4-STEP REBUILD PIPELINE:
+1. STITCH DESIGN (Theme, Colors, OKLCH, Variables)
+2. FIGMA (Layout, Structure, Spacing)
+3. SHADCN COMPONENTS (Assemble primitives from @/components/shadcn)
+4. CONNECT BACKEND / API (Wire up the data, React Router, and Context)
+
+NEVER deviate from this order when building a new page.
+====================================================================
+Before doing anything, follow these strict rules:
+
+1. You are ONLY allowed to use existing shadcn components from:
+   client/src/components/shadcn/
+
+2. Allowed components list (strict):
+   button, input, label, card, form, toast, dialog, alert, checkbox, radio-group, select, separator, tabs, badge, avatar, dropdown-menu, sheet, skeleton, switch, textarea, accordion, alert-dialog, aspect-ratio, breadcrumb, calendar, carousel, chart, collapsible, combobox, command, context-menu, table, popover, drawer, hover-card, input-otp, kbd, menubar, navigation-menu, pagination, progress, resizable, scroll-area, slider, sonner, spinner, toggle, toggle-group, tooltip, toaster
+
+3. DO NOT:
+   * create new components
+   * use @base-ui/react
+   * use useRender or mergeProps
+   * add random Tailwind styles outside components
+   * redesign UI or change structure
+
+4. If a required component is:
+   * missing
+   * not found
+   * not installed
+   THEN:
+   STOP immediately and say:
+   "Component [name] not found. Please install it first."
+   DO NOT create a replacement.
+   DO NOT continue without it.
+
+5. Before writing code, you MUST confirm:
+   "I will only use allowed shadcn components and follow all rules."
+   If any rule is broken, stop and fix before continuing.
+
+6. STRICT RULE: NEVER remove, refactor, or "clean up" my existing code unless I specifically ask you to. You must ONLY make surgical changes to the exact lines required to fix the issue. My current system is already built and functioning—do not break my edge cases.
+
+7. ARCHITECTURE RULE: Raw UI components stay in `src/components/shadcn/`. Business logic and complex assembled components (like an `<AssignmentSubmitButton />`) must be built in `src/components/features/` and import their base UI primitives from `shadcn/`.
+
+---
+
+# Our Core Technology Stack & Development Flow
+
+Step 1: The Three Pillars
+* FIGMA: Used strictly for LAYOUT. (Spacing, paddings, margins, grid structures).
+* STITCH: Used strictly for DESIGN. (Colors, themes, border styles, gradients, visual tokens).
+* SHADCN: Used strictly for COMPONENTS. (Tables, notification bars, buttons, forms, inputs, etc.).
+
+Step 2: Design Ingestion
+I will actively read your Figma layout and your Stitch design tokens using the MCP integrations to understand your exact visual and structural blueprint.
+
+Step 3: Component Sourcing
+The user provides base component code directly from the official shadcn/ui website (e.g. Table, Alert/Notification bar, Button).
+
+Step 4: Surgical Styling
+I will surgically inject the Stitch-defined design colors and the Figma-defined spacing into the allowed Shadcn components to match your vision perfectly.
+
+Step 5: Backend Wiring
+I will wire the styled React UI components to the existing Express.js backend without altering any existing business logic.

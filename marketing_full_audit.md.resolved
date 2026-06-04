@@ -1,0 +1,126 @@
+# 🔬 Classgrid Marketing Site — Full Deep-Scan Audit
+
+**Files Scanned:** 15 core files across `app/`, `components/`, `content/`, `sanity/`, `public/`
+**Date:** 2026-04-13
+
+---
+
+## 🔴 CRITICAL BUGS (Must fix before going live)
+
+### 1. `scroll-morph-hero.tsx` — Scroll Still Tied to `MAX_SCROLL = 3000`
+- **Line 85:** `const MAX_SCROLL = 3000;` — Even though the `handleWheel` hijacking was removed and `useScroll()` was added (line 140), the `virtualScroll` is still clamped to `MAX_SCROLL`:
+  ```ts
+  const virtualScroll = useTransform(scrollY, (value) => Math.min(Math.max(value, 0), MAX_SCROLL));
+  ```
+- This means the morph animation only reacts to the first 3000px of page scroll. After that, the component is dead/frozen.
+- **The hero title inside this component (lines 208-233) duplicates the REAL hero title in `page.tsx` (lines 84-88).** You now have TWO competing `h1` headlines. The one inside scroll-morph-hero says "The Operating System for Modern Campuses" while the real one says "The Operating System for Modern Education."
+
+### 2. `scroll-morph-hero.tsx` — 20 Missing Image Files
+- **Lines 87-108:** The IMAGES array references 20 PNG files:
+  ```
+  /dashboards/attendance-dashboard.png
+  /dashboards/fee-ledger.png
+  /dashboards/timetable-view.png
+  ... (20 total)
+  ```
+- **The `/public/` directory is EMPTY** (only has an empty `/logos/` folder). None of these files exist. Every single card will show a broken image icon.
+
+### 3. `globals.css` — DUPLICATE `.dark` Block (Lines 33-73)
+- The `.dark` CSS custom properties block is defined **twice identically** (lines 33-52 and lines 54-73). This is a dead duplicate that serves no purpose. It also means the dark theme `--ring` is `#8b6fff` (purple) instead of the blue `#3b82f6` used in `:root`, creating an inconsistent focus ring color.
+
+### 4. `globals.css` — DUPLICATE `@keyframes marquee` (Lines 153 and 212)
+- The marquee keyframes are defined **twice** — once inside `@theme inline` (line 153) and once inside `@layer utilities` (line 212). They use different `translateX` values:
+  - Theme version: `translateX(calc(-100% - var(--gap)))` 
+  - Utilities version: `translateX(-50%)`
+- This creates unpredictable behavior depending on CSS specificity.
+
+### 5. `globals.css` — Body Background is Dark-Mode Only
+- **Lines 235-239:** The body `background-image` uses dark gradients (`#000000`, `#06080f`). The `.light body` override exists (line 242) but uses the `.light` class selector, while the actual ThemeProvider uses `.dark` class. The base body styles assume dark mode.
+
+### 6. `integrations-marquee.tsx` — Duplicate "Razorpay" Entry
+- **Lines 6 and 18:** Razorpay appears TWICE in the `integrationLogos` array with different URLs and colors. One uses simpleicons, the other uses a G2 Crowd image.
+
+### 7. `public/logos/` — EMPTY Directory
+- The trust section (page.tsx line 139) maps over `trustContent.logos` which contains paths like `/logos/mit.png`, `/logos/vjit.png`, etc. 
+- The `/public/logos/` directory is **completely empty**. All institute trust logos will fail to load.
+- The agent "fixed" this by rendering the file path as uppercase text instead of showing actual logos (see page.tsx lines 144-148), which is a hack, not a fix.
+
+---
+
+## 🟡 MEDIUM BUGS (Functional issues)
+
+### 8. `bento-grid.tsx` — `@ts-nocheck` Suppresses All Errors
+- **Line 1:** `// @ts-nocheck` — This hides ALL TypeScript errors in the entire file. The `useMotionTemplate` hook at line 80 is called inside JSX (not at the top level), which violates React's Rules of Hooks. This will crash in production with stricter React modes.
+
+### 9. `radial-orbital-timeline.tsx` — `@ts-nocheck` + `dangerouslySetInnerHTML`
+- **Line 1:** `// @ts-nocheck` — Same as above, all TypeScript errors are suppressed.
+- **Line 175:** Uses `dangerouslySetInnerHTML` to inject a `<style>` tag with `@keyframes spin`. This is an XSS risk pattern and should use a `<style>` JSX element or Tailwind's `animate-spin` utility instead.
+
+### 10. `testimonial-carousel.tsx` — Hardcoded Fallback Data Ignores Sanity
+- **Lines 16-64:** Contains 6 hardcoded fake testimonials ("Dr. Sarah Jenkins", "Marcus Chen", etc.) as a fallback. These are NOT real Classgrid customers. If the Sanity CMS query returns `null` (which it likely does since no content has been published yet), these fake testimonials will display on the live site.
+- The Sanity `testimonials` interface expects `id`, `quote`, `author`, `role`, `initial`, `logo` — but the Sanity schema might return different field names (`_id`, `text`, `name`, `position`). This type mismatch will cause silent data drops.
+
+### 11. `testimonial-carousel.tsx` — Inline `<style>` Tag
+- **Lines 74-98:** The entire marquee animation is defined inside an inline `<style>` JSX block. This creates a new `<style>` element on every render, which is a performance problem. These keyframes should be in `globals.css`.
+
+### 12. `page.tsx` — Form Has No `onSubmit` Handler
+- **Lines 437-499:** The demo request form has input fields but:
+  - No `<form>` wrapper element
+  - No `onSubmit` handler
+  - No validation
+  - No API route to submit to
+  - The "Schedule My Free Demo" button does literally nothing when clicked.
+
+### 13. `page.tsx` — Select Dropdown Hardcodes Dark Colors
+- **Line 462:** `bg-gray-900` is hardcoded on the `<select>` element. In light mode, this will appear as a black dropdown on a white page.
+
+### 14. `Footer.tsx` — Theme Switcher Buttons Don't Work
+- **Lines 182-190:** The Sun/Moon/System buttons in the footer status bar have no `onClick` handlers. They are dead buttons that do nothing. They need to call `useTheme().setTheme()` from `next-themes`.
+
+---
+
+## 🟢 LOW PRIORITY (Polish issues)
+
+### 15. `Navbar.tsx` — No Mobile Hamburger Menu
+- The navbar only renders `hidden md:flex` for desktop navigation. On mobile screens, there is NO hamburger menu, NO slide-out drawer. The only visible element on mobile is the logo and "Book a Demo" button.
+
+### 16. `page.tsx` — Hardcoded Light Mode Hero Text
+- **Line 240:** `text-[#FAFAFA]` inside the scroll morph overlay. This is hardcoded white — it breaks in light mode (white text on white background = invisible).
+
+### 17. `laptop-mockup.tsx` — `frameBorder` is Deprecated HTML
+- **Line 11:** `frameBorder="0"` is a deprecated HTML attribute. Modern browsers ignore it. Should be styled with CSS `border: none` instead.
+
+### 18. `page.tsx` — Trust Logos Show File Paths as Text
+- **Lines 144-148:** Instead of rendering actual `<img>` tags for institute logos, it strips the path and renders the filename as uppercase text (e.g., "MIT", "VJIT"). This is a visible hack, not a proper implementation.
+
+### 19. `content/homepage.ts` — Pricing Placeholder
+- **Line 33:** `"₹X/year all-inclusive"` — This is a literal placeholder. It will display "₹X/year" to real visitors. Must be replaced with actual pricing or removed.
+
+### 20. `Globe.tsx` — Markers Are for Random World Cities
+- **Lines 24-35:** The globe markers show Manila, Mumbai, Dhaka, Cairo, Beijing, São Paulo, Mexico City, New York, Osaka, Istanbul. These are NOT Classgrid customer locations. They should either be removed or updated to real Indian institution cities (Pune, Mumbai, Delhi, Bangalore, etc.).
+
+### 21. `Reveal.tsx` — Motion Type Casting
+- **Line 12:** `const MotionDiv = motion.div as any;` — This is a Framer Motion v10/v11 compatibility hack that suppresses all type safety on the motion component.
+
+### 22. `content/homepage.ts` — Only 8 of 41 Modules Listed
+- **Lines 45-101:** Only 8 `coreModules` are defined. The page says "41 Modules. Zero Compromise." but only 8 appear in the Bento Grid. The additional 16 from `additionalModules` (line 104) are behind a "Show 16 Sub-Modules" button that has no expand logic.
+
+### 23. `integrations-marquee.tsx` — Only 12 Integration Logos
+- The section title says "Deeply Integrated Ecosystem" but only shows 12 logos. The homepage blueprint specifies 250+ integrations. Many critical ones are missing (WhatsApp, Twilio, SendGrid, Google Sheets, HuggingFace).
+
+### 24. `page.tsx` — `as any` Type Casting Everywhere
+- Lines 67, 68, 71-73, 174, 236, 268, 322, 334, 377 — `as any` is used 10+ times to silence TypeScript. This means the entire page has ZERO type safety.
+
+### 25. `next.config.ts` — Not Scanned Yet
+- The Next.js config may have `images.domains` misconfigurations that could block external image loading (simpleicons, worldvectorlogo, g2crowd).
+
+---
+
+## Summary Table
+
+| Severity | Count | Key Areas |
+|----------|-------|-----------|
+| 🔴 Critical | 7 | Scroll morph, missing images, duplicate CSS, empty public dir |
+| 🟡 Medium | 7 | @ts-nocheck, fake testimonials, dead form, broken theme switcher |
+| 🟢 Low | 11 | No mobile nav, placeholder pricing, wrong globe markers |
+| **Total** | **25** | — |

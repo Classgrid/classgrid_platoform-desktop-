@@ -1,0 +1,367 @@
+import { sendEmail } from "../brevo.service.js";
+
+/**
+ * admission-notification.service.js — Unified Admission Notification Dispatcher
+ * 
+ * Sends event-driven notifications across all channels:
+ *   1. Email (Brevo SMTP)
+ *   2. SMS (Fast2SMS — ₹0.09/msg)
+ *   3. Push (Firebase FCM)
+ * 
+ * Trigger Types (10 lifecycle events):
+ *   1. APPLICATION_RECEIVED
+ *   2. APPLICATION_UNDER_REVIEW
+ *   3. DOCUMENTS_VERIFIED
+ *   4. DOCUMENTS_REJECTED
+ *   5. MERIT_LIST_PUBLISHED
+ *   6. SELECTED
+ *   7. WAITLISTED
+ *   8. FEE_PAYMENT_PENDING
+ *   9. ENROLLED
+ *  10. WITHDRAWN
+ */
+
+// ─── SMS Budget Control ─── 
+let smsBudgetUsed = 0;
+const SMS_BUDGET_LIMIT = parseInt(process.env.SMS_BUDGET_LIMIT || "5000"); // ₹ limit
+const SMS_COST_PER_MSG = 0.09;
+
+// ─── Fast2SMS API ───
+const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY || "";
+const FAST2SMS_ENABLED = !!FAST2SMS_API_KEY;
+
+/**
+ * Send SMS via Fast2SMS DLT Route.
+ * @param {string} phone - 10-digit Indian mobile
+ * @param {string} message - SMS body (max 160 chars for single part)
+ * @returns {Promise<Object>}
+ */
+async function sendSMS(phone, message) {
+    if (!FAST2SMS_ENABLED) {
+        console.log(`[SMS-Mock] To: ${phone} | ${message}`);
+        return { success: true, mock: true };
+    }
+
+    // Budget guard
+    const projectedCost = smsBudgetUsed + SMS_COST_PER_MSG;
+    if (projectedCost > SMS_BUDGET_LIMIT) {
+        console.warn(`[SMS] Budget limit reached! Used: ₹${smsBudgetUsed}/${SMS_BUDGET_LIMIT}`);
+        return { success: false, error: "SMS budget exhausted" };
+    }
+
+    try {
+        const response = await fetch("https://www.fast2sms.com/dev/bulkV2", {
+            method: "POST",
+            headers: {
+                "authorization": FAST2SMS_API_KEY,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                route: "q", // Quick transactional
+                message,
+                language: "english",
+                flash: 0,
+                numbers: phone.replace(/^\+91/, "").replace(/\D/g, "")
+            })
+        });
+
+        const data = await response.json();
+        if (data.return) {
+            smsBudgetUsed += SMS_COST_PER_MSG;
+            console.log(`[SMS] Sent to ${phone}. Budget: ₹${smsBudgetUsed.toFixed(2)}/${SMS_BUDGET_LIMIT}`);
+        }
+        return { success: data.return, data };
+    } catch (err) {
+        console.error("[SMS] Fast2SMS Error:", err.message);
+        return { success: false, error: err.message };
+    }
+}
+
+/**
+ * Send Push Notification via Firebase FCM.
+ * @param {Array<string>} fcmTokens 
+ * @param {string} title 
+ * @param {string} body 
+ */
+async function sendPush(fcmTokens, title, body) {
+    if (!fcmTokens || fcmTokens.length === 0) return { success: false, error: "No FCM tokens" };
+
+    try {
+        const admin = (await import("firebase-admin")).default;
+        const message = {
+            notification: { title, body },
+            tokens: fcmTokens
+        };
+        const result = await admin.messaging().sendEachForMulticast(message);
+        console.log(`[FCM] Sent: ${result.successCount}/${fcmTokens.length}`);
+        return { success: true, sent: result.successCount, failed: result.failureCount };
+    } catch (err) {
+        console.error("[FCM] Error:", err.message);
+        return { success: false, error: err.message };
+    }
+}
+
+// ─── NOTIFICATION TEMPLATES ───
+const TEMPLATES = {
+    APPLICATION_RECEIVED: {
+        sms: (name, orgName, extra) => `Hi ${name}, your application to ${orgName} has been received. Track status directly here: ${extra.track_url}`,
+        email_subject: (orgName) => `Application Received — ${orgName}`,
+        email_body: (name, orgName, extra) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">📝 Application Received</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>Your application to <strong>${orgName}</strong> has been successfully received.</p>
+                    <p>Application ID: <code>${extra.appId}</code></p>
+                    <div style="margin-top: 24px; text-align: center;">
+                        <a href="${extra.track_url}" style="display:inline-block;padding:12px 24px;background-color:#6366f1;color:white;text-decoration:none;border-radius:6px;font-weight:bold;">Track Application Status</a>
+                    </div>
+                </div>
+            </div>`,
+        push_title: "📝 Application Received",
+        push_body: (orgName) => `Your application to ${orgName} has been received.`
+    },
+
+    DOCUMENTS_VERIFIED: {
+        sms: (name, orgName, extra) => `Hi ${name}, your documents for ${orgName} have been verified. Pay fees here: ${extra.track_url}`,
+        email_subject: (orgName) => `Documents Verified — ${orgName}`,
+        email_body: (name, orgName, extra) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#10b981,#059669);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">✅ Documents Verified</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>All your submitted documents for <strong>${orgName}</strong> have been verified.</p>
+                    <p>Please proceed to complete the fee payment to confirm your admission.</p>
+                    <div style="margin-top: 24px; text-align: center;">
+                        <a href="${extra.track_url}" style="display:inline-block;padding:12px 24px;background-color:#10b981;color:white;text-decoration:none;border-radius:6px;font-weight:bold;">Pay Admission Fee</a>
+                    </div>
+                </div>
+            </div>`,
+        push_title: "✅ Documents Verified",
+        push_body: (orgName) => `Your documents for ${orgName} have been verified. Pay fees to confirm.`
+    },
+
+    DOCUMENTS_REJECTED: {
+        sms: (name, orgName) => `Hi ${name}, one or more documents for ${orgName} were rejected. Please re-upload.`,
+        email_subject: (orgName) => `Document Issue — ${orgName}`,
+        email_body: (name, orgName, reason) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#ef4444,#dc2626);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">⚠️ Document Rejected</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>One or more of your documents for <strong>${orgName}</strong> require correction.</p>
+                    <p><strong>Reason:</strong> ${reason || "Please contact the admission office."}</p>
+                    <p>Please re-upload the corrected document(s) at your earliest convenience.</p>
+                </div>
+            </div>`,
+        push_title: "⚠️ Document Issue",
+        push_body: () => `A document was rejected. Please re-upload.`
+    },
+
+    MERIT_LIST_PUBLISHED: {
+        sms: (name, orgName) => `Hi ${name}, the merit list for ${orgName} has been published. Check your rank on classgrid.in`,
+        email_subject: (orgName) => `Merit List Published — ${orgName}`,
+        email_body: (name, orgName, rank) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">📊 Merit List Published</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>The merit list for <strong>${orgName}</strong> has been published.</p>
+                    ${rank ? `<p>Your Merit Rank: <strong>#${rank}</strong></p>` : ""}
+                    <p>Please check the admission portal for further steps.</p>
+                </div>
+            </div>`,
+        push_title: "📊 Merit List Published",
+        push_body: (orgName) => `Merit list for ${orgName} is now available.`
+    },
+
+    SELECTED: {
+        sms: (name, orgName) => `Congratulations ${name}! You have been SELECTED for admission at ${orgName}. Complete fee payment to confirm.`,
+        email_subject: (orgName) => `🎉 Admission Offer — ${orgName}`,
+        email_body: (name, orgName) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">🎉 Congratulations!</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>We are pleased to inform you that you have been <strong>selected</strong> for admission at <strong>${orgName}</strong>.</p>
+                    <p>Please complete your fee payment at the earliest to confirm your seat.</p>
+                </div>
+            </div>`,
+        push_title: "🎉 You're Selected!",
+        push_body: (orgName) => `You have been selected for admission at ${orgName}!`
+    },
+
+    WAITLISTED: {
+        sms: (name, orgName, pos) => `Hi ${name}, you are on the waitlist (Position: ${pos}) for ${orgName}. We'll notify you if a seat opens.`,
+        email_subject: (orgName) => `Waitlisted — ${orgName}`,
+        email_body: (name, orgName, pos) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">⏳ Waitlisted</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>You have been placed on the waitlist for <strong>${orgName}</strong>.</p>
+                    <p>Waitlist Position: <strong>#${pos || "N/A"}</strong></p>
+                    <p>You will be notified automatically if a seat becomes available.</p>
+                </div>
+            </div>`,
+        push_title: "⏳ Waitlisted",
+        push_body: (orgName) => `You are on the waitlist for ${orgName}.`
+    },
+
+    FEE_PAYMENT_PENDING: {
+        sms: (name, orgName) => `Hi ${name}, your fee payment for ${orgName} is pending. Complete payment to confirm admission.`,
+        email_subject: (orgName) => `Fee Payment Pending — ${orgName}`,
+        email_body: (name, orgName) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">💳 Payment Pending</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>Your admission fee payment for <strong>${orgName}</strong> is pending.</p>
+                    <p>Please complete the payment before the deadline to secure your seat.</p>
+                </div>
+            </div>`,
+        push_title: "💳 Payment Pending",
+        push_body: (orgName) => `Complete your fee payment for ${orgName}.`
+    },
+
+    ENROLLED: {
+        sms: (name, orgName) => `Congratulations ${name}! You are now officially enrolled at ${orgName}. Welcome aboard! 🎓`,
+        email_subject: (orgName) => `🎓 Enrollment Confirmed — ${orgName}`,
+        email_body: (name, orgName) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">🎓 Welcome to ${orgName}!</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>Your enrollment at <strong>${orgName}</strong> is confirmed!</p>
+                    <p>Login credentials have been sent separately. Please check your email.</p>
+                </div>
+            </div>`,
+        push_title: "🎓 Enrolled!",
+        push_body: (orgName) => `You are now enrolled at ${orgName}!`
+    },
+
+    WITHDRAWN: {
+        sms: (name, orgName) => `Hi ${name}, your admission at ${orgName} has been withdrawn. Contact admin for any queries.`,
+        email_subject: (orgName) => `Application Withdrawn — ${orgName}`,
+        email_body: (name, orgName) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:#262626;padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">Application Withdrawn</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>Your application at <strong>${orgName}</strong> has been withdrawn.</p>
+                    <p>If this was not intended, please contact the admission office immediately.</p>
+                </div>
+            </div>`,
+        push_title: "Application Withdrawn",
+        push_body: (orgName) => `Your application at ${orgName} has been withdrawn.`
+    },
+
+    APPLICATION_UNDER_REVIEW: {
+        sms: (name, orgName) => `Hi ${name}, your application for ${orgName} is under review. We'll update you soon.`,
+        email_subject: (orgName) => `Application Under Review — ${orgName}`,
+        email_body: (name, orgName) => `
+            <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#3b82f6,#2563eb);padding:32px;text-align:center;">
+                    <h1 style="color:white;margin:0;">🔍 Under Review</h1>
+                </div>
+                <div style="padding:32px;">
+                    <p>Dear <strong>${name}</strong>,</p>
+                    <p>Your application for <strong>${orgName}</strong> is currently being reviewed.</p>
+                    <p>We will notify you once the verification is complete.</p>
+                </div>
+            </div>`,
+        push_title: "🔍 Under Review",
+        push_body: (orgName) => `Your application for ${orgName} is being reviewed.`
+    }
+};
+
+/**
+ * Dispatch notification across all channels for a specific trigger.
+ * 
+ * @param {string} trigger - e.g., "APPLICATION_RECEIVED", "ENROLLED"
+ * @param {Object} context - { application, orgName, fcmTokens, extra }
+ * @returns {Promise<Object>} { email, sms, push }
+ */
+export async function dispatchNotification(trigger, context) {
+    const template = TEMPLATES[trigger];
+    if (!template) {
+        console.warn(`[Notification] No template for trigger: ${trigger}`);
+        return { error: `Unknown trigger: ${trigger}` };
+    }
+
+    const { application, orgName, fcmTokens, extra } = context;
+    const name = application.full_name;
+    const results = { email: null, sms: null, push: null };
+
+    // 1. Email
+    if (application.email) {
+        try {
+            const subject = template.email_subject(orgName);
+            const html = template.email_body(name, orgName, extra);
+            await sendEmail({
+                to: application.email,
+                subject,
+                html,
+                text: template.sms(name, orgName, extra)
+            });
+            results.email = { success: true };
+        } catch (err) {
+            results.email = { success: false, error: err.message };
+        }
+    }
+
+    // 2. SMS
+    if (application.phone) {
+        results.sms = await sendSMS(application.phone, template.sms(name, orgName, extra));
+    }
+
+    // 3. Push
+    if (fcmTokens && fcmTokens.length > 0) {
+        results.push = await sendPush(
+            fcmTokens,
+            template.push_title,
+            template.push_body(orgName)
+        );
+    }
+
+    console.log(`[Notification] ${trigger} dispatched for ${name}: Email=${results.email?.success}, SMS=${results.sms?.success}, Push=${results.push?.success}`);
+    return results;
+}
+
+/**
+ * Get current SMS budget usage.
+ * @returns {{ used: number, limit: number, remaining: number, messages_sent: number }}
+ */
+export function getSMSBudgetStatus() {
+    return {
+        used: smsBudgetUsed,
+        limit: SMS_BUDGET_LIMIT,
+        remaining: SMS_BUDGET_LIMIT - smsBudgetUsed,
+        messages_sent: Math.floor(smsBudgetUsed / SMS_COST_PER_MSG),
+        cost_per_msg: SMS_COST_PER_MSG
+    };
+}
+
+export default {
+    dispatchNotification,
+    getSMSBudgetStatus,
+    TEMPLATES
+};

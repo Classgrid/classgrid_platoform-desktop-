@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classgrid Admission Email Proof — All 4 Types</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #fff; font-family: 'Inter', sans-serif; padding: 40px 20px; }
+    .page-title { text-align: center; font-size: 28px; margin-bottom: 12px; font-weight: 700; }
+    .page-sub { text-align: center; font-size: 14px; color: #9ca3af; margin-bottom: 48px; }
+    .stage-label {
+      font-size: 14px; font-weight: 600; color: #000; background: #facc15;
+      display: inline-block; padding: 4px 14px; border-radius: 4px; margin-bottom: 8px;
+    }
+    .org-label {
+      font-size: 12px; font-weight: 600; color: #fff; background: #3b82f6;
+      display: inline-block; padding: 3px 10px; border-radius: 4px; margin-left: 8px;
+    }
+    .org-label.school { background: #22c55e; }
+    .org-label.coaching { background: #a855f7; }
+    .org-label.engineering { background: #ef4444; }
+    .org-label.jr-college { background: #f97316; }
+    .org-label.universal { background: #6366f1; }
+    .email-title { font-size: 16px; font-weight: 600; color: #e5e5e5; margin-bottom: 20px; }
+    .email-wrapper {
+      max-width: 660px; margin: 0 auto 60px; border: 1px solid #333; border-radius: 12px; overflow: hidden;
+    }
+    .email-meta-bar {
+      background: #1a1a2e; padding: 14px 20px; border-bottom: 1px solid #333;
+      font-size: 13px; color: #9ca3af;
+    }
+    .email-meta-bar strong { color: #fff; }
+    /* ======== EXACT CLASSGRID EMAIL CSS (copy from baseTemplate) ======== */
+    .email-body {
+      background: #0f0f0f; padding: 0;
+    }
+    .email-container {
+      background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden;
+      margin: 30px auto; max-width: 600px;
+    }
+    .email-header {
+      padding: 30px; border-bottom: 1px solid #2a2a2a; text-align: center;
+    }
+    .email-header img { display: block; margin: 0 auto 16px; border-radius: 6px; }
+    .email-header h1 { color: #ffffff; margin: 0; font-size: 20px; }
+    .email-content {
+      padding: 30px; color: #cccccc; font-size: 14px; line-height: 1.7;
+    }
+    .email-content h1 { color: #ffffff; margin-top: 0; margin-bottom: 16px; font-size: 20px; }
+    .email-content h3 { color: #ffffff; margin-top: 0; margin-bottom: 16px; }
+    .email-content p { margin: 0 0 20px; color: #cccccc; font-size: 14px; line-height: 1.7; }
+    .email-content ul { margin: 0 0 20px 20px; color: #cccccc; font-size: 14px; padding: 0; line-height: 1.7; }
+    .email-content li { margin-bottom: 8px; }
+    .email-content strong { color: #ffffff; }
+    .email-content a { color: #ffffff; text-decoration: underline; }
+    .email-content .btn {
+      display: inline-block; background-color: #ffffff; color: #000000 !important;
+      text-decoration: none; padding: 12px 28px; border-radius: 6px; font-size: 14px;
+      font-weight: bold; margin: 10px 0; text-align: center;
+    }
+    .email-content .btn-danger { background-color: #dc2626; color: #ffffff !important; }
+    .email-content .box {
+      background-color: #161616; border: 1px solid #2a2a2a; border-radius: 8px;
+      padding: 20px; margin-bottom: 24px;
+    }
+    .email-content .box p { margin-bottom: 8px; color: #cccccc; }
+    .email-content .box p:last-child { margin-bottom: 0; }
+    .email-content .box .meta {
+      font-size: 12px; color: #9ca3af; margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    }
+    .email-content .box .code {
+      font-family: monospace; font-size: 24px; color: #ffffff; letter-spacing: 4px;
+      font-weight: bold; display: block; margin-top: 8px;
+    }
+    .email-footer {
+      padding: 20px; text-align: center; border-top: 1px solid #2a2a2a; color: #7a7a7a; font-size: 12px;
+    }
+    .email-support { margin-top: 30px; }
+    .email-support p { color: #9ca3af; font-size: 13px; margin: 0; }
+    .divider { border: none; border-top: 2px dashed #333; margin: 60px auto; max-width: 660px; }
+  </style>
+</head>
+<body>
+
+<h1 class="page-title">📧 Classgrid Admission Email Suite — LIVE PROOF</h1>
+<p class="page-sub">Every email sent during the admission process for ALL institution types. Rendered using the EXACT same CSS as production emails.</p>
+
+<!-- ═══════════════ EMAIL 1: OTP VERIFICATION ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 1</span>
+    <span class="org-label universal">ALL TYPES</span><br>
+    <strong>Function:</strong> getAdmissionVerificationOtpEmailHtml<br>
+    <strong>Trigger:</strong> Student enters email/phone → OTP generated → This email fires
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Admission Email Verification</h1>
+      </div>
+      <div class="email-content">
+        <h1>Verify your Email Address</h1>
+        <p>Hi <strong>Shivam Kotwal</strong>,</p>
+        <p>We received a request to verify your email for your admission application to <strong>Pune Institute of Computer Technology</strong>.</p>
+        <div class="box" style="text-align:center; margin: 24px 0;">
+          <div class="meta">Your Verification Code</div>
+          <span class="code" style="font-size:32px; letter-spacing:8px; color:#ffffff;">847291</span>
+          <p style="margin-top:12px; font-size:13px; color:#9ca3af;">This code expires in <strong style="color:#ffffff;">5 minutes</strong>.</p>
+        </div>
+        <p style="color:#9ca3af; font-size:13px;">If you did not initiate this application, you can safely ignore this email.</p>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 2: APPLICATION RECEIVED ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 2</span>
+    <span class="org-label universal">ALL TYPES</span><br>
+    <strong>Function:</strong> getAdmissionApplicationReceivedEmailHtml<br>
+    <strong>Trigger:</strong> Student completes form + uploads documents → clicks Submit
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Application Received — Pune Institute of Computer Technology</h1>
+      </div>
+      <div class="email-content">
+        <h1>Application Submitted Successfully 📩</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>Your admission application form for <strong>Pune Institute of Computer Technology</strong> has been successfully submitted and is now under review by the administration.</p>
+        <div class="box">
+          <div class="meta">Application Summary</div>
+          <p><strong>Application No:</strong> <span style="font-family: monospace; font-size: 16px; color: #3b82f6;">APP-PICT-2026-00421</span></p>
+          <p><strong>Course/Branch Applied:</strong> Computer Engineering</p>
+          <p><strong>Submission Date:</strong> 14 April, 2026 11:45 PM IST</p>
+        </div>
+        <div class="box" style="border-left: 3px solid #6366f1;">
+          <p style="margin-bottom: 8px;"><strong>🔍 What happens next?</strong></p>
+          <p style="margin-bottom: 8px;">1. The administration desk will verify your uploaded documents.</p>
+          <p style="margin-bottom: 8px;">2. You will receive an email update regarding document approval or rejection.</p>
+          <p style="margin-bottom: 0;">3. If approved, you will be requested to pay the official admission fee to secure your seat.</p>
+        </div>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 3: ADMIN APPROVED ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 4</span>
+    <span class="org-label school">SCHOOL</span>
+    <span class="org-label jr-college">JR. COLLEGE</span>
+    <span class="org-label coaching">COACHING</span><br>
+    <strong>Function:</strong> getAdmissionVerificationApprovedEmailHtml<br>
+    <strong>Trigger:</strong> Admin clicks "Approve" after checking documents manually
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Application Approved — Action Required</h1>
+      </div>
+      <div class="email-content">
+        <h1>🟢 Documents Verified & Approved</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>Great news! The administration desk at <strong>Sunrise Public School</strong> has successfully reviewed and verified your admission application and documents.</p>
+        <div class="box" style="border-left: 3px solid #f59e0b;">
+          <p style="margin-bottom: 8px;"><strong>⚠️ Action Required: Fee Payment</strong></p>
+          <p>To officially confirm your seat for <strong>Class 11 (Science)</strong>, you must complete your fee payment within the stipulated deadline.</p>
+          <p>Total Fee Payable: <strong>₹45,000</strong></p>
+        </div>
+        <div style="text-align:center; margin: 30px 0;">
+          <a href="#" class="btn">Proceed to Payment</a>
+        </div>
+        <p style="margin-top:20px; font-size:14px; color:#ef4444;">
+          Note: Failure to pay the fees before the deadline will result in automatic cancellation of your verified seat.
+        </p>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 4: ADMIN REJECTED ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 4</span>
+    <span class="org-label universal">ALL TYPES</span><br>
+    <strong>Function:</strong> getAdmissionVerificationRejectedEmailHtml<br>
+    <strong>Trigger:</strong> Admin clicks "Reject" with a reason
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Application Update — Correction Required</h1>
+      </div>
+      <div class="email-content">
+        <h1>🔴 Application Requires Correction</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>The administration desk at <strong>Pune Institute of Computer Technology</strong> has reviewed your application but found discrepancies or invalid documents.</p>
+        <div class="box" style="border-left: 3px solid #ef4444;">
+          <div class="meta">Rejection Reason</div>
+          <p style="color:#ffffff; font-weight: 500;">Uploaded Aadhar Card image is blurry and unreadable. Please re-upload a clear scan or photo of both sides of your Aadhar Card.</p>
+        </div>
+        <p style="margin-bottom: 24px;">Please login to your admission portal immediately to rectify the errors and re-submit your application before the deadline.</p>
+        <div style="text-align:center; margin: 30px 0;">
+          <a href="#" class="btn">Login & Rectify</a>
+        </div>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 5: ENGINEERING PRN & DIVISION ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 4 (AUTO-BYPASS)</span>
+    <span class="org-label engineering">ENGINEERING</span><br>
+    <strong>Function:</strong> getEngineeringPrnAllotmentEmailHtml<br>
+    <strong>Trigger:</strong> CET student form submitted → Auto-PRN generated → Division/Batch assigned instantly
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Official PRN & Division Allotment</h1>
+      </div>
+      <div class="email-content">
+        <h1>Welcome to Computer Engineering</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>Your application and documents have been successfully processed. Your official academic provisions and credentials for <strong>Pune Institute of Computer Technology</strong> are now ready.</p>
+        <div class="box">
+          <div class="meta">Official Academic Allotment</div>
+          <p><strong>Permanent Registration No (PRN):</strong> <span style="font-family: monospace; font-size: 16px; color: #3b82f6;">2026CE-SC-420</span></p>
+          <p><strong>Admitted Category:</strong> SC (Seat: CAP)</p>
+          <p><strong>Division:</strong> J</p>
+          <p><strong>Lab Batch:</strong> J-2</p>
+        </div>
+        <div class="box" style="border-left: 3px solid #f59e0b;">
+          <p style="margin-bottom: 8px;"><strong>⚠️ Action Required: Fee Payment</strong></p>
+          <p>To officially confirm this seat, you must complete your category-adjusted fee payment within the stipulated deadline.</p>
+          <p>Login to the admission portal using your PRN to complete the checkout.</p>
+        </div>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 6: FEE RECEIPT ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 5</span>
+    <span class="org-label universal">ALL TYPES</span><br>
+    <strong>Function:</strong> getAdmissionFeeReceiptHtml<br>
+    <strong>Trigger:</strong> Razorpay webhook → payment.captured → Fee receipt fires instantly
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Admission Fee Receipt</h1>
+      </div>
+      <div class="email-content">
+        <h1>Fee Payment Receipt</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>We are pleased to confirm that your admission fee for <strong>Pune Institute of Computer Technology</strong> has been successfully received.</p>
+        <div class="box">
+          <div class="meta">Receipt Details</div>
+          <p><strong>Receipt No:</strong> RCPT-PICT-2026-0421</p>
+          <p><strong>Amount Paid:</strong> ₹1,18,500</p>
+          <p><strong>Payment Date:</strong> 14 April, 2026 11:50 PM IST</p>
+          <p><strong>Transaction ID:</strong> pay_OxR4kJ8mQ2pN5v</p>
+        </div>
+        <div class="box" style="border-left: 3px solid #34d399;">
+          <p><strong>Enrollment Status:</strong> Confirmed 🎉</p>
+          <p>Your admission is now finalized. You can access your student dashboard using your registered phone/email.</p>
+        </div>
+        <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">This is a computer-generated receipt and does not require a physical signature.</p>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 7: ENGINEERING FINAL CONFIRMATION ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 6 — FINAL</span>
+    <span class="org-label engineering">ENGINEERING</span><br>
+    <strong>Function:</strong> getEngineeringFinalConfirmationEmailHtml<br>
+    <strong>Trigger:</strong> Fee confirmed → ERP account created → This is the grand finale email
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Final Admission Confirmation</h1>
+      </div>
+      <div class="email-content">
+        <h1>🟢 OFFICIAL ADMISSION CONFIRMED</h1>
+        <p>Dear <strong>Shivam Kotwal</strong>,</p>
+        <p>Congratulations! Your fee payment has been successfully received, and your admission to <strong>Pune Institute of Computer Technology</strong> is now <strong>100% CONFIRMED</strong>.</p>
+
+        <h3 style="color:#ffffff; margin-top:24px;">🏛️ Academic Allotment Details</h3>
+        <ul style="padding-left:20px;">
+          <li><strong>Branch Allotted:</strong> Computer Engineering (Choice Code: CE6205)</li>
+          <li><strong>Admitted Category:</strong> SC</li>
+          <li><strong>Academic Year:</strong> 2026-2027</li>
+          <li><strong>Division:</strong> J</li>
+          <li><strong>Lab Batch:</strong> J-2</li>
+          <li><strong>PRN:</strong> <span style="color:#34d399;">2026CE-SC-420</span></li>
+        </ul>
+
+        <h3 style="color:#ffffff; margin-top:24px;">💳 Transaction Receipt</h3>
+        <ul style="padding-left:20px;">
+          <li><strong>Razorpay ID:</strong> pay_OxR4kJ8mQ2pN5v</li>
+          <li><strong>Total Fee Paid:</strong> ₹1,18,500 (SC Category Tuition Waiver Applied)</li>
+          <li><strong>Payment Date:</strong> 14 April, 2026 11:50 PM IST</li>
+        </ul>
+
+        <div class="box" style="margin-top:24px; border-left: 3px solid #3b82f6;">
+          <p style="margin-bottom: 8px;"><strong>📱 Next Steps: Download Classgrid</strong></p>
+          <p>Your ERP account is active. Download the Classgrid App on your phone.</p>
+          <p><strong>Login ID:</strong> 2026CE-SC-420</p>
+          <p style="margin-bottom: 0;"><strong>Password:</strong> Shivam@2026 (Set by you during registration)</p>
+        </div>
+
+        <p style="margin-top:24px; font-size:14px; color:#9ca3af;">
+          <strong>📄 Final Document Submission:</strong> Attached to this email is your Official Admission Confirmation PDF. Please print it and submit it along with your physical original documents to the Admin Desk before the reporting deadline.
+        </p>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 8: SCHOOL FINAL CONFIRMATION ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 6 — FINAL</span>
+    <span class="org-label school">SCHOOL</span>
+    <span class="org-label jr-college">JR. COLLEGE</span><br>
+    <strong>Function:</strong> getSchoolAdmissionConfirmationEmailHtml<br>
+    <strong>Trigger:</strong> Fee confirmed → Student provisioned → Parent notified
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Registration Confirmed</h1>
+      </div>
+      <div class="email-content">
+        <h1>Welcome to Sunrise Public School</h1>
+        <p>Dear Parent/Guardian of <strong>Arjun Mehta</strong>,</p>
+        <p>We are delighted to confirm that your ward's admission for the academic year <strong>2026-2027</strong> has been successfully completed.</p>
+        <div class="box">
+          <div class="meta">Enrollment Details</div>
+          <p><strong>Student Name:</strong> Arjun Mehta</p>
+          <p><strong>Grade/Standard:</strong> Class 5</p>
+          <p><strong>Division:</strong> Div A</p>
+          <p><strong>Roll/Registration No:</strong> <span style="font-family: monospace; font-size: 16px; color: #3b82f6;">SPS-2026-0089</span></p>
+        </div>
+        <div class="box" style="border-left: 3px solid #34d399;">
+          <p style="margin-bottom: 8px;"><strong>📱 Parent Portal Access</strong></p>
+          <p>Please download the Classgrid App to track attendance, timetable, and fees.</p>
+          <p><strong>Login Phone:</strong> +91 98765 43210</p>
+          <p style="margin-bottom: 0;">Use the 'Login with OTP' feature on your phone to instantly access the dashboard.</p>
+        </div>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL 9: COACHING FINAL CONFIRMATION ═══════════════ -->
+<div class="email-wrapper">
+  <div class="email-meta-bar">
+    <span class="stage-label">STAGE 6 — FINAL</span>
+    <span class="org-label coaching">COACHING</span><br>
+    <strong>Function:</strong> getCoachingAdmissionConfirmationEmailHtml<br>
+    <strong>Trigger:</strong> Fee confirmed → Student enrolled in batch
+  </div>
+  <div class="email-body">
+    <div class="email-container">
+      <div class="email-header">
+        <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48">
+        <h1>Batch Enrollment Complete</h1>
+      </div>
+      <div class="email-content">
+        <h1>You are Enrolled: JEE Advanced Target 2027</h1>
+        <p>Hi <strong>Riya Sharma</strong>,</p>
+        <p>Your enrollment at <strong>Resonance Coaching</strong> is confirmed. Let's get to work.</p>
+        <div class="box" style="border-left: 3px solid #a855f7;">
+          <div class="meta">Course Details</div>
+          <p><strong>Course/Batch:</strong> JEE Advanced Target 2027</p>
+          <p><strong>Target Exam:</strong> JEE Advanced</p>
+          <p><strong>Student ID:</strong> <span style="font-family: monospace; font-size: 16px; color: #3b82f6;">RES-JEE-2026-0842</span></p>
+        </div>
+        <p style="margin-top:20px; font-size:14px; color:#9ca3af;">
+          Download the Classgrid App to access your upcoming tests, video lectures, and live schedule.
+        </p>
+        <div class="email-support"><p>Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a></p></div>
+      </div>
+      <div class="email-footer">© 2026 Classgrid. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SUMMARY TABLE ═══════════════ -->
+<div style="max-width: 700px; margin: 60px auto; background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 30px;">
+  <h2 style="color: #fff; margin-bottom: 20px; font-size: 18px;">📋 Complete Email Coverage Map</h2>
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ccc;">
+    <thead>
+      <tr style="border-bottom: 1px solid #333;">
+        <th style="text-align: left; padding: 10px; color: #9ca3af;">Stage</th>
+        <th style="text-align: left; padding: 10px; color: #9ca3af;">Email</th>
+        <th style="text-align: left; padding: 10px; color: #9ca3af;">Applies To</th>
+        <th style="text-align: left; padding: 10px; color: #9ca3af;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">1</td>
+        <td style="padding: 10px;">OTP Verification</td>
+        <td style="padding: 10px;">🟣 All</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">2</td>
+        <td style="padding: 10px;">Application Received</td>
+        <td style="padding: 10px;">🟣 All</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">4</td>
+        <td style="padding: 10px;">Docs Approved → Pay Fee</td>
+        <td style="padding: 10px;">🟢 School / 🟠 Jr.College / 🟣 Coaching</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">4</td>
+        <td style="padding: 10px;">Docs Rejected → Rectify</td>
+        <td style="padding: 10px;">🟣 All</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">4</td>
+        <td style="padding: 10px;">PRN + Division Allotment</td>
+        <td style="padding: 10px;">🔴 Engineering</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">5</td>
+        <td style="padding: 10px;">Fee Payment Receipt</td>
+        <td style="padding: 10px;">🟣 All</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">6</td>
+        <td style="padding: 10px;">Final Confirmation (Engineering)</td>
+        <td style="padding: 10px;">🔴 Engineering</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #222;">
+        <td style="padding: 10px;">6</td>
+        <td style="padding: 10px;">Final Confirmation (School/Jr.College)</td>
+        <td style="padding: 10px;">🟢 School / 🟠 Jr.College</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">6</td>
+        <td style="padding: 10px;">Final Confirmation (Coaching)</td>
+        <td style="padding: 10px;">🟣 Coaching</td>
+        <td style="padding: 10px;">✅ CODED</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 20px; font-size: 12px; color: #6b7280;">
+    📌 Phone OTP is handled by <code style="color:#3b82f6;">sms.service.js</code> (Fast2SMS) and stored in <code style="color:#3b82f6;">AdmissionOTP.js</code> model. No email template needed — it's an SMS text message.
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+    "name": "classgrid-platform",
+    "private": true,
+    "description": "Classgrid Platform — Monorepo root",
+    "scripts": {
+        "start": "cd server && node server.js",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+        "dev:server": "npm run dev --prefix server",
+        "dev:client": "npm run dev:client --prefix client",
+        "install:server": "cd server && npm install",
+        "install:client": "cd client && npm install",
+        "install:all": "cd server && npm install && cd ../client && npm install"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1"
+    },
+    "dependencies": {
+        "@radix-ui/react-dialog": "^1.1.15",
+        "@radix-ui/react-label": "^2.1.8",
+        "@sanity/client": "^7.21.0",
+        "@tiptap/extension-placeholder": "^3.20.4",
+        "@tiptap/pm": "^3.20.4",
+        "@tiptap/react": "^3.20.4",
+        "@tiptap/starter-kit": "^3.20.4",
+        "@vercel/analytics": "^1.6.1",
+        "country-state-city": "^3.2.1",
+        "html5-qrcode": "^2.3.8",
+        "indian-pincodes": "^1.1.0",
+        "lucide-react": "^1.7.0",
+        "rehype-raw": "^7.0.0",
+        "turndown": "^7.2.4",
+        "turndown-plugin-gfm": "^1.0.2",
+        "uuid": "^14.0.0"
+    }
+}

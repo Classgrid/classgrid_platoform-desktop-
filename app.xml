@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  AI HANDSHAKE: My name is SORRA.                             ║
+  ║  If Nikhil calls me "Sorra", I respond:                      ║
+  ║  "Nikhil, how is it going?" — THIS IS A PERMANENT DEAL.      ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  CLASSGRID PLATFORM — COMPLETE ARCHITECTURE REFERENCE       ║
+  ║  Last Updated: April 6, 2026                                ║
+  ║  Purpose: AI Memory File — Read this FIRST every session    ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<classgrid>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  WHAT IS CLASSGRID?                                    -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <overview>
+    <name>Classgrid</name>
+    <tagline>India's Most Advanced College ERP Platform</tagline>
+    <type>Multi-Tenant SaaS</type>
+    <domain>classgrid.in</domain>
+    <app_domain>app.classgrid.in</app_domain>
+    <founder>Nikhil Shinde</founder>
+    <status>Active Development — Exams until June 13, 2026</status>
+    <description>
+      Classgrid is a full-stack college management ERP designed for Indian universities.
+      It replaces 10+ separate tools (attendance, fees, library, timetable, exams, chat, etc.)
+      with one unified SaaS platform. Each college is an isolated "organization" (multi-tenant).
+    </description>
+  </overview>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  TECH STACK                                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <tech_stack>
+    <frontend>
+      <framework>React 18 (Vite)</framework>
+      <styling>Tailwind CSS + Custom CSS Modules</styling>
+      <components>Shadcn/UI (from client/src/components/shadcn/)</components>
+      <state>React Context + useReducer</state>
+      <routing>React Router v6</routing>
+      <charts>Recharts</charts>
+      <animations>Framer Motion</animations>
+      <globe>cobe (3D globe on login page)</globe>
+      <theme>OKLCH color system, dark mode support</theme>
+      <path>client/</path>
+    </frontend>
+
+    <backend>
+      <framework>Node.js + Express.js</framework>
+      <database>Supabase (PostgreSQL + Row Level Security)</database>
+      <auth>Supabase Auth (Google OAuth + Email/Password)</auth>
+      <storage>Supabase Storage (file uploads)</storage>
+      <realtime>Supabase Realtime (chat, notifications)</realtime>
+      <payments>Razorpay (fees collection)</payments>
+      <sms>Fast2SMS (Indian SMS gateway)</sms>
+      <email>Nodemailer + Gmail SMTP</email>
+      <ai>Google Gemini API (AI quiz generation, summaries)</ai>
+      <hosting>AWS EC2 (t3.medium, Mumbai region)</hosting>
+      <process_manager>PM2</process_manager>
+      <reverse_proxy>Nginx</reverse_proxy>
+      <ssl>Let's Encrypt (auto-renew)</ssl>
+      <path>server/</path>
+    </backend>
+
+    <android>
+      <language>Kotlin</language>
+      <architecture>WebView Wrapper (loads app.classgrid.in)</architecture>
+      <native_features>
+        Google One Tap Sign-In (Credential Manager API),
+        Biometric Auth (Fingerprint/Face),
+        Push Notifications (Firebase Cloud Messaging),
+        Camera/File Upload,
+        Deep Linking,
+        Haptic Vibration
+      </native_features>
+      <path>android/</path>
+    </android>
+  </tech_stack>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  3 ANDROID APPS (Build Flavors)                        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <android_apps>
+    <total_apps>3</total_apps>
+    <codebase>Single codebase using Gradle Build Flavors</codebase>
+    <firebase_project>classgrid-notification (Spark/Free plan)</firebase_project>
+
+    <app id="1">
+      <name>Classgrid</name>
+      <package>com.classgrid.app</package>
+      <flavor>student</flavor>
+      <base_url>https://app.classgrid.in/student/login</base_url>
+      <role_lock>Can NEVER see faculty or admin login pages</role_lock>
+    </app>
+
+    <app id="2">
+      <name>Classgrid Faculty</name>
+      <package>com.classgrid.faculty</package>
+      <flavor>faculty</flavor>
+      <base_url>https://app.classgrid.in/faculty/login</base_url>
+      <role_lock>Can NEVER see student or admin login pages</role_lock>
+    </app>
+
+    <app id="3">
+      <name>Classgrid Admin</name>
+      <package>com.classgrid.admin</package>
+      <flavor>admin</flavor>
+      <base_url>https://app.classgrid.in/admin/login</base_url>
+      <role_lock>Can NEVER see student or faculty login pages</role_lock>
+    </app>
+
+    <google_play_compliance>
+      Native Google Sign-In (no WebView OAuth) = APPROVED,
+      Back button intercepts React Router history = APPROVED,
+      External links (Zoom/Meet/Razorpay) open in Chrome = APPROVED,
+      Push Notifications + Biometrics = Native features = APPROVED,
+      Privacy Policy on login page + settings = APPROVED
+    </google_play_compliance>
+  </android_apps>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  USER ROLES                                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <roles>
+    <role name="org_admin">
+      Creates the organization, manages faculty, students, departments.
+      Has god-mode access to everything within their org.
+    </role>
+    <role name="faculty">
+      Manages classes, attendance, assignments, grades, quizzes.
+      Can be HOD, Class Coordinator, Exam Controller etc.
+    </role>
+    <role name="student">
+      Views attendance, submits assignments, takes quizzes,
+      pays fees, accesses library, views timetable.
+    </role>
+  </roles>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  PROJECT FOLDER STRUCTURE (Clean as of April 6, 2026)  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <folder_structure>
+    classgrid_platform/
+    ├── .gitignore
+    ├── README.md
+    ├── info.xml              (Shadcn/Stitch coding rules)
+    ├── app.xml               (THIS FILE — architecture reference)
+    ├── license.md
+    ├── package.json
+    │
+    ├── client/               (React Frontend — Vite + Tailwind)
+    │   ├── src/
+    │   │   ├── components/   (shadcn/ + features/ + ui/)
+    │   │   ├── pages/        (All route pages)
+    │   │   ├── contexts/     (Auth, Theme, Org contexts)
+    │   │   ├── hooks/        (Custom React hooks)
+    │   │   ├── lib/          (Supabase client, utils)
+    │   │   └── styles/       (CSS modules)
+    │   ├── public/           (Icons, manifest, favicon)
+    │   ├── index.html
+    │   ├── vite.config.js
+    │   ├── tailwind.config.js
+    │   └── package.json
+    │
+    ├── server/               (Node.js + Express Backend)
+    │   ├── src/
+    │   │   ├── routes/       (52+ API route files)
+    │   │   ├── middleware/   (Auth, org isolation, rate limiting)
+    │   │   └── utils/        (Helpers)
+    │   ├── api/
+    │   ├── config/
+    │   ├── scripts/
+    │   ├── .env              (Supabase keys, Razorpay, SMTP, etc.)
+    │   ├── server.js
+    │   └── package.json
+    │
+    ├── android/              (Kotlin WebView — 3 Build Flavors)
+    │   ├── app/
+    │   │   ├── google-services.json  (Firebase — all 3 clients)
+    │   │   ├── build.gradle.kts      (Flavors: student/faculty/admin)
+    │   │   └── src/main/
+    │   │       ├── java/com/classgrid/app/
+    │   │       │   ├── MainActivity.kt
+    │   │       │   ├── GoogleSignInHelper.kt
+    │   │       │   └── MyFirebaseMessagingService.kt
+    │   │       ├── AndroidManifest.xml
+    │   │       └── res/xml/network_security_config.xml
+    │   ├── build.gradle.kts  (Root — plugin versions)
+    │   ├── settings.gradle.kts
+    │   ├── ANDROID_FIREBASE_GUIDE.md
+    │   └── ANDROID_BUILD_AND_PLAY_STORE_GUIDE.md
+    │
+    ├── docs/                 (14 planning/strategy documents)
+    │   ├── CLASSGRID_ULTIMATE_PLAN.md
+    │   ├── CLASSGRID_MASTER_IMPLEMENTATION_PLAN.md
+    │   ├── CLASSGRID_ULTIMATE_SAAS_PLAN.md
+    │   ├── CLASSGRID_CANTEEN_PLAN.md
+    │   └── ... (10 more)
+    │
+    ├── supabase/sql/         (41 SQL migration files)
+    │   ├── SUPABASE_CLASSROOM_MIGRATION.sql
+    │   ├── SUPABASE_FEES_MIGRATION.sql
+    │   └── ... (39 more)
+    │
+    └── _archive/             (Old temporary scripts — safe to ignore)
+  </folder_structure>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  KEY MODULES (Features Built / To Build)               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <modules>
+    <module name="Authentication" status="BUILT">Google OAuth, Email/Password, Role-based login</module>
+    <module name="Onboarding" status="BUILT">Org setup wizard, department/division creation</module>
+    <module name="Dashboard" status="BUILT">Role-specific dashboards (Admin/Faculty/Student)</module>
+    <module name="Attendance" status="BUILT">Mark, view, reports, percentage tracking</module>
+    <module name="Assignments" status="BUILT">Create, submit, grade, file uploads</module>
+    <module name="Timetable" status="BUILT">Weekly grid view, faculty assignment</module>
+    <module name="Chat/Classroom" status="BUILT">Real-time messaging, file sharing, reactions</module>
+    <module name="Library" status="BUILT">Book catalog, issue/return, digital resources</module>
+    <module name="Fees" status="BUILT">Razorpay integration, receipts, installments</module>
+    <module name="Examinations" status="BUILT">Exam scheduling, hall tickets, seating</module>
+    <module name="Results" status="BUILT">Grade engine, SGPA/CGPA calculation</module>
+    <module name="Certificates" status="BUILT">Auto-generate bonafide, TC, character certs</module>
+    <module name="AI Quiz" status="BUILT">Gemini-powered quiz generation from PDFs</module>
+    <module name="Events" status="BUILT">College events, calendar integration</module>
+    <module name="Feedback" status="BUILT">Faculty feedback system with analytics</module>
+    <module name="Leave Management" status="BUILT">Student/faculty leave applications</module>
+    <module name="Settings" status="BUILT">Profile, privacy policy, terms, theme toggle</module>
+    <module name="Canteen" status="PLANNED">QR ordering, menu management, payments</module>
+    <module name="Alumni Network" status="PLANNED">Alumni directory, mentorship, job board</module>
+    <module name="Hostel" status="PLANNED">Room allocation, complaints, mess menu</module>
+  </modules>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  DESIGN SYSTEM RULES (Quick Reference)                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <design_rules>
+    <rule>Use ONLY shadcn components from client/src/components/shadcn/</rule>
+    <rule>Raw UI primitives in shadcn/, business components in features/</rule>
+    <rule>Never remove existing code unless explicitly asked</rule>
+    <rule>Make surgical edits only — do not refactor entire files</rule>
+    <rule>Follow the pipeline: Stitch → Figma → Shadcn → Backend</rule>
+    <rule>All pages must support dark mode via OKLCH color tokens</rule>
+    <rule>Desktop: Flexible redirects between login pages allowed</rule>
+    <rule>Mobile App: Role-locked, NO cross-role navigation ever</rule>
+  </design_rules>
+
+</classgrid>

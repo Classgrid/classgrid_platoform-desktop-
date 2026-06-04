@@ -1,0 +1,763 @@
+﻿academic-plan.routes.js >> router.post('/classrooms/:classroomId', isAuthenticated, requireClassroomOwner, async (req, res) => {
+academic-plan.routes.js >> router.get('/classrooms/:classroomId', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.post('/:planId/units', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.post('/units/:unitId/topics', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.patch('/topics/:topicId', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.delete('/units/:unitId', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.delete('/topics/:topicId', isAuthenticated, async (req, res) => {
+academic-plan.routes.js >> router.get('/me/plans', isAuthenticated, async (req, res) => {
+academic.routes.js >> router.get("/", isAuthenticated, async (req, res) => {
+academic.routes.js >> router.put("/", isAuthenticated, async (req, res) => {
+activity.routes.js >> router.post("/log", isAuthenticated, async (req, res) => {
+activity.routes.js >> router.get("/classroom/:id", isAuthenticated, requireClassroomOwner, async (req, res) => {
+activity.routes.js >> router.get("/classroom/:id/analytics", isAuthenticated, requireClassroomOwner, async (req, res) => {
+activity.routes.js >> router.get("/classroom/:id/content/:targetId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+admin.routes.js >> router.get("/pending-organizations", isAuthenticated, requireRole("super_admin"), getPendingOrganizations);
+admin.routes.js >> router.post("/approve-organization/:id", isAuthenticated, requireRole("super_admin"), approveOrganization);
+admin.routes.js >> router.post("/reject-organization/:id", isAuthenticated, requireRole("super_admin"), rejectOrganization);
+admin.routes.js >> router.get("/all-organizations", isAuthenticated, requireRole("super_admin"), getAllOrganizations);
+admin.routes.js >> router.get("/all-users", isAuthenticated, requireRole("super_admin"), getAllUsers);
+admin.routes.js >> router.post("/suspend-organization/:id", isAuthenticated, requireRole("super_admin"), suspendOrganization);
+admin.routes.js >> router.post("/block-organization/:id", isAuthenticated, requireRole("super_admin"), blockOrganization);
+admin.routes.js >> router.post("/reactivate-organization/:id", isAuthenticated, requireRole("super_admin"), reactivateOrganization);
+admin.routes.js >> router.delete("/delete-organization/:id", isAuthenticated, requireRole("super_admin"), deleteOrganization);
+admin.routes.js >> router.post("/reset-admin-password/:id", isAuthenticated, requireRole("super_admin"), resetOrgAdminPassword);
+admin.routes.js >> router.post("/suspend-user/:id", isAuthenticated, requireRole("super_admin", "org_admin"), suspendUser);
+admin.routes.js >> router.post("/reactivate-user/:id", isAuthenticated, requireRole("super_admin", "org_admin"), reactivateUser);
+admin.routes.js >> router.delete("/delete-user/:id", isAuthenticated, requireRole("super_admin"), deleteUser);
+admin.routes.js >> router.post("/create-super-admin", isAuthenticated, requireRole("super_admin"), createSuperAdmin);
+admin.routes.js >> router.get("/notes/pending", isAuthenticated, requireRole("super_admin"), getPendingNotes);
+admin.routes.js >> router.post("/notes/:id/approve", isAuthenticated, requireRole("super_admin"), approveNote);
+admin.routes.js >> router.post("/notes/:id/reject", isAuthenticated, requireRole("super_admin"), rejectNote);
+admin.routes.js >> router.get("/system-settings", isAuthenticated, requireRole("super_admin"), getSystemSettings);
+admin.routes.js >> router.post("/system-settings", isAuthenticated, requireRole("super_admin"), updateSystemSettings);
+admin.routes.js >> router.get("/usage/:orgId", isAuthenticated, requireRole("super_admin"), getOrgUsage);
+admin.routes.js >> router.get("/email-analytics", isAuthenticated, requireRole("super_admin"), getEmailAnalytics);
+admin.routes.js >> router.get("/dashboard-analytics", isAuthenticated, requireRole("super_admin"), getDashboardAnalytics);
+admin.routes.js >> router.get("/global-storage", isAuthenticated, requireRole("super_admin"), getGlobalStorageUsage);
+admin.routes.js >> router.get("/org-insight/:orgId", isAuthenticated, requireRole("super_admin"), getOrgInsight);
+admin.routes.js >> router.get("/api-metrics", isAuthenticated, requireRole("super_admin"), getApiMetrics);
+admin.routes.js >> router.get("/system-activity", isAuthenticated, requireRole("super_admin"), getSystemActivity);
+admin.routes.js >> router.get("/email-stats", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+admin.routes.js >> router.get("/email-logs", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+admin.routes.js >> router.post("/email-resend/:jobId", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+admin.routes.js >> router.get("/student-performance", isAuthenticated, requireRole("super_admin"), getGlobalStudentPerformance);
+admin.routes.js >> router.get("/audit-log", isAuthenticated, requireRole("super_admin"), getGlobalAuditLog);
+admin.routes.js >> router.get("/dashboard/overview", isAuthenticated, requireRole("super_admin"), getDashboardOverview);
+admin.routes.js >> router.get("/dashboard/organizations", isAuthenticated, requireRole("super_admin"), getDashboardOrganizations);
+admin.routes.js >> router.get("/dashboard/users", isAuthenticated, requireRole("super_admin"), getDashboardUsers);
+admin.routes.js >> router.get("/dashboard/activity", isAuthenticated, requireRole("super_admin"), getRecentActivity);
+admin.routes.js >> router.patch("/organization/:id/domains", isAuthenticated, requireRole("super_admin"), updateOrgDomains);
+admin.routes.js >> router.get("/org-analytics/:orgId", isAuthenticated, requireRole("super_admin"), getOrgAnalytics);
+admin.routes.js >> router.get("/users/export", isAuthenticated, requireRole("super_admin"), exportUsers);
+admin.routes.js >> router.post("/organizations/provision", isAuthenticated, requireRole("super_admin"), handleManualProvisioning);
+admission.routes.js >> router.post("/cet/validate-en", validateEN);
+admission.routes.js >> router.post("/cet/send-otp", otpSendLimiter, sendENOTP);
+admission.routes.js >> router.post("/cet/verify-otp", loginLimiter, verifyENOTP);
+admission.routes.js >> router.post("/verify-phone", loginLimiter, verifyPhoneOTP); // Firebase Phone OTP verify
+admission.routes.js >> router.post("/send-email-otp", otpSendLimiter, sendEmailOTP);
+admission.routes.js >> router.post("/verify-email-otp", loginLimiter, verifyEmailOTP);
+admission.routes.js >> router.post("/save-draft", isAdmissionCandidate, saveApplicationDraft);
+admission.routes.js >> router.post("/submit", isAdmissionCandidate, submitApplication);
+admission.routes.js >> router.get("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getAdmissionConfig);
+admission.routes.js >> router.patch("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), updateAdmissionConfig);
+admission.routes.js >> router.post("/config/preset", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), injectPreset);
+admission.routes.js >> router.get("/docs/checklist", isAdmissionCandidate, getRequiredDocsChecklist);
+admission.routes.js >> router.post("/docs/upload", isAdmissionCandidate, upload.single("file"), uploadAdmissionDoc);
+admission.routes.js >> router.get("/docs/view", isAuthenticated, getDocViewLink); // Generic view (checks auth inside)
+admission.routes.js >> router.get("/candidate/docs/view", isAdmissionCandidate, getDocViewLink); // Candidate-specific view
+admission.routes.js >> router.post("/cet/import", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), upload.single("file"), importCETAllotments);
+admission.routes.js >> router.patch("/admin/verify-doc", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), verifyAdmissionDoc);
+admission.routes.js >> router.get("/broadcast/merit-list/:hierarchyId", isAuthenticated, getLiveMeritList);
+admission.routes.js >> router.get("/broadcast/seat-matrix", isAuthenticated, getLiveSeatMatrix);
+admission.routes.js >> router.post("/broadcast/call-candidate", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_counselor"]), callCandidate);
+admission.routes.js >> router.post("/pay/initiate", isAdmissionCandidate, initiateFeePayment);
+admission.routes.js >> router.post("/pay/verify", isAdmissionCandidate, verifyFeePayment);
+admission.routes.js >> router.post("/payments/webhook", handlePaymentWebhook); // Public (verified via signature)
+admission.routes.js >> router.post("/admin/enroll", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_clerk"]), adminEnrollStudent);
+admission.routes.js >> router.post("/admin/waitlist/promote", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), promoteWaitlist);
+admission.routes.js >> router.post("/admin/scholarship/bulk-import", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), upload.single("file"), importScholarships);
+admission.routes.js >> router.post("/applications/:id/withdraw", isAuthenticated, withdrawApplication); // Admin withdrawal
+admission.routes.js >> router.post("/candidate/withdraw/:id", isAdmissionCandidate, withdrawApplication); // Candidate self-withdrawal
+admission.routes.js >> router.post("/apply", admissionApplyLimiter, applyForAdmission);
+admission.routes.js >> router.post("/desk-enroll", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_clerk"]), deskEnroll);
+admission.routes.js >> router.get("/export/dte", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), exportDTE);
+admission.routes.js >> router.get("/export/saral", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), exportSARAL);
+admission.routes.js >> router.get("/export/aicte", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), exportAICTE);
+admission.routes.js >> router.get("/export/state-board", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), exportStateBoard);
+admission.routes.js >> router.post("/enroll", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_clerk"]), fullEnrollStudent);
+admission.routes.js >> router.patch("/cet/:en/allot-division", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), allotDivisionForCET);
+admission.routes.js >> router.patch("/cet/:en/mark-upgraded", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), markCETUpgraded);
+admission.routes.js >> router.post("/docs/validate-expiry", isAuthenticated, validateDocumentExpiry);
+admission.routes.js >> router.post("/direct/generate-merit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), generateMerit);
+admission.routes.js >> router.get("/direct/merit-list", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_counselor"]), getMeritList);
+admission.routes.js >> router.get("/print/application/:id", isAuthenticated, getApplicationPrintData);
+admission.routes.js >> router.post("/applications/merge", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), mergeApplications);
+admission.routes.js >> router.post("/allocate-divisions", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), allocateDivisions);
+admission.routes.js >> router.post("/generate-prns", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), batchGeneratePRNsRoute);
+admission.routes.js >> router.post("/cet/:en_number/report", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), reportRLA);
+admission.routes.js >> router.post("/cet/:en_number/request-noc", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), requestNOC);
+admission.routes.js >> router.post("/cet/:en_number/confirm-upgrade", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), confirmUpgrade);
+admission.routes.js >> router.post("/notify", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), sendAdmissionNotification);
+admission.routes.js >> router.get("/sms-budget", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getSmsBudget);
+admission.routes.js >> router.post("/parent/login", admissionParentLoginLimiter, parentLogin);
+admission.routes.js >> router.get("/parent/status/:applicationId", isParent, parentGetStatus);
+admission.routes.js >> router.get("/parent/documents/:applicationId", isParent, parentGetDocuments);
+admission.routes.js >> router.get("/analytics", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getAdmissionAnalytics);
+admission.routes.js >> router.get("/cet/dashboard", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getCETDashboard);
+admission.routes.js >> router.post("/acap/register", admissionApplyLimiter, acapRegister); // Public
+admission.routes.js >> router.post("/acap/generate-merit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), acapGenerateMerit);
+admission.routes.js >> router.post("/acap/verify-gate", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), verifyGateEntry);
+admission.routes.js >> router.get("/merit-list/live", admissionLiveMeritLimiter, getLiveMeritListOptimized);
+admission.routes.js >> router.patch("/applications/:id/stage", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), updateApplicationStage);
+admission.routes.js >> router.post("/admin/bulk-verify", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_verifier"]), bulkVerifyApplications);
+admission.routes.js >> router.post("/admin/bulk-select", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), bulkSelectApplications);
+admission.routes.js >> router.post("/admin/bulk-update-compliance", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), bulkUpdateCompliance);
+admission.routes.js >> router.post("/round/advance", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), advanceAdmissionRound);
+admission.routes.js >> router.patch("/applications/:id/unlock-edit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), unlockStudentEditWindow);
+admission.routes.js >> router.patch("/applications/:id/lock-edit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), lockStudentEditWindow);
+advanced_quiz.routes.js >> router.post("/create", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.post("/check-sheet", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/my-quizzes", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.put("/:quizId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.delete("/:quizId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/status", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/classroom/:classroomId", isAuthenticated, requireClassroomMember, async (req, res) => {
+advanced_quiz.routes.js >> router.get("/:quizId", isAuthenticated, async (req, res) => {
+advanced_quiz.routes.js >> router.post("/ai/generate", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/google/sync", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/student/dashboard", isAuthenticated, requireRole("student"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/:quizId/start", isAuthenticated, requireRole("student"), async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/autosave", isAuthenticated, requireRole("student"), quizAutosaveLimiter, async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/anticheat", isAuthenticated, requireRole("student"), quizAntiCheatLimiter, async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/submit", isAuthenticated, requireRole("student"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/:quizId/review", isAuthenticated, requireRole("student"), async (req, res) => {
+advanced_quiz.routes.js >> router.post("/:quizId/explain", isAuthenticated, requireRole("student"), async (req, res) => {
+advanced_quiz.routes.js >> router.get("/:quizId/results", isAuthenticated, async (req, res) => {
+advanced_quiz.routes.js >> router.get("/:quizId/analytics", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+ai.routes.js >> router.post("/index-material", isAuthenticated, requireRole("teacher", "super-admin"), indexMaterial);
+ai.routes.js >> router.post("/syllabus-chat", isAuthenticated, chatWithSyllabus);
+ai.routes.js >> router.get("/my-persona", isAuthenticated, getMyPersona);
+alumni.routes.js >> router.get('/admin/all', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+alumni.routes.js >> router.post('/admin/status/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+alumni.routes.js >> router.post('/admin/upload/:id', isAuthenticated, requireRole('org_admin'), upload.single('file'), async (req, res) => {
+alumni.routes.js >> router.get('/me', isAuthenticated, async (req, res) => {
+analytics.routes.js >> router.get("/student/:id", isAuthenticated, async (req, res) => {
+analytics.routes.js >> router.get("/student/:id/ai-summary", isAuthenticated, async (req, res) => {
+analytics.routes.js >> router.get("/classroom/:classroomId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+analytics.routes.js >> router.get("/leave/daily", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+analytics.routes.js >> router.get("/leave/stats/:classroomId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+assignment.routes.js >> router.post("/:classroomId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+assignment.routes.js >> router.get("/global/me", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.get("/:assignmentId", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.post("/:assignmentId/submit", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.delete("/:assignmentId/unsubmit", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.post("/:assignmentId/grade/:submissionId", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.post("/:assignmentId/grade-bulk", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.put("/:assignmentId", isAuthenticated, async (req, res) => {
+assignment.routes.js >> router.delete("/:assignmentId", isAuthenticated, async (req, res) => {
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.post(
+attendance.routes.js >> router.get(
+attendance.routes.js >> router.patch(
+attendance.routes.js >> router.get(
+attendance_dashboard.routes.js >> router.get("/active-sessions", isAuthenticated, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/dashboard-summary", isAuthenticated, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/dashboard-trends", isAuthenticated, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/dashboard-insights", isAuthenticated, async (req, res) => {
+attendance_dashboard.routes.js >> router.post("/:classroomId/bulk-override", isAuthenticated, requireClassroomOwner, async (req, res) => {
+attendance_dashboard.routes.js >> router.post("/:classroomId/appeal", isAuthenticated, requireClassroomMember, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/:classroomId/export", isAuthenticated, requireClassroomOwner, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/classroom-members/:classroomId", isAuthenticated, async (req, res) => {
+attendance_dashboard.routes.js >> router.get("/subject-stats", isAuthenticated, async (req, res) => {
+audit.routes.js >> router.get('/data', isAuthenticated, isAdmin, async (req, res) => {
+audit.routes.js >> router.get('/criterion/:number', isAuthenticated, isAdmin, async (req, res) => {
+audit.routes.js >> router.get('/export/csv', isAuthenticated, isAdmin, async (req, res) => {
+audit.routes.js >> router.get('/report', isAuthenticated, isAdmin, async (req, res) => {
+auth.routes.js >> router.get("/system-config", authController.getSystemConfig);
+auth.routes.js >> router.post("/check-email", emailCheckLimiter, authController.checkEmailForLogin);
+auth.routes.js >> router.post("/signup-init", authController.initiateSignup);
+auth.routes.js >> router.get("/verify-token/:token", authController.verifySignupToken);
+auth.routes.js >> router.post("/signup-complete", authController.completeSignup);
+auth.routes.js >> router.post("/check-admin-status", authController.checkAdminStatus);
+auth.routes.js >> router.post("/validate-activation-token", authController.validateActivationToken);
+auth.routes.js >> router.post("/activate-admin", authController.activateAdmin);
+auth.routes.js >> router.post("/resend-activation", authController.resendActivation);
+auth.routes.js >> router.post("/login", loginLimiter, authController.login);
+auth.routes.js >> router.post("/request-login-otp", loginLimiter, authController.requestLoginOtp);
+auth.routes.js >> router.post("/resend-device-otp", otpSendLimiter, authController.resendDeviceOtp);
+auth.routes.js >> router.post("/verify-device", authController.verifyDeviceOtp);
+auth.routes.js >> router.post("/setup-org-admin", authController.setupOrgAdmin); // kept for backward compat
+auth.routes.js >> router.post("/logout", authController.logout);
+auth.routes.js >> router.get("/me", isAuthenticated, authController.getCurrentUser);
+auth.routes.js >> router.post("/forgot-password", resetPasswordLimiter, authController.forgotPassword);
+auth.routes.js >> router.post("/reset-password", resetPasswordLimiter, authController.resetPassword);
+auth.routes.js >> router.post("/faculty-activate", resetPasswordLimiter, authController.facultyActivate);
+auth.routes.js >> router.post("/force-reset-password", isAuthenticated, authController.forceResetPassword);
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+auth.routes.js >> router.get(
+calendar.routes.js >> router.get("/connect", isAuthenticated, (req, res) => {
+calendar.routes.js >> router.get("/callback", async (req, res) => {
+calendar.routes.js >> router.post("/disconnect", isAuthenticated, async (req, res) => {
+calendar.routes.js >> router.post("/meet", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+calendar.routes.js >> router.delete("/meet/:id", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+calendar.routes.js >> router.post("/disconnect", isAuthenticated, async (req, res) => {
+call.routes.js >> router.post('/initiate', isAuthenticated, initiateCall);
+canteen.routes.js >> router.get("/menu", isAuthenticated, getMenu);
+canteen.routes.js >> router.get("/menu/specials", isAuthenticated, getDailySpecials);
+canteen.routes.js >> router.post("/menu", isAuthenticated, requireRole("org_admin", "canteen_manager"), createItem);
+canteen.routes.js >> router.put("/menu/:id", isAuthenticated, requireRole("org_admin", "canteen_manager"), updateItem);
+canteen.routes.js >> router.delete("/menu/:id", isAuthenticated, requireRole("org_admin", "canteen_manager"), deleteItem);
+canteen.routes.js >> router.put("/menu/:id/toggle-availability", isAuthenticated, requireRole("org_admin", "canteen_manager"), toggleAvailability);
+canteen.routes.js >> router.post("/menu/bulk-import", isAuthenticated, requireRole("org_admin", "canteen_manager"), bulkImportMenu);
+canteen.routes.js >> router.post("/menu/reset-stock", isAuthenticated, requireRole("org_admin", "canteen_manager"), resetDailyStock);
+canteen.routes.js >> router.post("/order/create-razorpay-order", isAuthenticated, createRazorpayOrder);
+canteen.routes.js >> router.post("/order/verify-payment", isAuthenticated, verifyPayment);
+canteen.routes.js >> router.get("/order/history/student", isAuthenticated, getStudentHistory);
+canteen.routes.js >> router.post("/order/:id/rate", isAuthenticated, rateOrderItems);
+canteen.routes.js >> router.get("/order/queue/live", isAuthenticated, requireRole("org_admin", "canteen_manager", "kitchen_staff"), getLiveQueue);
+canteen.routes.js >> router.patch("/order/:id/status", isAuthenticated, requireRole("org_admin", "canteen_manager", "kitchen_staff"), updateOrderStatus);
+canteen.routes.js >> router.get("/analytics", isAuthenticated, requireRole("org_admin", "canteen_manager"), getCanteenAnalytics);
+certificate.routes.js >> router.post('/', isAuthenticated, async (req, res) => {
+certificate.routes.js >> router.get('/', isAuthenticated, async (req, res) => {
+certificate.routes.js >> router.patch('/:id/status', isAuthenticated, async (req, res) => {
+certificate.routes.js >> router.get('/trusted-domains', isAuthenticated, async (req, res) => {
+certificate.routes.js >> router.delete('/:id', isAuthenticated, async (req, res) => {
+certificate.routes.js >> router.get('/analytics', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+changelog.routes.js >> router.get("/", isAuthenticated, async (req, res) => {
+changelog.routes.js >> router.post("/react", isAuthenticated, async (req, res) => {
+changelog.routes.js >> router.post("/create", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+changelog.routes.js >> router.put("/:id", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+changelog.routes.js >> router.delete("/:id", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+chat.routes.js >> router.get('/classroom-context/:classroomId', async (req, res) => {
+chat.routes.js >> router.post('/stream', upload.none(), async (req, res) => {
+chat.routes.js >> router.post('/', upload.single('file'), async (req, res) => {
+classroom.routes.js >> router.get("/proxy/pdf", isAuthenticated, async (req, res) => {
+classroom.routes.js >> router.post("/hf-summarize", isAuthenticated, async (req, res) => {
+classroom.routes.js >> router.post("/", isAuthenticated, requireRole("teacher", "faculty"), requireOrganization, validateClassroom, async (req, res) => {
+classroom.routes.js >> router.put("/:id/cover", isAuthenticated, requireClassroomOwner, upload.single("coverImage"), async (req, res) => {
+classroom.routes.js >> router.get("/", isAuthenticated, requireOrganization, async (req, res) => {
+classroom.routes.js >> router.get("/all-requests", isAuthenticated, async (req, res) => {
+classroom.routes.js >> router.get("/my-requests", isAuthenticated, async (req, res) => {
+classroom.routes.js >> router.get("/discover", isAuthenticated, requireOrganization, async (req, res) => {
+classroom.routes.js >> router.get("/my-organization", isAuthenticated, requireOrganization, async (req, res) => {
+classroom.routes.js >> router.post("/join-by-code", isAuthenticated, joinClassroomLimiter, enforceClassroomAccess, validateJoinCode, async (req, res) => {
+classroom.routes.js >> router.post("/:id/join", isAuthenticated, joinClassroomLimiter, enforceClassroomAccess, async (req, res) => {
+classroom.routes.js >> router.get("/:id/requests", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.put("/:id/requests/:requestId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.put("/:id/requests-bulk", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.get("/:id", isAuthenticated, requireClassroomMember, async (req, res) => {
+classroom.routes.js >> router.put("/:id", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.delete("/:id", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.get("/:id/meetings", isAuthenticated, requireClassroomMember, async (req, res) => {
+classroom.routes.js >> router.get("/:id/members", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.delete("/:id/members/:userId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.post("/:id/upload-urls", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.post("/:id/content/:type", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.post("/:id/resend-notification", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.get("/:id/content/:type", isAuthenticated, requireClassroomMember, async (req, res) => {
+classroom.routes.js >> router.post("/:id/notify", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.get("/:id/students", isAuthenticated, requireClassroomMember, async (req, res) => {
+classroom.routes.js >> router.put("/:id/content/:type/:contentId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.put("/:id/content/materials/:contentId/replace", isAuthenticated, requireClassroomOwner, upload.single("file"), async (req, res) => {
+classroom.routes.js >> router.delete("/:id/content/:type/:contentId", isAuthenticated, requireClassroomOwner, async (req, res) => {
+classroom.routes.js >> router.post("/:id/content/materials/:contentId/summarize", isAuthenticated, async (req, res) => {
+classroom_chat.routes.js >> router.get('/cleanup', async (req, res) => {
+classroom_chat.routes.js >> router.get('/:id', isAuthenticated, requireClassroomMember, async (req, res) => {
+classroom_chat.routes.js >> router.post('/:id', isAuthenticated, requireClassroomMember, upload.single('file'), async (req, res) => {
+comments.routes.js >> router.get('/:contentId', isAuthenticated, async (req, res) => {
+comments.routes.js >> router.post('/:contentId', isAuthenticated, async (req, res) => {
+comments.routes.js >> router.delete('/:commentId', isAuthenticated, async (req, res) => {
+course-library.routes.js >> router.post("/playlists", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), createPlaylist);
+course-library.routes.js >> router.get("/playlists/:classroomId", isAuthenticated, getPlaylists);
+course-library.routes.js >> router.put("/playlists/:id", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), updatePlaylist);
+course-library.routes.js >> router.delete("/playlists/:id", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), deletePlaylist);
+course-library.routes.js >> router.post("/videos", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), addVideo);
+course-library.routes.js >> router.post("/videos/bulk-add", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), bulkAddVideos);
+course-library.routes.js >> router.get("/videos/:classroomId", isAuthenticated, getVideos);
+course-library.routes.js >> router.put("/videos/:id", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), updateVideo);
+course-library.routes.js >> router.delete("/videos/:id", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), deleteVideo);
+course-library.routes.js >> router.get("/analytics/:classroomId", isAuthenticated, requireRole("faculty", "teacher", "org_admin"), getLibraryAnalytics);
+course.routes.js >> router.post('/', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+course.routes.js >> router.get('/', isAuthenticated, async (req, res) => {
+course.routes.js >> router.get('/:id', isAuthenticated, async (req, res) => {
+course.routes.js >> router.put('/:id', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+course.routes.js >> router.delete('/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+course.routes.js >> router.post('/:id/subjects', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+course.routes.js >> router.put('/subjects/:subjectId', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+course.routes.js >> router.delete('/subjects/:subjectId', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+course.routes.js >> router.get('/student/my-courses', isAuthenticated, async (req, res) => {
+course.routes.js >> router.post('/:id/assign-faculty', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+course.routes.js >> router.delete('/faculty-assignment/:assignmentId', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+course.routes.js >> router.get('/:id/faculty', isAuthenticated, async (req, res) => {
+course.routes.js >> router.get('/faculty/my-subjects', isAuthenticated, async (req, res) => {
+course.routes.js >> router.get('/org/faculty-list', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+course.routes.js >> router.post('/:id/bulk-assign-faculty', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+course.routes.js >> router.post('/:id/generate-classrooms', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+crm.routes.js >> router.post("/leads", isAuthenticated, requireRole(["org_admin", "counselor", "fee_manager", "admission_head"]), async (req, res) => {
+crm.routes.js >> router.get("/leads", isAuthenticated, requireRole(["org_admin", "counselor", "fee_manager", "admission_head"]), async (req, res) => {
+crm.routes.js >> router.patch("/leads/:id/stage", isAuthenticated, requireRole(["org_admin", "counselor", "fee_manager"]), async (req, res) => {
+crm.routes.js >> router.patch("/leads/:id/follow-up", isAuthenticated, requireRole(["org_admin", "counselor", "fee_manager"]), async (req, res) => {
+crm.routes.js >> router.get("/leads/due-today", isAuthenticated, requireRole(["org_admin", "counselor"]), async (req, res) => {
+crm.routes.js >> router.delete("/leads/:id", isAuthenticated, requireRole(["org_admin"]), async (req, res) => {
+cron.routes.js >> router.get("/plan-expiry-check", async (req, res) => {
+cron.routes.js >> router.get("/process-email-queue", async (req, res) => {
+demo.routes.js >> router.post("/create", isAuthenticated, requireRole("super_admin", "org_admin"), createDemoAccount);
+demo.routes.js >> router.get("/list", isAuthenticated, requireRole("super_admin", "org_admin"), getDemoAccounts);
+demo.routes.js >> router.post("/:id/reset-password", isAuthenticated, requireRole("super_admin", "org_admin"), resetDemoPassword);
+demo.routes.js >> router.post("/:id/login-as", isAuthenticated, requireRole("super_admin", "org_admin"), loginAsDemo);
+demo.routes.js >> router.delete("/:id", isAuthenticated, requireRole("super_admin", "org_admin"), deleteDemoAccount);
+demo.routes.js >> router.post("/exit-impersonation", isAuthenticated, exitImpersonation);
+digest.routes.js >> router.get("/daily", async (req, res) => {
+events.routes.js >> router.post('/', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+events.routes.js >> router.put('/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+events.routes.js >> router.delete('/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+events.routes.js >> router.get('/upcoming', isAuthenticated, async (req, res) => {
+events.routes.js >> router.get('/', isAuthenticated, async (req, res) => {
+exam.routes.js >> router.post('/', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.get('/', isAuthenticated, async (req, res) => {
+exam.routes.js >> router.get('/:id', isAuthenticated, async (req, res) => {
+exam.routes.js >> router.delete('/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.post('/:id/parse-timetable', isAuthenticated, requireRole('org_admin'), upload.single('pdf'), async (req, res) => {
+exam.routes.js >> router.post('/:id/timetable', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.put('/:id/timetable/:entryId', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.delete('/:id/timetable/:entryId', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.post('/:id/fees/set', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+exam.routes.js >> router.get('/:id/fees', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+examinations.routes.js >> router.get('/admin/all', async (req, res) => {
+examinations.routes.js >> router.post('/admin/create', async (req, res) => {
+examinations.routes.js >> router.delete('/admin/:id', async (req, res) => {
+examinations.routes.js >> router.post('/admin/:examId/timetable/upload', upload.single('file'), async (req, res) => {
+examinations.routes.js >> router.post('/admin/:examId/timetable/save', async (req, res) => {
+examinations.routes.js >> router.get('/admin/:examId/timetables', async (req, res) => {
+examinations.routes.js >> router.get('/student/active', async (req, res) => {
+external.routes.js >> router.post(
+fee-records.routes.js >> router.post('/create', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+fee-records.routes.js >> router.get('/all', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+fee-records.routes.js >> router.get('/summary', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+fee-records.routes.js >> router.get('/reminders', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+fee-records.routes.js >> router.patch('/:recordId/pay', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+fee-records.routes.js >> router.get('/me', isAuthenticated, async (req, res) => {
+fee-records.routes.js >> router.get('/student/:studentId', isAuthenticated, async (req, res) => {
+feedback.routes.js >> router.post('/forms', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+feedback.routes.js >> router.get('/forms', isAuthenticated, async (req, res) => {
+feedback.routes.js >> router.get('/student/active', isAuthenticated, async (req, res) => {
+feedback.routes.js >> router.get('/forms/:id', isAuthenticated, async (req, res) => {
+feedback.routes.js >> router.post('/forms/:id/submit', isAuthenticated, async (req, res) => {
+feedback.routes.js >> router.get('/forms/:id/analytics', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+feedback.routes.js >> router.get('/forms/:id/participation', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+feedback.routes.js >> router.post('/forms/:id/ai-insights', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+feedback.routes.js >> router.delete('/forms/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+feedback.routes.js >> router.put('/forms/:id/close', isAuthenticated, requireRole('org_admin', 'faculty'), async (req, res) => {
+feedback.routes.js >> router.get('/faculty-ratings', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+feedback.routes.js >> router.get('/org-analytics', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+fees.routes.js >> router.post("/structures", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.get("/structures", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.delete("/structures/:id", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.post("/assign", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.post("/pay", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.get("/students", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.get("/me", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.get("/payments", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.get("/analytics", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.patch("/students/:id/block", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.post("/razorpay/order", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.post("/razorpay/verify", isAuthenticated, async (req, res) => {
+fees.routes.js >> router.post("/razorpay/webhook", async (req, res) => {
+fees.routes.js >> router.put("/razorpay/config", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+fees.routes.js >> router.get("/razorpay/config", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.get("/posts", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.post("/posts", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.post("/posts/:id/upvote", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.get("/posts/:id", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.post("/posts/:id/comments", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.patch("/posts/:id/pin", isAuthenticated, requireRole("org_admin", "super_admin"), async (req, res) => {
+forum.routes.js >> router.delete("/posts/:id", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.patch("/posts/:id/lock", isAuthenticated, requireRole("org_admin", "super_admin"), async (req, res) => {
+forum.routes.js >> router.post("/comments/:id/upvote", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.delete("/comments/:id", isAuthenticated, async (req, res) => {
+forum.routes.js >> router.get("/admin/posts", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+forum.routes.js >> router.get("/admin/analytics", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+forum.routes.js >> router.patch("/admin/posts/:id", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+google.routes.js >> router.get("/status", isAuthenticated, (req, res) => {
+google.routes.js >> router.get("/drive/files", isAuthenticated, async (req, res) => {
+google.routes.js >> router.get("/classroom/courses", isAuthenticated, async (req, res) => {
+google.routes.js >> router.get("/classroom/coursework", isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.get('/:id', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.put('/:id', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, res) => {
+group_chat.routes.js >> router.put('/:id/permissions', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.put('/:id/admins/:userId', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/:id/members', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/:id/exit', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.delete('/:id', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/:id/polls', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
+group_chat.routes.js >> router.get('/:id/polls', isAuthenticated, async (req, res) => {
+hierarchy.routes.js >> router.get("/tree", getTree);
+hierarchy.routes.js >> router.get("/terminology", getOrgTerminology);
+hierarchy.routes.js >> router.get("/children/:parentId", getChildren);
+hierarchy.routes.js >> router.post("/node", validateHierarchyRequest, createNode);
+hierarchy.routes.js >> router.post("/seed", seedHierarchy);
+hierarchy.routes.js >> router.patch("/node/:nodeId", updateNode);
+hierarchy.routes.js >> router.delete("/node/:nodeId", deleteNode);
+holidays.routes.js >> router.get("/", isAuthenticated, async (req, res) => {
+holidays.routes.js >> router.get("/upcoming", isAuthenticated, async (req, res) => {
+holidays.routes.js >> router.get("/today", isAuthenticated, async (req, res) => {
+holidays.routes.js >> router.patch("/:id", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+holidays.routes.js >> router.post("/manual", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+holidays.routes.js >> router.post("/sync", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+internal-tests.routes.js >> router.post('/', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.get('/my-tests', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.get('/:id', isAuthenticated, async (req, res) => {
+internal-tests.routes.js >> router.put('/:id', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.delete('/:id', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.get('/:id/students', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.post('/:id/marks', isAuthenticated, requireRole('org_admin', 'faculty', 'teacher'), async (req, res) => {
+internal-tests.routes.js >> router.get('/student/my-tests', isAuthenticated, async (req, res) => {
+leave.routes.js >> router.post("/request", isAuthenticated, async (req, res) => {
+leave.routes.js >> router.post("/quick", isAuthenticated, async (req, res) => {
+leave.routes.js >> router.get("/me", isAuthenticated, async (req, res) => {
+leave.routes.js >> router.get("/teacher", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+leave.routes.js >> router.put("/:requestId/status", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+leave.routes.js >> router.delete("/:requestId", isAuthenticated, async (req, res) => {
+leave.routes.js >> router.get("/summary", isAuthenticated, async (req, res) => {
+leave.routes.js >> router.get("/calendar", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+library.routes.js >> router.get('/catalog', isAuthenticated, async (req, res) => {
+library.routes.js >> router.post('/books', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.post('/import', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.post('/issue', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.post('/return', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.get('/transactions', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.get('/student/books', isAuthenticated, async (req, res) => {
+library.routes.js >> router.post('/student/book-info', isAuthenticated, async (req, res) => {
+library.routes.js >> router.post('/reserve', isAuthenticated, async (req, res) => {
+library.routes.js >> router.get('/reservations', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.get('/student/reservations', isAuthenticated, async (req, res) => {
+library.routes.js >> router.post('/cancel-reservation', isAuthenticated, async (req, res) => {
+library.routes.js >> router.post('/fulfill-reservation', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.get('/overdue-check', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.get('/analytics', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+library.routes.js >> router.delete('/books/:id', isAuthenticated, requireRole('org_admin', 'library_manager'), async (req, res) => {
+live.routes.js >> router.post("/generate-token", isAuthenticated, getAgoraToken);
+live.routes.js >> router.post("/generate-rtm-token", isAuthenticated, getRtmToken);
+live.routes.js >> router.post("/start", isAuthenticated, startMeeting);
+live.routes.js >> router.post("/join/:meetingId", isAuthenticated, joinMeeting);
+live.routes.js >> router.post("/end/:meetingId", isAuthenticated, endMeeting);
+live.routes.js >> router.get("/history/:classroomId", isAuthenticated, getMeetingHistory);
+live.routes.js >> router.post("/meeting/:meetingId/start-recording", isAuthenticated, startRecording);
+live.routes.js >> router.post("/meeting/:meetingId/stop-recording", isAuthenticated, stopRecording);
+live.routes.js >> router.put("/:meetingId", isAuthenticated, updateGoLiveDetails);
+marketplace.routes.js >> router.post('/upload', isAuthenticated, upload.single('file'), async (req, res) => {
+marketplace.routes.js >> router.get('/list', isAuthenticated, async (req, res) => {
+marketplace.routes.js >> router.post('/buy/:id', isAuthenticated, async (req, res) => {
+marks.routes.js >> router.post(
+marks.routes.js >> router.post(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.put(
+marks.routes.js >> router.delete(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+marks.routes.js >> router.put(
+marks.routes.js >> router.get(
+marks.routes.js >> router.post(
+marks.routes.js >> router.put(
+marks.routes.js >> router.delete(
+marks.routes.js >> router.post(
+marks.routes.js >> router.get(
+marks.routes.js >> router.post(
+marks.routes.js >> router.post(
+marks.routes.js >> router.put(
+marks.routes.js >> router.get(
+marks.routes.js >> router.get(
+meet.routes.js >> router.get("/classroom/:classroomId", isAuthenticated, requireClassroomMember, async (req, res) => {
+meet.routes.js >> router.get("/global/me", isAuthenticated, async (req, res) => {
+meet.routes.js >> router.get("/:id", isAuthenticated, async (req, res) => {
+meet.routes.js >> router.put("/:id", isAuthenticated, async (req, res) => {
+messaging.routes.js >> router.post("/:classroomId", isAuthenticated, requireClassroomMember, upload.single("file"), async (req, res) => {
+messaging.routes.js >> router.get("/threads/all", isAuthenticated, async (req, res) => {
+messaging.routes.js >> router.get("/:classroomId", isAuthenticated, requireClassroomMember, async (req, res) => {
+messaging.routes.js >> router.get("/:classroomId/private/:userId", isAuthenticated, requireClassroomMember, async (req, res) => {
+messaging.routes.js >> router.get("/:classroomId/threads", isAuthenticated, requireClassroomMember, async (req, res) => {
+messaging.routes.js >> router.delete("/:classroomId/:messageId", isAuthenticated, requireClassroomMember, async (req, res) => {
+notes.routes.js >> router.post("/upload-url", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.post("/", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.get("/org", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.get("/my-notes", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.post("/view", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.get("/views/:noteId", isAuthenticated, requireRole("teacher", "faculty"), async (req, res) => {
+notes.routes.js >> router.get("/my-views", isAuthenticated, requireRole("teacher", "faculty"), async (req, res) => {
+notes.routes.js >> router.post("/verify", isAuthenticated, requireRole("teacher", "faculty"), async (req, res) => {
+notes.routes.js >> router.post("/generate-quiz", isAuthenticated, requireRole("teacher", "faculty"), async (req, res) => {
+notes.routes.js >> router.get("/quiz/:noteId", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.post("/quiz/:noteId/submit", isAuthenticated, async (req, res) => {
+notes.routes.js >> router.get("/quiz-analytics/:noteId", isAuthenticated, requirePlan("PRO"), requireRole("teacher", "faculty"), async (req, res) => {
+notification.routes.js >> router.get("/", isAuthenticated, async (req, res) => {
+notification.routes.js >> router.put("/:id/read", isAuthenticated, async (req, res) => {
+notification.routes.js >> router.put("/read-all", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.post('/ocr-import', isAuthenticated, requireRole('teacher', 'faculty', 'org_admin'), upload.single('file'), async (req, res) => {
+online-exam.routes.js >> router.post('/ai/generate', isAuthenticated, requireRole('teacher', 'faculty', 'org_admin'), async (req, res) => {
+online-exam.routes.js >> router.post('/upload-asset', isAuthenticated, requireRole('teacher', 'faculty'), upload.single('file'), async (req, res) => {
+online-exam.routes.js >> router.post("/create", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.get("/my-exams", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.get("/:examId", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.put("/:examId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.delete("/:examId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/status", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.get("/student/dashboard", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/start", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/verify-access", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/run-code", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/autosave", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/anticheat", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/proctor/flag", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/hall-ticket", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/submit", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/verify-access", isAuthenticated, requireRole("student"), async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/results", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.post("/explain-mistake", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/results/all", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.patch("/attempts/:attemptId/grade", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/analytics", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.post("/:examId/proctor-heartbeat", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.get("/:examId/proctor-report", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+online-exam.routes.js >> router.get("/student/topic-analysis", isAuthenticated, async (req, res) => {
+online-exam.routes.js >> router.get("/student/rank-prediction", isAuthenticated, async (req, res) => {
+org-website.routes.js >> router.get("/resolve", resolveTenantBySlug);
+org-website.routes.js >> orgRouter.get("/my-content",            getMyWebsiteContent);    // GET  /api/org-website/my-content
+org-website.routes.js >> orgRouter.post("/setup",                setupWebsiteContent);    // POST /api/org-website/setup
+org-website.routes.js >> orgRouter.patch("/update",              updateWebsiteContent);   // PATCH /api/org-website/update
+org-website.routes.js >> orgRouter.patch("/publish",             togglePublish);          // PATCH /api/org-website/publish
+org-website.routes.js >> orgRouter.post("/notices",              addNotice);              // POST  /api/org-website/notices
+org-website.routes.js >> orgRouter.delete("/notices/:noticeId",  deleteNotice);           // DELETE /api/org-website/notices/:id
+org-website.routes.js >> orgRouter.post("/gallery",              addGalleryImage);        // POST /api/org-website/gallery
+org-website.routes.js >> orgRouter.post("/gallery/video",        addGalleryVideo);        // POST /api/org-website/gallery/video
+org-website.routes.js >> superRouter.get("/org-websites", listAllWebsites);               // GET /api/super-admin/org-websites
+org.routes.js >> router.get("/dashboard", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.patch("/domains", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.patch("/type", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/academic-config", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.put("/academic-config", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/dashboard/overview", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/dashboard/users", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/dashboard/classrooms", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/dashboard/classrooms/:id/members", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/dashboard/activity", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/users/export", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/bulk-suspend", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/bulk-role-update", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/change-role", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/pending-invites", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/resend-invite", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/academic-years", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/academic-years", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/division-mappings", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/division-mappings", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/promotion-preview", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/promote", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/promotion-batches", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/data-export", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/import/validate", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/import/rollback/:batchId", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/import/errors/:batchId", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.get("/onboarding-progress", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.patch("/onboarding-progress", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+org.routes.js >> router.post("/regenerate-org-code", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+organization.routes.js >> router.post("/apply", applyLimiter, validateApplyOrg, applyOrganization);
+organization.routes.js >> router.get("/branding", getOrgBranding);
+organization.routes.js >> router.post("/verify-code", isAuthenticated, verifyCodeLimiter, validateVerifyCode, verifyOrgCode);
+organization.routes.js >> router.post("/validate", isAuthenticated, validateOrgCode, validateOrganization);
+organization.routes.js >> router.post("/add-faculty", isAuthenticated, requireRole("super_admin", "org_admin"), validateFaculty, addFaculty);
+organization.routes.js >> router.delete("/remove-faculty/:id", isAuthenticated, requireRole("super_admin", "org_admin"), removeFaculty);
+organization.routes.js >> router.put("/faculty/:id", isAuthenticated, requireRole("super_admin", "org_admin"), updateFaculty);
+organization.routes.js >> router.put("/faculty/:id/role", isAuthenticated, requireRole("super_admin", "org_admin"), updateFacultyRole);
+organization.routes.js >> router.post("/reset-faculty-password", isAuthenticated, requireRole("super_admin", "org_admin"), resetFacultyPassword);
+organization.routes.js >> router.get("/me", isAuthenticated, requireRole("super_admin", "org_admin"), getOrganizationDetails);
+organization.routes.js >> router.get("/public-info", isAuthenticated, getOrgPublicInfo);
+organization.routes.js >> router.get("/faculties", isAuthenticated, requireRole("super_admin", "org_admin"), getFaculties);
+organization.routes.js >> router.delete("/remove-student/:id", isAuthenticated, requireRole("super_admin", "org_admin"), removeStudent);
+organization.routes.js >> router.get("/students", isAuthenticated, requireRole("super_admin", "org_admin"), getStudents);
+organization.routes.js >> router.get("/classrooms", isAuthenticated, requireRole("super_admin", "org_admin"), getClassrooms);
+organization.routes.js >> router.get("/analytics", isAuthenticated, requireRole("super_admin", "org_admin"), getOrganizationAnalytics);
+organization.routes.js >> router.get("/attendance-analytics", isAuthenticated, requireRole("super_admin", "org_admin"), getAttendanceAnalytics);
+organization.routes.js >> router.post("/announcements", isAuthenticated, requireRole("super_admin", "org_admin"), validateOrganizationAnnouncement, createOrganizationAnnouncement);
+organization.routes.js >> router.get("/announcements", isAuthenticated, getOrganizationAnnouncements); // Accessible by faculty/students too, filtered inside controller
+organization.routes.js >> router.put("/announcements/:id", isAuthenticated, requireRole("super_admin", "org_admin"), validateOrganizationAnnouncement, updateOrganizationAnnouncement);
+organization.routes.js >> router.delete("/announcements/:id", isAuthenticated, requireRole("super_admin", "org_admin"), deleteOrganizationAnnouncement);
+organization.routes.js >> router.get("/announcements/:id/stats", isAuthenticated, requireRole("super_admin", "org_admin"), getOrganizationAnnouncementStats);
+organization.routes.js >> router.post("/request-delete", isAuthenticated, requireRole("org_admin"), requestDeleteOrganization);
+organization.routes.js >> router.get("/verify-delete", verifyDeleteOrganization); // Public — accessed via email link
+organization.routes.js >> router.get("/notes/pending", isAuthenticated, requireRole("org_admin"), getOrgPendingNotes);
+organization.routes.js >> router.post("/notes/:id/approve", isAuthenticated, requireRole("org_admin"), approveOrgNote);
+organization.routes.js >> router.post("/notes/:id/reject", isAuthenticated, requireRole("org_admin"), rejectOrgNote);
+organization.routes.js >> router.post("/change-password", isAuthenticated, requireRole("org_admin", "super_admin"), changeOrgAdminPassword);
+organization.routes.js >> router.post("/archive-classroom/:id", isAuthenticated, requireRole("org_admin", "super_admin"), archiveClassroomByAdmin);
+organization.routes.js >> router.get("/student-performance", isAuthenticated, requireRole("org_admin", "super_admin"), getStudentPerformance);
+organization.routes.js >> router.get("/audit-log", isAuthenticated, requireRole("org_admin"), getOrgAuditLog);
+organization.routes.js >> router.put("/logo", isAuthenticated, requireRole("org_admin", "super_admin"), updateOrgLogo);
+organization.routes.js >> router.get("/test-accounts", isAuthenticated, requireRole("org_admin", "super_admin"), getTestAccounts);
+organization.routes.js >> router.post("/test-accounts", isAuthenticated, requireRole("org_admin", "super_admin"), createTestAccount);
+organization.routes.js >> router.post("/test-accounts/:id/reset", isAuthenticated, requireRole("org_admin", "super_admin"), resetTestAccountPassword);
+organization.routes.js >> router.delete("/test-accounts/:id", isAuthenticated, requireRole("org_admin", "super_admin"), deleteTestAccount);
+org_chat.routes.js >> router.get('/users', isAuthenticated, async (req, res) => {
+org_chat.routes.js >> router.get('/unread-counts', isAuthenticated, async (req, res) => {
+org_chat.routes.js >> router.post('/messages/:otherUserId/read', isAuthenticated, async (req, res) => {
+org_chat.routes.js >> router.get('/messages/:otherUserId', isAuthenticated, async (req, res) => {
+org_chat.routes.js >> router.post('/messages/:otherUserId', isAuthenticated, upload.single('file'), async (req, res) => {
+past-paper.routes.js >> router.post('/ingest', upload.single('file'), async (req, res) => {
+past-paper.routes.js >> router.get('/analyze', async (req, res) => {
+past-paper.routes.js >> router.get('/mock-test', async (req, res) => {
+past-paper.routes.js >> router.get('/list', async (req, res) => {
+payroll.routes.js >> router.post("/calculate", requireRole("org_admin", "super_admin"), calculatePayroll);
+payroll.routes.js >> router.get("/summary", requireRole("org_admin", "super_admin"), getPayrollSummary);
+payroll.routes.js >> router.get("/me", requireRole("faculty", "teacher", "org_admin"), getMyPayslip);
+pendingActions.routes.js >> router.get("/", isAuthenticated, async (req, res) => {
+public.routes.js >> router.post("/request-demo", async (req, res) => {
+public.routes.js >> router.post("/request-demo/:id/meeting-booked", async (req, res) => {
+push.routes.js >> router.post("/register-device", isAuthenticated, async (req, res) => {
+push.routes.js >> router.delete("/unregister-device", isAuthenticated, async (req, res) => {
+push.routes.js >> router.post("/send", isAuthenticated, requireRole("org_admin", "faculty"), async (req, res) => {
+push.routes.js >> router.post("/send-by-role", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+push.routes.js >> router.post("/broadcast", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+push.routes.js >> router.get("/notifications", isAuthenticated, async (req, res) => {
+push.routes.js >> router.patch("/notifications/read-all", isAuthenticated, async (req, res) => {
+quiz.routes.js >> router.post("/save", isAuthenticated, async (req, res) => {
+quiz.routes.js >> router.get("/history", isAuthenticated, async (req, res) => {
+result.routes.js >> router.get('/schemes', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.post('/schemes', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.delete('/schemes/:id', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.get('/schemes/:id/subjects', isAuthenticated, async (req, res) => {
+result.routes.js >> router.post('/schemes/:id/subjects', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.post('/schemes/:id/upload-marks', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.post('/schemes/:id/generate', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.get('/student/:studentId/cgpa', isAuthenticated, async (req, res) => {
+result.routes.js >> router.post('/schemes/:id/publish', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.post('/schemes/:id/lock', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.get('/schemes/:id/results', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+result.routes.js >> router.get('/student/me', isAuthenticated, async (req, res) => {
+result.routes.js >> router.post('/upload-csv', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+review.routes.js >> router.get("/", async (req, res) => {
+review.routes.js >> router.post("/", async (req, res) => {
+review.routes.js >> router.post("/feedback", isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.get('/family', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.put('/family', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.get('/qualifications', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.put('/qualifications', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.delete('/qualifications/:id', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.get('/documents', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.put('/documents', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.delete('/documents/:doc_type', isAuthenticated, async (req, res) => {
+student-profile.routes.js >> router.put('/compliance', isAuthenticated, updateStudentCompliance);
+student.routes.js >> router.post('/send-onboarding-otp', isAuthenticated, async (req, res) => {
+student.routes.js >> router.post('/verify-onboarding-otp', isAuthenticated, async (req, res) => {
+student.routes.js >> router.post('/onboarding', isAuthenticated, async (req, res) => {
+student.routes.js >> router.get('/profile', isAuthenticated, async (req, res) => {
+student.routes.js >> router.get('/academic-history', isAuthenticated, async (req, res) => {
+student.routes.js >> router.put('/academic-history', isAuthenticated, async (req, res) => {
+student.routes.js >> router.delete('/academic-history/:qual_type', isAuthenticated, async (req, res) => {
+student.routes.js >> router.get('/address', isAuthenticated, async (req, res) => {
+student.routes.js >> router.put('/address', isAuthenticated, async (req, res) => {
+student.routes.js >> router.get('/onboarding-progress', isAuthenticated, async (req, res) => {
+student.routes.js >> router.post('/batch-import', isAuthenticated, async (req, res) => {
+super-admin.routes.js >> router.post("/broadcast-global", broadcastGlobal);
+super-admin.routes.js >> router.post("/email-org-admins", emailOrgAdmins);
+super-admin.routes.js >> router.post("/scheduled-notifications", createScheduledNotification);
+super-admin.routes.js >> router.get("/scheduled-notifications", listScheduledNotifications);
+super-admin.routes.js >> router.patch("/scheduled-notifications/:id/cancel", cancelScheduledNotification);
+super-admin.routes.js >> router.get("/feature-flags", listFeatureFlags);
+super-admin.routes.js >> router.post("/feature-flags", upsertFeatureFlag);
+super-admin.routes.js >> router.patch("/feature-flags/:key/toggle", toggleFeatureFlag);
+super-admin.routes.js >> router.get("/health", healthCheck);
+super-admin.routes.js >> router.post("/impersonate/:userId", impersonateUser);
+super-admin.routes.js >> router.get("/error-logs", getErrorLogs);
+super-admin.routes.js >> router.get("/subscription/:orgId", getOrgSubscription);
+super-admin.routes.js >> router.put("/subscription/:orgId", updateOrgSubscription);
+super-admin.routes.js >> router.get("/leads", getDemoLeads);
+super-admin.routes.js >> router.post("/leads/:id/approve", approveLeadAndProvision);
+super-admin.routes.js >> router.post("/leads/:id/schedule-meeting", scheduleLeadMeeting);
+support.routes.js >> router.post("/tickets", isAuthenticated, async (req, res) => {
+support.routes.js >> router.get("/tickets", isAuthenticated, async (req, res) => {
+support.routes.js >> router.get("/tickets/:id", isAuthenticated, async (req, res) => {
+support.routes.js >> router.post("/tickets/:id/reply", isAuthenticated, async (req, res) => {
+support.routes.js >> router.get("/admin/tickets", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+support.routes.js >> router.patch("/admin/tickets/:id", isAuthenticated, requireRole("super_admin"), async (req, res) => {
+teacher-planner.routes.js >> router.post('/plan', isAuthenticated, requireRole('faculty', 'org_admin'), async (req, res) => {
+teacher-planner.routes.js >> router.get('/me', isAuthenticated, requireRole('faculty', 'org_admin'), async (req, res) => {
+teacher-planner.routes.js >> router.get('/classroom/:classroomId', isAuthenticated, async (req, res) => {
+teacher-planner.routes.js >> router.get('/today', isAuthenticated, requireRole('faculty', 'org_admin'), async (req, res) => {
+teacher-planner.routes.js >> router.patch('/plan/:planId/goals/:goalId', isAuthenticated, async (req, res) => {
+teacher-planner.routes.js >> router.delete('/plan/:planId', isAuthenticated, requireRole('faculty', 'org_admin'), async (req, res) => {
+thread_chat.routes.js >> router.get('/', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/dm/:userId', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.get('/:id/messages', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/read', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/messages/:msgId/reactions', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.patch('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/summarize', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/suggest-replies', isAuthenticated, async (req, res) => {
+thread_chat.routes.js >> router.post('/:id/notes', isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.get("/division/:divisionId", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.get("/division/:divisionId/today", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.get("/me/today", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.post("/division/:divisionId", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.post("/division/:divisionId/bulk", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.put("/:slotId", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.delete("/:slotId", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.post("/extra", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.get("/extra/division/:divisionId", isAuthenticated, async (req, res) => {
+timetable.routes.js >> router.delete("/extra/:id", isAuthenticated, async (req, res) => {
+user.routes.js >> router.get("/profile", isAuthenticated, async (req, res) => {
+user.routes.js >> router.put("/update", isAuthenticated, async (req, res) => {
+user.routes.js >> router.get("/email-preferences", isAuthenticated, async (req, res) => {
+user.routes.js >> router.put("/email-preferences", isAuthenticated, async (req, res) => {
+user.routes.js >> router.post("/fcm-token", isAuthenticated, async (req, res) => {
+user.routes.js >> router.post("/divisions", isAuthenticated, async (req, res) => {
+user.routes.js >> router.get("/my-teaching-roles", isAuthenticated, async (req, res) => {
+video.routes.js >> router.patch("/progress", isAuthenticated, updateVideoProgress);
+video.routes.js >> router.get("/continue-watching", isAuthenticated, getContinueWatching);
+video.routes.js >> router.get("/progress/:classroomId", isAuthenticated, getClassroomVideoAnalytics);
+viva.routes.js >> router.post("/initialize", isAuthenticated, async (req, res) => {
+viva.routes.js >> router.post("/evaluate-session", isAuthenticated, async (req, res) => {
+viva.routes.js >> router.get("/history", isAuthenticated, async (req, res) => {
+viva.routes.js >> router.get("/:vivaId/transcript", isAuthenticated, async (req, res) => {
+viva.routes.js >> router.get("/scheduled", isAuthenticated, requireRole("student"), async (req, res) => {
+viva.routes.js >> router.post("/schedule", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+viva.routes.js >> router.get("/faculty/dashboard/:classroomId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+viva.routes.js >> router.get("/faculty/student/:studentId", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+viva.routes.js >> router.patch("/schedule/:scheduleId/activate", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+viva.routes.js >> router.patch("/schedule/:scheduleId/complete", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+voice.routes.js >> router.post('/send', isAuthenticated, upload.single('audio'), async (req, res) => {
+webhook.routes.js >> router.post("/zoom", express.json(), async (req, res) => {
+zoom.routes.js >> router.get("/connect", isAuthenticated, (req, res) => {
+zoom.routes.js >> router.get("/callback", async (req, res) => {
+zoom.routes.js >> router.post("/meet", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+zoom.routes.js >> router.delete("/meet/:id", isAuthenticated, requireRole("faculty", "org_admin"), async (req, res) => {
+zoom.routes.js >> router.post("/disconnect", isAuthenticated, async (req, res) => {

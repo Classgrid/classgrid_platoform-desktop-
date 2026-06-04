@@ -1,0 +1,1909 @@
+import User from "../models/User.js";
+import DemoRequest from "../models/DemoRequest.js";
+import Verification from "../models/Verification.js";
+import DeviceVerification from "../models/DeviceVerification.js";
+import Organization from "../models/Organization.js";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+import { sendEmail } from "../services/brevo.service.js";
+import connectDB from "../../config/db.js";
+import { checkAndRegisterDevice, getDeviceFingerprint } from "../services/device-fingerprint.service.js";
+import {
+    getFacultyWelcomeEmailHtml,
+    getFacultyWelcomePlainText,
+    getStudentWelcomeEmailHtml,
+    getStudentWelcomePlainText,
+    getLoginNotificationHtml,
+    getLoginNotificationPlainText,
+    getVerificationEmailHtml,
+    getPasswordResetEmailHtml,
+    getVerificationEmailPlainText,
+    getPasswordResetEmailPlainText,
+    getNoAccountSignInAttemptHtml,
+    getNoAccountSignInAttemptPlainText,
+    getOrgAdminInviteHtml,
+    getOrgAdminInvitePlainText,
+} from "../services/email-templates.service.js";
+import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
+import { syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
+
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
+const getFrontendUrl = () => {
+    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+};
+
+const FRONTEND_URL = getFrontendUrl();
+
+const INSTITUTION_ADMIN_ROLES = new Set([
+    "org_admin",
+    "library_manager",
+    "hod",
+    "principal",
+    "vice_principal",
+    "exam_controller",
+    "fee_manager",
+    "admission_head",
+    "admission_verifier",
+    "admission_counselor",
+    "admission_clerk",
+    "tpo_officer",
+    "transport_manager",
+    "counselor",
+    "coordinator",
+]);
+
+const ROLE_LABELS = {
+    student: "Student",
+    teacher: "Faculty",
+    faculty: "Faculty",
+    org_admin: "Organization Admin",
+    library_manager: "Library Manager",
+    hod: "Head of Department",
+    principal: "Principal",
+    vice_principal: "Vice Principal",
+    exam_controller: "Exam Controller",
+    fee_manager: "Fees Manager",
+    admission_head: "Admissions Head",
+    admission_verifier: "Admissions Verifier",
+    admission_counselor: "Admissions Counselor",
+    admission_clerk: "Admissions Clerk",
+    tpo_officer: "Placement Officer",
+    transport_manager: "Transport Manager",
+    counselor: "Counselor",
+    coordinator: "Coordinator",
+    super_admin: "Super Admin",
+};
+
+const DASHBOARD_TARGETS = {
+    student: "/student/work",
+    teacher: "/work",
+    faculty: "/work",
+    org_admin: "/org/dashboard",
+    library_manager: "/dept/library/dashboard",
+    hod: "/org/dashboard",
+    principal: "/org/dashboard",
+    vice_principal: "/org/dashboard",
+    exam_controller: "/dept/exams/dashboard",
+    fee_manager: "/dept/fees/dashboard",
+    admission_head: "/dept/admissions/dashboard",
+    admission_verifier: "/dept/admissions/dashboard",
+    admission_counselor: "/dept/admissions/dashboard",
+    admission_clerk: "/dept/admissions/dashboard",
+    tpo_officer: "/org/dashboard",
+    transport_manager: "/dept/transport/dashboard",
+    counselor: "/org/dashboard",
+    coordinator: "/org/dashboard",
+    super_admin: "/superadmin/dashboard",
+};
+
+const isInstitutionAdminRole = (role) => INSTITUTION_ADMIN_ROLES.has(role);
+const getRoleLabel = (role) => ROLE_LABELS[role] || role;
+
+const getLoginPortalPath = (loginTab) => {
+    if (loginTab === "super_admin") return "/superadmin/login";
+    if (loginTab === "admin" || loginTab === "org_admin") return "/admin/login";
+    if (loginTab === "teacher" || loginTab === "faculty") return "/faculty/login";
+    return "/student/login";
+};
+
+const getFrontendDashboardTarget = (user) => {
+    if (user.role === "super_admin") return "/superadmin/dashboard";
+    if (isInstitutionAdminRole(user.role)) return DASHBOARD_TARGETS[user.role] || "/org/dashboard";
+    if (["faculty", "teacher"].includes(user.role) && !user.organization_id) return "/enter-org-code";
+    return DASHBOARD_TARGETS[user.role] || "/classroom";
+};
+
+const generateActivationCredentials = () => {
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const activationCode = String(Math.floor(100000 + Math.random() * 900000));
+    const activationCodeHash = crypto.createHash("sha256").update(activationCode).digest("hex");
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    return {
+        rawToken,
+        hashedToken,
+        activationCode,
+        activationCodeHash,
+        expiresAt,
+    };
+};
+
+const findPendingOrgAdminByActivation = async ({ token, email, activationCode }) => {
+    if (token) {
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+        return User.findOne({
+            activationToken: hashedToken,
+            activationTokenExpires: { $gt: new Date() }
+        }).select("+password");
+    }
+
+    if (email && activationCode) {
+        const activationCodeHash = crypto.createHash("sha256").update(String(activationCode).trim()).digest("hex");
+        return User.findOne({
+            email: String(email).toLowerCase().trim(),
+            activationCodeHash,
+            activationCodeExpires: { $gt: new Date() }
+        }).select("+password");
+    }
+
+    return null;
+};
+
+// 🔒 In-memory rate limiter for "no account" emails (max 1 per 15 min per email)
+const noAccountEmailCooldown = new Map();
+const NO_ACCOUNT_EMAIL_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+
+// Helper: Get approximate location from IP
+const getLocationFromIP = async (req) => {
+    try {
+        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '';
+        // For localhost/private IPs, use auto-detect (ipapi returns server's public IP location)
+        const isLocal = !ip || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.');
+        const url = isLocal ? 'https://ipapi.co/json/' : `https://ipapi.co/${ip}/json/`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.error) return 'Unknown location';
+        if (data.city && data.country_name) return `${data.city}, ${data.country_name}`;
+        if (data.region && data.country_name) return `${data.region}, ${data.country_name}`;
+        return data.country_name || 'Unknown location';
+    } catch { return 'Unknown location'; }
+};
+
+// Helper: Parse device from User-Agent
+const getDeviceFromUA = (ua) => {
+    if (!ua) return 'Unknown device';
+    let browser = 'Unknown browser';
+    let os = 'Unknown OS';
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+    else if (ua.includes('Edg')) browser = 'Edge';
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac')) os = 'macOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+    return `${browser} on ${os}`;
+};
+
+// Helper: Send Vercel-style "no account" email (rate-limited, fire-and-forget)
+const sendNoAccountEmail = async (email, req) => {
+    const lastSent = noAccountEmailCooldown.get(email);
+    if (lastSent && Date.now() - lastSent < NO_ACCOUNT_EMAIL_COOLDOWN_MS) return; // Rate limited
+    noAccountEmailCooldown.set(email, Date.now());
+    try {
+        const location = await getLocationFromIP(req);
+        sendEmail({
+            to: email,
+            subject: 'Sign-in attempt on Classgrid',
+            html: getNoAccountSignInAttemptHtml(email, location),
+            text: getNoAccountSignInAttemptPlainText(email, location),
+        }).catch(err => console.error('No-account email error:', err));
+    } catch (err) { console.error('No-account email dispatch error:', err); }
+};
+
+// ─── Day 3 "Login Law": Platform-Aware Session Expiry ────────────────
+// Mobile JWT  = 365 days  (students stay logged in like Instagram/WhatsApp)
+// Desktop JWT = 24 hours  (secure default for shared computers)
+// Desktop JWT = 7 days    (if "Remember Me" is checked)
+// ─────────────────────────────────────────────────────────────────────
+
+/** Detect if the request is from a mobile app (Android WebView / iOS) */
+const isMobileApp = (req) => {
+    const ua = (req.headers["user-agent"] || "").toLowerCase();
+    // Android WebView sends "wv" in UA; native apps send custom header
+    const platformHeader = (req.headers["x-platform-app"] || "").toLowerCase();
+    if (platformHeader === "android" || platformHeader === "ios") return true;
+    if (ua.includes("classgrid") || ua.includes("wv")) return true;
+    if ((ua.includes("android") || ua.includes("iphone") || ua.includes("ipad")) && !ua.includes("chrome/")) return true;
+    return false;
+};
+
+// Helper: Token Generator (standardized — all tokens carry id, role, organizationId)
+const generateToken = (user, req = null, rememberMe = false) => {
+    let expiry = "24h"; // Desktop default: 24 hours
+
+    if (req && isMobileApp(req)) {
+        expiry = "365d"; // Mobile app: 365 days (like Instagram)
+    } else if (rememberMe) {
+        expiry = "7d";   // Desktop "Remember Me": 7 days
+    }
+
+    return jwt.sign(
+        { id: user._id, role: user.role, organizationId: user.organization_id || null },
+        JWT_SECRET,
+        { expiresIn: expiry }
+    );
+};
+
+// Helper: Set Cookie (duration matches JWT expiry)
+const setTokenCookie = (res, token, req = null, rememberMe = false) => {
+    const isProd = process.env.NODE_ENV === "production";
+
+    let maxAge = 24 * 60 * 60 * 1000; // 24 hours (desktop default)
+    if (req && isMobileApp(req)) {
+        maxAge = 365 * 24 * 60 * 60 * 1000; // 365 days (mobile)
+    } else if (rememberMe) {
+        maxAge = 7 * 24 * 60 * 60 * 1000;   // 7 days (remember me)
+    }
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "None" : "Lax",
+        path: "/",
+        maxAge,
+    });
+};
+
+// ─────────────────────────────────────────────
+// Helper: Send Welcome Email (First Login)
+// ─────────────────────────────────────────────
+const sendWelcomeEmail = async (user, provider = "manual") => {
+    try {
+        const dashboardUrl = `${getFrontendUrl()}/classroom`;
+        let html, text;
+
+        // Use organization name if available (otherwise generic org name for unassigned students)
+        let orgName = "Classgrid";
+        if (user.organization_id) {
+            const org = await Organization.findById(user.organization_id).select('name');
+            orgName = org ? org.name : "Classgrid";
+        }
+
+        if (user.role === 'faculty' || user.role === 'teacher') {
+            html = getFacultyWelcomeEmailHtml(user.name, orgName, dashboardUrl);
+            text = getFacultyWelcomePlainText(user.name, orgName, dashboardUrl);
+        } else {
+            // Default to Student welcome for any other role
+            html = getStudentWelcomeEmailHtml(user.name, dashboardUrl);
+            text = getStudentWelcomePlainText(user.name, dashboardUrl);
+        }
+
+        await sendEmail({
+            to: user.email,
+            subject: "🎉 Welcome to Classgrid - Account Created Successfully",
+            html: html,
+            text: text,
+        });
+        console.log(`📧 Welcome email sent to ${user.email} (${provider})`);
+    } catch (err) {
+        console.error("Welcome Email Error (non-critical):", err.message);
+    }
+};
+
+// ─────────────────────────────────────────────
+// Helper: Send Login Notification (New Device Only)
+// ─────────────────────────────────────────────
+const sendLoginNotification = async (user, provider = "manual") => {
+    try {
+        await sendEmail({
+            to: user.email,
+            subject: "🔐 Classgrid - Account Login Notification",
+            html: getLoginNotificationHtml(user, provider),
+            text: getLoginNotificationPlainText(user, provider),
+        });
+        console.log(`📧 Login notification sent to ${user.email} (${provider})`);
+    } catch (err) {
+        console.error("Login Notification Error (non-critical):", err.message);
+    }
+};
+
+/* ==================== PUBLIC CONFIG ==================== */
+export const getSystemConfig = async (req, res) => {
+    try {
+        await connectDB();
+        const { default: SystemSettings } = await import("../models/SystemSettings.js");
+        const settings = await SystemSettings.findOne();
+        res.status(200).json({
+            maintenanceMode: settings?.maintenanceMode || false,
+            disableRegistrations: settings?.disableRegistrations || false,
+            aiFeatures: settings?.aiFeatures ?? true,
+            notesSystem: settings?.notesSystem ?? true,
+            chatSystem: settings?.chatSystem ?? true
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/* ==================== MANUAL AUTH ==================== */
+
+// Initiate Signup (Step 1: Email & Name)
+export const initiateSignup = async (req, res) => {
+    try {
+        await connectDB(); // Guard against cold-start DB not ready
+
+        const { default: SystemSettings } = await import("../models/SystemSettings.js");
+        const settings = await SystemSettings.findOne();
+        if (settings && settings.disableRegistrations) {
+            return res.status(403).json({ message: "New registrations are currently disabled by the Super Admin." });
+        }
+
+        const { name, email } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({ message: "Name and email are required" });
+        }
+
+        // Check if a VERIFIED user already exists with this email
+        const existingUser = await User.findOne({ email });
+        if (existingUser && existingUser.isEmailVerified) {
+            return res.status(400).json({ message: "Email already registered. Please login." });
+        }
+
+        // If an unverified user exists (from incomplete signup), delete them so we can redo
+        if (existingUser && !existingUser.isEmailVerified) {
+            await User.deleteOne({ _id: existingUser._id });
+        }
+
+        // Check if a verification is already pending
+        let verification = await Verification.findOne({ email });
+        const token = uuidv4();
+
+        if (verification) {
+            // Rate limit: max 2 sends per hour
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            const recentSendCount = (verification.lastResentAt && verification.lastResentAt > oneHourAgo)
+                ? verification.resendCount
+                : 0;
+
+            if (recentSendCount >= 2) {
+                return res.status(429).json({
+                    message: "Verification email already sent. Please wait before requesting again (max 2 per hour)."
+                });
+            }
+
+            // Update existing verification
+            verification.verificationToken = token;
+            verification.name = name;
+            verification.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            verification.resendCount = recentSendCount + 1;
+            verification.lastResentAt = new Date();
+            await verification.save();
+        } else {
+            // Create new verification
+            verification = await Verification.create({
+                name,
+                email,
+                verificationToken: token,
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                resendCount: 1,
+                lastResentAt: new Date(),
+            });
+        }
+
+        // Send Verification Email (with logo)
+        const apiVerifyLink = `${FRONTEND_URL}/api/auth/verify-token/${token}`;
+
+        await sendEmail({
+            to: email,
+            subject: "📧 Verify Email - Classgrid",
+            html: getVerificationEmailHtml(name, apiVerifyLink),
+            text: getVerificationEmailPlainText(name, apiVerifyLink),
+        });
+
+        res.json({ message: "Verification email sent. Please check your inbox." });
+
+    } catch (err) {
+        console.error("Initiate Signup Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Minimal Safe Admin Validation for Smart Email-First Login Flow
+export const checkAdminStatus = async (req, res) => {
+    try {
+        await connectDB();
+        let { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required" });
+        email = email.toLowerCase().trim();
+
+        // Find user by email and select mustResetPassword to check activation status
+        const user = await User.findOne({ email }).select("role mustResetPassword");
+
+        // If not found, or not an org_admin, return isOrgAdmin: false
+        if (!user || user.role !== "org_admin") {
+            return res.json({ isOrgAdmin: false });
+        }
+
+        // isOrgAdmin is true. 'isActivated' means they have completed setup (mustResetPassword is false)
+        const isActivated = !user.mustResetPassword;
+
+        return res.json({
+            isOrgAdmin: true,
+            isActivated
+        });
+    } catch (err) {
+        console.error("Check Admin Status Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// POST /api/auth/validate-activation-token
+// Validates if an activation token is valid and unused
+export const validateActivationToken = async (req, res) => {
+    try {
+        await connectDB();
+        const { token, email, activationCode } = req.body;
+
+        if (!token && !(email && activationCode)) {
+            return res.status(400).json({ message: "Provide either a token or email + activationCode." });
+        }
+
+        const user = await findPendingOrgAdminByActivation({ token, email, activationCode });
+
+        if (!user) {
+            return res.status(400).json({ message: "This activation credential is invalid or has expired." });
+        }
+
+        if (user.role !== "org_admin") {
+            return res.status(403).json({ message: "This activation link is not valid for your account type." });
+        }
+
+        if (!user.mustResetPassword) {
+            return res.status(400).json({ message: "This account has already been activated. Please sign in." });
+        }
+
+        return res.status(200).json({ valid: true, mode: token ? "link" : "code" });
+    } catch (err) {
+        console.error("Validate Activation Token Error:", err);
+        res.status(500).json({ message: "Server error during validation." });
+    }
+};
+
+// POST /api/auth/activate-admin
+// Validates activation token, sets password, marks admin as activated, auto-logs in
+export const activateAdmin = async (req, res) => {
+    try {
+        await connectDB();
+        const { token, password, email, activationCode } = req.body;
+
+        if ((!token && !(email && activationCode)) || !password) {
+            return res.status(400).json({ message: "Provide password plus either token or email + activationCode." });
+        }
+        if (password.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters." });
+        }
+
+        const user = await findPendingOrgAdminByActivation({ token, email, activationCode });
+
+        if (!user) {
+            return res.status(400).json({ message: "This activation credential is invalid or has expired. Please request a new one." });
+        }
+
+        if (user.role !== "org_admin") {
+            return res.status(403).json({ message: "This activation link is not valid for your account type." });
+        }
+
+        if (!user.mustResetPassword) {
+            return res.status(400).json({ message: "This account has already been activated. Please sign in." });
+        }
+
+        // Set password, mark activated, clear token (single-use)
+        user.password = await bcrypt.hash(password, 10);
+        user.mustResetPassword = false;
+        user.isEmailVerified = true;
+        user.activationToken = null;
+        user.activationTokenExpires = null;
+        user.activationCodeHash = null;
+        user.activationCodeExpires = null;
+        if (!user.linkedProviders) user.linkedProviders = [];
+        if (!user.linkedProviders.includes("manual")) user.linkedProviders.push("manual");
+        user.authProvider = "manual";
+        user.lastLoginAt = new Date();
+        await user.save();
+
+        if (user.organization_id) {
+            await syncDerivedOnboardingProgress(user.organization_id);
+            await DemoRequest.findOneAndUpdate(
+                { provisionedAdminId: user._id, provisionedOrganizationId: user.organization_id },
+                { $set: { lifecycleStage: "activated" } }
+            );
+            await trackOnboardingEvent({
+                organizationId: user.organization_id,
+                demoRequestId: null,
+                userId: user._id,
+                eventType: "org_admin_activated",
+                stage: "activated",
+                actorRole: "org_admin",
+                metadata: { mode: token ? "link" : "code" },
+            });
+        }
+
+        // Send activated confirmation email
+        const { getOrgAdminActivatedHtml, getOrgAdminActivatedPlainText } = await import("../services/email-templates.service.js");
+        const frontendUrl = getFrontendUrl();
+        const org = user.organization_id
+            ? await Organization.findById(user.organization_id).select("name").lean()
+            : null;
+        const orgNameFormatted = org?.name
+            ? encodeURIComponent(org.name.replace(/\s+/g, "-").toLowerCase())
+            : "dashboard";
+        const dashboardLink = `${frontendUrl}/org/${orgNameFormatted}/admin`;
+        const adminLoginLink = `${frontendUrl}/admin/login`;
+
+        try {
+            await sendEmail({
+                to: user.email,
+                subject: "Your Classgrid Admin Account is Active",
+                html: getOrgAdminActivatedHtml(user.name, dashboardLink, adminLoginLink),
+                text: getOrgAdminActivatedPlainText(user.name, dashboardLink, adminLoginLink),
+            });
+        } catch (emailErr) {
+            console.error("Activation email send error (non-critical):", emailErr.message);
+        }
+
+        // Auto login — generate JWT exactly like normal login does
+        const jwtToken = generateToken(user, req);
+        setTokenCookie(res, jwtToken, req);
+
+        res.status(200).json({
+            message: "Account activated successfully",
+            token: jwtToken,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture || "",
+                photoURL: user.profilePicture || "",
+                organization_id: user.organization_id || null,
+                organization: org ? { name: org.name } : null,
+                authProvider: "manual",
+            }
+        });
+    } catch (err) {
+        console.error("Activate Admin Error:", err);
+        res.status(500).json({ message: "Server error during activation." });
+    }
+};
+
+// POST /api/auth/resend-activation
+// Rate-limited: regenerates activation token and resends invite email for unactivated org admins
+export const resendActivation = async (req, res) => {
+    try {
+        await connectDB();
+        let { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required." });
+        email = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email });
+
+        // Always return the same safe message to prevent enumeration
+        const safeResponse = () => res.json({ message: "If that email is a pending admin account, a new activation link has been sent." });
+
+        if (!user || user.role !== "org_admin" || !user.mustResetPassword) {
+            return safeResponse();
+        }
+
+        // Rate limit: only allow resend if existing token was issued more than 5 minutes ago
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (user.activationTokenExpires && user.activationTokenExpires > new Date(Date.now() + (5 * 60 * 1000) - (2 * 60 * 1000))) {
+            // Token was issued less than 2 minutes ago (still near-full 5min remaining)
+            return res.status(429).json({ message: "Please wait a few minutes before requesting another activation email." });
+        }
+
+        const credentials = generateActivationCredentials();
+        user.activationToken = credentials.hashedToken;
+        user.activationTokenExpires = credentials.expiresAt;
+        user.activationCodeHash = credentials.activationCodeHash;
+        user.activationCodeExpires = credentials.expiresAt;
+        await user.save();
+
+        const frontendUrl = getFrontendUrl();
+        const activationLink = `${frontendUrl}/admin/activate?token=${credentials.rawToken}`;
+
+        const org = user.organization_id
+            ? await Organization.findById(user.organization_id).select("name").lean()
+            : null;
+        const orgName = org?.name || "your organization";
+
+        try {
+            await sendEmail({
+                to: user.email,
+                subject: "Activate Your Classgrid Admin Account",
+                html: getOrgAdminInviteHtml(user.name, orgName, activationLink, credentials.activationCode),
+                text: getOrgAdminInvitePlainText(user.name, orgName, activationLink, credentials.activationCode),
+            });
+        } catch (emailErr) {
+            console.error("Resend activation email error:", emailErr.message);
+            return res.status(500).json({ message: "Failed to send activation email. Please try again." });
+        }
+
+        return res.json({
+            message: "If that email is a pending admin account, a new activation link has been sent.",
+            activation: {
+                activationCode: credentials.activationCode,
+                activationLink,
+                expiresAt: credentials.expiresAt,
+            }
+        });
+    } catch (err) {
+        console.error("Resend Activation Error:", err);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+// POST /api/auth/manual-activation-link
+// Resolves a fresh activation link using email + activation code as fallback
+export const resolveManualActivationLink = async (req, res) => {
+    try {
+        await connectDB();
+        const { email, activationCode } = req.body;
+
+        if (!email || !activationCode) {
+            return res.status(400).json({ message: "Email and activationCode are required." });
+        }
+
+        const user = await findPendingOrgAdminByActivation({ email, activationCode });
+        if (!user || user.role !== "org_admin" || !user.mustResetPassword) {
+            return res.status(400).json({ message: "Invalid or expired activation code." });
+        }
+
+        const credentials = generateActivationCredentials();
+        user.activationToken = credentials.hashedToken;
+        user.activationTokenExpires = credentials.expiresAt;
+        user.activationCodeHash = credentials.activationCodeHash;
+        user.activationCodeExpires = credentials.expiresAt;
+        await user.save();
+
+        const activationLink = `${getFrontendUrl()}/admin/activate?token=${credentials.rawToken}`;
+        return res.json({
+            success: true,
+            activationLink,
+            activationCode: credentials.activationCode,
+            expiresAt: credentials.expiresAt,
+        });
+    } catch (err) {
+        console.error("Resolve Manual Activation Link Error:", err);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+
+
+// Login (Manual)
+export const login = async (req, res) => {
+    try {
+        await connectDB();
+        let { email, password, expectedLoginType, loginTab, deviceFingerprint, fingerprint, rememberMe } = req.body;
+        deviceFingerprint = deviceFingerprint || fingerprint;
+
+        // Prioritize stable cookie fingerprint if it exists
+        if (req.cookies && req.cookies.client_device_fp) {
+            deviceFingerprint = req.cookies.client_device_fp;
+        }
+
+        if (email) email = email.toLowerCase().trim();
+
+        // 🛡️ Login Law: Subdomain scoping (Day 3)
+        // If we are on a tenant subdomain (e.g. pccoe.classgrid.in), only allow logins for that tenant.
+        const tenantSlug = req.tenantSlug;
+        let tenantOrgId = null;
+
+        if (tenantSlug) {
+            const tenantOrg = await Organization.findOne({ subdomain: tenantSlug.toLowerCase() }).select("_id").lean();
+            if (!tenantOrg) {
+                return res.status(404).json({ message: "Organization session invalid or not found." });
+            }
+            tenantOrgId = tenantOrg._id;
+        }
+
+        // Explicitly select password and mustResetPassword
+        const user = await User.findOne({ email }).select("+password +mustResetPassword +isSandbox +loginAttempts +lockUntil");
+
+        if (user?.lockUntil && user.lockUntil > new Date()) {
+            const retryAfterSeconds = Math.ceil((user.lockUntil.getTime() - Date.now()) / 1000);
+            return res.status(429).json({
+                message: "Too many failed login attempts. Please try again later.",
+                retryAfterSeconds,
+            });
+        }
+
+        if (user?.lockUntil && user.lockUntil <= new Date()) {
+            user.lockUntil = null;
+            user.loginAttempts = 0;
+            await user.save();
+        }
+        // Check password existence & handle First-Time Admin Login
+        // We MUST verify password FIRST to prevent enumeration and timing attacks
+        // If user doesn't exist OR has no password, compare against a dummy hash to prevent timing leak
+        const dummyHash = '$2a$10$abcdefghijklmnopqrstuv'; // valid bcrypt format
+        const hashToCompare = user ? (user.password || dummyHash) : dummyHash;
+        
+        let isMatch = false;
+        try {
+            isMatch = await bcrypt.compare(password || "", hashToCompare);
+        } catch (e) {
+            isMatch = false;
+        }
+
+        if (!user || !user.password || !isMatch) {
+            if (user) {
+                user.loginAttempts = (user.loginAttempts || 0) + 1;
+                let responsePayload = { message: "Invalid email or password" };
+
+                if (user.loginAttempts >= 5) {
+                    user.lockUntil = new Date(Date.now() + 5 * 60 * 1000); // 5 min lock
+                    await user.save();
+                    return res.status(429).json({ message: "Too many failed login attempts. Please try again later." });
+                }
+
+                if (user.loginAttempts >= 3) {
+                    responsePayload.showResetHint = true;
+                }
+                await user.save();
+                return res.status(401).json(responsePayload);
+            } else {
+                // 🔒 Anti-timing: the bcrypt.compare took roughly the right amount of time
+                // 🔒 Silent Vercel-style email (fire-and-forget, rate-limited)
+                sendNoAccountEmail(email, req);
+                return res.status(401).json({ message: "Invalid email or password" });
+            }
+        }
+
+        // --- AT THIS POINT: Password is CORRECT so they legally own the account ---
+
+        // Strict role validation based on login page source
+        const userRoleLabel = getRoleLabel(user.role);
+
+        const reqRole = expectedLoginType || req.body.role;
+
+        if (reqRole === 'superadmin' || reqRole === 'super_admin') {
+            if (user.role !== 'super_admin') return res.status(403).json({ message: `This account is registered as ${userRoleLabel}. Please use the correct login portal for your role.` });
+        } else if (reqRole === 'admin' || reqRole === 'org_admin') {
+            if (!isInstitutionAdminRole(user.role)) return res.status(403).json({ message: `This account is registered as ${userRoleLabel}. Please use the correct login portal.` });
+        } else if (reqRole === 'standard' || reqRole === 'student' || reqRole === 'teacher') {
+            if (!['student', 'faculty', 'teacher'].includes(user.role)) return res.status(403).json({ message: `This account is registered as ${userRoleLabel}. Please use the Admin Login portal instead.` });
+        }
+
+        // Strict tab enforcement — prevent wrong-tab logins for standard users
+        if ((loginTab === 'student' || reqRole === 'student') && !['student'].includes(user.role)) {
+            return res.status(403).json({ message: `This account is registered as ${userRoleLabel}. Please use the correct portal.`, wrongTab: true, correctTab: 'teacher' });
+        }
+        if ((loginTab === 'teacher' || reqRole === 'teacher') && !['faculty', 'teacher'].includes(user.role)) {
+            return res.status(403).json({ message: `This account is registered as ${userRoleLabel}. Please use the correct portal.`, wrongTab: true, correctTab: 'student' });
+        }
+
+        // Status check — block suspended/blocked users
+        if (user.status === "suspended" || user.status === "blocked") {
+            return res.status(403).json({ message: "Your account is suspended. Please contact support." });
+        }
+
+        const { default: SystemSettings } = await import("../models/SystemSettings.js");
+        const settings = await SystemSettings.findOne();
+
+        if (settings && settings.maintenanceMode && user.role !== "super_admin") {
+            return res.status(503).json({ message: "The platform is currently in maintenance mode." });
+        }
+
+        // Organization status check — block if org is suspended/blocked
+        if (user.organization_id && ["org_admin", "faculty", "teacher"].includes(user.role)) {
+            const org = await Organization.findById(user.organization_id).select("status").lean();
+            if (org && (org.status === "suspended" || org.status === "blocked")) {
+                return res.status(403).json({ message: "Your organization is suspended. Please contact your administrator." });
+            }
+        }
+
+        // 🛡️ Login Law: Enforce Tenant Matching
+        if (tenantOrgId && user.role !== "super_admin") {
+            if (!user.organization_id || user.organization_id.toString() !== tenantOrgId.toString()) {
+                return res.status(403).json({ 
+                    message: "Unauthorized. This account is not registered to this institution's portal.",
+                    suggestion: "Please use the official Classgrid app or the general login portal."
+                });
+            }
+        }
+
+        // Email verification gate — admin-invited faculty are pre-verified (isEmailVerified=true set on creation)
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                message: "Please verify your email before logging in.",
+                code: "EMAIL_NOT_VERIFIED"
+            });
+        }
+
+        const isFirstLogin = !user.lastLoginAt;
+        const mustReset = !!user.mustResetPassword;
+
+        // --- DEVICE BINDING LOGIC (ALL ROLES) ---
+        // Sandbox/test accounts and internal @classgrid.in team accounts skip device verification
+        const isInternalDomain = user.email.endsWith("@classgrid.in");
+        if (deviceFingerprint && !user.isSandbox && !isInternalDomain) {
+            const isKnownDevice = user.trustedDevices && user.trustedDevices.some(d => d.fingerprint === deviceFingerprint);
+
+            if (!isKnownDevice) {
+                // New device: Require OTP
+                const existingVerification = await DeviceVerification.findOne({ email: user.email });
+                if (existingVerification && existingVerification.lastResentAt && Date.now() - existingVerification.lastResentAt.getTime() < 60000) {
+                    const timeLeft = Math.ceil((60000 - (Date.now() - existingVerification.lastResentAt.getTime())) / 1000);
+                    return res.status(429).json({
+                        message: 'Too many requests. Please try again after the timer expires.',
+                        needsDeviceOtp: true,
+                        retryAfterSeconds: timeLeft
+                    });
+                }
+
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+                await DeviceVerification.findOneAndUpdate(
+                    { email: user.email },
+                    {
+                        deviceFingerprint,
+                        otp,
+                        isUsed: false,
+                        failedAttempts: 0,
+                        resendCount: 0,
+                        lastResentAt: new Date(),
+                        expiresAt: new Date(Date.now() + 60 * 1000) // 60 seconds
+                    },
+                    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true, sort: { createdAt: -1 } }
+                );
+
+                const { getNewDeviceOtpHtml, getNewDeviceOtpPlainText } = await import("../services/email-templates.service.js");
+
+                try {
+                    await sendEmail({
+                        to: user.email,
+                        subject: "security alert: New Device Detected",
+                        html: getNewDeviceOtpHtml ? getNewDeviceOtpHtml(user.name, otp) : `<p>Your Classgrid verification code is: <strong>${otp}</strong></p>`,
+                        text: getNewDeviceOtpPlainText ? getNewDeviceOtpPlainText(user.name, otp) : `Your Classgrid verification code is: ${otp}`,
+                    });
+                } catch (emailErr) {
+                    console.error("Failed to send device OTP:", emailErr);
+                }
+
+                return res.status(200).json({
+                    message: "A verification code has been sent to your registered email.",
+                    needsDeviceOtp: true
+                });
+            }
+        }
+        // -----------------------------
+
+        const token = generateToken(user, req, rememberMe);
+        setTokenCookie(res, token, req, rememberMe);
+
+        // Track soft devices (used for OAuth alerts, separate from strict fingerprinting)
+        await checkAndRegisterDevice(user, req);
+
+        // Track last auth provider
+        user.lastLoginAt = new Date();
+        user.authProvider = "manual";
+        user.loginAttempts = 0;
+        user.lockUntil = null;
+        if (!user.linkedProviders) user.linkedProviders = [];
+        if (!user.linkedProviders.includes("manual")) user.linkedProviders.push("manual");
+        await user.save();
+
+        // Send welcome email on first login only
+        if (isFirstLogin && !mustReset) {
+            await sendWelcomeEmail(user, "manual");
+        }
+
+        // Detect if faculty/teacher needs to enter org code
+        const needsOrgCode = ['faculty', 'teacher'].includes(user.role) && !user.organization_id;
+
+        // --- AUTO-BRANDING RESOLUTION (Mobile & Web) ---
+        let organization = null;
+        if (user.organization_id) {
+            const orgDoc = await Organization.findById(user.organization_id)
+                .select("name logo_url branding subdomain")
+                .lean();
+            if (orgDoc) {
+                organization = {
+                    name: orgDoc.name,
+                    logo: orgDoc.logo_url,
+                    subdomain: orgDoc.subdomain,
+                    theme: orgDoc.branding?.theme_colors || {
+                        primary: "#6366f1",
+                        secondary: "#4f46e5",
+                        accent: "#f43f5e"
+                    }
+                };
+            }
+        }
+
+        res.json({
+            message: "Login successful",
+            firstLogin: isFirstLogin,
+            mustResetPassword: mustReset,
+            needsOrgCode,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture || "",
+                photoURL: user.profilePicture || "",
+                organization_id: user.organization_id || null,
+                authProvider: user.authProvider,
+                profile_completed: user.profile_completed || false,
+            },
+            organization
+        });
+    } catch (err) {
+        console.error("Login Error:", err);
+        res.status(500).json({ message: "Server error during login" });
+    }
+};
+
+
+// Passwordless Login: Request OTP
+export const requestLoginOtp = async (req, res) => {
+    try {
+        const { email, deviceFingerprint } = req.body;
+        
+        if (!email || !deviceFingerprint) {
+            return res.status(400).json({ message: "Email and device footprint are required." });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const existingVerification = await DeviceVerification.findOne({ email: normalizedEmail });
+        // Rate limit: Check if requested within last 60s (synced with frontend UI timer)
+        if (existingVerification && existingVerification.lastResentAt && Date.now() - existingVerification.lastResentAt.getTime() < 60000) {
+            const timeLeft = Math.ceil((60000 - (Date.now() - existingVerification.lastResentAt.getTime())) / 1000);
+            return res.status(429).json({ message: "Too many requests. Please try again after the timer expires.", retryAfterSeconds: timeLeft });
+        }
+        
+        let newResendCount = 1;
+        if (existingVerification) {
+            if (existingVerification.resendCount >= 10) {
+                const timeSinceLastResend = Date.now() - existingVerification.lastResentAt.getTime();
+                if (timeSinceLastResend < 10 * 60 * 1000) {
+                    const timeLeft = Math.ceil((10 * 60 * 1000 - timeSinceLastResend) / 1000);
+                    return res.status(429).json({ 
+                        message: "Too many requests. Please try again after 10 minutes.", 
+                        retryAfterSeconds: timeLeft 
+                    });
+                }
+                newResendCount = 1;
+            } else {
+                newResendCount = (existingVerification.resendCount || 0) + 1;
+            }
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        await DeviceVerification.findOneAndUpdate(
+            { email: normalizedEmail },
+            {
+                deviceFingerprint,
+                otp,
+                isUsed: false,
+                failedAttempts: 0,
+                resendCount: newResendCount,
+                lastResentAt: new Date(),
+                expiresAt: new Date(Date.now() + 60 * 1000) // 60 seconds
+            },
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+        );
+
+        const { getNewDeviceOtpHtml, getNewDeviceOtpPlainText } = await import("../services/email-templates.service.js");
+
+        try {
+            await sendEmail({
+                to: normalizedEmail,
+                subject: "Classgrid - Your Login Code",
+                html: getNewDeviceOtpHtml ? getNewDeviceOtpHtml(user.name, otp) : `<p>Your Classgrid verification code is: <strong>${otp}</strong></p>`,
+                text: getNewDeviceOtpPlainText ? getNewDeviceOtpPlainText(user.name, otp) : `Your Classgrid verification code is: ${otp}`,
+            });
+        } catch (emailErr) {
+            console.error("Failed to send login OTP:", emailErr);
+            return res.status(500).json({ message: "Failed to send email. Please try again later." });
+        }
+
+        res.json({ success: true, message: "A login code has been sent to your email.", needsDeviceOtp: true });
+    } catch (error) {
+        console.error("Request Login OTP Error:", error);
+        res.status(500).json({ message: "Server error while requesting OTP." });
+    }
+};
+
+// Verify Signup Token (Step 2: Link Clicked)
+export const verifySignupToken = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const FRONTEND_URL = getFrontendUrl();
+
+        // Standard signup verification processing
+        const verification = await Verification.findOne({ verificationToken: token });
+
+        if (!verification) {
+            return res.redirect(`${FRONTEND_URL}/login?error=InvalidToken`);
+        }
+
+        if (verification.isUsed) {
+            return res.redirect(`${FRONTEND_URL}/login?error=TokenAlreadyUsed`);
+        }
+
+        if (verification.expiresAt < new Date()) {
+            return res.redirect(`${FRONTEND_URL}/login?error=TokenExpired`);
+        }
+
+        // Redirect to new intermediate success page Instead of straight to password
+        res.redirect(`${FRONTEND_URL}/verify-email?token=${token}&email=${encodeURIComponent(verification.email)}&name=${encodeURIComponent(verification.name)}`);
+
+    } catch (err) {
+        console.error("Verify Token Error:", err);
+        const FRONTEND_URL = getFrontendUrl();
+        res.redirect(`${FRONTEND_URL}/login?error=ServerError`);
+    }
+};
+
+// Complete Signup (Step 3: Set Password)
+export const completeSignup = async (req, res) => {
+    try {
+        const { token, password, role } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({ message: "Token and password are required" });
+        }
+
+        const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+        if (!strongPassword.test(password)) {
+            return res.status(400).json({
+                message: "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
+            });
+        }
+
+        // Validate role if provided
+        const validRoles = ["student", "teacher"];
+        const userRole = validRoles.includes(role) ? role : "student";
+
+        // Step 1: Atomically find valid token and mark it as used to prevent race-condition reuse
+        const updatedVerification = await Verification.findOneAndUpdate(
+            {
+                verificationToken: token,
+                isUsed: false,
+                expiresAt: { $gt: new Date() }
+            },
+            { $set: { isUsed: true } },
+            { returnDocument: 'after' }
+        );
+
+        if (!updatedVerification) {
+            // Document is invalid, already used, or expired
+            return res.status(400).json({ message: "Token is invalid, expired, or has already been used" });
+        }
+
+        // Hash Password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create the user
+        const user = await User.create({
+            name: updatedVerification.name,
+            email: updatedVerification.email,
+            password: hashedPassword,
+            role: userRole,
+            authProvider: "manual",
+            linkedProviders: ["manual"],
+            isEmailVerified: true,
+            lastLoginAt: new Date(),
+            passwordChangedAt: Date.now()
+        });
+
+        // Delete verification doc
+        await Verification.deleteOne({ _id: updatedVerification._id });
+
+        // Send Welcome Email
+        await sendWelcomeEmail(user, "manual");
+
+        // Auto Login
+        const jwtToken = generateToken(user, req);
+        setTokenCookie(res, jwtToken, req);
+
+        // Detect if faculty/teacher needs to enter org code
+        const needsOrgCode = ['faculty', 'teacher'].includes(user.role) && !user.organization_id;
+
+        res.json({
+            message: "Account created successfully",
+            token: jwtToken,
+            firstLogin: true,
+            needsOrgCode,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture || "",
+                photoURL: user.profilePicture || "",
+                organization_id: user.organization_id || null,
+                authProvider: "manual"
+            }
+        });
+
+    } catch (err) {
+        console.error("Complete Signup Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/* ==================== OAUTH CALLBACKS ==================== */
+
+// Common OAuth callback handler (used by Google, GitHub, Facebook)
+export const oauthCallback = async (req, res) => {
+    // Passport populates req.user
+    if (!req.user) {
+        return res.redirect(`${FRONTEND_URL}/login?error=AuthFailed`);
+    }
+
+    // Status checks
+    if (req.user.status === "suspended" || req.user.status === "blocked") {
+        return res.redirect(`${FRONTEND_URL}/login?error=account_suspended`);
+    }
+
+    // Tab enforcement for Google OAuth (state param carries loginTab)
+    const loginTab = req.query.state || null;
+    const oauthUserRoleLabel = getRoleLabel(req.user.role);
+
+    if (req.user.role === 'super_admin' && loginTab !== 'super_admin') {
+        return res.redirect(`${FRONTEND_URL}/superadmin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as Super Admin. Please log in here.`)}`);
+    }
+    if (isInstitutionAdminRole(req.user.role) && loginTab !== 'admin' && loginTab !== 'org_admin') {
+        return res.redirect(`${FRONTEND_URL}/admin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as ${oauthUserRoleLabel}. Please use the Admin portal to log in.`)}`);
+    }
+    if (req.user.role === 'student' && loginTab !== 'student') {
+        return res.redirect(`${FRONTEND_URL}/login?error=wrong_tab&tab=student&message=${encodeURIComponent(`This account is registered as Student. Please use the Student tab to sign in.`)}`);
+    }
+    if (['faculty', 'teacher'].includes(req.user.role) && loginTab !== 'teacher' && loginTab !== 'faculty') {
+        return res.redirect(`${FRONTEND_URL}/login?error=wrong_tab&tab=teacher&message=${encodeURIComponent(`This account is registered as Faculty. Please use the Faculty tab to sign in.`)}`);
+    }
+
+    const { default: SystemSettings } = await import("../models/SystemSettings.js");
+    const settings = await SystemSettings.findOne();
+
+    if (settings && settings.maintenanceMode && req.user.role !== "super_admin") {
+        return res.redirect(`${FRONTEND_URL}/login?error=maintenance_mode`);
+    }
+
+    let orgName = 'dashboard';
+    if (req.user.organization_id && req.user.role !== "super_admin") {
+        const { default: Organization } = await import("../models/Organization.js");
+        const org = await Organization.findById(req.user.organization_id).select("name status").lean();
+        if (org && (org.status === "suspended" || org.status === "blocked")) {
+            return res.redirect(`${FRONTEND_URL}/login?error=org_suspended`);
+        }
+        if (org && org.name) {
+            orgName = org.name;
+        }
+    }
+
+    // Determine provider
+    const provider = req.user.authProvider || "social";
+
+    // If org_admin logs in with Google (social), remove forced password setup
+    if (req.user.role === 'org_admin' && provider !== 'manual') {
+        req.user.mustResetPassword = false;
+    }
+
+    // Check First Login
+    const isFirstLogin = !req.user.lastLoginAt;
+
+    // --- DEVICE OTP CHECK FOR OAUTH (ALL PROVIDERS) ---
+    // Skip device check for first-ever login, sandbox accounts, and internal @classgrid.in team accounts
+    const isOAuthInternalDomain = req.user.email && req.user.email.endsWith("@classgrid.in");
+    if (!isFirstLogin && !req.user.isSandbox && !isOAuthInternalDomain) {
+        const { fingerprint: serverFingerprint } = getDeviceFingerprint(req);
+        const isKnownDevice = req.user.trustedDevices && req.user.trustedDevices.some(d => d.fingerprint === serverFingerprint);
+
+        if (!isKnownDevice) {
+            // Unknown device — send OTP and redirect to verification page
+            const userEmail = req.user.email;
+            try {
+                // Rate limit: check if OTP was sent within last 60 seconds
+                const existingVerification = await DeviceVerification.findOne({ email: userEmail });
+                const portalPath = getLoginPortalPath(loginTab);
+
+                if (existingVerification && existingVerification.lastResentAt && Date.now() - existingVerification.lastResentAt.getTime() < 45000) {
+                    // OTP was sent recently, just redirect to the verify page
+                    return res.redirect(`${FRONTEND_URL}${portalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
+                }
+
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                await DeviceVerification.findOneAndUpdate(
+                    { email: userEmail },
+                    {
+                        deviceFingerprint: serverFingerprint,
+                        otp,
+                        isUsed: false,
+                        failedAttempts: 0,
+                        resendCount: 0,
+                        lastResentAt: new Date(),
+                        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 mins
+                    },
+                    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true, sort: { createdAt: -1 } }
+                );
+
+                const { getNewDeviceOtpHtml, getNewDeviceOtpPlainText } = await import("../services/email-templates.service.js");
+                try {
+                    await sendEmail({
+                        to: userEmail,
+                        subject: "Security Alert: New Device Detected",
+                        html: getNewDeviceOtpHtml ? getNewDeviceOtpHtml(req.user.name, otp) : `<p>Your Classgrid verification code is: <strong>${otp}</strong></p>`,
+                        text: getNewDeviceOtpPlainText ? getNewDeviceOtpPlainText(req.user.name, otp) : `Your Classgrid verification code is: ${otp}`,
+                    });
+                } catch (emailErr) {
+                    console.error("Failed to send OAuth device OTP:", emailErr);
+                }
+
+                const finalPortalPath = getLoginPortalPath(loginTab);
+
+                return res.redirect(`${FRONTEND_URL}${finalPortalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
+            } catch (deviceErr) {
+                console.error("OAuth device check error (non-blocking):", deviceErr);
+                // If device check fails, STILL allow login rather than breaking OAuth entirely
+            }
+        }
+    }
+    // --- END DEVICE OTP CHECK ---
+
+    // Device registration (soft — track devices for future checks)
+    await checkAndRegisterDevice(req.user, req);
+
+    // Update last login
+    req.user.lastLoginAt = new Date();
+    await req.user.save();
+
+    const token = generateToken(req.user, req);
+    setTokenCookie(res, token, req);
+
+    // Send welcome email on first login only
+    if (isFirstLogin) {
+        await sendWelcomeEmail(req.user, provider);
+    }
+
+    // Role-based redirect
+    const target = getFrontendDashboardTarget(req.user);
+
+    const qs = isFirstLogin ? `?welcome=true&token=${token}` : `?token=${token}`;
+    res.redirect(`${FRONTEND_URL}${target}${qs}`);
+};
+
+// Forgot Password
+export const forgotPassword = async (req, res) => {
+    try {
+        await connectDB();
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+        // Security: always return the same message to prevent user enumeration
+        const safeResponse = () => res.json({ message: "If that email is registered, a password reset link has been sent." });
+
+        if (!user) return safeResponse();
+
+        // Only gate on email verification for standard signup users (not admin-invited faculty)
+        if (!user.isEmailVerified) return safeResponse();
+
+        // 🔒 Forgot-password rate limiting — max 5 requests per 1 hour
+        const now = Date.now();
+        if (user.resetAttemptsExpiresAt && user.resetAttemptsExpiresAt > now) {
+            // Window is still active — check count
+            if ((user.resetAttempts || 0) >= 5) {
+                return res.status(429).json({ message: "Too many reset requests. Please wait before trying again." });
+            }
+            user.resetAttempts = (user.resetAttempts || 0) + 1;
+        } else {
+            // Window expired or first request — start fresh window
+            user.resetAttempts = 1;
+            user.resetAttemptsExpiresAt = new Date(now + 60 * 60 * 1000); // 1 hour
+        }
+        await user.save();
+
+        // Generate a cryptographically secure token
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+        await user.save();
+
+        const resetLink = `${getFrontendUrl()}/reset-password?token=${rawToken}`;
+
+        sendEmail({
+            to: email,
+            subject: "🔑 Reset Your Password - Classgrid",
+            html: getPasswordResetEmailHtml(resetLink),
+            text: getPasswordResetEmailPlainText(resetLink)
+        }).catch(err => console.error("Async email dispatch error:", err));
+
+        return safeResponse();
+
+    } catch (err) {
+        console.error("Forgot Password Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Reset Password
+export const resetPassword = async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ message: "Reset token is required." });
+        }
+
+        const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+        if (!password || !strongPassword.test(password)) {
+            return res.status(422).json({
+                message: "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
+            });
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+        const user = await User.findOneAndUpdate(
+            {
+                resetPasswordToken: hashedToken,
+                resetPasswordExpires: { $gt: Date.now() }
+            },
+            {
+                $set: {
+                    password: await bcrypt.hash(password, 10),
+                    isEmailVerified: true,
+                    mustResetPassword: false,
+                    passwordChangedAt: Date.now()
+                },
+                $unset: {
+                    resetPasswordToken: "",
+                    resetPasswordExpires: ""
+                },
+                $addToSet: {
+                    linkedProviders: "manual"
+                }
+            },
+            { returnDocument: "after" }
+        );
+
+        if (!user) {
+            return res.status(400).json({ message: "This link has expired or has already been used. Please request a new one." });
+        }
+
+        res.json({
+            message: "Password reset successful. You can now log in with your new password.",
+            role: user.role
+        });
+
+    } catch (err) {
+        console.error("Reset Password Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Faculty Activation (Unified Flow)
+export const facultyActivate = async (req, res) => {
+    try {
+        await connectDB();
+        const { token, password, orgCode } = req.body;
+
+        if (!token) return res.status(400).json({ message: "Activation token is required." });
+        if (!orgCode) return res.status(400).json({ message: "Faculty Organization Code is required." });
+
+        const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+        if (!password || !strongPassword.test(password)) {
+            return res.status(422).json({
+                message: "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
+            });
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+        // 1. Validate Organization Code first
+        const org = await Organization.findOne({
+            $or: [{ private_code: orgCode }, { organizationCode: orgCode }]
+        });
+
+        if (!org) {
+            return res.status(400).json({ message: "Invalid Faculty Organization Code. Please check the code provided in your invitation." });
+        }
+
+        // 2. Perform Atomic Activation
+        const user = await User.findOneAndUpdate(
+            {
+                resetPasswordToken: hashedToken,
+                resetPasswordExpires: { $gt: Date.now() },
+                role: { $in: ['faculty', 'teacher'] },
+                organization_id: org._id // Security check enforces correct org natively
+            },
+            {
+                $set: {
+                    password: await bcrypt.hash(password, 10),
+                    isEmailVerified: true,
+                    mustResetPassword: false,
+                    passwordChangedAt: Date.now()
+                },
+                $unset: {
+                    resetPasswordToken: "",
+                    resetPasswordExpires: ""
+                },
+                $addToSet: {
+                    linkedProviders: "manual"
+                }
+            },
+            { returnDocument: "after" }
+        );
+
+        if (!user) {
+            return res.status(400).json({ message: "This link has expired or has already been used. Please request a new one." });
+        }
+
+        res.json({
+            message: "Faculty account activated successfully. You are now linked to your organization."
+        });
+
+    } catch (err) {
+        console.error("Faculty Activation Error:", err);
+        res.status(500).json({ message: "Server error during activation" });
+    }
+};
+
+// Logout
+export const logout = (req, res) => {
+    const isProd = process.env.NODE_ENV === "production";
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "None" : "Lax",
+        path: "/",
+    });
+
+    // Subdomain-aware logout redirect hint
+    const redirectPath = "/login";
+    
+    res.json({ 
+        message: "Logged out successfully",
+        redirect: redirectPath
+    });
+};
+
+// Setup Org Admin Account String (Custom login flow for new org admins)
+export const setupOrgAdmin = async (req, res) => {
+    try {
+        await connectDB();
+        const { email, orgCode, password } = req.body;
+
+        if (!email || !orgCode || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const org = await Organization.findOne({ private_code: orgCode });
+        if (!org) {
+            return res.status(404).json({ message: "Invalid Organization Code" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "Admin user not found" });
+        }
+
+        if (user.organization_id.toString() !== org._id.toString()) {
+            return res.status(403).json({ message: "You do not belong to this organization or invalid code." });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        user.isEmailVerified = true;
+        user.mustResetPassword = false; // Password has been set — clear the flag
+        if (!user.linkedProviders) user.linkedProviders = [];
+        if (!user.linkedProviders.includes("manual")) user.linkedProviders.push("manual");
+        user.lastLoginAt = new Date();
+        user.authProvider = "manual";
+
+        await user.save();
+
+        org.is_active = true;
+        await org.save();
+
+        const { getOrgAdminActivatedHtml, getOrgAdminActivatedPlainText } = await import("../services/email-templates.service.js");
+        const FRONTEND_URL = getFrontendUrl();
+        const orgNameFormatted = org.name ? encodeURIComponent(org.name.replace(/\s+/g, '-').toLowerCase()) : 'dashboard';
+        const dashboardLink = `${FRONTEND_URL}/org/${orgNameFormatted}/admin`;
+        const adminLoginLink = `${FRONTEND_URL}/admin/login`;
+
+        // Attempt to send email, fail activation if email fails to prevent silent failure
+        await sendEmail({
+            to: email,
+            subject: "Your Classgrid Admin Account is Active",
+            html: getOrgAdminActivatedHtml(user.name, dashboardLink, adminLoginLink),
+            text: getOrgAdminActivatedPlainText(user.name, dashboardLink, adminLoginLink),
+        });
+
+        // Generate JWT Token exactly as normal login does
+        const token = generateToken(user, req);
+        setTokenCookie(res, token, req);
+
+        res.status(200).json({
+            message: "Account activated successfully",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                organization: { name: org.name }
+            }
+        });
+    } catch (err) {
+        console.error("Setup Org Admin Error:", err);
+        res.status(500).json({ message: "Server error during admin setup" });
+    }
+};
+
+// Get Me
+export const getCurrentUser = async (req, res) => {
+    try {
+        // req.user is already fully populated by isAuthenticated middleware
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        // Optional: fetch org data only if needed, safely — never let this crash the auth check
+        let orgData = null;
+        if (req.user.organization_id) {
+            try {
+                const userWithOrg = await User.findById(req.user._id)
+                    .populate("organization_id")
+                    .maxTimeMS(4000);
+                if (userWithOrg && userWithOrg.organization_id) {
+                    orgData = {
+                        id: userWithOrg.organization_id._id,
+                        name: userWithOrg.organization_id.name,
+                        logo_url: userWithOrg.organization_id.logo_url,
+                        subdomain: userWithOrg.organization_id.subdomain,
+                        branding: userWithOrg.organization_id.branding || {
+                            theme_colors: { primary: "#6366f1", secondary: "#4f46e5", accent: "#f43f5e" }
+                        },
+                        rollNumberLabel: userWithOrg.organization_id.rollNumberLabel || "PRN",
+                        allowed_domains: userWithOrg.organization_id.allowed_domains || [],
+                        structure_type: userWithOrg.organization_id.structure_type || "engineering"
+                    };
+                }
+            } catch (orgErr) {
+                // Non-fatal — org data is optional for auth check
+                console.warn("GetMe: Could not fetch org data (non-fatal):", orgErr.message);
+            }
+        }
+
+        res.json({
+            id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            role: req.user.role,
+            department: req.user.department || "",
+            subject: req.user.subject || null,
+            profilePicture: req.user.profilePicture || "",
+            phoneNumber: req.user.phoneNumber || "",
+            authProvider: req.user.authProvider,
+            linkedProviders: req.user.linkedProviders,
+            lastLoginAt: req.user.lastLoginAt,
+            createdAt: req.user.createdAt,
+            prn: req.user.prn || null,
+            organization: orgData,
+            mustResetPassword: req.user.mustResetPassword || false,
+            profile_completed: req.user.profile_completed || false,
+            isImpersonating: req.isImpersonating || false,
+            realUser: req.realUser ? {
+                id: req.realUser._id,
+                role: req.realUser.role,
+            } : null,
+            google_access_token: req.user.google_access_token || null,
+            zoom_access_token: req.user.zoom_access_token || null,
+            token: generateToken(req.user)
+        });
+    } catch (err) {
+        console.error("GetMe Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// POST /api/auth/force-reset-password
+export const forceResetPassword = async (req, res) => {
+    try {
+        await connectDB();
+        const { password } = req.body;
+
+        if (!password || password.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters long." });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        if (!user.mustResetPassword) {
+            return res.status(400).json({ message: "You are not required to reset your password." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+        user.mustResetPassword = false;
+
+        await user.save();
+
+        res.json({ message: "Password updated successfully. You can now access your dashboard." });
+    } catch (err) {
+        console.error("Force Reset Password Error:", err);
+        res.status(500).json({ message: "Server error updating password." });
+    }
+};
+
+// POST /api/auth/resend-device-otp
+export const resendDeviceOtp = async (req, res) => {
+    try {
+        await connectDB();
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required" });
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const existingVerification = await DeviceVerification.findOne({ email: user.email }).sort({ createdAt: -1 });
+        
+        let newResendCount = 1;
+        if (existingVerification) {
+            if (existingVerification.lastResentAt && Date.now() - existingVerification.lastResentAt.getTime() < 60000) {
+                const timeLeft = Math.ceil((60000 - (Date.now() - existingVerification.lastResentAt.getTime())) / 1000);
+                return res.status(429).json({ message: "Too many requests. Please try again after the timer expires.", retryAfterSeconds: timeLeft });
+            }
+
+            if (existingVerification.resendCount >= 10) {
+                const timeSinceLastResend = Date.now() - existingVerification.lastResentAt.getTime();
+                if (timeSinceLastResend < 10 * 60 * 1000) {
+                    const timeLeft = Math.ceil((10 * 60 * 1000 - timeSinceLastResend) / 1000);
+                    return res.status(429).json({ 
+                        message: "Too many requests. Please try again after 10 minutes.", 
+                        retryAfterSeconds: timeLeft 
+                    });
+                }
+                newResendCount = 1;
+            } else {
+                newResendCount = (existingVerification.resendCount || 0) + 1;
+            }
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        await DeviceVerification.findOneAndUpdate(
+            { email: user.email },
+            {
+                $set: {
+                    otp,
+                    isUsed: false,
+                    failedAttempts: 0,
+                    resendCount: newResendCount,
+                    lastResentAt: new Date(),
+                    expiresAt: new Date(Date.now() + 60 * 1000) // 60 seconds
+                }
+            },
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true, sort: { createdAt: -1 } }
+        );
+
+        const { getNewDeviceOtpHtml, getNewDeviceOtpPlainText } = await import("../services/email-templates.service.js");
+
+        try {
+            await sendEmail({
+                to: user.email,
+                subject: "Security Alert: New Device Detected",
+                html: getNewDeviceOtpHtml ? getNewDeviceOtpHtml(user.name, otp) : `<p>Your Classgrid verification code is: <strong>${otp}</strong></p>`,
+                text: getNewDeviceOtpPlainText ? getNewDeviceOtpPlainText(user.name, otp) : `Your Classgrid verification code is: ${otp}`,
+            });
+        } catch (emailErr) {
+            console.error("Failed to resend device OTP:", emailErr);
+            return res.status(500).json({ message: "Failed to send OTP email" });
+        }
+
+        res.json({ message: "OTP sent successfully." });
+    } catch (err) {
+        console.error("Resend OTP Error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// POST /api/auth/verify-device
+// Step 2 of Device Binding: verify the OTP and issue the token
+export const verifyDeviceOtp = async (req, res) => {
+    try {
+        await connectDB();
+        const { email, otp } = req.body;
+        let { deviceFingerprint } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Missing required fields." });
+        }
+
+        const verification = await DeviceVerification.findOne({
+            email: email.toLowerCase().trim()
+        }).sort({ createdAt: -1 }); // get most recent OTP for this email
+
+        if (!verification) {
+            return res.status(400).json({ message: "No pending OTP request found." });
+        }
+
+        deviceFingerprint = deviceFingerprint || req.cookies?.client_device_fp || verification.deviceFingerprint;
+
+        // Check code
+        if (verification.otp !== otp) {
+            // Increment failed attempts
+            await DeviceVerification.updateOne({ _id: verification._id }, { $inc: { failedAttempts: 1 } });
+            return res.status(400).json({ message: "Invalid OTP code." });
+        }
+
+        // Atomically verify expiry, usage, and attempt limits, then mark as used
+        const updatedVerification = await DeviceVerification.findOneAndUpdate(
+            {
+                _id: verification._id,
+                isUsed: false,
+                expiresAt: { $gt: new Date() },
+                failedAttempts: { $lt: 5 }
+            },
+            { $set: { isUsed: true } },
+            { returnDocument: 'after' }
+        );
+
+        if (!updatedVerification) {
+            return res.status(400).json({ message: "OTP Expired" });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        if (!user) return res.status(404).json({ message: "User not found." });
+
+        // Capture isFirstLogin BEFORE updating lastLoginAt
+        const isFirstLogin = !user.lastLoginAt;
+
+        // OTP is valid! Add device to trusted array
+        if (!user.trustedDevices) user.trustedDevices = [];
+        // Store client-side fingerprint (used by manual login check)
+        user.trustedDevices.push({
+            fingerprint: deviceFingerprint,
+            addedAt: new Date(),
+            browser: req.headers['user-agent'] || ""
+        });
+
+        // Also store server-side fingerprint (used by OAuth login check)
+        // This ensures the device is recognized by BOTH manual and OAuth login flows
+        const { fingerprint: serverFp } = getDeviceFingerprint(req);
+        const serverAlreadyTrusted = user.trustedDevices.some(d => d.fingerprint === serverFp);
+        if (!serverAlreadyTrusted) {
+            user.trustedDevices.push({
+                fingerprint: serverFp,
+                addedAt: new Date(),
+                browser: req.headers['user-agent'] || ""
+            });
+        }
+
+        user.lastLoginAt = new Date();
+        user.authProvider = "manual";
+        await user.save();
+
+        // Clean up verification doc
+        await DeviceVerification.deleteOne({ _id: verification._id });
+
+        const token = generateToken(user, req);
+        setTokenCookie(res, token, req);
+
+        // Store the approved fingerprint in a stable cookie to prevent future mismatch loops
+        const isProd = process.env.NODE_ENV === "production";
+        res.cookie("client_device_fp", deviceFingerprint, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+        });
+
+        const mustReset = !!user.mustResetPassword;
+        const needsOrgCode = ['faculty', 'teacher'].includes(user.role) && !user.organization_id;
+
+        // Fetch org name for role-based redirect support
+        let orgName = null;
+        if (user.organization_id) {
+            const org = await Organization.findById(user.organization_id).select('name').lean();
+            orgName = org ? org.name : null;
+        }
+        // --- AUTO-BRANDING RESOLUTION ---
+        let brandInfo = null;
+        if (user.organization_id) {
+            const orgDoc = await Organization.findById(user.organization_id)
+                .select("name logo_url branding subdomain")
+                .lean();
+            if (orgDoc) {
+                brandInfo = {
+                    name: orgDoc.name,
+                    logo: orgDoc.logo_url,
+                    subdomain: orgDoc.subdomain,
+                    theme: orgDoc.branding?.theme_colors || {
+                        primary: "#6366f1",
+                        secondary: "#4f46e5",
+                        accent: "#f43f5e"
+                    }
+                };
+            }
+        }
+
+        res.json({
+            message: "Device verified and login successful",
+            firstLogin: isFirstLogin,
+            mustResetPassword: mustReset,
+            needsOrgCode,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture || "",
+                photoURL: user.profilePicture || "",
+                organization_id: user.organization_id || null,
+                authProvider: user.authProvider,
+            },
+            organization: brandInfo
+        });
+    } catch (err) {
+        console.error("Device Verification Error:", err);
+        res.status(500).json({ message: "Server error during verification." });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Check Email for Login (Secure Email-First Flow)
+// POST /api/auth/check-email
+// If user exists → { exists: true, hasPassword }
+// If user doesn't exist → sends silent notification + { exists: false }
+// ─────────────────────────────────────────────
+export const checkEmailForLogin = async (req, res) => {
+    try {
+        await connectDB();
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required." });
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail }).select("+password");
+
+        if (user) {
+            return res.status(200).json({ exists: true, hasPassword: !!user.password, role: user.role });
+        }
+
+        // User doesn't exist → send Vercel-style notification email (rate-limited, fire-and-forget)
+        sendNoAccountEmail(normalizedEmail, req);
+
+        return res.status(200).json({ exists: false });
+    } catch (err) {
+        console.error("checkEmailForLogin Error:", err);
+        return res.status(500).json({ message: "Server error." });
+    }
+};
+
