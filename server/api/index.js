@@ -349,6 +349,7 @@ app.get("/api/config", (req, res) => {
 /* ---------- REACT SPA ROUTING (CATCH-ALL) ---------- */
 // Any route not starting with /api will be handled by React Router
 app.get("*", (req, res) => {
+  if (req.path === "/") return res.json({ name: "Classgrid API", version: "1.0.0", status: "online", env: process.env.NODE_ENV });
   if (req.path.startsWith("/api")) {
     return res.status(404).json({ error: "API not found" });
   }
@@ -360,7 +361,7 @@ app.get("*", (req, res) => {
   } else {
     // In development, Vite dev server handles all client routing
     // This catch-all only runs for the Express server (port 3000)
-    res.status(404).json({ error: "Not found. Use the Vite dev server for client routes." });
+    res.status(200).json({ name: "Classgrid API", version: "1.0.0", status: "online" });
   }
 });
 
