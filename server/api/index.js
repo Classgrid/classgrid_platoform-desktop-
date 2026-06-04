@@ -354,7 +354,8 @@ app.get("*", (req, res) => {
       name: "Ultimate Classgrid API", 
       version: "3.0.0", 
       status: "online", 
-      env: process.env.NODE_ENV,
+      env: process.env.NODE_ENV
+      /* 
       health: {
         database: "✅ Connected",
         redis: "✅ Working",
@@ -362,6 +363,7 @@ app.get("*", (req, res) => {
         api_routes: "✅ 78 Modules Active",
         production_app: "✅ Healthy"
       }
+      */
     });
   }
   if (req.path.startsWith("/api")) {
