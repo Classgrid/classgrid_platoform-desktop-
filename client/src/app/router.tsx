@@ -82,10 +82,18 @@ import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 
 export function AppRouter() {
+  // ── SUBDOMAIN DETECTION ──
+  const hostname = window.location.hostname;
+  const subdomain = hostname.split(".")[0];
+  const isSuperAdmin = subdomain === "superadmin";
+
   return (
     <Routes>
-      {/* ── AUTH ROUTES ── */}
-      <Route path="/login" element={<InstitutionUserLoginPage />} />
+      {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
+      <Route 
+        path="/login" 
+        element={isSuperAdmin ? <PlatformLoginPage /> : <InstitutionUserLoginPage />} 
+      />
       <Route path="/auth/user" element={<InstitutionUserLoginPage />} />
       <Route path="/student/login" element={<InstitutionUserLoginPage preferredRole="student" />} />
       <Route path="/faculty/login" element={<InstitutionUserLoginPage preferredRole="teacher" />} />
