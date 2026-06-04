@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Save } from "lucide-react";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgButton } from "@/components/classgrid/Button";
-import { SettingsAppearanceCard } from "../../components/settings/SettingsAppearanceCard";
-import { SettingsNotificationsCard } from "../../components/settings/SettingsNotificationsCard";
-import { SettingsPushCard } from "../../components/settings/SettingsPushCard";
-import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../../queries/useSettingsQueries";
+import { SettingsAppearanceCard } from "../components/settings/SettingsAppearanceCard";
+import { SettingsNotificationsCard } from "../components/settings/SettingsNotificationsCard";
+import { SettingsPushCard } from "../components/settings/SettingsPushCard";
+import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../queries/useSettingsQueries";
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 
 export function SharedSettingsPage() {

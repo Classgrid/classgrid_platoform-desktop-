@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Loader } from "lucide-react";
 import { CgButton } from "@/components/classgrid/Button";
 import { useUserProfile, useUpdateProfile, ProfileData } from "../queries/useUserProfile";
-import { ProfileIdentityCard } from "../../components/profile/ProfileIdentityCard";
-import { ProfileBasicInfoCard } from "../../components/profile/ProfileBasicInfoCard";
-import { ProfileAcademicCard } from "../../components/profile/ProfileAcademicCard";
-import { ProfileOrganizationCard } from "../../components/profile/ProfileOrganizationCard";
-import { ProfileSecurityCard } from "../../components/profile/ProfileSecurityCard";
-import { ProfileAccountIntelligence } from "../../components/profile/ProfileAccountIntelligence";
-import { ProfileStudentExtendedTabs } from "../../components/profile/ProfileStudentExtendedTabs";
+import { ProfileIdentityCard } from "../components/profile/ProfileIdentityCard";
+import { ProfileBasicInfoCard } from "../components/profile/ProfileBasicInfoCard";
+import { ProfileAcademicCard } from "../components/profile/ProfileAcademicCard";
+import { ProfileOrganizationCard } from "../components/profile/ProfileOrganizationCard";
+import { ProfileSecurityCard } from "../components/profile/ProfileSecurityCard";
+import { ProfileAccountIntelligence } from "../components/profile/ProfileAccountIntelligence";
+import { ProfileStudentExtendedTabs } from "../components/profile/ProfileStudentExtendedTabs";
 
 export function SharedProfilePage() {
   const { data: profileData, isLoading, refetch } = useUserProfile();
@@ -44,10 +44,10 @@ export function SharedProfilePage() {
 
   const handleSave = () => {
     if (!form) return;
-    
-    if (!form.name || !form.name.trim()) { 
-      setErrors({ name: "Name is required" }); 
-      return; 
+
+    if (!form.name || !form.name.trim()) {
+      setErrors({ name: "Name is required" });
+      return;
     }
 
     const updates = {
@@ -122,17 +122,17 @@ export function SharedProfilePage() {
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Profile out of sync</p>
           </div>
           <div className="flex gap-4">
-            <CgButton 
-              variant="ghost" 
-              className="hover:bg-danger/10 hover:text-danger transition-colors" 
+            <CgButton
+              variant="ghost"
+              className="hover:bg-danger/10 hover:text-danger transition-colors"
               onClick={handleReset}
               disabled={updateProfile.isPending}
             >
               Reset
             </CgButton>
-            <CgButton 
-              className="shadow-lg shadow-primary/20" 
-              onClick={handleSave} 
+            <CgButton
+              className="shadow-lg shadow-primary/20"
+              onClick={handleSave}
               isLoading={updateProfile.isPending}
             >
               Push Updates
