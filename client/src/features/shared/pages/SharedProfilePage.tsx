@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader } from "lucide-react";
 import { CgButton } from "@/components/classgrid/Button";
-import { useUserProfile, useUpdateProfile, ProfileData } from "../../queries/useUserProfile";
+import { useUserProfile, useUpdateProfile, ProfileData } from "../queries/useUserProfile";
 import { ProfileIdentityCard } from "../../components/profile/ProfileIdentityCard";
 import { ProfileBasicInfoCard } from "../../components/profile/ProfileBasicInfoCard";
 import { ProfileAcademicCard } from "../../components/profile/ProfileAcademicCard";

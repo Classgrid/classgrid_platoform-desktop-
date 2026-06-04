@@ -6,7 +6,7 @@ import { SettingsAppearanceCard } from "../../components/settings/SettingsAppear
 import { SettingsNotificationsCard } from "../../components/settings/SettingsNotificationsCard";
 import { SettingsPushCard } from "../../components/settings/SettingsPushCard";
 import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../../queries/useSettingsQueries";
-import { useUserProfile, useUpdateProfile } from "../../queries/useUserProfile";
+import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 
 export function SharedSettingsPage() {
   const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
