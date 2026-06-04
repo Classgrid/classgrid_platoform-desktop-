@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'server/**' # Only run when backend files change
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
 jobs:
   deploy:
