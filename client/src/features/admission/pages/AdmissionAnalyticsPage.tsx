@@ -1,0 +1,218 @@
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { 
+    PageShell, 
+    PageHeader,
+    Tabs,
+    ExportMenu
+} from "@/components/classgrid";
+import { CgPieChart } from "@/components/classgrid/CgPieChart";
+import { CgHistogram } from "@/components/classgrid/CgHistogram";
+import { CgBarChart } from "@/components/classgrid/CgBarChart";
+import { CgLineChart } from "@/components/classgrid/CgLineChart";
+import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
+
+export default function AdmissionAnalyticsPage() {
+    const [selectedHierarchy, setSelectedHierarchy] = useState<string>("");
+
+    // Use token from local storage (or your auth context)
+    const token = localStorage.getItem("token") || "";
+
+    const { data: analyticsData, isLoading, isError } = useQuery({
+        queryKey: ["admission-analytics", selectedHierarchy],
+        queryFn: async () => {
+            const url = selectedHierarchy 
+                ? `/api/admission/analytics?hierarchy_id=${selectedHierarchy}`
+                : `/api/admission/analytics`;
+            
+            const res = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch analytics");
+            return res.json();
+        }
+    });
+
+    const formatFunnelData = (funnel: Record<string, number> = {}) => {
+        return Object.entries(funnel).map(([stage, count]) => ({
+            name: stage.replace(/_/g, " ").toUpperCase(),
+            value: count
+        }));
+    };
+
+    const formatLineChartData = (dailyTrend: any[] = []) => {
+        let cumulative = 0;
+        return dailyTrend.map(day => {
+            cumulative += day.count;
+            return {
+                label: day._id,
+                value: cumulative
+            };
+        });
+    };
+
+    const formatHistogramData = (buckets: any[] = []) => {
+        return buckets.map(b => ({
+            range: typeof b._id === "number" ? `${b._id}-${b._id + 10}` : "Other",
+            count: b.count
+        }));
+    };
+
+    const formatBarData = (categoryCounts: any[] = []) => {
+        return categoryCounts.map(c => ({
+            label: c._id || "Unspecified",
+            value: c.count
+        }));
+    };
+
+    const pieCategoryData = analyticsData?.breakdown?.by_category?.map((c: any) => ({
+        id: c._id || "None",
+        label: c._id || "None",
+        value: c.count
+    })) || [];
+
+    const pieSeatData = analyticsData?.breakdown?.by_seat_type?.map((s: any) => ({
+        id: s._id || "None",
+        label: s._id || "None",
+        value: s.count
+    })) || [];
+
+    if (isLoading) return <PageShell><div className="p-8 text-center">Loading Analytics...</div></PageShell>;
+    if (isError) return <PageShell><div className="p-8 text-center text-red-500">Error loading data.</div></PageShell>;
+
+    return (
+        <PageShell>
+            <div className="flex justify-between items-start mb-6">
+                <PageHeader 
+                    title="Admission Analytics" 
+                    subtitle="Comprehensive dashboard with maximum data visualization"
+                />
+                <div className="flex gap-4">
+                    <select 
+                        className="cg-input"
+                        value={selectedHierarchy}
+                        onChange={(e) => setSelectedHierarchy(e.target.value)}
+                    >
+                        <option value="">All Branches / Global</option>
+                        {/* Mock options since actual hierarchy context is elsewhere */}
+                        <option value="school">School Division</option>
+                        <option value="engineering">Engineering Division</option>
+                    </select>
+                    <ExportMenu onExport={(type) => console.log(`Exporting ${type}`)} />
+                </div>
+            </div>
+
+            {/* Top Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Total Applications</span>
+                    <span className="text-3xl font-bold">{analyticsData?.summary?.total_applications || 0}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Conversion Rate</span>
+                    <span className="text-3xl font-bold text-green-500">{analyticsData?.summary?.conversion_rate || "0%"}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Fee Collected</span>
+                    <span className="text-3xl font-bold text-primary">₹{analyticsData?.summary?.fee_total_revenue?.toLocaleString() || 0}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Verified Docs</span>
+                    <span className="text-3xl font-bold">{analyticsData?.document_summary?.verified || 0}</span>
+                </motion.div>
+            </div>
+
+            {/* MANDATORY CHARTS LAYOUT */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                
+                {/* 1. Line Chart: Cumulative Applications Over Time */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Cumulative Applications Over Time</h3>
+                    <div className="h-[300px]">
+                        <CgLineChart 
+                            data={formatLineChartData(analyticsData?.daily_trend)}
+                            xAxisKey="label"
+                            series={[{ key: "value", color: "hsl(var(--primary))", name: "Total Applications" }]}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 2. Donut Chart: Conversion Funnel */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Conversion Funnel</h3>
+                    <div className="h-[300px]">
+                        <CgDonutChart 
+                            data={formatFunnelData(analyticsData?.summary?.funnel)} 
+                            centerLabel="Funnel"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 3. Histogram: Score Distribution */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Score Distribution (Merit Buckets)</h3>
+                    <div className="h-[300px]">
+                        <CgHistogram 
+                            data={formatHistogramData(analyticsData?.score_distribution)}
+                            xAxisKey="range"
+                            barKey="count"
+                            color="hsl(var(--chart-2))"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 4. Bar Graph: Category Breakdown */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Category Daily Trends</h3>
+                    <div className="h-[300px]">
+                        <CgBarChart 
+                            data={formatBarData(analyticsData?.breakdown?.by_category)}
+                            xAxisKey="label"
+                            series={[{ key: "value", color: "hsl(var(--chart-3))", name: "Count" }]}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 5. Pie Chart: Seat Type Breakdown */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Seat Type Breakdown</h3>
+                    <div className="h-[300px]">
+                        <CgPieChart data={pieSeatData} />
+                    </div>
+                </motion.div>
+
+                {/* 6. Pie Chart: Document Status */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                    className="cg-card p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Document Verification Status</h3>
+                    <div className="h-[300px]">
+                        <CgPieChart data={[
+                            { id: "Verified", label: "Verified", value: analyticsData?.document_summary?.verified || 0 },
+                            { id: "Pending", label: "Pending", value: analyticsData?.document_summary?.pending || 0 },
+                            { id: "Rejected", label: "Rejected", value: analyticsData?.document_summary?.rejected || 0 }
+                        ]} />
+                    </div>
+                </motion.div>
+
+            </div>
+        </PageShell>
+    );
+}

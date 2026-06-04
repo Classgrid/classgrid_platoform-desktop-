@@ -1,0 +1,227 @@
+/* LeftBrandPanel.css - styles for the left brand panel only */
+.brand-panel {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #111111, #000000);
+  position: relative;
+  overflow: hidden;
+  border-right: none !important;
+  max-height: 100vh;
+}
+
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+  background-size: cover;
+  z-index: 0;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.logo-text h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.logo-text p {
+  font-size: 1rem;
+  color: #e8eaf6;
+  opacity: 0.9;
+  margin-top: 0.3rem;
+}
+
+.intro-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  z-index: 1;
+}
+
+.contact-info {
+  margin: 0.8rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.contact-info h3 {
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-info h3 i {
+  color: #e8eaf6;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  color: #e8eaf6;
+  font-size: 0.85rem;
+}
+
+.contact-item i {
+  color: #ffffff;
+  width: 20px;
+  text-align: center;
+}
+
+.security-link {
+  margin-top: 0.8rem;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.security-link a {
+  color: #e8eaf6;
+  text-decoration: none;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  opacity: 0.9;
+}
+
+.security-link a:hover {
+  opacity: 1;
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #333;
+}
+
+.social-link[aria-label="Instagram"] {
+  color: #e1306c;
+}
+
+.social-link[aria-label="GitHub"] {
+  color: #333;
+}
+
+.social-link[aria-label="Facebook"] {
+  color: #1877f2;
+}
+
+.social-link[aria-label="Instagram"]:hover {
+  background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+  border-color: #dc2743;
+  color: #fff;
+}
+
+.social-link[aria-label="GitHub"]:hover {
+  background: #333;
+  border-color: #333;
+  color: #fff;
+}
+
+.social-link[aria-label="Facebook"]:hover {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #fff;
+}
+
+.social-link:hover {
+  transform: translateY(-5px) scale(1.15);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+}
+
+.social-link svg {
+  transition: transform 0.4s ease;
+}
+
+.social-link:hover svg {
+  transform: rotate(360deg) scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .brand-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-panel {
+    padding: 1.5rem;
+  }
+  .logo-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .logo-img {
+    width: 70px;
+    height: 70px;
+  }
+  .social-links {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .social-link {
+    width: 42px;
+    height: 42px;
+  }
+}

@@ -1,0 +1,329 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Search, Building2, CreditCard, Clock, CheckCircle,
+  RefreshCw, ShieldCheck, Users,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { CgPageHeader }   from "@/components/classgrid/PageHeader";
+import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { CgMetricCard }   from "@/components/classgrid/MetricCard";
+import { CgDataTable }    from "@/components/classgrid/DataTable";
+import { CgButton }       from "@/components/classgrid/Button";
+import { CgBadge }        from "@/components/classgrid/Badge";
+import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+import { CgDatePicker } from "@/components/classgrid/DatePicker";
+import {
+  Dialog, DialogContent, DialogHeader,
+  DialogTitle, DialogFooter, DialogDescription,
+} from "@/components/shadcn/dialog";
+
+import {
+  dashboardApi, billingApi,
+  type SuperAdminOrganization, type OrgSubscription,
+} from "../services/superAdminApi";
+
+// ── status badge variant helper ────────────────────────────────────────────────
+const statusVariant = (s?: string) => {
+  if (s === "active") return "success";
+  if (s === "suspended" || s === "blocked") return "danger";
+  return "warning";
+};
+
+// ── page ───────────────────────────────────────────────────────────────────────
+
+export function BillingPage() {
+  const queryClient = useQueryClient();
+  const [search, setSearch]         = useState("");
+  const [selectedOrg, setSelectedOrg] = useState<SuperAdminOrganization | null>(null);
+  const [plan, setPlan]             = useState("demo");
+  const [expiresAt, setExpiresAt]   = useState<Date | undefined>(undefined);
+
+  // ── data fetching ──────────────────────────────────────────────────────────
+  const {
+    data: orgsData, isLoading: orgsLoading,
+    isError: orgsError, refetch, isFetching,
+  } = useQuery({
+    queryKey: ["superadmin-all-orgs-billing"],
+    queryFn: dashboardApi.getOrganizations,
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const { data: subData, isLoading: subLoading } = useQuery({
+    queryKey: ["superadmin-org-subscription", selectedOrg?._id],
+    queryFn: () => billingApi.getOrgSubscription(selectedOrg!._id),
+    enabled: !!selectedOrg,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (payload: Partial<OrgSubscription>) =>
+      billingApi.updateOrgSubscription(selectedOrg!._id, payload),
+    onSuccess: (res) => {
+      toast.success(res.message || "Subscription updated.");
+      queryClient.invalidateQueries({ queryKey: ["superadmin-all-orgs-billing"] });
+      queryClient.invalidateQueries({ queryKey: ["superadmin-org-subscription", selectedOrg?._id] });
+      setSelectedOrg(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to update subscription.");
+    },
+  });
+
+  // ── derived data ───────────────────────────────────────────────────────────
+  const allOrgs = orgsData?.data ?? [];
+  const filteredOrgs = allOrgs.filter((o) => {
+    const q = search.toLowerCase();
+    return (
+      o.name?.toLowerCase().includes(q) ||
+      o.ownerEmail?.toLowerCase().includes(q) ||
+      o.ownerName?.toLowerCase().includes(q) ||
+      o.status?.toLowerCase().includes(q)
+    );
+  });
+
+  const activeCount  = allOrgs.filter((o) => o.status === "active").length;
+  const demoCount    = allOrgs.filter((o) => o.plan === "demo" || !o.plan).length;
+  const totalUsers   = allOrgs.reduce((s, o) => s + (o.userCount ?? 0), 0);
+
+  // ── open manage dialog ─────────────────────────────────────────────────────
+  function openManage(org: SuperAdminOrganization) {
+    setSelectedOrg(org);
+    setPlan(org.plan || "demo");
+    setExpiresAt(undefined);
+  }
+
+  // ── TanStack Table columns (correct ColumnDef format) ─────────────────────
+  const columns: ColumnDef<SuperAdminOrganization>[] = [
+    {
+      header: "Organization",
+      accessorKey: "name",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span className="inline-flex size-8 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
+            <Building2 size={14} />
+          </span>
+          <div>
+            <div className="font-medium text-foreground">{row.original.name}</div>
+            <div className="text-xs text-muted-foreground capitalize">
+              {(row.original.orgType || "organization").replace(/_/g, " ")}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Owner",
+      accessorKey: "ownerEmail",
+      cell: ({ row }) => (
+        <div>
+          <div className="text-sm font-medium">{row.original.ownerName || "—"}</div>
+          <div className="text-xs text-muted-foreground">{row.original.ownerEmail || "—"}</div>
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => (
+        <CgBadge variant={statusVariant(row.original.status)} dot>
+          {row.original.status ?? "unknown"}
+        </CgBadge>
+      ),
+    },
+    {
+      header: "Plan",
+      accessorKey: "plan",
+      cell: ({ row }) => {
+        const p = row.original.plan || "demo";
+        return (
+          <div className="flex items-center gap-1.5">
+            {p === "active"
+              ? <CheckCircle size={13} className="text-emerald-500" />
+              : <Clock size={13} className="text-amber-500" />}
+            <span className="capitalize text-sm">{p}</span>
+          </div>
+        );
+      },
+    },
+    {
+      header: "Users",
+      accessorKey: "userCount",
+      cell: ({ row }) => (
+        <span className="tabular-nums font-medium">{row.original.userCount ?? 0}</span>
+      ),
+    },
+    {
+      header: "Actions",
+      id: "actions",
+      cell: ({ row }) => (
+        <CgButton size="sm" variant="outline" onClick={() => openManage(row.original)}>
+          <CreditCard size={13} /> Manage Plan
+        </CgButton>
+      ),
+    },
+  ];
+
+  // ── render ─────────────────────────────────────────────────────────────────
+  return (
+    <div className="cg-page cg-animate-in">
+
+      <CgPageHeader
+        title="Plans & Billing"
+        description="Manage organization subscriptions, quotas, and platform access."
+        actions={
+          <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            Refresh
+          </CgButton>
+        }
+      />
+
+      {/* ── Summary cards ─────────────────────────────────────────────────── */}
+      <div className="cg-stats-grid">
+        <CgMetricCard
+          title="Active Orgs"
+          value={orgsLoading ? "—" : activeCount}
+          icon={<CheckCircle size={15} />}
+        />
+        <CgMetricCard
+          title="Demo / Trial"
+          value={orgsLoading ? "—" : demoCount}
+          icon={<Clock size={15} />}
+        />
+        <CgMetricCard
+          title="Total Users Across Orgs"
+          value={orgsLoading ? "—" : totalUsers}
+          icon={<Users size={15} />}
+        />
+        <CgMetricCard
+          title="Total Organizations"
+          value={orgsLoading ? "—" : allOrgs.length}
+          icon={<ShieldCheck size={15} />}
+        />
+      </div>
+
+      {/* ── Org table ─────────────────────────────────────────────────────── */}
+      <CgSectionPanel
+        title="Organizations"
+        description="Click 'Manage Plan' to update a subscription or change plan type."
+        noPadding
+        actions={
+          orgsError
+            ? <CgBadge variant="danger">Load error</CgBadge>
+            : <CgBadge variant="success">Live data</CgBadge>
+        }
+      >
+        <div style={{ padding: "1rem" }}>
+          <CgFilterToolbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search org name, owner, status…"
+          />
+        </div>
+
+        <CgDataTable
+          columns={columns}
+          data={filteredOrgs}
+          isLoading={orgsLoading}
+          isError={orgsError}
+          onRetry={() => refetch()}
+          loadingLabel="Loading organizations…"
+          emptyIcon={<Building2 size={32} />}
+          emptyTitle="No organizations found"
+          emptyDescription="Try a different search term."
+          emptyMessage="No organizations match your search."
+        />
+      </CgSectionPanel>
+
+      {/* ── Manage Plan Dialog ─────────────────────────────────────────────── */}
+      <Dialog
+        open={!!selectedOrg}
+        onOpenChange={(open) => { if (!open) setSelectedOrg(null); }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Subscription</DialogTitle>
+            <DialogDescription>
+              Update plan for <strong>{selectedOrg?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          {subLoading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <RefreshCw size={14} className="cg-spin" /> Loading subscription…
+            </div>
+          ) : (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Plan Type</label>
+                <CgSearchableSelect
+                  value={plan}
+                  onValueChange={setPlan}
+                  options={[
+                    { label: "Demo / Trial", value: "demo" },
+                    { label: "Active (Paid)", value: "active" },
+                  ]}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Expiration Date (optional)</label>
+                <CgDatePicker
+                  value={
+                    expiresAt ||
+                    (subData?.subscription?.expiresAt
+                      ? new Date(subData.subscription.expiresAt)
+                      : undefined)
+                  }
+                  onChange={setExpiresAt}
+                />
+              </div>
+
+              {/* Current quotas from subscription */}
+              <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
+                <p className="font-medium">Current Quotas</p>
+                <div className="text-muted-foreground space-y-0.5">
+                  <div>Max Students: <strong>{subData?.subscription?.metadata?.max_students ?? "—"}</strong></div>
+                  <div>Max Faculty: <strong>{subData?.subscription?.metadata?.max_faculty ?? "—"}</strong></div>
+                  <div>Storage Limit: <strong>{subData?.subscription?.metadata?.storage_limit_gb ?? "—"} GB</strong></div>
+                </div>
+              </div>
+
+              {/* Billing rates display */}
+              {(subData?.subscription as any)?.billing && (
+                <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
+                  <p className="font-medium">Billing Rates (from Org Detail)</p>
+                  <div className="text-muted-foreground space-y-0.5">
+                    <div>Base: <strong>₹{(subData?.subscription as any).billing.basePricePerMonth ?? 0}/month</strong></div>
+                    <div>Per Student: <strong>₹{(subData?.subscription as any).billing.pricePerStudent ?? 0}</strong></div>
+                    <div>Per GB: <strong>₹{(subData?.subscription as any).billing.pricePerGB ?? 0}</strong></div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Edit rates on the Org Detail page for this org.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <CgButton variant="outline" onClick={() => setSelectedOrg(null)}>
+              Cancel
+            </CgButton>
+            <CgButton
+              onClick={() => updateMutation.mutate({ plan, expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined })}
+              isLoading={updateMutation.isPending}
+              disabled={subLoading}
+            >
+              Update Subscription
+            </CgButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

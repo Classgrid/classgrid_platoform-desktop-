@@ -1,0 +1,10 @@
+{
+  "name": "Classgrid",
+  "short_name": "Classgrid",
+  "description": "Classgrid education platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#34d399",
+  "icons": []
+}

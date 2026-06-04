@@ -1,0 +1,37 @@
+/**
+ * CgButton - Component-specific styles
+ * High-end SaaS interactions (Stripe/Vercel tier)
+ */
+
+.cg-button {
+  --ring-offset: 2px;
+  --transition-speed: 200ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cg-button-ring-offset {
+  box-shadow: 0 0 0 var(--ring-offset) var(--ring-offset-color, white),
+              0 0 0 calc(var(--ring-offset) + 2px) var(--ring-color, theme('colors.ring'));
+}
+
+/* Smooth motion refinement */
+.cg-button-active-scale {
+  transition: transform 150ms var(--ease);
+}
+
+.cg-button-active-scale:active {
+  transform: scale(0.97);
+}
+
+/* Loading state content lock */
+.cg-button-loading-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Accessibility: Aria-busy styles */
+.cg-button[aria-busy="true"] {
+  cursor: wait;
+}

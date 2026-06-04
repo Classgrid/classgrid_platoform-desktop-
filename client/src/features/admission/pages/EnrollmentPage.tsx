@@ -1,0 +1,405 @@
+import React, { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  GraduationCap, Hash, Loader2, CheckCircle, ChevronRight,
+  LayoutGrid, Users, Award, Armchair, DollarSign, UserCheck,
+} from "lucide-react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  CgPageShell, CgSectionPanel, CgDataTable, CgBadge, CgAvatar,
+  CgFilterToolbar, CgAlert, CgEmptyState, CgSelect, ExportMenu,
+} from "@/components/classgrid";
+import { CgBarChart } from "@/components/classgrid/CgBarChart";
+import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
+import { CgPieChart } from "@/components/classgrid/CgPieChart";
+import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import {
+  enrollStudent, batchGeneratePRNs, allocateDivisions,
+  getSeatMatrix, getExportUrl,
+} from "../../admissions/api";
+import { useApplications } from "../../admissions/queries/useApplications";
+import type { AdmissionApplication } from "../../admissions/types";
+
+// ── Hierarchy config ──
+const HIERARCHIES = [
+  { id: "all",         label: "All Divisions" },
+  { id: "school",      label: "School" },
+  { id: "jr_college",  label: "Jr. College" },
+  { id: "engineering", label: "Engineering" },
+  { id: "coaching",    label: "Coaching" },
+] as const;
+
+type HierarchyId = typeof HIERARCHIES[number]["id"];
+
+const CATEGORY_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--accent))",
+  "hsl(200 70% 52%)",
+  "hsl(40 90% 55%)",
+  "hsl(280 60% 55%)",
+  "hsl(340 65% 50%)",
+];
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+
+export function EnrollmentPage() {
+  const qc = useQueryClient();
+  const [activeHierarchy, setActiveHierarchy] = useState<HierarchyId>("all");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("verified");
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const hierarchyParam = activeHierarchy === "all" ? undefined : activeHierarchy;
+
+  // ── Real API Data ──
+  const { data: appData, isLoading } = useApplications({
+    status: statusFilter,
+    hierarchy_id: hierarchyParam,
+    search: search || undefined,
+    limit: 200,
+  });
+
+  const seatMatrix = useQuery({
+    queryKey: ["seat-matrix"],
+    queryFn: getSeatMatrix,
+  });
+
+  const apps: AdmissionApplication[] = appData?.applications ?? [];
+
+  // ── Mutations (connected to real backend) ──
+  const enrollMut = useMutation({
+    mutationFn: (applicationId: string) => enrollStudent(applicationId),
+    onSuccess: (data: any) => {
+      setSuccessMsg(`${data.message || "Enrolled successfully"}. PRN: ${data.prn || "N/A"}`);
+      setEnrollingId(null);
+      setPassword("");
+      qc.invalidateQueries({ queryKey: ["admission-applications"] });
+    },
+  });
+
+  const prnMut = useMutation({
+    mutationFn: batchGeneratePRNs,
+    onSuccess: () => {
+      setSuccessMsg("PRNs generated for all eligible candidates.");
+      qc.invalidateQueries({ queryKey: ["admission-applications"] });
+    },
+  });
+
+  const divisionMut = useMutation({
+    mutationFn: allocateDivisions,
+    onSuccess: () => {
+      setSuccessMsg("Divisions allocated successfully.");
+      qc.invalidateQueries({ queryKey: ["admission-applications"] });
+    },
+  });
+
+  // ── Charts Data ──
+  const { feeDonut, categoryBar, metrics } = useMemo(() => {
+    const paid = apps.filter(a => a.fee_paid).length;
+    const pending = apps.length - paid;
+    const enrolled = apps.filter(a => a.status === "enrolled").length;
+
+    const catCounts: Record<string, number> = {};
+    apps.forEach(a => {
+      const cat = a.category || "General";
+      catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+
+    return {
+      feeDonut: [
+        { name: "Paid", value: paid, color: "hsl(var(--primary))" },
+        { name: "Pending", value: pending, color: "hsl(var(--accent))" },
+      ],
+      categoryBar: Object.entries(catCounts).map(([name, count]) => ({ name, count })),
+      metrics: { total: apps.length, paid, pending, enrolled },
+    };
+  }, [apps]);
+
+  const enrolledCount = metrics.enrolled;
+  const pendingFeeCount = metrics.pending;
+  const missingPrnCount = apps.filter((a) => !a.prn).length;
+  const conversionRate = metrics.total > 0 ? Math.round((metrics.enrolled / metrics.total) * 100) : 0;
+
+  // ── Table Columns ──
+  const columns: ColumnDef<AdmissionApplication>[] = [
+    {
+      accessorKey: "full_name",
+      header: "Candidate",
+      cell: ({ row }) => (
+        <div className="cg-table__cell-identity">
+          <CgAvatar name={row.original.full_name} size="sm" />
+          <div>
+            <div className="cg-table__cell-primary font-semibold">{row.original.full_name}</div>
+            <small className="cg-table__cell-secondary font-mono">
+              {row.original.en_number ? `EN: ${row.original.en_number}` : row.original.phone || "—"}
+            </small>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-1">
+          <span className="text-foreground">{row.original.category || "General"}</span>
+          <CgBadge variant="outline" size="sm" className="w-fit">{row.original.entry_mode}</CgBadge>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "merit_score",
+      header: "Merit",
+      cell: ({ row }) => (
+        <span className="font-medium">
+          {row.original.merit_score > 0 ? `${row.original.merit_score.toFixed(2)}%` : "—"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "fee_paid",
+      header: "Fee Status",
+      cell: ({ row }) => (
+        row.original.fee_paid ? (
+          <CgBadge variant="success">Paid</CgBadge>
+        ) : (
+          <CgBadge variant="warning">Pending</CgBadge>
+        )
+      ),
+    },
+    {
+      accessorKey: "prn",
+      header: "PRN",
+      cell: ({ row }) => (
+        <span className="font-mono text-sm">{row.original.prn || "—"}</span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const s = row.original.status;
+        const variant = s === "enrolled" ? "success" : s === "verified" ? "info" : s === "fee_pending" ? "warning" : "neutral";
+        return <CgBadge variant={variant}>{s.replace("_", " ")}</CgBadge>;
+      },
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => {
+        const app = row.original;
+        const canEnroll = app.status === "verified" || app.status === "fee_pending" || app.status === "allotted";
+        const isThisEnrolling = enrollingId === app._id;
+
+        if (app.status === "enrolled") {
+          return <CgBadge variant="success">Enrolled ✓</CgBadge>;
+        }
+
+        if (isThisEnrolling) {
+          return (
+            <div className="flex gap-2 items-center">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Set password..."
+                className="w-32 text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                onClick={() => enrollMut.mutate(app._id)}
+                disabled={!password || enrollMut.isPending}
+                className="cg-btn cg-btn--primary cg-btn--sm"
+              >
+                {enrollMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : "Confirm"}
+              </button>
+              <button onClick={() => { setEnrollingId(null); setPassword(""); }} className="cg-btn cg-btn--ghost cg-btn--sm">
+                ✕
+              </button>
+            </div>
+          );
+        }
+
+        return (
+          <button
+            onClick={() => setEnrollingId(app._id)}
+            disabled={!canEnroll}
+            className="cg-btn cg-btn--outline cg-btn--sm"
+          >
+            Enroll <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        );
+      },
+    },
+  ];
+
+  return (
+    <CgPageShell
+      title="Final Enrollment"
+      description="Allocate divisions, generate PRNs, and officially enroll verified candidates."
+      breadcrumbs={[
+        { label: "Admissions", to: "/dept/admissions/dashboard" },
+        { label: "Enrollment" },
+      ]}
+      actions={
+        <div className="cg-flex-row">
+          <button
+            onClick={() => divisionMut.mutate()}
+            disabled={divisionMut.isPending}
+            className="cg-btn cg-btn--outline"
+          >
+            {divisionMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <LayoutGrid className="w-4 h-4" />}
+            Allocate Divisions
+          </button>
+          <button
+            onClick={() => prnMut.mutate()}
+            disabled={prnMut.isPending}
+            className="cg-btn cg-btn--outline"
+          >
+            {prnMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <Hash className="w-4 h-4" />}
+            Batch Generate PRNs
+          </button>
+          <ExportMenu
+            data={apps}
+            filename="enrollment-data"
+            columns={["full_name", "en_number", "category", "merit_score", "status", "prn"]}
+          />
+        </div>
+      }
+    >
+      {/* ── Hierarchy Tabs ── */}
+      <div className="cg-hierarchy-tabs">
+        {HIERARCHIES.map(h => (
+          <button
+            key={h.id}
+            onClick={() => setActiveHierarchy(h.id)}
+            className={`cg-hierarchy-tab${activeHierarchy === h.id ? " cg-hierarchy-tab--active" : ""}`}
+          >
+            {h.label}
+            {activeHierarchy === h.id && (
+              <motion.span className="cg-hierarchy-tab__indicator" layoutId="hierarchy-indicator-enroll" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Success / Error Alerts ── */}
+      {successMsg && (
+        <CgAlert variant="success" title="Success">{successMsg}</CgAlert>
+      )}
+      {(enrollMut.isError || prnMut.isError || divisionMut.isError) && (
+        <CgAlert variant="danger" title="Error">
+          {(enrollMut.error as Error)?.message || (prnMut.error as Error)?.message || (divisionMut.error as Error)?.message || "Operation failed."}
+        </CgAlert>
+      )}
+
+      {/* ── Metric Cards ── */}
+      <motion.div className="cg-grid-4col mb-6" variants={stagger} initial="hidden" animate="show">
+        <motion.div variants={fadeUp}>
+          <CgMetricCard title="Total Enrolled" value={enrolledCount} icon={<CheckCircle className="w-5 h-5" />} />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <CgMetricCard title="Fee Collection Pending" value={pendingFeeCount} icon={<DollarSign className="w-5 h-5" />} />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <CgMetricCard title="Missing PRN" value={missingPrnCount} icon={<UserCheck className="w-5 h-5" />} />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <CgMetricCard title="Conversion Rate" value={`${conversionRate}%`} icon={<Users className="w-5 h-5" />} />
+        </motion.div>
+      </motion.div>
+
+      {/* ── Charts ── */}
+      <motion.div className="cg-grid-2col mb-6" variants={stagger} initial="hidden" animate="show">
+        <motion.div variants={fadeUp}>
+          <CgSectionPanel title="Fee Payment Status" description="Paid vs Pending for enrollment candidates.">
+            {isLoading ? (
+              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+            ) : (feeDonut[0]?.value ?? 0) + (feeDonut[1]?.value ?? 0) > 0 ? (
+              <CgPieChart data={feeDonut} height={220} />
+            ) : (
+              <CgEmptyState title="No data" description="No candidates in this filter." />
+            )}
+          </CgSectionPanel>
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <CgSectionPanel title="Category Distribution" description="Reservation category split.">
+            {isLoading ? (
+              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+            ) : categoryBar.length > 0 ? (
+              <CgBarChart data={categoryBar} indexKey="name" series={[{ key: "count", color: "hsl(var(--accent))", name: "Candidates" }]} height={220} />
+            ) : (
+              <CgEmptyState title="No data" description="No category data." />
+            )}
+          </CgSectionPanel>
+        </motion.div>
+      </motion.div>
+
+      {/* ── Seat Matrix (Live from backend) ── */}
+      {seatMatrix.data && (
+        <motion.div variants={fadeUp} initial="hidden" animate="show" className="mb-6">
+          <CgSectionPanel title="Live Seat Matrix" description="Real-time seat availability from the seat matrix service.">
+            {seatMatrix.isLoading ? (
+              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+            ) : (
+              <div className="cg-grid-3col">
+                {(Array.isArray(seatMatrix.data) ? seatMatrix.data : seatMatrix.data?.matrix || []).map((entry: any, i: number) => (
+                  <div key={i} className="p-4 bg-card border border-border rounded-lg">
+                    <div className="text-sm font-medium text-foreground mb-1">{entry.hierarchy_name || entry.name || `Seat ${i + 1}`}</div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Total: {entry.total_seats ?? entry.total ?? "—"}</span>
+                      <span>Filled: {entry.filled ?? entry.allocated ?? "—"}</span>
+                      <span className="text-primary font-semibold">
+                        Available: {entry.available ?? ((entry.total_seats ?? entry.total ?? 0) - (entry.filled ?? entry.allocated ?? 0))}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CgSectionPanel>
+        </motion.div>
+      )}
+
+      {/* ── Data Table ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show">
+        <CgSectionPanel title="Enrollment Candidates" noPadding>
+          <div className="cg-panel__toolbar">
+            <CgFilterToolbar
+              searchValue={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search by name, EN number, phone..."
+              filters={
+                <CgSelect
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                  options={[
+                    { label: "Verified (Ready)", value: "verified" },
+                    { label: "Fee Pending", value: "fee_pending" },
+                    { label: "Allotted", value: "allotted" },
+                    { label: "Enrolled", value: "enrolled" },
+                    { label: "All Stages", value: "" },
+                  ]}
+                />
+              }
+            />
+          </div>
+
+          {isLoading ? (
+            <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+          ) : (
+            <CgDataTable
+              columns={columns}
+              data={apps}
+              pageSize={15}
+              emptyMessage="No candidates match your current filters."
+            />
+          )}
+        </CgSectionPanel>
+      </motion.div>
+    </CgPageShell>
+  );
+}

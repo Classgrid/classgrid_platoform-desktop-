@@ -1,0 +1,223 @@
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Flag, RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle, MessageSquare } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
+import { CgPageHeader } from "@/components/classgrid/PageHeader";
+import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { CgBadge } from "@/components/classgrid/Badge";
+import { CgButton } from "@/components/classgrid/Button";
+import { CgDataTable } from "@/components/classgrid/DataTable";
+import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/shadcn/dialog";
+import { apiClient } from "@/lib/apiClient";
+import { formatDate } from "@/utils/dateUtils";
+
+const SEVERITY_COLOR: Record<string, string> = {
+  low: "hsl(var(--success))", medium: "hsl(var(--warning))", high: "hsl(var(--danger))", critical: "hsl(340, 82%, 48%)",
+};
+
+const REASON_LABELS: Record<string, string> = {
+  spam: "Spam", harassment: "Harassment", hate_speech: "Hate Speech",
+  inappropriate: "Inappropriate", misinformation: "Misinformation", copyright: "Copyright", other: "Other",
+};
+
+const CONTENT_LABELS: Record<string, string> = {
+  forum_post: "Forum Post", forum_comment: "Forum Comment", chat_message: "Chat Message",
+  note: "Note", review: "Review", user_profile: "User Profile", other: "Other",
+};
+
+const ACTION_OPTIONS = [
+  { label: "No Action", value: "no_action" },
+  { label: "Remove Content", value: "content_removed" },
+  { label: "Warn User", value: "user_warned" },
+  { label: "Ban User", value: "user_banned" },
+];
+
+export function ContentModerationPage() {
+  const qc = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState("pending");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<any>(null);
+  const [resolveAction, setResolveAction] = useState("no_action");
+  const [resolveNote, setResolveNote] = useState("");
+
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["content-reports", statusFilter, typeFilter],
+    queryFn: () => apiClient.get<any>("/api/super-admin/content-reports", {
+      params: { status: statusFilter || undefined, contentType: typeFilter || undefined, limit: 200 },
+    }).then(r => r.data),
+    staleTime: 30_000,
+  });
+
+  const reports: any[] = data?.data ?? [];
+  const total: number = data?.total ?? 0;
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return reports;
+    const q = search.toLowerCase();
+    return reports.filter(r =>
+      (r.reportedBy?.name ?? "").toLowerCase().includes(q) ||
+      (r.reportedUser?.name ?? "").toLowerCase().includes(q) ||
+      (r.contentPreview ?? "").toLowerCase().includes(q) ||
+      (r.organizationId?.name ?? "").toLowerCase().includes(q)
+    );
+  }, [reports, search]);
+
+  const resolveMut = useMutation({
+    mutationFn: ({ id, action, note }: { id: string; action: string; note: string }) =>
+      apiClient.patch(`/api/super-admin/content-reports/${id}/resolve`, { action, note }).then(r => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["content-reports"] }); toast.success("Report resolved."); setSelected(null); },
+    onError: () => toast.error("Failed to resolve report."),
+  });
+
+  const dismissMut = useMutation({
+    mutationFn: (id: string) => apiClient.patch(`/api/super-admin/content-reports/${id}/dismiss`).then(r => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["content-reports"] }); toast.success("Report dismissed."); setSelected(null); },
+    onError: () => toast.error("Failed to dismiss."),
+  });
+
+  const pendingCount = reports.filter(r => r.status === "pending").length;
+  const resolvedCount = reports.filter(r => r.status === "resolved").length;
+  const criticalCount = reports.filter(r => r.severity === "critical" || r.severity === "high").length;
+
+  const columns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: "severity", header: "Severity", size: 90,
+      cell: ({ getValue }) => {
+        const s = getValue<string>() ?? "low";
+        return <span style={{ fontWeight: 700, fontSize: "0.8rem", color: SEVERITY_COLOR[s], textTransform: "uppercase" }}>{s}</span>;
+      },
+    },
+    {
+      accessorKey: "contentType", header: "Content Type", size: 130,
+      cell: ({ getValue }) => <CgBadge variant="neutral">{CONTENT_LABELS[getValue<string>()] ?? getValue<string>()}</CgBadge>,
+    },
+    {
+      accessorKey: "reason", header: "Reason", size: 130,
+      cell: ({ getValue }) => <CgBadge variant="danger">{REASON_LABELS[getValue<string>()] ?? getValue<string>()}</CgBadge>,
+    },
+    {
+      accessorKey: "contentPreview", header: "Content Preview", size: 240,
+      cell: ({ getValue }) => <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>"{String(getValue<string>() ?? "").substring(0, 120)}{(getValue<string>() ?? "").length > 120 ? "…" : ""}"</span>,
+    },
+    {
+      accessorKey: "reportedBy", header: "Reported By", size: 140,
+      cell: ({ getValue }) => { const u = getValue<any>(); return <span style={{ fontSize: "0.82rem" }}>{u?.name ?? "Anonymous"}</span>; },
+    },
+    {
+      accessorKey: "reportedUser", header: "Accused User", size: 140,
+      cell: ({ getValue }) => { const u = getValue<any>(); return u ? <span style={{ fontSize: "0.82rem", fontWeight: 500 }}>{u.name}</span> : <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>Unknown</span>; },
+    },
+    {
+      accessorKey: "status", header: "Status", size: 110,
+      cell: ({ getValue }) => {
+        const s = getValue<string>();
+        if (s === "pending") return <CgBadge variant="warning" dot>Pending</CgBadge>;
+        if (s === "resolved") return <CgBadge variant="success">Resolved</CgBadge>;
+        return <CgBadge variant="neutral">{s}</CgBadge>;
+      },
+    },
+    {
+      accessorKey: "createdAt", header: "Reported", size: 110,
+      cell: ({ getValue }) => <span style={{ fontSize: "0.8rem" }}>{formatDate(getValue<string>())}</span>,
+    },
+    {
+      id: "actions", header: "Actions", size: 150,
+      cell: ({ row }) => {
+        const r = row.original;
+        if (r.status !== "pending") return <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>{r.resolution?.action ?? "—"}</span>;
+        return (
+          <div style={{ display: "flex", gap: "0.3rem" }}>
+            <CgButton size="sm" onClick={() => { setSelected(r); setResolveAction("no_action"); setResolveNote(""); }}>Review</CgButton>
+            <CgButton size="sm" variant="outline" isLoading={dismissMut.isPending} onClick={() => dismissMut.mutate(r._id)}>Dismiss</CgButton>
+          </div>
+        );
+      },
+    },
+  ], [dismissMut.isPending]);
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "0.5rem 0.75rem", border: "1px solid hsl(var(--border))",
+    borderRadius: "var(--radius)", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: "0.9rem", outline: "none",
+  };
+
+  return (
+    <div className="cg-page cg-animate-in">
+      <CgPageHeader
+        title="Content Moderation"
+        description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
+        actions={<CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>}
+      />
+
+      <div className="cg-stats-grid">
+        <CgMetricCard title="Pending Reports" value={isLoading ? "—" : pendingCount} icon={<Clock size={15} />} />
+        <CgMetricCard title="High Severity" value={isLoading ? "—" : criticalCount} icon={<AlertTriangle size={15} />} />
+        <CgMetricCard title="Resolved" value={isLoading ? "—" : resolvedCount} icon={<CheckCircle2 size={15} />} />
+        <CgMetricCard title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
+      </div>
+
+      <div style={{ marginTop: "1.25rem" }}>
+        <CgSectionPanel title="Content Reports" description="All user-submitted reports across all organizations." noPadding
+          actions={
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={[
+                { label: "Pending", value: "pending" }, { label: "Resolved", value: "resolved" },
+                { label: "Dismissed", value: "dismissed" }, { label: "All", value: "" },
+              ]} />
+              <CgSearchableSelect value={typeFilter} onValueChange={setTypeFilter} options={[
+                { label: "All Types", value: "" }, { label: "Forum Post", value: "forum_post" },
+                { label: "Forum Comment", value: "forum_comment" }, { label: "Chat", value: "chat_message" },
+                { label: "Notes", value: "note" }, { label: "Review", value: "review" },
+              ]} />
+            </div>
+          }
+        >
+          <div style={{ padding: "0.75rem 1rem" }}>
+            <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search reporter, accused, content…" />
+          </div>
+          <CgDataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
+            emptyIcon={<Flag size={32} />} emptyTitle="No reports found" emptyDescription="No content reports match the current filters." emptyMessage="No reports." />
+        </CgSectionPanel>
+      </div>
+
+      {/* Resolve Dialog */}
+      <Dialog open={!!selected} onOpenChange={o => !o && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Resolve Report</DialogTitle>
+            <DialogDescription>
+              <strong>{REASON_LABELS[selected?.reason] ?? selected?.reason}</strong> report on a{" "}
+              <strong>{CONTENT_LABELS[selected?.contentType] ?? selected?.contentType}</strong> by{" "}
+              {selected?.reportedUser?.name ?? "unknown user"}.
+            </DialogDescription>
+          </DialogHeader>
+          {selected?.contentPreview && (
+            <div style={{ padding: "0.75rem", background: "hsl(var(--muted) / 0.5)", borderRadius: "var(--radius)", fontSize: "0.84rem", fontStyle: "italic", color: "hsl(var(--muted-foreground))" }}>
+              "{selected.contentPreview}"
+            </div>
+          )}
+          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+            <div>
+              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Action</label>
+              <CgSearchableSelect value={resolveAction} onValueChange={setResolveAction} options={ACTION_OPTIONS} />
+            </div>
+            <div>
+              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Moderation Note</label>
+              <input style={inputStyle} value={resolveNote} onChange={e => setResolveNote(e.target.value)} placeholder="Internal note (not shown to users)…" />
+            </div>
+          </div>
+          <DialogFooter>
+            <CgButton variant="outline" onClick={() => dismissMut.mutate(selected._id)} isLoading={dismissMut.isPending}>Dismiss</CgButton>
+            <CgButton isLoading={resolveMut.isPending} onClick={() => resolveMut.mutate({ id: selected._id, action: resolveAction, note: resolveNote })}>
+              <CheckCircle2 size={14} /> Resolve
+            </CgButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

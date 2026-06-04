@@ -1,0 +1,233 @@
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Building2, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+
+import { CgPageHeader } from "@/components/classgrid/PageHeader";
+import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { CgDataTable } from "@/components/classgrid/DataTable";
+import { CgButton } from "@/components/classgrid/Button";
+import { CgBadge } from "@/components/classgrid/Badge";
+import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+import { formatDate } from "@/utils/dateUtils";
+
+import { dashboardApi, type SuperAdminOrganization } from "../services/superAdminApi";
+
+const statusVariant = (status?: string) => {
+  if (status === "active") return "success";
+  if (status === "suspended" || status === "blocked") return "danger";
+  return "warning";
+};
+
+export function OrganizationsPage() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["superadmin-all-orgs"],
+    queryFn: dashboardApi.getOrganizations,
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const allOrgs = data?.data || [];
+  const filteredOrgs = useMemo(() => {
+    let result = allOrgs;
+    if (statusFilter) {
+      result = result.filter(o => o.status === statusFilter);
+    }
+    const q = search.trim().toLowerCase();
+    if (!q) return result;
+
+    return result.filter((o) =>
+      [o.name, o.ownerEmail, o.ownerName, o.orgType, o.status, o.plan]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
+    );
+  }, [allOrgs, search, statusFilter]);
+
+  const stats = useMemo(() => {
+    const totalUsers = allOrgs.reduce((sum, org) => sum + (org.userCount ?? 0), 0);
+    return {
+      total: allOrgs.length,
+      active: allOrgs.filter((org) => org.status === "active").length,
+      suspended: allOrgs.filter((org) => org.status === "suspended" || org.status === "blocked").length,
+      totalUsers,
+    };
+  }, [allOrgs]);
+
+  const columns: ColumnDef<SuperAdminOrganization>[] = [
+    {
+      header: "Organization Name",
+      accessorKey: "name",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-9 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
+            <Building2 className="size-4" />
+          </span>
+          <div>
+            <div className="font-medium text-foreground">{row.original.name}</div>
+            <div className="text-xs capitalize text-muted-foreground">
+              {(row.original.orgType || "organization").replace(/_/g, " ")}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Owner",
+      accessorKey: "ownerEmail",
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium text-foreground">{row.original.ownerName || "Owner not set"}</div>
+          <div className="text-xs text-muted-foreground">{row.original.ownerEmail || "No owner email"}</div>
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => (
+        <CgBadge variant={statusVariant(row.original.status)} dot>
+          {row.original.status}
+        </CgBadge>
+      ),
+    },
+    {
+      header: "Users",
+      accessorKey: "userCount",
+      cell: ({ row }) => <span className="font-medium tabular-nums">{row.original.userCount ?? 0}</span>,
+    },
+    {
+      header: "Joined",
+      accessorKey: "createdAt",
+      cell: ({ row }) => (
+        <span className="text-sm">
+          {formatDate(row.original.createdAt)}
+        </span>
+      ),
+    },
+    {
+      header: "Actions",
+      id: "actions",
+      cell: ({ row }) => (
+        <CgButton size="sm" variant="outline" asChild>
+          <Link to={`/superadmin/orgs/${row.original._id}`}>View Details</Link>
+        </CgButton>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <CgPageHeader
+        title="Organizations Directory"
+        description="Live organization records from the Classgrid backend, including owner, status, and user counts."
+        actions={
+          <>
+            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCw className={`size-4 ${isFetching ? "cg-spin" : ""}`} />
+              Refresh
+            </CgButton>
+            <CgButton asChild>
+              <Link to="/superadmin/onboard">
+                <Plus className="size-4" />
+                Onboard New Org
+              </Link>
+            </CgButton>
+          </>
+        }
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <CgMetricCard title="Total Organizations" value={isLoading ? "..." : stats.total} icon={<Building2 size={16} />} />
+        <CgMetricCard title="Active Organizations" value={isLoading ? "..." : stats.active} icon={<ShieldCheck size={16} />} />
+        <CgMetricCard title="Users In Orgs" value={isLoading ? "..." : stats.totalUsers} icon={<Users size={16} />} />
+      </div>
+
+      <CgSectionPanel
+        title="Organizations"
+        description="Search, inspect, and manage provisioned institutions."
+        actions={
+          stats.suspended > 0 ? (
+            <CgBadge variant="danger">{stats.suspended} needs attention</CgBadge>
+          ) : (
+            <CgBadge variant="success">Backend connected</CgBadge>
+          )
+        }
+        noPadding
+      >
+        <div style={{ padding: "1rem" }}>
+          <CgFilterToolbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search name, owner, plan..."
+            filters={
+              <div style={{ width: "180px" }}>
+                <CgSearchableSelect
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                  placeholder="Filter by Status"
+                  options={[
+                    { label: "Active", value: "active" },
+                    { label: "Suspended", value: "suspended" },
+                    { label: "Blocked", value: "blocked" },
+                  ]}
+                  allowClear
+                />
+              </div>
+            }
+          />
+        </div>
+
+        {isError ? (
+          <div className="cg-alert cg-alert--danger" style={{ margin: "0 1rem 1rem" }}>
+            <div className="cg-alert__body">
+              <span className="cg-alert__title">Backend request failed</span>
+              <p className="cg-alert__message">
+                {(error as Error)?.message || "The organizations endpoint did not return data."}
+              </p>
+            </div>
+            <CgButton variant="outline" onClick={() => refetch()}>
+              Retry
+            </CgButton>
+          </div>
+        ) : null}
+
+        <CgDataTable
+          columns={columns}
+          data={filteredOrgs}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={() => refetch()}
+          loadingLabel="Fetching organizations from the backend"
+          emptyIcon={<Building2 size={32} />}
+          emptyTitle={allOrgs.length ? "No organizations match your search" : "No organizations have been created yet"}
+          emptyDescription={
+            allOrgs.length
+              ? "Try a different name, owner email, status, or plan."
+              : "Create the first organization to start seeing real backend data in this directory."
+          }
+          emptyAction={
+            allOrgs.length ? (
+              <CgButton variant="outline" onClick={() => setSearch("")}>
+                Clear Search
+              </CgButton>
+            ) : (
+              <CgButton asChild>
+                <Link to="/superadmin/onboard">
+                  <Plus className="size-4" />
+                  Create Organization
+                </Link>
+              </CgButton>
+            )
+          }
+          emptyMessage="No organizations found."
+        />
+      </CgSectionPanel>
+    </div>
+  );
+}

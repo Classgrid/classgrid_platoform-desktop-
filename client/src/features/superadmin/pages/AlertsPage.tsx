@@ -1,0 +1,229 @@
+import { useState, useMemo } from "react";
+import { AlertTriangle, Mail, RefreshCw, Send, XCircle } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { CgBadge } from "@/components/classgrid/Badge";
+import { CgDataTable } from "@/components/classgrid/DataTable";
+import { CgTabs, CgTabList, CgTabTrigger, CgTabContent } from "@/components/classgrid/Tabs";
+import { formatDate, formatTime } from "@/utils/dateUtils";
+import { useErrorLogs, useEmailLogs, useResendEmail } from "../queries/useAlerts";
+import type { ErrorLog, EmailLog } from "../services/superAdminApi";
+
+// ── columns ───────────────────────────────────────────────────────────────────
+
+const errorColumns: ColumnDef<ErrorLog>[] = [
+  {
+    accessorKey: "timestamp",
+    header: "Time",
+    size: 140,
+    cell: ({ getValue }) => {
+      const d = getValue<string>();
+      return (
+        <div>
+          <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
+          <div className="cg-table__info">{formatTime(d)}</div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "level",
+    header: "Level",
+    size: 100,
+    cell: ({ getValue }) => {
+      const lvl = getValue<string>().toLowerCase();
+      const variant = lvl === "error" ? "danger" : lvl === "warn" ? "warning" : "info";
+      return <CgBadge variant={variant}>{lvl.toUpperCase()}</CgBadge>;
+    },
+  },
+  {
+    accessorKey: "message",
+    header: "Error Message",
+    size: 350,
+    cell: ({ getValue }) => (
+      <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "330px" }}>
+        {getValue<string>()}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "context",
+    header: "Context",
+    size: 120,
+    cell: ({ getValue }) => (
+      <span style={{ fontFamily: "monospace", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+        {getValue<string>() || "N/A"}
+      </span>
+    ),
+  },
+];
+
+function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean): ColumnDef<EmailLog>[] {
+  return [
+    {
+      accessorKey: "to",
+      header: "Recipient",
+      size: 200,
+    },
+    {
+      accessorKey: "subject",
+      header: "Subject",
+      size: 250,
+      cell: ({ getValue }) => (
+        <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "230px" }}>
+          {getValue<string>()}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      size: 110,
+      cell: ({ getValue }) => {
+        const s = getValue<string>();
+        const variant = s === "sent" ? "success" : s === "failed" ? "danger" : "warning";
+        return <CgBadge variant={variant} dot>{s}</CgBadge>;
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Queued At",
+      size: 140,
+      cell: ({ getValue }) => {
+        const d = getValue<string>();
+        return (
+          <div>
+            <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
+            <div className="cg-table__info">{formatTime(d)}</div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Action",
+      size: 100,
+      cell: ({ row }) => {
+        const email = row.original;
+        if (email.status !== "failed") return null;
+
+        return (
+          <button
+            className="cg-btn cg-btn--outline"
+            disabled={isMutating}
+            onClick={() => onResend(email._id)}
+          >
+            Retry
+          </button>
+        );
+      },
+    },
+  ];
+}
+
+// ── page ─────────────────────────────────────────────────────────────────────
+
+export function AlertsPage() {
+  const { data: errData, isLoading: errLoading, refetch: refetchErr, isFetching: errFetching } = useErrorLogs();
+  const { data: emailData, isLoading: emailLoading, refetch: refetchEmail, isFetching: emailFetching } = useEmailLogs();
+  const resendMutation = useResendEmail();
+
+  const [activeTab, setActiveTab] = useState("system-errors");
+
+  const errors = errData?.logs ?? [];
+  const emails = emailData?.docs ?? [];
+
+  const handleRefresh = () => {
+    if (activeTab === "system-errors") refetchErr();
+    else refetchEmail();
+  };
+
+  const isFetching = errFetching || emailFetching;
+
+  const emailColumns = useMemo(
+    () => buildEmailColumns((id) => resendMutation.mutate(id), resendMutation.isPending),
+    [resendMutation]
+  );
+
+  return (
+    <div className="cg-page">
+      {/* Header */}
+      <div className="cg-page__header">
+        <div className="cg-page__header-content">
+          <h1 className="cg-page__title">System Alerts & Logs</h1>
+          <p className="cg-page__description">
+            Monitor real-time system errors, worker logs, and email delivery failures.
+          </p>
+        </div>
+        <div className="cg-page__header-actions">
+          <button
+            className="cg-btn cg-btn--outline"
+            onClick={handleRefresh}
+            disabled={isFetching}
+          >
+            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            Refresh Logs
+          </button>
+        </div>
+      </div>
+
+      {/* Metrics */}
+      <div className="cg-stats-grid">
+        <CgMetricCard
+          title="Recent Errors"
+          value={errLoading ? "—" : errors.length}
+          icon={<AlertTriangle size={16} />}
+          trend={{ value: errors.length > 10 ? 1 : 0, label: "Needs attention" }}
+        />
+        <CgMetricCard
+          title="Emails Queued"
+          value={emailLoading ? "—" : emailData?.totalDocs ?? 0}
+          icon={<Mail size={16} />}
+        />
+        <CgMetricCard
+          title="Email Failures"
+          value={emailLoading ? "—" : emails.filter(e => e.status === "failed").length}
+          icon={<XCircle size={16} />}
+        />
+        <CgMetricCard
+          title="Emails Sent"
+          value={emailLoading ? "—" : emails.filter(e => e.status === "sent").length}
+          icon={<Send size={16} />}
+        />
+      </div>
+
+      {/* Tabs & Data Tables */}
+      <div style={{ marginTop: "1.5rem" }}>
+        <CgTabs value={activeTab} onValueChange={setActiveTab}>
+          <CgTabList>
+            <CgTabTrigger value="system-errors">System Errors</CgTabTrigger>
+            <CgTabTrigger value="email-logs">Email Delivery Logs</CgTabTrigger>
+          </CgTabList>
+
+          <CgTabContent value="system-errors">
+            <CgSectionPanel title="Application Errors" description="Server-side exceptions and unhandled rejections." noPadding>
+              <CgDataTable
+                columns={errorColumns}
+                data={errors}
+                pageSize={10}
+                emptyMessage={errLoading ? "Loading errors…" : "No recent system errors found. System is healthy."}
+              />
+            </CgSectionPanel>
+          </CgTabContent>
+
+          <CgTabContent value="email-logs">
+            <CgSectionPanel title="Email Worker Logs" description="Track the status of transactional and background emails." noPadding>
+              <CgDataTable
+                columns={emailColumns}
+                data={emails}
+                pageSize={10}
+                emptyMessage={emailLoading ? "Loading logs…" : "No email logs found."}
+              />
+            </CgSectionPanel>
+          </CgTabContent>
+        </CgTabs>
+      </div>
+    </div>
+  );
+}
