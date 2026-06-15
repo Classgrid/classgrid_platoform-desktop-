@@ -1,11 +1,22 @@
 import express from "express";
-import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
+import { isAuthenticated, requireOrganization, requireRole } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import Organization from "../models/Organization.js";
 import User from "../models/User.js";
 import Classroom from "../models/Classroom.js";
 import { logAdminAction } from "../services/auditLog.service.js";
 import { getChatSb } from "../config/supabaseClient.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
+import { buildInstitutionProfile as buildSharedInstitutionProfile } from "../services/institution-profile.service.js";
+import {
+    getAdmissionTrack,
+    getDefaultQuotaByStructureType,
+    isCETStructureType,
+    isCoachingStructureType,
+    isJuniorCollegeStructureType,
+    isSchoolStructureType,
+    resolveStructureType,
+} from "../services/admissions/organization-admission-type.service.js";
 import {
     TRACKED_ONBOARDING_STEPS,
     deriveOnboardingStage,
@@ -22,6 +33,133 @@ import {
 } from "../controllers/support-communication.controller.js";
 
 const router = express.Router();
+
+const PROFILE_BY_ORG_TYPE = {
+    school: {
+        dashboardVariant: "school",
+        admissionMode: "school_standard",
+        terminology: {
+            institution: "School",
+            learner: "Student",
+            educator: "Teacher",
+            program: "Standard",
+            group: "Division",
+            identifier: "Roll No",
+        },
+        academicHierarchy: ["standard", "division"],
+        enabledModules: ["admissions", "fees", "attendance", "examinations", "library", "transport"],
+        admissionWorkflows: ["class_capacity", "parent_details", "age_check", "document_review"],
+    },
+    junior_college: {
+        dashboardVariant: "junior_college",
+        admissionMode: "junior_college_merit",
+        terminology: {
+            institution: "Junior College",
+            learner: "Student",
+            educator: "Faculty",
+            program: "Stream",
+            group: "Division",
+            identifier: "Roll No",
+        },
+        academicHierarchy: ["stream", "standard", "division"],
+        enabledModules: ["admissions", "fees", "attendance", "examinations", "library"],
+        admissionWorkflows: ["stream_selection", "tenth_marks_merit", "rounds", "document_review"],
+    },
+    engineering: {
+        dashboardVariant: "engineering",
+        admissionMode: "engineering_cet_cap",
+        terminology: {
+            institution: "Engineering College",
+            learner: "Student",
+            educator: "Faculty",
+            program: "Branch",
+            group: "Division",
+            identifier: "PRN",
+        },
+        academicHierarchy: ["degree", "department", "year", "semester", "division", "batch"],
+        enabledModules: ["admissions", "fees", "attendance", "examinations", "library", "compliance", "placements"],
+        admissionWorkflows: ["cet_import", "cap_rounds", "branch_merit", "seat_matrix", "document_review"],
+    },
+    coaching: {
+        dashboardVariant: "coaching",
+        admissionMode: "coaching_enrollment",
+        terminology: {
+            institution: "Coaching Institute",
+            learner: "Learner",
+            educator: "Mentor",
+            program: "Course",
+            group: "Batch",
+            identifier: "Enrollment No",
+        },
+        academicHierarchy: ["course", "batch"],
+        enabledModules: ["admissions", "fees", "attendance", "examinations", "crm"],
+        admissionWorkflows: ["lead_tracking", "counselling", "trial_batch", "batch_capacity", "fee_plan"],
+    },
+    diploma: {
+        dashboardVariant: "engineering",
+        admissionMode: "diploma_merit",
+        terminology: {
+            institution: "Diploma Institute",
+            learner: "Student",
+            educator: "Faculty",
+            program: "Department",
+            group: "Division",
+            identifier: "Enrollment No",
+        },
+        academicHierarchy: ["department", "year", "semester", "division"],
+        enabledModules: ["admissions", "fees", "attendance", "examinations", "library"],
+        admissionWorkflows: ["department_merit", "seat_matrix", "document_review"],
+    },
+};
+
+function normalizeOrgType(org, resolvedStructureType) {
+    const type = String(org?.org_type || "").toLowerCase();
+    if (PROFILE_BY_ORG_TYPE[type]) return type;
+
+    const structure = String(resolvedStructureType || org?.structure_type || "").toLowerCase();
+    if (isSchoolStructureType(structure)) return "school";
+    if (isJuniorCollegeStructureType(structure)) return "junior_college";
+    if (isCoachingStructureType(structure)) return "coaching";
+    if (isCETStructureType(structure)) return structure.includes("diploma") ? "diploma" : "engineering";
+    return "school";
+}
+
+function buildInstitutionProfile(org) {
+    const structureType = resolveStructureType(org) || org.structure_type;
+    const orgType = normalizeOrgType(org, structureType);
+    const base = PROFILE_BY_ORG_TYPE[orgType] || PROFILE_BY_ORG_TYPE.school;
+    const identifierLabel = org.academic_config?.identifierLabel || org.rollNumberLabel || base.terminology.identifier;
+    const admissionTrack = getAdmissionTrack(structureType);
+
+    return {
+        organization: {
+            id: org._id.toString(),
+            name: org.name,
+            org_type: orgType,
+            structure_type: structureType,
+            division_mode: org.division_mode,
+            allow_sub_batches: Boolean(org.allow_sub_batches),
+            status: org.status,
+        },
+        dashboardVariant: base.dashboardVariant,
+        terminology: {
+            ...base.terminology,
+            identifier: identifierLabel,
+        },
+        academicHierarchy: base.academicHierarchy,
+        enabledModules: base.enabledModules,
+        admissionProfile: {
+            mode: base.admissionMode,
+            track: admissionTrack,
+            structureType,
+            baseOrgType: orgType,
+            defaultQuota: getDefaultQuotaByStructureType(structureType),
+            dashboardVariant: base.dashboardVariant,
+            enabledWorkflows: base.admissionWorkflows,
+        },
+        academicConfig: org.academic_config || {},
+    };
+}
 
 /**
  * PATH: /api/org/dashboard
@@ -45,6 +183,14 @@ router.get("/dashboard", isAuthenticated, requireRole("org_admin"), async (req, 
         console.error("[Org Dashboard Error]:", err.message);
         res.status(500).json({ message: "Server error" });
     }
+});
+
+/**
+ * GET /api/org-admin/institution-profile
+ * Frontend contract for institution-specific dashboards and workflows.
+ */
+router.get("/institution-profile", isAuthenticated, requireOrganization, attachInstitutionProfile(), (req, res) => {
+    res.json(req.institutionProfile);
 });
 
 /**

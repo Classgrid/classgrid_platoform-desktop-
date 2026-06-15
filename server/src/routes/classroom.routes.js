@@ -1,6 +1,7 @@
 import express from "express";
 import { classroomClient, studentNotesClient, getChatSb } from "../config/supabaseClient.js";
 import { isAuthenticated, requireRole, requireOrganization } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { requireClassroomMember, requireClassroomOwner } from "../middleware/classroom.middleware.js";
 import { enforceClassroomAccess } from "../middleware/classroom-access.middleware.js";
 import Classroom from "../models/Classroom.js";
@@ -35,6 +36,23 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 40 * 1024 * 1024 } // 40MB per file
 });
+
+function getClassroomCourseType(profile) {
+    const orgType = profile?.admissionProfile?.baseOrgType || profile?.organization?.org_type;
+    const typeMap = {
+        school: "SCHOOL",
+        junior_college: "JUNIOR_COLLEGE",
+        engineering: "ENGINEERING",
+        coaching: "COACHING",
+        diploma: "DIPLOMA",
+    };
+
+    return typeMap[orgType] || "COLLEGE";
+}
+
+function toBoolean(value) {
+    return value === true || value === "true";
+}
 
 // ─────────────────────────────────────────────
 // PROXY PDF DOWNLOAD (Bypass CORS)
@@ -106,19 +124,23 @@ ${text}
 // ─────────────────────────────────────────────
 // CREATE CLASSROOM (Teacher/Faculty only)
 // ─────────────────────────────────────────────
-router.post("/", isAuthenticated, requireRole("teacher", "faculty"), requireOrganization, validateClassroom, async (req, res) => {
+router.post("/", isAuthenticated, requireRole("teacher", "faculty"), requireOrganization, attachInstitutionProfile(), validateClassroom, async (req, res) => {
     try {
         await connectDB();
+        const orgId = req.effectiveOrganizationId || req.user.organization_id;
         const { 
             name, description, subject, subjectSlug, settings,
-            course_type, year, branch, semester, standard, division, division_id, subject_id
+            course_type, academic_year, term, stream, year, branch, semester, standard,
+            division, division_id, sub_batch, sub_batch_id, subject_id,
+            class_teacher, class_teacher_id, assistant_teacher, assistant_teacher_id,
+            mentor, mentor_id, is_entrance_batch, entrance_exam, entrance_course
         } = req.body;
 
         if (!name || (!subject && !subject_id)) {
             return res.status(400).json({ message: "Name and subject are required" });
         }
 
-        if (!req.user || !req.user._id || !req.user.organization_id) {
+        if (!req.user || !req.user._id || !orgId) {
             return res.status(400).json({ message: "Invalid user session or missing organization ID. Please re-login." });
         }
 
@@ -128,9 +150,12 @@ router.post("/", isAuthenticated, requireRole("teacher", "faculty"), requireOrga
             subject,
             subjectSlug: subjectSlug || subject.toLowerCase().replace(/\s+/g, "-"),
             teacher: req.user._id,
-            organization_id: req.user.organization_id,
+            organization_id: orgId,
             // ── STRUCTURED ERP FIELDS ──
-            course_type: course_type || 'COLLEGE',
+            course_type: course_type || getClassroomCourseType(req.institutionProfile),
+            academic_year: academic_year || null,
+            term: term || null,
+            stream: stream || null,
             year: year || null,
             branch: branch || null,
             semester: semester || null,
@@ -138,6 +163,14 @@ router.post("/", isAuthenticated, requireRole("teacher", "faculty"), requireOrga
             division: division || null,
             division_id: division_id || null,
             subject_id: subject_id || null,
+            sub_batch: sub_batch || null,
+            sub_batch_id: sub_batch_id || null,
+            class_teacher: class_teacher || class_teacher_id || null,
+            assistant_teacher: assistant_teacher || assistant_teacher_id || null,
+            mentor: mentor || mentor_id || null,
+            is_entrance_batch: toBoolean(is_entrance_batch),
+            entrance_exam: entrance_exam || null,
+            entrance_course: entrance_course || null,
         };
 
         // Settings
@@ -209,7 +242,7 @@ router.put("/:id/cover", isAuthenticated, requireClassroomOwner, upload.single("
 // ─────────────────────────────────────────────
 // LIST CLASSROOMS (role-aware)
 // ─────────────────────────────────────────────
-router.get("/", isAuthenticated, requireOrganization, async (req, res) => {
+router.get("/", isAuthenticated, requireOrganization, attachInstitutionProfile(), async (req, res) => {
     try {
         await connectDB();
         if (req.user.role === "teacher" || req.user.role === "faculty") {
@@ -411,7 +444,7 @@ router.get("/my-requests", isAuthenticated, async (req, res) => {
 // ─────────────────────────────────────────────
 // DISCOVER / BROWSE CLASSROOMS (Students)
 // ─────────────────────────────────────────────
-router.get("/discover", isAuthenticated, requireOrganization, async (req, res) => {
+router.get("/discover", isAuthenticated, requireOrganization, attachInstitutionProfile(), async (req, res) => {
     try {
         await connectDB();
         const { search, subject } = req.query;
@@ -481,7 +514,7 @@ router.get("/discover", isAuthenticated, requireOrganization, async (req, res) =
 // ─────────────────────────────────────────────
 // GET ALL ORG CLASSROOMS (Students)
 // ─────────────────────────────────────────────
-router.get("/my-organization", isAuthenticated, requireOrganization, async (req, res) => {
+router.get("/my-organization", isAuthenticated, requireOrganization, attachInstitutionProfile(), async (req, res) => {
     try {
         await connectDB();
         const classrooms = await Classroom.find({

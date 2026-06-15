@@ -1,8 +1,18 @@
 import express from 'express';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import { primarySupabaseClient as supabase } from '../config/supabaseClient.js';
 
 const router = express.Router();
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        examination_profile: req.institutionProfile.examinationProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 const getOrgId = (user) => user?.organization_id || user?.org_id || user?.organization?._id || user?.organization;
 

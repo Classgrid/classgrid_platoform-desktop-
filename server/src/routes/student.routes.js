@@ -1,5 +1,6 @@
 import express from 'express';
-import { isAuthenticated } from '../middleware/auth.middleware.js';
+import { isAuthenticated, requireOrganization } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import { getChatSb } from '../config/supabaseClient.js';
 import User from '../models/User.js';
 import DeviceVerification from '../models/DeviceVerification.js';
@@ -97,16 +98,16 @@ router.post('/verify-onboarding-otp', isAuthenticated, async (req, res) => {
 // POST /api/student/onboarding
 // Creates a Supabase student record and marks profile_completed = true
 // ======================================================
-router.post('/onboarding', isAuthenticated, async (req, res) => {
+router.post('/onboarding', isAuthenticated, requireOrganization, attachInstitutionProfile(), async (req, res) => {
   try {
     const userId = req.user._id.toString();
-    const orgId = req.user.organization_id?.toString();
+    const orgId = (req.effectiveOrganizationId || req.user.organization_id)?.toString();
 
     if (!orgId) {
       return res.status(400).json({ message: 'You do not belong to any organization.' });
     }
 
-    const { full_name, division_id, prn, roll_no, year, org_type } = req.body;
+    const { full_name, division_id, prn, roll_no, year, abc_id } = req.body;
 
     if (!division_id) return res.status(400).json({ message: 'Division is required.' });
     if (!full_name || !full_name.trim()) return res.status(400).json({ message: 'Full name is required.' });
@@ -125,14 +126,25 @@ router.post('/onboarding', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: 'Invalid division selected.' });
     }
 
-    const resolvedOrgType = org_type || 'COLLEGE';
+    const resolvedOrgType = req.institutionProfile?.admissionProfile?.baseOrgType || 'school';
+    const identifierLabel = req.institutionProfile?.terminology?.identifier || 'Identifier';
+    const usesPrimaryIdentifier = ['engineering', 'diploma'].includes(resolvedOrgType);
     const cleanPrn = prn?.trim().toUpperCase() || null;
     const cleanRoll = roll_no?.trim() || null;
+    const cleanAbcId = abc_id?.trim() || null;
 
-    if (resolvedOrgType === 'COLLEGE') {
-      if (!cleanPrn) return res.status(400).json({ message: 'PRN is required for college students.' });
+    if (cleanAbcId && !usesPrimaryIdentifier) {
+      return res.status(400).json({ message: 'ABC ID is only supported for higher-education profiles.' });
+    }
+
+    if (cleanAbcId && !/^[0-9]{12}$/.test(cleanAbcId)) {
+      return res.status(400).json({ message: 'ABC ID must be a 12-digit number.' });
+    }
+
+    if (usesPrimaryIdentifier) {
+      if (!cleanPrn) return res.status(400).json({ message: `${identifierLabel} is required.` });
       if (!/^[A-Z0-9]{1,15}$/.test(cleanPrn)) {
-        return res.status(400).json({ message: 'PRN must be alphanumeric and up to 15 characters.' });
+        return res.status(400).json({ message: `${identifierLabel} must be alphanumeric and up to 15 characters.` });
       }
       // ── Uniqueness: PRN within org ──
       const { data: prnCheck } = await sb
@@ -143,10 +155,10 @@ router.post('/onboarding', isAuthenticated, async (req, res) => {
         .maybeSingle();
 
       if (prnCheck) {
-        return res.status(409).json({ message: 'This PRN is already registered in your organization. Contact your admin if this is an error.' });
+        return res.status(409).json({ message: `This ${identifierLabel} is already registered in your organization. Contact your admin if this is an error.` });
       }
     } else {
-      if (!cleanRoll) return res.status(400).json({ message: 'Roll Number is required for school students.' });
+      if (!cleanRoll) return res.status(400).json({ message: `${identifierLabel} is required.` });
       // ── Uniqueness: Roll No within division ──
       const { data: rollCheck } = await sb
         .from('students')
@@ -156,7 +168,7 @@ router.post('/onboarding', isAuthenticated, async (req, res) => {
         .maybeSingle();
 
       if (rollCheck) {
-        return res.status(409).json({ message: 'This Roll Number is already taken in this division.' });
+        return res.status(409).json({ message: `This ${identifierLabel} is already taken in this division.` });
       }
     }
 
@@ -204,7 +216,8 @@ router.post('/onboarding', isAuthenticated, async (req, res) => {
       profile_completed: true,
     };
     if (cleanPrn) mongoUpdate.prn = cleanPrn;
-    if (resolvedOrgType === 'COLLEGE' && year) mongoUpdate.batch = year;
+    if (cleanAbcId) mongoUpdate.abc_id = cleanAbcId;
+    if (usesPrimaryIdentifier && year) mongoUpdate.batch = year;
 
     await User.findByIdAndUpdate(req.user._id, { $set: mongoUpdate });
 
@@ -584,4 +597,3 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
 });
 
 export default router;
-

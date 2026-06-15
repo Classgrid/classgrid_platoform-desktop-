@@ -12,8 +12,19 @@ import {
     bulkAddVideos,
 } from "../controllers/course-library.controller.js";
 import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get("/institution-profile", attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        library_profile: req.institutionProfile.libraryProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // 📚 MODULE 23: YouTube Course Library Routes

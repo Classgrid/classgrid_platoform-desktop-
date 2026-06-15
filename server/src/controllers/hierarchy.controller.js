@@ -26,12 +26,18 @@ export async function createNode(req, res) {
             return res.status(400).json({ error: "level_type and name are required." });
         }
 
+        let parent = null;
+
         // Validate parent exists if provided
         if (parent_id) {
-            const parent = await AcademicHierarchy.findOne({ _id: parent_id, organization_id: orgId });
+            parent = await AcademicHierarchy.findOne({ _id: parent_id, organization_id: orgId });
             if (!parent) {
                 return res.status(404).json({ error: "Parent node not found in this organization." });
             }
+        }
+
+        if (level_type === "sub_batch" && parent?.level_type !== "division") {
+            return res.status(400).json({ error: "Batch must be created under a division." });
         }
 
         const node = await AcademicHierarchy.create({

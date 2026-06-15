@@ -1,9 +1,20 @@
 import express from 'express';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import TeacherPlan from '../models/TeacherPlan.js';
 import Classroom from '../models/Classroom.js';
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        staff_assignment_profile: req.institutionProfile.staffAssignmentProfile,
+        academic_session_profile: req.institutionProfile.academicSessionProfile,
+    });
+});
 
 // ═══════════════════════════════════════════════════════════════
 // PLAN CRUD

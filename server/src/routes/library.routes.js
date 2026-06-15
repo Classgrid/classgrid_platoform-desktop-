@@ -1,5 +1,6 @@
 import express from 'express';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import { getChatSb } from '../config/supabaseClient.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
@@ -7,6 +8,16 @@ import mongoose from 'mongoose';
 import { sendEmail } from '../services/brevo.service.js';
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        library_profile: req.institutionProfile.libraryProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ======================================================
 // Helper: Get Supabase Client & Org ID

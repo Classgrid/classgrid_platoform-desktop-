@@ -36,11 +36,14 @@ import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
-import { OrgAdminDashboardPage } from "@/features/org/pages/OrgAdminDashboardPage";
+import { OrgAdminDashboardRouter } from "@/features/org/pages/OrgAdminDashboardRouter";
+import { OrgAnnouncementsPage } from "@/features/org/pages/OrgAnnouncementsPage";
+import { OrgStudentsPage } from "@/features/org/pages/OrgStudentsPage";
+import { OrgFacultyPage } from "@/features/org/pages/OrgFacultyPage";
 import { StudentDashboardPage } from "@/features/student/pages/StudentDashboardPage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
 import { FacultyWorkPage } from "@/features/faculty/pages/FacultyWorkPage";
-import { AdmissionDashboardPage } from "@/features/admission/pages/AdmissionDashboardPage";
+import { AdmissionDashboardRouter } from "@/features/admission/pages/AdmissionDashboardRouter";
 import { AllApplicationsPage } from "@/features/admission/pages/AllApplicationsPage";
 import { ApplicationDetailsPage } from "@/features/admission/pages/ApplicationDetailsPage";
 import { DocumentVerificationPage } from "@/features/admission/pages/DocumentVerificationPage";
@@ -61,11 +64,11 @@ import { VacancyTrackerPage } from "@/features/admissions/pages/VacancyTrackerPa
 import { LeadTrackingPage } from "@/features/admissions/pages/LeadTrackingPage";
 import { CommunicationPage } from "@/features/admissions/pages/CommunicationPage";
 import { BulkSmsPage } from "@/features/admissions/pages/BulkSmsPage";
-import { FeesDashboardPage } from "@/features/fees/pages/FeesDashboardPage";
-import { ExamsDashboardPage } from "@/features/exams/pages/ExamsDashboardPage";
-import { LibraryDashboardPage } from "@/features/library/pages/LibraryDashboardPage";
-import { AttendanceDashboardPage } from "@/features/attendance/pages/AttendanceDashboardPage";
-import { HrDashboardPage } from "@/features/hr/pages/HrDashboardPage";
+import { FeesDashboardRouter } from "@/features/fees/pages/FeesDashboardRouter";
+import { ExamsDashboardRouter } from "@/features/exams/pages/ExamsDashboardRouter";
+import { LibraryDashboardRouter } from "@/features/library/pages/LibraryDashboardRouter";
+import { AttendanceDashboardRouter } from "@/features/attendance/pages/AttendanceDashboardRouter";
+import { HRDashboardRouter } from "@/features/hr/pages/HRDashboardRouter";
 import { HostelDashboardPage } from "@/features/hostel/pages/HostelDashboardPage";
 import { SupportPage } from "@/features/support/pages/SupportPage";
 import { GenericPage } from "@/features/system/pages/GenericPage";
@@ -206,11 +209,14 @@ export function AppRouter() {
 
 
         {/* 2. Org Admin Dashboard */}
-        <Route path="/org/dashboard" element={<OrgAdminDashboardPage />} />
+        <Route path="/org/dashboard" element={<OrgAdminDashboardRouter />} />
+        <Route path="/org/announcements" element={<OrgAnnouncementsPage />} />
+        <Route path="/org/students" element={<OrgStudentsPage />} />
+        <Route path="/org/faculty" element={<OrgFacultyPage />} />
         <Route path="/org/admissions" element={<Navigate to="/dept/admissions/dashboard" replace />} />
 
         {/* 3. Admissions Department Dashboard */}
-        <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardPage />} />
+        <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardRouter />} />
         <Route path="/dept/admissions/applications" element={<AllApplicationsPage />} />
         <Route path="/dept/admissions/applications/:id" element={<ApplicationDetailsPage />} />
         <Route path="/dept/admissions/new" element={<NewApplicationPage />} />
@@ -233,19 +239,19 @@ export function AppRouter() {
         <Route path="/dept/admissions/bulk" element={<BulkSmsPage />} />
 
         {/* 4. Fees Department Dashboard */}
-        <Route path="/dept/fees/dashboard" element={<FeesDashboardPage />} />
+        <Route path="/dept/fees/dashboard" element={<FeesDashboardRouter />} />
 
         {/* 5. Examination Department Dashboard */}
-        <Route path="/dept/exams/dashboard" element={<ExamsDashboardPage />} />
+        <Route path="/dept/exams/dashboard" element={<ExamsDashboardRouter />} />
 
         {/* 6. Library Department Dashboard */}
-        <Route path="/dept/library/dashboard" element={<LibraryDashboardPage />} />
+        <Route path="/dept/library/dashboard" element={<LibraryDashboardRouter />} />
 
         {/* 7. Attendance Department Dashboard */}
-        <Route path="/dept/attendance/dashboard" element={<AttendanceDashboardPage />} />
+        <Route path="/dept/attendance/dashboard" element={<AttendanceDashboardRouter />} />
 
         {/* 8. HR & Payroll Department Dashboard */}
-        <Route path="/dept/hr/dashboard" element={<HrDashboardPage />} />
+        <Route path="/dept/hr/dashboard" element={<HRDashboardRouter />} />
 
         {/* 9. Hostel & Transport Dashboard */}
         <Route path="/dept/hostel/dashboard" element={<HostelDashboardPage />} />

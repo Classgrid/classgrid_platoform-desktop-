@@ -45,14 +45,44 @@ const classroomSchema = new mongoose.Schema(
         },
 
         // ── ERP STRUCTURED FIELDS (Added during Upgrade) ──
-        course_type: { type: String, enum: ['SCHOOL', 'COLLEGE'], default: 'COLLEGE' },
+        course_type: {
+            type: String,
+            enum: ['SCHOOL', 'COLLEGE', 'JUNIOR_COLLEGE', 'ENGINEERING', 'COACHING', 'DIPLOMA'],
+            default: 'COLLEGE',
+        },
+        academic_year: { type: String }, // e.g., 2025-2026
+        term: { type: String }, // e.g., Term 2 / after Diwali
+        stream: { type: String }, // Junior college: Science, Commerce, Arts
         year: { type: String },
         branch: { type: String },
         semester: { type: Number },
         standard: { type: String },
         division: { type: String }, // e.g., 'A', 'B'
         division_id: { type: String }, // Supabase UUID
+        sub_batch: { type: String }, // e.g., J2 under Division J
+        sub_batch_id: { type: String },
         subject_id: { type: String }, // Supabase course_subjects UUID
+        class_teacher: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+        assistant_teacher: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+        mentor: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+        is_entrance_batch: {
+            type: Boolean,
+            default: false,
+        },
+        entrance_exam: { type: String }, // JEE, NEET, MHT_CET, etc.
+        entrance_course: { type: String },
 
         // Cover image / banner
         coverImage: {
@@ -118,5 +148,7 @@ classroomSchema.pre("save", function () {
 classroomSchema.index({ teacher: 1, createdAt: -1 });
 classroomSchema.index({ classCode: 1 }, { unique: true });
 classroomSchema.index({ subjectSlug: 1 });
+classroomSchema.index({ organization_id: 1, course_type: 1, academic_year: 1 });
+classroomSchema.index({ organization_id: 1, stream: 1, standard: 1, division: 1, sub_batch: 1 });
 
 export default mongoose.model("Classroom", classroomSchema);

@@ -5,6 +5,7 @@ import {
     getMasterDocumentPool as getMasterDocumentPoolService,
     getOrgTypeDefaults,
 } from "../services/admissions/strategy-selector.js";
+import { buildInstitutionProfile } from "../services/institution-profile.service.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { markOnboardingStep, syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
 
@@ -21,7 +22,7 @@ import { markOnboardingStep, syncDerivedOnboardingProgress } from "../services/o
 export const getAdmissionConfig = async (req, res) => {
     try {
         const org = await Organization.findById(req.user.organization_id)
-            .select("admission_config structure_type name");
+            .select("name org_type structure_type division_mode allow_sub_batches status rollNumberLabel academic_config admission_config");
         
         if (!org) return res.status(404).json({ error: "Organization not found" });
 
@@ -36,13 +37,17 @@ export const getAdmissionConfig = async (req, res) => {
             structure_type: structureType,
             admission_config: config,
         });
+        const institutionProfile = req.institutionProfile || buildInstitutionProfile(orgObject);
 
         res.json({
             organization: org.name,
             structure_type: structureType,
             config,
             admission_config: config,
-            form_schema: schema
+            form_schema: schema,
+            institution_profile: institutionProfile,
+            admission_profile: institutionProfile.admissionProfile,
+            learner_record_profile: institutionProfile.learnerRecordProfile,
         });
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch admission configuration." });

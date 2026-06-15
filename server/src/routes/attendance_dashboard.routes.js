@@ -1,5 +1,6 @@
 import express from "express";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { requireClassroomMember, requireClassroomOwner } from "../middleware/classroom.middleware.js";
 import { requirePlan } from "../middleware/plan.middleware.js";
 import AttendanceSession from "../models/AttendanceSession.js";
@@ -11,6 +12,8 @@ import User from "../models/User.js";
 import connectDB from "../../config/db.js";
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
 
 // ── Active Sessions (for home screen banner) ──
 router.get("/active-sessions", isAuthenticated, async (req, res) => {

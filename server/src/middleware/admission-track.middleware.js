@@ -1,5 +1,9 @@
 import Organization from "../models/Organization.js";
 import {
+    INSTITUTION_PROFILE_ORG_SELECT,
+    buildInstitutionProfile,
+} from "../services/institution-profile.service.js";
+import {
     getAdmissionTrack,
     resolveStructureType,
 } from "../services/admissions/organization-admission-type.service.js";
@@ -18,7 +22,7 @@ async function resolveOrgForAdmissionRequest(req) {
     }
 
     const organization = await Organization.findById(organizationId)
-        .select("structure_type admission_config")
+        .select(INSTITUTION_PROFILE_ORG_SELECT)
         .lean();
 
     if (!organization) {
@@ -30,6 +34,7 @@ async function resolveOrgForAdmissionRequest(req) {
         organization,
         structureType: resolveStructureType(organization),
         track: getAdmissionTrack(resolveStructureType(organization)),
+        institutionProfile: buildInstitutionProfile(organization),
     };
 }
 
@@ -63,7 +68,10 @@ function createTrackMiddleware(expectedTrack) {
                 organization_id: resolved.organizationId,
                 structure_type: resolved.structureType,
                 track: resolved.track,
+                institution_profile: resolved.institutionProfile,
             };
+            req.institutionProfile = resolved.institutionProfile;
+            req.institutionOrganization = resolved.organization;
 
             if (resolved.track !== expectedTrack) {
                 return res.status(403).json(getTrackErrorMessage(expectedTrack, resolved.structureType));

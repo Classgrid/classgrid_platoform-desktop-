@@ -3,11 +3,22 @@ import multer from 'multer';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import Groq from 'groq-sdk';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import { primarySupabaseClient as supabase } from '../config/supabaseClient.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        examination_profile: req.institutionProfile.examinationProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ── Helper: get org_id from user ──────────────────────────────────────────
 function getOrgId(user) {

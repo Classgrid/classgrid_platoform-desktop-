@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { primarySupabaseClient as supabase } from "../config/supabaseClient.js";
 import User from "../models/User.js";
 import Organization from "../models/Organization.js";
@@ -8,6 +9,15 @@ import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { markOnboardingStep, syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
 
 const router = express.Router();
+const attachOptionalInstitutionProfile = attachInstitutionProfile({ required: false });
+
+router.get("/institution-profile", isAuthenticated, attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        fee_profile: req.institutionProfile.feeProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // Helper: Get org's own Razorpay keys (NO platform fallback)
 // If org hasn't configured keys → online payment is blocked
@@ -24,7 +34,7 @@ async function getOrgRazorpayKeys(orgId) {
 // ══════════════════════════════════════════════════════════════════════════
 // 1. POST /structures — Create fee structure (Admin only)
 // ══════════════════════════════════════════════════════════════════════════
-router.post("/structures", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.post("/structures", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const { name, academic_year, division_id, total_amount, due_date, late_fine_per_day, components } = req.body;
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
@@ -89,7 +99,7 @@ router.post("/structures", isAuthenticated, requireRole("org_admin"), async (req
 // ══════════════════════════════════════════════════════════════════════════
 // 2. GET /structures — List all fee structures for org
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/structures", isAuthenticated, async (req, res) => {
+router.get("/structures", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
 
@@ -110,7 +120,7 @@ router.get("/structures", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 3. DELETE /structures/:id — Delete fee structure
 // ══════════════════════════════════════════════════════════════════════════
-router.delete("/structures/:id", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.delete("/structures/:id", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const { error } = await supabase
             .from("fee_structures")
@@ -129,7 +139,7 @@ router.delete("/structures/:id", isAuthenticated, requireRole("org_admin"), asyn
 // 4. POST /assign — Assign fee structure to students in a division
 //    Auto-generates student_fees records
 // ══════════════════════════════════════════════════════════════════════════
-router.post("/assign", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.post("/assign", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const { structure_id, student_ids } = req.body;
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
@@ -172,7 +182,7 @@ router.post("/assign", isAuthenticated, requireRole("org_admin"), async (req, re
 // 5. POST /pay — Record a payment (Admin/Teacher)
 //    Auto-updates paid_amount and status
 // ══════════════════════════════════════════════════════════════════════════
-router.post("/pay", isAuthenticated, async (req, res) => {
+router.post("/pay", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         if (req.user.role === "student") {
             return res.status(403).json({ message: "Students cannot record payments" });
@@ -230,7 +240,7 @@ router.post("/pay", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 6. GET /students — List all student fees (Admin view with filters)
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/students", isAuthenticated, async (req, res) => {
+router.get("/students", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
         const { status, division_id, structure_id } = req.query;
@@ -258,7 +268,7 @@ router.get("/students", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 7. GET /me — Student's own fee records + payment history
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/me", isAuthenticated, async (req, res) => {
+router.get("/me", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
         const studentId = req.user._id.toString();
@@ -299,7 +309,7 @@ router.get("/me", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 8. GET /payments — All payments (Admin transactions view)
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/payments", isAuthenticated, async (req, res) => {
+router.get("/payments", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
 
@@ -321,7 +331,7 @@ router.get("/payments", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 9. GET /analytics — Collection summary (Admin dashboard)
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/analytics", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.get("/analytics", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
 
@@ -417,7 +427,7 @@ router.get("/analytics", isAuthenticated, requireRole("org_admin"), async (req, 
 // ══════════════════════════════════════════════════════════════════════════
 // 10. PATCH /students/:id/block — Toggle block/unblock student
 // ══════════════════════════════════════════════════════════════════════════
-router.patch("/students/:id/block", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.patch("/students/:id/block", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const { is_blocked } = req.body;
 
@@ -439,7 +449,7 @@ router.patch("/students/:id/block", isAuthenticated, requireRole("org_admin"), a
 // ══════════════════════════════════════════════════════════════════════════
 // 11. POST /razorpay/order — Create Razorpay order (Student pays online)
 // ══════════════════════════════════════════════════════════════════════════
-router.post("/razorpay/order", isAuthenticated, async (req, res) => {
+router.post("/razorpay/order", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const { student_fee_id } = req.body;
 
@@ -516,7 +526,7 @@ router.post("/razorpay/order", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 12. POST /razorpay/verify — Verify payment after checkout (frontend calls)
 // ══════════════════════════════════════════════════════════════════════════
-router.post("/razorpay/verify", isAuthenticated, async (req, res) => {
+router.post("/razorpay/verify", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, student_fee_id, amount } = req.body;
 
@@ -677,7 +687,7 @@ router.post("/razorpay/webhook", async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 // 14. PUT /razorpay/config — Admin saves org's Razorpay keys
 // ══════════════════════════════════════════════════════════════════════════
-router.put("/razorpay/config", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+router.put("/razorpay/config", isAuthenticated, attachOptionalInstitutionProfile, requireRole("org_admin"), async (req, res) => {
     try {
         const { fees_razorpay_key_id, fees_razorpay_key_secret, fees_razorpay_webhook_secret } = req.body;
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
@@ -704,7 +714,7 @@ router.put("/razorpay/config", isAuthenticated, requireRole("org_admin"), async 
 // ══════════════════════════════════════════════════════════════════════════
 // 15. GET /razorpay/config — Check if org has Razorpay configured
 // ══════════════════════════════════════════════════════════════════════════
-router.get("/razorpay/config", isAuthenticated, async (req, res) => {
+router.get("/razorpay/config", isAuthenticated, attachOptionalInstitutionProfile, async (req, res) => {
     try {
         const orgId = req.user.organization_id?.toString() || req.effectiveOrganizationId;
         const rzpKeys = await getOrgRazorpayKeys(orgId);

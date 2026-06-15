@@ -4,13 +4,22 @@ import multer from 'multer';
 import pdfParse from 'pdf-parse';
 import Groq from 'groq-sdk';
 import { isAuthenticated } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 
-// Middleware to ensure user is logged in
-router.use(isAuthenticated);
+// Middleware to ensure user is logged in and profile context is available.
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        examination_profile: req.institutionProfile.examinationProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ==========================================
 // EXAM ANALYTICS (DASHBOARD)

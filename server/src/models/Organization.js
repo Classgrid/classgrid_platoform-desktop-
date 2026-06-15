@@ -40,7 +40,7 @@ const organizationSchema = new mongoose.Schema(
             enum: ["with_divisions", "without_divisions"],
             default: "with_divisions",
         },
-        // Engineering/Diploma only: enables Lab Batch splitting (Batch A1, A2 under Division A)
+        // Enables optional splitting under a division, such as lab batches or junior-college batches.
         allow_sub_batches: {
             type: Boolean,
             default: false,

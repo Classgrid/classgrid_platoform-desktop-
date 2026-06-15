@@ -1,10 +1,21 @@
 import express from 'express';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
+import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import FeeRecord from '../models/FeeRecord.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get('/institution-profile', attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        fee_profile: req.institutionProfile.feeProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ═══════════════════════════════════════════════════════════════
 // ADMIN ENDPOINTS

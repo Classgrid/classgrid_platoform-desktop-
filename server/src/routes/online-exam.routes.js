@@ -1,6 +1,7 @@
 import express from "express";
 import { getChatSb, primarySupabaseClient, studentNotesClient } from "../config/supabaseClient.js";
 import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import User from "../models/User.js";
 import Classroom from "../models/Classroom.js";
 import { analyzeProctorSnapshot } from "../services/ai/proctor.service.js";
@@ -10,6 +11,16 @@ import axios from "axios";
 import { extractQuestionsFromImage } from "../services/ai/ocr-quiz.service.js";
 
 const router = express.Router();
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get("/institution-profile", attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        examination_profile: req.institutionProfile.examinationProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
+
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
@@ -1644,4 +1655,3 @@ router.get("/student/rank-prediction", isAuthenticated, async (req, res) => {
 });
 
 export default router;
-

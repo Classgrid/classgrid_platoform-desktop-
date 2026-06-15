@@ -1,5 +1,6 @@
 import express from "express";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { validateHierarchyRequest, enforcePlanBoundary } from "../middleware/hierarchy-validator.middleware.js";
 import {
     createNode,
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(isAuthenticated);
+router.use(attachInstitutionProfile());
 
 // ============================================
 // 📐 Academic Hierarchy CRUD

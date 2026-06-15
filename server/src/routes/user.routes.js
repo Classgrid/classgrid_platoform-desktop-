@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import Organization from "../models/Organization.js";
 import connectDB from "../../config/db.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { getChatSb } from "../config/supabaseClient.js";
 
 const router = express.Router();
@@ -37,6 +38,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         hobby: user.hobby || "",
         subjectsAssigned: user.subjectsAssigned || "",
         prn: user.prn || null,
+        abc_id: user.abc_id || null,
         authProvider: user.authProvider,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
@@ -70,9 +72,9 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 // =======================
 // UPDATE USER PROFILE
 // =======================
-router.put("/update", isAuthenticated, async (req, res) => {
+router.put("/update", isAuthenticated, attachInstitutionProfile({ required: false }), async (req, res) => {
   try {
-    const { name, phoneNumber, profilePicture, profileBanner, qualification, department, bio, prn, branch, batch, address, hobby, subjectsAssigned, dob, gender, alternateEmail, signature, admission_type, category } = req.body;
+    const { name, phoneNumber, profilePicture, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, alternateEmail, signature, admission_type, category } = req.body;
 
     // Safety check: Don't allow empty name
     if (name !== undefined && (name === null || name.trim() === "")) {
@@ -118,7 +120,7 @@ router.put("/update", isAuthenticated, async (req, res) => {
     }
 
     // Fetch the current user to enforce field locking
-    const currentUser = await User.findById(req.user._id).select("prn branch batch department organization_id profile_completed").lean();
+    const currentUser = await User.findById(req.user._id).select("prn abc_id branch batch department organization_id profile_completed").lean();
 
     // ── 🎓 Org Academic Config — server-side validation ──────────────
     let orgAcademicConfig = null;
@@ -129,6 +131,9 @@ router.put("/update", isAuthenticated, async (req, res) => {
             .lean();
         orgAcademicConfig = orgDoc?.academic_config || null;
     }
+    const profileOrgType = req.institutionProfile?.admissionProfile?.baseOrgType || null;
+    const identifierLabel = req.institutionProfile?.terminology?.identifier || orgAcademicConfig?.identifierLabel || "PRN";
+    const usesPrimaryIdentifier = ["engineering", "diploma"].includes(profileOrgType);
 
     // 🎓 Academic Field Locking Logic
     // Apply .trim() BEFORE any truthy checks
@@ -136,6 +141,7 @@ router.put("/update", isAuthenticated, async (req, res) => {
     const trimmedBranch = branch !== undefined && branch !== null ? String(branch).trim() : undefined;
     const trimmedBatch = batch !== undefined && batch !== null ? String(batch).trim() : undefined;
     const trimmedPrn = prn !== undefined && prn !== null ? String(prn).trim() : undefined;
+    const trimmedAbcId = abc_id !== undefined && abc_id !== null ? String(abc_id).trim() : undefined;
 
     if (trimmedDept !== undefined) {
       if (trimmedDept === "") {
@@ -204,14 +210,14 @@ router.put("/update", isAuthenticated, async (req, res) => {
     if (trimmedPrn !== undefined) {
       if (trimmedPrn === "") {
         // Only enforce PRN non-empty strictness for students where PRN is required
-        const prnRequired = req.user.role === 'student' && orgAcademicConfig?.prnRequired !== false;
+        const prnRequired = req.user.role === 'student' && usesPrimaryIdentifier && orgAcademicConfig?.prnRequired !== false;
         
         if (currentUser.prn && orgAcademicConfig?.prnLocked) {
-          return res.status(400).json({ message: "PRN has already been set and is locked by your organization." });
+          return res.status(400).json({ message: `${identifierLabel} has already been set and is locked by your organization.` });
         }
         
         if (prnRequired) {
-          return res.status(400).json({ message: "PRN cannot be empty or whitespace only." });
+          return res.status(400).json({ message: `${identifierLabel} cannot be empty or whitespace only.` });
         } else {
           // If allowed to be empty, we unset it from the DB
           updateData.$unset = updateData.$unset || {};
@@ -220,13 +226,13 @@ router.put("/update", isAuthenticated, async (req, res) => {
       } else {
         if (!/^[a-zA-Z0-9]{1,15}$/.test(trimmedPrn)) {
         console.warn(`[ProfileUpdate] User ${req.user._id} submitted invalid PRN format: ${trimmedPrn}`);
-        return res.status(400).json({ message: "PRN must be alphanumeric and up to 15 characters." });
+        return res.status(400).json({ message: `${identifierLabel} must be alphanumeric and up to 15 characters.` });
       }
 
       // ── PRN Lock: strictly respect org academic_config.prnLocked ──
       if (currentUser && currentUser.prn) {
         if (orgAcademicConfig?.prnLocked) {
-          return res.status(400).json({ message: "PRN has already been set and is locked by your organization." });
+          return res.status(400).json({ message: `${identifierLabel} has already been set and is locked by your organization.` });
         }
       }
       
@@ -237,11 +243,32 @@ router.put("/update", isAuthenticated, async (req, res) => {
           prn: trimmedPrn,
         }).lean();
         if (existing) {
-          return res.status(409).json({ message: "This PRN is already registered in your organization. Please contact your faculty or organization admin." });
+          return res.status(409).json({ message: `This ${identifierLabel} is already registered in your organization. Please contact your faculty or organization admin.` });
         }
       }
       }
       updateData.prn = trimmedPrn;
+    }
+
+    if (trimmedAbcId !== undefined) {
+      if (!usesPrimaryIdentifier) {
+        return res.status(400).json({ message: "ABC ID is only supported for higher-education profiles." });
+      }
+
+      if (trimmedAbcId === "") {
+        updateData.$unset = updateData.$unset || {};
+        updateData.$unset.abc_id = 1;
+      } else {
+        if (!/^[0-9]{12}$/.test(trimmedAbcId)) {
+          return res.status(400).json({ message: "ABC ID must be a 12-digit number." });
+        }
+
+        if (currentUser.abc_id && currentUser.abc_id.trim() !== "" && currentUser.abc_id !== trimmedAbcId) {
+          return res.status(400).json({ message: "ABC ID is already set and cannot be changed from profile update." });
+        }
+
+        updateData.abc_id = trimmedAbcId;
+      }
     }
 
     // Determine if profile should be marked as completed

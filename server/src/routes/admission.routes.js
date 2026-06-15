@@ -79,6 +79,7 @@ import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/auth.middleware.js";
 import { requireAdmissionRole } from "../middleware/admission-roles.middleware.js";
 import { isAdmissionCandidate } from "../middleware/admission-auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { requireCETTrack, requireDirectTrack } from "../middleware/admission-track.middleware.js";
 import {
     otpSendLimiter,
@@ -108,9 +109,16 @@ router.post("/save-draft", isAdmissionCandidate, saveApplicationDraft);
 router.post("/submit", isAdmissionCandidate, submitApplication);
 
 // Protected: Admin Configuration
-router.get("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getAdmissionConfig);
-router.patch("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), updateAdmissionConfig);
-router.post("/config/preset", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), injectPreset);
+router.get("/institution-profile", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head", "admission_counselor", "admission_clerk", "admission_verifier"]), attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        admission_profile: req.institutionProfile.admissionProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
+router.get("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), attachInstitutionProfile(), getAdmissionConfig);
+router.patch("/config", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), attachInstitutionProfile(), updateAdmissionConfig);
+router.post("/config/preset", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), attachInstitutionProfile(), injectPreset);
 router.get("/master-field-pool", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getMasterFieldPool);
 router.get("/master-document-pool", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), getMasterDocumentPool);
 

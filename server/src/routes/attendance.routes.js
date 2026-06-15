@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import multer from "multer";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { requireClassroomMember, requireClassroomOwner } from "../middleware/classroom.middleware.js";
 import { requirePlan } from "../middleware/plan.middleware.js";
 import AttendanceSession from "../models/AttendanceSession.js";
@@ -22,6 +23,16 @@ import { attendanceQueue } from "../workers/attendance.worker.js";
 import { dispatchNotification, bulkDispatchNotification } from "../services/notification.service.js";
 
 const router = express.Router();
+
+router.use(isAuthenticated, attachInstitutionProfile({ required: false }));
+
+router.get("/institution-profile", attachInstitutionProfile(), (req, res) => {
+    res.json({
+        institution_profile: req.institutionProfile,
+        attendance_profile: req.institutionProfile.attendanceProfile,
+        learner_record_profile: req.institutionProfile.learnerRecordProfile,
+    });
+});
 
 // ─────────────────────────────────────────────────────────────
 // 🔐 ATTENDANCE MODE
