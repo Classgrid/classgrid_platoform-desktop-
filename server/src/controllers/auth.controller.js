@@ -195,12 +195,15 @@ const sendNoAccountEmail = async (email, req) => {
     if (lastSent && Date.now() - lastSent < NO_ACCOUNT_EMAIL_COOLDOWN_MS) return; // Rate limited
     noAccountEmailCooldown.set(email, Date.now());
     try {
-        const location = await getLocationFromIP(req);
+        const cityString = await getLocationFromIP(req);
+        const deviceString = getDeviceFromUA(req.headers['user-agent']);
+        const locationData = { city: cityString, device: deviceString };
+        
         sendEmail({
             to: email,
             subject: 'Sign-in attempt on Classgrid',
-            html: getNoAccountSignInAttemptHtml(email, location),
-            text: getNoAccountSignInAttemptPlainText(email, location),
+            html: getNoAccountSignInAttemptHtml(email, locationData),
+            text: getNoAccountSignInAttemptPlainText(email, locationData),
         }).catch(err => console.error('No-account email error:', err));
     } catch (err) { console.error('No-account email dispatch error:', err); }
 };

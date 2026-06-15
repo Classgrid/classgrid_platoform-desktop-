@@ -144,7 +144,7 @@ export function AuthCard({
       const result = await checkEmailForLogin(email.trim());
       if (!result.exists) {
         setFeedback({
-          message: "No account was found for this email. We sent a security notice to that address.",
+          message: "No account was found for this email. We sent an email to that address.",
           tone: "info",
         });
         return;
