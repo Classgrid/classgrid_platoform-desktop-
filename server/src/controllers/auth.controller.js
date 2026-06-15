@@ -1603,6 +1603,7 @@ export const getCurrentUser = async (req, res) => {
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            additional_roles: req.user.additional_roles || [],
             department: req.user.department || "",
             subject: req.user.subject || null,
             profilePicture: req.user.profilePicture || "",

@@ -144,16 +144,6 @@ export const dashboardConfigs: DashboardConfig[] = [
     logo: "Classgrid",
     brandIcon: Building2,
     mobileMode: "desktop-only",
-    switcher: {
-      current: { label: "School Admin", id: "testmyth", icon: Building2 },
-      items: [
-        { label: "School Admin", id: "testmyth", icon: Building2 },
-        { label: "Jr. College Admin", id: "jrcollege", icon: GraduationCap },
-        { label: "Engineering Admin", id: "engg", icon: Briefcase },
-        { label: "Coaching Admin", id: "coaching", icon: Target }
-      ],
-      subtext: "Module switcher"
-    },
     sections: [
       {
         label: "OVERVIEW",
