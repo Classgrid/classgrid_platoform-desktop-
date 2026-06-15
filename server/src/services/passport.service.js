@@ -59,7 +59,24 @@ const passportConfig = () => {
                 async (req, accessToken, refreshToken, profile, done) => {
                     try {
                         await connectDB(); // Ensure DB ready before any query
-                        const email = profile.emails[0].value;
+                        let reqLoginTab = 'student';
+                        let orgSlug = '';
+                        if (req.query.state) {
+                            try {
+                                const stateObj = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
+                                if (stateObj.t) reqLoginTab = stateObj.t;
+                                if (stateObj.h) {
+                                    const hostParts = stateObj.h.split('.');
+                                    if (hostParts.length >= 3 && !['www', 'app', 'api'].includes(hostParts[0])) {
+                                        orgSlug = hostParts[0];
+                                    }
+                                }
+                            } catch(e) {
+                                reqLoginTab = req.query.state; // fallback for legacy
+                            }
+                        }
+
+                        const email = profile.emails[0].value.toLowerCase();
 
                         // Step 1: Find by googleId OR email (to allow linking)
                         let user = await User.findOne({
@@ -85,7 +102,7 @@ const passportConfig = () => {
 
                         // Step 2: No user exists → Block login
                         console.log(`🚫 Google: Blocked login for non-existent user: ${email}`);
-                        sendNoAccountEmail(email, req); // Fire and forget the email notification
+                        sendNoAccountEmail(email, req, orgSlug); // Fire and forget the email notification
                         return done(new Error("We sent an message to your email"), null);
                     } catch (err) {
                         done(err, null);

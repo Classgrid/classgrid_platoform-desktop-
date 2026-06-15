@@ -207,7 +207,7 @@ const getDeviceFromUA = (ua) => {
 };
 
 // Helper: Send Vercel-style "no account" email (rate-limited, fire-and-forget)
-export const sendNoAccountEmail = async (email, req) => {
+export const sendNoAccountEmail = async (email, req, orgSlug = '') => {
     const lastSent = noAccountEmailCooldown.get(email);
     if (lastSent && Date.now() - lastSent < NO_ACCOUNT_EMAIL_COOLDOWN_MS) return; // Rate limited
     noAccountEmailCooldown.set(email, Date.now());
@@ -217,7 +217,7 @@ export const sendNoAccountEmail = async (email, req) => {
         console.log(`[DEBUG Email] UA: ${req.headers['user-agent']} -> Device: ${deviceString}`);
         console.log(`[DEBUG Email] IP: ${req.headers['x-forwarded-for'] || req.socket?.remoteAddress} -> City: ${cityString}`);
         
-        const locationData = { city: cityString, device: deviceString };
+        const locationData = { city: cityString, device: deviceString, orgSlug };
         
         sendEmail({
             to: email,

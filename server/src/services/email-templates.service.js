@@ -2207,9 +2207,10 @@ This is a computer-generated receipt and does not require a physical signature.
 export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
-  const content = `
+    const orgNameText = location.orgSlug ? `<strong>${location.orgSlug.toUpperCase()}</strong>` : "your institution";
+    const content = `
     <h1>Login Attempt</h1>
-    <p>We received a login attempt for <strong>${email}</strong>. If this was you, please ensure you are using the correct email address provided by your institution.</p>
+    <p>We received a login attempt for <strong>${email}</strong>. If this was you, please ensure you are using the correct email address provided by ${orgNameText}.</p>
 
     <div class="box">
       <div class="meta">Attempt Details</div>
@@ -2239,9 +2240,11 @@ export const getNoAccountSignInAttemptPlainText = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
 
+  const orgNameText = location.orgSlug ? location.orgSlug.toUpperCase() : "your institution";
+
   return `Login attempt
 
-We received a login attempt for ${email}. If this was you, please ensure you are using the correct email address provided by your institution.
+We received a login attempt for ${email}. If this was you, please ensure you are using the correct email address provided by ${orgNameText}.
 
 Device: ${device}
 Location: ${city}

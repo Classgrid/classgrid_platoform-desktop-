@@ -51,9 +51,12 @@ router.get(
     "/google",
     (req, res, next) => {
         const loginTab = req.query.loginTab || req.query.role || 'student';
+        const host = req.query.host || '';
+        const stateObj = { t: loginTab, h: host };
+        const stateStr = Buffer.from(JSON.stringify(stateObj)).toString('base64');
         passport.authenticate("google", {
             scope: ["profile", "email"],
-            state: loginTab, prompt: 'select_account consent' // survives the round-trip through Google OAuth
+            state: stateStr, prompt: 'select_account consent' // survives the round-trip through Google OAuth
         })(req, res, next);
     }
 );

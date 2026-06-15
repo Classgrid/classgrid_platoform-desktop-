@@ -84,5 +84,5 @@ type GoogleAuthUrlPayload = {
 
 export function getGoogleAuthUrl({ audience, role }: GoogleAuthUrlPayload) {
   const loginTab = getAuthIntent(audience, role);
-  return new URL(`/api/auth/google?loginTab=${encodeURIComponent(loginTab)}`, API_BASE_URL).toString();
+  return new URL(`/api/auth/google?loginTab=${encodeURIComponent(loginTab)}&host=${encodeURIComponent(window.location.hostname)}`, API_BASE_URL).toString();
 }
