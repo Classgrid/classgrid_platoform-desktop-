@@ -53,7 +53,7 @@ router.get(
         const loginTab = req.query.loginTab || req.query.role || 'student';
         passport.authenticate("google", {
             scope: ["profile", "email"],
-            state: loginTab  // survives the round-trip through Google OAuth
+            state: loginTab, prompt: 'select_account consent' // survives the round-trip through Google OAuth
         })(req, res, next);
     }
 );
