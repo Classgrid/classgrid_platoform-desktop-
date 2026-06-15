@@ -46,16 +46,16 @@ export function DashboardMetrics() {
         trend={{ value: 3.2, label: "active roles" }}
       />
       <CgMetricCard
-        title={feesEnabled ? `${feeLabel} Collected` : `Active ${programLabel}`}
-        value={feesEnabled ? "INR 12.4L / 18L" : (overview?.totalClassrooms?.toLocaleString() || "0")}
+        title={`Active ${programLabel}`}
+        value={overview?.totalClassrooms?.toLocaleString() || "0"}
         icon={<WalletCards className="h-4 w-4" />}
-        meta={feesEnabled ? "69% of current demand" : "Configured for this profile"}
+        meta="Configured for this profile"
       />
       <CgMetricCard
-        title={`${attendanceLabel} %`}
-        value="87%"
+        title="Total Memberships"
+        value={overview?.totalMemberships?.toLocaleString() || "0"}
         icon={<ClipboardCheck className="h-4 w-4" />}
-        trend={{ value: 4.1, label: "today" }}
+        meta="Active classroom enrollments"
       />
     </section>
   );
