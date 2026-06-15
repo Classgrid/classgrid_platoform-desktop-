@@ -102,7 +102,7 @@ export const resolveTenant = async (req, res, next) => {
 
         // 2. DB lookup
         const org = await Organization.findOne({ subdomain: slug })
-            .select("_id name subdomain structure_type admission_config subscription_tier logo_url")
+            .select("_id name subdomain org_type structure_type admission_config subscription_tier logo_url")
             .lean();
 
         if (!org) {
@@ -136,7 +136,7 @@ export const getPublicTenantInfo = async (req, res) => {
 
         if (!org) {
             org = await Organization.findOne({ subdomain: slug })
-                .select("_id name subdomain structure_type logo_url tagline admission_config.is_portal_open")
+                .select("_id name subdomain org_type structure_type logo_url tagline admission_config.is_portal_open")
                 .lean();
 
             if (org) setCachedTenant(slug, org);
@@ -150,8 +150,11 @@ export const getPublicTenantInfo = async (req, res) => {
             success: true,
             tenant: {
                 id: org._id,
+                tenantId: org._id,
                 name: org.name,
                 subdomain: org.subdomain,
+                org_type: org.org_type,
+                orgType: org.org_type,
                 structure_type: org.structure_type,
                 logo_url: org.logo_url,
                 tagline: org.tagline,

@@ -1,0 +1,361 @@
+/* ═══════════════════════════════════════════════════════════
+   TENANT LANDING PAGE — orgname.classgrid.in
+   Premium institution portal with admin + ERP login cards
+   ═══════════════════════════════════════════════════════════ */
+
+.tenant-landing {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #e4e4e7;
+  overflow-x: hidden;
+}
+
+/* ── Animated Background ── */
+.tenant-landing__bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.1), transparent),
+    radial-gradient(ellipse 50% 50% at 20% 60%, rgba(59, 130, 246, 0.08), transparent),
+    #09090b;
+}
+
+/* ── Loader ── */
+.tenant-landing-loader {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #a1a1aa;
+  background: #09090b;
+}
+
+.tenant-landing-loader h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.tenant-landing-loader p {
+  font-size: 0.875rem;
+  color: #71717a;
+}
+
+.tenant-landing-loader .spinner {
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Header ── */
+.tenant-landing__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  background: rgba(9, 9, 11, 0.6);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tenant-landing__brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tenant-landing__logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tenant-landing__logo-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.tenant-landing__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fafafa;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.tenant-landing__tagline {
+  font-size: 0.8rem;
+  color: #71717a;
+  margin: 2px 0 0;
+}
+
+.tenant-landing__badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #71717a;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tenant-landing__badge strong {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+/* ── Main Content ── */
+.tenant-landing__main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* ── Sections ── */
+.tenant-landing__section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 20px;
+}
+
+/* ── Card Grids ── */
+.tenant-landing__grid--erp {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.tenant-landing__grid--admin {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* ── ERP Cards (Larger) ── */
+.tenant-landing__card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+}
+
+.tenant-landing__card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+}
+
+.tenant-landing__card--erp {
+  padding: 28px 28px;
+}
+
+.tenant-landing__card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #818cf8;
+  flex-shrink: 0;
+  transition: background 0.25s;
+}
+
+.tenant-landing__card:hover .tenant-landing__card-icon {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2));
+}
+
+.tenant-landing__card-icon--admin {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #a1a1aa;
+}
+
+.tenant-landing__card:hover .tenant-landing__card-icon--admin {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.tenant-landing__card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tenant-landing__card-text h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 0 0 2px;
+}
+
+.tenant-landing__card-text p {
+  font-size: 0.8rem;
+  color: #71717a;
+  margin: 0;
+}
+
+.tenant-landing__card-arrow {
+  color: #52525b;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.tenant-landing__card:hover .tenant-landing__card-arrow {
+  color: #818cf8;
+}
+
+/* ── Admin Cards (Compact) ── */
+.tenant-landing__card--admin {
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.tenant-landing__card--admin .tenant-landing__card-text h3 {
+  font-size: 0.85rem;
+}
+
+/* ── Admission CTA ── */
+.tenant-landing__admission-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 24px 28px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(52, 211, 153, 0.04));
+  cursor: pointer;
+  text-align: left;
+  color: #6ee7b7;
+  transition: all 0.25s;
+  font: inherit;
+}
+
+.tenant-landing__admission-cta:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(52, 211, 153, 0.08));
+  border-color: rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+}
+
+.tenant-landing__admission-cta h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 0 0 2px;
+}
+
+.tenant-landing__admission-cta p {
+  font-size: 0.8rem;
+  color: #6ee7b7;
+  margin: 0;
+}
+
+/* ── Footer ── */
+.tenant-landing__footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  color: #52525b;
+}
+
+.tenant-landing__footer a {
+  color: #818cf8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tenant-landing__footer a:hover {
+  text-decoration: underline;
+}
+
+.tenant-landing__footer-note {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #3f3f46;
+}
+
+.tenant-landing__footer-note code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #71717a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .tenant-landing__header {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .tenant-landing__main {
+    padding: 32px 16px 48px;
+    gap: 36px;
+  }
+
+  .tenant-landing__grid--erp,
+  .tenant-landing__grid--admin {
+    grid-template-columns: 1fr;
+  }
+
+  .tenant-landing__card--erp {
+    padding: 20px 20px;
+  }
+
+  .tenant-landing__name {
+    font-size: 1.1rem;
+  }
+}

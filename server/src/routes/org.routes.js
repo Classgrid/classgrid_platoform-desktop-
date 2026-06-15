@@ -1661,5 +1661,183 @@ router.post("/regenerate-org-code", isAuthenticated, requireRole("org_admin"), a
     }
 });
 
+// ═══════════════════════════════════════════════════════════
+// SUBDOMAIN MANAGEMENT (orgname.classgrid.in)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * GET /api/org-admin/subdomain
+ * Returns the current subdomain for this organization
+ */
+router.get("/subdomain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const org = await Organization.findById(orgId).select("subdomain name").lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        res.json({
+            subdomain: org.subdomain || null,
+            url: org.subdomain ? `${org.subdomain}.classgrid.in` : null,
+            name: org.name,
+        });
+    } catch (err) {
+        console.error("[Subdomain GET] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+/**
+ * PATCH /api/org-admin/subdomain
+ * Body: { subdomain: "pccoe" }
+ * Sets or updates the subdomain slug for this organization.
+ * 
+ * Rules:
+ * - 3-30 characters
+ * - Lowercase alphanumeric + hyphens only
+ * - Cannot start or end with a hyphen
+ * - Cannot be a system subdomain (www, app, admin, api, etc.)
+ * - Must be unique across all organizations
+ */
+router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const { subdomain } = req.body;
+
+        // Allow clearing subdomain
+        if (subdomain === null || subdomain === "") {
+            const org = await Organization.findById(orgId).select("subdomain").lean();
+            const oldSlug = org?.subdomain;
+
+            await Organization.findByIdAndUpdate(orgId, { $unset: { subdomain: 1 } });
+
+            // Invalidate cache for old slug
+            if (oldSlug) {
+                try {
+                    const { invalidateTenantCache } = await import("../middleware/subdomain-router.middleware.js");
+                    invalidateTenantCache(oldSlug);
+                } catch (_) { /* best effort */ }
+            }
+
+            logAdminAction(req, "clear_subdomain", "organization", orgId, "Subdomain cleared", { old: oldSlug });
+            return res.json({ success: true, message: "Subdomain cleared.", subdomain: null, url: null });
+        }
+
+        // Validate format
+        const slug = String(subdomain).toLowerCase().trim();
+
+        if (slug.length < 3 || slug.length > 30) {
+            return res.status(400).json({ message: "Subdomain must be between 3 and 30 characters." });
+        }
+
+        if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
+            return res.status(400).json({
+                message: "Subdomain can only contain lowercase letters, numbers, and hyphens. Cannot start or end with a hyphen.",
+            });
+        }
+
+        // Block system subdomains
+        const SYSTEM_SUBDOMAINS = new Set([
+            "www", "app", "admin", "api", "dev", "staging", "mail", "ftp",
+            "superadmin", "v1", "v2", "studio", "docs", "blog", "help",
+            "support", "status", "cdn", "static", "assets", "test",
+            "demo", "sandbox", "classgrid", "platform", "dashboard",
+        ]);
+
+        if (SYSTEM_SUBDOMAINS.has(slug)) {
+            return res.status(400).json({ message: `"${slug}" is a reserved subdomain and cannot be used.` });
+        }
+
+        // Check uniqueness (exclude current org)
+        const existing = await Organization.findOne({ subdomain: slug, _id: { $ne: orgId } }).select("_id name").lean();
+        if (existing) {
+            return res.status(409).json({
+                message: `Subdomain "${slug}" is already taken by another organization.`,
+            });
+        }
+
+        // Get old slug for cache invalidation
+        const currentOrg = await Organization.findById(orgId).select("subdomain").lean();
+        const oldSlug = currentOrg?.subdomain;
+
+        // Update
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            { $set: { subdomain: slug } },
+            { new: true, runValidators: true }
+        ).select("subdomain name");
+
+        // Invalidate cache for both old and new slugs
+        try {
+            const { invalidateTenantCache } = await import("../middleware/subdomain-router.middleware.js");
+            if (oldSlug) invalidateTenantCache(oldSlug);
+            invalidateTenantCache(slug);
+        } catch (_) { /* best effort */ }
+
+        logAdminAction(req, "update_subdomain", "organization", orgId, updatedOrg.name, {
+            old: oldSlug || null,
+            new: slug,
+        });
+
+        res.json({
+            success: true,
+            message: `Subdomain set to "${slug}" successfully.`,
+            subdomain: slug,
+            url: `${slug}.classgrid.in`,
+        });
+    } catch (err) {
+        // Handle MongoDB unique constraint violation
+        if (err.code === 11000) {
+            return res.status(409).json({ message: "This subdomain is already in use." });
+        }
+        console.error("[Subdomain PATCH] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+/**
+ * GET /api/org-admin/subdomain/check?slug=pccoe
+ * Public-ish availability check (still requires auth for rate-limit safety)
+ */
+router.get("/subdomain/check", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const slug = String(req.query.slug || "").toLowerCase().trim();
+
+        if (!slug || slug.length < 3) {
+            return res.json({ available: false, reason: "Too short (min 3 characters)." });
+        }
+
+        if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug)) {
+            return res.json({ available: false, reason: "Invalid characters." });
+        }
+
+        const SYSTEM_SUBDOMAINS = new Set([
+            "www", "app", "admin", "api", "dev", "staging", "mail", "ftp",
+            "superadmin", "v1", "v2", "studio", "docs", "blog", "help",
+            "support", "status", "cdn", "static", "assets", "test",
+            "demo", "sandbox", "classgrid", "platform", "dashboard",
+        ]);
+
+        if (SYSTEM_SUBDOMAINS.has(slug)) {
+            return res.json({ available: false, reason: "Reserved subdomain." });
+        }
+
+        const orgId = req.user.organization_id;
+        const existing = await Organization.findOne({ subdomain: slug, _id: { $ne: orgId } }).select("_id").lean();
+
+        res.json({
+            available: !existing,
+            reason: existing ? "Already taken." : null,
+            preview: `${slug}.classgrid.in`,
+        });
+    } catch (err) {
+        console.error("[Subdomain Check] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
 export default router;
 
