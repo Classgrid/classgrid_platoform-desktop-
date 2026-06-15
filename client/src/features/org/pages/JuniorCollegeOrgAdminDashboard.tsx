@@ -32,11 +32,9 @@ export function JuniorCollegeOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Manage {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} through the profile contract.
           </p>
-        </div>
       </header>
 
       <DashboardMetrics />
-      <DashboardCharts />
       <DashboardActivity />
     </main>
   );

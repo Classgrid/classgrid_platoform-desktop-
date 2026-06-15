@@ -32,11 +32,9 @@ export function CoachingOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Coordinate {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} through the coaching profile.
           </p>
-        </div>
       </header>
 
       <DashboardMetrics />
-      <DashboardCharts />
       <DashboardActivity />
     </main>
   );

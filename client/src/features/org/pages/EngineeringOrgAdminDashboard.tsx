@@ -32,11 +32,9 @@ export function EngineeringOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Track {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} across academic and outcome workflows.
           </p>
-        </div>
       </header>
 
       <DashboardMetrics />
-      <DashboardCharts />
       <DashboardActivity />
     </main>
   );

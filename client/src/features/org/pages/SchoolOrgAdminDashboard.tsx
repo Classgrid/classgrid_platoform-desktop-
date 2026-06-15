@@ -32,11 +32,9 @@ export function SchoolOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Monitor {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} from the active profile.
           </p>
-        </div>
       </header>
 
       <DashboardMetrics />
-      <DashboardCharts />
       <DashboardActivity />
     </main>
   );
