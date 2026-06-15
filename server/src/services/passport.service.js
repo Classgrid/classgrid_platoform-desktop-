@@ -84,22 +84,9 @@ const passportConfig = () => {
                             return done(null, user);
                         }
 
-                        // Step 2: No user exists → Create new user
-                        console.log("👤 Google: Creating new user");
-                        const picture = profile.photos && profile.photos.length > 0 ? profile.photos[0].value : "";
-
-                        user = await User.create({
-                            name: profile.displayName || "Google User",
-                            email: email,
-                            googleId: profile.id,
-                            role: "student",
-                            status: "active",
-                            profilePicture: picture,
-                            authProvider: "google",
-                            linkedProviders: ["google"],
-                            isEmailVerified: true,
-                        });
-                        return done(null, user);
+                        // Step 2: No user exists → Block login
+                        console.log(`🚫 Google: Blocked login for non-existent user: ${email}`);
+                        return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
                     } catch (err) {
                         done(err, null);
                     }
@@ -164,22 +151,9 @@ const passportConfig = () => {
                             return done(null, user);
                         }
 
-                        // Step 2: Create new Facebook user
-                        console.log("👤 Facebook: Creating new user");
-                        const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : "";
-
-                        user = await User.create({
-                            name: profile.displayName,
-                            email: email,
-                            facebookId: profile.id,
-                            role: "student",
-                            status: "active",
-                            profilePicture: picture,
-                            authProvider: "facebook",
-                            linkedProviders: ["facebook"],
-                            isEmailVerified: true,
-                        });
-                        done(null, user);
+                        // Step 2: No user exists → Block login
+                        console.log(`🚫 Facebook: Blocked login for non-existent user: ${email}`);
+                        return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
                     } catch (err) {
                         done(err, null);
                     }
@@ -239,22 +213,9 @@ const passportConfig = () => {
                             return done(null, user);
                         }
 
-                        // Step 2: Create new GitHub user
-                        console.log("👤 GitHub: Creating new user");
-                        const picture = (profile.photos && profile.photos[0]) ? profile.photos[0].value : (profile._json && profile._json.avatar_url) ? profile._json.avatar_url : "";
-
-                        user = await User.create({
-                            name: profile.displayName || profile.username || "GitHub User",
-                            email: email,
-                            githubId: profile.id,
-                            role: "student",
-                            status: "active",
-                            profilePicture: picture,
-                            authProvider: "github",
-                            linkedProviders: ["github"],
-                            isEmailVerified: true,
-                        });
-                        done(null, user);
+                        // Step 2: No user exists → Block login
+                        console.log(`🚫 GitHub: Blocked login for non-existent user: ${email}`);
+                        return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
                     } catch (err) {
                         console.error("❌ GitHub Strategy Error:", err);
                         done(err, null);
@@ -323,21 +284,9 @@ const passportConfig = () => {
                             return done(null, user);
                         }
 
-                        // Step 2: Create new LinkedIn user
-                        console.log("👤 LinkedIn: Creating new user");
-
-                        user = await User.create({
-                            name: name || "LinkedIn User",
-                            email: email,
-                            linkedinId: linkedinId,
-                            role: "student",
-                            status: "active",
-                            profilePicture: picture,
-                            authProvider: "linkedin",
-                            linkedProviders: ["linkedin"],
-                            isEmailVerified: true,
-                        });
-                        done(null, user);
+                        // Step 2: No user exists → Block login
+                        console.log(`🚫 LinkedIn: Blocked login for non-existent user: ${email}`);
+                        return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
                     } catch (err) {
                         console.error("❌ LinkedIn Strategy Error:", err);
                         done(err, null);

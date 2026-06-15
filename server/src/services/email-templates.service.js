@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Classgrid - Minimalist Transactional Email Templates
  */
 
@@ -2208,8 +2208,8 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
   const content = `
-    <h1>Sign-in attempt</h1>
-    <p>Someone tried to sign in to Classgrid using <strong>${email}</strong>, but no account exists for this email address.</p>
+    <h1>Login Attempt</h1>
+    <p>We received a login attempt for <strong>${email}</strong>. If this was you, please ensure you are using the correct email address provided by your institution.</p>
 
     <div class="box">
       <div class="meta">Attempt Details</div>
@@ -2223,7 +2223,7 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
 
   return baseTemplate({
     content,
-    title: "Sign-in attempt",
+    title: "Login attempt",
     ignoreText: "If this was not you, no action is required.",
   });
 };
@@ -2232,9 +2232,9 @@ export const getNoAccountSignInAttemptPlainText = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
 
-  return `Sign-in attempt
+  return `Login attempt
 
-Someone tried to sign in to Classgrid using ${email}, but no account exists for this email address.
+We received a login attempt for ${email}. If this was you, please ensure you are using the correct email address provided by your institution.
 
 Device: ${device}
 Location: ${city}
