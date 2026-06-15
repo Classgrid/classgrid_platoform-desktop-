@@ -2207,10 +2207,11 @@ This is a computer-generated receipt and does not require a physical signature.
 export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
-    const orgNameText = location.orgSlug ? `<strong>${location.orgSlug.toUpperCase()}</strong>` : "your institution";
+    const orgUrl = location.orgSlug ? `${location.orgSlug}.classgrid.in` : "Classgrid";
+    const orgNameText = location.orgSlug ? `<strong>${location.orgSlug.toUpperCase()}</strong> (${orgUrl})` : "your institution";
     const content = `
     <h1>Login Attempt</h1>
-    <p>We received a login attempt for <strong>${email}</strong>. If this was you, please ensure you are using the correct email address provided by ${orgNameText}.</p>
+    <p>We received a login attempt for <strong>${email}</strong>, but no account was found for this email in ${orgNameText}. If this was you, please ensure you are using the correct email address provided by your institution.</p>
 
     <div class="box">
       <div class="meta">Attempt Details</div>
@@ -2240,11 +2241,12 @@ export const getNoAccountSignInAttemptPlainText = (email, location = {}) => {
   const device = location.device || "Unknown device";
   const city = location.city || "Unknown location";
 
-  const orgNameText = location.orgSlug ? location.orgSlug.toUpperCase() : "your institution";
+  const orgUrl = location.orgSlug ? `${location.orgSlug}.classgrid.in` : "Classgrid";
+  const orgNameText = location.orgSlug ? `${location.orgSlug.toUpperCase()} (${orgUrl})` : "your institution";
 
   return `Login attempt
 
-We received a login attempt for ${email}. If this was you, please ensure you are using the correct email address provided by ${orgNameText}.
+We received a login attempt for ${email}, but no account was found for this email in ${orgNameText}. If this was you, please ensure you are using the correct email address provided by your institution.
 
 Device: ${device}
 Location: ${city}
