@@ -4,10 +4,12 @@ import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgButton } from "@/components/classgrid/Button";
 import { useMyClassrooms, MyClassroomRecord } from "../queries/useMyClassrooms";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+import { CreateClassroomModal } from "../components/CreateClassroomModal";
 
 export function ClassroomsPage() {
   const { data: user } = useCurrentUser();
   const { data: classroomsData, isLoading } = useMyClassrooms();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const classrooms = classroomsData?.classrooms ?? [];
@@ -55,7 +57,7 @@ export function ClassroomsPage() {
                 className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
               />
             </div>
-            <CgButton>
+            <CgButton onClick={() => isTeacher && setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {isTeacher ? "Create Class" : "Join Class"}
             </CgButton>
@@ -74,10 +76,20 @@ export function ClassroomsPage() {
               ? "You haven't created any classrooms yet. Create your first class to start teaching."
               : "You haven't joined any classrooms yet. Click 'Join Class' to enter a class code."}
           </p>
-          <CgButton className="mt-6">
-            <Plus className="mr-2 h-4 w-4" />
-            {isTeacher ? "Create Class" : "Join Class"}
-          </CgButton>
+          {isTeacher ? (
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="mt-6 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Plus size={16} />
+              Create Class
+            </button>
+          ) : (
+            <CgButton className="mt-6">
+              <Plus className="mr-2 h-4 w-4" />
+              Join Class
+            </CgButton>
+          )}
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -86,12 +98,16 @@ export function ClassroomsPage() {
           ))}
         </div>
       )}
+
+      <CreateClassroomModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 }
 
 function ClassroomCard({ classroom, isTeacher }: { classroom: MyClassroomRecord; isTeacher: boolean }) {
-  // Generate a reliable gradient based on the classroom name length to keep it consistent but varied
   const gradients = [
     "from-blue-500 to-indigo-600",
     "from-emerald-500 to-teal-600",
@@ -103,9 +119,7 @@ function ClassroomCard({ classroom, isTeacher }: { classroom: MyClassroomRecord;
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/30 cursor-pointer">
-      {/* Card Header (Banner) */}
       <div className={`h-24 w-full bg-gradient-to-r ${gradient} relative`}>
-        {/* If we had a coverImage, we'd render it here as an absolutely positioned img */}
         {classroom.coverImage && (
           <img 
             src={classroom.coverImage} 
@@ -116,7 +130,6 @@ function ClassroomCard({ classroom, isTeacher }: { classroom: MyClassroomRecord;
         <div className="absolute inset-0 bg-black/10"></div>
       </div>
 
-      {/* Card Body */}
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-1 flex items-start justify-between gap-2">
           <h3 className="font-bold text-lg text-foreground line-clamp-1 group-hover:text-primary transition-colors">
