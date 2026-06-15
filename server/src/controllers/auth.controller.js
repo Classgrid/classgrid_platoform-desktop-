@@ -156,22 +156,36 @@ const findPendingOrgAdminByActivation = async ({ token, email, activationCode })
 const noAccountEmailCooldown = new Map();
 const NO_ACCOUNT_EMAIL_COOLDOWN_MS = 1000; // 1 second (temp for testing)
 
-// Helper: Get approximate location from IP
+// Helper: Get approximate location from IP (uses ip-api.com — free, no key, 45 req/min)
 const getLocationFromIP = async (req) => {
     try {
         const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '';
-        // For localhost/private IPs, use auto-detect (ipapi returns server's public IP location)
         const isLocal = !ip || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.');
-        const url = isLocal ? 'https://ipapi.co/json/' : `https://ipapi.co/${ip}/json/`;
-        const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+
+        // Primary: ip-api.com (free, 45 req/min, no key needed)
+        const apiUrl = isLocal
+            ? 'http://ip-api.com/json/?fields=city,regionName,country,status'
+            : `http://ip-api.com/json/${ip}?fields=city,regionName,country,status`;
+        const res = await fetch(apiUrl);
         const data = await res.json();
-        if (data.error) return 'Unknown location';
-        if (data.city && data.country_name) return `${data.city}, ${data.country_name}`;
-        if (data.region && data.country_name) return `${data.region}, ${data.country_name}`;
-        return data.country_name || 'Unknown location';
-    } catch (error) { 
-        console.error(`[DEBUG Email] getLocationFromIP error:`, error);
-        return 'Unknown location'; 
+
+        if (data.status === 'success' && data.city && data.country) {
+            return `${data.city}, ${data.country}`;
+        }
+        if (data.status === 'success' && data.regionName && data.country) {
+            return `${data.regionName}, ${data.country}`;
+        }
+
+        // Fallback: ipinfo.io (free, 50k req/month, no key needed)
+        const fallbackUrl = isLocal ? 'https://ipinfo.io/json' : `https://ipinfo.io/${ip}/json`;
+        const res2 = await fetch(fallbackUrl);
+        const data2 = await res2.json();
+        if (data2.city && data2.country) return `${data2.city}, ${data2.country}`;
+
+        return 'Unknown location';
+    } catch (error) {
+        console.error(`[getLocationFromIP] error:`, error?.message || error);
+        return 'Unknown location';
     }
 };
 
