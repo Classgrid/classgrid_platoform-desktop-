@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import connectDB from "../../config/db.js";
 import { processDemoExpiryReminders } from "../services/demo-expiry-reminder.service.js";
 
@@ -81,6 +81,60 @@ router.get("/process-email-queue", async (req, res) => {
     } catch (err) {
         const totalDuration = Date.now() - cronStart;
         console.error("[Cron] Email queue error:", err.message, `duration=${totalDuration}ms`);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+});
+
+/**
+ * GET /api/cron/auto-close-tickets
+ *
+ * Automatically closes SupportTickets that have been "resolved" for more than 7 days.
+ * Can be triggered by cron-job.org or Vercel cron.
+ */
+router.get("/auto-close-tickets", async (req, res) => {
+    try {
+        const cronSecret = process.env.CRON_SECRET;
+        const querySecret = req.query.secret;
+        const authHeader = req.headers["authorization"];
+
+        if (cronSecret && querySecret !== cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        await connectDB();
+        
+        const SupportTicket = (await import("../models/SupportTicket.js")).default;
+        
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const result = await SupportTicket.updateMany(
+            {
+                status: "resolved",
+                resolvedAt: { $lt: sevenDaysAgo }
+            },
+            {
+                $set: { status: "closed" },
+                $push: {
+                    events: {
+                        type: 'statusChanged',
+                        label: 'Ticket auto-closed after 7 days of inactivity',
+                        from: 'resolved',
+                        to: 'closed',
+                        actorName: 'System',
+                        actorRole: 'system',
+                        createdAt: new Date()
+                    }
+                }
+            }
+        );
+
+        res.json({
+            message: "Ticket auto-close complete",
+            closedCount: result.modifiedCount
+        });
+    } catch (err) {
+        console.error("[Cron] Ticket auto-close error:", err.message);
         res.status(500).json({ message: "Server error", error: err.message });
     }
 });

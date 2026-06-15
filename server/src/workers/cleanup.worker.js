@@ -1,4 +1,4 @@
-﻿import nodeCron from "node-cron";
+import nodeCron from "node-cron";
 import Notification from "../models/Notification.js";
 import AttendanceSession from "../models/AttendanceSession.js";
 import connectDB from "../../config/db.js";
@@ -74,6 +74,44 @@ export const initCronJobs = () => {
             }
         } catch (err) {
             console.error("[Cron] Demo reminder check error:", err.message);
+        }
+    }, { timezone: "Asia/Kolkata" });
+
+    // 5. Auto-close resolved tickets after 7 days of inactivity
+    nodeCron.schedule("0 1 * * *", async () => {
+        console.log("[Cron] Running ticket auto-close cleanup...");
+        try {
+            const SupportTicket = (await import("../models/SupportTicket.js")).default;
+            
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+            const result = await SupportTicket.updateMany(
+                {
+                    status: "resolved",
+                    resolvedAt: { $lt: sevenDaysAgo }
+                },
+                {
+                    $set: { status: "closed" },
+                    $push: {
+                        events: {
+                            type: 'statusChanged',
+                            label: 'Ticket auto-closed after 7 days of inactivity',
+                            from: 'resolved',
+                            to: 'closed',
+                            actorName: 'System',
+                            actorRole: 'system',
+                            createdAt: new Date()
+                        }
+                    }
+                }
+            );
+
+            if (result.modifiedCount > 0) {
+                console.log(`[Cron] Auto-closed ${result.modifiedCount} resolved tickets.`);
+            }
+        } catch (err) {
+            console.error("[Cron] Ticket auto-close error:", err.message);
         }
     }, { timezone: "Asia/Kolkata" });
 
