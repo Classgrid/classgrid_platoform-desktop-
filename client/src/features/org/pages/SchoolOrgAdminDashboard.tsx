@@ -37,44 +37,9 @@ export function SchoolOrgAdminDashboard() {
 
       <DashboardMetrics />
       <DashboardCharts />
-      <SchoolAcademicPulse profile={profile} />
       <DashboardActivity />
     </main>
   );
 }
 
-function SchoolAcademicPulse({ profile }: { profile: InstitutionProfile }) {
-  const terminology = profile.terminology;
-  const programLabel = pluralizeLabel(terminology.program ?? getProfileTerm(profile, "program"));
-  const groupLabel = pluralizeLabel(terminology.group ?? getProfileTerm(profile, "group"));
-  const ownerLabel = profile.staffAssignmentProfile.primaryOwnerLabel;
-  const periodLabel = profile.academicSessionProfile.periodLabel ?? profile.academicSessionProfile.yearLabel;
 
-  return (
-    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <BookOpenCheck className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">Academic Coverage</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {programLabel} are tracked through {periodLabel} planning and daily timetable readiness.
-        </p>
-      </article>
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <Layers3 className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">Grouping Mode</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {profile.structureFeatures.hasVisibleDivisions
-            ? `${groupLabel} are visible for operations.`
-            : `${groupLabel} can stay defaulted when an institute does not use them.`}
-        </p>
-      </article>
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <CalendarDays className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">Ownership</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {ownerLabel} assignments stay aligned with the profile hierarchy.
-        </p>
-      </article>
-    </section>
-  );
-}

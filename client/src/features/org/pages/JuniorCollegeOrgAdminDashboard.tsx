@@ -37,46 +37,8 @@ export function JuniorCollegeOrgAdminDashboard() {
 
       <DashboardMetrics />
       <DashboardCharts />
-      <StreamWiseStats profile={profile} />
       <DashboardActivity />
     </main>
   );
 }
 
-function StreamWiseStats({ profile }: { profile: InstitutionProfile }) {
-  const terminology = profile.terminology;
-  const programLabel = profile.levelLabels.stream ?? terminology.program ?? getProfileTerm(profile, "program");
-  const groupLabel = terminology.group ?? getProfileTerm(profile, "group");
-  const subBatchLabel = profile.levelLabels.sub_batch;
-  const entranceSupported = profile.entrancePreparationProfile.supported;
-
-  return (
-    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <Network className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">{pluralizeLabel(programLabel)} Pipeline</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Intake, admission status, and academic placement stay grouped by {programLabel}.
-        </p>
-      </article>
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <Layers3 className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">{groupLabel} and {subBatchLabel}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {profile.structureFeatures.hasSubBatches
-            ? `${subBatchLabel} support is active inside each ${groupLabel}.`
-            : `${groupLabel} can run without ${subBatchLabel} when not required.`}
-        </p>
-      </article>
-      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
-        <Target className="mb-4 h-5 w-5 text-primary" />
-        <h3 className="text-base font-semibold text-foreground">Entrance Preparation</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {entranceSupported
-            ? "Parallel preparation batches can attach to academic placement."
-            : "Parallel preparation batches are disabled for this profile."}
-        </p>
-      </article>
-    </section>
-  );
-}
