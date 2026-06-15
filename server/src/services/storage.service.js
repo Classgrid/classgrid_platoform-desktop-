@@ -18,14 +18,15 @@ class StorageService {
      * @param {string} folderPath - Path within bucket (e.g. "org_id/app_id")
      * @returns {Promise<Object>} { url, path, fullPath }
      */
-    async uploadDocument(fileBuffer, fileName, mimeType, folderPath) {
+    async uploadDocument(fileBuffer, fileName, mimeType, folderPath, targetBucket = null) {
         try {
             const fileExt = fileName.split('.').pop();
             const uniqueFileName = `${uuidv4()}.${fileExt}`;
             const filePath = `${folderPath}/${uniqueFileName}`;
+            const bucketToUse = targetBucket || this.bucket;
 
             const { data, error } = await primarySupabaseClient.storage
-                .from(this.bucket)
+                .from(bucketToUse)
                 .upload(filePath, fileBuffer, {
                     contentType: mimeType,
                     upsert: true
@@ -35,7 +36,7 @@ class StorageService {
 
             return {
                 path: data.path,
-                fullPath: `${this.bucket}/${data.path}`,
+                fullPath: `${bucketToUse}/${data.path}`,
                 // In production, we should probably generate signed URLs on demand
                 // for security, rather than storing public ones.
                 // But for now, we'll return the relative path.

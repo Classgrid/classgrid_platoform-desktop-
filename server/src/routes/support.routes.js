@@ -167,7 +167,7 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
                     file.originalname,
                     file.mimetype,
                     folderPath,
-                    file.size
+                    "support-attachments" // explicitly use the support bucket
                 );
                 uploadedAttachments.push({
                     id: uploadResult.id,
@@ -232,7 +232,7 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
         });
     } catch (err) {
         console.error("[Support] Public create error:", err.message);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -348,7 +348,7 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
                     file.originalname,
                     file.mimetype,
                     folderPath,
-                    file.size
+                    "support-attachments" // explicitly use the support bucket
                 );
                 uploadedAttachments.push({
                     id: uploadResult.id,
@@ -438,7 +438,7 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
                     file.originalname, 
                     file.mimetype, 
                     folderPath,
-                    file.size
+                    "support-attachments" // explicitly use the support bucket
                 );
                 uploadedAttachments.push({
                     id: uploadResult.id,
@@ -567,7 +567,7 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
                     file.originalname, 
                     file.mimetype, 
                     folderPath,
-                    file.size
+                    "support-attachments" // explicitly use the support bucket
                 );
                 uploadedAttachments.push({
                     id: uploadResult.id,

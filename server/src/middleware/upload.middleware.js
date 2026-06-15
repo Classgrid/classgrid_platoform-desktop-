@@ -1,6 +1,6 @@
 import multer from "multer";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Memory storage (best for direct uploads to S3/Cloudinary/etc)
 const memoryStorage = multer.memoryStorage();
