@@ -127,7 +127,7 @@ ${content}
 
 <div style="margin-top:30px;">
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a>
+Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
 </p>
 </div>
 
@@ -209,7 +209,7 @@ Go to Dashboard
 </div>
 
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a>
+Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
 </p>
 
 </td>
@@ -285,7 +285,7 @@ Join Classroom
 </div>
 
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a>
+Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
 </p>
 
 </td>
@@ -482,7 +482,7 @@ export const getOrgApprovalEmailHtml = (orgName, ownerName, organizationCode, ho
       <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af; font-style: italic;">Bookmarking ensures you can return directly without navigating through the main portal.</p>
     </div>
 
-    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a></p>
+    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
   `;
   return baseTemplate({
     content,
@@ -507,7 +507,7 @@ export const getOrgAdminInviteHtml = (adminName, orgName, activationLink) => {
     <a href="${activationLink}" class="btn">Activate Admin Account</a>
 
     <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#ffffff;">/admin/login</a>.</p>
-    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a>.</p>
+    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>.</p>
   `;
   return baseTemplate({
     content,
@@ -868,7 +868,7 @@ Need assistance?
 </p>
 
 <p style="font-size:14px;margin:5px 0 0;">
-<a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">
+<a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">
 support@classgrid.in
 </a>
 </p>
@@ -974,7 +974,7 @@ Your faculty account has been successfully created. You're now ready to manage c
 
 Go to Dashboard: ${dashboardUrl}
 
-Need help? Contact support@classgrid.in
+Need help? Contact https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1004,7 +1004,7 @@ Your account has been successfully created. You're now ready to begin your acade
 
 Join Classroom: ${dashboardUrl}
 
-Need help? Contact support@classgrid.in
+Need help? Contact https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1020,7 +1020,7 @@ Secure My Account: ${getFrontendUrl()}/reset-password
 
 If this was you, you can safely ignore this email.
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1035,7 +1035,7 @@ Verify Email: ${verifyLink}
 
 If you did not sign up for Classgrid, please ignore this email.
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1049,7 +1049,7 @@ Reset Password: ${resetLink}
 
 If you did not request this password reset, you can safely ignore this email. Your password will remain unchanged.
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1071,7 +1071,7 @@ ${orgCode ? `--- YOUR ORGANIZATION CODE ---\n\nFaculty Organization Code: ${orgC
 Activate your Faculty account: ${verifyLink}
 (This link expires in 5 minutes.)
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1182,9 +1182,9 @@ IMPORTANT:
 - Do not share this link with anyone.
 - After activation, you can sign in anytime at: ${getFrontendUrl()}/admin/login
 
-If you did not apply for a Classgrid organization, please contact us at support@classgrid.in.
+If you did not apply for a Classgrid organization, please contact us at https://classgrid.in/support.
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1198,7 +1198,7 @@ Phone: ${data.phone}
 
 Review Application: ${getFrontendUrl()}/superadmin/login
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1211,7 +1211,7 @@ Student Code: ${honorCode}
 
 View in Admin Panel: ${dashboardUrl}
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1245,7 +1245,7 @@ We appreciate your interest in building a structured digital environment with Cl
 Warm regards,
 The Classgrid Team
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1256,7 +1256,7 @@ export const getOrgRejectionEmailPlainText = (ownerName, instituteName, reason =
 Hi ${ownerName},
 We have reviewed your application for ${instituteName}. Unfortunately, we are unable to approve it at this time.
 ${reason ? `\nReason: ${reason}\n` : ''}
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1275,7 +1275,7 @@ What you can do now:
 
 Go to Admin Dashboard: ${dashboardLink}
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1299,7 +1299,7 @@ Your platform-level controls include:
 
 Login to Super Admin Dashboard: ${loginLink}
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1468,7 +1468,7 @@ Mark Attendance Now: ${classroomUrl}
 
 This session expires in 4 minutes. Act quickly!
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1507,7 +1507,7 @@ If you believe this is an error, contact your instructor.
 
 View Classroom: ${classroomUrl}
 
-For contact, mail us at: support@classgrid.in
+For contact, visit: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1641,7 +1641,7 @@ export const getPlanExpiryReminderHtml = (orgName, ownerName, planName, expiryDa
     <a href="${dashboardUrl}" class="btn">${isExpired ? 'Continue With Paid Access' : 'Open Org Admin Dashboard'}</a>
 
     <p style="margin-top: 24px; font-size: 13px; color: #9ca3af;">Classgrid pricing is handled separately from this reminder flow. Use the dashboard to continue, or contact support if you need help with the next payment step.</p>
-    <p style="font-size: 13px; color: #9ca3af;">Need help? Contact us at <a href="mailto:support@classgrid.in" style="color:#ffffff; font-weight:500;">support@classgrid.in</a>.</p>
+    <p style="font-size: 13px; color: #9ca3af;">Need help? Contact us at <a href="https://classgrid.in/support" style="color:#ffffff; font-weight:500;">https://classgrid.in/support</a>.</p>
   `;
   return baseTemplate({
     content,
@@ -1855,9 +1855,9 @@ export const getConsolidatedApprovalEmailHtml = ({
     </div>
 
     <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#ffffff;">/admin/login</a>.</p>
-    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a>.</p>
+    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>.</p>
 
-    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a></p>
+    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
   `;
 
   return baseTemplate({
@@ -1957,9 +1957,9 @@ ${getFrontendUrl()}/admin/login
 
 After activation, you can sign in anytime at /admin/login.
 
-If you did not apply for a Classgrid organization, please contact us at support@classgrid.in.
+If you did not apply for a Classgrid organization, please contact us at https://classgrid.in/support.
 
-Need help? Contact support@classgrid.in
+Need help? Contact https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1979,10 +1979,10 @@ export const getAccountSuspensionEmailHtml = (userName, reason) => {
     <p>While your account is suspended, you will not be able to log in or access any Classgrid services.</p>
 
     <p style="margin-top: 24px;">If you believe this is a mistake or would like to appeal, please contact our support team:</p>
-    <a href="mailto:support@classgrid.in" class="btn" style="background: #f59e0b; color: #000;">Contact Support</a>
+    <a href="https://classgrid.in/support" class="btn" style="background: #f59e0b; color: #000;">Contact Support</a>
 
     <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">
-      Email: <a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a>
+      Support: <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>
     </p>
   `;
   return baseTemplate({ content, title: 'Account Suspended' });
@@ -2020,10 +2020,10 @@ export const getAccountDeletionEmailHtml = (userName, reason) => {
     <p>All your data, including classroom memberships, sessions, and tokens, has been removed from our platform.</p>
 
     <p style="margin-top: 24px;">If you believe this was done in error, please contact our support team immediately:</p>
-    <a href="mailto:support@classgrid.in" class="btn" style="background: #ef4444;">Contact Support</a>
+    <a href="https://classgrid.in/support" class="btn" style="background: #ef4444;">Contact Support</a>
 
     <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">
-      Email: <a href="mailto:support@classgrid.in" style="color:#ffffff;">support@classgrid.in</a>
+      Support: <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>
     </p>
   `;
   return baseTemplate({ content, title: 'Account Deleted' });
@@ -2218,7 +2218,14 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
       <p><strong>Time:</strong> ${formatDate(new Date())}</p>
     </div>
 
-    <p>If this was you, please check the email address or contact your institution administrator.</p>
+    <h3 style="color:#ffffff; margin-top:24px;">Why did this happen?</h3>
+    <ul style="color:#e5e7eb; padding-left:20px; line-height:1.6; margin-bottom:24px;">
+      <li>You may have used a personal email instead of your official institution email.</li>
+      <li>Your institution administrator may not have created your account yet.</li>
+    </ul>
+
+    <h3 style="color:#ffffff;">Next Steps</h3>
+    <p>If you believe you should have access, please contact your institution administrator directly.</p>
   `;
 
   return baseTemplate({
@@ -2240,7 +2247,12 @@ Device: ${device}
 Location: ${city}
 Time: ${formatDate(new Date())}
 
-If this was you, please check the email address or contact your institution administrator.
+Why did this happen?
+• You may have used a personal email instead of your official institution email.
+• Your institution administrator may not have created your account yet.
+
+Next Steps
+If you believe you should have access, please contact your institution administrator directly.
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
