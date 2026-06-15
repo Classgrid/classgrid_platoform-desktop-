@@ -784,7 +784,7 @@ export const login = async (req, res) => {
             } else {
                 // 🔒 Anti-timing: the bcrypt.compare took roughly the right amount of time
                 // 🔒 Silent Vercel-style email (fire-and-forget, rate-limited)
-                sendNoAccountEmail(email, req);
+                sendNoAccountEmail(email, req, tenantSlug);
                 return res.status(401).json({ message: "Invalid email or password" });
             }
         }
