@@ -154,7 +154,7 @@ const findPendingOrgAdminByActivation = async ({ token, email, activationCode })
 
 // 🔒 In-memory rate limiter for "no account" emails (max 1 per 15 min per email)
 const noAccountEmailCooldown = new Map();
-const NO_ACCOUNT_EMAIL_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+const NO_ACCOUNT_EMAIL_COOLDOWN_MS = 1000; // 1 second (temp for testing)
 
 // Helper: Get approximate location from IP
 const getLocationFromIP = async (req) => {
@@ -197,6 +197,9 @@ const sendNoAccountEmail = async (email, req) => {
     try {
         const cityString = await getLocationFromIP(req);
         const deviceString = getDeviceFromUA(req.headers['user-agent']);
+        console.log(`[DEBUG Email] UA: ${req.headers['user-agent']} -> Device: ${deviceString}`);
+        console.log(`[DEBUG Email] IP: ${req.headers['x-forwarded-for'] || req.socket?.remoteAddress} -> City: ${cityString}`);
+        
         const locationData = { city: cityString, device: deviceString };
         
         sendEmail({
