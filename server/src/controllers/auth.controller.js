@@ -207,7 +207,7 @@ const getDeviceFromUA = (ua) => {
 };
 
 // Helper: Send Vercel-style "no account" email (rate-limited, fire-and-forget)
-const sendNoAccountEmail = async (email, req) => {
+export const sendNoAccountEmail = async (email, req) => {
     const lastSent = noAccountEmailCooldown.get(email);
     if (lastSent && Date.now() - lastSent < NO_ACCOUNT_EMAIL_COOLDOWN_MS) return; // Rate limited
     noAccountEmailCooldown.set(email, Date.now());

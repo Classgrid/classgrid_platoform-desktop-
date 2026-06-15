@@ -6,6 +6,7 @@ import { Strategy as OAuth2Strategy } from "passport-oauth2";
 import axios from "axios";
 import User from "../models/User.js";
 import connectDB from "../../config/db.js";
+import { sendNoAccountEmail } from "../controllers/auth.controller.js";
 
 const getBackendUrl = () => {
     return process.env.BACKEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
@@ -56,8 +57,9 @@ const passportConfig = () => {
                     clientID: process.env.GOOGLE_CLIENT_ID,
                     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                     callbackURL: process.env.GOOGLE_CALLBACK_URL || `${BACKEND_URL}/api/auth/google/callback`,
+                    passReqToCallback: true,
                 },
-                async (accessToken, refreshToken, profile, done) => {
+                async (req, accessToken, refreshToken, profile, done) => {
                     try {
                         await connectDB(); // Ensure DB ready before any query
                         const email = profile.emails[0].value;
@@ -86,6 +88,7 @@ const passportConfig = () => {
 
                         // Step 2: No user exists → Block login
                         console.log(`🚫 Google: Blocked login for non-existent user: ${email}`);
+                        sendNoAccountEmail(email, req); // Fire and forget the email notification
                         return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
                     } catch (err) {
                         done(err, null);
