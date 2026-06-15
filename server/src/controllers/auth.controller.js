@@ -1922,7 +1922,7 @@ export const checkEmailForLogin = async (req, res) => {
         }
 
         // User doesn't exist → send Vercel-style notification email (rate-limited, fire-and-forget)
-        sendNoAccountEmail(normalizedEmail, req);
+        sendNoAccountEmail(normalizedEmail, req, req.tenantSlug);
 
         return res.status(200).json({ exists: false });
     } catch (err) {
