@@ -39,31 +39,19 @@ export function DashboardActivity() {
 
   // Fallback if no backend activity exists
   if (entries.length === 0) {
-    entries = [
-      {
-        id: "mock-1",
-        label: `New ${learnerLabel} application moved to verification`,
-        detail: admissionWorkflow,
-        time: "2m ago",
-        icon: <FileText className="h-4 w-4" />,
-      },
-      hasFees
-        ? {
-            id: "mock-2",
-            label: `${feeLabel} payment received`,
-            detail: "Finance update",
-            time: "15m ago",
-            icon: <WalletCards className="h-4 w-4" />,
-          }
-        : null,
-      {
-        id: "mock-3",
-        label: `${programLabel} document queue reviewed`,
-        detail: "Operations update",
-        time: "1h ago",
-        icon: <CheckCircle2 className="h-4 w-4" />,
-      },
-    ].filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+    return (
+      <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Recent Activity</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Live operations from the active profile.</p>
+          </div>
+        </div>
+        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+          No recent activity found in this organization.
+        </div>
+      </article>
+    );
   }
 
   return (
