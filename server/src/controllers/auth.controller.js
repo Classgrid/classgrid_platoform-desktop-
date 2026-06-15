@@ -163,13 +163,16 @@ const getLocationFromIP = async (req) => {
         // For localhost/private IPs, use auto-detect (ipapi returns server's public IP location)
         const isLocal = !ip || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.');
         const url = isLocal ? 'https://ipapi.co/json/' : `https://ipapi.co/${ip}/json/`;
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
         const data = await res.json();
         if (data.error) return 'Unknown location';
         if (data.city && data.country_name) return `${data.city}, ${data.country_name}`;
         if (data.region && data.country_name) return `${data.region}, ${data.country_name}`;
         return data.country_name || 'Unknown location';
-    } catch { return 'Unknown location'; }
+    } catch (error) { 
+        console.error(`[DEBUG Email] getLocationFromIP error:`, error);
+        return 'Unknown location'; 
+    }
 };
 
 // Helper: Parse device from User-Agent
