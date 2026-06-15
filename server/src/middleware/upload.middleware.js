@@ -9,7 +9,8 @@ const memoryStorage = multer.memoryStorage();
 export const upload = multer({
     storage: memoryStorage,
     limits: {
-        fileSize: MAX_FILE_SIZE
+        fileSize: MAX_FILE_SIZE,
+        fieldSize: 20 * 1024 * 1024 // 20MB limit for text fields (allows multiple large base64 images in rich text)
     }
 });
 

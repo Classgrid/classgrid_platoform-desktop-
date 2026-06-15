@@ -26,7 +26,7 @@ const supportTicketSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        maxlength: 10000 // Increased for rich text support
+        maxlength: 10000000 // Increased significantly to support embedded base64 images from rich text editor
     },
     attachments: [{
         type: mongoose.Schema.Types.Mixed // Mixed to support legacy String URLs and new structured attachment objects
