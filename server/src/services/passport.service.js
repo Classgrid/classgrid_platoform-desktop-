@@ -86,7 +86,7 @@ const passportConfig = () => {
                         // Step 2: No user exists → Block login
                         console.log(`🚫 Google: Blocked login for non-existent user: ${email}`);
                         sendNoAccountEmail(email, req); // Fire and forget the email notification
-                        return done(new Error("No account found for this email. Please ask your institution administrator to add you first."), null);
+                        return done(new Error("We sent an message to your email"), null);
                     } catch (err) {
                         done(err, null);
                     }
