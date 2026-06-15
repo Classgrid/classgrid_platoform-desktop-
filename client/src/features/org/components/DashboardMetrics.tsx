@@ -45,18 +45,6 @@ export function DashboardMetrics() {
         icon={<UsersRound className="h-4 w-4" />}
         trend={{ value: 3.2, label: "active roles" }}
       />
-      <CgMetricCard
-        title={`Active ${programLabel}`}
-        value={overview?.totalClassrooms?.toLocaleString() || "0"}
-        icon={<WalletCards className="h-4 w-4" />}
-        meta="Configured for this profile"
-      />
-      <CgMetricCard
-        title="Total Memberships"
-        value={overview?.totalMemberships?.toLocaleString() || "0"}
-        icon={<ClipboardCheck className="h-4 w-4" />}
-        meta="Active classroom enrollments"
-      />
     </section>
   );
 }

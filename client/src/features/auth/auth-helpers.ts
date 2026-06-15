@@ -180,9 +180,9 @@ export function getRedirectPath(role: string | null | undefined) {
     case "transport_manager":
       return "/dept/transport/dashboard";
     case "student":
-      return "/student/dashboard";
+      return "/classrooms";
     case "teacher":
-      return "/work";
+      return "/classrooms";
     case "org_admin":
     case "hod":
     case "principal":

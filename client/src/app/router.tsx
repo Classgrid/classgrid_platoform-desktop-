@@ -40,6 +40,8 @@ import { OrgAdminDashboardRouter } from "@/features/org/pages/OrgAdminDashboardR
 import { OrgAnnouncementsPage } from "@/features/org/pages/OrgAnnouncementsPage";
 import { OrgStudentsPage } from "@/features/org/pages/OrgStudentsPage";
 import { OrgFacultyPage } from "@/features/org/pages/OrgFacultyPage";
+import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
+import { OrgClassroomsPage } from "@/features/org/pages/OrgClassroomsPage";
 import { StudentDashboardPage } from "@/features/student/pages/StudentDashboardPage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
 import { FacultyWorkPage } from "@/features/faculty/pages/FacultyWorkPage";
@@ -213,6 +215,7 @@ export function AppRouter() {
         <Route path="/org/announcements" element={<OrgAnnouncementsPage />} />
         <Route path="/org/students" element={<OrgStudentsPage />} />
         <Route path="/org/faculty" element={<OrgFacultyPage />} />
+        <Route path="/org/classrooms" element={<OrgClassroomsPage />} />
         <Route path="/org/admissions" element={<Navigate to="/dept/admissions/dashboard" replace />} />
 
         {/* 3. Admissions Department Dashboard */}
@@ -264,8 +267,8 @@ export function AppRouter() {
         <Route path="/student/work" element={<StudentWorkPage />} />
 
         {/* ── Common pages ── */}
-        <Route path="/classroom" element={<GenericPage title="Home" />} />
-        <Route path="/classrooms" element={<GenericPage title="Home" />} />
+        <Route path="/classroom" element={<ClassroomsPage />} />
+        <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
         <Route path="/tools" element={<GenericPage title="Schedule" />} />
         <Route path="/chat" element={<GenericPage title="Messages" />} />
