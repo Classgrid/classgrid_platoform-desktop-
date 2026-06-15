@@ -83,20 +83,20 @@ export const initCronJobs = () => {
         try {
             const SupportTicket = (await import("../models/SupportTicket.js")).default;
 
-            const thresholdDate = new Date();
-            thresholdDate.setMinutes(thresholdDate.getMinutes() - 30);
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
             const result = await SupportTicket.updateMany(
                 {
                     status: "resolved",
-                    resolvedAt: { $lt: thresholdDate }
+                    resolvedAt: { $lt: sevenDaysAgo }
                 },
                 {
                     $set: { status: "closed" },
                     $push: {
                         events: {
                             type: 'statusChanged',
-                            label: 'Ticket auto-closed after 30 minutes of inactivity',
+                            label: 'Ticket auto-closed after 7 days of inactivity',
                             from: 'resolved',
                             to: 'closed',
                             actorName: 'System',
