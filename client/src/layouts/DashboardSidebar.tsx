@@ -7,8 +7,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { DashboardConfig } from "@/layouts/types";
 import { useUiStore } from "@/lib/stores/uiStore";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
-import { getLoginPathForPath, getRoleLabel } from "@/features/auth/auth-helpers";
+import { getLoginPathForPath, getRoleLabel, getPortalLabel, getRedirectPath } from "@/features/auth/auth-helpers";
 import { apiClient } from "@/lib/apiClient";
+import { Building2, Briefcase, User, Layers } from "lucide-react";
 
 type DashboardSidebarProps = {
   config: DashboardConfig;
@@ -39,6 +40,12 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
       }),
     }))
     .filter((section) => section.items.length > 0);
+
+  // Determine user's roles
+  const userRoles = Array.from(new Set([user?.role, ...(user?.additional_roles || [])].filter(Boolean)));
+  const hasMultipleRoles = userRoles.length > 1;
+  const currentRole = config.role;
+  const currentRoleLabel = getPortalLabel(currentRole);
 
   const handleLogout = async () => {
     setIsMenuOpen(false);
@@ -96,7 +103,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
           </div>
         </div>
 
-        {config.switcher ? (
+        {hasMultipleRoles ? (
           <div className="cg-sidebar__switcher">
             <button
               aria-expanded={isSwitcherOpen}
@@ -109,34 +116,36 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
             >
               <span className="cg-user-card__body">
                 <span className="cg-user-card__avatar cg-user-card__avatar--icon">
-                  {SwitcherIcon ? <SwitcherIcon size={14} /> : config.switcher.current.label[0]}
+                  <Layers size={14} />
                 </span>
                 <span className="cg-user-card__meta">
-                  <strong>{config.switcher.current.label}</strong>
-                  <small>{config.switcher.current.id}</small>
+                  <strong>{currentRoleLabel}</strong>
+                  <small>Switch Role / Portal</small>
                 </span>
               </span>
               <ChevronDown className="cg-user-card__chevron" size={14} />
             </button>
 
-            {config.switcher.subtext ? (
-              <p className="cg-sidebar__switcher-hint">{config.switcher.subtext}</p>
-            ) : null}
-
             {isSwitcherOpen ? (
               <div className="cg-user-menu cg-user-menu--top">
-                {config.switcher.items.map((item) => {
-                  const ItemIcon = item.icon;
-
+                {userRoles.map((roleId) => {
+                  const roleName = getPortalLabel(roleId);
+                  const isActive = roleId === currentRole;
+                  
                   return (
                     <button
-                      key={item.id}
-                      className="cg-user-menu__button"
-                      onClick={() => setIsSwitcherOpen(false)}
+                      key={roleId}
+                      className={`cg-user-menu__button ${isActive ? 'active' : ''}`}
+                      onClick={() => {
+                        setIsSwitcherOpen(false);
+                        if (!isActive) {
+                          navigate(getRedirectPath(roleId));
+                        }
+                      }}
                       type="button"
                     >
-                      {ItemIcon ? <ItemIcon size={14} /> : null}
-                      <span>{item.label}</span>
+                      <Building2 size={14} />
+                      <span style={{ fontWeight: isActive ? 600 : 400 }}>{roleName}</span>
                     </button>
                   );
                 })}
