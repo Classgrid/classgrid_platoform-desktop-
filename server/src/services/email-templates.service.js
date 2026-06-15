@@ -127,7 +127,7 @@ ${content}
 
 <div style="margin-top:30px;">
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 </div>
 
@@ -209,7 +209,7 @@ Go to Dashboard
 </div>
 
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 
 </td>
@@ -285,7 +285,7 @@ Join Classroom
 </div>
 
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">https://classgrid.in/support</a>
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 
 </td>
@@ -974,7 +974,7 @@ Your faculty account has been successfully created. You're now ready to manage c
 
 Go to Dashboard: ${dashboardUrl}
 
-Need help? Contact https://classgrid.in/support
+Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1004,7 +1004,7 @@ Your account has been successfully created. You're now ready to begin your acade
 
 Join Classroom: ${dashboardUrl}
 
-Need help? Contact https://classgrid.in/support
+Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1182,7 +1182,7 @@ IMPORTANT:
 - Do not share this link with anyone.
 - After activation, you can sign in anytime at: ${getFrontendUrl()}/admin/login
 
-If you did not apply for a Classgrid organization, please contact us at https://classgrid.in/support.
+If you did not apply for a Classgrid organization, please raise a ticket at https://classgrid.in/support.
 
 For contact, visit: https://classgrid.in/support
 
@@ -1957,9 +1957,9 @@ ${getFrontendUrl()}/admin/login
 
 After activation, you can sign in anytime at /admin/login.
 
-If you did not apply for a Classgrid organization, please contact us at https://classgrid.in/support.
+If you did not apply for a Classgrid organization, please raise a ticket at https://classgrid.in/support.
 
-Need help? Contact https://classgrid.in/support
+Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -2227,7 +2227,7 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
     </ul>
 
     <h3 style="color:#ffffff;">Next Steps</h3>
-    <p>If you believe you should have access, please contact your institution administrator directly.</p>
+    <p>If you believe you should have access, please reach out to your institution administrator directly.</p>
   `;
 
   return baseTemplate({
@@ -2257,7 +2257,7 @@ Why did this happen?
 • Your institution administrator may not have created your account yet.
 
 Next Steps
-If you believe you should have access, please contact your institution administrator directly.
+If you believe you should have access, please reach out to your institution administrator directly.
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
