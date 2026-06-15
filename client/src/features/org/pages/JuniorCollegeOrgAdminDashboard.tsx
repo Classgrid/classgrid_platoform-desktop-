@@ -1,6 +1,4 @@
-import { Layers3, Network, Target } from "lucide-react";
 import { DashboardActivity } from "../components/DashboardActivity";
-import { DashboardCharts } from "../components/DashboardCharts";
 import { DashboardMetrics } from "../components/DashboardMetrics";
 import {
   getProfileTerm,
@@ -32,6 +30,7 @@ export function JuniorCollegeOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Manage {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} through the profile contract.
           </p>
+        </div>
       </header>
 
       <DashboardMetrics />

@@ -1,6 +1,4 @@
-import { BriefcaseBusiness, ChartNoAxesColumnIncreasing, Gauge } from "lucide-react";
 import { DashboardActivity } from "../components/DashboardActivity";
-import { DashboardCharts } from "../components/DashboardCharts";
 import { DashboardMetrics } from "../components/DashboardMetrics";
 import {
   getProfileTerm,
@@ -32,6 +30,7 @@ export function EngineeringOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Track {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} across academic and outcome workflows.
           </p>
+        </div>
       </header>
 
       <DashboardMetrics />

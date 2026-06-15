@@ -1,6 +1,4 @@
-import { Filter, ListChecks, Target } from "lucide-react";
 import { DashboardActivity } from "../components/DashboardActivity";
-import { DashboardCharts } from "../components/DashboardCharts";
 import { DashboardMetrics } from "../components/DashboardMetrics";
 import {
   getProfileTerm,
@@ -32,6 +30,7 @@ export function CoachingOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Coordinate {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} through the coaching profile.
           </p>
+        </div>
       </header>
 
       <DashboardMetrics />

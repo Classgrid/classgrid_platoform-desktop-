@@ -1,6 +1,4 @@
-import { BookOpenCheck, CalendarDays, Layers3 } from "lucide-react";
 import { DashboardActivity } from "../components/DashboardActivity";
-import { DashboardCharts } from "../components/DashboardCharts";
 import { DashboardMetrics } from "../components/DashboardMetrics";
 import {
   getProfileTerm,
@@ -32,6 +30,7 @@ export function SchoolOrgAdminDashboard() {
           <p className="text-muted-foreground">
             Monitor {learnerLabel}, {educatorLabel}, {programLabel}, and {groupLabel} from the active profile.
           </p>
+        </div>
       </header>
 
       <DashboardMetrics />
