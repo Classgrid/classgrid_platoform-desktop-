@@ -100,4 +100,6 @@ const passportConfig = () => {
         console.error("❌ Fix: Add GOOGLE_CLIENT_ID to your Vercel Environment Variables immediately.");
     }
 
-    };\n\nexport default passportConfig;\n
+};
+
+export default passportConfig;
