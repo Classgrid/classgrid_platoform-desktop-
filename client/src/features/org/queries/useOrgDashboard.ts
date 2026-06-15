@@ -49,3 +49,22 @@ export function useOrgDashboardAnalytics() {
     },
   });
 }
+
+export interface OrgDashboardActivityItem {
+  _id: string;
+  type: string;
+  action: string;
+  message: string;
+  user_id: { _id: string; name: string } | string;
+  createdAt: string;
+}
+
+export function useOrgDashboardActivity() {
+  return useQuery({
+    queryKey: ["org-admin", "dashboard", "activity"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ activities: OrgDashboardActivityItem[] }>("/api/org-admin/dashboard/activity");
+      return data;
+    },
+  });
+}

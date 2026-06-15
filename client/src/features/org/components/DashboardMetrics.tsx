@@ -6,9 +6,13 @@ import {
   isModuleEnabled,
   pluralizeLabel,
 } from "./dashboardProfileUtils";
+import { useOrgDashboardOverview } from "../queries/useOrgDashboard";
 
 export function DashboardMetrics() {
-  const { data: profile, isLoading } = useInstitutionProfile();
+  const { data: profile, isLoading: isProfileLoading } = useInstitutionProfile();
+  const { data: overview, isLoading: isOverviewLoading } = useOrgDashboardOverview();
+
+  const isLoading = isProfileLoading || isOverviewLoading;
 
   if (isLoading || !profile) {
     return (
@@ -31,19 +35,19 @@ export function DashboardMetrics() {
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <CgMetricCard
         title={`Total ${learnerLabel}`}
-        value="1,247"
+        value={overview?.totalStudents?.toLocaleString() || "0"}
         icon={<GraduationCap className="h-4 w-4" />}
-        trend={{ value: 6.8, label: "current cycle" }}
+        trend={{ value: 6.8, label: "current cycle" }} // Mock trend since no trend data from backend
       />
       <CgMetricCard
         title={`Total ${educatorLabel}`}
-        value="89"
+        value={overview?.totalFaculty?.toLocaleString() || "0"}
         icon={<UsersRound className="h-4 w-4" />}
         trend={{ value: 3.2, label: "active roles" }}
       />
       <CgMetricCard
         title={feesEnabled ? `${feeLabel} Collected` : `Active ${programLabel}`}
-        value={feesEnabled ? "INR 12.4L / 18L" : "42"}
+        value={feesEnabled ? "INR 12.4L / 18L" : (overview?.totalClassrooms?.toLocaleString() || "0")}
         icon={<WalletCards className="h-4 w-4" />}
         meta={feesEnabled ? "69% of current demand" : "Configured for this profile"}
       />
