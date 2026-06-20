@@ -1,4 +1,4 @@
-﻿/**
+/**
  * strategy-selector.js — Admission Strategy Factory (v2: Universal Master Pool)
  *
  * Architecture:
@@ -519,10 +519,10 @@ const ADMISSION_STRATEGIES = {
 
     school_with_div: {
         auth_method: "phone_otp",
-        ranking_type: "merit_percentage",
+        ranking_type: "direct",
         seat_types: ["GENERAL", "RTE", "MANAGEMENT"],
         entry_modes: ["PORTAL", "DESK"],
-        workflow_variant: "standard",
+        workflow_variant: "fast_track",
         requires_printout: true,
         govt_exports: ["saral_csv"],
         supports_rla: false,
@@ -532,10 +532,10 @@ const ADMISSION_STRATEGIES = {
 
     school_no_div: {
         auth_method: "phone_otp",
-        ranking_type: "merit_percentage",
+        ranking_type: "direct",
         seat_types: ["GENERAL", "RTE", "MANAGEMENT"],
         entry_modes: ["PORTAL", "DESK"],
-        workflow_variant: "standard",
+        workflow_variant: "fast_track",
         requires_printout: true,
         govt_exports: ["saral_csv"],
         supports_rla: false,
