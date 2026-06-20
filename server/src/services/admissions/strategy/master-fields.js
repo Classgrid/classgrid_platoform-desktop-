@@ -205,18 +205,18 @@ const MASTER_FIELD_POOL = {
     academic_history: {
         label: "Academic History",
         fields: [
-            { key: "10th_board", label: "10th Board", type: "text" },
+            { key: "10th_board", label: "10th Board", type: "dropdown", options: ["State Board", "CBSE", "ICSE", "IB", "IGCSE", "Other"] },
             { key: "10th_percentage", label: "10th Percentage", type: "number" },
-            { key: "12th_board", label: "12th Board", type: "text" },
+            { key: "12th_board", label: "12th Board", type: "dropdown", options: ["State Board", "CBSE", "ICSE", "IB", "IGCSE", "Other"] },
             { key: "12th_percentage", label: "12th Percentage", type: "number" },
             { key: "pcm_percentage", label: "PCM Percentage", type: "number" },
             { key: "diploma_percentage", label: "Diploma Percentage", type: "number" },
-            { key: "stream_applying", label: "Stream Applying For", type: "text" },
+            { key: "stream_applying", label: "Stream Applying For", type: "dropdown", options: ["Science", "Commerce", "Arts", "Vocational", "Diploma", "Engineering", "Medical"] },
             { key: "previous_school", label: "Previous School/College", type: "text" },
             { key: "previous_percentage", label: "Previous Percentage", type: "number" },
-            { key: "standard_applying", label: "Standard Applying For", type: "text" },
-            { key: "course_selected", label: "Course Selected", type: "text" },
-            { key: "batch_preferred", label: "Batch Preferred", type: "text" },
+            { key: "standard_applying", label: "Standard Applying For", type: "dropdown", options: ["11th", "12th", "First Year (FY)", "Second Year (SY)", "Third Year (TY)", "Fourth Year", "PG First Year", "PG Second Year"] },
+            { key: "course_selected", label: "Course Selected", type: "dropdown", options: ["B.E. / B.Tech", "B.Sc", "B.Com", "B.A.", "BBA", "BCA", "Diploma", "M.E. / M.Tech", "MBA", "MCA"] },
+            { key: "batch_preferred", label: "Batch Preferred", type: "dropdown", options: ["Morning", "Afternoon", "Evening", "Weekend"] },
         ]
     },
 
