@@ -167,8 +167,15 @@ export function FormBuilderPage() {
                         {field.label}
                         {isLocked && <CgBadge variant="warning" size="sm">Locked by CET</CgBadge>}
                       </div>
-                      <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                        Type: {field.type}
+                      <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                        <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
+                          {field.type}
+                        </span>
+                        {field.options && (
+                          <span style={{ opacity: 0.8 }}>
+                            Options: {field.options.join(", ")}
+                          </span>
+                        )}
                       </div>
                     </div>
 
