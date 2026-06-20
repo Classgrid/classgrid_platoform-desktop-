@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, FileText, LayoutList } from "lucide-react";
 import { CgPageShell, CgSectionPanel, CgAlert, CgBadge } from "@/components/classgrid";
-import { useMasterFieldPool, useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
+import { useMasterFieldPool, useMasterDocumentPool, useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
 
 // ═══════════════════════════════════════════════════════════════
-// FormBuilderPage — Phase 2: Real UI for Field Toggles
+// FormBuilderPage — Phase 2.5: UI for Fields AND Documents
 // ═══════════════════════════════════════════════════════════════
 
 type FieldToggle = {
@@ -14,56 +14,72 @@ type FieldToggle = {
   is_required?: boolean;
 };
 
+type DocToggle = {
+  key: string;
+  admission: boolean;
+  onboarding: boolean;
+};
+
 export function FormBuilderPage() {
   const { data: poolData, isLoading: poolLoading, isError: poolError } = useMasterFieldPool();
+  const { data: docPoolData, isLoading: docLoading, isError: docError } = useMasterDocumentPool();
   const { data: configResponse, isLoading: configLoading, isError: configError } = useAdmissionConfig();
   const updateConfig = useUpdateAdmissionConfig();
 
+  const [activeTab, setActiveTab] = useState<"fields" | "documents">("fields");
+
   // Local state for the toggles before saving
   const [toggles, setToggles] = useState<Record<string, FieldToggle>>({});
+  const [docToggles, setDocToggles] = useState<Record<string, DocToggle>>({});
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize state from backend data
   useEffect(() => {
-    if (configResponse && poolData && !isInitialized) {
+    if (configResponse && poolData && docPoolData && !isInitialized) {
       const existingToggles = configResponse.config?.form_builder_config?.field_toggles || [];
       const toggleMap: Record<string, FieldToggle> = {};
-      
-      // Convert array to map for easy O(1) lookups and updates
-      existingToggles.forEach((t: FieldToggle) => {
-        toggleMap[t.key] = t;
-      });
+      existingToggles.forEach((t: FieldToggle) => toggleMap[t.key] = t);
+
+      const existingDocToggles = configResponse.config?.form_builder_config?.document_toggles || [];
+      const docToggleMap: Record<string, DocToggle> = {};
+      existingDocToggles.forEach((t: DocToggle) => docToggleMap[t.key] = t);
 
       setToggles(toggleMap);
+      setDocToggles(docToggleMap);
       setIsInitialized(true);
     }
-  }, [configResponse, poolData, isInitialized]);
+  }, [configResponse, poolData, docPoolData, isInitialized]);
 
   const handleToggleChange = (fieldKey: string, prop: keyof FieldToggle, value: boolean) => {
     setToggles(prev => {
       const current = prev[fieldKey] || { key: fieldKey, admission: false, onboarding: false, is_required: false };
-      return {
-        ...prev,
-        [fieldKey]: { ...current, [prop]: value }
-      };
+      return { ...prev, [fieldKey]: { ...current, [prop]: value } };
+    });
+  };
+
+  const handleDocToggleChange = (docKey: string, prop: keyof DocToggle, value: boolean) => {
+    setDocToggles(prev => {
+      const current = prev[docKey] || { key: docKey, admission: false, onboarding: false };
+      return { ...prev, [docKey]: { ...current, [prop]: value } };
     });
   };
 
   const handleSave = () => {
-    // Convert map back to array for backend
     const fieldTogglesArray = Object.values(toggles).filter(t => t.admission || t.onboarding);
+    const docTogglesArray = Object.values(docToggles).filter(t => t.admission || t.onboarding);
 
     updateConfig.mutate({
       admission_config: {
         form_builder_config: {
           ...configResponse?.config?.form_builder_config,
-          field_toggles: fieldTogglesArray
+          field_toggles: fieldTogglesArray,
+          document_toggles: docTogglesArray
         }
       }
     });
   };
 
-  if (poolLoading || configLoading) {
+  if (poolLoading || configLoading || docLoading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
         <Loader2 size={24} className="cg-spin" />
@@ -71,7 +87,7 @@ export function FormBuilderPage() {
     );
   }
 
-  if (poolError || configError) {
+  if (poolError || configError || docError) {
     return (
       <CgPageShell title="Form Builder">
         <CgAlert variant="danger" title="API Error">Could not connect to backend services.</CgAlert>
@@ -82,7 +98,7 @@ export function FormBuilderPage() {
   return (
     <CgPageShell
       title="Dynamic Form Builder"
-      description="Select which fields candidates see during Admission and Onboarding. Connected directly to your master strategy engine."
+      description="Configure both the textual fields and the required document uploads for your admission pipeline."
       breadcrumbs={[
         { label: "Admissions", to: "/dept/admissions/dashboard" },
         { label: "Form Builder" },
@@ -90,7 +106,7 @@ export function FormBuilderPage() {
     >
       {updateConfig.isSuccess && (
         <CgAlert variant="success" title="Successfully Saved!">
-          Your admission form fields have been updated across the entire portal.
+          Your form fields and required documents have been updated across the entire portal.
         </CgAlert>
       )}
 
@@ -110,9 +126,9 @@ export function FormBuilderPage() {
         boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
       }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>Configure Form Fields</h3>
+          <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>Configure Form & Documents</h3>
           <p style={{ margin: 0, fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
-            Select fields below, then click save to apply them.
+            Select fields and document uploads below, then click save.
           </p>
         </div>
         <button 
@@ -126,95 +142,198 @@ export function FormBuilderPage() {
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-        {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => (
-          <CgSectionPanel key={sectionKey} title={section.label}>
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "2fr 1fr 1fr 1fr", 
-              gap: "1rem", 
-              paddingBottom: "0.5rem",
-              borderBottom: "1px solid hsl(var(--border))",
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              color: "hsl(var(--muted-foreground))"
-            }}>
-              <div>Field Name</div>
-              <div style={{ textAlign: "center" }}>Admission Form</div>
-              <div style={{ textAlign: "center" }}>Onboarding Form</div>
-              <div style={{ textAlign: "center" }}>Required</div>
-            </div>
+      {/* TABS */}
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))" }}>
+        <button
+          onClick={() => setActiveTab("fields")}
+          style={{
+            display: "flex", alignItems: "center", gap: "0.5rem",
+            padding: "0.75rem 1.5rem",
+            background: activeTab === "fields" ? "hsl(var(--primary) / 0.1)" : "transparent",
+            border: "none",
+            borderBottom: activeTab === "fields" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
+            color: activeTab === "fields" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+            fontWeight: 600,
+            cursor: "pointer"
+          }}
+        >
+          <LayoutList size={18} /> Basic Fields
+        </button>
+        <button
+          onClick={() => setActiveTab("documents")}
+          style={{
+            display: "flex", alignItems: "center", gap: "0.5rem",
+            padding: "0.75rem 1.5rem",
+            background: activeTab === "documents" ? "hsl(var(--primary) / 0.1)" : "transparent",
+            border: "none",
+            borderBottom: activeTab === "documents" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
+            color: activeTab === "documents" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+            fontWeight: 600,
+            cursor: "pointer"
+          }}
+        >
+          <FileText size={18} /> Document Uploads
+        </button>
+      </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
-              {section.fields.map((field: any) => {
-                const currentToggle = toggles[field.key] || { admission: false, onboarding: false, is_required: false };
-                const isLocked = field.locked_by_cet; // Engineering locked fields
+      {/* ── FIELDS TAB ── */}
+      {activeTab === "fields" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => (
+            <CgSectionPanel key={sectionKey} title={section.label}>
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "2fr 1fr 1fr 1fr", 
+                gap: "1rem", 
+                paddingBottom: "0.5rem",
+                borderBottom: "1px solid hsl(var(--border))",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                color: "hsl(var(--muted-foreground))"
+              }}>
+                <div>Field Name</div>
+                <div style={{ textAlign: "center" }}>Admission Form</div>
+                <div style={{ textAlign: "center" }}>Onboarding Form</div>
+                <div style={{ textAlign: "center" }}>Required</div>
+              </div>
 
-                return (
-                  <div key={field.key} style={{ 
-                    display: "grid", 
-                    gridTemplateColumns: "2fr 1fr 1fr 1fr", 
-                    gap: "1rem",
-                    alignItems: "center",
-                    padding: "0.75rem",
-                    background: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.05)" : "transparent",
-                    border: "1px solid",
-                    borderColor: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.2)" : "hsl(var(--border))",
-                    borderRadius: "var(--radius)"
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        {field.label}
-                        {isLocked && <CgBadge variant="warning" size="sm">Locked by CET</CgBadge>}
-                      </div>
-                      <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                        <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
-                          {field.type}
-                        </span>
-                        {field.options && (
-                          <span style={{ opacity: 0.8 }}>
-                            Options: {field.options.join(", ")}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
+                {section.fields.map((field: any) => {
+                  const currentToggle = toggles[field.key] || { admission: false, onboarding: false, is_required: false };
+                  const isLocked = field.locked_by_cet;
+
+                  return (
+                    <div key={field.key} style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: "2fr 1fr 1fr 1fr", 
+                      gap: "1rem",
+                      alignItems: "center",
+                      padding: "0.75rem",
+                      background: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.05)" : "transparent",
+                      border: "1px solid",
+                      borderColor: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.2)" : "hsl(var(--border))",
+                      borderRadius: "var(--radius)"
+                    }}>
+                      <div>
+                        <div style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          {field.label}
+                          {isLocked && <CgBadge variant="warning" size="sm">Locked by CET</CgBadge>}
+                        </div>
+                        <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                          <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
+                            {field.type}
                           </span>
-                        )}
+                          {field.options && (
+                            <span style={{ opacity: 0.8 }}>Options: {field.options.join(", ")}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <input 
+                          type="checkbox" 
+                          disabled={isLocked}
+                          checked={currentToggle.admission || isLocked} 
+                          onChange={(e) => handleToggleChange(field.key, "admission", e.target.checked)}
+                          style={{ width: "18px", height: "18px", cursor: isLocked ? "not-allowed" : "pointer" }}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <input 
+                          type="checkbox" 
+                          disabled={isLocked}
+                          checked={currentToggle.onboarding || isLocked} 
+                          onChange={(e) => handleToggleChange(field.key, "onboarding", e.target.checked)}
+                          style={{ width: "18px", height: "18px", cursor: isLocked ? "not-allowed" : "pointer" }}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <input 
+                          type="checkbox" 
+                          disabled={isLocked || (!currentToggle.admission && !currentToggle.onboarding)}
+                          checked={currentToggle.is_required || isLocked} 
+                          onChange={(e) => handleToggleChange(field.key, "is_required", e.target.checked)}
+                          style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                        />
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            </CgSectionPanel>
+          ))}
+        </div>
+      )}
 
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <input 
-                        type="checkbox" 
-                        disabled={isLocked}
-                        checked={currentToggle.admission || isLocked} 
-                        onChange={(e) => handleToggleChange(field.key, "admission", e.target.checked)}
-                        style={{ width: "18px", height: "18px", cursor: isLocked ? "not-allowed" : "pointer" }}
-                      />
-                    </div>
+      {/* ── DOCUMENTS TAB ── */}
+      {activeTab === "documents" && (
+        <CgSectionPanel title="Required Documents">
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "2fr 1fr 1fr", 
+            gap: "1rem", 
+            paddingBottom: "0.5rem",
+            borderBottom: "1px solid hsl(var(--border))",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            color: "hsl(var(--muted-foreground))"
+          }}>
+            <div>Document Name</div>
+            <div style={{ textAlign: "center" }}>Upload in Admission Form</div>
+            <div style={{ textAlign: "center" }}>Upload in Onboarding Form</div>
+          </div>
 
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <input 
-                        type="checkbox" 
-                        disabled={isLocked}
-                        checked={currentToggle.onboarding || isLocked} 
-                        onChange={(e) => handleToggleChange(field.key, "onboarding", e.target.checked)}
-                        style={{ width: "18px", height: "18px", cursor: isLocked ? "not-allowed" : "pointer" }}
-                      />
-                    </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
+            {docPoolData?.map((doc: any) => {
+              const currentToggle = docToggles[doc.key] || { admission: false, onboarding: false };
 
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <input 
-                        type="checkbox" 
-                        disabled={isLocked || (!currentToggle.admission && !currentToggle.onboarding)}
-                        checked={currentToggle.is_required || isLocked} 
-                        onChange={(e) => handleToggleChange(field.key, "is_required", e.target.checked)}
-                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
-                      />
+              return (
+                <div key={doc.key} style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "2fr 1fr 1fr", 
+                  gap: "1rem",
+                  alignItems: "center",
+                  padding: "0.75rem",
+                  background: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.05)" : "transparent",
+                  border: "1px solid",
+                  borderColor: currentToggle.admission || currentToggle.onboarding ? "hsl(var(--primary) / 0.2)" : "hsl(var(--border))",
+                  borderRadius: "var(--radius)"
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 500 }}>{doc.label}</div>
+                    <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem" }}>
+                      <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
+                        file_upload
+                      </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CgSectionPanel>
-        ))}
-      </div>
+
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={currentToggle.admission} 
+                      onChange={(e) => handleDocToggleChange(doc.key, "admission", e.target.checked)}
+                      style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={currentToggle.onboarding} 
+                      onChange={(e) => handleDocToggleChange(doc.key, "onboarding", e.target.checked)}
+                      style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CgSectionPanel>
+      )}
+
     </CgPageShell>
   );
 }

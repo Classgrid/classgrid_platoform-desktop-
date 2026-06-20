@@ -284,6 +284,11 @@ export async function getMasterDocumentPool() {
   return response.data;
 }
 
+export async function getMasterDocumentPool() {
+  const response = await apiClient.get("/api/admission/master-document-pool");
+  return response.data;
+}
+
 export async function injectPreset(preset: string) {
   const response = await apiClient.post("/api/admission/config/preset", { preset });
   return response.data;
