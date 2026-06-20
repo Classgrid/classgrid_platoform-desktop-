@@ -261,10 +261,59 @@ export function FormBuilderPage() {
                           {field.options && !isLocationField && (
                             <span style={{ opacity: 0.8 }}>Options: {field.options.join(", ")}</span>
                           )}
-                          {isLocationField && (
-                            <span style={{ opacity: 0.8 }}>Powered by india-locations.json</span>
-                          )}
                         </div>
+
+                        {/* Special Preview for the 7000+ line Custom Dataset */}
+                        {isLocationField && (
+                          <div style={{ marginTop: "0.75rem", padding: "0.5rem", background: "hsl(var(--primary) / 0.05)", borderRadius: "var(--radius)", border: "1px solid hsl(var(--primary) / 0.2)" }}>
+                            <div style={{ fontSize: "0.75rem", color: "hsl(var(--primary))", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              ✨ Connected to 7,389+ Custom Locations Dataset
+                            </div>
+                            
+                            {field.key.endsWith("_country") && (
+                              <select disabled style={{ marginTop: "0.5rem", padding: "0.25rem 0.5rem", borderRadius: "4px", border: "1px solid hsl(var(--border))", width: "250px", fontSize: "0.75rem", opacity: 0.8 }}>
+                                <option>India</option>
+                                <option>Afghanistan</option>
+                                <option>Australia</option>
+                                <option>United States of America (USA)</option>
+                                <option>...and 190+ more</option>
+                              </select>
+                            )}
+                            
+                            {field.key.endsWith("_state") && (
+                              <select disabled style={{ marginTop: "0.5rem", padding: "0.25rem 0.5rem", borderRadius: "4px", border: "1px solid hsl(var(--border))", width: "250px", fontSize: "0.75rem", opacity: 0.8 }}>
+                                <option>Preview States...</option>
+                                <option>Maharashtra</option>
+                                <option>Gujarat</option>
+                                <option>Delhi</option>
+                                <option>Karnataka</option>
+                                <option>...and 24+ more states</option>
+                              </select>
+                            )}
+
+                            {field.key.endsWith("_district") && (
+                              <select disabled style={{ marginTop: "0.5rem", padding: "0.25rem 0.5rem", borderRadius: "4px", border: "1px solid hsl(var(--border))", width: "250px", fontSize: "0.75rem", opacity: 0.8 }}>
+                                <option>Preview Districts...</option>
+                                <option>Pune</option>
+                                <option>Mumbai</option>
+                                <option>Thane</option>
+                                <option>Nagpur</option>
+                                <option>...and 700+ more districts</option>
+                              </select>
+                            )}
+
+                            {field.key.endsWith("_taluka") && (
+                              <select disabled style={{ marginTop: "0.5rem", padding: "0.25rem 0.5rem", borderRadius: "4px", border: "1px solid hsl(var(--border))", width: "250px", fontSize: "0.75rem", opacity: 0.8 }}>
+                                <option>Preview Talukas...</option>
+                                <option>Haveli</option>
+                                <option>Maval</option>
+                                <option>Andheri</option>
+                                <option>Borivali</option>
+                                <option>...and 6000+ more talukas</option>
+                              </select>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ display: "flex", justifyContent: "center" }}>
