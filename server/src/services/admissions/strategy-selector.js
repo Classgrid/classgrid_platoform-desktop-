@@ -85,13 +85,7 @@ const MASTER_FIELD_POOL = {
         label: "Birth & Native Place",
         fields: [
             { key: "birth_place", label: "Birth Place", type: "text" },
-            { key: "birth_country", label: "Birth Country", type: "dropdown", options: ["India", "USA", "UK", "Canada", "Australia", "Other"] },
-            { key: "birth_state", label: "Birth State", type: "dropdown", options: ["Maharashtra", "Gujarat", "Delhi", "Karnataka", "Tamil Nadu", "Other"] },
-            { key: "birth_district", label: "Birth District", type: "dropdown", options: ["Pune", "Mumbai", "Thane", "Nagpur", "Nashik", "Other"] },
             { key: "native_place", label: "Native Place", type: "text" },
-            { key: "native_country", label: "Native Country", type: "dropdown", options: ["India", "USA", "UK", "Canada", "Australia", "Other"] },
-            { key: "native_state", label: "Native State", type: "dropdown", options: ["Maharashtra", "Gujarat", "Delhi", "Karnataka", "Tamil Nadu", "Other"] },
-            { key: "native_district", label: "Native District", type: "dropdown", options: ["Pune", "Mumbai", "Thane", "Nagpur", "Nashik", "Other"] },
             { key: "native_area_type", label: "Native Area Type", type: "dropdown", options: ["Rural", "Urban"] },
         ]
     },
