@@ -27,6 +27,7 @@ export function FormBuilderPage() {
   const updateConfig = useUpdateAdmissionConfig();
 
   const [activeTab, setActiveTab] = useState<"fields" | "documents">("fields");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Local state for the toggles before saving
   const [toggles, setToggles] = useState<Record<string, FieldToggle>>({});
@@ -142,44 +143,74 @@ export function FormBuilderPage() {
         </button>
       </div>
 
-      {/* TABS */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))" }}>
-        <button
-          onClick={() => setActiveTab("fields")}
-          style={{
-            display: "flex", alignItems: "center", gap: "0.5rem",
-            padding: "0.75rem 1.5rem",
-            background: activeTab === "fields" ? "hsl(var(--primary) / 0.1)" : "transparent",
-            border: "none",
-            borderBottom: activeTab === "fields" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
-            color: activeTab === "fields" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-        >
-          <LayoutList size={18} /> Basic Fields
-        </button>
-        <button
-          onClick={() => setActiveTab("documents")}
-          style={{
-            display: "flex", alignItems: "center", gap: "0.5rem",
-            padding: "0.75rem 1.5rem",
-            background: activeTab === "documents" ? "hsl(var(--primary) / 0.1)" : "transparent",
-            border: "none",
-            borderBottom: activeTab === "documents" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
-            color: activeTab === "documents" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-        >
-          <FileText size={18} /> Document Uploads
-        </button>
+      {/* TABS & SEARCH BAR */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))" }}>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <button
+            onClick={() => setActiveTab("fields")}
+            style={{
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              padding: "0.75rem 1.5rem",
+              background: activeTab === "fields" ? "hsl(var(--primary) / 0.1)" : "transparent",
+              border: "none",
+              borderBottom: activeTab === "fields" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
+              color: activeTab === "fields" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            <LayoutList size={18} /> Basic Fields
+          </button>
+          <button
+            onClick={() => setActiveTab("documents")}
+            style={{
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              padding: "0.75rem 1.5rem",
+              background: activeTab === "documents" ? "hsl(var(--primary) / 0.1)" : "transparent",
+              border: "none",
+              borderBottom: activeTab === "documents" ? "2px solid hsl(var(--primary))" : "2px solid transparent",
+              color: activeTab === "documents" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            <FileText size={18} /> Document Uploads
+          </button>
+        </div>
+
+        {/* SEARCH BAR */}
+        <div style={{ paddingBottom: "0.5rem" }}>
+          <input
+            type="search"
+            placeholder={activeTab === "fields" ? "Search 111+ fields..." : "Search documents..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: "var(--radius)",
+              border: "1px solid hsl(var(--border))",
+              background: "hsl(var(--background))",
+              width: "250px",
+              fontSize: "0.9rem"
+            }}
+          />
+        </div>
       </div>
 
       {/* ── FIELDS TAB ── */}
       {activeTab === "fields" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => (
+          {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => {
+            // Filter fields in this section
+            const filteredFields = section.fields.filter((field: any) => 
+              field.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
+              field.key.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            // If a search query exists and no fields match, hide the section
+            if (searchQuery && filteredFields.length === 0) return null;
+
+            return (
             <CgSectionPanel key={sectionKey} title={section.label}>
               <div style={{ 
                 display: "grid", 
@@ -198,7 +229,7 @@ export function FormBuilderPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
-                {section.fields.map((field: any) => {
+                {filteredFields.map((field: any) => {
                   const currentToggle = toggles[field.key] || { admission: false, onboarding: false, is_required: false };
                   const isLocked = field.locked_by_cet;
 
@@ -263,7 +294,7 @@ export function FormBuilderPage() {
                 })}
               </div>
             </CgSectionPanel>
-          ))}
+          )})}
         </div>
       )}
 
@@ -286,7 +317,9 @@ export function FormBuilderPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
-            {docPoolData?.map((doc: any) => {
+            {docPoolData
+              ?.filter((doc: any) => doc.label.toLowerCase().includes(searchQuery.toLowerCase()) || doc.key.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((doc: any) => {
               const currentToggle = docToggles[doc.key] || { admission: false, onboarding: false };
 
               return (
