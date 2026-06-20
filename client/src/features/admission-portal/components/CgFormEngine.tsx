@@ -43,10 +43,10 @@ function FieldRenderer({
   disabled: boolean;
   formData: Record<string, any>;
 }) {
+  if (!field || !field.id) return null;
+
   const htmlType = normalizeType(field.type);
 
-  // ── Cascading Location Logic ──
-  // Check if this field is a location field (e.g., native_country, permanent_state, etc.)
   const isCountry = field.id.endsWith("_country");
   const isState = field.id.endsWith("_state");
   const isDistrict = field.id.endsWith("_district");
@@ -55,12 +55,11 @@ function FieldRenderer({
   if (isCountry || isState || isDistrict || isTaluka) {
     const prefixMatch = field.id.match(/^(.*?)_(country|state|district|taluka)$/);
     if (prefixMatch) {
-      const prefix = prefixMatch[1]; // e.g., "native", "permanent", "current"
+      const prefix = prefixMatch[1];
       const selectedCountry = formData[`${prefix}_country`] || "India";
       const selectedState = formData[`${prefix}_state`];
       const selectedDistrict = formData[`${prefix}_district`];
 
-      // If country is not India, render text inputs for State, District, Taluka
       if (selectedCountry !== "India" && !isCountry) {
         return (
           <input
@@ -80,7 +79,6 @@ function FieldRenderer({
         options = COUNTRIES;
       } else if (isState) {
         options = Object.keys(indiaLocationsData.states || {});
-        // "Other" option
         options.push("Other");
       } else if (isDistrict && selectedState && indiaLocationsData.states[selectedState as keyof typeof indiaLocationsData.states]) {
         options = Object.keys(indiaLocationsData.states[selectedState as keyof typeof indiaLocationsData.states] || {});
@@ -93,7 +91,6 @@ function FieldRenderer({
         options.push("Other");
       }
 
-      // If it's a state/district/taluka but the parent hasn't been selected yet
       if (!isCountry && options.length === 0 && !value) {
         return (
           <select className="cg-form__input" disabled>
@@ -102,10 +99,6 @@ function FieldRenderer({
         );
       }
 
-      // The conditionally rendered text input for "Other"
-      // If the currently saved value is NOT in the generated options array AND the options array exists AND has length > 0
-      // That means they chose "Other" and typed a custom string, OR they are currently typing "Other"
-      // Wait, let's manage internal state for "isOther" or rely on the value.
       const isOtherCustomValue = value && !options.includes(value) && value !== "Other";
       const displaySelectValue = isOtherCustomValue ? "Other" : (value || "");
 
@@ -131,7 +124,6 @@ function FieldRenderer({
             ))}
           </select>
 
-          {/* Conditionally render text input if "Other" is selected or custom value exists */}
           {(displaySelectValue === "Other" || isOtherCustomValue) && (
             <input
               type="text"

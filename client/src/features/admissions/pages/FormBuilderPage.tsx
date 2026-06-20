@@ -232,10 +232,6 @@ export function FormBuilderPage() {
                 {filteredFields.map((field: any) => {
                   const currentToggle = toggles[field.key] || { admission: false, onboarding: false, is_required: false };
                   const isLocked = field.locked_by_cet;
-                  
-                  // Make it clear to the Admin that these are cascading dropdowns in the student view
-                  const isLocationField = field.key.endsWith("_country") || field.key.endsWith("_state") || field.key.endsWith("_district") || field.key.endsWith("_taluka");
-                  const displayType = isLocationField ? "cascading-dropdown" : field.type;
 
                   return (
                     <div key={field.key} style={{ 
@@ -256,13 +252,10 @@ export function FormBuilderPage() {
                         </div>
                         <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                           <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
-                            {displayType}
+                            {field.type}
                           </span>
-                          {field.options && !isLocationField && (
+                          {field.options && (
                             <span style={{ opacity: 0.8 }}>Options: {field.options.join(", ")}</span>
-                          )}
-                          {isLocationField && (
-                            <span style={{ opacity: 0.8 }}>Powered by india-locations.json</span>
                           )}
                         </div>
                       </div>
