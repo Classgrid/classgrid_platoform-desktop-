@@ -87,22 +87,44 @@ export function FormBuilderPage() {
         { label: "Admissions", to: "/dept/admissions/dashboard" },
         { label: "Form Builder" },
       ]}
-      actions={
-        <button 
-          className="cg-btn cg-btn--primary" 
-          onClick={handleSave} 
-          disabled={updateConfig.isPending}
-        >
-          {updateConfig.isPending ? <Loader2 size={16} className="cg-spin" /> : <Save size={16} />}
-          Save Form Configuration
-        </button>
-      }
     >
       {updateConfig.isSuccess && (
         <CgAlert variant="success" title="Successfully Saved!">
           Your admission form fields have been updated across the entire portal.
         </CgAlert>
       )}
+
+      {/* Floating Save Bar */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "1rem 1.5rem",
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border))",
+        borderRadius: "var(--radius)",
+        marginBottom: "2rem",
+        position: "sticky",
+        top: "1rem",
+        zIndex: 10,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+      }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>Configure Form Fields</h3>
+          <p style={{ margin: 0, fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+            Select fields below, then click save to apply them.
+          </p>
+        </div>
+        <button 
+          className="cg-btn cg-btn--primary" 
+          onClick={handleSave} 
+          disabled={updateConfig.isPending}
+          style={{ padding: "0.75rem 1.5rem", fontSize: "1rem" }}
+        >
+          {updateConfig.isPending ? <Loader2 size={18} className="cg-spin" /> : <Save size={18} />}
+          Save Form Configuration
+        </button>
+      </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => (
