@@ -252,20 +252,60 @@ export function FormBuilderPage() {
                         </div>
                         <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                           <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
-                            {field.key.includes("_country") || field.key.includes("_state") || field.key.includes("_district") || field.key.includes("_taluka") ? "dropdown" : field.type}
+                            {field?.key?.includes("_country") || field?.key?.includes("_state") || field?.key?.includes("_district") || field?.key?.includes("_taluka") ? "dropdown" : field.type}
                           </span>
-                          {(field.options || field.key.includes("_country") || field.key.includes("_state") || field.key.includes("_district") || field.key.includes("_taluka")) && (
+                          {(field.options || field?.key?.includes("_country") || field?.key?.includes("_state") || field?.key?.includes("_district") || field?.key?.includes("_taluka")) && (
                             <span style={{ opacity: 0.8 }}>
                               Options: {
                                 field.options ? field.options.join(", ") : 
-                                field.key.includes("_country") ? "India, USA, UK, Canada, Australia, Other" :
-                                field.key.includes("_state") ? "Maharashtra, Gujarat, Delhi, Karnataka, Tamil Nadu, Other" :
-                                field.key.includes("_district") ? "Pune, Mumbai, Thane, Nagpur, Nashik, Other" :
-                                field.key.includes("_taluka") ? "Haveli, Pune City, Maval, Mulshi, Other" : ""
+                                field?.key?.includes("_country") ? "India, USA, UK, Canada, Australia, Other" :
+                                field?.key?.includes("_state") ? "Maharashtra, Gujarat, Delhi, Karnataka, Tamil Nadu, Other" :
+                                field?.key?.includes("_district") ? "Pune, Mumbai, Thane, Nagpur, Nashik, Other" :
+                                field?.key?.includes("_taluka") ? "7,300+ Indian Talukas" : ""
                               }
                             </span>
                           )}
                         </div>
+
+                        {/* Interactive Dropdown Previews for Admin Verification */}
+                        {field?.key?.endsWith("_country") && (
+                          <div style={{ marginTop: "0.75rem" }}>
+                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                              <option value="" disabled selected>Select Country</option>
+                              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </div>
+                        )}
+                        
+                        {field?.key?.endsWith("_state") && (
+                          <div style={{ marginTop: "0.75rem" }}>
+                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                              <option value="" disabled selected>Select State</option>
+                              {Object.keys(indiaLocationsData.states || {}).map(s => <option key={s} value={s}>{s}</option>)}
+                              <option>Other</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {field?.key?.endsWith("_district") && (
+                          <div style={{ marginTop: "0.75rem" }}>
+                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                              <option value="" disabled selected>Select District</option>
+                              {Object.values(indiaLocationsData.states || {}).flatMap((stateObj: any) => Object.keys(stateObj || {})).slice(0, 50).map(d => <option key={d} value={d}>{d}</option>)}
+                              <option disabled>...</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {field?.key?.endsWith("_taluka") && (
+                          <div style={{ marginTop: "0.75rem" }}>
+                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                              <option value="" disabled selected>Select Taluka</option>
+                              <option disabled>Select a District to view Talukas</option>
+                            </select>
+                          </div>
+                        )}
+
                       </div>
 
                       <div style={{ display: "flex", justifyContent: "center" }}>
