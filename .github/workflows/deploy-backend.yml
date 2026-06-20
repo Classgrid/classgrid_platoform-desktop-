@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Go to the project folder
-            cd ~/classgrid_platoform-desktop-
+            cd ~/classgrid/current || cd ~/classgrid_platform || cd ~/classgrid_platoform-desktop-
             
             # Pull the latest code from GitHub forcefully
             git fetch origin main
@@ -26,5 +26,5 @@ jobs:
             
             # Go into server folder, install new packages, and restart PM2
             cd server
-            npm install
-            pm2 restart classgrid-backend
+            npm install --production
+            pm2 reload ecosystem.config.cjs --env production
