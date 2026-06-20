@@ -203,8 +203,8 @@ export function FormBuilderPage() {
           {Object.entries(poolData || {}).map(([sectionKey, section]: [string, any]) => {
             // Filter fields in this section
             const filteredFields = section.fields.filter((field: any) => 
-              field.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
-              field.key.toLowerCase().includes(searchQuery.toLowerCase())
+              (field?.label || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+              (field?.key || "").toLowerCase().includes(searchQuery.toLowerCase())
             );
 
             // If a search query exists and no fields match, hide the section
@@ -258,45 +258,6 @@ export function FormBuilderPage() {
                             <span style={{ opacity: 0.8 }}>Options: {field.options.join(", ")}</span>
                           )}
                         </div>
-
-                        {/* Functional Preview for Location Fields */}
-                        {field.key.endsWith("_country") && (
-                          <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.8rem", padding: "0.25rem 0.5rem" }}>
-                              <option value="">Preview: Select Country</option>
-                              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                          </div>
-                        )}
-                        
-                        {field.key.endsWith("_state") && (
-                          <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.8rem", padding: "0.25rem 0.5rem" }}>
-                              <option value="">Preview: Select State</option>
-                              {Object.keys(indiaLocationsData.states || {}).map(s => <option key={s} value={s}>{s}</option>)}
-                              <option>Other</option>
-                            </select>
-                          </div>
-                        )}
-
-                        {field.key.endsWith("_district") && (
-                          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
-                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.8rem", padding: "0.25rem 0.5rem" }}>
-                              <option value="">Preview: Select District (Cascades from State)</option>
-                              {Object.values(indiaLocationsData.states || {}).flatMap(stateObj => Object.keys(stateObj)).slice(0, 50).map(d => <option key={d} value={d}>{d}</option>)}
-                              <option disabled>...and 650+ more</option>
-                            </select>
-                          </div>
-                        )}
-
-                        {field.key.endsWith("_taluka") && (
-                          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
-                            <select className="cg-form__input" style={{ width: "250px", fontSize: "0.8rem", padding: "0.25rem 0.5rem" }}>
-                              <option value="">Preview: Select Taluka (Cascades from District)</option>
-                              <option disabled>7,300+ Talukas loaded</option>
-                            </select>
-                          </div>
-                        )}
                       </div>
 
                       <div style={{ display: "flex", justifyContent: "center" }}>
