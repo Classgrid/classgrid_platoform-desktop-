@@ -12,9 +12,6 @@ function escapeHtml(value = "") {
 function getMarketingSiteUrl() {
     return (
         process.env.MARKETING_SITE_URL?.trim() ||
-        process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-        process.env.PUBLIC_SITE_URL?.trim() ||
-        process.env.FRONTEND_URL?.trim() ||
         (process.env.NODE_ENV === "production"
             ? "https://classgrid.in"
             : "http://localhost:3000")
@@ -145,7 +142,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
 </ul>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">(This link takes you to your secure ticket dashboard where you can view all messages and respond.)</p>
+
 <div style="text-align:center;margin:0 0 30px;">
 <a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
 </div>
@@ -234,7 +231,7 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl, admi
         "- Respond promptly – inactive tickets may be auto-closed after 48 hours.",
         "",
         "Warm regards,",
-        "The Classgrid Support Team",
+        "The Classgrid Team",
         "",
         "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
     ].join("\n");
@@ -359,7 +356,7 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
 </div>
 
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We appreciate your patience and trust in Classgrid. Our goal is to make your experience seamless and enjoyable.</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Sincerely,<br><strong>The Classgrid Support Team</strong></p>
+<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
@@ -424,8 +421,8 @@ function buildTicketCreationPlainText({ ticket, trackingUrl }) {
         "NEED TO REPLY?",
         "Simply respond directly to this email, and your message will be automatically appended to your ticket.",
         "",
-        "Sincerely,",
-        "The Classgrid Support Team",
+        "Warm regards,",
+        "The Classgrid Team",
         "",
         "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
     ].join("\n");
@@ -456,7 +453,7 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
     const currentYear = new Date().getFullYear();
     const subject = ticket.subject || "Classgrid Talk Request";
     const ticketIdShort = String(ticket._id).slice(0, 8);
-    const userName = ticket.submitterName || "Prospect";
+    const userName = ticket.submitterName || "User";
     const institutionLabel = ticket.institution || "Not provided";
     const categoryLabel = formatTicketLabel(ticket.category || "general");
     const priorityLabel = formatTicketLabel(ticket.priority || "medium");
@@ -495,8 +492,8 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <tr>
 <td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
-<p style="color:#cccccc;margin:0 0 15px;">Thank you for your interest in Classgrid.</p>
-<p style="color:#cccccc;margin:0 0 30px;">We have received your consultation request and saved the details below for our team to review.</p>
+<p style="color:#cccccc;margin:0 0 15px;">Thank you for contacting Classgrid.</p>
+<p style="color:#cccccc;margin:0 0 30px;">We have received your inquiry and saved the details below for our team to review.</p>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Request Summary</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
@@ -524,10 +521,7 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
 <td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
 </tr>
-<tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Assigned to</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(assignedToLabel)}</td>
-</tr>
+
 <tr>
 <td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Created</td>
 <td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(createdDate)}</td>
@@ -538,19 +532,15 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 30px;">
 <tr>
 <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;width:40%;">1. Review</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Our team will review the institution, subject, category, and priority saved on this request.</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Our team will review the details saved on this request.</td>
 </tr>
 <tr>
 <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">2. Assignment</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">A suitable Classgrid specialist will be assigned based on your request details.</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">A suitable Classgrid specialist will be assigned based on your needs.</td>
 </tr>
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">3. Consultation</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We will discuss your institution's goals, current workflows, and evaluation needs.</td>
-</tr>
-<tr>
-<td style="padding:10px 0;color:#ffffff;font-size:14px;font-weight:600;">4. Recommendations</td>
-<td style="padding:10px 0;color:#cccccc;font-size:14px;">You will receive guidance on product fit, implementation, onboarding, and support options.</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">3. Resolution</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We will work with you to provide the necessary support or information.</td>
 </tr>
 </table>
 
@@ -560,13 +550,8 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <li style="margin-bottom:10px;">🎥 <a href="https://classgrid.in/#demo" style="color:#34d399;text-decoration:none;">Product Demo</a> – Watch Classgrid in action</li>
 </ul>
 
-<div style="padding:20px;background:#161616;border-radius:10px;border:1px dashed #34d399;margin:0 0 30px;text-align:center;">
-  <h3 style="color:#34d399;font-size:15px;margin:0 0 8px;">A Note for You</h3>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">This is not a support ticket – we understand you're not a platform user yet. Think of this as your personalized discovery journey with Classgrid. No obligations. Just conversations.</p>
-</div>
-
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to learning about your institution and exploring how we can partner together.</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Talk Team</strong></p>
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
+<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
@@ -603,8 +588,8 @@ export function buildTalkRequestCreationPlainText({ ticket, trackingUrl }) {
         "",
         `Dear ${userName},`,
         "",
-        "Thank you for your interest in Classgrid.",
-        "We have received your consultation request and saved the details below for our team to review.",
+        "Thank you for contacting Classgrid.",
+        "We have received your inquiry and saved the details below for our team to review.",
         "",
         "REQUEST SUMMARY",
         `Request ID: #CG-TALK-${ticketIdShort}`,
@@ -613,26 +598,22 @@ export function buildTalkRequestCreationPlainText({ ticket, trackingUrl }) {
         `Category: ${categoryLabel}`,
         `Priority: ${priorityLabel}`,
         `Status: ${statusLabel}`,
-        `Assigned to: ${assignedToLabel}`,
+
         `Created: ${createdDate}`,
         "",
         "WHAT HAPPENS NEXT?",
-        "1. Review: Our team will review the institution, subject, category, and priority saved on this request.",
-        "2. Assignment: A suitable Classgrid specialist will be assigned based on your request details.",
-        "3. Consultation: We will discuss your institution's goals, current workflows, and evaluation needs.",
-        "4. Recommendations: You will receive guidance on product fit, implementation, onboarding, and support options.",
+        "1. Review: Our team will review the details saved on this request.",
+        "2. Assignment: A suitable Classgrid specialist will be assigned based on your needs.",
+        "3. Resolution: We will work with you to provide the necessary support or information.",
         "",
         "WHILE YOU WAIT",
         "Explore how Classgrid empowers institutions like yours:",
         "- Product Demo: https://classgrid.in/#demo",
         "",
-        "A NOTE FOR YOU",
-        "This is not a support ticket – we understand you're not a platform user yet. Think of this as your personalized discovery journey with Classgrid. No obligations. Just conversations.",
-        "",
-        "We look forward to learning about your institution and exploring how we can partner together.",
+        "We look forward to assisting you.",
         "",
         "Warm regards,",
-        "The Classgrid Talk Team",
+        "The Classgrid Team",
         "",
         "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
     ].join("\n");
@@ -730,7 +711,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 <div style="text-align:center;margin:0 0 40px;">
 <a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
-<p style="color:#9ca3af;font-size:12px;margin-top:10px;">(This link takes you to your secure ticket dashboard)</p>
+
 </div>
 
 <div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:center;">
@@ -743,36 +724,8 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
   ${specialistEmail ? `<p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 <a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;text-decoration:none;">${escapeHtml(specialistEmail)}</a></p>` : ''}
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Tips for Your Evaluation</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 30px;">
-<tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;width:40%;">Request a Live Demo</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Ask your specialist for a personalized screen-share walkthrough</td>
-</tr>
-<tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Set up a Sandbox</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We can provision a demo classroom for your faculty to test freely</td>
-</tr>
-<tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Invite Your Faculty</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Feel free to CC department heads or IT staff on this thread</td>
-</tr>
-<tr>
-<td style="padding:10px 0;color:#ffffff;font-size:14px;font-weight:600;">Explore Core Features</td>
-<td style="padding:10px 0;color:#cccccc;font-size:14px;">Deep-dive into Quizzes, Attendance, and Organization Analytics</td>
-</tr>
-</table>
-
-<div style="padding:20px;background:#161616;border-radius:10px;border:1px dashed #34d399;margin:0 0 30px;text-align:center;">
-  <h3 style="color:#34d399;font-size:15px;margin:0 0 8px;">Exploring Classgrid for your institution?</h3>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 10px;">Our team can help you understand how the platform supports admissions, fees, attendance, exams, results, communication, and day-to-day administration.</p>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">You can ask about modules, setup, migration, pricing, security, or whether Classgrid fits your institution before making any commitment.</p>
-</div>
-
-
-
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We're here to make your evaluation process smooth and insightful. Looking forward to connecting further!</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Best regards,<br><strong>The Classgrid Talk Team</strong></p>
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
+<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
@@ -782,7 +735,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
   <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
   <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk. If you no longer wish to receive these updates, reply with "UNSUBSCRIBE".</p>
+<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk.</p>
 </td>
 </tr>
 </table>
@@ -795,7 +748,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversationUrl, adminName, adminEmail }) {
     const ticketIdShort = String(ticket._id).slice(0, 8);
-    const userName = ticket.submitterName || "Prospect";
+    const userName = ticket.submitterName || "User";
     const specialistName = adminName || ticket.assignedToName || "Your Classgrid Talk Specialist";
     const specialistEmail = adminEmail?.trim() || "";
     const institutionLabel = ticket.institution || "Not provided";
@@ -835,21 +788,10 @@ export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversat
         specialistName,
         specialistEmail ? `Email: ${specialistEmail}` : "",
         "",
-        "TIPS FOR YOUR EVALUATION",
-        "- Request a Live Demo: Ask your specialist for a personalized screen-share walkthrough",
-        "- Set up a Sandbox: We can provision a demo classroom for your faculty to test freely",
-        "- Invite Your Faculty: Feel free to CC department heads or IT staff on this thread",
-        "- Explore Core Features: Deep-dive into Quizzes, Attendance, and Organization Analytics",
+        "We look forward to assisting you.",
         "",
-        "EXPLORING CLASSGRID FOR YOUR INSTITUTION?",
-        "Our team can help you understand how the platform supports admissions, fees, attendance, exams, results, communication, and day-to-day administration.",
-        "You can ask about modules, setup, migration, pricing, security, or whether Classgrid fits your institution before making any commitment.",
-        "",
-
-        "We're here to make your evaluation process smooth and insightful. Looking forward to connecting further!",
-        "",
-        "Best regards,",
-        "The Classgrid Talk Team",
+        "Warm regards,",
+        "The Classgrid Team",
         "",
         "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
     ].join("\n");
@@ -860,7 +802,7 @@ export async function notifyUserOfTalkRequestCreation({ ticket }) {
     if (!to) return { queued: false, reason: "missing_submitter_email" };
 
     const siteUrl = getMarketingSiteUrl();
-    const trackingUrl = `${siteUrl}/talk/requests/${ticket._id}?email=${encodeURIComponent(to)}`;
+    const trackingUrl = `${siteUrl}/support/requests/${ticket._id}?email=${encodeURIComponent(to)}`;
     const subject = `Classgrid Talk request received: ${ticket.subject || "Classgrid Talk Request"} | Classgrid`;
 
     const job = await enqueueEmail({
@@ -881,7 +823,7 @@ export async function notifyTalkCreatorOfAdminReply({ ticket, replyMessage, admi
     if (!to) return { queued: false, reason: "missing_submitter_email" };
 
     const siteUrl = getMarketingSiteUrl();
-    const conversationUrl = `${siteUrl}/talk/requests/${ticket._id}?email=${encodeURIComponent(to)}`;
+    const conversationUrl = `${siteUrl}/support/requests/${ticket._id}?email=${encodeURIComponent(to)}`;
     const ticketIdShort = String(ticket._id).slice(0, 8);
     const subject = `New Message from Your Classgrid Talk Specialist – Request #CG-TALK-${ticketIdShort}`;
 
