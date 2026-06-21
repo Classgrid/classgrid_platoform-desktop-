@@ -25,6 +25,10 @@ function formatReplyBody(message) {
     return escapeHtml(message).replace(/\r?\n/g, "<br>");
 }
 
+function stripHtml(html = "") {
+    return String(html).replace(/<[^>]*>?/gm, '').trim();
+}
+
 function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
     const currentYear = new Date().getFullYear();
     const subject = ticket.subject || "Support ticket";
@@ -96,7 +100,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Support Team Reply</h3>
 <div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
-  <p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;white-space:pre-wrap;">${formatReplyBody(replyMessage)}</p>
+  <div style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
@@ -104,7 +108,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 <li style="margin-bottom:10px;"><strong>Reply to this message:</strong> Simply respond to this email, and your reply will be added to the ticket.</li>
 <li style="margin-bottom:10px;"><strong>Add additional details:</strong> If you have screenshots, logs, or extra context, attach them to your reply.</li>
 <li style="margin-bottom:10px;"><strong>Check ticket status:</strong> Use the button below to view the full conversation history.</li>
-<li style="margin-bottom:10px;"><strong>Close the ticket:</strong> If your issue is already resolved, just let us know and we'll close it for you.</li>
+<li style="margin-bottom:10px;"><strong>Close the ticket:</strong> Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.</li>
 </ul>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
@@ -123,7 +127,6 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Need Additional Help?</h3>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
 <li style="margin-bottom:10px;">📧 <strong>Email:</strong> <a href="mailto:support@classgrid.in" style="color:#34d399;text-decoration:none;">support@classgrid.in</a></li>
-<li style="margin-bottom:10px;">💬 <strong>Live Chat:</strong> Available Mon–Fri, 9 AM – 6 PM IST on our website</li>
 </ul>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
@@ -176,13 +179,13 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }) {
         `Category: ${category}`,
         "",
         "SUPPORT TEAM REPLY",
-        replyMessage,
+        stripHtml(replyMessage),
         "",
         "WHAT YOU CAN DO NEXT",
         "- Reply to this message: Simply respond to this email.",
         "- Add additional details: Attach screenshots or logs to your reply.",
         "- Check ticket status: View the full conversation online.",
-        "- Close the ticket: Let us know if your issue is resolved.",
+        "- Close the ticket: Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.",
         "",
         "VIEW & REPLY TO YOUR TICKET",
         `👉 ${conversationUrl}`,
@@ -194,7 +197,6 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }) {
         "",
         "NEED ADDITIONAL HELP?",
         "Email: support@classgrid.in",
-        "Live Chat: Available Mon–Fri, 9 AM – 6 PM IST on our website",
         "",
         "Warm regards,",
         "The Classgrid Support Team",
@@ -293,7 +295,7 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
 
 <div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
   <p style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;font-weight:600;">Your Original Message</p>
-  <p style="color:#e5e5e5;font-size:14px;line-height:1.6;margin:0;white-space:pre-wrap;">${formatReplyBody(userMessage)}</p>
+  <div style="color:#e5e5e5;font-size:14px;line-height:1.6;margin:0;">${userMessage}</div>
 </div>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What Happens Next?</h3>
@@ -312,9 +314,7 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Additional Resources</h3>
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">While you wait, you may find these self-help resources useful:</p>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
-<li style="margin-bottom:10px;">📘 <a href="https://classgrid.in/support" style="color:#34d399;text-decoration:none;">Classgrid Help Center</a> – Browse FAQs and how-to guides</li>
-<li style="margin-bottom:10px;">🎥 <a href="https://classgrid.in/resources" style="color:#34d399;text-decoration:none;">Video Tutorials</a> – Step-by-step walkthroughs for common tasks</li>
-<li style="margin-bottom:10px;">💬 <strong>Live Chat</strong> – Available Mon–Fri, 9 AM – 6 PM IST</li>
+<li style="margin-bottom:10px;">📘 <a href="https://classgrid.in/help-center" style="color:#34d399;text-decoration:none;">Classgrid Help Center</a> – Browse FAQs and how-to guides</li>
 </ul>
 
 <div style="padding:18px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
@@ -367,7 +367,7 @@ function buildTicketCreationPlainText({ ticket, trackingUrl }) {
         "Status: Open – Awaiting Agent Assignment",
         "",
         "YOUR ORIGINAL MESSAGE",
-        userMessage,
+        stripHtml(userMessage),
         "",
         "WHAT HAPPENS NEXT?",
         "- Initial Review: Our support engineer will analyze your issue and may reach out for additional details.",
@@ -380,9 +380,7 @@ function buildTicketCreationPlainText({ ticket, trackingUrl }) {
         "",
         "ADDITIONAL RESOURCES",
         "While you wait, you may find these self-help resources useful:",
-        "- Classgrid Help Center: https://classgrid.in/support",
-        "- Video Tutorials: https://classgrid.in/resources",
-        "- Live Chat: Available Mon–Fri, 9 AM – 6 PM IST",
+        "- Classgrid Help Center: https://classgrid.in/help-center",
         "",
         "NEED TO REPLY?",
         "Simply respond directly to this email, and your message will be automatically appended to your ticket. For urgent matters, you may also reach us at support@classgrid.in.",
@@ -510,14 +508,12 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">While You Wait</h3>
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">Explore how Classgrid empowers institutions like yours:</p>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
-<li style="margin-bottom:10px;">📘 <a href="https://classgrid.in/case-studies" style="color:#34d399;text-decoration:none;">See Case Studies</a> – Real success stories from similar institutions</li>
-<li style="margin-bottom:10px;">🎥 <a href="https://classgrid.in/demo" style="color:#34d399;text-decoration:none;">Product Demo Videos</a> – Watch Classgrid in action</li>
-<li style="margin-bottom:10px;">📊 <a href="https://classgrid.in/features" style="color:#34d399;text-decoration:none;">Feature Overview</a> – Understand our core capabilities</li>
+<li style="margin-bottom:10px;">🎥 <a href="https://classgrid.in/#demo" style="color:#34d399;text-decoration:none;">Product Demo</a> – Watch Classgrid in action</li>
 </ul>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Have Questions in the Meantime?</h3>
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 5px;">You can always reach our Classgrid Talk team directly:</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 30px;">📧 <a href="mailto:talk@classgrid.in" style="color:#34d399;text-decoration:none;">talk@classgrid.in</a><br><span style="color:#9ca3af;font-size:12px;">(Please include your Request ID #CG-TALK-${escapeHtml(ticketIdShort)} for faster routing.)</span></p>
+<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 30px;">📧 <a href="mailto:support@classgrid.in" style="color:#34d399;text-decoration:none;">support@classgrid.in</a><br><span style="color:#9ca3af;font-size:12px;">(Please include your Request ID #CG-TALK-${escapeHtml(ticketIdShort)} for faster routing.)</span></p>
 
 <div style="padding:20px;background:#161616;border-radius:10px;border:1px dashed #34d399;margin:0 0 30px;text-align:center;">
   <h3 style="color:#34d399;font-size:15px;margin:0 0 8px;">A Note for You</h3>
@@ -533,10 +529,9 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
 <td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
 <p style="margin:0 0 10px;">
   <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/about" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">About Us</a> | 
   <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a request through Classgrid Talk. If you did not initiate this, please contact us at talk@classgrid.in.</p>
+<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a request through Classgrid Talk. If you did not initiate this, please contact us at support@classgrid.in.</p>
 </td>
 </tr>
 </table>
@@ -577,12 +572,10 @@ export function buildTalkRequestCreationPlainText({ ticket, trackingUrl }) {
         "",
         "WHILE YOU WAIT",
         "Explore how Classgrid empowers institutions like yours:",
-        "- See Case Studies: https://classgrid.in/case-studies",
-        "- Product Demo Videos: https://classgrid.in/demo",
-        "- Feature Overview: https://classgrid.in/features",
+        "- Product Demo: https://classgrid.in/#demo",
         "",
         "HAVE QUESTIONS IN THE MEANTIME?",
-        `You can always reach our Classgrid Talk team directly at talk@classgrid.in (Please include your Request ID #CG-TALK-${ticketIdShort} for faster routing.)`,
+        `You can always reach our Classgrid Talk team directly at support@classgrid.in (Please include your Request ID #CG-TALK-${ticketIdShort} for faster routing.)`,
         "",
         "A NOTE FOR YOU",
         "This is not a support ticket – we understand you're not a platform user yet. Think of this as your personalized discovery journey with Classgrid. No obligations. Just conversations.",
@@ -657,7 +650,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Specialist's Message</h3>
 <div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
-  <p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;white-space:pre-wrap;">${formatReplyBody(replyMessage)}</p>
+  <div style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
@@ -676,41 +669,37 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 <div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
   <h3 style="color:#ffffff;font-size:15px;margin:0 0 8px;">Your Dedicated Specialist</h3>
   <p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;"><strong>${escapeHtml(specialistName)}</strong></p>
-  <p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 talk@classgrid.in</p>
+  <p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 support@classgrid.in</p>
   <p style="color:#e5e5e5;font-size:14px;margin:0 0 0;">🕒 Available: Mon–Fri, 9 AM – 6 PM IST</p>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Helpful Reminders</h3>
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Tips for Your Evaluation</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 30px;">
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;width:40%;">Share your timeline</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Helps us tailor the conversation to your decision cycle</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;width:40%;">Request a Live Demo</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Ask your specialist for a personalized screen-share walkthrough</td>
 </tr>
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Mention key pain points</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We can focus on what matters most to you</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Set up a Sandbox</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We can provision a demo classroom for your faculty to test freely</td>
 </tr>
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Involve your team</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Feel free to CC colleagues – we're happy to include them</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">Invite Your Faculty</td>
+<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Feel free to CC department heads or IT staff on this thread</td>
 </tr>
 <tr>
-<td style="padding:10px 0;color:#ffffff;font-size:14px;font-weight:600;">No pressure</td>
-<td style="padding:10px 0;color:#cccccc;font-size:14px;">This is an exploratory conversation, not a sales pitch</td>
+<td style="padding:10px 0;color:#ffffff;font-size:14px;font-weight:600;">Explore Core Features</td>
+<td style="padding:10px 0;color:#cccccc;font-size:14px;">Deep-dive into Quizzes, Attendance, and Organization Analytics</td>
 </tr>
 </table>
 
 <div style="padding:20px;background:#161616;border-radius:10px;border:1px dashed #34d399;margin:0 0 30px;text-align:center;">
-  <h3 style="color:#34d399;font-size:15px;margin:0 0 8px;">Not a platform user? No problem.</h3>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 10px;">We understand you're evaluating Classgrid and haven't signed up yet. This conversation is designed to give you clarity, not commitment.</p>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">If at any point you'd like to pause or stop the conversation, just let us know – we respect your time.</p>
+  <h3 style="color:#34d399;font-size:15px;margin:0 0 8px;">Exploring Classgrid for your institution?</h3>
+  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 10px;">Our team can help you understand how the platform supports admissions, fees, attendance, exams, results, communication, and day-to-day administration.</p>
+  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">You can ask about modules, setup, migration, pricing, security, or whether Classgrid fits your institution before making any commitment.</p>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Need Additional Help?</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
-<li style="margin-bottom:10px;">📧 <strong><a href="mailto:talk@classgrid.in" style="color:#34d399;text-decoration:none;">talk@classgrid.in</a></strong> – For any administrative questions</li>
-<li style="margin-bottom:10px;">💬 <strong>Live Chat:</strong> Available on our website during business hours</li>
-</ul>
+
 
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We're here to make your evaluation process smooth and insightful. Looking forward to connecting further!</p>
 <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Best regards,<br><strong>The Classgrid Talk Team</strong></p>
@@ -721,10 +710,9 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 <td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
 <p style="margin:0 0 10px;">
   <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/about" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">About Us</a> | 
   <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk. If you no longer wish to receive these updates, reply with "UNSUBSCRIBE" or contact talk@classgrid.in.</p>
+<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk. If you no longer wish to receive these updates, reply with "UNSUBSCRIBE" or contact support@classgrid.in.</p>
 </td>
 </tr>
 </table>
@@ -754,7 +742,7 @@ export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversat
         "Status: Awaiting Your Response",
         "",
         "SPECIALIST'S MESSAGE",
-        replyMessage,
+        stripHtml(replyMessage),
         "",
         "WHAT YOU CAN DO NEXT",
         "- Reply directly: Respond to this email – your message goes straight to your specialist.",
@@ -767,23 +755,20 @@ export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversat
         "",
         "YOUR DEDICATED SPECIALIST",
         specialistName,
-        "Email: talk@classgrid.in",
+        "Email: support@classgrid.in",
         "Available: Mon–Fri, 9 AM – 6 PM IST",
         "",
-        "HELPFUL REMINDERS",
-        "- Share your timeline: Helps us tailor the conversation to your decision cycle",
-        "- Mention key pain points: We can focus on what matters most to you",
-        "- Involve your team: Feel free to CC colleagues – we're happy to include them",
-        "- No pressure: This is an exploratory conversation, not a sales pitch",
+        "TIPS FOR YOUR EVALUATION",
+        "- Request a Live Demo: Ask your specialist for a personalized screen-share walkthrough",
+        "- Set up a Sandbox: We can provision a demo classroom for your faculty to test freely",
+        "- Invite Your Faculty: Feel free to CC department heads or IT staff on this thread",
+        "- Explore Core Features: Deep-dive into Quizzes, Attendance, and Organization Analytics",
         "",
-        "NOT A PLATFORM USER? NO PROBLEM.",
-        "We understand you're evaluating Classgrid and haven't signed up yet. This conversation is designed to give you clarity, not commitment.",
-        "If at any point you'd like to pause or stop the conversation, just let us know – we respect your time.",
+        "EXPLORING CLASSGRID FOR YOUR INSTITUTION?",
+        "Our team can help you understand how the platform supports admissions, fees, attendance, exams, results, communication, and day-to-day administration.",
+        "You can ask about modules, setup, migration, pricing, security, or whether Classgrid fits your institution before making any commitment.",
         "",
-        "NEED ADDITIONAL HELP?",
-        "Email: talk@classgrid.in – For any administrative questions",
-        "Live Chat: Available on our website during business hours",
-        "",
+
         "We're here to make your evaluation process smooth and insightful. Looking forward to connecting further!",
         "",
         "Best regards,",

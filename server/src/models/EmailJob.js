@@ -30,6 +30,8 @@ const emailJobSchema = new mongoose.Schema(
                 "absence",
                 "support_ticket_reply",
                 "support_ticket_new",
+                "talk_request_new",
+                "talk_request_reply",
                 "other",
             ],
             default: "other",

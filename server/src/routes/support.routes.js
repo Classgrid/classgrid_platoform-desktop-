@@ -5,7 +5,7 @@ import SupportTicket from "../models/SupportTicket.js";
 import User from "../models/User.js";
 import { multipleUploads } from "../middleware/upload.middleware.js";
 import storageService from "../services/storage.service.js";
-import { notifyTicketCreatorOfAdminReply, notifyUserOfTicketCreation } from "../services/support-ticket-email.service.js";
+import { notifyTicketCreatorOfAdminReply, notifyUserOfTicketCreation, notifyUserOfTalkRequestCreation, notifyTalkCreatorOfAdminReply } from "../services/support-ticket-email.service.js";
 
 
 
@@ -215,7 +215,11 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
 
         // ── Send email notification for new ticket ──
         try {
-            await notifyUserOfTicketCreation({ ticket });
+            if (isGeneralInquiry) {
+                await notifyUserOfTalkRequestCreation({ ticket });
+            } else {
+                await notifyUserOfTicketCreation({ ticket });
+            }
         } catch (emailErr) {
             console.error("[Support] New ticket email notification failed:", emailErr.message);
         }
@@ -636,11 +640,19 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         let emailNotification = { queued: false };
         if (isSuperAdmin) {
             try {
-                emailNotification = await notifyTicketCreatorOfAdminReply({
-                    ticket,
-                    replyMessage: message.trim(),
-                    adminName: authorName
-                });
+                if (ticket.institution) {
+                    emailNotification = await notifyTalkCreatorOfAdminReply({
+                        ticket,
+                        replyMessage: message.trim(),
+                        adminName: authorName
+                    });
+                } else {
+                    emailNotification = await notifyTicketCreatorOfAdminReply({
+                        ticket,
+                        replyMessage: message.trim(),
+                        adminName: authorName
+                    });
+                }
             } catch (emailErr) {
                 console.error("[Support] Reply email notification failed:", emailErr.message);
             }
