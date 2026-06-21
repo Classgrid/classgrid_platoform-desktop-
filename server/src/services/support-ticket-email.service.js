@@ -144,6 +144,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
     ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
     <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${escapeHtml(specialistName)}</strong>
     ${adminAvatar ? `<span style="color:#34d399;font-size:14px;vertical-align:middle;margin-left:4px;" title="Verified Support Staff">✔️</span>` : ''}
+    ${specialistEmail ? `<br><a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;font-size:13px;text-decoration:none;">${escapeHtml(specialistEmail)}</a>` : ''}
   </div>
 </div>
 

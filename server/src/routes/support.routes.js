@@ -647,14 +647,16 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
                         ticket,
                         replyMessage: message.trim(),
                         adminName: authorName,
-                        adminAvatar
+                        adminAvatar,
+                        adminEmail
                     });
                 } else {
                     emailNotification = await notifyTicketCreatorOfAdminReply({
                         ticket,
                         replyMessage: message.trim(),
                         adminName: authorName,
-                        adminAvatar
+                        adminAvatar,
+                        adminEmail
                     });
                 }
             } catch (emailErr) {
