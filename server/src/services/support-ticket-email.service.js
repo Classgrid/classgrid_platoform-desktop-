@@ -61,12 +61,11 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 <td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
 <h2 style="color:#ffffff;font-size:20px;margin:0 0 8px;line-height:1.3;">${escapeHtml(subject)}</h2>
 <p style="color:#9ca3af;font-size:12px;margin:0 0 20px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Ticket #${escapeHtml(String(ticket._id).slice(0, 8))}</p>
-<div style="padding:18px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;text-align:center;">
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">You have received a new message from our team regarding this request.</p>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:10px 0 0;">Please log in to our support portal to read the full message and continue the conversation.</p>
+<div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;text-align:left;">
+  <p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${formatReplyBody(replyMessage)}</p>
 </div>
 <div style="text-align:center;margin:30px 0;">
-<a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">View Full Conversation</a>
+<a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">Reply to Conversation</a>
 </div>
 
 <div style="margin-top:30px;text-align:center;">
@@ -96,10 +95,9 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }) {
         "",
         ticket.subject || "Support ticket",
         "",
-        "You have received a new message from our team regarding this request.",
-        "Please log in to our support portal to read the full message and continue the conversation.",
+        replyMessage,
         "",
-        `View full conversation: ${conversationUrl}`,
+        `Reply to conversation: ${conversationUrl}`,
         "",
         "Classgrid Support"
     ].join("\n");
