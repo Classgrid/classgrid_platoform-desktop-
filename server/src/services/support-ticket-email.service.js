@@ -185,6 +185,11 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
   <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:10px 0 0;">You can track your ticket status and reply to our team using the button below.</p>
 </div>
 
+<div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;text-align:left;">
+  <p style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;font-weight:600;">Your Original Message</p>
+  <p style="color:#e5e5e5;font-size:14px;line-height:1.6;margin:0;white-space:pre-wrap;">${formatReplyBody(ticket.message || "No description provided.")}</p>
+</div>
+
 <div style="text-align:center;margin:30px 0;">
 <a href="${escapeHtml(trackingUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">Track Your Ticket</a>
 </div>
@@ -221,6 +226,10 @@ function buildTicketCreationPlainText({ ticket, trackingUrl }) {
         "",
         "Our support team has been notified and will review your request shortly.",
         "You can track your ticket status and reply to our team using the link below.",
+        "",
+        "--- Your Original Message ---",
+        ticket.message || "No description provided.",
+        "-----------------------------",
         "",
         `Track your ticket: ${trackingUrl}`,
         "",
