@@ -28,13 +28,21 @@ function formatReplyBody(message) {
 function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
     const currentYear = new Date().getFullYear();
     const subject = ticket.subject || "Support ticket";
+    const ticketIdShort = String(ticket._id).slice(0, 8);
+    const category = ticket.category || "general";
+    const priority = ticket.priority || "medium";
+    const userName = ticket.submitterName || "User";
+    
+    // Formatting dates for history
+    const openedDate = new Date(ticket.createdAt || Date.now()).toLocaleString();
+    const repliedDate = new Date().toLocaleString();
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Reply on Your Support Ticket</title>
+  <title>New Reply on Your Support Ticket – #${escapeHtml(ticketIdShort)}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body, html {
@@ -54,30 +62,89 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 <td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
 <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
 <h1 style="color:#ffffff;margin:0;font-size:22px;">New Reply on Your Support Ticket</h1>
+<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Ticket #${escapeHtml(ticketIdShort)}</p>
 </td>
 </tr>
 <tr>
 <td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
-<h2 style="color:#ffffff;font-size:20px;margin:0 0 8px;line-height:1.3;">${escapeHtml(subject)}</h2>
-<p style="color:#9ca3af;font-size:12px;margin:0 0 20px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Ticket #${escapeHtml(String(ticket._id).slice(0, 8))}</p>
-<div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;text-align:left;">
-  <p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${formatReplyBody(replyMessage)}</p>
-</div>
-<div style="text-align:center;margin:30px 0;">
-<a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">Reply to Conversation</a>
+<p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
+<p style="color:#cccccc;margin:0 0 30px;">You have received a new reply from the Classgrid Support Team regarding your open ticket. Please review the message below and let us know if you need further assistance.</p>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Summary</h3>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;">
+<tr>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Ticket ID</td>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">#${escapeHtml(ticketIdShort)}</td>
+</tr>
+<tr>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Subject</td>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(subject)}</td>
+</tr>
+<tr>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">Open – Awaiting Your Response</td>
+</tr>
+<tr>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Priority</td>
+<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(priority.charAt(0).toUpperCase() + priority.slice(1))}</td>
+</tr>
+<tr>
+<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Category</td>
+<td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(category.charAt(0).toUpperCase() + category.slice(1))}</td>
+</tr>
+</table>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Support Team Reply</h3>
+<div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
+  <p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;white-space:pre-wrap;">${formatReplyBody(replyMessage)}</p>
 </div>
 
-<div style="margin-top:30px;text-align:center;">
-<p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a>
-</p>
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
+<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
+<li style="margin-bottom:10px;"><strong>Reply to this message:</strong> Simply respond to this email, and your reply will be added to the ticket.</li>
+<li style="margin-bottom:10px;"><strong>Add additional details:</strong> If you have screenshots, logs, or extra context, attach them to your reply.</li>
+<li style="margin-bottom:10px;"><strong>Check ticket status:</strong> Use the button below to view the full conversation history.</li>
+<li style="margin-bottom:10px;"><strong>Close the ticket:</strong> If your issue is already resolved, just let us know and we'll close it for you.</li>
+</ul>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">(This link takes you to your secure ticket dashboard where you can view all messages and respond.)</p>
+<div style="text-align:center;margin:0 0 30px;">
+<a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
 </div>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Quick Tips for a Faster Resolution</h3>
+<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
+<li style="margin-bottom:10px;">✅ <strong>Be specific</strong> – include error messages, steps to reproduce, and your device/browser info.</li>
+<li style="margin-bottom:10px;">✅ <strong>Attach screenshots</strong> – they help us visualize the issue clearly.</li>
+<li style="margin-bottom:10px;">✅ <strong>Respond promptly</strong> – if we don't hear back within 48 hours, the ticket may be auto-closed.</li>
+</ul>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Need Additional Help?</h3>
+<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
+<li style="margin-bottom:10px;">📧 <strong>Email:</strong> <a href="mailto:support@classgrid.in" style="color:#34d399;text-decoration:none;">support@classgrid.in</a></li>
+<li style="margin-bottom:10px;">💬 <strong>Live Chat:</strong> Available Mon–Fri, 9 AM – 6 PM IST on our website</li>
+</ul>
+
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
+<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>Opened:</strong> ${escapeHtml(openedDate)} – Initial request submitted</p>
+<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>Replied:</strong> ${escapeHtml(repliedDate)} – Support team sent the above response</p>
+<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 30px;"><strong>Next Action:</strong> Awaiting your reply</p>
+
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We value your feedback! If you're satisfied with our response so far, please consider rating your support experience once the ticket is resolved.</p>
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">Thank you for choosing Classgrid. We're here to help!</p>
+<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Support Team</strong></p>
+
 </td>
 </tr>
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px;">
-<p style="margin-bottom:8px;color:#7a7a7a;font-size:12px;">You received this because you opened a Classgrid support ticket.</p>
-&copy; ${currentYear} Classgrid. All rights reserved.
+<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
+<p style="margin:0 0 10px;">
+  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
+  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
+  <a href="https://classgrid.in/terms" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
+</p>
+<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you opened a support ticket on Classgrid. If you did not expect this reply or wish to unsubscribe from ticket notifications, please contact us immediately.</p>
 </td>
 </tr>
 </table>
@@ -89,16 +156,50 @@ Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;te
 }
 
 function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }) {
+    const ticketIdShort = String(ticket._id).slice(0, 8);
+    const userName = ticket.submitterName || "User";
+    const category = ticket.category || "general";
+    const priority = ticket.priority || "medium";
+    
     return [
-        "New Reply on Your Support Ticket",
+        `New Reply on Your Support Ticket – #${ticketIdShort}`,
         "",
-        ticket.subject || "Support ticket",
+        `Dear ${userName},`,
         "",
+        "You have received a new reply from the Classgrid Support Team regarding your open ticket. Please review the message below and let us know if you need further assistance.",
+        "",
+        "TICKET SUMMARY",
+        `Ticket ID: #${ticketIdShort}`,
+        `Subject: ${ticket.subject || "Support ticket"}`,
+        "Status: Open – Awaiting Your Response",
+        `Priority: ${priority}`,
+        `Category: ${category}`,
+        "",
+        "SUPPORT TEAM REPLY",
         replyMessage,
         "",
-        `Reply to conversation: ${conversationUrl}`,
+        "WHAT YOU CAN DO NEXT",
+        "- Reply to this message: Simply respond to this email.",
+        "- Add additional details: Attach screenshots or logs to your reply.",
+        "- Check ticket status: View the full conversation online.",
+        "- Close the ticket: Let us know if your issue is resolved.",
         "",
-        "Classgrid Support"
+        "VIEW & REPLY TO YOUR TICKET",
+        `👉 ${conversationUrl}`,
+        "",
+        "QUICK TIPS FOR A FASTER RESOLUTION",
+        "- Be specific – include error messages and context.",
+        "- Attach screenshots.",
+        "- Respond promptly – inactive tickets may be auto-closed after 48 hours.",
+        "",
+        "NEED ADDITIONAL HELP?",
+        "Email: support@classgrid.in",
+        "Live Chat: Available Mon–Fri, 9 AM – 6 PM IST on our website",
+        "",
+        "Warm regards,",
+        "The Classgrid Support Team",
+        "",
+        "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
     ].join("\n");
 }
 
