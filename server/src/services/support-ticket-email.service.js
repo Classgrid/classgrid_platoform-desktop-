@@ -29,10 +29,11 @@ function stripHtml(html = "") {
     return String(html).replace(/<[^>]*>?/gm, '').trim();
 }
 
-function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
+function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, adminName, adminAvatar }) {
     const currentYear = new Date().getFullYear();
     const subject = ticket.subject || "Support ticket";
     const ticketIdShort = String(ticket._id).slice(0, 8);
+    const specialistName = adminName || "The Classgrid Support Team";
     const category = ticket.category || "general";
     const priority = ticket.priority || "medium";
     const userName = ticket.submitterName || "User";
@@ -136,7 +137,14 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We value your feedback! If you're satisfied with our response so far, please consider rating your support experience once the ticket is resolved.</p>
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">Thank you for choosing Classgrid. We're here to help!</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Support Team</strong></p>
+<div style="margin-top:10px;">
+  <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
+  <div style="display:inline-block;text-align:left;">
+    ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
+    <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${escapeHtml(specialistName)}</strong>
+    ${adminAvatar ? `<span style="color:#34d399;font-size:14px;vertical-align:middle;margin-left:4px;" title="Verified Support Staff">✔️</span>` : ''}
+  </div>
+</div>
 
 </td>
 </tr>
@@ -205,7 +213,7 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }) {
     ].join("\n");
 }
 
-export async function notifyTicketCreatorOfAdminReply({ ticket, replyMessage }) {
+export async function notifyTicketCreatorOfAdminReply({ ticket, replyMessage, adminName, adminAvatar }) {
     const to = ticket?.submitterEmail?.trim();
     if (!to) return { queued: false, reason: "missing_submitter_email" };
 
@@ -216,7 +224,7 @@ export async function notifyTicketCreatorOfAdminReply({ ticket, replyMessage }) 
     const job = await enqueueEmail({
         to,
         subject,
-        html: buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }),
+        html: buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, adminName, adminAvatar }),
         text: buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl }),
         type: "support_ticket_reply",
         userId: ticket.submittedBy || null,
@@ -589,11 +597,11 @@ export function buildTalkRequestCreationPlainText({ ticket, trackingUrl }) {
     ].join("\n");
 }
 
-export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
+export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversationUrl, adminName, adminAvatar }) {
     const currentYear = new Date().getFullYear();
     const ticketIdShort = String(ticket._id).slice(0, 8);
     const userName = ticket.submitterName || "Prospect";
-    const specialistName = ticket.assignedToName || "Your Classgrid Talk Specialist";
+    const specialistName = adminName || ticket.assignedToName || "Your Classgrid Talk Specialist";
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -666,9 +674,13 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 <p style="color:#9ca3af;font-size:12px;margin-top:10px;">(This link takes you to your secure ticket dashboard)</p>
 </div>
 
-<div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
-  <h3 style="color:#ffffff;font-size:15px;margin:0 0 8px;">Your Dedicated Specialist</h3>
-  <p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;"><strong>${escapeHtml(specialistName)}</strong></p>
+<div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:center;">
+  <h3 style="color:#ffffff;font-size:15px;margin:0 0 15px;">Your Dedicated Specialist</h3>
+  ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;border:2px solid #34d399;object-fit:cover;">` : ''}
+  <p style="color:#e5e5e5;font-size:16px;margin:0 0 5px;">
+    <strong>${escapeHtml(specialistName)}</strong>
+    ${adminAvatar ? `<span style="color:#34d399;font-size:14px;vertical-align:middle;margin-left:4px;" title="Verified Staff">✔️</span>` : ''}
+  </p>
   <p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 support@classgrid.in</p>
   <p style="color:#e5e5e5;font-size:14px;margin:0 0 0;">🕒 Available: Mon–Fri, 9 AM – 6 PM IST</p>
 </div>
@@ -799,7 +811,7 @@ export async function notifyUserOfTalkRequestCreation({ ticket }) {
     return { queued: Boolean(job), jobId: job?._id, trackingUrl };
 }
 
-export async function notifyTalkCreatorOfAdminReply({ ticket, replyMessage }) {
+export async function notifyTalkCreatorOfAdminReply({ ticket, replyMessage, adminName, adminAvatar }) {
     const to = ticket?.submitterEmail?.trim();
     if (!to) return { queued: false, reason: "missing_submitter_email" };
 
@@ -811,7 +823,7 @@ export async function notifyTalkCreatorOfAdminReply({ ticket, replyMessage }) {
     const job = await enqueueEmail({
         to,
         subject,
-        html: buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversationUrl }),
+        html: buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversationUrl, adminName, adminAvatar }),
         text: buildTalkRequestReplyPlainText({ ticket, replyMessage, conversationUrl }),
         type: "talk_request_reply",
         userId: ticket.submittedBy || null,

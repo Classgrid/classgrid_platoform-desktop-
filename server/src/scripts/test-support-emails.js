@@ -34,23 +34,23 @@ async function run() {
   const createResult = await notifyUserOfTicketCreation({ ticket: mockTicket });
   console.log("   Queue Result:", createResult);
 
-  // console.log(`\n2. Queuing Admin Reply Email to ${emailToTest}...`);
-  // const replyResult = await notifyTicketCreatorOfAdminReply({ 
-  //   ticket: mockTicket,
-  //   replyMessage: "Hello Nikhil!<br><br>This is a <strong>test reply</strong> from the Classgrid Support Team. We can now send <u>underlined text</u> and even <a href='https://classgrid.in' style='color:#34d399;'>Hypertext links</a>!<br><br>Please let us know if you have any questions."
-  // });
-  // console.log("   Queue Result:", replyResult);
+  console.log(`\n2. Queuing Admin Reply Email to ${emailToTest}...`);
+  const replyResult = await notifyTicketCreatorOfAdminReply({ 
+    ticket: mockTicket,
+    replyMessage: "Hello Nikhil!<br><br>This is a <strong>test reply</strong> from the Classgrid Support Team. We can now send <u>underlined text</u> and even <a href='https://classgrid.in' style='color:#34d399;'>Hypertext links</a>!<br><br>Please let us know if you have any questions."
+  });
+  console.log("   Queue Result:", replyResult);
 
-  // console.log(`\n3. Queuing Talk Request Creation Email to ${emailToTest}...`);
-  // const talkCreateResult = await notifyUserOfTalkRequestCreation({ ticket: mockTicket });
-  // console.log("   Queue Result:", talkCreateResult);
+  console.log(`\n3. Queuing Talk Request Creation Email to ${emailToTest}...`);
+  const talkCreateResult = await notifyUserOfTalkRequestCreation({ ticket: mockTicket });
+  console.log("   Queue Result:", talkCreateResult);
 
-  // console.log(`\n4. Queuing Talk Request Admin Reply Email to ${emailToTest}...`);
-  // const talkReplyResult = await notifyTalkCreatorOfAdminReply({ 
-  //   ticket: mockTicket,
-  //   replyMessage: "Hello! Thank you for reaching out to Classgrid Talk. We would love to show you how Classgrid can streamline your institution's operations.<br><br>Please let me know a good time for a brief 15-minute <strong>introductory call</strong> next week."
-  // });
-  // console.log("   Queue Result:", talkReplyResult);
+  console.log(`\n4. Queuing Talk Request Admin Reply Email to ${emailToTest}...`);
+  const talkReplyResult = await notifyTalkCreatorOfAdminReply({ 
+    ticket: mockTicket,
+    replyMessage: "Hello! Thank you for reaching out to Classgrid Talk. We would love to show you how Classgrid can streamline your institution's operations.<br><br>Please let me know a good time for a brief 15-minute <strong>introductory call</strong> next week."
+  });
+  console.log("   Queue Result:", talkReplyResult);
 
 
   console.log(`\n3. Processing Email Queue (Sending emails via Brevo)...`);

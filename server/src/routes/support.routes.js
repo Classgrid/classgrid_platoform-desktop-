@@ -640,17 +640,20 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         let emailNotification = { queued: false };
         if (isSuperAdmin) {
             try {
+                const adminAvatar = req.user.profilePicture || req.user.profilePic || req.user.image || "";
                 if (ticket.institution) {
                     emailNotification = await notifyTalkCreatorOfAdminReply({
                         ticket,
                         replyMessage: message.trim(),
-                        adminName: authorName
+                        adminName: authorName,
+                        adminAvatar
                     });
                 } else {
                     emailNotification = await notifyTicketCreatorOfAdminReply({
                         ticket,
                         replyMessage: message.trim(),
-                        adminName: authorName
+                        adminName: authorName,
+                        adminAvatar
                     });
                 }
             } catch (emailErr) {
