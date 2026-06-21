@@ -7,7 +7,6 @@ import {
   lowerLabel,
   pluralizeLabel,
 } from "./dashboardProfileUtils";
-import { useOrgDashboardAnalytics } from "../queries/useOrgDashboard";
 
 type ChartPanelProps = {
   title: string;
@@ -46,10 +45,7 @@ function BarRow({ label, value }: { label: string; value: number }) {
 }
 
 export function DashboardCharts() {
-  const { data: profile, isLoading: isProfileLoading } = useInstitutionProfile();
-  const { data: analytics, isLoading: isAnalyticsLoading } = useOrgDashboardAnalytics();
-
-  const isLoading = isProfileLoading || isAnalyticsLoading;
+  const { data: profile, isLoading } = useInstitutionProfile();
 
   if (isLoading || !profile) {
     return (
@@ -69,42 +65,23 @@ export function DashboardCharts() {
     ? `${groupLabel} plus sub-batch view`
     : `${groupLabel} level view`;
 
-  // 1. Enrollment Trends
-  const trendMax = analytics?.enrollmentTrends?.reduce((max, t) => Math.max(max, t.newUsers), 0) || 1;
-  const trendValues = (analytics?.enrollmentTrends || []).map((t) => ({
-    period: t.month.split(" ")[0], // e.g., "Jan 24" -> "Jan"
-    value: Math.round((t.newUsers / trendMax) * 100),
-    rawValue: t.newUsers
+  const trendValues = [
+    { period: "M1", value: 56 },
+    { period: "M2", value: 64 },
+    { period: "M3", value: 72 },
+    { period: "M4", value: 79 },
+    { period: "M5", value: 86 },
+    { period: "M6", value: 94 },
+  ];
+  const roleDistribution = [
+    { label: learnerLabel, value: 82 },
+    { label: educatorLabel, value: 12 },
+    { label: "Admin team", value: 6 },
+  ];
+  const hierarchyDistribution = [74, 68, 91, 62].map((value, index) => ({
+    label: `${hierarchyLabel} ${index + 1}`,
+    value,
   }));
-
-  // 2. Role Distribution
-  const totalDemographics = analytics?.demographics?.reduce((sum, d) => sum + d.value, 0) || 1;
-  const roleDistribution = (analytics?.demographics || []).map((d) => {
-    let label = d.name;
-    if (label.toLowerCase() === "student") label = learnerLabel;
-    if (label.toLowerCase() === "faculty") label = educatorLabel;
-    if (label.toLowerCase() === "org_admin") label = "Admin team";
-    
-    return {
-      label,
-      value: Math.round((d.value / totalDemographics) * 100),
-    };
-  });
-
-  // 3. Hierarchy/Branch Distribution
-  const totalBranch = analytics?.branchDistribution?.reduce((sum, b) => sum + b.students, 0) || 1;
-  const hierarchyDistribution = (analytics?.branchDistribution || []).slice(0, 4).map((b) => ({
-    label: b.branch,
-    value: Math.round((b.students / totalBranch) * 100),
-  }));
-
-  // Fallbacks if data is empty (e.g. fresh DB)
-  if (roleDistribution.length === 0) {
-    roleDistribution.push({ label: learnerLabel, value: 0 }, { label: educatorLabel, value: 0 });
-  }
-  if (hierarchyDistribution.length === 0) {
-    hierarchyDistribution.push({ label: `No ${hierarchyLabel}s found`, value: 0 });
-  }
 
   return (
     <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -119,8 +96,7 @@ export function DashboardCharts() {
               <div
                 className="w-full rounded-t-md bg-primary/80"
                 style={{ height: `${item.value}%` }}
-                aria-label={`${item.period}: ${item.rawValue} users`}
-                title={`${item.rawValue} new users`}
+                aria-label={`${item.period}: ${item.value}%`}
               />
               <span className="text-xs text-muted-foreground">{item.period}</span>
             </div>

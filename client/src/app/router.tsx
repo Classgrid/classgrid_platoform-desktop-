@@ -68,6 +68,9 @@ import { CommunicationPage } from "@/features/admissions/pages/CommunicationPage
 import { BulkSmsPage } from "@/features/admissions/pages/BulkSmsPage";
 import { FeesDashboardRouter } from "@/features/fees/pages/FeesDashboardRouter";
 import { ExamsDashboardRouter } from "@/features/exams/pages/ExamsDashboardRouter";
+import { ResultsProcessingPage } from "@/features/results/pages/ResultsProcessingPage";
+import { ResultsPage } from "@/features/results/pages/ResultsPage";
+import { ExamGradingPage } from "@/features/exams/pages/ExamGradingPage";
 import { LibraryDashboardRouter } from "@/features/library/pages/LibraryDashboardRouter";
 import { AttendanceDashboardRouter } from "@/features/attendance/pages/AttendanceDashboardRouter";
 import { HRDashboardRouter } from "@/features/hr/pages/HRDashboardRouter";
@@ -246,6 +249,7 @@ export function AppRouter() {
 
         {/* 5. Examination Department Dashboard */}
         <Route path="/dept/exams/dashboard" element={<ExamsDashboardRouter />} />
+        <Route path="/dept/exams/results" element={<ResultsProcessingPage />} />
 
         {/* 6. Library Department Dashboard */}
         <Route path="/dept/library/dashboard" element={<LibraryDashboardRouter />} />
@@ -261,12 +265,14 @@ export function AppRouter() {
 
         {/* 10. Faculty Dashboard */}
         <Route path="/work" element={<FacultyWorkPage />} />
+        <Route path="/exam/grading" element={<ExamGradingPage />} />
 
         {/* 11. Student Dashboard */}
         <Route path="/student/dashboard" element={<StudentDashboardPage />} />
         <Route path="/student/work" element={<StudentWorkPage />} />
 
         {/* ── Common pages ── */}
+        <Route path="/results" element={<ResultsPage />} />
         <Route path="/classroom" element={<ClassroomsPage />} />
         <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />

@@ -244,7 +244,7 @@ export async function notifyUserOfTicketCreation({ ticket }) {
         subject,
         html: buildTicketCreationEmailHtml({ ticket, trackingUrl }),
         text: buildTicketCreationPlainText({ ticket, trackingUrl }),
-        type: "support_ticket_created",
+        type: "support_ticket_new",
         userId: ticket.submittedBy || null,
         organizationId: ticket.organization_id || null,
     });

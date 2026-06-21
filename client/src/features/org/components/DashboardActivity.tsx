@@ -5,14 +5,11 @@ import {
   isModuleEnabled,
   lowerLabel,
 } from "./dashboardProfileUtils";
-import { useOrgDashboardActivity } from "../queries/useOrgDashboard";
-import { formatDistanceToNow } from "date-fns";
 
 export function DashboardActivity() {
-  const { data: profile, isLoading: isProfileLoading } = useInstitutionProfile();
-  const { data: activityData, isLoading: isActivityLoading } = useOrgDashboardActivity();
+  const { data: profile, isLoading } = useInstitutionProfile();
 
-  if (isProfileLoading || isActivityLoading || !profile) {
+  if (isLoading || !profile) {
     return <div className="h-56 animate-pulse rounded-lg border border-border bg-muted/40" />;
   }
 
@@ -22,25 +19,28 @@ export function DashboardActivity() {
   const admissionWorkflow = profile.admissionProfile.enabledWorkflows[0] ?? "profile workflow";
   const hasFees = isModuleEnabled(profile, "fees");
 
-  // Format real backend activities
-  let entries = (activityData?.activities || []).map((act) => {
-    let icon = <CheckCircle2 className="h-4 w-4" />;
-    if (act.type === "admission" || act.type === "user") icon = <FileText className="h-4 w-4" />;
-    if (act.type === "finance" || act.type === "fee") icon = <WalletCards className="h-4 w-4" />;
-    
-    return {
-      id: act._id,
-      label: act.message || `${act.action} by ${typeof act.user_id === 'object' ? act.user_id.name : 'Unknown'}`,
-      detail: act.type.charAt(0).toUpperCase() + act.type.slice(1) + " update",
-      time: formatDistanceToNow(new Date(act.createdAt), { addSuffix: true }),
-      icon,
-    };
-  });
-
-  // Hide component if no backend activity exists
-  if (entries.length === 0) {
-    return null;
-  }
+  const entries = [
+    {
+      label: `New ${learnerLabel} application moved to verification`,
+      detail: admissionWorkflow,
+      time: "2m ago",
+      icon: <FileText className="h-4 w-4" />,
+    },
+    hasFees
+      ? {
+          label: `${feeLabel} payment received`,
+          detail: "Finance update",
+          time: "15m ago",
+          icon: <WalletCards className="h-4 w-4" />,
+        }
+      : null,
+    {
+      label: `${programLabel} document queue reviewed`,
+      detail: "Operations update",
+      time: "1h ago",
+      icon: <CheckCircle2 className="h-4 w-4" />,
+    },
+  ].filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
 
   return (
     <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
@@ -58,7 +58,7 @@ export function DashboardActivity() {
       </div>
       <ul className="divide-y divide-border">
         {entries.map((entry) => (
-          <li key={entry.id} className="flex items-center justify-between gap-4 py-3">
+          <li key={`${entry.label}-${entry.time}`} className="flex items-center justify-between gap-4 py-3">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">{entry.icon}</span>
               <div>

@@ -138,7 +138,7 @@ function computeRanking(results) {
 // SCHEME MANAGEMENT
 // ======================================================
 
-router.get('/schemes', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+router.get('/schemes', isAuthenticated, requireRole('org_admin', 'teacher'), async (req, res) => {
     try {
         const { sb, orgId } = getSb(req);
         const { data, error } = await sb
@@ -293,7 +293,7 @@ router.post('/schemes/:id/subjects', isAuthenticated, requireRole('org_admin'), 
 // MARKS UPLOAD
 // ======================================================
 
-router.post('/schemes/:id/upload-marks', isAuthenticated, requireRole('org_admin'), async (req, res) => {
+router.post('/schemes/:id/upload-marks', isAuthenticated, requireRole('org_admin', 'teacher'), async (req, res) => {
     try {
         const { sb, orgId } = getSb(req);
         const schemeId = req.params.id;
