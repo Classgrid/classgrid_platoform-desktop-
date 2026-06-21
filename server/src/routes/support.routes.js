@@ -641,6 +641,7 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         if (isSuperAdmin) {
             try {
                 const adminAvatar = req.user.profilePicture || req.user.profilePic || req.user.image || "";
+                const adminEmail = req.user.email?.trim() || "";
                 if (ticket.institution) {
                     emailNotification = await notifyTalkCreatorOfAdminReply({
                         ticket,
