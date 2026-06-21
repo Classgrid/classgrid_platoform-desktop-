@@ -54,7 +54,6 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl }) {
 <td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
 <img src="https://classgrid.in/Classgrid.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
 <h1 style="color:#ffffff;margin:0;font-size:22px;">New Reply on Your Support Ticket</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Classgrid Support has replied to your request.</p>
 </td>
 </tr>
 <tr>
