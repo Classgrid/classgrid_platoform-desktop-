@@ -71,6 +71,13 @@ function getLastComment(ticket) {
     return ticket.lastComment || lastMessage?.date || ticket.updatedAt || ticket.createdAt;
 }
 
+function formatTicketDate(value, fallback = "Not provided") {
+    if (!value) return fallback;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+}
+
 function serializeTicket(ticket) {
     if (!ticket) return null;
     const messages = getTicketMessages(ticket);
@@ -369,9 +376,14 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
         const now = new Date();
         const authorName = (name || ticket.submitterName || "Classgrid User").trim();
 
+        // Dynamically fetch user role to display in activity history
+        const submitterUser = await User.findOne({ email: email.trim().toLowerCase() }).lean();
+        const roleRaw = submitterUser ? submitterUser.role : "user";
+        const formattedRole = roleRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
         ticket.replies.push({
             authorName,
-            authorRole: "user",
+            authorRole: roleRaw,
             message: message.trim(),
             attachments: uploadedAttachments,
             createdAt: now
@@ -379,7 +391,7 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
 
         ticket.messages.push({
             author: authorName,
-            role: "user",
+            role: normalizeMessageRole(roleRaw),
             body: message.trim(),
             date: now,
             footer: `Email: ${email.trim().toLowerCase()}`,
@@ -389,9 +401,9 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
 
         ticket.events.push({
             type: 'userReply',
-            label: 'User replied',
+            label: `${formattedRole} replied`,
             actorName: authorName,
-            actorRole: 'user',
+            actorRole: roleRaw,
             createdAt: now
         });
 
@@ -607,9 +619,11 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             attachments: uploadedAttachments
         });
 
+        const formattedRole = (req.user.role || 'user').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
         ticket.events.push({
             type: isSuperAdmin ? 'adminReply' : 'userReply',
-            label: isSuperAdmin ? 'Admin replied' : 'User replied',
+            label: isSuperAdmin ? 'Admin replied' : `${formattedRole} replied`,
             actorName: authorName,
             actorRole: req.user.role,
             createdAt: now
@@ -618,7 +632,21 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         ticket.lastComment = now;
         if (isSuperAdmin) {
             ticket.lastAdminReplyAt = now;
-            ticket.status = "in_progress";
+            // If admin sends resolve: true, mark as resolved; otherwise in_progress
+            if (req.body.resolve === true || req.body.resolve === "true") {
+                ticket.status = "resolved";
+                ticket.resolvedAt = now;
+                ticket.resolvedBy = req.user._id;
+                ticket.events.push({
+                    type: 'resolved',
+                    label: 'Ticket resolved',
+                    actorName: authorName,
+                    actorRole: req.user.role,
+                    createdAt: now
+                });
+            } else {
+                ticket.status = "in_progress";
+            }
             if (!ticket.assignedTo) {
                 ticket.assignedTo = req.user._id;
                 ticket.events.push({

@@ -254,7 +254,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 <div style="text-align:center;margin:0 0 40px;">
 <a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
-<p style="color:#9ca3af;font-size:12px;margin-top:10px;">(This link takes you to your secure ticket dashboard)</p>
+
 </div>
 
 <div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">

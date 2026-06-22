@@ -40,7 +40,7 @@ function formatTicketDate(value, fallback = "Not provided") {
     if (!value) return fallback;
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleString();
+    return date.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 }
 
 function getTicketAssigneeName(ticket = {}, fallback = "Unassigned") {
@@ -155,8 +155,12 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
 </ul>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
-<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>Opened:</strong> ${escapeHtml(openedDate)} – Initial request submitted</p>
-<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>Replied:</strong> ${escapeHtml(repliedDate)} – Support team sent the above response</p>
+${(ticket.events || []).map(ev => {
+    const evDate = formatTicketDate(ev.createdAt);
+    const evLabel = ev.label || ev.type || "Activity";
+    const evActor = ev.actorName ? " by " + escapeHtml(ev.actorName) : "";
+    return '<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>' + escapeHtml(evDate) + '</strong> – ' + escapeHtml(evLabel) + evActor + '</p>';
+}).join("\n")}
 <p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 30px;"><strong>Current Status:</strong> ${escapeHtml(statusLabel)}</p>
 
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We value your feedback! If you're satisfied with our response so far, please consider rating your support experience once the ticket is resolved.</p>
@@ -166,7 +170,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
   <div style="display:inline-block;text-align:left;">
     ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
     <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${escapeHtml(specialistName)}</strong>
-    ${adminAvatar ? `<span style="color:#34d399;font-size:14px;vertical-align:middle;margin-left:4px;" title="Verified Support Staff">✔️</span>` : ''}
+    ${adminAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Support Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
     ${specialistEmail ? `<br><a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;font-size:13px;text-decoration:none;">${escapeHtml(specialistEmail)}</a>` : ''}
   </div>
 </div>
@@ -719,7 +723,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
   ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;border:2px solid #34d399;object-fit:cover;">` : ''}
   <p style="color:#e5e5e5;font-size:16px;margin:0 0 5px;">
     <strong>${escapeHtml(specialistName)}</strong>
-    ${adminAvatar ? `<span style="color:#34d399;font-size:14px;vertical-align:middle;margin-left:4px;" title="Verified Staff">✔️</span>` : ''}
+    ${adminAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
   </p>
   ${specialistEmail ? `<p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 <a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;text-decoration:none;">${escapeHtml(specialistEmail)}</a></p>` : ''}
 </div>
