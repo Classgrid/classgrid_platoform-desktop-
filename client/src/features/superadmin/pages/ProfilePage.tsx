@@ -20,6 +20,7 @@ type ProfileData = {
   email: string;
   role: string;
   profilePicture: string;
+  profileBanner?: string;
   lastLoginAt?: string;
   createdAt?: string;
 };
@@ -41,6 +42,10 @@ export function ProfilePage() {
   });
   const [prefs, setPrefs] = useState<EmailPrefs>({ global: true, announcements: true });
   const [errors, setErrors] = useState<{ name?: string }>({});
+
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState("");
+  const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
 
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["superadmin-profile"],
@@ -93,64 +98,62 @@ export function ProfilePage() {
   const handlePrefToggle = (field: keyof EmailPrefs) => {
     const newPrefs = { ...prefs, [field]: !prefs[field] };
     setPrefs(newPrefs);
-    setIsDirty(true);
   };
 
-  const compressImage = (file: File, targetWidth: number, targetHeight: number): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return resolve(img.src); // Fallback to raw if canvas fails
-
-          // Resize with cover (crop to fit aspect ratio)
-          const imgRatio = img.width / img.height;
-          const targetRatio = targetWidth / targetHeight;
-          let drawWidth = targetWidth;
-          let drawHeight = targetHeight;
-          let offsetX = 0;
-          let offsetY = 0;
-
-          if (imgRatio > targetRatio) {
-            drawWidth = img.height * targetRatio;
-            offsetX = (img.width - drawWidth) / 2;
-            drawWidth = img.width - offsetX * 2;
-          } else {
-            drawHeight = img.width / targetRatio;
-            offsetY = (img.height - drawHeight) / 2;
-            drawHeight = img.height - offsetY * 2;
-          }
-
-          canvas.width = targetWidth;
-          canvas.height = targetHeight;
-          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
-          
-          // Output as highly compressed JPEG (max 100KB)
-          resolve(canvas.toDataURL("image/jpeg", 0.7));
-        };
-      };
-    });
+  const openCropper = (file: File, type: "avatar" | "banner") => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      setCropSrc(e.target?.result as string);
+      setCropType(type);
+      setCropOpen(true);
+    };
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const base64 = await compressImage(file, 400, 400); // Avatar 1:1 ratio
-    setForm((prev) => ({ ...prev, profilePicture: base64 }));
-    updateProfile.mutate({ profilePicture: base64 });
+    if (file) openCropper(file, "avatar");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const base64 = await compressImage(file, 1584, 396); // LinkedIn Banner standard size 4:1 ratio
-    setForm((prev) => ({ ...prev, profileBanner: base64 }));
-    updateProfile.mutate({ profileBanner: base64 });
+    if (file) openCropper(file, "banner");
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+  };
+
+  const uploadToR2 = async (blob: Blob, type: "avatar" | "banner") => {
+    const loadingToast = toast.loading(`Uploading ${type}...`);
+    try {
+      const ext = blob.type === "image/png" ? "png" : "jpg";
+      const fileName = `${type}-${Date.now()}.${ext}`;
+      
+      const { data } = await apiClient.post("/api/user/upload-url", {
+        fileName,
+        fileType: blob.type
+      });
+
+      await fetch(data.uploadUrl, {
+        method: "PUT",
+        body: blob,
+        headers: {
+          "Content-Type": blob.type
+        }
+      });
+
+      const updatePayload = type === "avatar" 
+        ? { profilePicture: data.publicUrl }
+        : { profileBanner: data.publicUrl };
+
+      setForm((prev) => ({ ...prev, ...updatePayload }));
+      updateProfile.mutate(updatePayload);
+      setCropOpen(false);
+      
+      toast.success(`${type} updated successfully!`, { id: loadingToast });
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to upload ${type}`, { id: loadingToast });
+    }
   };
 
   const handleSave = () => {
@@ -160,7 +163,6 @@ export function ProfilePage() {
   };
 
   const isLoading = profileLoading || prefsLoading;
-  const completionPercentage = [!!form.name, !!form.email, !!form.phoneNumber, !!form.profilePicture].filter(Boolean).length * 25;
 
   return (
     <div className="cg-profile-container">
@@ -171,7 +173,6 @@ export function ProfilePage() {
         </div>
       ) : (
         <>
-          {/* Identity Header */}
           <div className="cg-profile-id-card">
             <div 
               className="cg-profile-banner" 
@@ -207,11 +208,7 @@ export function ProfilePage() {
           </div>
 
           <div className="cg-profile-bento">
-            
-            {/* Left Column */}
             <div className="flex flex-col gap-6">
-              
-              {/* Basic Info */}
               <div className="cg-bento-card">
                 <div className="cg-bento-header">
                   <h3 className="cg-bento-title"><UserIcon size={18} /> Basic Information</h3>
@@ -231,7 +228,6 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              {/* Preferences */}
               <div className="cg-bento-card">
                 <div className="cg-bento-header">
                   <h3 className="cg-bento-title"><Palette size={18} /> User Experience</h3>
@@ -260,13 +256,9 @@ export function ProfilePage() {
                   </div>
                 </div>
               </div>
-
             </div>
 
-            {/* Right Column */}
             <div className="flex flex-col gap-6">
-              
-              {/* Contact Details */}
               <div className="cg-bento-card">
                 <div className="cg-bento-header">
                   <h3 className="cg-bento-title"><Phone size={18} /> Contact & Support</h3>
@@ -287,7 +279,6 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              {/* Security Actions */}
               <div className="cg-bento-card">
                 <div className="cg-bento-header">
                   <h3 className="cg-bento-title"><Shield size={18} /> Security Guard</h3>
@@ -316,10 +307,8 @@ export function ProfilePage() {
                   </div>
                 </div>
               </div>
-
             </div>
 
-            {/* Full Width Insights */}
             <div className="cg-card-full">
               <div className="cg-bento-card">
                 <div className="cg-bento-header">
@@ -344,10 +333,17 @@ export function ProfilePage() {
                 </div>
               </div>
             </div>
-
           </div>
 
-          {/* Sticky Bar */}
+          <ImageCropperModal
+            isOpen={cropOpen}
+            onClose={() => setCropOpen(false)}
+            imageSrc={cropSrc}
+            aspectRatio={cropType === "avatar" ? 1 : 1584 / 396}
+            title={cropType === "avatar" ? "Crop Profile Picture" : "Crop Banner"}
+            onCropComplete={(blob) => uploadToR2(blob, cropType)}
+          />
+
           {isDirty && (
             <div className="cg-sticky-save-bar">
               <div className="flex flex-col gap-1">

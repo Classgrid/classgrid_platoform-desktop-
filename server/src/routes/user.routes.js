@@ -5,6 +5,7 @@ import connectDB from "../../config/db.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { attachInstitutionProfile } from "../middleware/institution-profile.middleware.js";
 import { getChatSb } from "../config/supabaseClient.js";
+import { generateR2UploadUrl } from "../services/r2.service.js";
 
 const router = express.Router();
 
@@ -358,6 +359,28 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
   } catch (error) {
     console.error("UPDATE PROFILE ERROR:", error.message);
     res.status(500).json({ message: "Server error updating profile" });
+  }
+});
+
+// =======================
+// GET R2 UPLOAD URL
+// =======================
+router.post("/upload-url", isAuthenticated, async (req, res) => {
+  try {
+    const { fileName, fileType } = req.body;
+    if (!fileName || !fileType) {
+      return res.status(400).json({ message: "Filename and file type are required" });
+    }
+
+    // Ensure the filename is unique to prevent overwriting
+    const uniqueFileName = `${req.user._id}/${Date.now()}-${fileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+
+    const { uploadUrl, publicUrl } = await generateR2UploadUrl(uniqueFileName, fileType);
+
+    res.json({ uploadUrl, publicUrl });
+  } catch (error) {
+    console.error("GET UPLOAD URL ERROR:", error);
+    res.status(500).json({ message: "Failed to generate upload URL" });
   }
 });
 
