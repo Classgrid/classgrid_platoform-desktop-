@@ -434,6 +434,14 @@ export function SupportTicketsPage() {
                 ticket.submitterName ??
                 ticket.name ??
                 "Unknown";
+                
+              const conversation = getConversation(ticket);
+              let unreadCount = 0;
+              for (let i = conversation.length - 1; i >= 0; i--) {
+                if (conversation[i].role === "admin") break;
+                if (conversation[i].role === "user") unreadCount++;
+              }
+
               return (
                 <div
                   key={ticket._id}
@@ -447,13 +455,13 @@ export function SupportTicketsPage() {
                     >
                       {getInitials(name)}
                     </div>
-                    {ticket.status === "open" && (
+                    {unreadCount > 0 && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
                     )}
                   </div>
 
-                  {/* Middle: Name + Subject + Org */}
-                  <div className="flex-1 min-w-0">
+                  {/* Middle: Name + Subject + Org + Meta */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-semibold text-sm text-foreground truncate">
                         {name}
@@ -464,28 +472,43 @@ export function SupportTicketsPage() {
                         </span>
                       )}
                     </div>
+                    
                     <p className="text-sm text-muted-foreground truncate">
                       {ticket.subject}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded text-white ${statusBadgeBg(ticket.status)}`}
-                      >
-                        {statusLabel(ticket.status)}
+                    
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded text-white ${statusBadgeBg(ticket.status)}`}>
+                          {statusLabel(ticket.status)}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          {ticket.priority}
+                        </span>
+                      </div>
+                      
+                      <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
+                      
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                        <Clock className="w-3.5 h-3.5" />
+                        {fmtDateTime(ticket.createdAt)}
                       </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {ticket.priority}
-                      </span>
+                      
+                      {unreadCount > 0 && (
+                        <>
+                          <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
+                          <span className="flex items-center gap-1 text-xs font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                            {unreadCount} new message{unreadCount > 1 ? 's' : ''}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  {/* Right: Date + Read Button */}
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span className="text-xs text-muted-foreground">
-                      {fmtDate(ticket.createdAt)}
-                    </span>
+                  {/* Right: Assigned To + Read Button */}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     {ticket.assignedTo && (
-                      <span className="text-[10px] text-emerald-500 font-medium">
+                      <span className="text-[10px] text-emerald-500 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-md">
                         → {ticket.assignedTo.name}
                       </span>
                     )}
