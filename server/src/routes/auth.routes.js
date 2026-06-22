@@ -87,10 +87,9 @@ router.get(
                 return res.redirect(`${TARGET_URL}${errorPath}?error=AuthFailed`);
             }
             req.user = user;
-            next();
+            return authController.oauthCallback(req, res);
         })(req, res, next);
-    },
-    authController.oauthCallback
+    }
 );
 
 export default router;
