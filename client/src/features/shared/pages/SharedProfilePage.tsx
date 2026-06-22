@@ -3,6 +3,7 @@ import { Loader } from "lucide-react";
 import { CgButton } from "@/components/classgrid/Button";
 import { useUserProfile, useUpdateProfile, ProfileData } from "../queries/useUserProfile";
 import { ProfileIdentityCard } from "../components/profile/ProfileIdentityCard";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 export function SharedProfilePage() {
   const { data: profileData, isLoading } = useUserProfile();
@@ -31,11 +32,29 @@ export function SharedProfilePage() {
   }
 
   return (
-    <div className="cg-page max-w-4xl mx-auto">
-      <header className="cg-page__header">
+    <div className="cg-page max-w-4xl mx-auto" style={{ paddingTop: "1.5rem" }}>
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">My Account</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Global Profile</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      <header className="cg-page__header flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">My Account</p>
-          <h1 className="text-2xl font-bold tracking-tight">Global Profile</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+            Global Profile
+            {updateProfile.isPending && (
+              <Loader size={18} className="animate-spin text-muted-foreground" />
+            )}
+          </h1>
         </div>
       </header>
 

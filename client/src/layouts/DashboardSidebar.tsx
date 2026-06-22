@@ -207,7 +207,11 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
           type="button"
         >
           <span className="cg-user-card__body">
-            <span className="cg-user-card__avatar">{user?.name?.[0] ?? config.identity.name[0]}</span>
+            {user?.profilePicture ? (
+              <img src={user.profilePicture} alt={cardTitle} className="cg-user-card__avatar" style={{ padding: 0, border: 'none', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              <span className="cg-user-card__avatar">{user?.name?.[0] ?? config.identity.name[0]}</span>
+            )}
             <span className="cg-user-card__meta">
               <strong>{cardTitle}</strong>
               <small>{cardSubtitle}</small>

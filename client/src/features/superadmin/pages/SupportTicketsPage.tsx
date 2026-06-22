@@ -609,13 +609,17 @@ export function SupportTicketsPage() {
                 {/* Avatar */}
                 <div className="relative shrink-0">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
-                      msg.role === "admin"
+                    className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${
+                      (msg as any).avatar
+                        ? ""
+                        : msg.role === "admin"
                         ? "bg-emerald-100 dark:bg-emerald-900/40"
                         : `${getAvatarColor(msg.author)} text-white font-bold text-sm`
                     }`}
                   >
-                    {msg.role === "admin" ? (
+                    {(msg as any).avatar ? (
+                      <img src={(msg as any).avatar} alt="" className="w-full h-full object-cover" />
+                    ) : msg.role === "admin" ? (
                       <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     ) : (
                       <span>{getInitials(msg.author)}</span>
