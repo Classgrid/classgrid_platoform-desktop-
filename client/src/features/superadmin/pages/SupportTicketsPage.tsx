@@ -286,43 +286,103 @@ export function SupportTicketsPage() {
                   key={ticket._id} 
                   onClick={() => setSelectedTicket(ticket)}
                   style={{ 
-                    padding: "1rem", 
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1.25rem",
+                    padding: "1rem 1.25rem", 
                     borderBottom: "1px solid var(--cg-border, #2a2a2a)", 
                     cursor: "pointer",
                     background: isSelected ? "var(--cg-border, #2a2a2a)" : "transparent",
-                    transition: "background 0.2s"
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "rgba(255, 255, 255, 0.03)";
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "transparent";
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: ticket.status === "open" ? "#3b82f6" : "transparent" }} />
-                      <strong style={{ fontSize: "0.95rem" }}>{name}</strong>
+                  {/* Left: Avatar Profile Icon */}
+                  <div style={{ position: "relative" }}>
+                    <div
+                      className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${getAvatarColor(name)}`}
+                      style={{
+                        width: 48,
+                        height: 48,
+                        fontSize: "16px",
+                        flex: "0 0 auto",
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
+                      }}
+                    >
+                      <span>{getInitials(name)}</span>
                     </div>
-                    <span className="cg-table__info" style={{ fontSize: "0.8rem" }}>{fmtDateTime(ticket.createdAt)}</span>
+                    {ticket.status === "open" && (
+                      <div style={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        background: "#3b82f6",
+                        border: "2px solid var(--cg-surface, #1e1e1e)"
+                      }} />
+                    )}
                   </div>
                   
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    {ticket.assignedTo ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                        <CgAvatar name={ticket.assignedTo.name} size="sm" />
-                        <span style={{ fontSize: "0.8rem", color: "var(--cg-text-muted, #a1a1aa)" }}>Assigned to {ticket.assignedTo.name}</span>
-                      </div>
-                    ) : (
-                      <button 
-                        className="cg-btn cg-btn--outline" 
-                        style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", height: "auto" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          alert("Will call assign API here.");
-                        }}
-                      >
-                        Assign to Me
-                      </button>
-                    )}
-                    
+                  {/* Middle: Name and Assignment */}
+                  <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                    <strong style={{ fontSize: "1.05rem", color: "var(--cg-text, #f4f4f5)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {name}
+                    </strong>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {ticket.assignedTo ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <span style={{ fontSize: "0.85rem", color: "var(--cg-text-muted, #a1a1aa)" }}>
+                            Assigned to <span style={{ color: "#3b82f6", fontWeight: 500 }}>{ticket.assignedTo.name}</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <button 
+                          style={{ 
+                            padding: "0.3rem 0.8rem", 
+                            fontSize: "0.75rem", 
+                            background: "#27272a", // Solid dark gray
+                            color: "#e4e4e7",
+                            border: "1px solid #3f3f46",
+                            borderRadius: "0.375rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.background = "#3f3f46";
+                            e.currentTarget.style.borderColor = "#52525b";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.background = "#27272a";
+                            e.currentTarget.style.borderColor = "#3f3f46";
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert("Will call assign API here.");
+                          }}
+                        >
+                          Assign to Me
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Time and Read Button */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "0.8rem", color: "var(--cg-text-muted, #a1a1aa)", fontWeight: 500 }}>
+                      {fmtDateTime(ticket.createdAt)}
+                    </span>
                     <button 
                       style={{ 
-                        padding: "0.35rem 1rem", 
+                        padding: "0.35rem 1.25rem", 
                         fontSize: "0.75rem", 
                         background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
                         color: "white",
@@ -335,7 +395,7 @@ export function SupportTicketsPage() {
                       }}
                       onMouseOver={(e) => {
                         e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow = "0 4px 6px rgba(59, 130, 246, 0.4)";
+                        e.currentTarget.style.boxShadow = "0 4px 8px rgba(59, 130, 246, 0.4)";
                       }}
                       onMouseOut={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
