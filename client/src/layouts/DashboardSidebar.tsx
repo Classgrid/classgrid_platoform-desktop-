@@ -28,7 +28,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
   const SwitcherIcon = config.switcher?.current.icon;
   const menuItems = config.identity.menuItems ?? [];
   const userRoleLabel = user ? getRoleLabel(user.role) : null;
-  const cardTitle = user ? `${user.name} (${userRoleLabel})` : (config.identity.cardTitle ?? config.identity.name);
+  const cardTitle = user ? user.name : (config.identity.cardTitle ?? config.identity.name);
   const cardSubtitle = user ? (user.email ?? userRoleLabel) : (config.identity.cardSubtitle ?? config.identity.email ?? config.identity.subtitle);
   const normalizedUserEmail = (user?.email ?? "").trim().toLowerCase();
   const visibleSections = config.sections
@@ -220,40 +220,49 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
           <ChevronDown className="cg-user-card__chevron" size={14} />
         </button>
 
-        {isMenuOpen ? (
-          <div className="cg-user-menu">
-            {menuItems.map((item) => {
-              const ItemIcon = item.icon;
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="cg-user-menu shadow-xl border border-white/10"
+              style={{ transformOrigin: "bottom center" }}
+            >
+              {menuItems.map((item) => {
+                const ItemIcon = item.icon;
 
-              if (item.to) {
+                if (item.to) {
+                  return (
+                    <div key={item.label}>
+                      {item.dividerBefore ? <div className="cg-user-menu__divider" /> : null}
+                      <NavLink onClick={() => setIsMenuOpen(false)} to={item.to} className="hover:bg-white/5 transition-colors rounded-md">
+                        <ItemIcon size={14} />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={item.label}>
                     {item.dividerBefore ? <div className="cg-user-menu__divider" /> : null}
-                    <NavLink onClick={() => setIsMenuOpen(false)} to={item.to}>
+                    <button onClick={() => {
+                      if (item.label === "Log out") {
+                        void handleLogout();
+                        return;
+                      }
+                    }} type="button" className="hover:bg-red-500/10 hover:text-red-400 transition-colors rounded-md w-full">
                       <ItemIcon size={14} />
                       <span>{item.label}</span>
-                    </NavLink>
+                    </button>
                   </div>
                 );
-              }
-
-              return (
-                <div key={item.label}>
-                  {item.dividerBefore ? <div className="cg-user-menu__divider" /> : null}
-                  <button onClick={() => {
-                    if (item.label === "Log out") {
-                      void handleLogout();
-                      return;
-                    }
-                  }} type="button">
-                    <ItemIcon size={14} />
-                    <span>{item.label}</span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </aside>
   );
