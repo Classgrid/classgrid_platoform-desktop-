@@ -123,122 +123,7 @@ function getAvatarColor(name: string) {
 
 // ── column definition ─────────────────────────────────────────────────────────
 
-function buildColumns(
-  onView: (ticket: SupportTicket) => void,
-  onResolve: (id: string) => void,
-  isUpdating: boolean
-): ColumnDef<SupportTicket>[] {
-  return [
-    {
-      accessorKey: "subject",
-      header: "Subject",
-      size: 280,
-      cell: ({ row }) => {
-        const ticket = row.original;
-        return (
-          <div>
-            <div style={{ fontWeight: 500, fontSize: "0.88rem" }}>
-              {ticket.subject}
-            </div>
-            <div className="cg-table__info">{ticket.category}</div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "submitterName",
-      header: "Submitter",
-      size: 200,
-      cell: ({ row }) => {
-        const t = row.original;
-        const name = t.submittedBy?.name ?? t.submitterName ?? "Unknown";
-        const email = t.submittedBy?.email ?? t.submitterEmail ?? "";
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <CgAvatar name={name} size="sm" />
-            <div>
-              <div style={{ fontSize: "0.84rem", fontWeight: 500 }}>{name}</div>
-              <div className="cg-table__info">{email}</div>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "priority",
-      header: "Priority",
-      size: 110,
-      cell: ({ getValue }) => {
-        const p = getValue<TicketPriority>();
-        const cfg = PRIORITY_CONFIG[p] ?? { label: p, variant: "neutral" as const };
-        return <CgBadge variant={cfg.variant}>{cfg.label}</CgBadge>;
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      size: 130,
-      cell: ({ getValue }) => {
-        const s = getValue<TicketStatus>();
-        const cfg = STATUS_CONFIG[s] ?? { label: s, variant: "neutral" as const };
-        return (
-          <CgBadge variant={cfg.variant} dot>
-            {cfg.label}
-          </CgBadge>
-        );
-      },
-    },
-    {
-      accessorKey: "replies",
-      header: "Replies",
-      size: 80,
-      cell: ({ getValue }) => {
-        const replies = getValue<SupportTicket["replies"]>();
-        return (
-          <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-            <MessageSquare size={13} />
-            {replies?.length ?? 0}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Opened",
-      size: 120,
-      cell: ({ getValue }) => fmtDate(getValue<string>()),
-    },
-    {
-      id: "actions",
-      header: "Action",
-      size: 210,
-      cell: ({ row }) => {
-        const t = row.original;
-        const isResolved = t.status === "resolved" || t.status === "closed";
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-            <button
-              className="cg-btn cg-btn--outline"
-              onClick={() => onView(t)}
-              type="button"
-            >
-              <Eye size={13} />
-              View
-            </button>
-            <button
-              className={`cg-btn cg-btn--${isResolved ? "outline" : "primary"}`}
-              disabled={isResolved || isUpdating}
-              onClick={() => !isResolved && onResolve(t._id)}
-              type="button"
-            >
-              {isResolved ? "Resolved" : "Resolve"}
-            </button>
-          </div>
-        );
-      },
-    },
-  ];
-}
+// Columns removed for WhatsApp layout
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
@@ -289,18 +174,7 @@ export function SupportTicketsPage() {
     [apiStats, tickets.length]
   );
 
-  const columns = useMemo(
-    () =>
-      buildColumns(
-        (ticket) => {
-          setSelectedTicket(ticket);
-          setReplyBody("");
-        },
-        (id) => updateTicket.mutate({ id, status: "resolved" }),
-        updateTicket.isPending
-      ),
-    [updateTicket]
-  );
+  // columns memo removed for WhatsApp layout
 
   const selectedRequester = selectedTicket ? getRequester(selectedTicket) : null;
   const selectedMessages = selectedTicket ? getConversation(selectedTicket) : [];
@@ -371,216 +245,112 @@ export function SupportTicketsPage() {
         />
       </div>
 
-      {/* Filters + Table */}
-      <CgSectionPanel
-        title="All Tickets"
-        description="Filtered view across all organisations and users."
-        noPadding
-        actions={
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Filter size={14} />
-            <select
-              className="cg-select__trigger"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <select
-              className="cg-select__trigger"
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-            >
-              {PRIORITY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        }
-      >
-        {isError ? (
-          <div className="cg-alert cg-alert--danger">
-            <AlertCircle size={16} className="cg-alert__icon" />
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Failed to load support tickets</span>
-              <p className="cg-alert__message">
-                Verify your session is active and retry.
-              </p>
-            </div>
-            <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>
-              Retry
-            </button>
-          </div>
-        ) : (
-          <CgDataTable
-            columns={columns}
-            data={tickets}
-            pageSize={10}
-            emptyMessage={
-              isLoading
-                ? "Loading tickets…"
-                : "No tickets match the current filters."
-            }
-          />
-        )}
-      </CgSectionPanel>
-
-      <CgModal
-        open={Boolean(selectedTicket)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedTicket(null);
-            setReplyBody("");
-          }
-        }}
-      >
-        <CgModalContent
-          title={selectedTicket?.subject || "Support ticket"}
-          description={selectedTicket ? `Ticket #${selectedTicket._id.slice(0, 8)}` : undefined}
-          size="xl"
+      {/* Filters + WhatsApp Layout */}
+      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1rem" }}>
+        <Filter size={14} />
+        <select
+          className="cg-select__trigger"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
-          {selectedTicket && selectedRequester ? (
-            <div style={{ display: "grid", gap: "1rem" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 280px)",
-                  gap: "1rem",
-                  alignItems: "start",
-                }}
-              >
-                <div style={{ display: "grid", gap: "0.75rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                    <CgBadge variant={STATUS_CONFIG[selectedTicket.status]?.variant ?? "neutral"} dot>
-                      {STATUS_CONFIG[selectedTicket.status]?.label ?? selectedTicket.status}
-                    </CgBadge>
-                    <CgBadge variant={PRIORITY_CONFIG[selectedTicket.priority]?.variant ?? "neutral"}>
-                      {PRIORITY_CONFIG[selectedTicket.priority]?.label ?? selectedTicket.priority}
-                    </CgBadge>
-                    <span className="cg-table__info">Last comment {fmtDateTime(selectedTicket.lastComment)}</span>
-                  </div>
+          {STATUS_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <select
+          className="cg-select__trigger"
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        >
+          {PRIORITY_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
 
-                  <div
-                    style={{
-                      border: "1px solid var(--cg-border, #2a2a2a)",
-                      borderRadius: "0.75rem",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {selectedMessages.map((message, index) => (
-                      <div
-                        key={("_id" in message ? message._id : undefined) ?? `${message.role}-${index}`}
-                        style={{
-                          display: "flex",
-                          gap: "0.75rem",
-                          padding: "1rem",
-                          borderTop: index === 0 ? "none" : "1px solid var(--cg-border, #2a2a2a)",
-                        }}
-                      >
-                        <div
-                          className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${
-                            message.role === "admin"
-                              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                              : getAvatarColor(message.author)
-                          }`}
-                          style={{
-                            width: 36,
-                            height: 36,
-                            fontSize: "14px",
-                            flex: "0 0 auto",
-                          }}
-                        >
-                          {message.role === "admin" ? <ShieldCheck size={18} /> : <span>{getInitials(message.author)}</span>}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap" }}>
-                            <strong style={{ fontSize: "0.9rem" }}>{message.author}</strong>
-                            <span className="cg-table__info">{fmtDateTime(message.date)}</span>
-                          </div>
-                          <RichSupportContent html={message.body} />
-                          {message.footer ? (
-                            <p className="cg-table__info" style={{ whiteSpace: "pre-wrap", marginTop: "0.75rem" }}>
-                              {message.footer}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    border: "1px solid var(--cg-border, #2a2a2a)",
-                    borderRadius: "0.75rem",
-                    padding: "1rem",
-                    display: "grid",
-                    gap: "0.85rem",
+      <div style={{ display: "grid", gridTemplateColumns: "350px minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
+        {/* Pane A: Ticket List */}
+        <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--cg-border, #2a2a2a)", borderRadius: "0.5rem", background: "var(--cg-surface, #1e1e1e)", height: "calc(100vh - 250px)", overflowY: "auto" }}>
+          {isError ? (
+            <div style={{ padding: "1rem" }}>Failed to load tickets.</div>
+          ) : isLoading ? (
+            <div style={{ padding: "1rem" }}>Loading...</div>
+          ) : tickets.length === 0 ? (
+            <div style={{ padding: "1rem" }}>No tickets found.</div>
+          ) : (
+            tickets.map((ticket) => {
+              const name = ticket.submittedBy?.name ?? ticket.submitterName ?? ticket.name ?? "Unknown";
+              const isSelected = selectedTicket?._id === ticket._id;
+              return (
+                <div 
+                  key={ticket._id} 
+                  onClick={() => setSelectedTicket(ticket)}
+                  style={{ 
+                    padding: "1rem", 
+                    borderBottom: "1px solid var(--cg-border, #2a2a2a)", 
+                    cursor: "pointer",
+                    background: isSelected ? "var(--cg-border, #2a2a2a)" : "transparent",
+                    transition: "background 0.2s"
                   }}
                 >
-                  <DetailRow label="Requester" value={selectedRequester.name} />
-                  <DetailRow label="Email" value={selectedRequester.email} />
-                  <DetailRow label="Institution" value={selectedTicket.institution || selectedTicket.organization_id?.name || "—"} />
-                  <DetailRow label="Created" value={fmtDateTime(selectedTicket.createdAt)} />
-                  <DetailRow label="Assigned" value={selectedTicket.assignedTo?.name ?? "Unassigned"} />
-                  <DetailRow label="Category" value={selectedTicket.category} />
-                  <label style={{ display: "grid", gap: "0.35rem", fontSize: "0.82rem", fontWeight: 600 }}>
-                    Status
-                    <select
-                      className="cg-select__trigger"
-                      value={selectedTicket.status}
-                      disabled={updateTicket.isPending}
-                      onChange={(event) => handleSelectedStatusChange(event.target.value as TicketStatus)}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: ticket.status === "open" ? "#3b82f6" : "transparent" }} />
+                      <strong style={{ fontSize: "0.95rem" }}>{name}</strong>
+                    </div>
+                    <span className="cg-table__info" style={{ fontSize: "0.8rem" }}>{fmtDateTime(ticket.createdAt)}</span>
+                  </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    {ticket.assignedTo ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <CgAvatar name={ticket.assignedTo.name} size="sm" />
+                        <span style={{ fontSize: "0.8rem", color: "var(--cg-text-muted, #a1a1aa)" }}>Assigned to {ticket.assignedTo.name}</span>
+                      </div>
+                    ) : (
+                      <button 
+                        className="cg-btn cg-btn--outline" 
+                        style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", height: "auto" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          alert("Will call assign API here.");
+                        }}
+                      >
+                        Assign to Me
+                      </button>
+                    )}
+                    
+                    <button 
+                      className="cg-btn cg-btn--outline"
+                      style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", height: "auto" }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        alert("Will mark as read"); 
+                      }}
                     >
-                      {(["open", "in_progress", "waiting_on_user", "resolved", "closed"] as TicketStatus[]).map((status) => (
-                        <option key={status} value={status}>
-                          {STATUS_CONFIG[status]?.label ?? status}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      Read
+                    </button>
+                  </div>
                 </div>
-              </div>
+              );
+            })
+          )}
+        </div>
 
-              <form onSubmit={(event) => { event.preventDefault(); submitReply(); }}>
-                <div style={{ display: "grid", gap: "0.5rem", fontWeight: 600 }}>
-                  <span>Reply</span>
-                  <RichReplyEditor
-                    ref={replyEditorRef}
-                    onChange={setReplyBody}
-                    placeholder="Type your reply to the requester..."
-                    minHeight={150}
-                    onSubmit={submitReply}
-                  />
-                </div>
-                <CgModalFooter>
-                  <button
-                    type="button"
-                    className="cg-btn cg-btn--outline"
-                    onClick={() => setSelectedTicket(null)}
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="submit"
-                    className="cg-btn cg-btn--primary"
-                    disabled={!replyBody.trim() || replyToTicket.isPending}
-                  >
-                    <Send size={14} />
-                    {replyToTicket.isPending ? "Sending..." : "Send Reply"}
-                  </button>
-                </CgModalFooter>
-              </form>
-            </div>
-          ) : null}
-        </CgModalContent>
-      </CgModal>
+        {/* Pane B: Read Page Placeholder */}
+        <div style={{ border: "1px solid var(--cg-border, #2a2a2a)", borderRadius: "0.5rem", background: "var(--cg-surface, #1e1e1e)", height: "calc(100vh - 250px)", overflowY: "auto", padding: "2rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+           {selectedTicket ? (
+             <div style={{ textAlign: "center", color: "var(--cg-text-muted, #a1a1aa)" }}>
+               <h3>{selectedTicket.submittedBy?.name ?? selectedTicket.submitterName ?? selectedTicket.name ?? "Unknown"}'s Ticket Selected</h3>
+               <p>Pending Read Page Design from User...</p>
+             </div>
+           ) : (
+             <div style={{ textAlign: "center", color: "var(--cg-text-muted, #a1a1aa)" }}>
+                Select a ticket from the left to read
+             </div>
+           )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -411,5 +411,13 @@ userSchema.index(
   { unique: true, partialFilterExpression: { prn: { $type: "string" } } }
 );
 
+// 🛡️ Auto-verify all @classgrid.in emails
+userSchema.pre('save', function(next) {
+  if (this.email && this.email.toLowerCase().endsWith('@classgrid.in')) {
+    this.isEmailVerified = true;
+    this.verification_status = 'verified';
+  }
+  next();
+});
 
 export default mongoose.models.User || mongoose.model("User", userSchema);
