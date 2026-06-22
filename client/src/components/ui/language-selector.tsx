@@ -3,13 +3,13 @@
 import { Globe, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { SUPPORTED_LANGS, LANG_LABELS, type SupportedLang } from "@/lib/locale";
 
 export function LanguageSelector() {
-  const router = useRouter();
-  const pathname = usePathname() || "/";
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const getLang = useCallback((): SupportedLang => {
     const param = searchParams.get("lang");

@@ -16,8 +16,7 @@
  */
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useNavigate } from 'react-router-dom';
 import { RefreshCw, ArrowLeft, Wifi } from 'lucide-react';
 import { SectionAccentBar } from "@/components/ui/section-accent-bar";
 
@@ -35,7 +34,7 @@ export function CmsFallback({
   backHref = '/',
   backLabel,
 }: CmsFallbackProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <main className="min-h-[60vh] bg-background text-foreground flex items-center justify-center px-6 py-24">
@@ -61,7 +60,7 @@ export function CmsFallback({
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <button
-            onClick={() => router.refresh()}
+            onClick={() => navigate(0)}
             className="inline-flex h-10 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             <RefreshCw className="h-4 w-4" />

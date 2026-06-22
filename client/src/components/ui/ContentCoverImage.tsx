@@ -1,4 +1,4 @@
-import Image from "next/image";
+// import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type ContentCoverImageProps = {
@@ -21,13 +21,10 @@ export function ContentCoverImage({
         className
       )}
     >
-      <Image 
+      <img 
         src={src} 
         alt={alt || "Cover image"} 
-        fill 
-        className="object-contain" 
-        priority={priority}
-        sizes="(max-width: 1024px) 100vw, 1024px"
+        className="object-contain w-full h-full" 
       />
     </div>
   );

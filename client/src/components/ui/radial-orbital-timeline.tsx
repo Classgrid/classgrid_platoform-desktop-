@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import Image from "next/image";
+// import Image from "next/image"; (removed for Vite)
 import { AnimatePresence, motion, useMotionValue, useTransform, useAnimationFrame } from "framer-motion";
 import { CheckCircle2, Sparkles, X, BarChart3, Zap, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -600,7 +600,7 @@ export default function RadialOrbitalTimeline({ activeTab, rings, roleDataMap = 
             </AnimatePresence>
 
             <div className={cn("relative flex h-full w-full items-center justify-center rounded-full transition-colors duration-1000", selectedNode ? `map-border-${activeColorIdx}` : "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/30")}>
-              <Image src="/logo.png" alt="Classgrid core" width={60} height={60} className="h-[60px] w-[60px] object-contain relative z-10" priority />
+              <img src="/logo.png" alt="Classgrid core" className="h-[60px] w-[60px] object-contain relative z-10" />
 
               <AnimatePresence>
                 {selectedNode && animStep >= 2 && (
