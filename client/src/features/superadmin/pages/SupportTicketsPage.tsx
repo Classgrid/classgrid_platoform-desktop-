@@ -121,10 +121,6 @@ function getAvatarColor(name: string) {
   return avatarColors[index];
 }
 
-// ── column definition ─────────────────────────────────────────────────────────
-
-// Columns removed for WhatsApp layout
-
 // ── page ─────────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -174,8 +170,6 @@ export function SupportTicketsPage() {
     [apiStats, tickets.length]
   );
 
-  // columns memo removed for WhatsApp layout
-
   const selectedRequester = selectedTicket ? getRequester(selectedTicket) : null;
   const selectedMessages = selectedTicket ? getConversation(selectedTicket) : [];
 
@@ -201,91 +195,81 @@ export function SupportTicketsPage() {
 
   return (
     <div className="cg-page">
-      {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Support Tickets</h1>
-          <p className="cg-page__description">
-            Manage and resolve platform support tickets raised by institution users.
-          </p>
-        </div>
-        <div className="cg-page__header-actions">
-          <button
-            className="cg-btn cg-btn--outline"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Metrics */}
-      <div className="cg-stats-grid">
-        <CgMetricCard
-          title="Open"
-          value={isLoading ? "—" : displayStats.open}
-          icon={<AlertCircle size={16} />}
-        />
-        <CgMetricCard
-          title="In Progress"
-          value={isLoading ? "—" : displayStats.inProgress}
-          icon={<Clock size={16} />}
-        />
-        <CgMetricCard
-          title="Resolved"
-          value={isLoading ? "—" : displayStats.resolved}
-          icon={<CheckCircle2 size={16} />}
-        />
-        <CgMetricCard
-          title="Loaded"
-          value={isLoading ? "—" : displayStats.total}
-          icon={<MessageSquare size={16} />}
-        />
-      </div>
-
-      {/* Filters + WhatsApp Layout */}
-      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1rem" }}>
-        <Filter size={14} />
-        <select
-          className="cg-select__trigger"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <select
-          className="cg-select__trigger"
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value)}
-        >
-          {PRIORITY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </div>
-
-      {selectedTicket ? (
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          {/* Read Page Top Bar with Back Button */}
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "1.5rem" }}>
-            <button 
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem", border: "none", background: "transparent", padding: "0.5rem", cursor: "pointer", color: "var(--cg-text-muted)" }}
-              onClick={() => setSelectedTicket(null)}
-              onMouseOver={(e) => e.currentTarget.style.color = "var(--cg-text)"}
-              onMouseOut={(e) => e.currentTarget.style.color = "var(--cg-text-muted)"}
-            >
-               <span style={{ fontSize: "1.2rem" }}>←</span> Back to Tickets
-            </button>
+      {!selectedTicket && (
+        <>
+          {/* Header */}
+          <div className="cg-page__header">
+            <div className="cg-page__header-content">
+              <h1 className="cg-page__title">Support Tickets</h1>
+              <p className="cg-page__description">
+                Manage and resolve platform support tickets raised by institution users.
+              </p>
+            </div>
+            <div className="cg-page__header-actions">
+              <button
+                className="cg-btn cg-btn--outline"
+                onClick={() => refetch()}
+                disabled={isFetching}
+              >
+                <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+                Refresh
+              </button>
+            </div>
           </div>
 
-          {/* Main Split Layout */}
-          <div style={{ display: "flex", gap: "2rem", flex: 1, minHeight: 0 }}>
-            {/* Left Column: Thread */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", paddingRight: "1rem" }}>
+          {/* Metrics */}
+          <div className="cg-stats-grid">
+            <CgMetricCard
+              title="Open"
+              value={isLoading ? "—" : displayStats.open}
+              icon={<AlertCircle size={16} />}
+            />
+            <CgMetricCard
+              title="In Progress"
+              value={isLoading ? "—" : displayStats.inProgress}
+              icon={<Clock size={16} />}
+            />
+            <CgMetricCard
+              title="Resolved"
+              value={isLoading ? "—" : displayStats.resolved}
+              icon={<CheckCircle2 size={16} />}
+            />
+            <CgMetricCard
+              title="Loaded"
+              value={isLoading ? "—" : displayStats.total}
+              icon={<MessageSquare size={16} />}
+            />
+          </div>
+
+          {/* Filters + WhatsApp Layout */}
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1rem" }}>
+            <Filter size={14} />
+            <select
+              className="cg-select__trigger"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <select
+              className="cg-select__trigger"
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+            >
+              {PRIORITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
+
+      {selectedTicket ? (
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, padding: "1.5rem" }}>
+           {/* Read Page Layout (Left only, no back button, no right card) */}
+           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
               {/* Message Block */}
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "2rem" }}>
                  <div className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${getAvatarColor(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}`} style={{ width: 48, height: 48, flexShrink: 0 }}>
@@ -297,46 +281,33 @@ export function SupportTicketsPage() {
                        <span style={{ fontSize: "0.85rem", color: "var(--cg-text-muted)" }}>{fmtDateTime(selectedTicket.createdAt)}</span>
                     </div>
                     <div style={{ fontSize: "0.95rem", lineHeight: "1.6", color: "var(--cg-text)", marginTop: "0.5rem" }}>
-                       <p>{selectedTicket.description || "The user's original support message is displayed here in a clean paragraph format."}</p>
+                       <RichSupportContent html={selectedTicket.message || selectedTicket.description || "<p>The user's original support message is displayed here in a clean paragraph format.</p>"} />
                     </div>
                  </div>
               </div>
               
-              {/* Footer / Rich Text Editor Placeholder */}
+              {/* Footer / Rich Text Editor */}
               <div style={{ marginTop: "auto", borderTop: "1px solid var(--cg-border)", paddingTop: "1.5rem", paddingBottom: "2rem" }}>
-                 <p style={{ color: "var(--cg-text-muted)", marginBottom: "0.5rem", fontSize: "0.85rem" }}>Reply to user...</p>
-                 <div style={{ border: "1px solid var(--cg-border)", borderRadius: "8px", height: "150px", background: "var(--cg-surface)" }}>
-                    <div style={{ padding: "1rem", color: "var(--cg-text-muted)" }}>Rich text editor component will be loaded here.</div>
+                 <div style={{ background: "var(--cg-surface)", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--cg-border)" }}>
+                   <RichReplyEditor
+                     ref={replyEditorRef}
+                     onChange={setReplyBody}
+                     placeholder="Type your reply... (Shift+Enter for newline)"
+                     minHeight={150}
+                     onSubmit={submitReply}
+                   />
                  </div>
                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-                    <button style={{ background: "#3b82f6", color: "white", border: "none", padding: "0.5rem 1.5rem", borderRadius: "9999px", fontWeight: 600, cursor: "pointer" }}>Send Reply</button>
+                    <button 
+                      style={{ background: "#3b82f6", color: "white", border: "none", padding: "0.5rem 1.5rem", borderRadius: "9999px", fontWeight: 600, cursor: "pointer" }}
+                      onClick={submitReply}
+                      disabled={replyToTicket.isPending}
+                    >
+                      {replyToTicket.isPending ? "Sending..." : "Send Reply"}
+                    </button>
                  </div>
               </div>
-            </div>
-
-            {/* Right Metadata Card */}
-            <div style={{ width: "320px", flexShrink: 0 }}>
-               <div style={{ border: "1px solid #2a2a2a", borderRadius: "12px", background: "var(--cg-surface, #1e1e1e)", overflow: "hidden" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    {[
-                       { label: "Id", value: selectedTicket._id ? "#" + selectedTicket._id.slice(-8) : "—" },
-                       { label: "Requester", value: selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown" },
-                       { label: "Email", value: selectedTicket.submittedBy?.email || selectedTicket.email || "—" },
-                       { label: "Created", value: fmtDateTime(selectedTicket.createdAt) },
-                       { label: "Assigned to", value: selectedTicket.assignedTo?.name || "Unassigned" },
-                       { label: "Category", value: selectedTicket.category || "General" },
-                       { label: "Priority", value: selectedTicket.priority || "High" },
-                       { label: "Status", value: selectedTicket.status?.toUpperCase() || "OPEN" }
-                    ].map((row, i) => (
-                       <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "1rem", borderBottom: i === 7 ? "none" : "1px solid #2a2a2a" }}>
-                          <span style={{ color: "var(--cg-text-muted)", fontSize: "0.85rem", fontWeight: 600 }}>{row.label}</span>
-                          <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--cg-text)", textAlign: "right", wordBreak: "break-all" }}>{row.value || "—"}</span>
-                       </div>
-                    ))}
-                  </div>
-               </div>
-            </div>
-          </div>
+           </div>
         </div>
       ) : (
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "stretch", flex: 1, minHeight: 0 }}>
