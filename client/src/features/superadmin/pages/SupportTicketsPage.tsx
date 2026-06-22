@@ -268,7 +268,78 @@ export function SupportTicketsPage() {
         </select>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "stretch" }}>
+      {selectedTicket ? (
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+          {/* Read Page Top Bar with Back Button */}
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "1.5rem" }}>
+            <button 
+              style={{ display: "flex", alignItems: "center", gap: "0.5rem", border: "none", background: "transparent", padding: "0.5rem", cursor: "pointer", color: "var(--cg-text-muted)" }}
+              onClick={() => setSelectedTicket(null)}
+              onMouseOver={(e) => e.currentTarget.style.color = "var(--cg-text)"}
+              onMouseOut={(e) => e.currentTarget.style.color = "var(--cg-text-muted)"}
+            >
+               <span style={{ fontSize: "1.2rem" }}>←</span> Back to Tickets
+            </button>
+          </div>
+
+          {/* Main Split Layout */}
+          <div style={{ display: "flex", gap: "2rem", flex: 1, minHeight: 0 }}>
+            {/* Left Column: Thread */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", paddingRight: "1rem" }}>
+              {/* Message Block */}
+              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "2rem" }}>
+                 <div className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${getAvatarColor(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}`} style={{ width: 48, height: 48, flexShrink: 0 }}>
+                    <span>{getInitials(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}</span>
+                 </div>
+                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                       <strong style={{ fontSize: "1.1rem" }}>{selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown"}</strong>
+                       <span style={{ fontSize: "0.85rem", color: "var(--cg-text-muted)" }}>{fmtDateTime(selectedTicket.createdAt)}</span>
+                    </div>
+                    <div style={{ fontSize: "0.95rem", lineHeight: "1.6", color: "var(--cg-text)", marginTop: "0.5rem" }}>
+                       <p>{selectedTicket.description || "The user's original support message is displayed here in a clean paragraph format."}</p>
+                    </div>
+                 </div>
+              </div>
+              
+              {/* Footer / Rich Text Editor Placeholder */}
+              <div style={{ marginTop: "auto", borderTop: "1px solid var(--cg-border)", paddingTop: "1.5rem", paddingBottom: "2rem" }}>
+                 <p style={{ color: "var(--cg-text-muted)", marginBottom: "0.5rem", fontSize: "0.85rem" }}>Reply to user...</p>
+                 <div style={{ border: "1px solid var(--cg-border)", borderRadius: "8px", height: "150px", background: "var(--cg-surface)" }}>
+                    <div style={{ padding: "1rem", color: "var(--cg-text-muted)" }}>Rich text editor component will be loaded here.</div>
+                 </div>
+                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+                    <button style={{ background: "#3b82f6", color: "white", border: "none", padding: "0.5rem 1.5rem", borderRadius: "9999px", fontWeight: 600, cursor: "pointer" }}>Send Reply</button>
+                 </div>
+              </div>
+            </div>
+
+            {/* Right Metadata Card */}
+            <div style={{ width: "320px", flexShrink: 0 }}>
+               <div style={{ border: "1px solid #2a2a2a", borderRadius: "12px", background: "var(--cg-surface, #1e1e1e)", overflow: "hidden" }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    {[
+                       { label: "Id", value: selectedTicket._id ? "#" + selectedTicket._id.slice(-8) : "—" },
+                       { label: "Requester", value: selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown" },
+                       { label: "Email", value: selectedTicket.submittedBy?.email || selectedTicket.email || "—" },
+                       { label: "Created", value: fmtDateTime(selectedTicket.createdAt) },
+                       { label: "Assigned to", value: selectedTicket.assignedTo?.name || "Unassigned" },
+                       { label: "Category", value: selectedTicket.category || "General" },
+                       { label: "Priority", value: selectedTicket.priority || "High" },
+                       { label: "Status", value: selectedTicket.status?.toUpperCase() || "OPEN" }
+                    ].map((row, i) => (
+                       <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "1rem", borderBottom: i === 7 ? "none" : "1px solid #2a2a2a" }}>
+                          <span style={{ color: "var(--cg-text-muted)", fontSize: "0.85rem", fontWeight: 600 }}>{row.label}</span>
+                          <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--cg-text)", textAlign: "right", wordBreak: "break-all" }}>{row.value || "—"}</span>
+                       </div>
+                    ))}
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "stretch", flex: 1, minHeight: 0 }}>
         {/* Pane A: Ticket List */}
         <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--cg-border, #2a2a2a)", borderRadius: "0.5rem", background: "var(--cg-surface, #1e1e1e)", height: "calc(100vh - 250px)", overflowY: "auto" }}>
           {isError ? (
@@ -415,6 +486,7 @@ export function SupportTicketsPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
