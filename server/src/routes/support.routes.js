@@ -91,7 +91,8 @@ function serializeTicket(ticket) {
         lastComment: getLastComment({ ...ticket, messages }),
         requester: {
             name: ticket.submitterName || ticket.submittedBy?.name || "Unknown",
-            email: ticket.submitterEmail || ticket.submittedBy?.email || ""
+            email: ticket.submitterEmail || ticket.submittedBy?.email || "",
+            role: ticket.submittedBy?.role || null
         }
     };
 }
