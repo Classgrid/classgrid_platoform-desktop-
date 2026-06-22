@@ -268,7 +268,7 @@ export function SupportTicketsPage() {
         </select>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "350px minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "stretch" }}>
         {/* Pane A: Ticket List */}
         <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--cg-border, #2a2a2a)", borderRadius: "0.5rem", background: "var(--cg-surface, #1e1e1e)", height: "calc(100vh - 250px)", overflowY: "auto" }}>
           {isError ? (
@@ -321,11 +321,29 @@ export function SupportTicketsPage() {
                     )}
                     
                     <button 
-                      className="cg-btn cg-btn--outline"
-                      style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", height: "auto" }}
+                      style={{ 
+                        padding: "0.35rem 1rem", 
+                        fontSize: "0.75rem", 
+                        background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "9999px",
+                        fontWeight: 600,
+                        boxShadow: "0 2px 4px rgba(59, 130, 246, 0.3)",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.boxShadow = "0 4px 6px rgba(59, 130, 246, 0.4)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "0 2px 4px rgba(59, 130, 246, 0.3)";
+                      }}
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        alert("Will mark as read"); 
+                        alert("Will mark as read and open Read Page"); 
                       }}
                     >
                       Read
@@ -335,20 +353,6 @@ export function SupportTicketsPage() {
               );
             })
           )}
-        </div>
-
-        {/* Pane B: Read Page Placeholder */}
-        <div style={{ border: "1px solid var(--cg-border, #2a2a2a)", borderRadius: "0.5rem", background: "var(--cg-surface, #1e1e1e)", height: "calc(100vh - 250px)", overflowY: "auto", padding: "2rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-           {selectedTicket ? (
-             <div style={{ textAlign: "center", color: "var(--cg-text-muted, #a1a1aa)" }}>
-               <h3>{selectedTicket.submittedBy?.name ?? selectedTicket.submitterName ?? selectedTicket.name ?? "Unknown"}'s Ticket Selected</h3>
-               <p>Pending Read Page Design from User...</p>
-             </div>
-           ) : (
-             <div style={{ textAlign: "center", color: "var(--cg-text-muted, #a1a1aa)" }}>
-                Select a ticket from the left to read
-             </div>
-           )}
         </div>
       </div>
     </div>
