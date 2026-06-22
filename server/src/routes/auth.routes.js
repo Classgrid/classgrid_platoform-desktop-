@@ -63,14 +63,25 @@ router.get(
 router.get(
     "/google/callback",
     (req, res, next) => {
-        const FRONTEND_URL = getFrontendUrl();
+        const stateRaw = req.query.state || null;
+        let host = '';
+        if (stateRaw) {
+            try {
+                const decoded = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf-8'));
+                host = decoded.h || '';
+            } catch (e) {}
+        }
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
+        const TARGET_URL = host ? `${scheme}${host}` : defaultFrontendUrl;
+
         passport.authenticate("google", { session: false }, (err, user) => {
             if (err) {
                 console.error("Google OAuth Error:", err.message);
-                return res.redirect(`${FRONTEND_URL}/login?error=google_blocked&message=${encodeURIComponent(err.message)}`);
+                return res.redirect(`${TARGET_URL}/login?error=google_blocked&message=${encodeURIComponent(err.message)}`);
             }
             if (!user) {
-                return res.redirect(`${FRONTEND_URL}/login?error=AuthFailed`);
+                return res.redirect(`${TARGET_URL}/login?error=AuthFailed`);
             }
             req.user = user;
             next();
