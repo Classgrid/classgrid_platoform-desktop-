@@ -80,7 +80,7 @@ router.get(
 
         passport.authenticate("google", { session: false }, (err, user) => {
             if (err) {
-                console.error("Google OAuth Error:", err.message);
+                console.error("Google OAuth Error Trace:", err.stack || err);
                 return res.redirect(`${TARGET_URL}${errorPath}?error=google_blocked&message=${encodeURIComponent(err.message)}`);
             }
             if (!user) {
