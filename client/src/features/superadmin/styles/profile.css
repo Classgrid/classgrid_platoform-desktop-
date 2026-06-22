@@ -43,6 +43,10 @@
 .cg-profile-banner {
   height: 250px;
   position: relative;
+  /* Bulletproof fix: Manually cut the top corners so it doesn't rely on the parent's overflow: hidden bug */
+  border-radius: 16px 16px 0 0;
+  /* Adds a tiny, subtle white rim so the black image doesn't bleed into the dark background */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .cg-profile-id-body {
