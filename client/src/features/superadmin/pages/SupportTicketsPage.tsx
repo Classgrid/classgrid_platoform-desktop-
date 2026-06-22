@@ -18,6 +18,10 @@ import { CgBadge } from "@/components/classgrid/Badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { CgModal, CgModalContent, CgModalFooter } from "@/components/classgrid/Modal";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { toast } from "sonner";
 import RichReplyEditor, { type RichReplyEditorRef } from "@/app/support/components/RichReplyEditor";
 import { RichSupportContent } from "@/app/support/components/RichSupportContent";
 import {
@@ -191,6 +195,7 @@ export function SupportTicketsPage() {
     setReplyBody("");
     replyEditorRef.current?.clear();
     refetch();
+    toast.success("Reply sent successfully");
   };
 
   return (
@@ -206,14 +211,14 @@ export function SupportTicketsPage() {
               </p>
             </div>
             <div className="cg-page__header-actions">
-              <button
-                className="cg-btn cg-btn--outline"
+              <Button
+                variant="outline"
                 onClick={() => refetch()}
                 disabled={isFetching}
               >
-                <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+                {isFetching ? <Spinner className="w-4 h-4 mr-2" /> : <RefreshCw size={14} className="mr-2" />}
                 Refresh
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -270,6 +275,28 @@ export function SupportTicketsPage() {
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, padding: "1.5rem" }}>
            {/* Read Page Layout (Left only, no back button, no right card) */}
            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
+              <div style={{ marginBottom: "1.5rem" }}>
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink 
+                        href="#" 
+                        onClick={(e: React.MouseEvent) => {
+                           e.preventDefault();
+                           setSelectedTicket(null);
+                        }}
+                      >
+                        Tickets
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown"}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+
               {/* Message Block */}
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "2rem" }}>
                  <div className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${getAvatarColor(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}`} style={{ width: 48, height: 48, flexShrink: 0 }}>
@@ -298,13 +325,13 @@ export function SupportTicketsPage() {
                    />
                  </div>
                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-                    <button 
-                      style={{ background: "#3b82f6", color: "white", border: "none", padding: "0.5rem 1.5rem", borderRadius: "9999px", fontWeight: 600, cursor: "pointer" }}
+                    <Button 
+                      variant="primary"
                       onClick={submitReply}
                       disabled={replyToTicket.isPending}
                     >
-                      {replyToTicket.isPending ? "Sending..." : "Send Reply"}
-                    </button>
+                      {replyToTicket.isPending ? <><Spinner className="w-4 h-4 mr-2" /> Sending...</> : "Send Reply"}
+                    </Button>
                  </div>
               </div>
            </div>
@@ -385,34 +412,16 @@ export function SupportTicketsPage() {
                           </span>
                         </div>
                       ) : (
-                        <button 
-                          style={{ 
-                            padding: "0.3rem 0.8rem", 
-                            fontSize: "0.75rem", 
-                            background: "#27272a", // Solid dark gray
-                            color: "#e4e4e7",
-                            border: "1px solid #3f3f46",
-                            borderRadius: "0.375rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
-                            transition: "all 0.2s ease"
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background = "#3f3f46";
-                            e.currentTarget.style.borderColor = "#52525b";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background = "#27272a";
-                            e.currentTarget.style.borderColor = "#3f3f46";
-                          }}
+                        <Button 
+                          variant="secondary"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             alert("Will call assign API here.");
                           }}
                         >
                           Assign to Me
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -422,34 +431,16 @@ export function SupportTicketsPage() {
                     <span style={{ fontSize: "0.8rem", color: "var(--cg-text-muted, #a1a1aa)", fontWeight: 500 }}>
                       {fmtDateTime(ticket.createdAt)}
                     </span>
-                    <button 
-                      style={{ 
-                        padding: "0.35rem 1.25rem", 
-                        fontSize: "0.75rem", 
-                        background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "9999px",
-                        fontWeight: 600,
-                        boxShadow: "0 2px 4px rgba(59, 130, 246, 0.3)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease"
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                        e.currentTarget.style.boxShadow = "0 4px 8px rgba(59, 130, 246, 0.4)";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 2px 4px rgba(59, 130, 246, 0.3)";
-                      }}
+                    <Button 
+                      variant="primary"
+                      size="sm"
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         setSelectedTicket(ticket);
                       }}
                     >
                       Read
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
