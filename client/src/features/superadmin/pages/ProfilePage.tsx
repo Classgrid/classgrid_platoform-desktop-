@@ -192,30 +192,35 @@ export function ProfilePage() {
             >
               <div className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 rounded-full cursor-pointer text-white backdrop-blur-md transition-all z-10 group" onClick={() => bannerInputRef.current?.click()}>
                 <Camera size={16} />
-                <span className="absolute -bottom-10 right-0 scale-0 transition-all rounded bg-foreground px-3 py-1.5 text-xs text-background font-medium whitespace-nowrap shadow-lg group-hover:scale-100 pointer-events-none">Update Background</span>
+                <span className="absolute -bottom-10 right-0 scale-0 transition-all rounded bg-foreground px-3 py-1.5 text-xs text-background font-medium whitespace-nowrap shadow-lg group-hover:scale-100 pointer-events-none">Update Banner</span>
               </div>
               <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
             </div>
-            <div className="cg-profile-id-body">
-              <div className="cg-profile-avatar-anchor">
-                <CgAvatar name={form.name} src={form.profilePicture} size="lg" className="cg-profile-avatar-large" />
-                <div className="cg-profile-avatar-upload-btn group" onClick={() => fileInputRef.current?.click()}>
-                  <Camera size={18} />
-                  <span className="absolute -top-10 scale-0 transition-all rounded bg-foreground px-3 py-1.5 text-xs text-background font-medium whitespace-nowrap shadow-lg group-hover:scale-100 pointer-events-none">Update Photo</span>
-                </div>
+            <div className="px-8 pb-8 flex flex-col items-start">
+              <div 
+                className="relative -mt-[80px] sm:-mt-[100px] mb-4 cursor-pointer group" 
+                onClick={() => fileInputRef.current?.click()}
+                title="Update Photo"
+              >
+                <CgAvatar 
+                  name={form.name} 
+                  src={form.profilePicture} 
+                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg transition-transform duration-300 group-hover:scale-105" 
+                />
+                {/* Remove the separate camera button so the entire avatar acts as the button */}
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
               </div>
-              <div className="cg-profile-id-info">
+              <div className="flex flex-col w-full">
                 <div className="flex items-center gap-4">
                   <h1 className="cg-profile-primary-name">{form.name}</h1>
                   <CgBadge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest">
                     {form.role.replace("platform_", "").toUpperCase()}
                   </CgBadge>
                 </div>
-                <div className="cg-profile-id-meta">
-                  <span className="flex items-center gap-1.5"><Mail size={14} /> {form.email}</span>
-                  <span className="flex items-center gap-1.5"><Globe size={14} /> Classgrid Cloud</span>
-                  <span className="flex items-center gap-1.5 text-success"><Activity size={14} /> Current Status: Active</span>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium">
+                  <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
+                  <span className="flex items-center gap-1.5"><Globe size={16} /> Classgrid Cloud</span>
+                  <span className="flex items-center gap-1.5 text-success"><Activity size={16} /> Current Status: Active</span>
                 </div>
               </div>
             </div>
