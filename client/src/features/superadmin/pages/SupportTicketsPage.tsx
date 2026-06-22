@@ -473,8 +473,8 @@ export function SupportTicketsPage() {
                     </div>
                   </div>
 
-                  {/* Right: Date */}
-                  <div className="flex flex-col items-end gap-1 shrink-0">
+                  {/* Right: Date + Read Button */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className="text-xs text-muted-foreground">
                       {fmtDate(ticket.createdAt)}
                     </span>
@@ -483,6 +483,16 @@ export function SupportTicketsPage() {
                         → {ticket.assignedTo.name}
                       </span>
                     )}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTicket(ticket);
+                      }}
+                    >
+                      Read
+                    </Button>
                   </div>
                 </div>
               );
