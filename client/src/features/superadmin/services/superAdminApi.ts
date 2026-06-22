@@ -219,10 +219,22 @@ export const supportApi = {
       .patch<{ success: boolean; ticket: SupportTicket }>(`/api/support/admin/tickets/${id}`, payload)
       .then((r) => r.data),
 
-  replyToTicket: (id: string, message: string) =>
-    apiClient
-      .post<{ success: boolean; ticket: SupportTicket }>(`/api/support/tickets/${id}/reply`, { message })
-      .then((r) => r.data),
+  replyToTicket: (id: string, message: string, files?: File[]) => {
+    const formData = new FormData();
+    formData.append("message", message);
+    if (files && files.length > 0) {
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+    }
+    return apiClient
+      .post<{ success: boolean; ticket: SupportTicket }>(`/api/support/tickets/${id}/reply`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((r) => r.data);
+  },
 };
 
 // ─── Reviews Types ────────────────────────────────────────────────────────────

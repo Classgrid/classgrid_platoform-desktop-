@@ -37,8 +37,8 @@ export function useUpdateTicket() {
 export function useReplyToTicket() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, message }: { id: string; message: string }) =>
-      supportApi.replyToTicket(id, message),
+    mutationFn: ({ id, message, files }: { id: string; message: string; files?: File[] }) =>
+      supportApi.replyToTicket(id, message, files),
     onSuccess: () => qc.invalidateQueries({ queryKey: TICKETS_KEY }),
   });
 }
