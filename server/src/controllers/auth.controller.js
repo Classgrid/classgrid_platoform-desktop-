@@ -1177,36 +1177,57 @@ export const completeSignup = async (req, res) => {
 export const oauthCallback = async (req, res) => {
     // Passport populates req.user
     if (!req.user) {
-        return res.redirect(`${FRONTEND_URL}/login?error=AuthFailed`);
+        // Fallback to default frontend URL if user parsing fails before state parsing
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        return res.redirect(`${defaultFrontendUrl}/login?error=AuthFailed`);
     }
 
     // Status checks
     if (req.user.status === "suspended" || req.user.status === "blocked") {
-        return res.redirect(`${FRONTEND_URL}/login?error=account_suspended`);
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        return res.redirect(`${defaultFrontendUrl}/login?error=account_suspended`);
     }
 
-    // Tab enforcement for Google OAuth (state param carries loginTab)
-    const loginTab = req.query.state || null;
+    // Tab enforcement for Google OAuth (state param carries loginTab and host)
+    const stateRaw = req.query.state || null;
+    let loginTab = 'student';
+    let host = '';
+    
+    if (stateRaw) {
+        try {
+            const decoded = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf-8'));
+            loginTab = decoded.t || 'student';
+            host = decoded.h || '';
+        } catch (e) {
+            // Fallback for older plaintext state format
+            loginTab = stateRaw;
+        }
+    }
+
+    const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
+    const TARGET_URL = host ? `${scheme}${host}` : defaultFrontendUrl;
+
     const oauthUserRoleLabel = getRoleLabel(req.user.role);
 
     if (req.user.role === 'super_admin' && loginTab !== 'super_admin') {
-        return res.redirect(`${FRONTEND_URL}/superadmin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as Super Admin. Please log in here.`)}`);
+        return res.redirect(`${TARGET_URL}/superadmin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as Super Admin. Please log in here.`)}`);
     }
     if (isInstitutionAdminRole(req.user.role) && loginTab !== 'admin' && loginTab !== 'org_admin') {
-        return res.redirect(`${FRONTEND_URL}/admin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as ${oauthUserRoleLabel}. Please use the Admin portal to log in.`)}`);
+        return res.redirect(`${TARGET_URL}/admin/login?error=wrong_portal&message=${encodeURIComponent(`This account is registered as ${oauthUserRoleLabel}. Please use the Admin portal to log in.`)}`);
     }
     if (req.user.role === 'student' && loginTab !== 'student') {
-        return res.redirect(`${FRONTEND_URL}/login?error=wrong_tab&tab=student&message=${encodeURIComponent(`This account is registered as Student. Please use the Student tab to sign in.`)}`);
+        return res.redirect(`${TARGET_URL}/login?error=wrong_tab&tab=student&message=${encodeURIComponent(`This account is registered as Student. Please use the Student tab to sign in.`)}`);
     }
     if (['faculty', 'teacher'].includes(req.user.role) && loginTab !== 'teacher' && loginTab !== 'faculty') {
-        return res.redirect(`${FRONTEND_URL}/login?error=wrong_tab&tab=teacher&message=${encodeURIComponent(`This account is registered as Faculty. Please use the Faculty tab to sign in.`)}`);
+        return res.redirect(`${TARGET_URL}/login?error=wrong_tab&tab=teacher&message=${encodeURIComponent(`This account is registered as Faculty. Please use the Faculty tab to sign in.`)}`);
     }
 
     const { default: SystemSettings } = await import("../models/SystemSettings.js");
     const settings = await SystemSettings.findOne();
 
     if (settings && settings.maintenanceMode && req.user.role !== "super_admin") {
-        return res.redirect(`${FRONTEND_URL}/login?error=maintenance_mode`);
+        return res.redirect(`${TARGET_URL}/login?error=maintenance_mode`);
     }
 
     let orgName = 'dashboard';
@@ -1214,7 +1235,7 @@ export const oauthCallback = async (req, res) => {
         const { default: Organization } = await import("../models/Organization.js");
         const org = await Organization.findById(req.user.organization_id).select("name status").lean();
         if (org && (org.status === "suspended" || org.status === "blocked")) {
-            return res.redirect(`${FRONTEND_URL}/login?error=org_suspended`);
+            return res.redirect(`${TARGET_URL}/login?error=org_suspended`);
         }
         if (org && org.name) {
             orgName = org.name;
@@ -1249,7 +1270,7 @@ export const oauthCallback = async (req, res) => {
 
                 if (existingVerification && existingVerification.lastResentAt && Date.now() - existingVerification.lastResentAt.getTime() < 45000) {
                     // OTP was sent recently, just redirect to the verify page
-                    return res.redirect(`${FRONTEND_URL}${portalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
+                    return res.redirect(`${TARGET_URL}${portalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
                 }
 
                 const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -1281,7 +1302,7 @@ export const oauthCallback = async (req, res) => {
 
                 const finalPortalPath = getLoginPortalPath(loginTab);
 
-                return res.redirect(`${FRONTEND_URL}${finalPortalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
+                return res.redirect(`${TARGET_URL}${finalPortalPath}?device_verify=true&email=${encodeURIComponent(userEmail)}&provider=${provider}`);
             } catch (deviceErr) {
                 console.error("OAuth device check error (non-blocking):", deviceErr);
                 // If device check fails, STILL allow login rather than breaking OAuth entirely
@@ -1309,7 +1330,7 @@ export const oauthCallback = async (req, res) => {
     const target = getFrontendDashboardTarget(req.user);
 
     const qs = isFirstLogin ? `?welcome=true&token=${token}` : `?token=${token}`;
-    res.redirect(`${FRONTEND_URL}${target}${qs}`);
+    res.redirect(`${TARGET_URL}${target}${qs}`);
 };
 
 // Forgot Password
