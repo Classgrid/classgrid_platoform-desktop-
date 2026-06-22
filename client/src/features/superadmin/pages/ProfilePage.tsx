@@ -33,6 +33,7 @@ export function ProfilePage() {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState<ProfileData>({
