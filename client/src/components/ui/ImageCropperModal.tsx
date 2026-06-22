@@ -11,6 +11,8 @@ type ImageCropperModalProps = {
   onCropComplete: (croppedBlob: Blob) => void;
   aspectRatio?: number;
   title?: string;
+  minWidth?: number;
+  minHeight?: number;
 };
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
@@ -29,11 +31,27 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
   );
 }
 
-export function ImageCropperModal({ isOpen, onClose, imageSrc, onCropComplete, aspectRatio = 1, title = "Crop Image" }: ImageCropperModalProps) {
+export function ImageCropperModal({ 
+  isOpen, 
+  onClose, 
+  imageSrc, 
+  onCropComplete, 
+  aspectRatio = 1, 
+  title = "Crop Image",
+  minWidth,
+  minHeight
+}: ImageCropperModalProps) {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const imgRef = useRef<HTMLImageElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setCrop(undefined);
+      setCompletedCrop(undefined);
+    }
+  }, [isOpen, imageSrc]);
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     if (aspectRatio) {
@@ -43,7 +61,7 @@ export function ImageCropperModal({ isOpen, onClose, imageSrc, onCropComplete, a
   }
 
   const handleSave = async () => {
-    if (!completedCrop || !imgRef.current) return;
+    if (!completedCrop || !imgRef.current || completedCrop.width === 0 || completedCrop.height === 0) return;
     setIsProcessing(true);
 
     try {
@@ -83,11 +101,16 @@ export function ImageCropperModal({ isOpen, onClose, imageSrc, onCropComplete, a
       // Export as a high-quality JPEG Blob (quality: 0.95)
       canvas.toBlob(
         (blob) => {
-          if (blob) {
-            onCropComplete(blob);
+          try {
+            if (blob) {
+              onCropComplete(blob);
+            }
+          } catch (err) {
+            console.error("Error in onCropComplete callback:", err);
+          } finally {
+            setIsProcessing(false);
+            onClose();
           }
-          setIsProcessing(false);
-          onClose();
         },
         "image/jpeg",
         0.95
@@ -113,9 +136,12 @@ export function ImageCropperModal({ isOpen, onClose, imageSrc, onCropComplete, a
               onComplete={(c) => setCompletedCrop(c)}
               aspect={aspectRatio}
               circularCrop={aspectRatio === 1}
+              minWidth={minWidth}
+              minHeight={minHeight}
             >
               <img
                 ref={imgRef}
+                crossOrigin="anonymous"
                 alt="Crop preview"
                 src={imageSrc}
                 onLoad={onImageLoad}
@@ -131,7 +157,7 @@ export function ImageCropperModal({ isOpen, onClose, imageSrc, onCropComplete, a
           <Button variant="outline" onClick={onClose} disabled={isProcessing}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isProcessing || !completedCrop}>
+          <Button onClick={handleSave} disabled={isProcessing || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
             {isProcessing ? "Processing..." : "Apply & Upload"}
           </Button>
         </DialogFooter>
