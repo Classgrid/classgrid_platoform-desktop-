@@ -36,7 +36,7 @@ export function ProfilePage() {
 
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState<ProfileData>({
-    name: "", phoneNumber: "", email: "", role: "", profilePicture: "",
+    name: "", phoneNumber: "", email: "", role: "", profilePicture: "", profileBanner: ""
   });
   const [prefs, setPrefs] = useState<EmailPrefs>({ global: true, announcements: true });
   const [errors, setErrors] = useState<{ name?: string }>({});
@@ -59,6 +59,7 @@ export function ProfilePage() {
         email: profileData.user.email || "",
         role: profileData.user.role || "",
         profilePicture: profileData.user.profilePicture || profileData.user.photoURL || "",
+        profileBanner: profileData.user.profileBanner || "",
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
       });
@@ -94,16 +95,61 @@ export function ProfilePage() {
     setIsDirty(true);
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File, targetWidth: number, targetHeight: number): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(img.src); // Fallback to raw if canvas fails
+
+          // Resize with cover (crop to fit aspect ratio)
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+          let drawWidth = targetWidth;
+          let drawHeight = targetHeight;
+          let offsetX = 0;
+          let offsetY = 0;
+
+          if (imgRatio > targetRatio) {
+            drawWidth = img.height * targetRatio;
+            offsetX = (img.width - drawWidth) / 2;
+            drawWidth = img.width - offsetX * 2;
+          } else {
+            drawHeight = img.width / targetRatio;
+            offsetY = (img.height - drawHeight) / 2;
+            drawHeight = img.height - offsetY * 2;
+          }
+
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
+          
+          // Output as highly compressed JPEG (max 100KB)
+          resolve(canvas.toDataURL("image/jpeg", 0.7));
+        };
+      };
+    });
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setForm((prev) => ({ ...prev, profilePicture: base64 }));
-      updateProfile.mutate({ profilePicture: base64 });
-    };
-    reader.readAsDataURL(file);
+    const base64 = await compressImage(file, 400, 400); // Avatar 1:1 ratio
+    setForm((prev) => ({ ...prev, profilePicture: base64 }));
+    updateProfile.mutate({ profilePicture: base64 });
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await compressImage(file, 1584, 396); // LinkedIn Banner standard size 4:1 ratio
+    setForm((prev) => ({ ...prev, profileBanner: base64 }));
+    updateProfile.mutate({ profileBanner: base64 });
   };
 
   const handleSave = () => {
@@ -126,7 +172,15 @@ export function ProfilePage() {
         <>
           {/* Identity Header */}
           <div className="cg-profile-id-card">
-            <div className="cg-profile-banner"></div>
+            <div 
+              className="cg-profile-banner" 
+              style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+            >
+              <div className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 rounded-full cursor-pointer text-white backdrop-blur-md transition-all z-10" onClick={() => bannerInputRef.current?.click()}>
+                <Camera size={16} />
+              </div>
+              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+            </div>
             <div className="cg-profile-id-body">
               <div className="cg-profile-avatar-anchor">
                 <CgAvatar name={form.name} src={form.profilePicture} size="lg" className="cg-profile-avatar-large" />
