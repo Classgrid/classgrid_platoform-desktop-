@@ -107,12 +107,16 @@ export function ImageCropperModal({
               await onCropComplete(blob);
               setUploadStatus("complete");
               await new Promise(res => setTimeout(res, 600)); // Show 100% complete briefly
+              setUploadStatus("idle");
+              onClose();
             }
           } catch (err) {
             console.error("Error in onCropComplete callback:", err);
-          } finally {
-            setUploadStatus("idle");
-            onClose();
+            setUploadStatus("error");
+            setTimeout(() => {
+              setUploadStatus("idle");
+              onClose();
+            }, 2000);
           }
         },
         "image/jpeg",
@@ -120,7 +124,10 @@ export function ImageCropperModal({
       );
     } catch (error) {
       console.error("Cropping failed", error);
-      setUploadStatus("idle");
+      setUploadStatus("error");
+      setTimeout(() => {
+        setUploadStatus("idle");
+      }, 2000);
     }
   };
 
