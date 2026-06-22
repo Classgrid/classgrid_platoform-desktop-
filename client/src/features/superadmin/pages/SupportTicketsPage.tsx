@@ -445,7 +445,7 @@ export function SupportTicketsPage() {
                       }}
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        alert("Will mark as read and open Read Page"); 
+                        setSelectedTicket(ticket);
                       }}
                     >
                       Read
