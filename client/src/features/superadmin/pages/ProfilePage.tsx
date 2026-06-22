@@ -200,12 +200,11 @@ export function ProfilePage() {
               <div 
                 className="relative -mt-[80px] sm:-mt-[100px] mb-4 cursor-pointer group" 
                 onClick={() => fileInputRef.current?.click()}
-                title="Update Photo"
               >
                 <CgAvatar 
                   name={form.name} 
                   src={form.profilePicture} 
-                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white shadow-lg" 
+                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg" 
                 />
                 {/* Remove the separate camera button so the entire avatar acts as the button */}
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
