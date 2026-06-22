@@ -3,7 +3,8 @@
    ========================================= */
 
 :root {
-  --card-bg: #111111; /* Stronger contrast for cards */
+  --card-bg: #111111;
+  /* Stronger contrast for cards */
   --card-border: #222222;
   --card-hover: #2a2a2a;
 }
@@ -19,8 +20,15 @@
 }
 
 @keyframes profileFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Identity Header --- */
@@ -53,7 +61,7 @@
   width: 120px;
   height: 120px;
   border: 5px solid var(--card-bg);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .cg-profile-avatar-upload-btn {
@@ -109,8 +117,13 @@
 }
 
 @media (max-width: 900px) {
-  .cg-profile-bento { grid-template-columns: 1fr; }
-  .cg-card-full { grid-column: span 1; }
+  .cg-profile-bento {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-card-full {
+    grid-column: span 1;
+  }
 }
 
 /* --- Premium Cards --- */
@@ -252,8 +265,15 @@
 }
 
 @keyframes slideUp {
-  from { transform: translate(-50%, 150%); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from {
+    transform: translate(-50%, 150%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 
 /* --- Field Groups --- */
@@ -294,7 +314,7 @@
   transition: 0.3s;
 }
 
-.cg-switch input:checked + .cg-switch-track {
+.cg-switch input:checked+.cg-switch-track {
   background-color: var(--primary);
 }
 
@@ -310,6 +330,6 @@
   transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.cg-switch input:checked + .cg-switch-track .cg-switch-thumb {
+.cg-switch input:checked+.cg-switch-track .cg-switch-thumb {
   transform: translateX(20px);
 }
