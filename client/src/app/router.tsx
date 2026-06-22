@@ -34,7 +34,7 @@ import { NotificationEnginePage } from "@/features/superadmin/pages/Notification
 import { OrganizationsPage } from "@/features/superadmin/pages/OrganizationsPage";
 import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
-import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
+import { ProfilePage } from "@/features/superadmin/pages/ProfilePage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { OrgAdminDashboardRouter } from "@/features/org/pages/OrgAdminDashboardRouter";
 import { OrgAnnouncementsPage } from "@/features/org/pages/OrgAnnouncementsPage";
@@ -208,7 +208,7 @@ export function AppRouter() {
         <Route path="/superadmin/team" element={<TeamPage />} />
 
         {/* Super Admin — Profile & Settings */}
-        <Route path="/superadmin/profile" element={<SharedProfilePage />} />
+        <Route path="/superadmin/profile" element={<ProfilePage />} />
         <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
 
 
