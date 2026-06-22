@@ -3,6 +3,7 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from "react-im
 import "react-image-crop/dist/ReactCrop.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./dialog";
 import { Button } from "./button";
+import { ProgressOverlay } from "./ProgressOverlay";
 
 type ImageCropperModalProps = {
   isOpen: boolean;
@@ -163,10 +164,12 @@ export function ImageCropperModal({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isProcessing || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
-            {isProcessing ? "Processing..." : "Save"}
+            {isProcessing ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
+      
+      <ProgressOverlay isOpen={isProcessing} message="Uploading image to secure cloud..." />
     </Dialog>
   );
 }
