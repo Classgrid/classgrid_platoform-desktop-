@@ -19,10 +19,11 @@ import {
 } from "lucide-react";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -247,6 +248,8 @@ export function SupportTicketsPage() {
   const replyEditorRef = useRef<RichReplyEditorRef>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [previewFile, setPreviewFile] = useState<FilePreviewSource | null>(null);
+  const [replySent, setReplySent] = useState(false);
+  const replySentTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isLoading, isError, refetch, isFetching } = useSupportTickets({
     status: statusFilter || undefined,
@@ -313,7 +316,10 @@ export function SupportTicketsPage() {
       setReplyBody("");
       replyEditorRef.current?.clear();
       refetch();
-      toast.success("Reply sent successfully");
+      
+      setReplySent(true);
+      if (replySentTimerRef.current) clearTimeout(replySentTimerRef.current);
+      replySentTimerRef.current = setTimeout(() => setReplySent(false), 10000);
     } catch {
       toast.error("Failed to send reply");
     }
@@ -672,9 +678,37 @@ export function SupportTicketsPage() {
           {!isClosed ? (
             <div className="mt-8 pt-8 border-t border-border">
               <div className="space-y-3">
+                <AnimatePresence>
+                  {replySent && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm"
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.1 }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      </motion.div>
+                      <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                        Reply sent
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <RichReplyEditor
                   ref={replyEditorRef}
-                  onChange={(text) => setReplyBody(text)}
+                  onChange={(text) => {
+                    setReplyBody(text);
+                    if (text.trim() && replySent) {
+                      setReplySent(false);
+                      if (replySentTimerRef.current) clearTimeout(replySentTimerRef.current);
+                    }
+                  }}
                   placeholder="Type your reply here..."
                   minHeight={120}
                   onSubmit={submitReply}
