@@ -535,10 +535,24 @@ router.get("/tickets", isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════
 router.get("/tickets/:id", isAuthenticated, async (req, res) => {
     try {
-        const ticket = await SupportTicket.findById(req.params.id)
+        let ticket = await SupportTicket.findById(req.params.id)
             .populate("submittedBy", "name email role")
             .populate("assignedTo", "name email")
             .lean();
+
+        // Fallback for public tickets where submittedBy is missing
+        if (ticket && !ticket.submittedBy && ticket.submitterEmail) {
+            const user = await User.findOne(
+                { email: ticket.submitterEmail.toLowerCase() },
+                "name email role organization_id"
+            ).populate("organization_id", "name").lean();
+            if (user) {
+                ticket.submitterRole = user.role;
+                if (!ticket.organization_id && user.organization_id) {
+                    ticket.organization_id = user.organization_id;
+                }
+            }
+        }
 
         if (!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
 
@@ -728,6 +742,23 @@ router.get("/admin/tickets", isAuthenticated, requireRole("super_admin"), async 
                 .lean(),
             SupportTicket.countDocuments(filter)
         ]);
+
+        // Fallback for public tickets where submittedBy is missing
+        for (let ticket of tickets) {
+            if (!ticket.submittedBy && ticket.submitterEmail) {
+                const user = await User.findOne(
+                    { email: ticket.submitterEmail.toLowerCase() },
+                    "name email role organization_id"
+                ).populate("organization_id", "name").lean();
+                
+                if (user) {
+                    ticket.submitterRole = user.role;
+                    if (!ticket.organization_id && user.organization_id) {
+                        ticket.organization_id = user.organization_id;
+                    }
+                }
+            }
+        }
 
         // Stats
         const [openCount, inProgressCount, resolvedCount] = await Promise.all([

@@ -113,6 +113,7 @@ function getRequester(ticket: SupportTicket) {
     role:
       ticket.submittedBy?.role ??
       (ticket as any).requester?.role ??
+      (ticket as any).submitterRole ??
       "",
   };
 }
@@ -543,7 +544,7 @@ export function SupportTicketsPage() {
 
   // ── Ticket Detail View (2-column layout like marketing) ───────────────────
   const isClosed = selectedTicket.status === "closed";
-  const orgName = (selectedTicket as any).organization_id?.name || null;
+  const orgName = (selectedTicket as any).organization_id?.name || (selectedTicket as any).institution || null;
   const SUPABASE_URL = "https://bumxgscngzjadyozdpce.supabase.co";
 
   return (
