@@ -154,7 +154,12 @@ export function ImageCropperModal({
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose} disabled={isProcessing}>
+          <Button 
+            variant="outline" 
+            onClick={onClose} 
+            disabled={isProcessing}
+            className="border-white/[0.1] bg-white/[0.04] text-white/90 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-200 hover:bg-white/[0.08] hover:border-white/[0.2] hover:text-white hover:shadow-[0_0_14px_rgba(255,255,255,0.06)]"
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isProcessing || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
