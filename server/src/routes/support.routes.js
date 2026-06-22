@@ -660,7 +660,11 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
                     createdAt: now
                 });
             } else {
-                ticket.status = "in_progress";
+                // Only auto-upgrade to in_progress if it's currently open. 
+                // Do not overwrite if admin hand-picked "waiting_on_user" or left it in progress.
+                if (ticket.status === "open") {
+                    ticket.status = "in_progress";
+                }
             }
             if (!ticket.assignedTo) {
                 ticket.assignedTo = req.user._id;
