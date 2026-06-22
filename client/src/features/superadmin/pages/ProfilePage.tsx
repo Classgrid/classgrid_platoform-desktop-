@@ -101,6 +101,12 @@ export function ProfilePage() {
   };
 
   const openCropper = (file: File, type: "avatar" | "banner") => {
+    // Strict 5MB limit check
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(`Please select an image smaller than 5MB. This file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.`);
+      return;
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (e) => {
