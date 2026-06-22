@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Ask AI Button Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#09090b',
+            foreground: '#fafafa',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#09090b] text-foreground h-screen antialiased flex flex-col items-center justify-center">
+  
+  <div class="mb-12 text-center text-white/60 text-sm">
+    <p>This is the exact "Ask AI" button from the marketing repo.</p>
+    <p>Hover over it to see the hover effects!</p>
+  </div>
+
+  <!-- The exact Ask AI Button Layout translated to HTML -->
+  <div class="relative inline-flex">
+    
+    <!-- The Button -->
+    <button
+      type="button"
+      class="relative flex items-center h-9 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2 md:px-3 text-sm font-medium tracking-tight text-white/90 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-200 hover:bg-white/[0.08] hover:border-white/[0.2] hover:text-white cursor-pointer border-white/[0.2] shadow-[0_0_14px_rgba(255,255,255,0.06)]"
+    >
+      <!-- Lucide Bot Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 text-white/60"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+      
+      Ask AI
+      
+      <!-- Pulsing Dot -->
+      <span class="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/50 opacity-60"></span>
+        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white/80 ring-2 ring-black"></span>
+      </span>
+    </button>
+
+    <!-- Floating Prompt Tooltip -->
+    <span class="pointer-events-none absolute right-full top-1/2 mr-2 max-w-[190px] -translate-y-1/2 whitespace-nowrap rounded-md border border-white/[0.08] bg-black/90 px-2.5 py-1.5 text-[11px] font-medium text-white/85 shadow-lg backdrop-blur-xl">
+      How can I help you?
+    </span>
+
+  </div>
+
+</body>
+</html>
