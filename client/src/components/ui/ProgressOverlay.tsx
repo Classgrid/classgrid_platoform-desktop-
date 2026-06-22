@@ -75,7 +75,7 @@ export function ProgressOverlay({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-10 bg-background/95 backdrop-blur-xl rounded-lg border border-white/[0.1] shadow-2xl">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 bg-background/80 backdrop-blur-md">
       <div className="relative flex items-center justify-center mb-6" role="status" aria-live="polite">
         <div className={`absolute inset-0 blur-xl rounded-full ${isError ? 'bg-destructive/20' : 'bg-emerald-500/20'}`} />
         {isComplete ? (
