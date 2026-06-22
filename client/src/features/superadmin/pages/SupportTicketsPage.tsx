@@ -110,6 +110,10 @@ function getRequester(ticket: SupportTicket) {
       ticket.submitterEmail ??
       ticket.email ??
       "",
+    role:
+      ticket.submittedBy?.role ??
+      (ticket as any).requester?.role ??
+      "",
   };
 }
 
@@ -250,6 +254,7 @@ export function SupportTicketsPage() {
   const [previewFile, setPreviewFile] = useState<FilePreviewSource | null>(null);
   const [replySent, setReplySent] = useState(false);
   const replySentTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
 
   const { data, isLoading, isError, refetch, isFetching } = useSupportTickets({
     status: statusFilter || undefined,
@@ -289,16 +294,17 @@ export function SupportTicketsPage() {
     }
   }, [selectedMessages.length]);
 
-  const handleSelectedStatusChange = async (status: TicketStatus) => {
-    if (!selectedTicket) return;
+  const submitStatusChange = async () => {
+    if (!selectedTicket || !pendingStatus) return;
     try {
       const result = await updateTicket.mutateAsync({
         id: selectedTicket._id,
-        status,
+        status: pendingStatus,
       });
       setSelectedTicket(result.ticket);
+      setPendingStatus(null);
       refetch();
-      toast.success(`Status changed to ${statusLabel(status)}`);
+      toast.success(`Status changed to ${statusLabel(pendingStatus)}`);
     } catch {
       toast.error("Failed to update status");
     }
@@ -445,7 +451,10 @@ export function SupportTicketsPage() {
               return (
                 <div
                   key={ticket._id}
-                  onClick={() => setSelectedTicket(ticket)}
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setPendingStatus(null);
+                  }}
                   className="flex items-center gap-4 px-5 py-4 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors group"
                 >
                   {/* Avatar */}
@@ -786,6 +795,18 @@ export function SupportTicketsPage() {
                 label="Email"
                 value={selectedRequester?.email || "-"}
               />
+              {selectedRequester?.role && (
+                <div className="flex items-start justify-between gap-2 min-w-0">
+                  <dt className="font-semibold text-sm text-foreground shrink-0">
+                    Role
+                  </dt>
+                  <dd className="text-right min-w-0 break-all text-sm">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      {selectedRequester.role.replace(/_/g, " ")}
+                    </span>
+                  </dd>
+                </div>
+              )}
               {orgName && (
                 <div className="flex items-start justify-between gap-2 min-w-0">
                   <dt className="font-semibold text-sm text-foreground shrink-0 flex items-center gap-1.5">
@@ -836,15 +857,15 @@ export function SupportTicketsPage() {
                 </dt>
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-2 h-2 rounded-full ${statusColor(selectedTicket.status)}`}
+                    className={`w-2 h-2 rounded-full shrink-0 ${statusColor(pendingStatus || selectedTicket.status)}`}
                   />
                   <select
-                    value={selectedTicket.status}
+                    value={pendingStatus || selectedTicket.status}
                     onChange={(e) =>
-                      handleSelectedStatusChange(e.target.value as TicketStatus)
+                      setPendingStatus(e.target.value as TicketStatus)
                     }
                     disabled={updateTicket.isPending}
-                    className="flex-1 h-8 px-2 text-sm rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="flex-1 h-8 px-2 text-sm rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 min-w-0"
                   >
                     {STATUS_CHANGE_OPTIONS.map((s) => (
                       <option key={s} value={s}>
@@ -852,6 +873,17 @@ export function SupportTicketsPage() {
                       </option>
                     ))}
                   </select>
+                  {pendingStatus && pendingStatus !== selectedTicket.status && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={submitStatusChange}
+                      disabled={updateTicket.isPending}
+                      className="h-8 shrink-0 px-3 py-0 whitespace-nowrap"
+                    >
+                      Update
+                    </Button>
+                  )}
                 </div>
               </div>
 
