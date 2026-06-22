@@ -141,13 +141,17 @@ export function ProfilePage() {
         fileType: blob.type
       });
 
-      await fetch(data.uploadUrl, {
+      const response = await fetch(data.uploadUrl, {
         method: "PUT",
         body: blob,
         headers: {
           "Content-Type": blob.type
         }
       });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
 
       const updatePayload = type === "avatar" 
         ? { profilePicture: data.publicUrl }

@@ -139,6 +139,11 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    profileBanner: {
+      type: String,
+      default: "",
+    },
+
     signature: {
       type: String,
       default: "",

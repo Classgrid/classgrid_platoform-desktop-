@@ -163,7 +163,7 @@ export function ImageCropperModal({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isProcessing || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
-            {isProcessing ? "Processing..." : "Apply & Upload"}
+            {isProcessing ? "Processing..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
