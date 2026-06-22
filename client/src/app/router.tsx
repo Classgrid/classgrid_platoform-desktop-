@@ -289,7 +289,7 @@ export function AppRouter() {
         <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
         <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
         <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
-        <Route path="/profile" element={<SharedProfilePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SharedSettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
 
