@@ -205,7 +205,7 @@ export function ProfilePage() {
                 <CgAvatar 
                   name={form.name} 
                   src={form.profilePicture} 
-                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg transition-transform duration-300 group-hover:scale-105" 
+                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg" 
                 />
                 {/* Remove the separate camera button so the entire avatar acts as the button */}
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />

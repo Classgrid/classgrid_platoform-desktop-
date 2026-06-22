@@ -51,7 +51,7 @@ export function CgAvatar({ name, src, size = "md", className = "" }: CgAvatarPro
   const bgColorClass = src ? "bg-muted" : `${getAvatarColor(name)} text-white`;
 
   return (
-    <RadixAvatar.Root className={`${cls} relative inline-flex items-center justify-center overflow-hidden ${bgColorClass} transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]`}>
+    <RadixAvatar.Root className={`${cls} relative inline-flex items-center justify-center overflow-hidden ${bgColorClass}`}>
       {src ? (
         <RadixAvatar.Image
           alt={name}
