@@ -9,7 +9,7 @@ type ImageCropperModalProps = {
   isOpen: boolean;
   onClose: () => void;
   imageSrc: string;
-  onCropComplete: (croppedBlob: Blob) => void;
+  onCropComplete: (croppedBlob: Blob) => Promise<void> | void;
   aspectRatio?: number;
   title?: string;
   minWidth?: number;
@@ -45,7 +45,7 @@ export function ImageCropperModal({
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const imgRef = useRef<HTMLImageElement>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "complete">("idle");
 
   React.useEffect(() => {
     if (isOpen) {
@@ -63,7 +63,7 @@ export function ImageCropperModal({
 
   const handleSave = async () => {
     if (!completedCrop || !imgRef.current || completedCrop.width === 0 || completedCrop.height === 0) return;
-    setIsProcessing(true);
+    setUploadStatus("uploading");
 
     try {
       const image = imgRef.current;
@@ -101,15 +101,17 @@ export function ImageCropperModal({
 
       // Export as a high-quality JPEG Blob (quality: 0.95)
       canvas.toBlob(
-        (blob) => {
+        async (blob) => {
           try {
             if (blob) {
-              onCropComplete(blob);
+              await onCropComplete(blob);
+              setUploadStatus("complete");
+              await new Promise(res => setTimeout(res, 600)); // Show 100% complete briefly
             }
           } catch (err) {
             console.error("Error in onCropComplete callback:", err);
           } finally {
-            setIsProcessing(false);
+            setUploadStatus("idle");
             onClose();
           }
         },
@@ -118,7 +120,7 @@ export function ImageCropperModal({
       );
     } catch (error) {
       console.error("Cropping failed", error);
-      setIsProcessing(false);
+      setUploadStatus("idle");
     }
   };
 
@@ -158,18 +160,18 @@ export function ImageCropperModal({
           <Button 
             variant="outline" 
             onClick={onClose} 
-            disabled={isProcessing}
+            disabled={uploadStatus !== "idle"}
             className="border-white/[0.1] bg-white/[0.04] text-white/90 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-200 hover:bg-white/[0.08] hover:border-white/[0.2] hover:text-white hover:shadow-[0_0_14px_rgba(255,255,255,0.06)]"
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isProcessing || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
-            {isProcessing ? "Saving..." : "Save"}
+          <Button onClick={handleSave} disabled={uploadStatus !== "idle" || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0}>
+            {uploadStatus !== "idle" ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
       
-      <ProgressOverlay isOpen={isProcessing} message="Uploading image to secure cloud..." />
+      <ProgressOverlay isOpen={uploadStatus !== "idle"} status={uploadStatus === "idle" ? "uploading" : uploadStatus} message="Uploading image to secure cloud..." />
     </Dialog>
   );
 }
