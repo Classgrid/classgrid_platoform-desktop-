@@ -12,6 +12,8 @@ import { CgButton } from "@/components/classgrid/Button";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { CgBadge } from "@/components/classgrid/Badge";
 import { Input } from "@/components/shadcn/input";
+import { ImageCropperModal } from "@/components/ui/ImageCropperModal";
+import { toast } from "react-hot-toast";
 import "../styles/profile.css";
 
 type ProfileData = {
