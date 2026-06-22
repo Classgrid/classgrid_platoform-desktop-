@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, PanelLeft } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 
 import type { DashboardConfig } from "@/layouts/types";
