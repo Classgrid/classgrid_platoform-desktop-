@@ -177,11 +177,11 @@ function statusColor(status: string) {
     case "closed":
       return "bg-zinc-400";
     case "open":
-      return "bg-emerald-500";
+      return "bg-emerald-500"; // Green for Open
     case "in_progress":
       return "bg-amber-500";
     case "waiting_on_user":
-      return "bg-blue-500";
+      return "bg-red-500"; // Red for Waiting on User
     default:
       return "bg-zinc-400";
   }
@@ -190,15 +190,15 @@ function statusColor(status: string) {
 function statusBadgeBg(status: string) {
   switch (status) {
     case "resolved":
-      return "bg-emerald-500";
-    case "closed":
       return "bg-zinc-500";
+    case "closed":
+      return "bg-zinc-600";
     case "in_progress":
       return "bg-amber-500";
     case "open":
-      return "bg-blue-500";
+      return "bg-emerald-500"; // Green for Open
     case "waiting_on_user":
-      return "bg-indigo-500";
+      return "bg-red-500"; // Red for Waiting on User
     default:
       return "bg-zinc-500";
   }
