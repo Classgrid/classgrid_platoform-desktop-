@@ -442,8 +442,21 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
           <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border bg-muted/50 overflow-x-auto flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="relative">
               <Select
+                onOpenChange={(open) => {
+                  if (open) {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+                      setSavedSelection(sel.getRangeAt(0));
+                    }
+                  }
+                }}
                 onValueChange={(val) => {
                   editorRef.current?.focus();
+                  const sel = window.getSelection();
+                  if (savedSelection && sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(savedSelection);
+                  }
                   document.execCommand("formatBlock", false, val);
                   syncContent();
                 }}
@@ -477,8 +490,21 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
             </div>
             <div className="relative">
               <Select
+                onOpenChange={(open) => {
+                  if (open) {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+                      setSavedSelection(sel.getRangeAt(0));
+                    }
+                  }
+                }}
                 onValueChange={(val) => {
                   editorRef.current?.focus();
+                  const sel = window.getSelection();
+                  if (savedSelection && sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(savedSelection);
+                  }
                   document.execCommand("fontSize", false, val);
                   syncContent();
                 }}
