@@ -272,32 +272,32 @@ export function SupportTicketsPage() {
       )}
 
       {selectedTicket ? (
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, padding: "1.5rem" }}>
-           {/* Read Page Layout (Left only, no back button, no right card) */}
-           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
-              <div style={{ marginBottom: "1.5rem" }}>
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink 
-                        href="#" 
-                        onClick={(e: React.MouseEvent) => {
-                           e.preventDefault();
-                           setSelectedTicket(null);
-                        }}
-                      >
-                        Tickets
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown"}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, height: "100%", minHeight: 0 }}>
+           {/* Top Header Area: Breadcrumb */}
+           <div style={{ padding: "1.5rem 1.5rem 0 1.5rem", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink 
+                      href="#" 
+                      onClick={(e: React.MouseEvent) => {
+                         e.preventDefault();
+                         setSelectedTicket(null);
+                      }}
+                    >
+                      Tickets
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown"}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+           </div>
 
-              {/* Message Block */}
+           {/* Scrollable Messages Area */}
+           <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem", maxWidth: "800px", margin: "0 auto", width: "100%" }}>
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "2rem" }}>
                  <div className={`flex items-center justify-center rounded-full text-white font-bold overflow-hidden ${getAvatarColor(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}`} style={{ width: 48, height: 48, flexShrink: 0 }}>
                     <span>{getInitials(selectedTicket.submittedBy?.name || selectedTicket.name || "Unknown")}</span>
@@ -312,27 +312,27 @@ export function SupportTicketsPage() {
                     </div>
                  </div>
               </div>
-              
-              {/* Footer / Rich Text Editor */}
-              <div style={{ marginTop: "auto", borderTop: "1px solid var(--cg-border)", paddingTop: "1.5rem", paddingBottom: "2rem" }}>
-                 <div style={{ background: "var(--cg-surface)", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--cg-border)" }}>
-                   <RichReplyEditor
-                     ref={replyEditorRef}
-                     onChange={setReplyBody}
-                     placeholder="Type your reply... (Shift+Enter for newline)"
-                     minHeight={150}
-                     onSubmit={submitReply}
-                   />
-                 </div>
-                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-                    <Button 
-                      variant="primary"
-                      onClick={submitReply}
-                      disabled={replyToTicket.isPending}
-                    >
-                      {replyToTicket.isPending ? <><Spinner className="w-4 h-4 mr-2" /> Sending...</> : "Send Reply"}
-                    </Button>
-                 </div>
+           </div>
+
+           {/* Fixed Footer Area: Editor */}
+           <div style={{ padding: "1rem 1.5rem 1.5rem 1.5rem", maxWidth: "800px", margin: "0 auto", width: "100%", borderTop: "1px solid var(--cg-border)" }}>
+              <div style={{ background: "var(--cg-surface)", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--cg-border)" }}>
+                <RichReplyEditor
+                  ref={replyEditorRef}
+                  onChange={setReplyBody}
+                  placeholder="Type your reply... (Shift+Enter for newline)"
+                  minHeight={150}
+                  onSubmit={submitReply}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+                 <Button 
+                   variant="primary"
+                   onClick={submitReply}
+                   disabled={replyToTicket.isPending}
+                 >
+                   {replyToTicket.isPending ? <><Spinner className="w-4 h-4 mr-2" /> Sending...</> : "Send Reply"}
+                 </Button>
               </div>
            </div>
         </div>
