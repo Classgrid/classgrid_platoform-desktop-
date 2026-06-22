@@ -176,9 +176,8 @@ export function ImageCropperModal({
             {uploadStatus !== "idle" ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
+        <ProgressOverlay isOpen={uploadStatus !== "idle"} status={uploadStatus === "idle" ? "uploading" : uploadStatus} message="Uploading image to secure cloud..." />
       </DialogContent>
-      
-      <ProgressOverlay isOpen={uploadStatus !== "idle"} status={uploadStatus === "idle" ? "uploading" : uploadStatus} message="Uploading image to secure cloud..." />
     </Dialog>
   );
 }

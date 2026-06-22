@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "./dialog";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 export type UploadStatus = "uploading" | "complete" | "error";
@@ -73,42 +72,42 @@ export function ProgressOverlay({
     return message;
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent aria-modal="true" className="sm:max-w-[400px] [&>button]:hidden flex flex-col items-center justify-center p-10 bg-[#09090b]/95 border-white/[0.1] shadow-2xl backdrop-blur-xl rounded-2xl">
-        <div className="relative flex items-center justify-center mb-6" role="status" aria-live="polite">
-          <div className={`absolute inset-0 blur-xl rounded-full ${isError ? 'bg-destructive/20' : 'bg-emerald-500/20'}`} />
-          {isComplete ? (
-            <CheckCircle2 className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
-          ) : isError ? (
-            <XCircle className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
-          ) : (
-            <Loader2 className={`h-12 w-12 animate-spin relative z-10 ${getStatusColor()}`} />
-          )}
-        </div>
-        
-        <h3 className="text-white/95 font-semibold text-lg tracking-tight mb-8 text-center">
-          {getStatusMessage()}
-        </h3>
-        
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-10 bg-background/95 backdrop-blur-xl rounded-lg border border-white/[0.1] shadow-2xl">
+      <div className="relative flex items-center justify-center mb-6" role="status" aria-live="polite">
+        <div className={`absolute inset-0 blur-xl rounded-full ${isError ? 'bg-destructive/20' : 'bg-emerald-500/20'}`} />
+        {isComplete ? (
+          <CheckCircle2 className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
+        ) : isError ? (
+          <XCircle className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
+        ) : (
+          <Loader2 className={`h-12 w-12 animate-spin relative z-10 ${getStatusColor()}`} />
+        )}
+      </div>
+      
+      <h3 className="text-foreground/90 font-semibold text-lg tracking-tight mb-8 text-center">
+        {getStatusMessage()}
+      </h3>
+      
+      <div 
+        role="progressbar" 
+        aria-valuenow={displayProgress} 
+        aria-valuemin={0} 
+        aria-valuemax={100}
+        className="w-[80%] max-w-[300px] h-2 bg-foreground/10 rounded-full overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]"
+      >
         <div 
-          role="progressbar" 
-          aria-valuenow={displayProgress} 
-          aria-valuemin={0} 
-          aria-valuemax={100}
-          className="w-full h-2 bg-white/[0.08] rounded-full overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.4)]"
-        >
-          <div 
-            className={`h-full rounded-full transition-all duration-300 ease-out ${getBgColor()} ${getGlowColor()}`}
-            style={{ width: `${displayProgress}%` }}
-          />
-        </div>
-        
-        <div className="mt-4 flex w-full justify-between items-center text-[13px] font-medium tracking-wider">
-          <span className="text-white/40 uppercase">{isComplete ? "Done" : isError ? "Failed" : "Progress"}</span>
-          <span className={getStatusColor()}>{displayProgress}%</span>
-        </div>
-      </DialogContent>
-    </Dialog>
+          className={`h-full rounded-full transition-all duration-300 ease-out ${getBgColor()} ${getGlowColor()}`}
+          style={{ width: `${displayProgress}%` }}
+        />
+      </div>
+      
+      <div className="mt-4 flex w-[80%] max-w-[300px] justify-between items-center text-[13px] font-medium tracking-wider">
+        <span className="text-muted-foreground uppercase">{isComplete ? "Done" : isError ? "Failed" : "Progress"}</span>
+        <span className={getStatusColor()}>{displayProgress}%</span>
+      </div>
+    </div>
   );
 }

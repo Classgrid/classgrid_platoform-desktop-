@@ -159,12 +159,12 @@ export function ProfilePage() {
 
       setForm((prev) => ({ ...prev, ...updatePayload }));
       updateProfile.mutate(updatePayload);
-      setCropOpen(false);
       
       toast.success(`${type} updated successfully!`, { id: loadingToast });
     } catch (err) {
       console.error(err);
       toast.error(`Failed to upload ${type}`, { id: loadingToast });
+      throw err;
     }
   };
 
