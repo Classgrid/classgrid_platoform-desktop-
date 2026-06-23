@@ -3,11 +3,11 @@ import { Users, UserPlus, X, Loader, Shield, Headphones, TrendingUp, Settings, R
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/marketing_ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 
 // ── Types ─────────────────────────────────────────────────────────────────────

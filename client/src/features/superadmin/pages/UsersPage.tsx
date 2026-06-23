@@ -3,7 +3,7 @@ import { Users, Building2, ShieldAlert, CheckCircle, RefreshCw, MoreVertical } f
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";

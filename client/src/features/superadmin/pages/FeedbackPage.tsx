@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/marketing_ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Input } from "@/components/marketing_ui/input";
 
 import { feedbackApi, type PlatformFeedback } from "../services/superAdminApi";
 

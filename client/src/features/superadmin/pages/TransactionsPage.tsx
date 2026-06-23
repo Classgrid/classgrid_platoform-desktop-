@@ -6,12 +6,12 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 

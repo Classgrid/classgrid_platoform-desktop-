@@ -4,13 +4,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building, Plus, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/marketing_ui/dialog";
+import { Input } from "@/components/marketing_ui/input";
 
 import { onboardingApi, type PendingOrganization } from "../services/superAdminApi";
 

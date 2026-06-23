@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { Switch } from "@/components/ui/switch";
-import { Spinner } from "@/components/ui/spinner";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Toggle } from "@/components/ui/toggle";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { Switch } from "@/components/marketing_ui/switch";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Button } from "@/components/marketing_ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Toggle } from "@/components/marketing_ui/toggle";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/marketing_ui/select";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/marketing_ui/breadcrumb";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/marketing_ui/table";
+import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { ColumnDef } from "@tanstack/react-table";
 import { AlertCircle, ArrowUpCircle, Bell, GitBranch, GitCommit, Search, ShieldCheck } from "lucide-react";
 

@@ -22,9 +22,9 @@ import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Breadcrumb,
@@ -33,7 +33,7 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
+} from "@/components/marketing_ui/breadcrumb";
 import { toast } from "sonner";
 import RichReplyEditor, {
   type RichReplyEditorRef,

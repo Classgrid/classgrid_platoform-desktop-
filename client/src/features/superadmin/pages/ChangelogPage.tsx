@@ -3,7 +3,7 @@ import { FileText, Plus, RefreshCw, Send, History } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgModal, CgModalContent, CgModalFooter } from "@/components/classgrid/Modal";
 import { useChangelog, useCreateChangelog, useDeleteChangelog } from "../queries/useChangelog";

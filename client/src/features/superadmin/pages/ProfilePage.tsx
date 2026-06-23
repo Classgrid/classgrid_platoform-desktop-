@@ -8,11 +8,11 @@ import {
   User as UserIcon, ChevronRight
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/marketing_ui/button";
 import { CgAvatar } from "@/components/classgrid/Avatar";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ImageCropperModal } from "@/components/ui/ImageCropperModal";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Input } from "@/components/marketing_ui/input";
+import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "react-hot-toast";
 import "../styles/profile.css";
 

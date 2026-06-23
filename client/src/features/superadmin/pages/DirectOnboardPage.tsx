@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle, Loader } from "lucide-react";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi, directProvisionApi } from "../services/superAdminApi";
 import type { DirectProvisionPayload } from "../services/superAdminApi";

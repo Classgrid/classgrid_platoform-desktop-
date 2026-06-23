@@ -12,9 +12,9 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/marketing_ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";

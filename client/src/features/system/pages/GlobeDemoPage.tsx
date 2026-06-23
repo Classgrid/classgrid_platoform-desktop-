@@ -1,4 +1,4 @@
-import { Globe } from "@/components/ui/Globe.jsx";
+import { Globe } from "@/components/marketing_ui/Globe.jsx";
 
 export function GlobeDemoPage() {
   return (

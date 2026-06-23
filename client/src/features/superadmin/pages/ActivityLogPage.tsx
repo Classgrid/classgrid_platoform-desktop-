@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import LinkModal from "@/app/support/components/LinkModal";
 import { uploadToSupabase } from "@/lib/supabase-storage";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/marketing_ui/select";
 
 // ── Toolbar button ──────────────────────────────────────────────
 

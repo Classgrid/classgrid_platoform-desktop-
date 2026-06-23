@@ -3,7 +3,7 @@ import { AlertTriangle, Mail, RefreshCw, Send, XCircle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgTabs, CgTabList, CgTabTrigger, CgTabContent } from "@/components/classgrid/Tabs";
 import { formatDate, formatTime } from "@/utils/dateUtils";

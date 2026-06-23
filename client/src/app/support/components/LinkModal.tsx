@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/marketing_ui/button";
+import { Label } from "@/components/marketing_ui/label";
 import { Link2, X } from "lucide-react";
 
 interface LinkModalProps {

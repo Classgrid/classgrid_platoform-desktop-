@@ -4,8 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building2, ClipboardList, Megaphone, Plus, RefreshCw, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";

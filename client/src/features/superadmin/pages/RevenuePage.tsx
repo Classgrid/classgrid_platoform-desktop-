@@ -5,7 +5,7 @@ import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { IndianRupee, TrendingUp, TrendingDown, RefreshCw, Users, CreditCard } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
