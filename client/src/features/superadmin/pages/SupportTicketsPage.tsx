@@ -345,9 +345,11 @@ export function SupportTicketsPage() {
     if (!selectedTicket || !replyBody.trim()) return;
 
     try {
+      const files = replyEditorRef.current?.getFiles() || [];
       const result = await replyToTicket.mutateAsync({
         id: selectedTicket._id,
         message: replyBody.trim(),
+        files: files.length > 0 ? files : undefined,
       });
       setSelectedTicket(result.ticket);
       setReplyBody("");
