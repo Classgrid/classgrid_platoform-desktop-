@@ -9,7 +9,7 @@ import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgButton } from "@/components/classgrid/Button";
 import { CgBadge } from "@/components/classgrid/Badge";
-import { Input } from "@/components/shadcn/input";
+import { Input } from "@/components/ui/input";
 
 import { feedbackApi, type PlatformFeedback } from "../services/superAdminApi";
 

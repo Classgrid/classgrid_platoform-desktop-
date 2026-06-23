@@ -13,7 +13,7 @@ import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
-} from "@/components/shadcn/dialog";
+} from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 
 const fetchFlags = () =>

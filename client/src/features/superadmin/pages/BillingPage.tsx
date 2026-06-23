@@ -19,7 +19,7 @@ import { CgDatePicker } from "@/components/classgrid/DatePicker";
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter, DialogDescription,
-} from "@/components/shadcn/dialog";
+} from "@/components/ui/dialog";
 
 import {
   dashboardApi, billingApi,

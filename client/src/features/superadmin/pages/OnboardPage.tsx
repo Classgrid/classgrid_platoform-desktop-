@@ -9,8 +9,8 @@ import { CgButton } from "@/components/classgrid/Button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/shadcn/dialog";
-import { Input } from "@/components/shadcn/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 import { onboardingApi, type PendingOrganization } from "../services/superAdminApi";
 

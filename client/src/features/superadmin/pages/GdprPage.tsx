@@ -10,7 +10,7 @@ import { CgButton } from "@/components/classgrid/Button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgAvatar } from "@/components/classgrid/Avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/shadcn/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 

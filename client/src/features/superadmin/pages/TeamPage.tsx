@@ -6,8 +6,8 @@ import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgBadge } from "@/components/classgrid/Badge";
 import { CgButton } from "@/components/classgrid/Button";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { Input } from "@/components/shadcn/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/shadcn/dialog";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 
 // ── Types ─────────────────────────────────────────────────────────────────────

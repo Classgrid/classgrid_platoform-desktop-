@@ -9,7 +9,7 @@ import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgBadge } from "@/components/classgrid/Badge";
 import { CgButton } from "@/components/classgrid/Button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/shadcn/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate, formatTime } from "@/utils/dateUtils";
 
