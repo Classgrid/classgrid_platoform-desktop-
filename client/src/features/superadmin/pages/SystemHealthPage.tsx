@@ -5,14 +5,11 @@ import {
   RefreshCw, Cpu, MemoryStick, Clock, Zap, XCircle, AlertCircle, Info,
 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate, formatTime } from "@/utils/dateUtils";
 

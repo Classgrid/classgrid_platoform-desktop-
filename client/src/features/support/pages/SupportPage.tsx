@@ -1,5 +1,4 @@
 import { ExternalLink, Mail, MessageSquare } from "lucide-react";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 
 export function SupportPage() {
   return (

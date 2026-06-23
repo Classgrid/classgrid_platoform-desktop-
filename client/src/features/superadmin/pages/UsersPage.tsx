@@ -6,8 +6,6 @@ import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { formatDate } from "@/utils/dateUtils";
 import { useAllUsers, useSuspendUser, useReactivateUser, useImpersonateUser } from "../queries/useUsers";
 import { LogIn } from "lucide-react";

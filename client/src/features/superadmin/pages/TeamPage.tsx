@@ -5,7 +5,6 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { Input } from "@/components/marketing_ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";

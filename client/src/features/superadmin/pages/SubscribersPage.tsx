@@ -13,14 +13,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { formatDate } from "@/utils/dateUtils";
 
@@ -272,10 +265,7 @@ export function SubscribersPage() {
   if (!isUserLoading && !isOwner) {
     return (
       <div className="cg-page cg-animate-in">
-        <CgPageHeader
-          title="Subscribers"
-          description="This page is reserved for the primary Classgrid owner account."
-        />
+        
         <div className="cg-alert cg-alert--danger">
           <ShieldAlert size={16} />
           <div className="cg-alert__body">
