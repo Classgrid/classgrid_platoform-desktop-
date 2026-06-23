@@ -16,7 +16,7 @@ import type { SupportTicket, TicketStatus } from "../services/superAdminApi";
 const STATUS_MAP: Record<TicketStatus, { label: string; variant: "success" | "warning" | "info" | "danger" | "neutral" }> = {
   open:        { label: "Open",        variant: "info" },
   in_progress: { label: "In Progress", variant: "warning" },
-  waiting_on_user: { label: "Waiting on User", variant: "warning" },
+  waiting_on_user: { label: "Awaiting your reply", variant: "warning" },
   resolved:    { label: "Resolved",    variant: "success" },
   closed:      { label: "Closed",      variant: "neutral" },
 };
@@ -313,7 +313,7 @@ export function HelpdeskPage() {
               <option value="">All Tickets</option>
               <option value="open">Open</option>
               <option value="in_progress">In Progress</option>
-              <option value="waiting_on_user">Waiting on User</option>
+              <option value="waiting_on_user">Awaiting your reply</option>
               <option value="resolved">Resolved</option>
               <option value="closed">Closed</option>
             </select>
