@@ -342,13 +342,17 @@ export function SupportTicketsPage() {
   };
 
   const submitReply = async () => {
-    if (!selectedTicket || !replyBody.trim()) return;
+    const currentHTML = replyEditorRef.current?.getHTML() || "";
+    const cleanText = currentHTML.replace(/<[^>]+>/g, "").trim();
+    const files = replyEditorRef.current?.getFiles() || [];
+    
+    // Allow submission if there is text OR if there are files attached
+    if (!selectedTicket || (!cleanText && files.length === 0)) return;
 
     try {
-      const files = replyEditorRef.current?.getFiles() || [];
       const result = await replyToTicket.mutateAsync({
         id: selectedTicket._id,
-        message: replyBody.trim(),
+        message: currentHTML,
         files: files.length > 0 ? files : undefined,
       });
       setSelectedTicket(result.ticket);
@@ -854,7 +858,7 @@ export function SupportTicketsPage() {
 
         {/* Right: Metadata Sidebar */}
         <div className="h-full">
-          <div className="bg-card border border-border rounded-lg p-5 sticky top-28">
+          <div className="bg-card border border-border rounded-lg p-5 lg:sticky lg:top-28">
             <dl className="space-y-4">
               <MetaRow
                 label="Id"

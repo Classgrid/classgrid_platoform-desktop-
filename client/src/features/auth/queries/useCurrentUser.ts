@@ -16,7 +16,11 @@ export function useCurrentUser() {
     queryFn: async () => {
       try {
         const res = await apiClient.get<CurrentUser | { user: CurrentUser }>("/api/auth/me");
-        return "user" in res.data ? res.data.user : res.data;
+        const data = "user" in res.data ? res.data.user : res.data;
+        if (data && !data._id && data.id) {
+          data._id = data.id;
+        }
+        return data;
       } catch (err) {
         return null; // Not logged in
       }
