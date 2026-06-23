@@ -718,10 +718,15 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             }
         }
 
+        const populatedTicket = await SupportTicket.findById(ticket._id)
+            .populate("submittedBy", "name email role")
+            .populate("assignedTo", "name email")
+            .lean();
+
         res.json({
             success: true,
             message: "Reply added",
-            ticket: serializeTicket(ticket.toObject()),
+            ticket: serializeTicket(populatedTicket),
             emailNotification
         });
     } catch (err) {

@@ -767,7 +767,7 @@ export function SupportTicketsPage() {
 
           {/* Reply Box */}
           {!isClosed ? (
-            selectedTicket.assignedTo && selectedTicket.assignedTo._id !== currentUser?._id ? (
+            selectedTicket.assignedTo && (typeof selectedTicket.assignedTo === 'string' ? selectedTicket.assignedTo : selectedTicket.assignedTo._id) !== currentUser?._id ? (
               <div className="mt-8 pt-8 border-t border-border">
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6 text-center">
                   <div className="w-12 h-12 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
