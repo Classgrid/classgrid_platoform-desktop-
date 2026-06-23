@@ -61,6 +61,7 @@ const STATUS_CONFIG: Record<
   waiting_on_user: { label: "Awaiting your reply", variant: "warning" },
   resolved: { label: "Resolved", variant: "success" },
   closed: { label: "Closed", variant: "neutral" },
+  reopened: { label: "Reopened", variant: "info" },
 };
 
 const PRIORITY_CONFIG: Record<
@@ -189,6 +190,8 @@ function statusColor(status: string) {
     case "resolved":
     case "closed":
       return "bg-zinc-400";
+    case "reopened":
+      return "bg-indigo-500";
     case "open":
       return "bg-emerald-500"; // Green for Open
     case "in_progress":
@@ -208,6 +211,8 @@ function statusBadgeBg(status: string) {
       return "bg-zinc-600";
     case "in_progress":
       return "bg-amber-500";
+    case "reopened":
+      return "bg-indigo-500";
     case "open":
       return "bg-emerald-500"; // Green for Open
     case "waiting_on_user":
@@ -237,6 +242,7 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "waiting_on_user", label: "Awaiting your reply" },
   { value: "resolved", label: "Resolved" },
   { value: "closed", label: "Closed" },
+  { value: "reopened", label: "Reopened" },
 ];
 
 const PRIORITY_OPTIONS: Array<{ value: string; label: string }> = [

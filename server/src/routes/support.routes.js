@@ -345,6 +345,10 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
             return res.status(404).json({ success: false, message: "Ticket not found" });
         }
 
+        if (ticket.status === "closed") {
+            return res.status(400).json({ success: false, message: "This ticket is closed and cannot receive new replies." });
+        }
+
         // Verify ownership via email
         if (ticket.submitterEmail?.toLowerCase() !== email.trim().toLowerCase()) {
             return res.status(403).json({ success: false, message: "Email does not match ticket owner" });
@@ -410,7 +414,11 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
 
         ticket.lastComment = now;
         ticket.lastUserReplyAt = now;
-        ticket.status = "open";
+        if (ticket.status === "resolved") {
+            ticket.status = "reopened";
+        } else {
+            ticket.status = "open";
+        }
 
         await ticket.save();
         res.json({ success: true, message: "Reply added", ticket: serializeTicket(ticket.toObject()) });
@@ -580,6 +588,10 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         const ticket = await SupportTicket.findById(req.params.id);
         if (!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
 
+        if (ticket.status === "closed") {
+            return res.status(400).json({ success: false, message: "This ticket is closed and cannot receive new replies." });
+        }
+
         const isSuperAdmin = req.user.role === "super_admin";
         const isOwner =
             ticket.submittedBy?.toString() === req.user._id.toString() ||
@@ -686,7 +698,11 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             }
         } else {
             ticket.lastUserReplyAt = now;
-            ticket.status = "open";
+            if (ticket.status === "resolved") {
+                ticket.status = "reopened";
+            } else {
+                ticket.status = "open";
+            }
         }
 
         await ticket.save();
@@ -802,6 +818,10 @@ router.patch("/admin/tickets/:id", isAuthenticated, requireRole("super_admin"), 
         const { status, priority, category, assignedTo } = req.body;
         const ticket = await SupportTicket.findById(req.params.id);
         if (!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
+
+        if (ticket.status === "closed") {
+            return res.status(400).json({ success: false, message: "Cannot modify a closed ticket. Please open a new ticket." });
+        }
 
         const now = new Date();
         const actorName = req.user.name || req.user.email;

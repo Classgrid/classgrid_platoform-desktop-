@@ -44,7 +44,7 @@ const supportTicketSchema = new mongoose.Schema({
     // Ticket lifecycle
     status: {
         type: String,
-        enum: ["open", "in_progress", "waiting_on_user", "resolved", "closed"],
+        enum: ["open", "in_progress", "waiting_on_user", "resolved", "closed", "reopened"],
         default: "open"
     },
     // Who raised the ticket (null for public/marketing submissions)

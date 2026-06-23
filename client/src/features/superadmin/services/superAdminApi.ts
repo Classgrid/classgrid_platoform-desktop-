@@ -87,7 +87,7 @@ export type SubscribersResponse = {
 
 // ─── Support Ticket Types ─────────────────────────────────────────────────────
 
-export type TicketStatus = "open" | "in_progress" | "waiting_on_user" | "resolved" | "closed";
+export type TicketStatus = "open" | "in_progress" | "waiting_on_user" | "resolved" | "closed" | "reopened";
 export type TicketPriority = "low" | "medium" | "high" | "urgent" | "critical";
 
 export type SupportTicket = {
