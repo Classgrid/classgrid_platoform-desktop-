@@ -13,7 +13,14 @@ import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
-import { AlertCircle, ArrowUpCircle, Users } from "lucide-react";
+import { Input } from "@/components/marketing_ui/input";
+import { Textarea } from "@/components/marketing_ui/textarea";
+import { Checkbox } from "@/components/marketing_ui/checkbox";
+import { Slider } from "@/components/marketing_ui/slider";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/marketing_ui/alert";
+import { Progress } from "@/components/marketing_ui/progress";
+import { AlertCircle, ArrowUpCircle, Users, Terminal } from "lucide-react";
 
 export function SandboxPage() {
   const { theme, setTheme } = useTheme();
@@ -22,7 +29,7 @@ export function SandboxPage() {
     <div className="min-h-screen p-8 bg-background text-foreground transition-colors duration-200 pb-24">
       <div className="mb-12 border-b border-border pb-4">
         <h1 className="text-2xl font-bold tracking-tight">Component Sandbox</h1>
-        <p className="text-sm text-muted-foreground mt-1">We have added exactly 13 pure marketing components so far.</p>
+        <p className="text-sm text-muted-foreground mt-1">We have added all major marketing UI components.</p>
       </div>
 
       <div className="max-w-[800px] mx-auto space-y-16">
@@ -200,6 +207,78 @@ export function SandboxPage() {
                 </TableRow>
               </TableBody>
             </Table>
+          </div>
+        </div>
+
+        {/* 14 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">14. Input</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Input type="email" placeholder="Email" className="max-w-sm" />
+          </div>
+        </div>
+
+        {/* 15 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">15. Textarea</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Textarea placeholder="Type your message here." />
+          </div>
+        </div>
+
+        {/* 16 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">16. Checkbox</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm flex items-center space-x-2">
+            <Checkbox id="terms" />
+            <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Accept terms and conditions
+            </label>
+          </div>
+        </div>
+
+        {/* 17 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">17. Slider</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Slider defaultValue={[50]} max={100} step={1} />
+          </div>
+        </div>
+
+        {/* 18 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">18. Tabs</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Tabs defaultValue="account" className="w-[400px]">
+              <TabsList>
+                <TabsTrigger value="account">Account</TabsTrigger>
+                <TabsTrigger value="password">Password</TabsTrigger>
+              </TabsList>
+              <TabsContent value="account">Make changes to your account here.</TabsContent>
+              <TabsContent value="password">Change your password here.</TabsContent>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* 19 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">19. Alert</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Alert>
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Heads up!</AlertTitle>
+              <AlertDescription>
+                You can add components to your app using the cli.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+
+        {/* 20 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">20. Progress</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Progress value={33} />
           </div>
         </div>
 
