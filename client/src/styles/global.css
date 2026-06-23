@@ -219,6 +219,13 @@
   background: hsl(var(--background));
 }
 
+.cg-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .cg-sidebar {
   background: hsl(var(--sidebar-background));
   border-right: 1px solid hsl(var(--sidebar-border));

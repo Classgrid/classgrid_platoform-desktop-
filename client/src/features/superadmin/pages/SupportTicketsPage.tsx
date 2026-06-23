@@ -262,7 +262,7 @@ const ticketCols = [
   { key: "status", header: "Status", width: "w-[110px]" },
   { key: "priority", header: "Priority", width: "w-[80px]" },
   { key: "assigned", header: "Assigned", width: "w-[140px]" },
-  { key: "action", header: "", width: "w-[70px]" },
+  { key: "action", header: "", width: "w-[90px]" },
 ];
 
 export function SupportTicketsPage() {
@@ -543,18 +543,36 @@ export function SupportTicketsPage() {
                   assigned: (
                     <div className="flex items-center">
                       {ticket.assignedTo ? (
-                        <div className="flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                            {currentUser?.profilePicture && ticket.assignedTo._id === currentUser._id ? (
-                              <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[9px] ${getAvatarColor(ticket.assignedTo.name)}`}>
-                                {getInitials(ticket.assignedTo.name)}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default hover:border-foreground/20 transition-colors">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                                  {currentUser?.profilePicture && ticket.assignedTo._id === currentUser._id ? (
+                                    <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[9px] ${getAvatarColor(ticket.assignedTo.name)}`}>
+                                      {getInitials(ticket.assignedTo.name)}
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="truncate max-w-[80px]">{ticket.assignedTo.name}</span>
                               </div>
-                            )}
-                          </div>
-                          <span className="truncate max-w-[80px]">{ticket.assignedTo.name}</span>
-                        </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {(() => {
+                                const adminReply = 
+                                  ticket.replies?.slice().reverse().find(r => r.authorName === ticket.assignedTo?.name) ||
+                                  ticket.messages?.slice().reverse().find(m => m.author === ticket.assignedTo?.name);
+                                
+                                if (adminReply) {
+                                  return `Replied on ${fmtDateTime(adminReply.createdAt || adminReply.date)}`;
+                                }
+                                return `Assigned on ${fmtDateTime(ticket.updatedAt)}`;
+                              })()}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       ) : (
                         currentUser && (
                           <button
