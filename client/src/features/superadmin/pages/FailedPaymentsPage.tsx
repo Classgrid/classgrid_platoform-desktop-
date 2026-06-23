@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw, XCircle, Building2, IndianRupee, Clock } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { apiClient } from "@/lib/apiClient";
@@ -162,17 +162,17 @@ export function FailedPaymentsPage() {
       )}
 
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Failed Payments"
           value={isLoading ? "—" : total}
           icon={<XCircle size={15} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Revenue at Risk"
           value={isLoading ? "—" : INR(totalLost)}
           icon={<IndianRupee size={15} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Affected Orgs"
           value={isLoading ? "—" : new Set(txns.map((t) => t.organizationId?.toString() ?? t.organizationName)).size}
           icon={<Building2 size={15} />}
@@ -180,7 +180,7 @@ export function FailedPaymentsPage() {
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel
+        <SectionPanel
           title="Failed Transaction Log"
           description="All failed or incomplete platform subscription payments."
           noPadding
@@ -203,7 +203,7 @@ export function FailedPaymentsPage() {
               searchPlaceholder="Search org, order ID, payment ID…"
             />
           </div>
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={filtered}
             isLoading={isLoading}
@@ -213,7 +213,7 @@ export function FailedPaymentsPage() {
             emptyDescription="All platform payments have been successfully processed."
             emptyMessage="No failures found."
           />
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
     </div>
   );

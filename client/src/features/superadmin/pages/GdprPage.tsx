@@ -4,12 +4,12 @@ import { Shield, Download, Trash2, RefreshCw, AlertTriangle, User } from "lucide
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgAvatar } from "@/components/classgrid/Avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -49,7 +49,7 @@ export function GdprPage() {
         const u = row.original;
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <CgAvatar name={u.name} size="sm" />
+            <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
               <div style={{ fontWeight: 500 }}>{u.name}</div>
               <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{u.email}</div>
@@ -111,13 +111,13 @@ export function GdprPage() {
           </div>
         </div>
       </div>
-      <CgSectionPanel title="All Users" description="Perform GDPR actions on any user account." noPadding>
+      <SectionPanel title="All Users" description="Perform GDPR actions on any user account." noPadding>
         <div style={{ padding: "0.75rem 1rem" }}>
           <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search by name or email…" />
         </div>
-        <CgDataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
+        <DataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
           emptyIcon={<User size={32} />} emptyTitle="No users found" emptyDescription="Try a different search." emptyMessage="No users." />
-      </CgSectionPanel>
+      </SectionPanel>
 
       <Dialog open={!!eraseTarget} onOpenChange={o => !o && setEraseTarget(null)}>
         <DialogContent className="max-w-md">

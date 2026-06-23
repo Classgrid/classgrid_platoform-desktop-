@@ -4,11 +4,11 @@ import {
   Plus, X, Calendar, Link2, Copy, Check, AlertTriangle, ChevronRight
 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { formatDate } from "@/utils/dateUtils";
@@ -418,13 +418,13 @@ export function LeadsPage() {
       </div>
 
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Leads" value={isLoading ? "—" : stats.total} icon={<ClipboardList size={16} />} />
-        <CgMetricCard title="Converted" value={isLoading ? "—" : stats.converted} icon={<CheckCircle size={16} />} />
-        <CgMetricCard title="Awaiting Follow-up" value={isLoading ? "—" : stats.pending} icon={<Clock size={16} />} />
-        <CgMetricCard title="Demo Scheduled" value={isLoading ? "—" : stats.demoScheduled} icon={<CalendarClock size={16} />} />
+        <StatCard title="Total Leads" value={isLoading ? "—" : stats.total} icon={<ClipboardList size={16} />} />
+        <StatCard title="Converted" value={isLoading ? "—" : stats.converted} icon={<CheckCircle size={16} />} />
+        <StatCard title="Awaiting Follow-up" value={isLoading ? "—" : stats.pending} icon={<Clock size={16} />} />
+        <StatCard title="Demo Scheduled" value={isLoading ? "—" : stats.demoScheduled} icon={<CalendarClock size={16} />} />
       </div>
 
-      <CgSectionPanel title="Lead Pipeline" description='Click "Manage" on any lead to approve, schedule meeting, or contact.' noPadding>
+      <SectionPanel title="Lead Pipeline" description='Click "Manage" on any lead to approve, schedule meeting, or contact.' noPadding>
         <div style={{ padding: "1rem" }}>
           <CgFilterToolbar
             searchValue={search}
@@ -438,10 +438,10 @@ export function LeadsPage() {
             <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>Retry</button>
           </div>
         ) : (
-          <CgDataTable columns={columns} data={filtered} pageSize={10}
+          <DataTable columns={columns} data={filtered} pageSize={10}
             emptyMessage={isLoading ? "Loading leads…" : "No leads found."} />
         )}
-      </CgSectionPanel>
+      </SectionPanel>
 
       {/* Lead Detail Drawer */}
       {selectedLead && (

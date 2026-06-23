@@ -4,11 +4,11 @@ import { Power, Plus, Shield, Zap, AlertTriangle, RefreshCw, ChevronDown } from 
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -187,14 +187,14 @@ export function FeatureFlagsPage() {
       />
 
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Flags" value={isLoading ? "—" : flags.length} icon={<Shield size={15} />} />
-        <CgMetricCard title="Active Features" value={isLoading ? "—" : enabledCount} icon={<Power size={15} />}
+        <StatCard title="Total Flags" value={isLoading ? "—" : flags.length} icon={<Shield size={15} />} />
+        <StatCard title="Active Features" value={isLoading ? "—" : enabledCount} icon={<Power size={15} />}
           trend={{ value: enabledCount, label: `of ${flags.length} total` }} />
-        <CgMetricCard title="Disabled Features" value={isLoading ? "—" : flags.length - enabledCount} icon={<AlertTriangle size={15} />} />
+        <StatCard title="Disabled Features" value={isLoading ? "—" : flags.length - enabledCount} icon={<AlertTriangle size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel
+        <SectionPanel
           title="All Feature Flags"
           description="Toggle any feature globally. All changes take effect immediately platform-wide."
           noPadding
@@ -202,7 +202,7 @@ export function FeatureFlagsPage() {
           <div style={{ padding: "0.75rem 1rem" }}>
             <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search flags, modules…" />
           </div>
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={filtered}
             isLoading={isLoading}
@@ -212,7 +212,7 @@ export function FeatureFlagsPage() {
             emptyDescription="Create a flag using the 'New Flag' button above."
             emptyMessage="No flags configured."
           />
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       {/* Confirm Toggle Dialog */}

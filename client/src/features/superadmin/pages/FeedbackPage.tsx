@@ -5,8 +5,8 @@ import { MessageSquare, Search, Bug, Lightbulb, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
@@ -133,7 +133,7 @@ export function FeedbackPage() {
         description="Review feature requests, bug reports, and general feedback from platform users."
       />
 
-      <CgSectionPanel>
+      <SectionPanel>
         <div className="mb-4 flex items-center justify-between">
           <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -150,13 +150,13 @@ export function FeedbackPage() {
           </Button>
         </div>
 
-        <CgDataTable
+        <DataTable
           columns={columns}
           data={filteredFeedbacks}
           isLoading={isLoading}
           emptyMessage="No feedback submitted yet."
         />
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }

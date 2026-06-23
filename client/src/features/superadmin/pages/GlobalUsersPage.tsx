@@ -4,12 +4,12 @@ import { Users, ShieldAlert, CheckCircle, RefreshCw, Ban, LogOut, Key, UserCheck
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgAvatar } from "@/components/classgrid/Avatar";
+import { DataTable } from "@/components/marketing_ui/data-table";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
@@ -60,7 +60,7 @@ export function GlobalUsersPage() {
         const u = row.original;
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <CgAvatar name={u.name} size="sm" />
+            <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
               <div style={{ fontWeight: 500 }}>{u.name}</div>
               <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{u.email}</div>
@@ -135,12 +135,12 @@ export function GlobalUsersPage() {
         actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
       />
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Users" value={isLoading ? "—" : total} icon={<Users size={15} />} />
-        <CgMetricCard title="Active" value={isLoading ? "—" : users.filter(u => u.status === "active").length} icon={<CheckCircle size={15} />} />
-        <CgMetricCard title="Banned" value={isLoading ? "—" : users.filter(u => u.status === "suspended").length} icon={<ShieldAlert size={15} />} />
+        <StatCard title="Total Users" value={isLoading ? "—" : total} icon={<Users size={15} />} />
+        <StatCard title="Active" value={isLoading ? "—" : users.filter(u => u.status === "active").length} icon={<CheckCircle size={15} />} />
+        <StatCard title="Banned" value={isLoading ? "—" : users.filter(u => u.status === "suspended").length} icon={<ShieldAlert size={15} />} />
       </div>
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="All Users" description={`Showing ${users.length} of ${total}`} noPadding>
+        <SectionPanel title="All Users" description={`Showing ${users.length} of ${total}`} noPadding>
           <div style={{ padding: "0.75rem 1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: 220 }}>
               <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search name or email…" />
@@ -148,9 +148,9 @@ export function GlobalUsersPage() {
             <CgSearchableSelect value={roleFilter} onValueChange={setRoleFilter} options={ROLE_OPTIONS} />
             <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={STATUS_OPTIONS} />
           </div>
-          <CgDataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
+          <DataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
             emptyIcon={<Users size={32} />} emptyTitle="No users found" emptyDescription="Try different filters." emptyMessage="No users." />
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       <Dialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
