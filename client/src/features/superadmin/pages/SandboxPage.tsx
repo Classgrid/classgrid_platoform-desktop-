@@ -3,7 +3,7 @@ import { useTheme } from "next-themes";
 import { CgSwitch } from "@/components/classgrid/Switch";
 import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { CgSimpleTable } from "@/components/classgrid/SimpleTable";
+import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
@@ -160,14 +160,14 @@ export function SandboxPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto space-y-12">
-        {/* --- 1. CgSimpleTable --- */}
+        {/* --- 1. ClassgridTable --- */}
         <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (CgSimpleTable)</h2>
+            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (ClassgridTable)</h2>
             <p className="text-sm text-muted-foreground">Clean, static, fast UI table for simple lists.</p>
           </div>
           
-          <CgSimpleTable columns={vercelCols} rows={genericData as any} />
+          <ClassgridTable columns={vercelCols} rows={genericData as any} />
         </div>
 
         {/* --- 2. CgDataTable --- */}
@@ -183,11 +183,11 @@ export function SandboxPage() {
         {/* --- 3. Exact Vercel Mockup --- */}
         <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">3. Vercel Style Mockup (using CgSimpleTable)</h2>
-            <p className="text-sm text-muted-foreground">The exact rich UI from your screenshot, built using the newly renamed CgSimpleTable component.</p>
+            <h2 className="text-lg font-semibold text-foreground">3. Vercel Style Mockup (using ClassgridTable)</h2>
+            <p className="text-sm text-muted-foreground">The exact rich UI from your screenshot, built using the newly renamed ClassgridTable component.</p>
           </div>
           
-          <CgSimpleTable 
+          <ClassgridTable 
             columns={deploymentsCols} 
             rows={deploymentsData as any} 
             className="border-zinc-800 bg-[#0a0a0a]" 

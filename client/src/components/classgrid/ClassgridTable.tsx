@@ -10,17 +10,17 @@ type Column = {
   width?: string;
 };
 
-type CgSimpleTableProps = {
+type ClassgridTableProps = {
   columns: Column[];
   rows: Record<string, React.ReactNode>[];
   className?: string;
 };
 
 /**
- * Classgrid Simple Table — clean background, subtle row borders,
+ * Classgrid Table — clean background, subtle row borders,
  * NO vertical column dividers, and accent-colored feature names.
  */
-export function CgSimpleTable({ columns, rows, className }: CgSimpleTableProps) {
+export function ClassgridTable({ columns, rows, className }: ClassgridTableProps) {
   return (
     <div
       className={cn(
