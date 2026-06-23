@@ -158,8 +158,11 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
 ${(ticket.events || []).map(ev => {
     const evDate = formatTicketDate(ev.createdAt);
     const evLabel = ev.label || ev.type || "Activity";
-    const evActor = ev.actorName ? " by " + escapeHtml(ev.actorName) : "";
-    return '<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>' + escapeHtml(evDate) + '</strong> – ' + escapeHtml(evLabel) + evActor + '</p>';
+      let evActor = "";
+      if (ev.actorName && !evLabel.includes(ev.actorName)) {
+          evActor = " by " + escapeHtml(ev.actorName);
+      }
+      return '<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>' + escapeHtml(evDate) + '</strong> – ' + escapeHtml(evLabel) + evActor + '</p>';
 }).join("\n")}
 <p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 30px;"><strong>Current Status:</strong> ${escapeHtml(statusLabel)}</p>
 
