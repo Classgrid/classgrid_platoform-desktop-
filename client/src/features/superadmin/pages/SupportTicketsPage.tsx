@@ -21,6 +21,8 @@ import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
+import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
+import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -243,6 +245,14 @@ const STATUS_CHANGE_OPTIONS: TicketStatus[] = [
   "closed",
 ];
 
+const ticketCols = [
+  { key: "requester", header: "Requester", width: "w-[250px]" },
+  { key: "subject", header: "Subject" },
+  { key: "status", header: "Status", width: "w-[150px]" },
+  { key: "priority", header: "Priority", width: "w-[120px]" },
+  { key: "time", header: "", width: "w-[180px]" },
+];
+
 export function SupportTicketsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
@@ -413,17 +423,17 @@ export function SupportTicketsPage() {
         </div>
 
         {/* Ticket List */}
-        <div className="flex flex-col border border-border rounded-lg bg-card" style={{ height: "calc(100vh - 280px)", overflowY: "auto" }}>
+        <div className="mt-4">
           {isError ? (
-            <div className="p-8 text-center text-sm text-red-500">
+            <div className="p-8 text-center text-sm text-red-500 border border-border rounded-lg bg-card">
               Failed to load tickets.
             </div>
           ) : isLoading ? (
-            <div className="p-12 text-center">
-              <Spinner className="w-6 h-6 mx-auto text-muted-foreground" />
+            <div className="p-6 border border-border rounded-lg bg-card">
+              <CgSkeleton lines={6} />
             </div>
           ) : tickets.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-12 text-center border border-border rounded-lg bg-card">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 mb-4">
                 <MessageSquare className="h-6 w-6" />
               </div>
@@ -435,107 +445,115 @@ export function SupportTicketsPage() {
               </p>
             </div>
           ) : (
-            tickets.map((ticket) => {
-              const name =
-                ticket.submittedBy?.name ??
-                ticket.submitterName ??
-                ticket.name ??
-                "Unknown";
-                
-              const conversation = getConversation(ticket);
-              let unreadCount = 0;
-              for (let i = conversation.length - 1; i >= 0; i--) {
-                if (conversation[i].role === "admin") break;
-                if (conversation[i].role === "user") unreadCount++;
-              }
+            <ClassgridTable
+              columns={ticketCols}
+              rows={tickets.map((ticket) => {
+                const name =
+                  ticket.submittedBy?.name ??
+                  ticket.submitterName ??
+                  ticket.name ??
+                  "Unknown";
 
-              return (
-                <div
-                  key={ticket._id}
-                  onClick={() => {
-                    setSelectedTicket(ticket);
-                    setPendingStatus(null);
-                  }}
-                  className="flex items-center gap-4 px-5 py-4 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors group"
-                >
-                  {/* Avatar */}
-                  <div className="relative shrink-0">
-                    <div
-                      className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm ${getAvatarColor(name)}`}
-                    >
-                      {getInitials(name)}
-                    </div>
-                    {unreadCount > 0 && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
-                    )}
-                  </div>
+                const conversation = getConversation(ticket);
+                let unreadCount = 0;
+                for (let i = conversation.length - 1; i >= 0; i--) {
+                  if (conversation[i].role === "admin") break;
+                  if (conversation[i].role === "user") unreadCount++;
+                }
 
-                  {/* Middle: Name + Subject + Org + Meta */}
-                  <div className="flex-1 min-w-0 flex flex-col gap-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-semibold text-sm text-foreground truncate">
-                        {name}
-                      </span>
-                      {(ticket as any).organization_id?.name && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium truncate max-w-[150px]">
-                          {(ticket as any).organization_id.name}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground truncate">
-                      {ticket.subject}
-                    </p>
-                    
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded text-white ${statusBadgeBg(ticket.status)}`}>
-                          {statusLabel(ticket.status)}
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                          {ticket.priority}
-                        </span>
+                return {
+                  requester: (
+                    <div className="flex items-center gap-3">
+                      <div className="relative shrink-0">
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs ${getAvatarColor(
+                            name
+                          )}`}
+                        >
+                          {getInitials(name)}
+                        </div>
+                        {unreadCount > 0 && (
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
+                        )}
                       </div>
-                      
-                      <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
-                      
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
-                        <Clock className="w-3.5 h-3.5" />
-                        {fmtDateTime(ticket.createdAt)}
-                      </span>
-                      
-                      {unreadCount > 0 && (
-                        <>
-                          <div className="hidden sm:block w-1 h-1 rounded-full bg-border" />
-                          <span className="flex items-center gap-1 text-xs font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                            {unreadCount} new message{unreadCount > 1 ? 's' : ''}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-foreground text-sm">
+                          {name}
+                        </span>
+                        {(ticket as any).organization_id?.name && (
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">
+                            {(ticket as any).organization_id.name}
                           </span>
-                        </>
+                        )}
+                      </div>
+                    </div>
+                  ),
+                  subject: (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-sm text-foreground">
+                        {ticket.subject}
+                      </span>
+                      {unreadCount > 0 && (
+                        <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full w-fit">
+                          {unreadCount} new message{unreadCount > 1 ? "s" : ""}
+                        </span>
                       )}
                     </div>
-                  </div>
-
-                  {/* Right: Assigned To + Read Button */}
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    {ticket.assignedTo && (
-                      <span className="text-[10px] text-emerald-500 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                        → {ticket.assignedTo.name}
+                  ),
+                  status: (
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-2 w-2 rounded-full ${statusColor(
+                          ticket.status
+                        )}`}
+                      />
+                      <span
+                        className={`text-xs font-medium ${
+                          ticket.status === "open"
+                            ? "text-emerald-500"
+                            : ticket.status === "waiting_on_user"
+                            ? "text-red-500"
+                            : "text-foreground"
+                        }`}
+                      >
+                        {statusLabel(ticket.status)}
                       </span>
-                    )}
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedTicket(ticket);
-                      }}
-                    >
-                      Read
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
+                    </div>
+                  ),
+                  priority: (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {ticket.priority}
+                    </span>
+                  ),
+                  time: (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {fmtDateTime(ticket.createdAt)}
+                        </span>
+                        {ticket.assignedTo && (
+                          <span className="text-[10px] text-emerald-500 font-medium">
+                            → {ticket.assignedTo.name}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTicket(ticket);
+                          setPendingStatus(null);
+                        }}
+                      >
+                        Read
+                      </Button>
+                    </div>
+                  ),
+                };
+              })}
+            />
           )}
         </div>
       </div>
