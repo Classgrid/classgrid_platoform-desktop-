@@ -26,6 +26,10 @@ import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, Me
 import { ScrollArea } from "@/components/marketing_ui/scroll-area";
 import { Separator } from "@/components/marketing_ui/separator";
 import { Calendar } from "@/components/marketing_ui/calendar";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/marketing_ui/carousel";
+import { BentoGrid, BentoCard } from "@/components/marketing_ui/bento-grid";
+import Marquee from "@/components/marketing_ui/marquee";
+import NumberTicker from "@/components/marketing_ui/number-ticker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/marketing_ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/marketing_ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/marketing_ui/radio-group";
@@ -590,6 +594,80 @@ export function SandboxPage() {
               selected={new Date()}
               className="rounded-md border"
             />
+          </div>
+        </div>
+        {/* 37 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">37. Carousel</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm flex justify-center">
+            <Carousel className="w-full max-w-xs">
+              <CarouselContent>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <Card>
+                        <CardContent className="flex aspect-square items-center justify-center p-6">
+                          <span className="text-4xl font-semibold">{index + 1}</span>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
+        </div>
+
+        {/* 38 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">38. Bento Grid</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <BentoGrid className="max-w-4xl mx-auto">
+              <BentoCard
+                name="Revenue Stream"
+                className="col-span-3 lg:col-span-1"
+                background={<div className="absolute inset-0 bg-primary/5" />}
+                Icon={ArrowUpCircle}
+                description="Monitor your real-time revenue."
+                href="#"
+                cta="Learn more"
+              />
+              <BentoCard
+                name="User Growth"
+                className="col-span-3 lg:col-span-2"
+                background={<div className="absolute inset-0 bg-primary/10" />}
+                Icon={Users}
+                description="See where your new users are coming from."
+                href="#"
+                cta="View metrics"
+              />
+            </BentoGrid>
+          </div>
+        </div>
+
+        {/* 39 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">39. Marquee</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm overflow-hidden">
+            <Marquee className="py-4 bg-muted/30 rounded-lg">
+              <span className="mx-4 text-xl font-bold">Launch faster</span>
+              <span className="mx-4 text-xl font-bold">Build better</span>
+              <span className="mx-4 text-xl font-bold">Scale higher</span>
+              <span className="mx-4 text-xl font-bold">Design beautifully</span>
+            </Marquee>
+          </div>
+        </div>
+
+        {/* 40 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">40. Number Ticker</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm text-center">
+            <p className="text-4xl font-bold tracking-tighter text-primary">
+              $<NumberTicker value={1000000} />
+            </p>
+            <p className="text-sm text-muted-foreground">Annual Recurring Revenue</p>
           </div>
         </div>
       </div>
