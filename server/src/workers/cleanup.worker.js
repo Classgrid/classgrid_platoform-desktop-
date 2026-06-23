@@ -77,26 +77,26 @@ export const initCronJobs = () => {
         }
     }, { timezone: "Asia/Kolkata" });
 
-    // 5. Auto-close resolved tickets after 7 days of inactivity
-    nodeCron.schedule("0 1 * * *", async () => {
+    // 5. Auto-close resolved tickets after 30 minutes of inactivity (for testing)
+    nodeCron.schedule("* * * * *", async () => {
         console.log("[Cron] Running ticket auto-close cleanup...");
         try {
             const SupportTicket = (await import("../models/SupportTicket.js")).default;
 
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const thirtyMinutesAgo = new Date();
+            thirtyMinutesAgo.setMinutes(thirtyMinutesAgo.getMinutes() - 30);
 
             const result = await SupportTicket.updateMany(
                 {
                     status: "resolved",
-                    resolvedAt: { $lt: sevenDaysAgo }
+                    resolvedAt: { $lt: thirtyMinutesAgo }
                 },
                 {
                     $set: { status: "closed" },
                     $push: {
                         events: {
                             type: 'statusChanged',
-                            label: 'Ticket auto-closed after 7 days of inactivity',
+                            label: 'Ticket auto-closed after 30 minutes of inactivity',
                             from: 'resolved',
                             to: 'closed',
                             actorName: 'System',
