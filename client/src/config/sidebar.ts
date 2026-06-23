@@ -31,8 +31,7 @@ const superAdminMenuItems: DashboardMenuItem[] = [
   { label: "Profile", to: "/superadmin/profile", icon: User },
   { label: "System Config", to: "/superadmin/config", icon: Settings },
   { label: "Settings", to: "/superadmin/settings", icon: Settings },
-  { label: "Help & Support", to: "/superadmin/support", icon: HelpCircle, dividerBefore: true },
-  { label: "Log out", icon: LogOut }
+  { label: "Log out", icon: LogOut, dividerBefore: true }
 ];
 
 const orgAdminMenuItems: DashboardMenuItem[] = [
