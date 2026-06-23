@@ -33,7 +33,6 @@ const supportTicketSchema = new mongoose.Schema({
     }],
     category: {
         type: String,
-        enum: ["getting_started", "account_security", "technical", "billing", "academics", "finance", "exams", "communication", "general", "inquiry", "login", "dashboard", "profile", "attendance", "fee", "examination", "timetable", "assignments", "live-classes", "chat", "admission", "library", "documents", "erp", "ai", "bug", "feature", "other"],
         default: "general"
     },
     // Priority for internal tracking
