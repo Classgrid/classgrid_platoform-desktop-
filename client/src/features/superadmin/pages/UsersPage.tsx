@@ -1,3 +1,4 @@
+import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
 import { useState, useMemo } from "react";
 import { Users, Building2, ShieldAlert, CheckCircle, RefreshCw, MoreVertical } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";

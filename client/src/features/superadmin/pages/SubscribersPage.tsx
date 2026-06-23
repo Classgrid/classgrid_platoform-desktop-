@@ -1,3 +1,4 @@
+import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
 import { useMemo, useState } from "react";
 import {
   Mail,

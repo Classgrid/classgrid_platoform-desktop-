@@ -1,3 +1,4 @@
+import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
 import { useState, useMemo } from "react";
 import { Users, UserPlus, X, Loader, Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

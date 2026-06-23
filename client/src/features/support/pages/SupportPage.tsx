@@ -1,3 +1,4 @@
+import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
 import { ExternalLink, Mail, MessageSquare } from "lucide-react";
 import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect } from "@/components/classgrid";
 
