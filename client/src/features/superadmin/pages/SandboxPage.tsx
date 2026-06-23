@@ -105,6 +105,40 @@ const deploymentsData = [
       </div>
     ),
   },
+  {
+    project: <span className="text-foreground">new</span>,
+    status: (
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+        <span className="text-foreground">Ready</span>
+        <span className="text-muted-foreground text-xs">23s</span>
+      </div>
+    ),
+    environment: (
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-background text-xs text-foreground">
+        <ArrowUpCircle size={14} className="text-muted-foreground" />
+        Production
+      </div>
+    ),
+    commit: (
+      <div className="flex items-center gap-4 text-muted-foreground">
+        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
+          <GitCommit size={14} />
+          <span className="font-mono text-xs">76db5d7</span>
+        </div>
+        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
+          <GitBranch size={14} />
+          <span className="text-xs">main</span>
+        </div>
+      </div>
+    ),
+    time: (
+      <div className="flex items-center justify-between w-full">
+        <span className="text-muted-foreground text-xs">7m ago</span>
+        <img src="https://github.com/shadcn.png" alt="Avatar" className="w-5 h-5 rounded-full" />
+      </div>
+    ),
+  },
 ];
 
 const deploymentsCols = [
