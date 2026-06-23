@@ -10,30 +10,17 @@ type Column = {
   width?: string;
 };
 
-type VercelTableProps = {
+type CgSimpleTableProps = {
   columns: Column[];
   rows: Record<string, React.ReactNode>[];
   className?: string;
 };
 
 /**
- * Vercel-style data table — dark background, subtle row borders,
- * vertical column dividers, and accent-colored feature names.
- *
- * Usage:
- * ```tsx
- * <VercelTable
- *   columns={[
- *     { key: "feature", header: "Feature", accent: true, width: "w-[220px]" },
- *     { key: "capability", header: "Capability" },
- *   ]}
- *   rows={[
- *     { feature: "Server Components", capability: "React components that render on the server" },
- *   ]}
- * />
- * ```
+ * Classgrid Simple Table — clean background, subtle row borders,
+ * NO vertical column dividers, and accent-colored feature names.
  */
-export function VercelTable({ columns, rows, className }: VercelTableProps) {
+export function CgSimpleTable({ columns, rows, className }: CgSimpleTableProps) {
   return (
     <div
       className={cn(
@@ -41,7 +28,7 @@ export function VercelTable({ columns, rows, className }: VercelTableProps) {
         className
       )}
     >
-      <table className="w-full min-w-[600px] text-left text-sm md:min-w-0">
+      <table className="w-full min-w-[600px] text-left text-sm md:min-w-0 border-collapse">
         <thead>
           <tr className="border-b border-border">
             {columns.map((col, i) => (
@@ -49,8 +36,7 @@ export function VercelTable({ columns, rows, className }: VercelTableProps) {
                 key={col.key}
                 className={cn(
                   "px-6 py-3.5 text-[13px] font-semibold text-foreground bg-muted/50",
-                  col.width,
-                  i > 0 && "border-l border-border"
+                  col.width
                 )}
               >
                 {col.header}
@@ -67,13 +53,12 @@ export function VercelTable({ columns, rows, className }: VercelTableProps) {
                 rowIdx < rows.length - 1 && "border-b border-border/60"
               )}
             >
-              {columns.map((col, colIdx) => (
+              {columns.map((col) => (
                 <td
                   key={col.key}
                   className={cn(
                     "px-6 py-3.5",
                     col.width,
-                    colIdx > 0 && "border-l border-border/60",
                     col.accent
                       ? "font-medium text-emerald-600 dark:text-emerald-400"
                       : "text-muted-foreground"

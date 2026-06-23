@@ -3,7 +3,7 @@ import { useTheme } from "next-themes";
 import { CgSwitch } from "@/components/classgrid/Switch";
 import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { VercelTable } from "@/components/ui/vercel-table";
+import { CgSimpleTable } from "@/components/classgrid/SimpleTable";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
@@ -160,14 +160,14 @@ export function SandboxPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto space-y-12">
-        {/* --- 1. VercelTable --- */}
+        {/* --- 1. CgSimpleTable --- */}
         <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (VercelTable)</h2>
+            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (CgSimpleTable)</h2>
             <p className="text-sm text-muted-foreground">Clean, static, fast UI table for simple lists.</p>
           </div>
           
-          <VercelTable columns={vercelCols} rows={genericData as any} />
+          <CgSimpleTable columns={vercelCols} rows={genericData as any} />
         </div>
 
         {/* --- 2. CgDataTable --- */}
@@ -183,11 +183,11 @@ export function SandboxPage() {
         {/* --- 3. Exact Vercel Mockup --- */}
         <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">3. Vercel Style Mockup (using VercelTable)</h2>
-            <p className="text-sm text-muted-foreground">The exact rich UI from your screenshot, built using the same VercelTable component.</p>
+            <h2 className="text-lg font-semibold text-foreground">3. Vercel Style Mockup (using CgSimpleTable)</h2>
+            <p className="text-sm text-muted-foreground">The exact rich UI from your screenshot, built using the newly renamed CgSimpleTable component.</p>
           </div>
           
-          <VercelTable 
+          <CgSimpleTable 
             columns={deploymentsCols} 
             rows={deploymentsData as any} 
             className="border-zinc-800 bg-[#0a0a0a]" 
