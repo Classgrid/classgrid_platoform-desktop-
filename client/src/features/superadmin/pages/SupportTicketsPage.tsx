@@ -45,6 +45,7 @@ import {
   useSupportTickets,
   useUpdateTicket,
 } from "../queries/useSupportTickets";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import type {
   SupportTicket,
   TicketStatus,
@@ -281,6 +282,8 @@ export function SupportTicketsPage() {
   const replySentTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
 
+  const { data: currentUser } = useCurrentUser();
+
   const { data, isLoading, isError, refetch, isFetching } = useSupportTickets({
     status: statusFilter || undefined,
     priority: priorityFilter || undefined,
@@ -502,7 +505,10 @@ export function SupportTicketsPage() {
                     </div>
                   ),
                   status: (
-                    <div className="flex items-center gap-2">
+                    <div 
+                      className="flex items-center gap-2 w-fit cursor-default"
+                      title={`Since ${fmtDateTime(ticket.createdAt)}`}
+                    >
                       <span
                         className={`h-2 w-2 rounded-full ${statusColor(
                           ticket.status
@@ -530,7 +536,6 @@ export function SupportTicketsPage() {
                     <div className="flex flex-col items-start gap-1.5">
                       <span 
                         className="text-xs text-muted-foreground cursor-default"
-                        title={fmtDateTime(ticket.createdAt)}
                       >
                         {getRelativeTime(ticket.createdAt)}
                       </span>
@@ -539,10 +544,14 @@ export function SupportTicketsPage() {
                           className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border bg-card text-[10px] font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors"
                           title={`Assigned to ${ticket.assignedTo.name}`}
                         >
-                          <div
-                            className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-white font-bold text-[8px] ${getAvatarColor(ticket.assignedTo.name)}`}
-                          >
-                            {getInitials(ticket.assignedTo.name)}
+                          <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                            {currentUser?.profilePicture ? (
+                              <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[8px] ${getAvatarColor(ticket.assignedTo.name)}`}>
+                                {getInitials(ticket.assignedTo.name)}
+                              </div>
+                            )}
                           </div>
                           <span>{ticket.assignedTo.name}</span>
                         </div>
