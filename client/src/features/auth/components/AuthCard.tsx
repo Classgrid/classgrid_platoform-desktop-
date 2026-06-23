@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Button } from "@/components/shadcn/button";
-import { Input } from "@/components/shadcn/input";
-import { Separator } from "@/components/shadcn/separator";
+import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
+import { Separator } from "@/components/marketing_ui/separator";
 import { cn } from "@/lib/utils";
 
 import { checkEmailForLogin, getGoogleAuthUrl, loginWithPassword, resendDeviceOtp, verifyDeviceOtp } from "../api";

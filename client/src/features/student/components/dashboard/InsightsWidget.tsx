@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/marketing_ui/card";
 import { StudentAnalytics } from "../../queries/useStudentDashboard";
 import { Lightbulb, TrendingUp, TrendingDown } from "lucide-react";
-import { Badge } from "@/components/shadcn/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 
 export function InsightsWidget({ data }: { data?: StudentAnalytics }) {
   if (!data) return null;

@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
-import { Progress } from "@/components/shadcn/progress";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/marketing_ui/card";
+import { Progress } from "@/components/marketing_ui/progress";
 import { Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OnboardingProgress } from "../../queries/useStudentDashboard";

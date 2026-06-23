@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/shadcn/card";
+import { Card, CardContent } from "@/components/marketing_ui/card";
 import { Sparkles, Activity } from "lucide-react";
 import { AiSummary } from "../../queries/useStudentDashboard";
 

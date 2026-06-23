@@ -2,8 +2,8 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
 
-import { Button } from "@/components/shadcn/button";
-import { Input } from "@/components/shadcn/input";
+import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { cn } from "@/lib/utils";
 
 import { requestPasswordReset } from "../api";

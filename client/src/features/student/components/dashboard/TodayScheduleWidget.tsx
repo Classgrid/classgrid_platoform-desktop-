@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/shadcn/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { TimetableSlot } from "../../queries/useStudentDashboard";
 import { Clock, MapPin, Sparkles } from "lucide-react";
-import { Badge } from "@/components/shadcn/badge";
+import { Badge } from "@/components/marketing_ui/badge";
 
 export function TodayScheduleWidget({ schedule, day }: { schedule?: TimetableSlot[], day?: string }) {
   if (!schedule) return null;

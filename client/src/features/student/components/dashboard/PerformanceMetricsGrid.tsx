@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/marketing_ui/card";
 import { CheckCircle, FileText, BookOpen, Mic } from "lucide-react";
 import { StudentAnalytics } from "../../queries/useStudentDashboard";
-import { Progress } from "@/components/shadcn/progress";
+import { Progress } from "@/components/marketing_ui/progress";
 
 export function PerformanceMetricsGrid({ data }: { data?: StudentAnalytics }) {
   if (!data) return null;

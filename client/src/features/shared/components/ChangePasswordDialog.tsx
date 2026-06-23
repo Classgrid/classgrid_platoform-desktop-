@@ -4,8 +4,8 @@ import { Lock } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { CgButton } from "@/components/classgrid/Button";
 import { CgFieldGroup } from "@/components/classgrid/CgFieldGroup";
-import { Input } from "@/components/shadcn/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/shadcn/dialog";
+import { Input } from "@/components/marketing_ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 type ChangePasswordDialogProps = {

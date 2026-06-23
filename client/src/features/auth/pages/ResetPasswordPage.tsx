@@ -2,8 +2,8 @@ import { type FormEvent, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole } from "lucide-react";
 
-import { Button } from "@/components/shadcn/button";
-import { Input } from "@/components/shadcn/input";
+import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { cn } from "@/lib/utils";
 
 import { resetPasswordWithToken } from "../api";

@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/shadcn/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/shadcn/card";
+import { Skeleton } from "@/components/marketing_ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/marketing_ui/card";
 
 export function DashboardSkeleton() {
   return (
