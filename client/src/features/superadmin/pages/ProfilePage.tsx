@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
-import { CgAvatar } from "@/components/classgrid/Avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
+import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
@@ -180,7 +181,7 @@ export function ProfilePage() {
     <div className="cg-profile-container">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader size={36} className="animate-spin text-primary" />
+          <Spinner size="lg" />
           <p className="text-muted-foreground font-medium">Syncing profile data...</p>
         </div>
       ) : (
@@ -201,11 +202,10 @@ export function ProfilePage() {
                 className="relative -mt-[80px] sm:-mt-[100px] mb-4 cursor-pointer group" 
                 onClick={() => fileInputRef.current?.click()}
               >
-                <CgAvatar 
-                  name={form.name} 
-                  src={form.profilePicture} 
-                  className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg" 
-                />
+                <Avatar className="w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] border-[4px] border-white dark:border-[#111111] shadow-lg">
+                  <AvatarImage src={form.profilePicture} alt={form.name} />
+                  <AvatarFallback className="text-4xl bg-primary/10 text-primary">{form.name?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
                 {/* Remove the separate camera button so the entire avatar acts as the button */}
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
               </div>

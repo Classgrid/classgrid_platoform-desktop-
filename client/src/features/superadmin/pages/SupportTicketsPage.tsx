@@ -18,11 +18,9 @@ import {
   X,
 } from "lucide-react";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { StatCard } from "@/components/classgrid/MetricCard";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgAvatar } from "@/components/classgrid/Avatar";
-import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
-import { Button } from "@/components/marketing_ui/button";
+import { RecentActivityTable } from "@/components/marketing_ui/data-table";`nimport { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
@@ -399,22 +397,22 @@ export function SupportTicketsPage() {
 
         {/* Metrics */}
         <div className="cg-stats-grid">
-          <CgMetricCard
+          <StatCard
             title="Open"
             value={isLoading ? "—" : displayStats.open}
             icon={<AlertCircle size={16} />}
           />
-          <CgMetricCard
+          <StatCard
             title="In Progress"
             value={isLoading ? "—" : displayStats.inProgress}
             icon={<Clock size={16} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Resolved"
             value={isLoading ? "—" : displayStats.resolved}
             icon={<CheckCircle2 size={16} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Loaded"
             value={isLoading ? "—" : displayStats.total}
             icon={<MessageSquare size={16} />}
