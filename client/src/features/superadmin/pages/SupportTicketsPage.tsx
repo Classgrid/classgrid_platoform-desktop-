@@ -92,11 +92,25 @@ function fmtDateTime(iso?: string) {
   if (isNaN(d.getTime())) return "-";
   return d.toLocaleString("en-IN", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function getRelativeTime(iso?: string) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "-";
+  const seconds = Math.floor((new Date().getTime() - d.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
 }
 
 function getRequester(ticket: SupportTicket) {
@@ -515,18 +529,21 @@ export function SupportTicketsPage() {
                   date: (
                     <div className="flex flex-col items-start gap-1.5">
                       <span 
-                        className="text-xs text-muted-foreground flex items-center gap-1.5 cursor-default"
-                        title={`Ticket created: ${fmtDateTime(ticket.createdAt)}`}
+                        className="text-xs text-muted-foreground cursor-default"
+                        title={fmtDateTime(ticket.createdAt)}
                       >
-                        <Clock className="w-3.5 h-3.5" />
-                        {fmtDateTime(ticket.createdAt)}
+                        {getRelativeTime(ticket.createdAt)}
                       </span>
                       {ticket.assignedTo && (
                         <div 
-                          className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 w-fit cursor-default"
+                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border bg-card text-[10px] font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors"
                           title={`Assigned to ${ticket.assignedTo.name}`}
                         >
-                          <ShieldCheck className="w-3 h-3" />
+                          <div
+                            className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-white font-bold text-[8px] ${getAvatarColor(ticket.assignedTo.name)}`}
+                          >
+                            {getInitials(ticket.assignedTo.name)}
+                          </div>
                           <span>{ticket.assignedTo.name}</span>
                         </div>
                       )}
