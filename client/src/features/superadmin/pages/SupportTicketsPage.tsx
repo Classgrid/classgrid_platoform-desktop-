@@ -244,6 +244,7 @@ const STATUS_CHANGE_OPTIONS: TicketStatus[] = [
   "closed",
 ];
 
+const ticketCols = [
   { key: "requester", header: "Requester", width: "w-[220px]" },
   { key: "subject", header: "Subject" },
   { key: "status", header: "Status", width: "w-[130px]" },
