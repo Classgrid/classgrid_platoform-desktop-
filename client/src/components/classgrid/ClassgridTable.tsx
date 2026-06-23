@@ -49,7 +49,7 @@ export function ClassgridTable({ columns, rows, className }: ClassgridTableProps
             <tr
               key={rowIdx}
               className={cn(
-                "transition-colors hover:bg-muted/30",
+                "transition-colors hover:bg-muted/60",
                 rowIdx < rows.length - 1 && "border-b border-border/60"
               )}
             >
