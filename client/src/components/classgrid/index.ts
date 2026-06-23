@@ -32,3 +32,4 @@ export * from './Switch';
 export * from './Select';
 export * from './Input';
 export const ExportMenu = () => null;
+export const Button = () => null; export const Avatar = () => null; export const CgAvatar = () => null; export const CgTabs = () => null; export const CgTabList = () => null; export const CgTabTrigger = () => null; export const CgModalContent = () => null; export const CgModalFooter = () => null;
