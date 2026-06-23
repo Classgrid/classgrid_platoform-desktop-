@@ -20,6 +20,12 @@ import { Slider } from "@/components/marketing_ui/slider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/marketing_ui/alert";
 import { Progress } from "@/components/marketing_ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/marketing_ui/alert-dialog";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/marketing_ui/drawer";
+import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "@/components/marketing_ui/menubar";
+import { ScrollArea } from "@/components/marketing_ui/scroll-area";
+import { Separator } from "@/components/marketing_ui/separator";
+import { Calendar } from "@/components/marketing_ui/calendar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/marketing_ui/accordion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/marketing_ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/marketing_ui/radio-group";
@@ -461,6 +467,131 @@ export function SandboxPage() {
           </div>
         </div>
 
+        {/* 31 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">31. Alert Dialog</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">Show Dialog</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account
+                    and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
+        {/* 32 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">32. Drawer</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="outline">Open Drawer</Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+                  <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                </DrawerHeader>
+                <DrawerFooter>
+                  <Button>Submit</Button>
+                  <DrawerClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        </div>
+
+        {/* 33 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">33. Menubar</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Menubar>
+              <MenubarMenu>
+                <MenubarTrigger>File</MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem>
+                    New Tab <MenubarShortcut>?T</MenubarShortcut>
+                  </MenubarItem>
+                  <MenubarItem>New Window</MenubarItem>
+                  <MenubarSeparator />
+                  <MenubarItem>Share</MenubarItem>
+                  <MenubarSeparator />
+                  <MenubarItem>Print</MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+              <MenubarMenu>
+                <MenubarTrigger>Edit</MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem>Undo</MenubarItem>
+                  <MenubarItem>Redo</MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
+          </div>
+        </div>
+
+        {/* 34 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">34. Scroll Area</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4">
+              Jokester began sneaking into the castle in the middle of the night and leaving
+              jokes all over the place: under the king's pillow, in his soup, even in the
+              royal toilet. The king was furious, but he couldn't seem to catch Jokester.
+              And the worst part was, the jokes were actually really funny.
+            </ScrollArea>
+          </div>
+        </div>
+
+        {/* 35 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">35. Separator</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium leading-none">Radix Primitives</h4>
+                <p className="text-sm text-muted-foreground">
+                  An open-source UI component library.
+                </p>
+              </div>
+              <Separator className="my-4" />
+              <div className="flex h-5 items-center space-x-4 text-sm">
+                <div>Blog</div>
+                <Separator orientation="vertical" />
+                <div>Docs</div>
+                <Separator orientation="vertical" />
+                <div>Source</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 36 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">36. Calendar</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm flex justify-center">
+            <Calendar
+              mode="single"
+              selected={new Date()}
+              className="rounded-md border"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
