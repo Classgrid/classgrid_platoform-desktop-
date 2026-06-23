@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { Star, MessageSquareQuote, RefreshCw, TrendingUp } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { useReviews } from "../queries/useReviews";
 import type { Review } from "../services/superAdminApi";
 
@@ -165,29 +165,29 @@ export function ReviewsPage() {
 
       {/* Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Total Reviews"
           value={isLoading ? "—" : stats.total}
           icon={<MessageSquareQuote size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Average Rating"
           value={isLoading ? "—" : stats.avg}
           icon={<Star size={16} />}
           trend={{ value: 4, label: "vs last month" }}
         />
-        <CgMetricCard
+        <StatCard
           title="Publicly Visible"
           value={isLoading ? "—" : stats.publicCount}
         />
-        <CgMetricCard
+        <StatCard
           title="With Suggestions"
           value={isLoading ? "—" : stats.withSuggestions}
         />
       </div>
 
       {/* Table */}
-      <CgSectionPanel
+      <SectionPanel
         title="Recent Feedback"
         description="All reviews submitted across the platform."
         noPadding
@@ -209,14 +209,14 @@ export function ReviewsPage() {
             <Button variant="outline" onClick={() => refetch()}>Retry</Button>
           </div>
         ) : (
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={filtered}
             pageSize={10}
             emptyMessage={isLoading ? "Loading reviews…" : "No reviews match your search."}
           />
         )}
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }

@@ -2,9 +2,9 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../services/superAdminApi";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { Badge } from "@/components/marketing_ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { IndianRupee, TrendingUp, TrendingDown, RefreshCw, Users, CreditCard } from "lucide-react";
@@ -104,24 +104,24 @@ export function RevenuePage() {
       />
 
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Monthly Recurring Revenue (MRR)"
           value={isLoading ? "—" : formatCurrency(revenueData.mrr)}
           icon={<TrendingUp size={16} />}
           trend={{ value: 12, label: "from last month" }}
         />
-        <CgMetricCard
+        <StatCard
           title="Total Platform Income"
           value={isLoading ? "—" : formatCurrency(revenueData.totalIncome)}
           icon={<IndianRupee size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Lost / Pending Revenue"
           value={isLoading ? "—" : formatCurrency(revenueData.lostRevenue)}
           icon={<TrendingDown size={16} />}
           trend={{ value: -5, label: "from last month" }}
         />
-        <CgMetricCard
+        <StatCard
           title="Active Paid Orgs"
           value={isLoading ? "—" : revenueData.activeSubs}
           icon={<Users size={16} />}
@@ -129,7 +129,7 @@ export function RevenuePage() {
       </div>
 
       <div style={{ marginTop: "1.5rem" }}>
-        <CgSectionPanel
+        <SectionPanel
           title="Recent Transactions"
           description="Latest payments from organizations for platform subscriptions."
           noPadding
@@ -141,7 +141,7 @@ export function RevenuePage() {
               </div>
             </div>
           ) : (
-            <CgDataTable
+            <DataTable
               columns={columns}
               data={revenueData.recentTransactions}
               pageSize={10}
@@ -151,7 +151,7 @@ export function RevenuePage() {
               emptyMessage="No transactions available."
             />
           )}
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
     </div>
   );

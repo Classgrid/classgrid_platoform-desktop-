@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import { CgPageHeader }   from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { CgMetricCard }   from "@/components/classgrid/MetricCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
@@ -388,32 +388,32 @@ export function OrgDetailPage() {
       </div>
 
       {/* ── Usage Metrics ───────────────────────────────────────────────── */}
-      <CgSectionPanel
+      <SectionPanel
         title="Usage Metrics"
         description="Live counts pulled from the database and refreshed on every page load."
       >
         <div className="cg-stats-grid">
-          <CgMetricCard
+          <StatCard
             title="Total Students"
             value={usage?.totalStudents ?? 0}
             icon={<GraduationCap size={15} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Teachers"
             value={usage?.totalTeachers ?? 0}
             icon={<Users size={15} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Admins"
             value={usage?.totalAdmins ?? 0}
             icon={<ShieldCheck size={15} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Total Classes"
             value={usage?.totalClasses ?? 0}
             icon={<BookOpen size={15} />}
           />
-          <CgMetricCard
+          <StatCard
             title="Emails Sent"
             value={usage?.emailsSent ?? 0}
             icon={<Mail size={15} />}
@@ -450,12 +450,12 @@ export function OrgDetailPage() {
             label={`${storagePct.toFixed(0)}%`}
           />
         </div>
-      </CgSectionPanel>
+      </SectionPanel>
 
       {/* ── Billing Config + Estimate ────────────────────────────────────── */}
       <div className="cg-two-col">
         {/* Rate Config Panel */}
-        <CgSectionPanel
+        <SectionPanel
           title="Billing Rate Config"
           description="Set custom pricing rates for this organization. Leave at 0 if not yet configured."
           actions={
@@ -497,10 +497,10 @@ export function OrgDetailPage() {
               No billing rates set yet. Click <strong>Edit Rates</strong> to configure pricing for this org.
             </p>
           )}
-        </CgSectionPanel>
+        </SectionPanel>
 
         {/* Billing Estimate Panel */}
-        <CgSectionPanel
+        <SectionPanel
           title="Monthly Bill Estimate"
           description="Calculated from current usage × your configured rates."
         >
@@ -570,12 +570,12 @@ export function OrgDetailPage() {
               </Button>
             </>
           )}
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       {/* ── Subscription Details + Quick Actions ────────────────────────── */}
       <div className="cg-two-col">
-        <CgSectionPanel title="Subscription Details" description="Current plan, limits, and feature access.">
+        <SectionPanel title="Subscription Details" description="Current plan, limits, and feature access.">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
             {[
               { label: "Plan", value: <Badge variant={planVariant(sub?.plan)}>{sub?.plan ?? "demo"}</Badge> },
@@ -591,9 +591,9 @@ export function OrgDetailPage() {
               </div>
             ))}
           </div>
-        </CgSectionPanel>
+        </SectionPanel>
 
-        <CgSectionPanel title="Quick Actions">
+        <SectionPanel title="Quick Actions">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <Button variant="outline" style={{ justifyContent: "flex-start" }} asChild>
               <Link to={`/superadmin/billing`}>
@@ -616,7 +616,7 @@ export function OrgDetailPage() {
               </Link>
             </Button>
           </div>
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       {/* Suspend Confirmation Dialog */}

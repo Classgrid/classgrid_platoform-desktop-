@@ -6,11 +6,11 @@ import {
 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { apiClient } from "@/lib/apiClient";
@@ -151,7 +151,7 @@ export function SystemHealthPage() {
       />
 
       {/* Service Status */}
-      <CgSectionPanel title="Service Status" description="Live connectivity of core platform services.">
+      <SectionPanel title="Service Status" description="Live connectivity of core platform services.">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", padding: "0.5rem 0" }}>
           {[
             { label: "API Server", up: serverUp, icon: <Server size={15} /> },
@@ -178,25 +178,25 @@ export function SystemHealthPage() {
             </div>
           ))}
         </div>
-      </CgSectionPanel>
+      </SectionPanel>
 
       {/* Metrics Grid */}
       <div className="cg-stats-grid" style={{ marginTop: "1.25rem" }}>
-        <CgMetricCard title="Total Users" value={metricsLoading ? "—" : m?.users?.total ?? 0} icon={<Activity size={15} />}
+        <StatCard title="Total Users" value={metricsLoading ? "—" : m?.users?.total ?? 0} icon={<Activity size={15} />}
           trend={{ value: m?.users?.new7d ?? 0, label: "new this week" }} />
-        <CgMetricCard title="Active Orgs" value={metricsLoading ? "—" : m?.orgs?.active ?? 0} icon={<CheckCircle2 size={15} />}
+        <StatCard title="Active Orgs" value={metricsLoading ? "—" : m?.orgs?.active ?? 0} icon={<CheckCircle2 size={15} />}
           trend={{ value: m?.orgs?.new7d ?? 0, label: "new this week" }} />
-        <CgMetricCard title="Suspended Orgs" value={metricsLoading ? "—" : m?.orgs?.suspended ?? 0} icon={<AlertTriangle size={15} />} />
-        <CgMetricCard title="Email Queue" value={metricsLoading ? "—" : m?.emails?.pending ?? 0} icon={<Mail size={15} />} />
-        <CgMetricCard title="Errors (24h)" value={metricsLoading ? "—" : m?.logs?.errors24h ?? 0} icon={<XCircle size={15} />} />
-        <CgMetricCard title="Warnings (24h)" value={metricsLoading ? "—" : m?.logs?.warnings24h ?? 0} icon={<AlertCircle size={15} />} />
-        <CgMetricCard title="Memory Usage" value={metricsLoading ? "—" : `${m?.memoryMB ?? 0} MB`} icon={<MemoryStick size={15} />} />
-        <CgMetricCard title="Uptime" value={metricsLoading ? "—" : formatUptime(m?.uptime ?? 0)} icon={<Clock size={15} />} />
+        <StatCard title="Suspended Orgs" value={metricsLoading ? "—" : m?.orgs?.suspended ?? 0} icon={<AlertTriangle size={15} />} />
+        <StatCard title="Email Queue" value={metricsLoading ? "—" : m?.emails?.pending ?? 0} icon={<Mail size={15} />} />
+        <StatCard title="Errors (24h)" value={metricsLoading ? "—" : m?.logs?.errors24h ?? 0} icon={<XCircle size={15} />} />
+        <StatCard title="Warnings (24h)" value={metricsLoading ? "—" : m?.logs?.warnings24h ?? 0} icon={<AlertCircle size={15} />} />
+        <StatCard title="Memory Usage" value={metricsLoading ? "—" : `${m?.memoryMB ?? 0} MB`} icon={<MemoryStick size={15} />} />
+        <StatCard title="Uptime" value={metricsLoading ? "—" : formatUptime(m?.uptime ?? 0)} icon={<Clock size={15} />} />
       </div>
 
       {/* Email Stats */}
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Email Queue Stats" description="Status of all emails in the outgoing queue.">
+        <SectionPanel title="Email Queue Stats" description="Status of all emails in the outgoing queue.">
           <div style={{ display: "flex", gap: "2rem", padding: "0.75rem 0", flexWrap: "wrap" }}>
             {[
               { label: "Sent", count: m?.emails?.sent ?? 0, color: "hsl(var(--success))" },
@@ -209,12 +209,12 @@ export function SystemHealthPage() {
               </div>
             ))}
           </div>
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       {/* Error Logs */}
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Error Logs" description="Recent system errors and warnings from the platform." noPadding
+        <SectionPanel title="Error Logs" description="Recent system errors and warnings from the platform." noPadding
           actions={
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <CgSearchableSelect
@@ -233,7 +233,7 @@ export function SystemHealthPage() {
           <div style={{ padding: "0.75rem 1rem" }}>
             <CgFilterToolbar searchValue={logSearch} onSearchChange={setLogSearch} searchPlaceholder="Search messages…" />
           </div>
-          <CgDataTable
+          <DataTable
             columns={logColumns}
             data={logs}
             isLoading={logsLoading}
@@ -243,7 +243,7 @@ export function SystemHealthPage() {
             emptyDescription="The system is clean — no matching log entries."
             emptyMessage="No error logs."
           />
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
     </div>
   );

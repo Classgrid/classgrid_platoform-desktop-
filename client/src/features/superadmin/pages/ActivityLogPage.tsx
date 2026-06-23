@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { Shield, RefreshCw, User, Building2, Clock, Filter } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { formatDate, formatTime } from "@/utils/dateUtils";
@@ -236,10 +236,10 @@ export function ActivityLogPage() {
 
       {/* Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Events" value={isLoading ? "—" : stats.total} icon={<Shield size={16} />} />
-        <CgMetricCard title="Super Admin Actions" value={isLoading ? "—" : stats.superAdminActions} icon={<User size={16} />} />
-        <CgMetricCard title="High-Risk Events" value={isLoading ? "—" : stats.danger} icon={<Building2 size={16} />} />
-        <CgMetricCard title="Warning Events" value={isLoading ? "—" : stats.warning} icon={<Clock size={16} />} />
+        <StatCard title="Total Events" value={isLoading ? "—" : stats.total} icon={<Shield size={16} />} />
+        <StatCard title="Super Admin Actions" value={isLoading ? "—" : stats.superAdminActions} icon={<User size={16} />} />
+        <StatCard title="High-Risk Events" value={isLoading ? "—" : stats.danger} icon={<Building2 size={16} />} />
+        <StatCard title="Warning Events" value={isLoading ? "—" : stats.warning} icon={<Clock size={16} />} />
       </div>
 
       {/* Filters */}
@@ -280,7 +280,7 @@ export function ActivityLogPage() {
       />
 
       {/* Table */}
-      <CgSectionPanel title="Event Timeline" description="Most recent actions first." noPadding>
+      <SectionPanel title="Event Timeline" description="Most recent actions first." noPadding>
         {isError ? (
           <div className="cg-alert cg-alert--danger" style={{ margin: "1rem" }}>
             <div className="cg-alert__body">
@@ -289,7 +289,7 @@ export function ActivityLogPage() {
             <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>Retry</button>
           </div>
         ) : (
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={filtered}
             pageSize={15}
@@ -302,7 +302,7 @@ export function ActivityLogPage() {
             }
           />
         )}
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import { AlertTriangle, Mail, RefreshCw, Send, XCircle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgTabs, CgTabList, CgTabTrigger, CgTabContent } from "@/components/classgrid/Tabs";
 import { formatDate, formatTime } from "@/utils/dateUtils";
 import { useErrorLogs, useEmailLogs, useResendEmail } from "../queries/useAlerts";
@@ -170,23 +170,23 @@ export function AlertsPage() {
 
       {/* Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Recent Errors"
           value={errLoading ? "—" : errors.length}
           icon={<AlertTriangle size={16} />}
           trend={{ value: errors.length > 10 ? 1 : 0, label: "Needs attention" }}
         />
-        <CgMetricCard
+        <StatCard
           title="Emails Queued"
           value={emailLoading ? "—" : emailData?.totalDocs ?? 0}
           icon={<Mail size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Email Failures"
           value={emailLoading ? "—" : emails.filter(e => e.status === "failed").length}
           icon={<XCircle size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Emails Sent"
           value={emailLoading ? "—" : emails.filter(e => e.status === "sent").length}
           icon={<Send size={16} />}
@@ -202,25 +202,25 @@ export function AlertsPage() {
           </CgTabList>
 
           <CgTabContent value="system-errors">
-            <CgSectionPanel title="Application Errors" description="Server-side exceptions and unhandled rejections." noPadding>
-              <CgDataTable
+            <SectionPanel title="Application Errors" description="Server-side exceptions and unhandled rejections." noPadding>
+              <DataTable
                 columns={errorColumns}
                 data={errors}
                 pageSize={10}
                 emptyMessage={errLoading ? "Loading errors…" : "No recent system errors found. System is healthy."}
               />
-            </CgSectionPanel>
+            </SectionPanel>
           </CgTabContent>
 
           <CgTabContent value="email-logs">
-            <CgSectionPanel title="Email Worker Logs" description="Track the status of transactional and background emails." noPadding>
-              <CgDataTable
+            <SectionPanel title="Email Worker Logs" description="Track the status of transactional and background emails." noPadding>
+              <DataTable
                 columns={emailColumns}
                 data={emails}
                 pageSize={10}
                 emptyMessage={emailLoading ? "Loading logs…" : "No email logs found."}
               />
-            </CgSectionPanel>
+            </SectionPanel>
           </CgTabContent>
         </CgTabs>
       </div>
