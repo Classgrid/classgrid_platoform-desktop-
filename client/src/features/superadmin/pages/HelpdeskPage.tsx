@@ -175,7 +175,7 @@ function ChatPanel({
           </div>
           <div className="cg-helpdesk__msg-bubble">
             <div className="cg-helpdesk__msg-sender">
-              {ticket.submitterName} <span className="cg-helpdesk__msg-role">· {ticket.category}</span>
+              {ticket.submitterName} <span className="cg-helpdesk__msg-role">· {CATEGORY_LABELS[ticket.category] || ticket.category}</span>
             </div>
             <RichSupportContent html={ticket.message} />
             <span className="cg-helpdesk__msg-time">{fmtTime(ticket.createdAt)}</span>
@@ -237,6 +237,37 @@ function ChatPanel({
 }
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
+
+const CATEGORY_LABELS: Record<string, string> = {
+  login: "Login & Authentication Issues",
+  dashboard: "Dashboard Not Loading",
+  profile: "Profile & Settings",
+  attendance: "Attendance & Biometric",
+  fee: "Fee Payment & Receipts",
+  examination: "Examination & Results",
+  timetable: "Timetable & Scheduling",
+  assignments: "Assignments & Submissions",
+  "live-classes": "Live Classes & Video",
+  chat: "Chat & Notifications",
+  admission: "Admission & Enrollment",
+  library: "Library & Resources",
+  documents: "Documents & Uploads",
+  erp: "ERP Module Issues",
+  ai: "AI Assistant",
+  bug: "Bug Report",
+  feature: "Feature Request",
+  other: "Other",
+  // Inquiries
+  technical: "Technical Support / ERP / AI / API",
+  billing: "Billing & Subscription",
+  academics: "Academics / Attendance / Admissions",
+  exams: "Examination Systems",
+  communication: "Communication & Scheduling",
+  finance: "HR & Payroll / Finance",
+  getting_started: "Getting Started",
+  account_security: "Account & Security",
+  general: "General Inquiry",
+};
 
 export function HelpdeskPage() {
   const qc = useQueryClient();
