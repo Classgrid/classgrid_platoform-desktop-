@@ -5,7 +5,7 @@ import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { DeploymentsTable } from "@/components/classgrid/DeploymentsTable";
+import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
 
@@ -68,14 +68,14 @@ export function SandboxPage() {
           <CgDataTable columns={cgCols} data={genericData} pageSize={5} />
         </div>
 
-        {/* --- 3. DeploymentsTable --- */}
+        {/* --- 3. RecentActivityTable --- */}
         <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">3. Vercel Style Mockup (DeploymentsTable)</h2>
-            <p className="text-sm text-muted-foreground">The exact rich UI from your screenshot, now completely encapsulated in its own component.</p>
+            <h2 className="text-lg font-semibold text-foreground">3. Recent Activity (RecentActivityTable)</h2>
+            <p className="text-sm text-muted-foreground">The exact rich visual UI from before, but populated with Classgrid-specific data (Users, Roles, Actions).</p>
           </div>
           
-          <DeploymentsTable />
+          <RecentActivityTable />
         </div>
 
         {/* --- CgSwitch --- */}
