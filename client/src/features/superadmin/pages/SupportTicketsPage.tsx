@@ -650,7 +650,7 @@ export function SupportTicketsPage() {
       </div>
 
       {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* Left: Message Thread */}
         <div className="lg:col-span-2 xl:col-span-3 space-y-0">
           {selectedMessages.map((msg, idx) => (
@@ -851,7 +851,7 @@ export function SupportTicketsPage() {
         </div>
 
         {/* Right: Metadata Sidebar */}
-        <div className="lg:col-span-1 lg:sticky lg:top-28">
+        <div className="lg:col-span-1 lg:self-start lg:sticky lg:top-28">
           <div className="bg-card border border-border rounded-lg p-5">
             <dl className="space-y-4">
               <MetaRow
