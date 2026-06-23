@@ -553,7 +553,16 @@ export function SupportTicketsPage() {
                               </div>
                             </TooltipTrigger>
                             <TooltipContent side="top">
-                              Since {fmtDateTime(ticket.createdAt)}
+                              {(() => {
+                                const adminReply = 
+                                  ticket.replies?.slice().reverse().find(r => r.authorName === ticket.assignedTo?.name) ||
+                                  ticket.messages?.slice().reverse().find(m => m.author === ticket.assignedTo?.name);
+                                
+                                if (adminReply) {
+                                  return `Replied on ${fmtDateTime(adminReply.createdAt || adminReply.date)}`;
+                                }
+                                return `Assigned on ${fmtDateTime(ticket.updatedAt)}`;
+                              })()}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
