@@ -24,6 +24,7 @@ import { CgAvatar } from "@/components/classgrid/Avatar";
 import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Breadcrumb,
@@ -505,10 +506,7 @@ export function SupportTicketsPage() {
                     </div>
                   ),
                   status: (
-                    <div 
-                      className="flex items-center gap-2 w-fit cursor-default"
-                      title={`Since ${fmtDateTime(ticket.createdAt)}`}
-                    >
+                    <div className="flex items-center gap-2">
                       <span
                         className={`h-2 w-2 rounded-full ${statusColor(
                           ticket.status
@@ -533,28 +531,32 @@ export function SupportTicketsPage() {
                     </span>
                   ),
                   date: (
-                    <div className="flex flex-col items-start gap-1.5">
-                      <span 
-                        className="text-xs text-muted-foreground cursor-default"
-                      >
+                    <div className="flex flex-col items-start gap-2">
+                      <span className="text-xs text-muted-foreground">
                         {getRelativeTime(ticket.createdAt)}
                       </span>
                       {ticket.assignedTo && (
-                        <div 
-                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-border bg-card text-[10px] font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors"
-                          title={`Assigned to ${ticket.assignedTo.name}`}
-                        >
-                          <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                            {currentUser?.profilePicture ? (
-                              <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[8px] ${getAvatarColor(ticket.assignedTo.name)}`}>
-                                {getInitials(ticket.assignedTo.name)}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                                  {currentUser?.profilePicture ? (
+                                    <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[9px] ${getAvatarColor(ticket.assignedTo.name)}`}>
+                                      {getInitials(ticket.assignedTo.name)}
+                                    </div>
+                                  )}
+                                </div>
+                                <span>{ticket.assignedTo.name}</span>
                               </div>
-                            )}
-                          </div>
-                          <span>{ticket.assignedTo.name}</span>
-                        </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              Since {fmtDateTime(ticket.createdAt)}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                     </div>
                   ),
