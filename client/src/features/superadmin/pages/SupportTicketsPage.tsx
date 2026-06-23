@@ -244,12 +244,12 @@ const STATUS_CHANGE_OPTIONS: TicketStatus[] = [
   "closed",
 ];
 
-const ticketCols = [
-  { key: "requester", header: "Requester", width: "w-[250px]" },
+  { key: "requester", header: "Requester", width: "w-[220px]" },
   { key: "subject", header: "Subject" },
-  { key: "status", header: "Status", width: "w-[150px]" },
-  { key: "priority", header: "Priority", width: "w-[120px]" },
-  { key: "time", header: "", width: "w-[180px]" },
+  { key: "status", header: "Status", width: "w-[130px]" },
+  { key: "priority", header: "Priority", width: "w-[100px]" },
+  { key: "date", header: "Date", width: "w-[150px]" },
+  { key: "action", header: "", width: "w-[80px]" },
 ];
 
 export function SupportTicketsPage() {
@@ -511,31 +511,31 @@ export function SupportTicketsPage() {
                       {ticket.priority}
                     </span>
                   ),
-                  time: (
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {fmtDateTime(ticket.createdAt)}
+                  date: (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {fmtDateTime(ticket.createdAt)}
+                      </span>
+                      {ticket.assignedTo && (
+                        <span className="text-[10px] text-emerald-500 font-medium">
+                          → {ticket.assignedTo.name}
                         </span>
-                        {ticket.assignedTo && (
-                          <span className="text-[10px] text-emerald-500 font-medium">
-                            → {ticket.assignedTo.name}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTicket(ticket);
-                          setPendingStatus(null);
-                        }}
-                      >
-                        Read
-                      </Button>
+                      )}
                     </div>
+                  ),
+                  action: (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTicket(ticket);
+                        setPendingStatus(null);
+                      }}
+                    >
+                      Read
+                    </Button>
                   ),
                 };
               })}
