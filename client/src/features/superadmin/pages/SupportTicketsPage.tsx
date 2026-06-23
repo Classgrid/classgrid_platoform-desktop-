@@ -241,8 +241,6 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 
 const PRIORITY_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All Priority" },
-  { value: "critical", label: "Critical" },
-  { value: "urgent", label: "Urgent" },
   { value: "high", label: "High" },
   { value: "medium", label: "Medium" },
   { value: "low", label: "Low" },
