@@ -116,6 +116,14 @@ export default {
   },
   plugins: [
     tailwindcssAnimate,
+    function({ addVariant }) {
+      addVariant('data-checked', '&[data-checked]');
+      addVariant('data-unchecked', '&[data-unchecked]');
+      addVariant('data-open', '&[data-open]');
+      addVariant('data-closed', '&[data-closed]');
+      addVariant('data-disabled', '&[data-disabled]');
+      addVariant('data-pressed', '&[data-pressed]');
+    },
     require("@tailwindcss/typography"),
   ],
 }
