@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { Download, FileBarChart, Users, GraduationCap, Building2, RefreshCw } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgDatePicker } from "@/components/classgrid/DatePicker";
 import { useAuditData } from "../queries/useAudit";
 import { apiClient } from "@/lib/apiClient";
@@ -136,21 +136,21 @@ export function AuditPage() {
         <>
           {/* Enrollment Metrics */}
           <div className="cg-stats-grid">
-            <CgMetricCard
+            <StatCard
               title="Total Students"
               value={isLoading ? "—" : audit?.enrollment?.totalStudents ?? 0}
               icon={<Users size={16} />}
             />
-            <CgMetricCard
+            <StatCard
               title="Total Faculty"
               value={isLoading ? "—" : audit?.enrollment?.totalFaculty ?? 0}
               icon={<GraduationCap size={16} />}
             />
-            <CgMetricCard
+            <StatCard
               title="Student-Faculty Ratio"
               value={isLoading ? "—" : audit?.enrollment?.studentFacultyRatio ?? "0:1"}
             />
-            <CgMetricCard
+            <StatCard
               title="Classrooms"
               value={isLoading ? "—" : audit?.enrollment?.totalClassrooms ?? 0}
               icon={<Building2 size={16} />}
@@ -159,14 +159,14 @@ export function AuditPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem", marginTop: "1.5rem" }}>
             {/* Criterion 2: Academic Performance Table */}
-            <CgSectionPanel title="Criterion 2: Academic Performance" description="Aggregated pass rates and averages by classroom." noPadding>
-              <CgDataTable
+            <SectionPanel title="Criterion 2: Academic Performance" description="Aggregated pass rates and averages by classroom." noPadding>
+              <DataTable
                 columns={perfColumns}
                 data={academicData}
                 pageSize={5}
                 emptyMessage={isLoading ? "Aggregating data..." : "No academic records for this period."}
               />
-            </CgSectionPanel>
+            </SectionPanel>
           </div>
         </>
       )}

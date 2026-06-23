@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { FileText, Plus, RefreshCw, Send, History } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgModal, CgModalContent, CgModalFooter } from "@/components/classgrid/Modal";
 import { useChangelog, useCreateChangelog, useDeleteChangelog } from "../queries/useChangelog";
 import type { ChangelogEntry, ChangelogType } from "../services/superAdminApi";
@@ -179,20 +179,20 @@ export function ChangelogPage() {
 
       {/* Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Total Updates"
           value={isLoading ? "—" : stats.total}
           icon={<History size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="New Features"
           value={isLoading ? "—" : stats.features}
         />
-        <CgMetricCard
+        <StatCard
           title="Bug Fixes"
           value={isLoading ? "—" : stats.fixes}
         />
-        <CgMetricCard
+        <StatCard
           title="Live Published"
           value={isLoading ? "—" : stats.published}
           icon={<Send size={16} />}
@@ -200,7 +200,7 @@ export function ChangelogPage() {
       </div>
 
       {/* Table */}
-      <CgSectionPanel title="Update History" description="All release notes." noPadding>
+      <SectionPanel title="Update History" description="All release notes." noPadding>
         {isError ? (
           <div className="cg-alert cg-alert--danger">
             <div className="cg-alert__body">
@@ -211,14 +211,14 @@ export function ChangelogPage() {
             </button>
           </div>
         ) : (
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={entries}
             pageSize={10}
             emptyMessage={isLoading ? "Loading history…" : "No updates found."}
           />
         )}
-      </CgSectionPanel>
+      </SectionPanel>
 
       {/* Create Modal */}
       <CgModal open={isModalOpen} onOpenChange={setIsModalOpen}>

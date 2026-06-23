@@ -5,7 +5,7 @@ import { Save, Bell, Palette, Shield } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { Button } from "@/components/marketing_ui/button";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import "../styles/settings.css";
 
 type EmailPrefs = {

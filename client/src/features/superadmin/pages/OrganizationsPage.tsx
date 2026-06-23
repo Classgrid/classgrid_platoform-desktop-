@@ -5,11 +5,11 @@ import { Building2, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-r
 import { Link } from "react-router-dom";
 
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { formatDate } from "@/utils/dateUtils";
@@ -143,12 +143,12 @@ export function OrganizationsPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <CgMetricCard title="Total Organizations" value={isLoading ? "..." : stats.total} icon={<Building2 size={16} />} />
-        <CgMetricCard title="Active Organizations" value={isLoading ? "..." : stats.active} icon={<ShieldCheck size={16} />} />
-        <CgMetricCard title="Users In Orgs" value={isLoading ? "..." : stats.totalUsers} icon={<Users size={16} />} />
+        <StatCard title="Total Organizations" value={isLoading ? "..." : stats.total} icon={<Building2 size={16} />} />
+        <StatCard title="Active Organizations" value={isLoading ? "..." : stats.active} icon={<ShieldCheck size={16} />} />
+        <StatCard title="Users In Orgs" value={isLoading ? "..." : stats.totalUsers} icon={<Users size={16} />} />
       </div>
 
-      <CgSectionPanel
+      <SectionPanel
         title="Organizations"
         description="Search, inspect, and manage provisioned institutions."
         actions={
@@ -197,7 +197,7 @@ export function OrganizationsPage() {
           </div>
         ) : null}
 
-        <CgDataTable
+        <DataTable
           columns={columns}
           data={filteredOrgs}
           isLoading={isLoading}
@@ -227,7 +227,7 @@ export function OrganizationsPage() {
           }
           emptyMessage="No organizations found."
         />
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }

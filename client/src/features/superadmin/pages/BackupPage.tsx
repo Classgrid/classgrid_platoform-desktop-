@@ -8,11 +8,11 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 
@@ -189,10 +189,10 @@ export function BackupPage() {
 
       {/* Top Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Records" value={statsLoading ? "—" : formatCount(totalRecords)} icon={<Database size={15} />} />
-        <CgMetricCard title="Collections" value={statsLoading ? "—" : collections.length} icon={<Shield size={15} />} />
-        <CgMetricCard title="Memory" value={metricsLoading ? "—" : `${metrics?.memoryMB ?? 0} MB`} icon={<HardDrive size={15} />} />
-        <CgMetricCard title="Uptime" value={metricsLoading ? "—" : formatUptime(metrics?.uptime ?? 0)} icon={<Clock size={15} />} />
+        <StatCard title="Total Records" value={statsLoading ? "—" : formatCount(totalRecords)} icon={<Database size={15} />} />
+        <StatCard title="Collections" value={statsLoading ? "—" : collections.length} icon={<Shield size={15} />} />
+        <StatCard title="Memory" value={metricsLoading ? "—" : `${metrics?.memoryMB ?? 0} MB`} icon={<HardDrive size={15} />} />
+        <StatCard title="Uptime" value={metricsLoading ? "—" : formatUptime(metrics?.uptime ?? 0)} icon={<Clock size={15} />} />
       </div>
 
       {/* ── OVERVIEW TAB ─────────────────────────────────────────────────────── */}
@@ -216,7 +216,7 @@ export function BackupPage() {
           </div>
 
           {/* System Health Details */}
-          <CgSectionPanel title="System Health" description="Runtime diagnostics for the current server instance.">
+          <SectionPanel title="System Health" description="Runtime diagnostics for the current server instance.">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.85rem", padding: "0.5rem 0" }}>
               {[
                 { label: "Node.js Version", value: metrics?.nodeVersion ?? "—", icon: <CheckCircle2 size={13} />, ok: true },
@@ -237,10 +237,10 @@ export function BackupPage() {
                 </div>
               ))}
             </div>
-          </CgSectionPanel>
+          </SectionPanel>
 
           {/* Backup Strategy Checklist */}
-          <CgSectionPanel title="Backup Strategy" description="Current status of each backup layer.">
+          <SectionPanel title="Backup Strategy" description="Current status of each backup layer.">
             {[
               { label: "Database (MongoDB Atlas)", status: "Auto ✓", desc: "Daily snapshots + 7-day point-in-time restore", ok: true },
               { label: "File Storage (Supabase)", status: "Replicated ✓", desc: "Files replicated across multiple Supabase regions", ok: true },
@@ -257,7 +257,7 @@ export function BackupPage() {
                 <Badge variant={ok ? "success" : "warning"}>{status}</Badge>
               </div>
             ))}
-          </CgSectionPanel>
+          </SectionPanel>
         </div>
       )}
 
@@ -274,8 +274,8 @@ export function BackupPage() {
           </div>
 
           {/* Collection Table */}
-          <CgSectionPanel title="Collections" description={`${collections.length} collections — ${formatCount(totalRecords)} total records`} noPadding>
-            <CgDataTable
+          <SectionPanel title="Collections" description={`${collections.length} collections — ${formatCount(totalRecords)} total records`} noPadding>
+            <DataTable
               columns={statsColumns}
               data={collections}
               isLoading={statsLoading}
@@ -285,14 +285,14 @@ export function BackupPage() {
               emptyDescription="Data is being fetched from the database."
               emptyMessage="No collections found."
             />
-          </CgSectionPanel>
+          </SectionPanel>
 
           {/* Export Log */}
           {exportLog.length > 0 && (
-            <CgSectionPanel title="Export Log (this session)" description="Downloads performed in this browser session." noPadding>
-              <CgDataTable columns={logColumns} data={exportLog} pageSize={10}
+            <SectionPanel title="Export Log (this session)" description="Downloads performed in this browser session." noPadding>
+              <DataTable columns={logColumns} data={exportLog} pageSize={10}
                 emptyMessage="No exports yet." emptyTitle="No exports" emptyDescription="" emptyIcon={<Download size={24} />} />
-            </CgSectionPanel>
+            </SectionPanel>
           )}
         </div>
       )}
@@ -332,7 +332,7 @@ export function BackupPage() {
           )}
 
           {/* Checks Table */}
-          <CgSectionPanel title="Integrity Checks" description="Automated data consistency verifications.">
+          <SectionPanel title="Integrity Checks" description="Automated data consistency verifications.">
             {integrityLoading ? (
               <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>Running checks…</div>
             ) : (
@@ -349,7 +349,7 @@ export function BackupPage() {
                 </div>
               ))
             )}
-          </CgSectionPanel>
+          </SectionPanel>
         </div>
       )}
 

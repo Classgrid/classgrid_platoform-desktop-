@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { Server, Activity, Database, Shield, Power } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { useSystemHealth, useFeatureFlags, useToggleFeatureFlag } from "../queries/useConfig";
 import type { FeatureFlag } from "../services/superAdminApi";
 
@@ -119,22 +119,22 @@ export function ConfigPage() {
 
       {/* Metrics (Health) */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Server Status"
           value={healthLoading ? "—" : healthData?.status?.toUpperCase() ?? "UNKNOWN"}
           icon={<Server size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Database"
           value={healthLoading ? "—" : healthData?.dbStatus ?? "UNKNOWN"}
           icon={<Database size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Uptime"
           value={healthLoading ? "—" : formatUptime(healthData?.uptime ?? 0)}
           icon={<Activity size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Active Flags"
           value={flagsLoading ? "—" : flags.filter((f) => f.isEnabled).length}
           icon={<Shield size={16} />}
@@ -142,7 +142,7 @@ export function ConfigPage() {
       </div>
 
       {/* Feature Flags Table */}
-      <CgSectionPanel
+      <SectionPanel
         title="Feature Flags"
         description="Toggle features across the entire platform globally. Disabling a feature hides it instantly for all organizations."
         noPadding
@@ -157,13 +157,13 @@ export function ConfigPage() {
           </div>
         }
       >
-        <CgDataTable
+        <DataTable
           columns={columns}
           data={filteredFlags}
           pageSize={15}
           emptyMessage={flagsLoading ? "Loading flags…" : "No feature flags found."}
         />
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }

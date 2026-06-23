@@ -4,11 +4,11 @@ import { IndianRupee, RefreshCw, Plus, RotateCcw, CheckCircle2, XCircle, Clock, 
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
@@ -156,14 +156,14 @@ export function TransactionsPage() {
       />
 
       <div className="cg-stats-grid">
-        <CgMetricCard title="Total Revenue" value={isLoading ? "—" : INR(totalRevenue)} icon={<IndianRupee size={15} />} />
-        <CgMetricCard title="Total Refunds" value={isLoading ? "—" : INR(totalRefunds)} icon={<RotateCcw size={15} />} />
-        <CgMetricCard title="Successful Payments" value={isLoading ? "—" : successCount} icon={<CheckCircle2 size={15} />} />
-        <CgMetricCard title="Refund Count" value={isLoading ? "—" : refundCount} icon={<AlertTriangle size={15} />} />
+        <StatCard title="Total Revenue" value={isLoading ? "—" : INR(totalRevenue)} icon={<IndianRupee size={15} />} />
+        <StatCard title="Total Refunds" value={isLoading ? "—" : INR(totalRefunds)} icon={<RotateCcw size={15} />} />
+        <StatCard title="Successful Payments" value={isLoading ? "—" : successCount} icon={<CheckCircle2 size={15} />} />
+        <StatCard title="Refund Count" value={isLoading ? "—" : refundCount} icon={<AlertTriangle size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Transaction History" description={`${filtered.length} records`} noPadding
+        <SectionPanel title="Transaction History" description={`${filtered.length} records`} noPadding
           actions={
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={[
@@ -180,9 +180,9 @@ export function TransactionsPage() {
           <div style={{ padding: "0.75rem 1rem" }}>
             <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search org, payment ID, note…" />
           </div>
-          <CgDataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
+          <DataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
             emptyIcon={<IndianRupee size={32} />} emptyTitle="No transactions yet" emptyDescription="Payments recorded via Razorpay or manually will appear here." emptyMessage="No transactions." />
-        </CgSectionPanel>
+        </SectionPanel>
       </div>
 
       {/* Refund Dialog */}

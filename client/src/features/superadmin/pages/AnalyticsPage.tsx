@@ -1,6 +1,6 @@
 import { BarChart3, TrendingUp, Users, RefreshCw } from "lucide-react";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { useDashboardAnalytics } from "../queries/useAnalytics";
 
 export function AnalyticsPage() {
@@ -46,22 +46,22 @@ export function AnalyticsPage() {
         <>
           {/* Top Metrics */}
           <div className="cg-stats-grid">
-            <CgMetricCard
+            <StatCard
               title="Active Usage Score"
               value={isLoading ? "—" : activeUsage}
               icon={<TrendingUp size={16} />}
               trend={{ value: 4.5, label: "from last week" }}
             />
-            <CgMetricCard
+            <StatCard
               title="New Users (Period)"
               value={isLoading ? "—" : totalUsersGrown}
               icon={<Users size={16} />}
             />
-            <CgMetricCard
+            <StatCard
               title="New Organizations"
               value={isLoading ? "—" : totalOrgsGrown}
             />
-            <CgMetricCard
+            <StatCard
               title="Total Data Points"
               value={isLoading ? "—" : Object.keys(analytics?.metrics || {}).length}
               icon={<BarChart3 size={16} />}
@@ -70,7 +70,7 @@ export function AnalyticsPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem" }}>
             {/* User Growth Chart */}
-            <CgSectionPanel title="User Acquisition" description="New users onboarded over time.">
+            <SectionPanel title="User Acquisition" description="New users onboarded over time.">
               <div
                 style={{
                   height: "300px",
@@ -89,10 +89,10 @@ export function AnalyticsPage() {
                 <span>[ Chart Integration: User Growth ]</span>
                 <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Data points: {userGrowth.length}</span>
               </div>
-            </CgSectionPanel>
+            </SectionPanel>
 
             {/* Org Growth Chart */}
-            <CgSectionPanel title="Organization Growth" description="New organizations signing up over time.">
+            <SectionPanel title="Organization Growth" description="New organizations signing up over time.">
               <div
                 style={{
                   height: "300px",
@@ -111,7 +111,7 @@ export function AnalyticsPage() {
                 <span>[ Chart Integration: Organization Growth ]</span>
                 <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Data points: {orgGrowth.length}</span>
               </div>
-            </CgSectionPanel>
+            </SectionPanel>
           </div>
         </>
       )}

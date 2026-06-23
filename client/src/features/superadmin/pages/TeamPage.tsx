@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { Users, UserPlus, X, Loader, Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
@@ -277,7 +277,7 @@ export function TeamPage() {
       </Dialog>
 
       {/* Team Table */}
-      <CgSectionPanel
+      <SectionPanel
         title={`Team Members (${stats.total})`}
         description="All platform staff with their assigned roles and access levels."
       >
@@ -355,7 +355,7 @@ export function TeamPage() {
             </table>
           </div>
         )}
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }
