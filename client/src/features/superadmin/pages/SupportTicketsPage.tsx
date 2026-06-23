@@ -648,9 +648,9 @@ export function SupportTicketsPage() {
       </div>
 
       {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {/* Left: Message Thread */}
-        <div className="lg:col-span-2 space-y-0">
+        <div className="lg:col-span-2 xl:col-span-3 space-y-0">
           {selectedMessages.map((msg, idx) => (
             <div key={(msg as any)._id || `msg-${idx}`}>
               {idx > 0 && <hr className="border-border my-0" />}
@@ -796,7 +796,7 @@ export function SupportTicketsPage() {
                     }
                   }}
                   placeholder="Type your reply here..."
-                  minHeight={120}
+                  minHeight={300}
                   onSubmit={submitReply}
                 />
                 <div className="flex flex-wrap items-center justify-between gap-3">
