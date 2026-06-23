@@ -650,7 +650,7 @@ export function SupportTicketsPage() {
       </div>
 
       {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-start">
         {/* Left: Message Thread */}
         <div className="lg:col-span-2 xl:col-span-3 space-y-0">
           {selectedMessages.map((msg, idx) => (
@@ -764,67 +764,83 @@ export function SupportTicketsPage() {
 
           {/* Reply Box */}
           {!isClosed ? (
-            <div className="mt-8 pt-8 border-t border-border">
-              <div className="space-y-3">
-                <AnimatePresence>
-                  {replySent && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm"
-                    >
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.1 }}
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      </motion.div>
-                      <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        Reply sent
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <RichReplyEditor
-                  ref={replyEditorRef}
-                  onChange={(text) => {
-                    setReplyBody(text);
-                    if (text.trim() && replySent) {
-                      setReplySent(false);
-                      if (replySentTimerRef.current) clearTimeout(replySentTimerRef.current);
-                    }
-                  }}
-                  placeholder="Type your reply here..."
-                  minHeight={300}
-                  onSubmit={submitReply}
-                />
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">
-                    Press Enter to send, Shift+Enter for new line.
+            selectedTicket.assignedTo && selectedTicket.assignedTo._id !== currentUser?._id ? (
+              <div className="mt-8 pt-8 border-t border-border">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6 text-center">
+                  <div className="w-12 h-12 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">
+                    Ticket Locked
+                  </h3>
+                  <p className="text-xs text-amber-600/80 dark:text-amber-400/80 max-w-md mx-auto">
+                    This ticket is currently assigned to <strong>{selectedTicket.assignedTo.name}</strong>. Only the assigned owner can reply to the user. You can click "Assign to me" in the sidebar if you wish to take over.
                   </p>
-                  <Button
-                    variant="primary"
-                    onClick={submitReply}
-                    disabled={!replyBody.trim() || replyToTicket.isPending}
-                  >
-                    {replyToTicket.isPending ? (
-                      <>
-                        <Spinner className="w-4 h-4 mr-2" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Reply
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-8 pt-8 border-t border-border">
+                <div className="space-y-3">
+                  <AnimatePresence>
+                    {replySent && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm"
+                      >
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.1 }}
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        </motion.div>
+                        <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                          Reply sent
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <RichReplyEditor
+                    ref={replyEditorRef}
+                    onChange={(text) => {
+                      setReplyBody(text);
+                      if (text.trim() && replySent) {
+                        setReplySent(false);
+                        if (replySentTimerRef.current) clearTimeout(replySentTimerRef.current);
+                      }
+                    }}
+                    placeholder="Type your reply here..."
+                    minHeight={300}
+                    onSubmit={submitReply}
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-muted-foreground">
+                      Press Enter to send, Shift+Enter for new line.
+                    </p>
+                    <Button
+                      variant="primary"
+                      onClick={submitReply}
+                      disabled={!replyBody.trim() || replyToTicket.isPending}
+                    >
+                      {replyToTicket.isPending ? (
+                        <>
+                          <Spinner className="w-4 h-4 mr-2" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Reply
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )
           ) : (
             <div className="mt-8 pt-8 border-t border-border text-center py-6">
               <p className="text-sm text-muted-foreground">
@@ -835,8 +851,8 @@ export function SupportTicketsPage() {
         </div>
 
         {/* Right: Metadata Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="bg-card border border-border rounded-lg p-5 lg:sticky lg:top-28">
+        <div className="lg:col-span-1 lg:sticky lg:top-28">
+          <div className="bg-card border border-border rounded-lg p-5">
             <dl className="space-y-4">
               <MetaRow
                 label="Id"

@@ -588,6 +588,13 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             return res.status(403).json({ success: false, message: "Not authorized" });
         }
 
+        // --- Ticket Lock: Prevent other admins from replying if assigned to someone else ---
+        if (isSuperAdmin && !isOwner) {
+            if (ticket.assignedTo && ticket.assignedTo.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ success: false, message: "This ticket is locked to another assigned admin." });
+            }
+        }
+
         // Handle File Uploads to Supabase
         const uploadedAttachments = [];
         if (req.files && req.files.length > 0) {
