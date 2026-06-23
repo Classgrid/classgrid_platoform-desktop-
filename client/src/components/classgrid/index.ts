@@ -20,3 +20,14 @@ export * from './SectionPanel';
 export * from './Tabs';
 export * from './CgPieChart';
 export * from './CgLineChart';
+
+export * from './CgHistogram';
+export * from './CgDonutChart';
+export * from './CgFunnelChart';
+export * from './CgAreaChart';
+export * from './CgRadarChart';
+export * from './CgCalendar';
+export * from './CgFieldGroup';
+export * from './Switch';
+export * from './Select';
+export * from './Input';
