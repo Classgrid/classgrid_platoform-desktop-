@@ -46,9 +46,19 @@ export function RecentActivityTable({
   emptyMessage = "No data found.",
 }: RecentActivityTableProps) {
   if (isLoading) {
+    const widths = ["w-[70%]", "w-[40%]", "w-[90%]", "w-[50%]", "w-[60%]"];
+    const skeletonRows = Array.from({ length: skeletonLines }).map((_, rIdx) => {
+      const rowObj: Record<string, React.ReactNode> = {};
+      columns.forEach((col, cIdx) => {
+        const widthClass = widths[(rIdx + cIdx) % widths.length];
+        rowObj[col.key] = <CgSkeleton className={`${widthClass} h-4 min-w-[60px]`} />;
+      });
+      return rowObj;
+    });
+
     return (
-      <div className="p-6 border border-border rounded-xl bg-card">
-        <CgSkeleton lines={skeletonLines} />
+      <div className="opacity-80 pointer-events-none">
+        <ClassgridTable columns={columns} rows={skeletonRows} className={className} />
       </div>
     );
   }
