@@ -513,15 +513,22 @@ export function SupportTicketsPage() {
                     </span>
                   ),
                   date: (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                    <div className="flex flex-col items-start gap-1.5">
+                      <span 
+                        className="text-xs text-muted-foreground flex items-center gap-1.5 cursor-default"
+                        title={`Ticket created: ${fmtDateTime(ticket.createdAt)}`}
+                      >
+                        <Clock className="w-3.5 h-3.5" />
                         {fmtDateTime(ticket.createdAt)}
                       </span>
                       {ticket.assignedTo && (
-                        <span className="text-[10px] text-emerald-500 font-medium">
-                          → {ticket.assignedTo.name}
-                        </span>
+                        <div 
+                          className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 w-fit cursor-default"
+                          title={`Assigned to ${ticket.assignedTo.name}`}
+                        >
+                          <ShieldCheck className="w-3 h-3" />
+                          <span>{ticket.assignedTo.name}</span>
+                        </div>
                       )}
                     </div>
                   ),

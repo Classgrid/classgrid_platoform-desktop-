@@ -5,7 +5,6 @@ import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
 
@@ -68,15 +67,6 @@ export function SandboxPage() {
           <CgDataTable columns={cgCols} data={genericData} pageSize={5} />
         </div>
 
-        {/* --- 3. RecentActivityTable --- */}
-        <div className="space-y-4">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">3. Recent Activity (RecentActivityTable)</h2>
-            <p className="text-sm text-muted-foreground">The exact rich visual UI from before, but populated with Classgrid-specific data (Users, Roles, Actions).</p>
-          </div>
-          
-          <RecentActivityTable />
-        </div>
 
         {/* --- CgSwitch --- */}
         <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col items-center justify-center gap-6 relative overflow-hidden">
