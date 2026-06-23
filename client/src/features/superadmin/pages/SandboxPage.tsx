@@ -3,6 +3,38 @@ import { useTheme } from "next-themes";
 import { CgSwitch } from "@/components/classgrid/Switch";
 import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { VercelTable } from "@/components/ui/vercel-table";
+import { CgDataTable } from "@/components/classgrid/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
+
+type DemoDeployment = {
+  project: string;
+  status: string;
+  branch: string;
+  time: string;
+};
+
+const demoData: DemoDeployment[] = [
+  { project: "classgrid_platform", status: "Ready", branch: "main", time: "1m ago" },
+  { project: "classgrid_marketing", status: "Building", branch: "feat/new-ui", time: "Just now" },
+  { project: "cgpa_tracker", status: "Error", branch: "bugfix/db", time: "2h ago" },
+];
+
+// Columns for VercelTable
+const vercelCols = [
+  { key: "project", header: "Project", accent: true, width: "w-[250px]" },
+  { key: "status", header: "Status" },
+  { key: "branch", header: "Branch" },
+  { key: "time", header: "Time" },
+];
+
+// Columns for CgDataTable
+const cgCols: ColumnDef<DemoDeployment>[] = [
+  { accessorKey: "project", header: "Project" },
+  { accessorKey: "status", header: "Status" },
+  { accessorKey: "branch", header: "Branch" },
+  { accessorKey: "time", header: "Time" },
+];
 
 export function SandboxPage() {
   const { theme, setTheme } = useTheme();
@@ -71,9 +103,9 @@ export function SandboxPage() {
               <span className="text-xs text-muted-foreground">Default (16px)</span>
             </div>
             
-            {/* Medium Size with Primary Color */}
+            {/* Medium Size with Brand Color */}
             <div className="flex flex-col items-center gap-3">
-              <Spinner className="w-8 h-8 text-blue-600 dark:text-blue-500" />
+              <Spinner className="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
               <span className="text-xs text-muted-foreground">Medium & Colored</span>
             </div>
 
@@ -85,6 +117,27 @@ export function SandboxPage() {
               </button>
               <span className="text-xs text-muted-foreground">Inside Button</span>
             </div>
+          </div>
+        </div>
+
+        {/* --- Vercel Table vs CgDataTable --- */}
+        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col gap-10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Table Comparison</h2>
+          </div>
+          
+          <p className="text-sm text-muted-foreground text-center max-w-2xl mx-auto">
+            Comparing the lightweight <code>VercelTable</code> (static, pure UI) vs the heavy-duty <code>CgDataTable</code> (sorting, pagination, TanStack).
+          </p>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground">1. VercelTable (from components/ui)</h3>
+            <VercelTable columns={vercelCols} rows={demoData as any} />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground">2. CgDataTable (from components/classgrid)</h3>
+            <CgDataTable columns={cgCols} data={demoData} pageSize={5} />
           </div>
         </div>
       </div>
