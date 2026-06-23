@@ -35,6 +35,7 @@ import { OrganizationsPage } from "@/features/superadmin/pages/OrganizationsPage
 import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { ProfilePage } from "@/features/superadmin/pages/ProfilePage";
+import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { OrgAdminDashboardRouter } from "@/features/org/pages/OrgAdminDashboardRouter";
 import { OrgAnnouncementsPage } from "@/features/org/pages/OrgAnnouncementsPage";
@@ -209,6 +210,7 @@ export function AppRouter() {
 
         {/* Super Admin — Profile & Settings */}
         <Route path="/superadmin/profile" element={<ProfilePage />} />
+        <Route path="/superadmin/sandbox" element={<SandboxPage />} />
         <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
 
 
