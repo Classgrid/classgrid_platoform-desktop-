@@ -1,0 +1,1 @@
+export const CgDataTable = () => null;
