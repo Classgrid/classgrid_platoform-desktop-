@@ -11,8 +11,8 @@ import {
 import { CgPageHeader }   from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard }   from "@/components/classgrid/MetricCard";
-import { CgBadge }        from "@/components/classgrid/Badge";
-import { CgButton }       from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgProgress }     from "@/components/classgrid/Progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";

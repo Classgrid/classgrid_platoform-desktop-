@@ -18,6 +18,14 @@ const buttonVariants = cva(
           "bg-emerald-600 text-white hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all duration-300",
         destructive:
           "bg-red-500 text-white hover:bg-red-600",
+        danger:
+          "bg-red-500 text-white hover:bg-red-600",
+        success:
+          "bg-emerald-500 text-white hover:bg-emerald-600",
+        warning:
+          "bg-amber-500 text-white hover:bg-amber-600",
+        info:
+          "bg-blue-500 text-white hover:bg-blue-600",
         outline:
           "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground transition-colors duration-300",
         secondary:

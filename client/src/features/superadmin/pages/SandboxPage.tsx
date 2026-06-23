@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
-import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Toggle } from "@/components/ui/toggle";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
+import { AlertCircle, ArrowUpCircle, Bell, GitBranch, GitCommit, Search, ShieldCheck } from "lucide-react";
 
 // 1. Generic platform data
 type DemoData = {
@@ -38,6 +45,7 @@ const cgCols: ColumnDef<DemoData>[] = [
 
 export function SandboxPage() {
   const { theme, setTheme } = useTheme();
+  const [toggleState, setToggleState] = useState(false);
 
   return (
     <div className="min-h-screen p-8 bg-background text-foreground transition-colors duration-200">
@@ -47,99 +55,177 @@ export function SandboxPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto space-y-12">
-        {/* --- 1. ClassgridTable --- */}
-        <div className="space-y-4">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (ClassgridTable)</h2>
-            <p className="text-sm text-muted-foreground">Clean, static, fast UI table for simple lists.</p>
-          </div>
-          
-          <ClassgridTable columns={vercelCols} rows={genericData as any} />
-        </div>
 
-        {/* --- 2. CgDataTable --- */}
-        <div className="space-y-4">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">2. Advanced Table (CgDataTable)</h2>
-            <p className="text-sm text-muted-foreground">Heavy-duty table with sorting, pagination, and empty states.</p>
-          </div>
-          
-          <CgDataTable columns={cgCols} data={genericData} pageSize={5} />
-        </div>
-
-
-        {/* --- CgSwitch --- */}
+        {/* --- Buttons --- */}
         <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col items-center justify-center gap-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
-            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">CgSwitch</h2>
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Buttons</h2>
           </div>
-          
-          <Switch 
-            checked={theme === "dark"} 
-            onCheckedChange={(c) => setTheme(c ? "dark" : "light")} 
-          />
-          
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
-            Theme: <code className="font-mono bg-muted text-foreground px-2 py-1 rounded-md text-xs font-semibold">{theme}</code>
-          </div>
-        </div>
-
-        {/* --- CgSkeleton --- */}
-        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col items-center justify-center gap-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
-            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">CgSkeleton</h2>
-          </div>
-          
-          <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-            Instead of spinning circles, we compose multiple skeletons together to create a "wireframe" of the content that is about to load. This makes the dashboard feel significantly faster.
-          </p>
-
-          {/* Simulated Loading Profile Card */}
-          <div className="w-full max-w-sm p-6 border border-border rounded-xl bg-background flex items-center gap-4">
-            {/* Avatar Skeleton */}
-            <CgSkeleton variant="circular" className="h-16 w-16 shrink-0" />
-            
-            {/* Text Skeletons */}
-            <div className="flex-1 space-y-3">
-              <CgSkeleton variant="text" className="h-4 w-3/4" />
-              <CgSkeleton variant="text" className="h-3 w-1/2" />
-            </div>
+          <div className="flex flex-wrap gap-4 items-center">
+            <Button variant="default">Default</Button>
+            <Button variant="primary">Primary (Glow)</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="link">Link</Button>
+            <Button variant="destructive">Destructive</Button>
+            <Button variant="success">Success</Button>
+            <Button variant="rainbow">Rainbow</Button>
+            <Button isLoading>Loading</Button>
           </div>
         </div>
 
-        {/* --- Spinner --- */}
+        {/* --- Badges --- */}
         <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col items-center justify-center gap-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
-            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Spinner</h2>
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Badges</h2>
+          </div>
+          <div className="flex flex-wrap gap-4 items-center">
+            <Badge variant="default">Default</Badge>
+            <Badge variant="secondary">Secondary</Badge>
+            <Badge variant="outline">Outline</Badge>
+            <Badge variant="success" dot>Success</Badge>
+            <Badge variant="warning" dot>Warning</Badge>
+            <Badge variant="danger" dot>Danger</Badge>
+            <Badge variant="info" icon={<AlertCircle className="w-3 h-3" />}>Info</Badge>
+          </div>
+        </div>
+
+        {/* --- Switch & Toggle & Select --- */}
+        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm grid grid-cols-1 md:grid-cols-3 gap-12 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Inputs & Controls</h2>
           </div>
           
-          <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
-            For small inline loading states (like inside a button) or full-page blocks, we use this Vercel-style spinner.
-          </p>
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Switch</h3>
+            <Switch checked={theme === "dark"} onCheckedChange={(c) => setTheme(c ? "dark" : "light")} />
+            <span className="text-xs text-muted-foreground">Dark Mode</span>
+          </div>
 
-          <div className="flex gap-12 items-center">
-            {/* Default Size */}
-            <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Toggle</h3>
+            <Toggle pressed={toggleState} onPressedChange={setToggleState} aria-label="Toggle favorite">
+              <Bell className="w-4 h-4" />
+            </Toggle>
+            <span className="text-xs text-muted-foreground">Notification Bell</span>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Select</h3>
+            <Select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="apple">Apple</SelectItem>
+                <SelectItem value="banana">Banana</SelectItem>
+                <SelectItem value="blueberry">Blueberry</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">Base UI Dropdown</span>
+          </div>
+        </div>
+
+        {/* --- Tooltip & Breadcrumb --- */}
+        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm grid grid-cols-1 md:grid-cols-2 gap-12 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Navigation & Overlays</h2>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Tooltip</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="outline" className="w-fit" />}>
+                  Hover me
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add to library</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Breadcrumb</h3>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/components">Components</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
+
+        {/* --- Table --- */}
+        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm flex flex-col gap-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Standard Table</h2>
+          </div>
+          <div className="mt-8 border border-border rounded-lg overflow-hidden">
+            <Table>
+              <TableCaption>A list of platform users.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Last Active</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {genericData.map((user) => (
+                  <TableRow key={user.name}>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.status === "Active" ? "success" : "secondary"} dot>{user.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">{user.lastActive}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* --- Spinner & Skeleton --- */}
+        <div className="p-12 border border-border rounded-2xl bg-card shadow-sm grid grid-cols-1 md:grid-cols-2 gap-12 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full px-4 py-2 bg-muted/30 border-b border-border">
+            <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Loading States</h2>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Spinner</h3>
+            <div className="flex gap-8 items-center">
               <Spinner />
-              <span className="text-xs text-muted-foreground">Default (16px)</span>
+              <Spinner className="w-6 h-6 text-emerald-500" />
+              <Button isLoading>Processing</Button>
             </div>
-            
-            {/* Medium Size with Brand Color */}
-            <div className="flex flex-col items-center gap-3">
-              <Spinner className="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
-              <span className="text-xs text-muted-foreground">Medium & Colored</span>
-            </div>
+          </div>
 
-            {/* Inside a Button */}
-            <div className="flex flex-col items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg font-medium text-sm">
-                <Spinner className="w-4 h-4 text-background" />
-                Saving...
-              </button>
-              <span className="text-xs text-muted-foreground">Inside Button</span>
+          <div className="flex flex-col gap-4 mt-8">
+            <h3 className="text-sm font-semibold">Skeleton</h3>
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

@@ -546,7 +546,7 @@ export function SupportTicketsPage() {
                       {ticket.assignedTo && (
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger asChild>
+                            <TooltipTrigger>
                               <div className="flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors">
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
                                   {currentUser?.profilePicture ? (
