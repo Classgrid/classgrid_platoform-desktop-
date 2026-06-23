@@ -903,8 +903,9 @@ export function SupportTicketsPage() {
                             );
                           }}
                           disabled={updateTicket.isPending}
-                          className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50"
                         >
+                          {updateTicket.isPending && <Spinner className="w-3 h-3" />}
                           {updateTicket.isPending ? "Assigning..." : "Assign to me"}
                         </button>
                       )}
