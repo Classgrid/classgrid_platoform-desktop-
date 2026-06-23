@@ -12,10 +12,7 @@ import {
   Paperclip,
   Eye,
   FileText,
-  ArrowLeft,
   Building2,
-  Mail,
-  X,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
@@ -260,12 +257,12 @@ const STATUS_CHANGE_OPTIONS: TicketStatus[] = [
 ];
 
 const ticketCols = [
-  { key: "requester", header: "Requester", width: "w-[220px]" },
+  { key: "requester", header: "Requester", width: "w-[200px]" },
   { key: "subject", header: "Subject" },
-  { key: "status", header: "Status", width: "w-[130px]" },
-  { key: "priority", header: "Priority", width: "w-[100px]" },
-  { key: "date", header: "Date", width: "w-[150px]" },
-  { key: "action", header: "", width: "w-[80px]" },
+  { key: "status", header: "Status", width: "w-[110px]" },
+  { key: "priority", header: "Priority", width: "w-[80px]" },
+  { key: "assigned", header: "Assigned", width: "w-[140px]" },
+  { key: "action", header: "", width: "w-[70px]" },
 ];
 
 export function SupportTicketsPage() {
@@ -281,6 +278,7 @@ export function SupportTicketsPage() {
   const [replySent, setReplySent] = useState(false);
   const replySentTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
+  const [assigningTicketId, setAssigningTicketId] = useState<string | null>(null);
 
   const { data: currentUser } = useCurrentUser();
 
@@ -540,37 +538,54 @@ export function SupportTicketsPage() {
                       <span className="text-xs text-muted-foreground">
                         {getRelativeTime(ticket.createdAt)}
                       </span>
-                      {ticket.assignedTo && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default shadow-sm hover:border-foreground/20 transition-colors">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                                  {currentUser?.profilePicture ? (
-                                    <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[9px] ${getAvatarColor(ticket.assignedTo.name)}`}>
-                                      {getInitials(ticket.assignedTo.name)}
-                                    </div>
-                                  )}
-                                </div>
-                                <span>{ticket.assignedTo.name}</span>
+                    </div>
+                  ),
+                  assigned: (
+                    <div className="flex items-center">
+                      {ticket.assignedTo ? (
+                        <div className="flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit">
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border">
+                            {currentUser?.profilePicture && ticket.assignedTo._id === currentUser._id ? (
+                              <img src={currentUser.profilePicture} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-white font-bold text-[9px] ${getAvatarColor(ticket.assignedTo.name)}`}>
+                                {getInitials(ticket.assignedTo.name)}
                               </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              {(() => {
-                                const adminReply = 
-                                  ticket.replies?.slice().reverse().find(r => r.authorName === ticket.assignedTo?.name) ||
-                                  ticket.messages?.slice().reverse().find(m => m.author === ticket.assignedTo?.name);
-                                
-                                if (adminReply) {
-                                  return `Replied on ${fmtDateTime(adminReply.createdAt || adminReply.date)}`;
+                            )}
+                          </div>
+                          <span className="truncate max-w-[80px]">{ticket.assignedTo.name}</span>
+                        </div>
+                      ) : (
+                        currentUser && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAssigningTicketId(ticket._id);
+                              updateTicket.mutate(
+                                { id: ticket._id, assignedTo: currentUser._id },
+                                {
+                                  onSuccess: () => {
+                                    toast.success("Assigned to you");
+                                    setAssigningTicketId(null);
+                                    refetch();
+                                  },
+                                  onError: () => {
+                                    toast.error("Failed to assign");
+                                    setAssigningTicketId(null);
+                                  },
                                 }
-                                return `Assigned on ${fmtDateTime(ticket.updatedAt)}`;
-                              })()}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                              );
+                            }}
+                            disabled={assigningTicketId === ticket._id}
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 rounded-full transition-colors disabled:opacity-50"
+                          >
+                            {assigningTicketId === ticket._id ? (
+                              <><Spinner className="w-3 h-3" /> Assigning...</>
+                            ) : (
+                              "Assign me"
+                            )}
+                          </button>
+                        )
                       )}
                     </div>
                   ),
@@ -916,6 +931,7 @@ export function SupportTicketsPage() {
                                 onSuccess: (res) => {
                                   toast.success("Ticket assigned to you");
                                   if (res.ticket) setSelectedTicket(res.ticket);
+                                  refetch();
                                 },
                                 onError: () => toast.error("Failed to assign ticket"),
                               }
