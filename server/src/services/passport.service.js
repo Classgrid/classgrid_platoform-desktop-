@@ -6,7 +6,7 @@ import connectDB from "../../config/db.js";
 import { sendNoAccountEmail } from "../controllers/auth.controller.js";
 
 const getBackendUrl = () => {
-    return process.env.BACKEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    return process.env.BACKEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://api.classgrid.in" : "http://localhost:5000");
 };
 
 const BACKEND_URL = getBackendUrl();
