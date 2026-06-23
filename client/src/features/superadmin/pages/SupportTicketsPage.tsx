@@ -58,7 +58,7 @@ const STATUS_CONFIG: Record<
 > = {
   open: { label: "Open", variant: "info" },
   in_progress: { label: "In Progress", variant: "warning" },
-  waiting_on_user: { label: "Waiting on User", variant: "warning" },
+  waiting_on_user: { label: "Awaiting your reply", variant: "warning" },
   resolved: { label: "Resolved", variant: "success" },
   closed: { label: "Closed", variant: "neutral" },
 };
@@ -222,7 +222,7 @@ function statusLabel(status: string) {
     case "in_progress":
       return "In Progress";
     case "waiting_on_user":
-      return "Waiting on User";
+      return "Awaiting your reply";
     default:
       return status.charAt(0).toUpperCase() + status.slice(1);
   }
@@ -234,7 +234,7 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All Status" },
   { value: "open", label: "Open" },
   { value: "in_progress", label: "In Progress" },
-  { value: "waiting_on_user", label: "Waiting on User" },
+  { value: "waiting_on_user", label: "Awaiting your reply" },
   { value: "resolved", label: "Resolved" },
   { value: "closed", label: "Closed" },
 ];
