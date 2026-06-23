@@ -851,8 +851,8 @@ export function SupportTicketsPage() {
         </div>
 
         {/* Right: Metadata Sidebar */}
-        <div className="h-full">
-          <div className="bg-card border border-border rounded-lg p-5 lg:sticky lg:top-28">
+        <div className="self-start sticky top-28">
+          <div className="bg-card border border-border rounded-lg p-5">
             <dl className="space-y-4">
               <MetaRow
                 label="Id"
