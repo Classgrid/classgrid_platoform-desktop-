@@ -4,119 +4,35 @@ import { CgSwitch } from "@/components/classgrid/Switch";
 import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { VercelTable } from "@/components/ui/vercel-table";
-import { GitCommit, GitBranch, ArrowUpCircle } from "lucide-react";
+import { CgDataTable } from "@/components/classgrid/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
 
-// Real-world Vercel-style deployment data with rich React nodes
-const deploymentsData = [
-  {
-    project: <span className="font-medium text-foreground">new</span>,
-    status: (
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-zinc-500 animate-pulse" />
-        <span className="text-zinc-400">Initializing</span>
-      </div>
-    ),
-    environment: (
-      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-background text-xs text-foreground">
-        <ArrowUpCircle size={14} className="text-muted-foreground" />
-        Production
-      </div>
-    ),
-    commit: (
-      <div className="flex items-center gap-4 text-muted-foreground">
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitCommit size={14} />
-          <span className="font-mono text-xs">ff4e4b2</span>
-        </div>
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitBranch size={14} />
-          <span className="text-xs">main</span>
-        </div>
-      </div>
-    ),
-    time: (
-      <div className="flex items-center justify-between w-full">
-        <span className="text-muted-foreground text-xs">Just now</span>
-        <img src="https://github.com/shadcn.png" alt="Avatar" className="w-5 h-5 rounded-full" />
-      </div>
-    ),
-  },
-  {
-    project: <span className="text-foreground">Add CgSkeleton and Sandbox demo</span>,
-    status: (
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-        <span className="text-foreground">Ready</span>
-        <span className="text-muted-foreground text-xs">22s</span>
-      </div>
-    ),
-    environment: (
-      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 text-xs text-white border border-blue-500 font-medium shadow-sm shadow-blue-900/20">
-        <ArrowUpCircle size={14} className="text-blue-200" />
-        Production
-      </div>
-    ),
-    commit: (
-      <div className="flex items-center gap-4 text-muted-foreground">
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitCommit size={14} />
-          <span className="font-mono text-xs">2a31879</span>
-        </div>
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitBranch size={14} />
-          <span className="text-xs">main</span>
-        </div>
-      </div>
-    ),
-    time: (
-      <div className="flex items-center justify-between w-full">
-        <span className="text-muted-foreground text-xs">3m ago</span>
-        <img src="https://github.com/shadcn.png" alt="Avatar" className="w-5 h-5 rounded-full" />
-      </div>
-    ),
-  },
-  {
-    project: <span className="text-foreground">new</span>,
-    status: (
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-        <span className="text-foreground">Ready</span>
-        <span className="text-muted-foreground text-xs">23s</span>
-      </div>
-    ),
-    environment: (
-      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-background text-xs text-foreground">
-        <ArrowUpCircle size={14} className="text-muted-foreground" />
-        Production
-      </div>
-    ),
-    commit: (
-      <div className="flex items-center gap-4 text-muted-foreground">
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitCommit size={14} />
-          <span className="font-mono text-xs">76db5d7</span>
-        </div>
-        <div className="flex items-center gap-1.5 hover:text-foreground cursor-pointer transition-colors">
-          <GitBranch size={14} />
-          <span className="text-xs">main</span>
-        </div>
-      </div>
-    ),
-    time: (
-      <div className="flex items-center justify-between w-full">
-        <span className="text-muted-foreground text-xs">7m ago</span>
-        <img src="https://github.com/shadcn.png" alt="Avatar" className="w-5 h-5 rounded-full" />
-      </div>
-    ),
-  },
+// Generic platform data — NOT Vercel deployments!
+type DemoData = {
+  name: string;
+  role: string;
+  status: string;
+  lastActive: string;
+};
+
+const genericData: DemoData[] = [
+  { name: "Nikhil Shinde", role: "Super Admin", status: "Active", lastActive: "1m ago" },
+  { name: "Platform Team", role: "Admin", status: "Active", lastActive: "Just now" },
+  { name: "Demo User", role: "Viewer", status: "Inactive", lastActive: "2h ago" },
 ];
 
 const vercelCols = [
-  { key: "project", header: "", width: "w-[300px]" },
-  { key: "status", header: "", width: "w-[150px]" },
-  { key: "environment", header: "", width: "w-[150px]" },
-  { key: "commit", header: "", width: "w-[200px]" },
-  { key: "time", header: "", width: "w-[120px]" },
+  { key: "name", header: "Name", accent: true, width: "w-[250px]" },
+  { key: "role", header: "Role" },
+  { key: "status", header: "Status" },
+  { key: "lastActive", header: "Last Active" },
+];
+
+const cgCols: ColumnDef<DemoData>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "role", header: "Role" },
+  { accessorKey: "status", header: "Status" },
+  { accessorKey: "lastActive", header: "Last Active" },
 ];
 
 export function SandboxPage() {
@@ -130,18 +46,24 @@ export function SandboxPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto space-y-12">
-        {/* --- Vercel Table Full Width Demo --- */}
-        <div>
+        {/* --- 1. VercelTable --- */}
+        <div className="space-y-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Deployments</h2>
-            <p className="text-sm text-muted-foreground">Perfectly fitted, full-width VercelTable component.</p>
+            <h2 className="text-lg font-semibold text-foreground">1. Lightweight Table (VercelTable)</h2>
+            <p className="text-sm text-muted-foreground">Clean, static, fast UI table for simple lists.</p>
           </div>
           
-          <VercelTable 
-            columns={vercelCols} 
-            rows={deploymentsData as any} 
-            className="border-zinc-800 bg-[#0a0a0a]" // Forcing exact Vercel dark mode background
-          />
+          <VercelTable columns={vercelCols} rows={genericData as any} />
+        </div>
+
+        {/* --- 2. CgDataTable --- */}
+        <div className="space-y-4">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-foreground">2. Advanced Table (CgDataTable)</h2>
+            <p className="text-sm text-muted-foreground">Heavy-duty table with sorting, pagination, and empty states.</p>
+          </div>
+          
+          <CgDataTable columns={cgCols} data={genericData} pageSize={5} />
         </div>
 
         {/* --- CgSwitch --- */}
