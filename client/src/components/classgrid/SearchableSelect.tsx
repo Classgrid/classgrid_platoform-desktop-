@@ -1,1 +1,1 @@
-export const CgSearchableSelect = () => null;
+export const CgSearchableSelect = (props: any) => null;

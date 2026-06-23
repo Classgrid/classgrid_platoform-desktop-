@@ -1,1 +1,1 @@
-export const CgPageHeader = () => null;
+export const CgPageHeader = (props: any) => null;

@@ -1,1 +1,1 @@
-export const CgDataTable = () => null;
+export const CgDataTable = (props: any) => null;

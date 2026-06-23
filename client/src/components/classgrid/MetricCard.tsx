@@ -1,1 +1,1 @@
-export const CgMetricCard = () => null;
+export const CgMetricCard = (props: any) => null;

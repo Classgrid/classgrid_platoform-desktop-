@@ -1,1 +1,1 @@
-export const CgDatePicker = () => null;
+export const CgDatePicker = (props: any) => null;

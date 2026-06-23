@@ -1,1 +1,1 @@
-export const CgFilterToolbar = () => null;
+export const CgFilterToolbar = (props: any) => null;

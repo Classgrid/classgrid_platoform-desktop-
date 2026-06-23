@@ -1,1 +1,1 @@
-export const ClassgridTable = () => null;
+export const ClassgridTable = (props: any) => null;

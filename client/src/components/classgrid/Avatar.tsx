@@ -1,1 +1,1 @@
-export const CgAvatar = () => null;
+export const CgAvatar = (props: any) => null;

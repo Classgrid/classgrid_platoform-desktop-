@@ -1,1 +1,1 @@
-export const CgBadge = () => null;
+export const CgBadge = (props: any) => null;

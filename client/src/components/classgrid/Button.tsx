@@ -1,1 +1,1 @@
-export const CgButton = () => null;
+export const CgButton = (props: any) => null;

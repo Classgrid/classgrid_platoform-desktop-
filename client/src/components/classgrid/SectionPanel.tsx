@@ -1,1 +1,1 @@
-export const CgSectionPanel = () => null;
+export const CgSectionPanel = (props: any) => null;
