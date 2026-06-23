@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 
 import { CgPageHeader }   from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { CgMetricCard }   from "@/components/classgrid/MetricCard";
 import { CgDataTable }    from "@/components/classgrid/DataTable";
 import { CgButton }       from "@/components/classgrid/Button";
@@ -184,22 +184,22 @@ export function BillingPage() {
 
       {/* ── Summary cards ─────────────────────────────────────────────────── */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Active Orgs"
           value={orgsLoading ? "—" : activeCount}
           icon={<CheckCircle size={15} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Demo / Trial"
           value={orgsLoading ? "—" : demoCount}
           icon={<Clock size={15} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Total Users Across Orgs"
           value={orgsLoading ? "—" : totalUsers}
           icon={<Users size={15} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Total Organizations"
           value={orgsLoading ? "—" : allOrgs.length}
           icon={<ShieldCheck size={15} />}
@@ -207,7 +207,7 @@ export function BillingPage() {
       </div>
 
       {/* ── Org table ─────────────────────────────────────────────────────── */}
-      <CgSectionPanel
+      <SectionPanel
         title="Organizations"
         description="Click 'Manage Plan' to update a subscription or change plan type."
         noPadding
@@ -225,7 +225,7 @@ export function BillingPage() {
           />
         </div>
 
-        <CgDataTable
+        <DataTable
           columns={columns}
           data={filteredOrgs}
           isLoading={orgsLoading}
@@ -237,7 +237,7 @@ export function BillingPage() {
           emptyDescription="Try a different search term."
           emptyMessage="No organizations match your search."
         />
-      </CgSectionPanel>
+      </SectionPanel>
 
       {/* ── Manage Plan Dialog ─────────────────────────────────────────────── */}
       <Dialog
