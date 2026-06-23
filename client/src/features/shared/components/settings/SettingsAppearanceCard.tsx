@@ -1,7 +1,7 @@
 import React from "react";
 import { Palette } from "lucide-react";
 import { useTheme } from "next-themes";
-import { CgSwitch } from "@/components/classgrid/CgSwitch";
+import { CgSwitch } from "@/components/classgrid/Switch";
 
 export function SettingsAppearanceCard() {
   const { theme, setTheme } = useTheme();
@@ -22,7 +22,7 @@ export function SettingsAppearanceCard() {
         </div>
         <CgSwitch 
           checked={theme === "dark"} 
-          onChange={(checked) => setTheme(checked ? "dark" : "light")} 
+          onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} 
         />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Smartphone } from "lucide-react";
-import { CgSwitch } from "@/components/classgrid/CgSwitch";
+import { CgSwitch } from "@/components/classgrid/Switch";
 
 type SettingsPushCardProps = {
   pushEnabled: boolean;
@@ -22,7 +22,7 @@ export function SettingsPushCard({ pushEnabled, onChange }: SettingsPushCardProp
           <span className="cg-settings-row-title">Enable Push Alerts</span>
           <span className="cg-settings-row-desc">Receive real-time system notifications</span>
         </div>
-        <CgSwitch checked={pushEnabled} onChange={onChange} />
+        <CgSwitch checked={pushEnabled} onCheckedChange={onChange} />
       </div>
     </div>
   );
