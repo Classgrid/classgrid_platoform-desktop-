@@ -135,7 +135,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
-<li style="margin-bottom:10px;"><strong>Reply to this message:</strong> Simply respond to this email, and your reply will be added to the ticket.</li>
+
 <li style="margin-bottom:10px;"><strong>Add additional details:</strong> If you have screenshots, logs, or extra context, attach them to your reply.</li>
 <li style="margin-bottom:10px;"><strong>Check ticket status:</strong> Use the button below to view the full conversation history.</li>
 <li style="margin-bottom:10px;"><strong>Close the ticket:</strong> Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.</li>
@@ -221,7 +221,7 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl, admi
         stripHtml(replyMessage),
         "",
         "WHAT YOU CAN DO NEXT",
-        "- Reply to this message: Simply respond to this email.",
+
         "- Add additional details: Attach screenshots or logs to your reply.",
         "- Check ticket status: View the full conversation online.",
         "- Close the ticket: Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.",
@@ -354,10 +354,7 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
 <li style="margin-bottom:10px;">📘 <a href="https://classgrid.in/help-center" style="color:#34d399;text-decoration:none;">Classgrid Help Center</a> – Browse FAQs and how-to guides</li>
 </ul>
 
-<div style="padding:18px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
-  <h3 style="color:#ffffff;font-size:15px;margin:0 0 8px;">Need to reply?</h3>
-  <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0;">Simply respond directly to this email, and your message will be automatically appended to your ticket.</p>
-</div>
+
 
 <p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We appreciate your patience and trust in Classgrid. Our goal is to make your experience seamless and enjoyable.</p>
 <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
@@ -422,9 +419,7 @@ function buildTicketCreationPlainText({ ticket, trackingUrl }) {
         "While you wait, you may find these self-help resources useful:",
         "- Classgrid Help Center: https://classgrid.in/help-center",
         "",
-        "NEED TO REPLY?",
-        "Simply respond directly to this email, and your message will be automatically appended to your ticket.",
-        "",
+
         "Warm regards,",
         "The Classgrid Team",
         "",
@@ -707,7 +702,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
-<li style="margin-bottom:10px;"><strong>Reply directly:</strong> Respond to this email – your message goes straight to your specialist.</li>
+
 <li style="margin-bottom:10px;"><strong>Schedule a call:</strong> Your specialist can share a booking link if you prefer a live conversation.</li>
 <li style="margin-bottom:10px;"><strong>Ask follow-up questions:</strong> No question is too small – we're here to help you evaluate.</li>
 <li style="margin-bottom:10px;"><strong>Request materials:</strong> Ask for demos, pricing, case studies, or technical docs.</li>
@@ -780,7 +775,6 @@ export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversat
         stripHtml(replyMessage),
         "",
         "WHAT YOU CAN DO NEXT",
-        "- Reply directly: Respond to this email – your message goes straight to your specialist.",
         "- Schedule a call: Your specialist can share a booking link if you prefer a live conversation.",
         "- Ask follow-up questions: No question is too small – we're here to help you evaluate.",
         "- Request materials: Ask for demos, pricing, case studies, or technical docs.",
