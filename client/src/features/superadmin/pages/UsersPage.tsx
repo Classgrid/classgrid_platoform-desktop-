@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { Users, Building2, ShieldAlert, CheckCircle, RefreshCw, MoreVertical } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgAvatar } from "@/components/classgrid/Avatar";
+import { DataTable } from "@/components/marketing_ui/data-table";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { formatDate } from "@/utils/dateUtils";
@@ -30,7 +30,7 @@ function buildColumns(
         const u = row.original;
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <CgAvatar name={u.name} size="sm" />
+            <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
               <div style={{ fontWeight: 500 }}>{u.name}</div>
               <div className="cg-table__info">{u.email}</div>
@@ -199,29 +199,29 @@ export function UsersPage() {
 
       {/* Metrics */}
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Total Users"
           value={isLoading ? "—" : stats.total}
           icon={<Users size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Super Admins"
           value={isLoading ? "—" : stats.superAdmins}
           icon={<ShieldAlert size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Org Admins"
           value={isLoading ? "—" : stats.orgAdmins}
           icon={<Building2 size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Suspended"
           value={isLoading ? "—" : stats.suspended}
           icon={<CheckCircle size={16} />}
         />
       </div>
 
-      <CgSectionPanel
+      <SectionPanel
         title="User Directory"
         description="Search by name, email, or organization."
         noPadding
@@ -259,14 +259,14 @@ export function UsersPage() {
             </button>
           </div>
         ) : (
-          <CgDataTable
+          <DataTable
             columns={columns}
             data={filtered}
             pageSize={10}
             emptyMessage={isLoading ? "Loading users…" : "No users found."}
           />
         )}
-      </CgSectionPanel>
+      </SectionPanel>
     </div>
   );
 }
