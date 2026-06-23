@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -109,11 +109,11 @@ export function TransactionsPage() {
     },
     {
       accessorKey: "type", header: "Type", size: 110,
-      cell: ({ getValue }) => { const t = TYPE_BADGE[getValue<string>()] ?? { variant: "neutral", label: getValue<string>() }; return <CgBadge variant={t.variant}>{t.label}</CgBadge>; },
+      cell: ({ getValue }) => { const t = TYPE_BADGE[getValue<string>()] ?? { variant: "neutral", label: getValue<string>() }; return <Badge variant={t.variant}>{t.label}</Badge>; },
     },
     {
       accessorKey: "status", header: "Status", size: 100,
-      cell: ({ getValue }) => { const s = STATUS_BADGE[getValue<string>()] ?? { variant: "neutral", label: getValue<string>() }; return <CgBadge variant={s.variant} dot>{s.label}</CgBadge>; },
+      cell: ({ getValue }) => { const s = STATUS_BADGE[getValue<string>()] ?? { variant: "neutral", label: getValue<string>() }; return <Badge variant={s.variant} dot>{s.label}</Badge>; },
     },
     {
       accessorKey: "razorpayPaymentId", header: "Razorpay ID", size: 170,
@@ -129,9 +129,9 @@ export function TransactionsPage() {
         const t = row.original;
         if (t.status !== "success" || t.type === "refund") return null;
         return (
-          <CgButton size="sm" variant="outline" onClick={() => setRefundTarget(t)}>
+          <Button size="sm" variant="outline" onClick={() => setRefundTarget(t)}>
             <RotateCcw size={12} /> Refund
-          </CgButton>
+          </Button>
         );
       },
     },
@@ -149,8 +149,8 @@ export function TransactionsPage() {
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>
-            <CgButton onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</CgButton>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>
+            <Button onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</Button>
           </div>
         }
       />
@@ -197,10 +197,10 @@ export function TransactionsPage() {
             <input style={inputStyle} value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder="Enter refund reason…" />
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setRefundTarget(null)}>Cancel</CgButton>
-            <CgButton variant="destructive" isLoading={refundMut.isPending} onClick={() => refundMut.mutate({ id: refundTarget._id, reason: refundReason })}>
+            <Button variant="outline" onClick={() => setRefundTarget(null)}>Cancel</Button>
+            <Button variant="destructive" isLoading={refundMut.isPending} onClick={() => refundMut.mutate({ id: refundTarget._id, reason: refundReason })}>
               <RotateCcw size={14} /> Confirm Refund
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -228,11 +228,11 @@ export function TransactionsPage() {
             </div>
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setManualOpen(false)}>Cancel</CgButton>
-            <CgButton isLoading={manualMut.isPending} disabled={!manual.organizationId || !manual.amount}
+            <Button variant="outline" onClick={() => setManualOpen(false)}>Cancel</Button>
+            <Button isLoading={manualMut.isPending} disabled={!manual.organizationId || !manual.amount}
               onClick={() => manualMut.mutate({ ...manual, amount: parseFloat(manual.amount) })}>
               Record Payment
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

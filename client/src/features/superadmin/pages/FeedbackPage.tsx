@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgButton } from "@/components/classgrid/Button";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import { feedbackApi, type PlatformFeedback } from "../services/superAdminApi";
@@ -92,9 +92,9 @@ export function FeedbackPage() {
       cell: ({ getValue }) => {
         const val = getValue<string>();
         return (
-        <CgBadge variant={val === "new" ? "warning" : val === "reviewed" ? "success" : "neutral"}>
+        <Badge variant={val === "new" ? "warning" : val === "reviewed" ? "success" : "neutral"}>
           {val}
-        </CgBadge>
+        </Badge>
         );
       },
     },
@@ -104,22 +104,22 @@ export function FeedbackPage() {
       cell: ({ row }) => (
         <div className="flex gap-2">
           {row.original.status !== "reviewed" && (
-            <CgButton
+            <Button
               size="sm"
               variant="outline"
               onClick={() => updateMutation.mutate({ id: row.original._id, status: "reviewed" })}
             >
               Mark Reviewed
-            </CgButton>
+            </Button>
           )}
           {row.original.status !== "archived" && (
-            <CgButton
+            <Button
               size="sm"
               variant="ghost"
               onClick={() => updateMutation.mutate({ id: row.original._id, status: "archived" })}
             >
               Archive
-            </CgButton>
+            </Button>
           )}
         </div>
       ),
@@ -144,10 +144,10 @@ export function FeedbackPage() {
               className="pl-9 h-10"
             />
           </div>
-          <CgButton variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2">
             <Mail className="size-4" />
             Send Broadcast
-          </CgButton>
+          </Button>
         </div>
 
         <CgDataTable

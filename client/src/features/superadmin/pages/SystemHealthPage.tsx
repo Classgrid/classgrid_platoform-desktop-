@@ -8,8 +8,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -114,7 +114,7 @@ export function SystemHealthPage() {
       header: "Context",
       size: 150,
       cell: ({ getValue }) => (
-        <CgBadge variant="neutral">{getValue<string>() || "—"}</CgBadge>
+        <Badge variant="neutral">{getValue<string>() || "—"}</Badge>
       ),
     },
     {
@@ -143,10 +143,10 @@ export function SystemHealthPage() {
         title="System Health"
         description="Real-time platform monitoring — infrastructure status, background jobs, memory, and error logs."
         actions={
-          <CgButton variant="outline" onClick={() => { refetchMetrics(); refetchLogs(); }} disabled={metricsFetching}>
+          <Button variant="outline" onClick={() => { refetchMetrics(); refetchLogs(); }} disabled={metricsFetching}>
             <RefreshCw size={14} className={metricsFetching ? "cg-spin" : ""} />
             Refresh
-          </CgButton>
+          </Button>
         }
       />
 

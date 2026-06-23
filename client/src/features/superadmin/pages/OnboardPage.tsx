@@ -4,8 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building, Plus, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
@@ -98,7 +98,7 @@ export function OnboardPage() {
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => <CgBadge variant="warning">{row.original.status}</CgBadge>,
+      cell: ({ row }) => <Badge variant="warning">{row.original.status}</Badge>,
     },
     {
       accessorKey: "createdAt",
@@ -109,14 +109,14 @@ export function OnboardPage() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <CgButton
+        <Button
           size="sm"
           variant="outline"
           onClick={() => approveMutation.mutate(row.original._id)}
           disabled={approveMutation.isPending}
         >
           {approveMutation.isPending ? "Approving..." : "Approve"}
-        </CgButton>
+        </Button>
       ),
     },
   ];
@@ -145,14 +145,14 @@ export function OnboardPage() {
         description="Review pending requests and provision organizations through live backend APIs."
         actions={
           <>
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`size-4 ${isFetching ? "cg-spin" : ""}`} />
               Refresh
-            </CgButton>
-            <CgButton onClick={() => setIsCreating(true)}>
+            </Button>
+            <Button onClick={() => setIsCreating(true)}>
               <Plus className="size-4" />
               Onboard New Org
-            </CgButton>
+            </Button>
           </>
         }
       />
@@ -168,10 +168,10 @@ export function OnboardPage() {
               className="h-10 pl-9"
             />
           </div>
-          <CgButton onClick={() => setIsCreating(true)}>
+          <Button onClick={() => setIsCreating(true)}>
             <Plus className="size-4" />
             Onboard New Org
-          </CgButton>
+          </Button>
         </div>
 
         {isError ? (
@@ -182,7 +182,7 @@ export function OnboardPage() {
                 {(error as Error)?.message || "The pending organizations endpoint did not return data."}
               </p>
             </div>
-            <CgButton variant="outline" onClick={() => refetch()}>Retry</CgButton>
+            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
           </div>
         ) : null}
 
@@ -202,12 +202,12 @@ export function OnboardPage() {
           }
           emptyAction={
             pendingOrgs.length ? (
-              <CgButton variant="outline" onClick={() => setSearch("")}>Clear Search</CgButton>
+              <Button variant="outline" onClick={() => setSearch("")}>Clear Search</Button>
             ) : (
-              <CgButton onClick={() => setIsCreating(true)}>
+              <Button onClick={() => setIsCreating(true)}>
                 <Plus className="size-4" />
                 Create Organization
-              </CgButton>
+              </Button>
             )
           }
         />
@@ -276,12 +276,12 @@ export function OnboardPage() {
               <Input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} />
             </div>
             <DialogFooter className="mt-4">
-              <CgButton type="button" variant="outline" onClick={() => setIsCreating(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
                 Cancel
-              </CgButton>
-              <CgButton type="submit" isLoading={createMutation.isPending}>
+              </Button>
+              <Button type="submit" isLoading={createMutation.isPending}>
                 Submit
-              </CgButton>
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

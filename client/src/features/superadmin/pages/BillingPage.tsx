@@ -129,9 +129,9 @@ export function BillingPage() {
       header: "Status",
       accessorKey: "status",
       cell: ({ row }) => (
-        <CgBadge variant={statusVariant(row.original.status)} dot>
+        <Badge variant={statusVariant(row.original.status)} dot>
           {row.original.status ?? "unknown"}
-        </CgBadge>
+        </Badge>
       ),
     },
     {
@@ -160,9 +160,9 @@ export function BillingPage() {
       header: "Actions",
       id: "actions",
       cell: ({ row }) => (
-        <CgButton size="sm" variant="outline" onClick={() => openManage(row.original)}>
+        <Button size="sm" variant="outline" onClick={() => openManage(row.original)}>
           <CreditCard size={13} /> Manage Plan
-        </CgButton>
+        </Button>
       ),
     },
   ];
@@ -175,10 +175,10 @@ export function BillingPage() {
         title="Plans & Billing"
         description="Manage organization subscriptions, quotas, and platform access."
         actions={
-          <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
             Refresh
-          </CgButton>
+          </Button>
         }
       />
 
@@ -213,8 +213,8 @@ export function BillingPage() {
         noPadding
         actions={
           orgsError
-            ? <CgBadge variant="danger">Load error</CgBadge>
-            : <CgBadge variant="success">Live data</CgBadge>
+            ? <Badge variant="danger">Load error</Badge>
+            : <Badge variant="success">Live data</Badge>
         }
       >
         <div style={{ padding: "1rem" }}>
@@ -311,16 +311,16 @@ export function BillingPage() {
           )}
 
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setSelectedOrg(null)}>
+            <Button variant="outline" onClick={() => setSelectedOrg(null)}>
               Cancel
-            </CgButton>
-            <CgButton
+            </Button>
+            <Button
               onClick={() => updateMutation.mutate({ plan, expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined })}
               isLoading={updateMutation.isPending}
               disabled={subLoading}
             >
               Update Subscription
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

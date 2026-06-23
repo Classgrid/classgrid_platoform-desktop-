@@ -3,7 +3,7 @@ import { Users, Building2, ShieldAlert, CheckCircle, RefreshCw, MoreVertical } f
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
@@ -47,9 +47,9 @@ function buildColumns(
         const role = getValue<string>();
         const isSuper = role === "super_admin";
         return (
-          <CgBadge variant={isSuper ? "danger" : "info"}>
+          <Badge variant={isSuper ? "danger" : "info"}>
             {role.replace("_", " ")}
-          </CgBadge>
+          </Badge>
         );
       },
     },
@@ -71,9 +71,9 @@ function buildColumns(
         const s = getValue<string>();
         const isActive = s === "active" || (!s && row.original.isEmailVerified);
         return isActive ? (
-          <CgBadge variant="success" dot>Active</CgBadge>
+          <Badge variant="success" dot>Active</Badge>
         ) : (
-          <CgBadge variant="warning">Suspended</CgBadge>
+          <Badge variant="warning">Suspended</Badge>
         );
       },
     },

@@ -5,8 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgAvatar } from "@/components/classgrid/Avatar";
@@ -58,7 +58,7 @@ export function GdprPage() {
         );
       },
     },
-    { accessorKey: "role", header: "Role", size: 130, cell: ({ getValue }) => <CgBadge variant="neutral">{getValue<string>().replace(/_/g, " ")}</CgBadge> },
+    { accessorKey: "role", header: "Role", size: 130, cell: ({ getValue }) => <Badge variant="neutral">{getValue<string>().replace(/_/g, " ")}</Badge> },
     {
       accessorKey: "organizationName", header: "Organization", size: 170,
       cell: ({ getValue }) => getValue<string>() || <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>Platform</span>,
@@ -67,9 +67,9 @@ export function GdprPage() {
       accessorKey: "status", header: "Status", size: 100,
       cell: ({ getValue }) => {
         const s = getValue<string>() ?? "active";
-        if (s === "active") return <CgBadge variant="success" dot>Active</CgBadge>;
-        if (s === "deleted") return <CgBadge variant="danger">Erased</CgBadge>;
-        return <CgBadge variant="warning">{s}</CgBadge>;
+        if (s === "active") return <Badge variant="success" dot>Active</Badge>;
+        if (s === "deleted") return <Badge variant="danger">Erased</Badge>;
+        return <Badge variant="warning">{s}</Badge>;
       },
     },
     { accessorKey: "createdAt", header: "Joined", size: 120, cell: ({ getValue }) => <span style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</span> },
@@ -80,9 +80,9 @@ export function GdprPage() {
         const isErased = u.status === "deleted" || u.name === "Deleted User";
         return (
           <div style={{ display: "flex", gap: "0.35rem" }}>
-            <CgButton size="sm" variant="outline" onClick={() => handleExport(u)}><Download size={12} /> Export</CgButton>
+            <Button size="sm" variant="outline" onClick={() => handleExport(u)}><Download size={12} /> Export</Button>
             {!isErased && u.role !== "super_admin" && (
-              <CgButton size="sm" variant="destructive" onClick={() => setEraseTarget(u)}><Trash2 size={12} /> Erase</CgButton>
+              <Button size="sm" variant="destructive" onClick={() => setEraseTarget(u)}><Trash2 size={12} /> Erase</Button>
             )}
           </div>
         );
@@ -100,7 +100,7 @@ export function GdprPage() {
       <CgPageHeader
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
-        actions={<CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
       />
       <div style={{ marginBottom: "1.25rem", padding: "1rem 1.25rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--warning) / 0.4)", background: "hsl(var(--warning) / 0.06)", display: "flex", gap: "0.75rem" }}>
         <AlertTriangle size={18} style={{ color: "hsl(var(--warning))", flexShrink: 0, marginTop: "0.1rem" }} />
@@ -132,10 +132,10 @@ export function GdprPage() {
             <input style={inputStyle} value={eraseConfirmText} onChange={e => setEraseConfirmText(e.target.value)} placeholder="ERASE" />
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => { setEraseTarget(null); setEraseConfirmText(""); }}>Cancel</CgButton>
-            <CgButton variant="destructive" isLoading={eraseMut.isPending} disabled={eraseConfirmText !== "ERASE"} onClick={() => eraseMut.mutate(eraseTarget._id)}>
+            <Button variant="outline" onClick={() => { setEraseTarget(null); setEraseConfirmText(""); }}>Cancel</Button>
+            <Button variant="destructive" isLoading={eraseMut.isPending} disabled={eraseConfirmText !== "ERASE"} onClick={() => eraseMut.mutate(eraseTarget._id)}>
               <Trash2 size={14} /> Erase Permanently
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

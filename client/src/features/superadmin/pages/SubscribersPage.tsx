@@ -12,9 +12,9 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
@@ -146,11 +146,11 @@ export function SubscribersPage() {
         size: 120,
         cell: ({ row }) =>
           row.original.is_active ? (
-            <CgBadge variant="success" dot>
+            <Badge variant="success" dot>
               Active
-            </CgBadge>
+            </Badge>
           ) : (
-            <CgBadge variant="warning">Paused</CgBadge>
+            <Badge variant="warning">Paused</Badge>
           ),
       },
       {
@@ -183,32 +183,32 @@ export function SubscribersPage() {
           return (
             <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
               {subscriber.is_active ? (
-                <CgButton
+                <Button
                   size="sm"
                   variant="outline"
                   disabled={isMutating}
                   onClick={() => handlePause(subscriber.email)}
                 >
                   Pause
-                </CgButton>
+                </Button>
               ) : (
-                <CgButton
+                <Button
                   size="sm"
                   variant="success"
                   disabled={isMutating}
                   onClick={() => handleResume(subscriber.email)}
                 >
                   Resume
-                </CgButton>
+                </Button>
               )}
-              <CgButton
+              <Button
                 size="sm"
                 variant="destructive"
                 disabled={isMutating}
                 onClick={() => handleRemove(subscriber.email)}
               >
                 Remove
-              </CgButton>
+              </Button>
             </div>
           );
         },
@@ -246,22 +246,22 @@ export function SubscribersPage() {
         size: 220,
         cell: ({ row }) => (
           <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
-            <CgButton
+            <Button
               size="sm"
               variant="success"
               disabled={isMutating}
               onClick={() => handleResume(row.original.email)}
             >
               Resume
-            </CgButton>
-            <CgButton
+            </Button>
+            <Button
               size="sm"
               variant="destructive"
               disabled={isMutating}
               onClick={() => handleRemove(row.original.email)}
             >
               Remove
-            </CgButton>
+            </Button>
           </div>
         ),
       },
@@ -296,14 +296,14 @@ export function SubscribersPage() {
         title="Subscribers"
         description="Track growth, unsubscribes, and audience health for blog and changelog emails."
         actions={
-          <CgButton
+          <Button
             variant="outline"
             onClick={() => refetch()}
             disabled={isFetching || isMutating}
           >
             <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
             Refresh
-          </CgButton>
+          </Button>
         }
       />
 
@@ -480,9 +480,9 @@ export function SubscribersPage() {
                       Joined {formatSubscriberDate(subscriber.created_at)}
                     </div>
                   </div>
-                  <CgBadge variant="success" dot>
+                  <Badge variant="success" dot>
                     Active
-                  </CgBadge>
+                  </Badge>
                 </div>
               ))}
             </div>

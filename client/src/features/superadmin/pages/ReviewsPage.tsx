@@ -3,8 +3,8 @@ import { Star, MessageSquareQuote, RefreshCw, TrendingUp } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { useReviews } from "../queries/useReviews";
 import type { Review } from "../services/superAdminApi";
@@ -107,9 +107,9 @@ const columns: ColumnDef<Review>[] = [
     cell: ({ getValue }) => {
       const isPublic = getValue<boolean>();
       return isPublic ? (
-        <CgBadge variant="success">Public</CgBadge>
+        <Badge variant="success">Public</Badge>
       ) : (
-        <CgBadge variant="neutral">Private</CgBadge>
+        <Badge variant="neutral">Private</Badge>
       );
     },
   },
@@ -157,9 +157,9 @@ export function ReviewsPage() {
           </p>
         </div>
         <div className="cg-page__header-actions">
-          <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
             <RefreshCw size={14} /> Refresh
-          </CgButton>
+          </Button>
         </div>
       </div>
 
@@ -206,7 +206,7 @@ export function ReviewsPage() {
         {isError ? (
           <div className="p-6 text-center text-destructive border border-destructive/30 rounded-lg">
             <p className="font-medium mb-3">Failed to load reviews. Check your connection.</p>
-            <CgButton variant="outline" onClick={() => refetch()}>Retry</CgButton>
+            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
           </div>
         ) : (
           <CgDataTable

@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
@@ -73,7 +73,7 @@ export function GlobalUsersPage() {
       accessorKey: "role", header: "Role", size: 130,
       cell: ({ getValue }) => {
         const r = getValue<string>();
-        return <CgBadge variant={r === "super_admin" ? "danger" : r === "org_admin" ? "info" : "neutral"}>{r.replace(/_/g, " ")}</CgBadge>;
+        return <Badge variant={r === "super_admin" ? "danger" : r === "org_admin" ? "info" : "neutral"}>{r.replace(/_/g, " ")}</Badge>;
       },
     },
     {
@@ -84,8 +84,8 @@ export function GlobalUsersPage() {
       accessorKey: "status", header: "Status", size: 110,
       cell: ({ getValue }) => {
         const s = getValue<string>() ?? "active";
-        if (s === "active") return <CgBadge variant="success" dot>Active</CgBadge>;
-        return <CgBadge variant="danger">{s}</CgBadge>;
+        if (s === "active") return <Badge variant="success" dot>Active</Badge>;
+        return <Badge variant="danger">{s}</Badge>;
       },
     },
     {
@@ -100,12 +100,12 @@ export function GlobalUsersPage() {
         return (
           <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
             {isBanned
-              ? <CgButton size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "unban" })}><UserCheck size={12} /> Unban</CgButton>
-              : <CgButton size="sm" variant="destructive" onClick={() => setConfirm({ user: u, action: "ban" })}><Ban size={12} /> Ban</CgButton>
+              ? <Button size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "unban" })}><UserCheck size={12} /> Unban</Button>
+              : <Button size="sm" variant="destructive" onClick={() => setConfirm({ user: u, action: "ban" })}><Ban size={12} /> Ban</Button>
             }
-            <CgButton size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "force-logout" })}><LogOut size={12} /> Logout</CgButton>
-            <CgButton size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "reset-password" })}><Key size={12} /> Reset</CgButton>
-            <CgButton size="sm" variant="outline" onClick={() => { setNewRole(u.role); setConfirm({ user: u, action: "change-role" }); }}>Role</CgButton>
+            <Button size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "force-logout" })}><LogOut size={12} /> Logout</Button>
+            <Button size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "reset-password" })}><Key size={12} /> Reset</Button>
+            <Button size="sm" variant="outline" onClick={() => { setNewRole(u.role); setConfirm({ user: u, action: "change-role" }); }}>Role</Button>
           </div>
         );
       },
@@ -132,7 +132,7 @@ export function GlobalUsersPage() {
       <CgPageHeader
         title="Global User Control"
         description="Search and manage any user across all organizations. All actions are logged."
-        actions={<CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
       />
       <div className="cg-stats-grid">
         <CgMetricCard title="Total Users" value={isLoading ? "—" : total} icon={<Users size={15} />} />
@@ -169,13 +169,13 @@ export function GlobalUsersPage() {
             </div>
           )}
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setConfirm(null)}>Cancel</CgButton>
-            <CgButton
+            <Button variant="outline" onClick={() => setConfirm(null)}>Cancel</Button>
+            <Button
               variant={confirm?.action === "ban" ? "destructive" : "default"}
               isLoading={isPending}
               onClick={executeAction}
               disabled={confirm?.action === "change-role" && !newRole}
-            >Confirm</CgButton>
+            >Confirm</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

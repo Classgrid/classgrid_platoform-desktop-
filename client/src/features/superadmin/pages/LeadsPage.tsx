@@ -6,8 +6,8 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -116,8 +116,8 @@ function LeadDrawer({
 
           {/* Status badges */}
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            <CgBadge variant={STATUS_MAP[lead.status]?.variant ?? "neutral"}>{STATUS_MAP[lead.status]?.label ?? lead.status}</CgBadge>
-            <CgBadge variant={MEETING_MAP[lead.meetingStatus ?? "pending"]?.variant ?? "neutral"}>{MEETING_MAP[lead.meetingStatus ?? "pending"]?.label ?? "No Meeting"}</CgBadge>
+            <Badge variant={STATUS_MAP[lead.status]?.variant ?? "neutral"}>{STATUS_MAP[lead.status]?.label ?? lead.status}</Badge>
+            <Badge variant={MEETING_MAP[lead.meetingStatus ?? "pending"]?.variant ?? "neutral"}>{MEETING_MAP[lead.meetingStatus ?? "pending"]?.label ?? "No Meeting"}</Badge>
           </div>
 
           {/* Contact info */}
@@ -296,7 +296,7 @@ function buildColumns(onOpen: (lead: Lead) => void): ColumnDef<Lead>[] {
       cell: ({ getValue }) => {
         const s = getValue<LeadStatus>();
         const { label, variant } = STATUS_MAP[s] ?? { label: s, variant: "neutral" as const };
-        return <CgBadge variant={variant} dot>{label}</CgBadge>;
+        return <Badge variant={variant} dot>{label}</Badge>;
       },
     },
     {
@@ -306,7 +306,7 @@ function buildColumns(onOpen: (lead: Lead) => void): ColumnDef<Lead>[] {
       cell: ({ getValue }) => {
         const s = getValue<string>();
         const { label, variant } = MEETING_MAP[s] ?? { label: "No Meeting", variant: "neutral" as const };
-        return <CgBadge variant={variant}>{label}</CgBadge>;
+        return <Badge variant={variant}>{label}</Badge>;
       },
     },
     {
@@ -410,10 +410,10 @@ export function LeadsPage() {
           <p className="cg-page__description">Manage inbound demo requests. Click any row to approve, schedule meeting, or contact.</p>
         </div>
         <div className="cg-page__header-actions">
-          <CgButton onClick={() => setShowCreateForm(true)}><Plus size={14} /> Add Lead</CgButton>
-          <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
+          <Button onClick={() => setShowCreateForm(true)}><Plus size={14} /> Add Lead</Button>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
             <RefreshCw size={14} /> Refresh
-          </CgButton>
+          </Button>
         </div>
       </div>
 

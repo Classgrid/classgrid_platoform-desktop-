@@ -3,7 +3,7 @@ import { FileText, Plus, RefreshCw, Send, History } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgModal, CgModalContent, CgModalFooter } from "@/components/classgrid/Modal";
 import { useChangelog, useCreateChangelog, useDeleteChangelog } from "../queries/useChangelog";
@@ -44,7 +44,7 @@ function buildColumns(onDelete: (id: string) => void, deleting: boolean): Column
       cell: ({ getValue }) => {
         const t = getValue<ChangelogType>();
         const cfg = TYPE_MAP[t] ?? { label: t, variant: "neutral" as const };
-        return <CgBadge variant={cfg.variant}>{cfg.label}</CgBadge>;
+        return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
       },
     },
     {
@@ -78,7 +78,7 @@ function buildColumns(onDelete: (id: string) => void, deleting: boolean): Column
       size: 110,
       cell: ({ getValue }) => {
         const isPub = getValue<boolean>();
-        return isPub ? <CgBadge variant="success" dot>Published</CgBadge> : <CgBadge variant="warning">Draft</CgBadge>;
+        return isPub ? <Badge variant="success" dot>Published</Badge> : <Badge variant="warning">Draft</Badge>;
       },
     },
     {

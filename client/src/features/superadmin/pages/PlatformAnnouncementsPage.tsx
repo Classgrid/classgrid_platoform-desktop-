@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgButton } from "@/components/classgrid/Button";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
@@ -69,9 +69,9 @@ export function PlatformAnnouncementsPage() {
       cell: ({ getValue }) => {
         const val = getValue<string>();
         return (
-        <CgBadge variant="neutral" className="capitalize">
+        <Badge variant="neutral" className="capitalize">
           {val.replace("_", " ")}
-        </CgBadge>
+        </Badge>
         );
       },
     },
@@ -81,7 +81,7 @@ export function PlatformAnnouncementsPage() {
       cell: ({ getValue }) => {
         const val = getValue<string>();
         return (
-        <CgBadge variant={val === "sent" ? "success" : "warning"}>{val}</CgBadge>
+        <Badge variant={val === "sent" ? "success" : "warning"}>{val}</Badge>
         );
       },
     },
@@ -110,10 +110,10 @@ export function PlatformAnnouncementsPage() {
               className="pl-9 h-10"
             />
           </div>
-          <CgButton className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <Megaphone className="size-4" />
             New Broadcast
-          </CgButton>
+          </Button>
         </div>
 
         <CgDataTable
@@ -165,16 +165,16 @@ export function PlatformAnnouncementsPage() {
           </div>
 
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               Cancel
-            </CgButton>
-            <CgButton
+            </Button>
+            <Button
               onClick={() => broadcastMutation.mutate({ title, body, target })}
               isLoading={broadcastMutation.isPending}
               disabled={!title || !body}
             >
               Send Now
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -4,8 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building2, ClipboardList, Megaphone, Plus, RefreshCw, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
@@ -89,9 +89,9 @@ export function DashboardHomePage() {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-          <CgBadge variant={orgStatusVariant(row.original.status)} dot>
+          <Badge variant={orgStatusVariant(row.original.status)} dot>
             {row.original.status ?? "unknown"}
-          </CgBadge>
+          </Badge>
         ),
       },
     ],
@@ -108,10 +108,10 @@ export function DashboardHomePage() {
           </p>
         </div>
         <div className="cg-page__header-actions">
-          <CgButton variant="outline" onClick={() => { refetch(); refetchOrgs(); }} disabled={isFetching || orgsFetching}>
+          <Button variant="outline" onClick={() => { refetch(); refetchOrgs(); }} disabled={isFetching || orgsFetching}>
             <RefreshCw size={14} className={isFetching || orgsFetching ? "cg-spin" : ""} />
             Refresh
-          </CgButton>
+          </Button>
         </div>
       </div>
 
@@ -123,7 +123,7 @@ export function DashboardHomePage() {
               Ensure the backend server is running on <code>localhost:3000</code> and you are logged in as Super Admin.
             </p>
           </div>
-          <CgButton variant="outline" onClick={() => refetch()}>Retry</CgButton>
+          <Button variant="outline" onClick={() => refetch()}>Retry</Button>
         </div>
       )}
 
@@ -176,12 +176,12 @@ export function DashboardHomePage() {
             emptyTitle="No organizations yet"
             emptyDescription="Create an organization to see real backend records here."
             emptyAction={
-              <CgButton asChild>
+              <Button asChild>
                 <Link to="/superadmin/onboard">
                   <Plus className="size-4" />
                   Create Organization
                 </Link>
-              </CgButton>
+              </Button>
             }
           />
         </CgSectionPanel>

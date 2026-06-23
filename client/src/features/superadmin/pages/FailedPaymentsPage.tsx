@@ -5,8 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -87,7 +87,7 @@ export function FailedPaymentsPage() {
         accessorKey: "type",
         header: "Type",
         size: 110,
-        cell: ({ getValue }) => <CgBadge variant="neutral">{getValue<string>()}</CgBadge>,
+        cell: ({ getValue }) => <Badge variant="neutral">{getValue<string>()}</Badge>,
       },
       {
         accessorKey: "razorpayOrderId",
@@ -129,9 +129,9 @@ export function FailedPaymentsPage() {
         title="Failed Payments"
         description="All platform billing payments that failed or were not completed. Investigate and follow up with organizations."
         actions={
-          <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh
-          </CgButton>
+          </Button>
         }
       />
 

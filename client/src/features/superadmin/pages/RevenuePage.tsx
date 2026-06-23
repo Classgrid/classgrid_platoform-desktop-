@@ -5,7 +5,7 @@ import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { IndianRupee, TrendingUp, TrendingDown, RefreshCw, Users, CreditCard } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -58,9 +58,9 @@ export function RevenuePage() {
         cell: ({ getValue }) => {
           const plan = getValue<string>();
           return (
-            <CgBadge variant={plan === "active" ? "success" : "neutral"} dot>
+            <Badge variant={plan === "active" ? "success" : "neutral"} dot>
               {plan === "active" ? "Paid" : "Demo"}
-            </CgBadge>
+            </Badge>
           );
         },
       },
@@ -77,7 +77,7 @@ export function RevenuePage() {
         cell: ({ getValue }) => {
           const status = getValue<string>();
           const variant = status === "successful" ? "success" : status === "failed" ? "danger" : "warning";
-          return <CgBadge variant={variant}>{status}</CgBadge>;
+          return <Badge variant={variant}>{status}</Badge>;
         },
       },
       {

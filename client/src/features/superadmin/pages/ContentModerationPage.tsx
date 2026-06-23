@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -94,11 +94,11 @@ export function ContentModerationPage() {
     },
     {
       accessorKey: "contentType", header: "Content Type", size: 130,
-      cell: ({ getValue }) => <CgBadge variant="neutral">{CONTENT_LABELS[getValue<string>()] ?? getValue<string>()}</CgBadge>,
+      cell: ({ getValue }) => <Badge variant="neutral">{CONTENT_LABELS[getValue<string>()] ?? getValue<string>()}</Badge>,
     },
     {
       accessorKey: "reason", header: "Reason", size: 130,
-      cell: ({ getValue }) => <CgBadge variant="danger">{REASON_LABELS[getValue<string>()] ?? getValue<string>()}</CgBadge>,
+      cell: ({ getValue }) => <Badge variant="danger">{REASON_LABELS[getValue<string>()] ?? getValue<string>()}</Badge>,
     },
     {
       accessorKey: "contentPreview", header: "Content Preview", size: 240,
@@ -116,9 +116,9 @@ export function ContentModerationPage() {
       accessorKey: "status", header: "Status", size: 110,
       cell: ({ getValue }) => {
         const s = getValue<string>();
-        if (s === "pending") return <CgBadge variant="warning" dot>Pending</CgBadge>;
-        if (s === "resolved") return <CgBadge variant="success">Resolved</CgBadge>;
-        return <CgBadge variant="neutral">{s}</CgBadge>;
+        if (s === "pending") return <Badge variant="warning" dot>Pending</Badge>;
+        if (s === "resolved") return <Badge variant="success">Resolved</Badge>;
+        return <Badge variant="neutral">{s}</Badge>;
       },
     },
     {
@@ -132,8 +132,8 @@ export function ContentModerationPage() {
         if (r.status !== "pending") return <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>{r.resolution?.action ?? "—"}</span>;
         return (
           <div style={{ display: "flex", gap: "0.3rem" }}>
-            <CgButton size="sm" onClick={() => { setSelected(r); setResolveAction("no_action"); setResolveNote(""); }}>Review</CgButton>
-            <CgButton size="sm" variant="outline" isLoading={dismissMut.isPending} onClick={() => dismissMut.mutate(r._id)}>Dismiss</CgButton>
+            <Button size="sm" onClick={() => { setSelected(r); setResolveAction("no_action"); setResolveNote(""); }}>Review</Button>
+            <Button size="sm" variant="outline" isLoading={dismissMut.isPending} onClick={() => dismissMut.mutate(r._id)}>Dismiss</Button>
           </div>
         );
       },
@@ -150,7 +150,7 @@ export function ContentModerationPage() {
       <CgPageHeader
         title="Content Moderation"
         description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
-        actions={<CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
       />
 
       <div className="cg-stats-grid">
@@ -211,10 +211,10 @@ export function ContentModerationPage() {
             </div>
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => dismissMut.mutate(selected._id)} isLoading={dismissMut.isPending}>Dismiss</CgButton>
-            <CgButton isLoading={resolveMut.isPending} onClick={() => resolveMut.mutate({ id: selected._id, action: resolveAction, note: resolveNote })}>
+            <Button variant="outline" onClick={() => dismissMut.mutate(selected._id)} isLoading={dismissMut.isPending}>Dismiss</Button>
+            <Button isLoading={resolveMut.isPending} onClick={() => resolveMut.mutate({ id: selected._id, action: resolveAction, note: resolveNote })}>
               <CheckCircle2 size={14} /> Resolve
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -3,8 +3,8 @@ import { Users, UserPlus, X, Loader, Shield, Headphones, TrendingUp, Settings, R
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -182,12 +182,12 @@ export function TeamPage() {
         description="Invite co-admins, support agents, sales staff, and analysts to help manage Classgrid. Each role has controlled access."
         actions={
           <div className="flex gap-2">
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
-            </CgButton>
-            <CgButton onClick={() => { setShowForm(true); setFormResult(null); }}>
+            </Button>
+            <Button onClick={() => { setShowForm(true); setFormResult(null); }}>
               <UserPlus size={14} /> Invite Team Member
-            </CgButton>
+            </Button>
           </div>
         }
       />
@@ -265,12 +265,12 @@ export function TeamPage() {
             </div>
 
             <DialogFooter className="mt-4">
-              <CgButton type="button" variant="outline" onClick={() => setShowForm(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                 Cancel
-              </CgButton>
-              <CgButton type="submit" isLoading={inviteMutation.isPending}>
+              </Button>
+              <Button type="submit" isLoading={inviteMutation.isPending}>
                 <UserPlus size={14} /> Send Invite
-              </CgButton>
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -331,14 +331,14 @@ export function TeamPage() {
                         </select>
                       </td>
                       <td className="px-4 py-3">
-                        <CgBadge variant={m.status === "active" ? "success" : m.status === "suspended" ? "danger" : "warning"} dot>
+                        <Badge variant={m.status === "active" ? "success" : m.status === "suspended" ? "danger" : "warning"} dot>
                           {m.status}
-                        </CgBadge>
+                        </Badge>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(m.lastLogin)}</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(m.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
-                        <CgButton
+                        <Button
                           size="sm"
                           variant="danger"
                           onClick={() => removeMutation.mutate(m._id)}
@@ -346,7 +346,7 @@ export function TeamPage() {
                           title="Remove from team"
                         >
                           <Trash2 size={14} />
-                        </CgButton>
+                        </Button>
                       </td>
                     </tr>
                   );

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { CgSwitch } from "@/components/classgrid/Switch";
+import { Switch } from "@/components/ui/switch";
 import { CgSkeleton } from "@/components/classgrid/Skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
@@ -74,7 +74,7 @@ export function SandboxPage() {
             <h2 className="text-xs font-bold text-muted-foreground tracking-widest uppercase">CgSwitch</h2>
           </div>
           
-          <CgSwitch 
+          <Switch 
             checked={theme === "dark"} 
             onCheckedChange={(c) => setTheme(c ? "dark" : "light")} 
           />

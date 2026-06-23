@@ -3,8 +3,8 @@ import { Server, Activity, Database, Shield, Power } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { useSystemHealth, useFeatureFlags, useToggleFeatureFlag } from "../queries/useConfig";
 import type { FeatureFlag } from "../services/superAdminApi";
@@ -27,7 +27,7 @@ function buildFlagColumns(
       header: "Module",
       size: 130,
       cell: ({ getValue }) => (
-        <CgBadge variant="neutral">{getValue<string>()}</CgBadge>
+        <Badge variant="neutral">{getValue<string>()}</Badge>
       ),
     },
     {
@@ -42,9 +42,9 @@ function buildFlagColumns(
       cell: ({ getValue }) => {
         const isEnabled = getValue<boolean>();
         return isEnabled ? (
-          <CgBadge variant="success" dot>Active</CgBadge>
+          <Badge variant="success" dot>Active</Badge>
         ) : (
-          <CgBadge variant="danger">Disabled</CgBadge>
+          <Badge variant="danger">Disabled</Badge>
         );
       },
     },
@@ -55,7 +55,7 @@ function buildFlagColumns(
       cell: ({ row }) => {
         const flag = row.original;
         return (
-          <CgButton
+          <Button
             variant={flag.isEnabled ? "destructive" : "default"}
             size="sm"
             disabled={toggling}
@@ -64,7 +64,7 @@ function buildFlagColumns(
           >
             <Power size={14} />
             {flag.isEnabled ? "Disable" : "Enable"}
-          </CgButton>
+          </Button>
         );
       },
     },

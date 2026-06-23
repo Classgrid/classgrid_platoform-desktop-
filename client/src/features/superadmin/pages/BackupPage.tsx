@@ -10,8 +10,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
@@ -149,10 +149,10 @@ export function BackupPage() {
     {
       id: "export", header: "Export", size: 130,
       cell: ({ row }) => (
-        <CgButton size="sm" variant="outline" isLoading={exporting === row.original.key}
+        <Button size="sm" variant="outline" isLoading={exporting === row.original.key}
           onClick={() => setExportTarget(row.original)}>
           <Download size={12} /> Export
-        </CgButton>
+        </Button>
       ),
     },
   ], [exporting]);
@@ -165,7 +165,7 @@ export function BackupPage() {
       accessorKey: "ts", header: "Exported At", size: 200,
       cell: ({ getValue }) => <span style={{ fontSize: "0.82rem" }}>{new Date(getValue<string>()).toLocaleString("en-IN")}</span>,
     },
-    { id: "status", header: "Status", size: 100, cell: () => <CgBadge variant="success" dot>Downloaded</CgBadge> },
+    { id: "status", header: "Status", size: 100, cell: () => <Badge variant="success" dot>Downloaded</Badge> },
   ], []);
 
   return (
@@ -180,9 +180,9 @@ export function BackupPage() {
               <TabBtn active={tab === "export"} onClick={() => setTab("export")}>Data Export</TabBtn>
               <TabBtn active={tab === "integrity"} onClick={() => { setTab("integrity"); refetchIntegrity(); }}>Integrity Check</TabBtn>
             </div>
-            <CgButton variant="outline" onClick={refetchAll}>
+            <Button variant="outline" onClick={refetchAll}>
               <RefreshCw size={14} /> Refresh
-            </CgButton>
+            </Button>
           </div>
         }
       />
@@ -211,7 +211,7 @@ export function BackupPage() {
               </div>
             </div>
             <a href="https://cloud.mongodb.com" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-              <CgButton variant="outline" size="sm"><ExternalLink size={13} /> Open Atlas</CgButton>
+              <Button variant="outline" size="sm"><ExternalLink size={13} /> Open Atlas</Button>
             </a>
           </div>
 
@@ -254,7 +254,7 @@ export function BackupPage() {
                   <div style={{ fontWeight: 500, fontSize: "0.9rem" }}>{label}</div>
                   <div style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>{desc}</div>
                 </div>
-                <CgBadge variant={ok ? "success" : "warning"}>{status}</CgBadge>
+                <Badge variant={ok ? "success" : "warning"}>{status}</Badge>
               </div>
             ))}
           </CgSectionPanel>
@@ -314,9 +314,9 @@ export function BackupPage() {
                 </div>
               )}
             </div>
-            <CgButton variant="outline" onClick={() => refetchIntegrity()} isLoading={integrityLoading}>
+            <Button variant="outline" onClick={() => refetchIntegrity()} isLoading={integrityLoading}>
               <Search size={14} /> Re-run Check
-            </CgButton>
+            </Button>
           </div>
 
           {/* Issues */}
@@ -344,7 +344,7 @@ export function BackupPage() {
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <span style={{ fontWeight: 700, fontFamily: "monospace", fontSize: "0.95rem" }}>{formatCount(check.value)}</span>
-                    <CgBadge variant={check.ok ? "success" : "warning"}>{check.ok ? "OK" : "Review"}</CgBadge>
+                    <Badge variant={check.ok ? "success" : "warning"}>{check.ok ? "OK" : "Review"}</Badge>
                   </div>
                 </div>
               ))
@@ -365,10 +365,10 @@ export function BackupPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setExportTarget(null)}>Cancel</CgButton>
-            <CgButton isLoading={exporting === exportTarget?.key} onClick={() => handleExport(exportTarget)}>
+            <Button variant="outline" onClick={() => setExportTarget(null)}>Cancel</Button>
+            <Button isLoading={exporting === exportTarget?.key} onClick={() => handleExport(exportTarget)}>
               <Download size={14} /> Download JSON
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

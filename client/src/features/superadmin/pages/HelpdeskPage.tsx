@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import RichReplyEditor, { type RichReplyEditorRef } from "@/app/support/components/RichReplyEditor";
 import { RichSupportContent, getPlainTextFromHtml } from "@/app/support/components/RichSupportContent";
 import { supportApi } from "../services/superAdminApi";
@@ -79,7 +79,7 @@ function ThreadItem({
         <span className="cg-helpdesk__thread-org">
           {ticket.organization_id?.name ?? ticket.submitterName}
         </span>
-        <CgBadge variant={variant} dot>{label}</CgBadge>
+        <Badge variant={variant} dot>{label}</Badge>
       </div>
       {ticket.message && (
         <p className="cg-helpdesk__thread-preview">{getPlainTextFromHtml(ticket.message).slice(0, 90)}...</p>
@@ -142,7 +142,7 @@ function ChatPanel({
           </span>
         </div>
         <div className="cg-helpdesk__chat-actions">
-          <CgBadge variant={statusVariant} dot>{statusLabel}</CgBadge>
+          <Badge variant={statusVariant} dot>{statusLabel}</Badge>
           {ticket.status !== "resolved" && (
             <button
               className="cg-btn cg-btn--success cg-btn--sm"

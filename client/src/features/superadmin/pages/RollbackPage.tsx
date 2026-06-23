@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
@@ -62,7 +62,7 @@ export function RollbackPage() {
       accessorKey: "action", header: "Action", size: 170,
       cell: ({ getValue }) => {
         const a = ACTION_LABELS[getValue<string>()] ?? { label: getValue<string>(), variant: "neutral" };
-        return <CgBadge variant={a.variant}>{a.label}</CgBadge>;
+        return <Badge variant={a.variant}>{a.label}</Badge>;
       },
     },
     {
@@ -89,8 +89,8 @@ export function RollbackPage() {
       accessorKey: "rollbackStatus", header: "Status", size: 120,
       cell: ({ getValue }) => {
         const s = getValue<string>();
-        if (s === "rolled_back") return <CgBadge variant="success" dot>Rolled Back</CgBadge>;
-        return <CgBadge variant="neutral" dot>Eligible</CgBadge>;
+        if (s === "rolled_back") return <Badge variant="success" dot>Rolled Back</Badge>;
+        return <Badge variant="neutral" dot>Eligible</Badge>;
       },
     },
     {
@@ -101,9 +101,9 @@ export function RollbackPage() {
           return <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>✓ Done</span>;
         }
         return (
-          <CgButton size="sm" variant="outline" onClick={() => setConfirmTarget(c)} disabled={rollbackMut.isPending}>
+          <Button size="sm" variant="outline" onClick={() => setConfirmTarget(c)} disabled={rollbackMut.isPending}>
             <RotateCcw size={12} /> Rollback
-          </CgButton>
+          </Button>
         );
       },
     },
@@ -116,7 +116,7 @@ export function RollbackPage() {
       <CgPageHeader
         title="Rollback Actions"
         description="Undo critical admin actions from the last 7 days. Only destructive/reversible actions are listed here."
-        actions={<CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
       />
 
       {/* Info */}
@@ -157,10 +157,10 @@ export function RollbackPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setConfirmTarget(null)}>Cancel</CgButton>
-            <CgButton isLoading={rollbackMut.isPending} onClick={() => rollbackMut.mutate(confirmTarget._id)}>
+            <Button variant="outline" onClick={() => setConfirmTarget(null)}>Cancel</Button>
+            <Button isLoading={rollbackMut.isPending} onClick={() => rollbackMut.mutate(confirmTarget._id)}>
               <RotateCcw size={14} /> Yes, Rollback
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

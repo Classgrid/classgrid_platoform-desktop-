@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { apiClient } from "@/lib/apiClient";
@@ -67,9 +67,9 @@ export function NotificationEnginePage() {
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</CgButton>
-            <CgButton variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</CgButton>
-            <CgButton onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</CgButton>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>
+            <Button variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</Button>
+            <Button onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</Button>
           </div>
         }
       />
@@ -132,11 +132,11 @@ export function NotificationEnginePage() {
                 <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
                   {["pending", "scheduled"].includes(n.status) ? (
                     <>
-                      <CgBadge variant="warning" dot>Scheduled</CgBadge>
-                      <CgButton size="sm" variant="outline" onClick={() => cancelMut.mutate(n._id)} isLoading={cancelMut.isPending}>Cancel</CgButton>
+                      <Badge variant="warning" dot>Scheduled</Badge>
+                      <Button size="sm" variant="outline" onClick={() => cancelMut.mutate(n._id)} isLoading={cancelMut.isPending}>Cancel</Button>
                     </>
                   ) : (
-                    <CgBadge variant="success" dot>Sent</CgBadge>
+                    <Badge variant="success" dot>Sent</Badge>
                   )}
                 </div>
               </div>
@@ -162,10 +162,10 @@ export function NotificationEnginePage() {
                 options={[{ label: "Info", value: "info" }, { label: "Warning", value: "warning" }, { label: "Critical", value: "error" }, { label: "Success", value: "success" }]} /></div>
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setBroadcastOpen(false)}>Cancel</CgButton>
-            <CgButton isLoading={broadcastMut.isPending} disabled={!broadcast.title || !broadcast.message} onClick={() => broadcastMut.mutate(broadcast)}>
+            <Button variant="outline" onClick={() => setBroadcastOpen(false)}>Cancel</Button>
+            <Button isLoading={broadcastMut.isPending} disabled={!broadcast.title || !broadcast.message} onClick={() => broadcastMut.mutate(broadcast)}>
               <Send size={14} /> Send Now
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -188,10 +188,10 @@ export function NotificationEnginePage() {
               <input style={inputStyle} type="datetime-local" value={scheduled.scheduledFor} onChange={e => setScheduled(p => ({ ...p, scheduledFor: e.target.value }))} /></div>
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setScheduleOpen(false)}>Cancel</CgButton>
-            <CgButton isLoading={scheduleMut.isPending} disabled={!scheduled.title || !scheduled.message} onClick={() => scheduleMut.mutate(scheduled)}>
+            <Button variant="outline" onClick={() => setScheduleOpen(false)}>Cancel</Button>
+            <Button isLoading={scheduleMut.isPending} disabled={!scheduled.title || !scheduled.message} onClick={() => scheduleMut.mutate(scheduled)}>
               <Clock size={14} /> Schedule
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

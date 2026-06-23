@@ -259,9 +259,9 @@ export function OrgDetailPage() {
     return (
       <div className="cg-page">
         <div className="cg-page__header cg-page__header--split">
-          <CgButton variant="ghost" onClick={() => navigate(-1)}>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
             <ArrowLeft size={14} /> Back
-          </CgButton>
+          </Button>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "3rem", color: "hsl(var(--muted-foreground))" }}>
           <RefreshCw size={18} className="cg-spin" />
@@ -280,8 +280,8 @@ export function OrgDetailPage() {
             <p className="cg-alert__message">The backend returned an error or the org does not exist.</p>
           </div>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <CgButton variant="outline" onClick={() => refetch()}>Retry</CgButton>
-            <CgButton variant="ghost" asChild><Link to="/superadmin/orgs">← All Orgs</Link></CgButton>
+            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+            <Button variant="ghost" asChild><Link to="/superadmin/orgs">← All Orgs</Link></Button>
           </div>
         </div>
       </div>
@@ -302,25 +302,25 @@ export function OrgDetailPage() {
         actions={
           <>
             {org.status === "suspended" ? (
-              <CgButton variant="default" onClick={() => activateMut.mutate()} isLoading={activateMut.isPending}>
+              <Button variant="default" onClick={() => activateMut.mutate()} isLoading={activateMut.isPending}>
                 <Power size={14} /> Activate Org
-              </CgButton>
+              </Button>
             ) : (
-              <CgButton variant="destructive" onClick={() => setSuspendConfirm(true)}>
+              <Button variant="destructive" onClick={() => setSuspendConfirm(true)}>
                 <AlertTriangle size={14} /> Suspend Org
-              </CgButton>
+              </Button>
             )}
             {org.owner_id && (
-              <CgButton variant="outline" onClick={() => impersonateMut.mutate()} isLoading={impersonateMut.isPending}>
+              <Button variant="outline" onClick={() => impersonateMut.mutate()} isLoading={impersonateMut.isPending}>
                 <LogIn size={14} /> Impersonate Admin
-              </CgButton>
+              </Button>
             )}
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh
-            </CgButton>
-            <CgButton variant="ghost" asChild>
+            </Button>
+            <Button variant="ghost" asChild>
               <Link to="/superadmin/orgs"><ArrowLeft size={14} /> All Orgs</Link>
-            </CgButton>
+            </Button>
           </>
         }
       />
@@ -339,18 +339,18 @@ export function OrgDetailPage() {
             icon: <ShieldCheck size={14} />,
             label: "Status",
             value: (
-              <CgBadge variant={statusVariant(org.status)} dot>
+              <Badge variant={statusVariant(org.status)} dot>
                 {org.status ?? "unknown"}
-              </CgBadge>
+              </Badge>
             ),
           },
           {
             icon: <CreditCard size={14} />,
             label: "Plan",
             value: (
-              <CgBadge variant={planVariant(sub?.plan)}>
+              <Badge variant={planVariant(sub?.plan)}>
                 {sub?.plan ?? "demo"}
-              </CgBadge>
+              </Badge>
             ),
           },
           {
@@ -461,18 +461,18 @@ export function OrgDetailPage() {
           actions={
             editingRates ? (
               <div style={{ display: "flex", gap: "0.5rem" }}>
-                <CgButton variant="ghost" size="sm" onClick={cancelEdit} disabled={saveMutation.isPending}>
+                <Button variant="ghost" size="sm" onClick={cancelEdit} disabled={saveMutation.isPending}>
                   Cancel
-                </CgButton>
-                <CgButton size="sm" onClick={saveRates} disabled={saveMutation.isPending}>
+                </Button>
+                <Button size="sm" onClick={saveRates} disabled={saveMutation.isPending}>
                   <Save size={13} />
                   {saveMutation.isPending ? "Saving…" : "Save Rates"}
-                </CgButton>
+                </Button>
               </div>
             ) : (
-              <CgButton variant="outline" size="sm" onClick={startEdit}>
+              <Button variant="outline" size="sm" onClick={startEdit}>
                 <Edit3 size={13} /> Edit Rates
-              </CgButton>
+              </Button>
             )
           }
         >
@@ -561,13 +561,13 @@ export function OrgDetailPage() {
                 Formula: Base + (Students × Rate) + (max(0, StorageGB − FreeGB) × GB Rate)
               </p>
 
-              <CgButton 
+              <Button 
                 onClick={handleRazorpayCheckout} 
                 isLoading={createOrderMut.isPending || verifyPaymentMut.isPending}
                 style={{ width: "100%" }}
               >
                 <CreditCard size={15} /> Pay Subscription (Razorpay)
-              </CgButton>
+              </Button>
             </>
           )}
         </CgSectionPanel>
@@ -578,8 +578,8 @@ export function OrgDetailPage() {
         <CgSectionPanel title="Subscription Details" description="Current plan, limits, and feature access.">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
             {[
-              { label: "Plan", value: <CgBadge variant={planVariant(sub?.plan)}>{sub?.plan ?? "demo"}</CgBadge> },
-              { label: "Billing Status", value: <CgBadge variant={sub?.isPaid ? "success" : "warning"}>{sub?.isPaid ? "Paid" : "Unpaid"}</CgBadge> },
+              { label: "Plan", value: <Badge variant={planVariant(sub?.plan)}>{sub?.plan ?? "demo"}</Badge> },
+              { label: "Billing Status", value: <Badge variant={sub?.isPaid ? "success" : "warning"}>{sub?.isPaid ? "Paid" : "Unpaid"}</Badge> },
               { label: "Max Students", value: sub?.metadata?.max_students ?? "—" },
               { label: "Max Faculty",  value: sub?.metadata?.max_faculty  ?? "—" },
               { label: "Storage Limit", value: `${sub?.metadata?.storage_limit_gb ?? 2} GB` },
@@ -595,26 +595,26 @@ export function OrgDetailPage() {
 
         <CgSectionPanel title="Quick Actions">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <CgButton variant="outline" style={{ justifyContent: "flex-start" }} asChild>
+            <Button variant="outline" style={{ justifyContent: "flex-start" }} asChild>
               <Link to={`/superadmin/billing`}>
                 <CreditCard size={14} /> Manage Plan &amp; Subscription
               </Link>
-            </CgButton>
-            <CgButton variant="outline" style={{ justifyContent: "flex-start" }} asChild>
+            </Button>
+            <Button variant="outline" style={{ justifyContent: "flex-start" }} asChild>
               <Link to={`/superadmin/users?org=${id}`}>
                 <Users size={14} /> View Users in This Org
               </Link>
-            </CgButton>
-            <CgButton variant="outline" style={{ justifyContent: "flex-start" }} asChild>
+            </Button>
+            <Button variant="outline" style={{ justifyContent: "flex-start" }} asChild>
               <Link to="/superadmin/alerts">
                 <Mail size={14} /> View Email &amp; Error Logs
               </Link>
-            </CgButton>
-            <CgButton variant="ghost" style={{ justifyContent: "flex-start" }} asChild>
+            </Button>
+            <Button variant="ghost" style={{ justifyContent: "flex-start" }} asChild>
               <Link to="/superadmin/orgs">
                 <ArrowLeft size={14} /> Back to All Organizations
               </Link>
-            </CgButton>
+            </Button>
           </div>
         </CgSectionPanel>
       </div>
@@ -629,10 +629,10 @@ export function OrgDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setSuspendConfirm(false)}>Cancel</CgButton>
-            <CgButton variant="destructive" isLoading={suspendMut.isPending} onClick={() => suspendMut.mutate()}>
+            <Button variant="outline" onClick={() => setSuspendConfirm(false)}>Cancel</Button>
+            <Button variant="destructive" isLoading={suspendMut.isPending} onClick={() => suspendMut.mutate()}>
               <AlertTriangle size={14} /> Yes, Suspend Org
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

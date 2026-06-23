@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgButton } from "@/components/classgrid/Button";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
@@ -91,9 +91,9 @@ export function OrganizationsPage() {
       header: "Status",
       accessorKey: "status",
       cell: ({ row }) => (
-        <CgBadge variant={statusVariant(row.original.status)} dot>
+        <Badge variant={statusVariant(row.original.status)} dot>
           {row.original.status}
-        </CgBadge>
+        </Badge>
       ),
     },
     {
@@ -114,9 +114,9 @@ export function OrganizationsPage() {
       header: "Actions",
       id: "actions",
       cell: ({ row }) => (
-        <CgButton size="sm" variant="outline" asChild>
+        <Button size="sm" variant="outline" asChild>
           <Link to={`/superadmin/orgs/${row.original._id}`}>View Details</Link>
-        </CgButton>
+        </Button>
       ),
     },
   ];
@@ -128,16 +128,16 @@ export function OrganizationsPage() {
         description="Live organization records from the Classgrid backend, including owner, status, and user counts."
         actions={
           <>
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`size-4 ${isFetching ? "cg-spin" : ""}`} />
               Refresh
-            </CgButton>
-            <CgButton asChild>
+            </Button>
+            <Button asChild>
               <Link to="/superadmin/onboard">
                 <Plus className="size-4" />
                 Onboard New Org
               </Link>
-            </CgButton>
+            </Button>
           </>
         }
       />
@@ -153,9 +153,9 @@ export function OrganizationsPage() {
         description="Search, inspect, and manage provisioned institutions."
         actions={
           stats.suspended > 0 ? (
-            <CgBadge variant="danger">{stats.suspended} needs attention</CgBadge>
+            <Badge variant="danger">{stats.suspended} needs attention</Badge>
           ) : (
-            <CgBadge variant="success">Backend connected</CgBadge>
+            <Badge variant="success">Backend connected</Badge>
           )
         }
         noPadding
@@ -191,9 +191,9 @@ export function OrganizationsPage() {
                 {(error as Error)?.message || "The organizations endpoint did not return data."}
               </p>
             </div>
-            <CgButton variant="outline" onClick={() => refetch()}>
+            <Button variant="outline" onClick={() => refetch()}>
               Retry
-            </CgButton>
+            </Button>
           </div>
         ) : null}
 
@@ -213,16 +213,16 @@ export function OrganizationsPage() {
           }
           emptyAction={
             allOrgs.length ? (
-              <CgButton variant="outline" onClick={() => setSearch("")}>
+              <Button variant="outline" onClick={() => setSearch("")}>
                 Clear Search
-              </CgButton>
+              </Button>
             ) : (
-              <CgButton asChild>
+              <Button asChild>
                 <Link to="/superadmin/onboard">
                   <Plus className="size-4" />
                   Create Organization
                 </Link>
-              </CgButton>
+              </Button>
             )
           }
           emptyMessage="No organizations found."

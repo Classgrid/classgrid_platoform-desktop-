@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle, Loader } from "lucide-react";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi, directProvisionApi } from "../services/superAdminApi";
 import type { DirectProvisionPayload } from "../services/superAdminApi";
@@ -267,9 +267,9 @@ export function DirectOnboardPage() {
                   <td>{org.plan || "—"}</td>
                   <td>{org.userCount ?? 0}</td>
                   <td>
-                    <CgBadge variant={org.status === "active" ? "success" : org.status === "suspended" ? "danger" : "warning"} dot>
+                    <Badge variant={org.status === "active" ? "success" : org.status === "suspended" ? "danger" : "warning"} dot>
                       {org.status ?? "unknown"}
-                    </CgBadge>
+                    </Badge>
                   </td>
                   <td style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
                     {org.createdAt ? new Date(org.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}

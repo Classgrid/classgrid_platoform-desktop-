@@ -8,9 +8,9 @@ import {
   User as UserIcon, ChevronRight
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/ui/button";
 import { CgAvatar } from "@/components/classgrid/Avatar";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ImageCropperModal } from "@/components/ui/ImageCropperModal";
 import { toast } from "react-hot-toast";
@@ -212,9 +212,9 @@ export function ProfilePage() {
               <div className="flex flex-col w-full">
                 <div className="flex items-center gap-4">
                   <h1 className="cg-profile-primary-name">{form.name}</h1>
-                  <CgBadge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest">
+                  <Badge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest">
                     {form.role.replace("platform_", "").toUpperCase()}
-                  </CgBadge>
+                  </Badge>
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium">
                   <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
@@ -291,7 +291,7 @@ export function ProfilePage() {
                     <label className="cg-field-label">Verification Email</label>
                     <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg border border-success/20">
                       <span className="text-sm font-medium">{form.email}</span>
-                      <CgBadge variant="success" size="sm" dot>Verified</CgBadge>
+                      <Badge variant="success" size="sm" dot>Verified</Badge>
                     </div>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export function ProfilePage() {
                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Update Password</p>
                       </div>
                     </div>
-                    <CgButton variant="outline" size="sm" className="h-8 rounded-lg px-4">Manage <ChevronRight size={14} /></CgButton>
+                    <Button variant="outline" size="sm" className="h-8 rounded-lg px-4">Manage <ChevronRight size={14} /></Button>
                   </div>
                   <div className="cg-action-card">
                     <div className="flex items-center gap-3">
@@ -321,7 +321,7 @@ export function ProfilePage() {
                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">MFA Security</p>
                       </div>
                     </div>
-                    <CgButton variant="outline" size="sm" className="h-8 rounded-lg px-4">Secure <ChevronRight size={14} /></CgButton>
+                    <Button variant="outline" size="sm" className="h-8 rounded-lg px-4">Secure <ChevronRight size={14} /></Button>
                   </div>
                 </div>
               </div>
@@ -369,12 +369,12 @@ export function ProfilePage() {
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Profile out of sync</p>
               </div>
               <div className="flex gap-4">
-                <CgButton variant="ghost" className="hover:bg-danger/10 hover:text-danger transition-colors" onClick={() => { setIsDirty(false); queryClient.invalidateQueries({ queryKey: ["superadmin-profile"] }); }}>
+                <Button variant="ghost" className="hover:bg-danger/10 hover:text-danger transition-colors" onClick={() => { setIsDirty(false); queryClient.invalidateQueries({ queryKey: ["superadmin-profile"] }); }}>
                   Reset
-                </CgButton>
-                <CgButton className="shadow-lg shadow-primary/20" onClick={handleSave} isLoading={updateProfile.isPending}>
+                </Button>
+                <Button className="shadow-lg shadow-primary/20" onClick={handleSave} isLoading={updateProfile.isPending}>
                   Push Updates
-                </CgButton>
+                </Button>
               </div>
             </div>
           )}

@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { Save, Bell, Palette, Shield } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/ui/button";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import "../styles/settings.css";
 
@@ -65,9 +65,9 @@ export function SettingsPage() {
         title="Settings"
         description="Manage your platform preferences, notifications, and appearance."
         actions={
-          <CgButton type="submit" isLoading={updatePrefs.isPending}>
+          <Button type="submit" isLoading={updatePrefs.isPending}>
             <Save size={14} /> Save Settings
-          </CgButton>
+          </Button>
         }
       />
 

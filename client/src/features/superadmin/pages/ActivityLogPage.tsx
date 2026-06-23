@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
@@ -133,9 +133,9 @@ const columns: ColumnDef<AuditLog>[] = [
     cell: ({ getValue }) => {
       const action = getValue<string>();
       return (
-        <CgBadge variant={getSeverity(action)}>
+        <Badge variant={getSeverity(action)}>
           {ACTION_LABELS[action] ?? action.replace(/_/g, " ")}
-        </CgBadge>
+        </Badge>
       );
     },
   },

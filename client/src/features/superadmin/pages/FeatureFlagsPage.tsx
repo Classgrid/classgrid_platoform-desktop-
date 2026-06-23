@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { CgPageHeader } from "@/components/classgrid/PageHeader";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
-import { CgButton } from "@/components/classgrid/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
 import {
@@ -113,7 +113,7 @@ export function FeatureFlagsPage() {
         accessorKey: "module",
         header: "Module",
         size: 120,
-        cell: ({ getValue }) => <CgBadge variant="neutral">{getValue<string>() || "platform"}</CgBadge>,
+        cell: ({ getValue }) => <Badge variant="neutral">{getValue<string>() || "platform"}</Badge>,
       },
       {
         accessorKey: "description",
@@ -131,9 +131,9 @@ export function FeatureFlagsPage() {
         size: 100,
         cell: ({ getValue }) =>
           getValue<boolean>() ? (
-            <CgBadge variant="success" dot>Active</CgBadge>
+            <Badge variant="success" dot>Active</Badge>
           ) : (
-            <CgBadge variant="danger">Killed</CgBadge>
+            <Badge variant="danger">Killed</Badge>
           ),
       },
       {
@@ -143,7 +143,7 @@ export function FeatureFlagsPage() {
         cell: ({ row }) => {
           const f = row.original;
           return (
-            <CgButton
+            <Button
               variant={f.isEnabled ? "destructive" : "default"}
               size="sm"
               disabled={toggleMut.isPending}
@@ -151,7 +151,7 @@ export function FeatureFlagsPage() {
             >
               <Power size={13} />
               {f.isEnabled ? "Disable" : "Enable"}
-            </CgButton>
+            </Button>
           );
         },
       },
@@ -173,15 +173,15 @@ export function FeatureFlagsPage() {
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <CgButton variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh
-            </CgButton>
-            <CgButton variant="outline" onClick={() => setNewFlagOpen(true)}>
+            </Button>
+            <Button variant="outline" onClick={() => setNewFlagOpen(true)}>
               <Plus size={14} /> New Flag
-            </CgButton>
-            <CgButton variant="destructive" onClick={() => setKillAllOpen(true)}>
+            </Button>
+            <Button variant="destructive" onClick={() => setKillAllOpen(true)}>
               <Zap size={14} /> Emergency Kill All
-            </CgButton>
+            </Button>
           </div>
         }
       />
@@ -229,14 +229,14 @@ export function FeatureFlagsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setConfirmKill(null)}>Cancel</CgButton>
-            <CgButton
+            <Button variant="outline" onClick={() => setConfirmKill(null)}>Cancel</Button>
+            <Button
               variant={confirmKill?.isEnabled ? "destructive" : "default"}
               isLoading={toggleMut.isPending}
               onClick={() => toggleMut.mutate({ key: confirmKill.key, isEnabled: !confirmKill.isEnabled })}
             >
               {confirmKill?.isEnabled ? "Yes, Disable" : "Yes, Enable"}
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -252,10 +252,10 @@ export function FeatureFlagsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setKillAllOpen(false)}>Cancel</CgButton>
-            <CgButton variant="destructive" isLoading={killAllMut.isPending} onClick={() => killAllMut.mutate()}>
+            <Button variant="outline" onClick={() => setKillAllOpen(false)}>Cancel</Button>
+            <Button variant="destructive" isLoading={killAllMut.isPending} onClick={() => killAllMut.mutate()}>
               <Zap size={14} /> Kill All Features Now
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -283,14 +283,14 @@ export function FeatureFlagsPage() {
             ))}
           </div>
           <DialogFooter>
-            <CgButton variant="outline" onClick={() => setNewFlagOpen(false)}>Cancel</CgButton>
-            <CgButton
+            <Button variant="outline" onClick={() => setNewFlagOpen(false)}>Cancel</Button>
+            <Button
               isLoading={upsertMut.isPending}
               disabled={!newFlag.key}
               onClick={() => upsertMut.mutate({ ...newFlag, isEnabled: true })}
             >
               Create Flag
-            </CgButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

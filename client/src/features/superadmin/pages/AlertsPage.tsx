@@ -3,7 +3,7 @@ import { AlertTriangle, Mail, RefreshCw, Send, XCircle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgBadge } from "@/components/classgrid/Badge";
+import { Badge } from "@/components/ui/badge";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgTabs, CgTabList, CgTabTrigger, CgTabContent } from "@/components/classgrid/Tabs";
 import { formatDate, formatTime } from "@/utils/dateUtils";
@@ -34,7 +34,7 @@ const errorColumns: ColumnDef<ErrorLog>[] = [
     cell: ({ getValue }) => {
       const lvl = getValue<string>().toLowerCase();
       const variant = lvl === "error" ? "danger" : lvl === "warn" ? "warning" : "info";
-      return <CgBadge variant={variant}>{lvl.toUpperCase()}</CgBadge>;
+      return <Badge variant={variant}>{lvl.toUpperCase()}</Badge>;
     },
   },
   {
@@ -83,7 +83,7 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
       cell: ({ getValue }) => {
         const s = getValue<string>();
         const variant = s === "sent" ? "success" : s === "failed" ? "danger" : "warning";
-        return <CgBadge variant={variant} dot>{s}</CgBadge>;
+        return <Badge variant={variant} dot>{s}</Badge>;
       },
     },
     {
