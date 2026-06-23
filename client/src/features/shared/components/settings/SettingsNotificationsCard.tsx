@@ -1,6 +1,6 @@
 import React from "react";
 import { Bell } from "lucide-react";
-import { CgSwitch } from "@/components/classgrid/Switch";
+import { Switch } from "@/components/marketing_ui/switch";
 import { CgSelect } from "@/components/classgrid/Select";
 import { EmailPrefs } from "../../queries/useSettingsQueries";
 
@@ -38,7 +38,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
           <span className="cg-settings-row-title">Global Notifications</span>
           <span className="cg-settings-row-desc">Master switch to enable or disable all emails</span>
         </div>
-        <CgSwitch 
+        <Switch 
           checked={prefs.global} 
           onCheckedChange={(c) => onChange("global", c)} 
         />
@@ -50,7 +50,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="cg-settings-row-title">Platform Announcements</span>
             <span className="cg-settings-row-desc">Receive emails about major platform updates</span>
           </div>
-          <CgSwitch checked={prefs.announcements} onCheckedChange={(c) => onChange("announcements", c)} />
+          <Switch checked={prefs.announcements} onCheckedChange={(c) => onChange("announcements", c)} />
         </div>
 
         <div className="cg-settings-row py-3 border-t border-border/50">
@@ -58,7 +58,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="cg-settings-row-title">Notes & Material</span>
             <span className="cg-settings-row-desc">Get notified when new study material is posted</span>
           </div>
-          <CgSwitch checked={prefs.notes} onCheckedChange={(c) => onChange("notes", c)} />
+          <Switch checked={prefs.notes} onCheckedChange={(c) => onChange("notes", c)} />
         </div>
 
         <div className="cg-settings-row py-3 border-t border-border/50">
@@ -66,7 +66,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="cg-settings-row-title">Quizzes & Assignments</span>
             <span className="cg-settings-row-desc">Get notified about new tests</span>
           </div>
-          <CgSwitch checked={prefs.quizzes} onCheckedChange={(c) => onChange("quizzes", c)} />
+          <Switch checked={prefs.quizzes} onCheckedChange={(c) => onChange("quizzes", c)} />
         </div>
 
         <div className="cg-settings-row py-3 border-t border-border/50">
@@ -74,7 +74,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="cg-settings-row-title">Join Approvals</span>
             <span className="cg-settings-row-desc">Updates when users request to join your class</span>
           </div>
-          <CgSwitch checked={prefs.joinApproval} onCheckedChange={(c) => onChange("joinApproval", c)} />
+          <Switch checked={prefs.joinApproval} onCheckedChange={(c) => onChange("joinApproval", c)} />
         </div>
 
         <div className="cg-settings-row py-3 border-t border-border/50">
@@ -82,7 +82,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="cg-settings-row-title">Email on Post</span>
             <span className="cg-settings-row-desc">Receive an email when you make a post</span>
           </div>
-          <CgSwitch checked={prefs.emailOnPost} onCheckedChange={(c) => onChange("emailOnPost", c)} />
+          <Switch checked={prefs.emailOnPost} onCheckedChange={(c) => onChange("emailOnPost", c)} />
         </div>
 
         <div className="cg-settings-row py-3 border-t border-border/50">

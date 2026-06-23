@@ -1,30 +1,46 @@
-import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
-
-function Switch({
-  className,
-  size = "default",
-  ...props
-}: SwitchPrimitive.Root.Props & {
-  size?: "sm" | "default"
-}) {
-  return (
-    <SwitchPrimitive.Root
-      data-slot="switch"
-      data-size={size}
-      className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        className
-      )}
-      {...props}
-    >
-      <SwitchPrimitive.Thumb
-        data-slot="switch-thumb"
-        className="pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
-      />
-    </SwitchPrimitive.Root>
-  )
+export interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  onCheckedChange?: (checked: boolean) => void;
 }
 
-export { Switch }
+export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
+  ({ checked, onCheckedChange, className, ...props }, ref) => {
+    return (
+      <label
+        className={cn(
+          "group relative inline-flex items-center cursor-pointer peer-disabled:cursor-not-allowed",
+          className
+        )}
+      >
+        <input
+          ref={ref}
+          type="checkbox"
+          role="switch"
+          aria-checked={checked}
+          className="sr-only peer"
+          checked={checked}
+          onChange={(e) => onCheckedChange?.(e.target.checked)}
+          {...props}
+        />
+        <div
+          className={cn(
+            "h-6 w-11 rounded-full bg-zinc-300 dark:bg-zinc-800",
+            "transition-colors duration-150 ease-in-out motion-reduce:transition-none",
+            "group-hover:bg-zinc-400 dark:group-hover:bg-zinc-700",
+            "peer-checked:bg-blue-600 peer-checked:group-hover:bg-blue-500",
+            "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/50 peer-focus-visible:ring-offset-2",
+            "peer-disabled:opacity-50 peer-disabled:group-hover:bg-zinc-300 dark:peer-disabled:group-hover:bg-zinc-800",
+            "after:content-[''] after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm",
+            "after:transition-transform after:duration-150 after:ease-in-out motion-reduce:after:transition-none",
+            "peer-checked:after:translate-x-full",
+            "peer-active:after:scale-90"
+          )}
+        />
+      </label>
+    );
+  }
+);
+
+Switch.displayName = "Switch";
