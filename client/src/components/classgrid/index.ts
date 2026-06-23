@@ -1,5 +1,5 @@
-export const CgPageShell = ({children}:any) => <div>{children}</div>;
-export const CgAlert = ({children}:any) => <div>{children}</div>;
+export const CgPageShell = ({children}:any) => null;
+export const CgAlert = ({children}:any) => null;
 export const CgEmptyState = () => null;
 export const CgSelect = () => null;
 
