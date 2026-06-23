@@ -18,7 +18,7 @@ export function SectionPanel({ title, description, noPadding, actions, children 
         </div>
         {actions && <div>{actions}</div>}
       </div>
-      <div className={$(-not  ? "pt-4" : "")}>{children}</div>
+      <div className={!noPadding ? "pt-4" : ""}>{children}</div>
     </section>
   );
 }
