@@ -21,8 +21,7 @@ import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
 import { CgMetricCard } from "@/components/classgrid/MetricCard";
 import { CgDataTable } from "@/components/classgrid/DataTable";
 import { CgAvatar } from "@/components/classgrid/Avatar";
-import { ClassgridTable } from "@/components/classgrid/ClassgridTable";
-import { CgSkeleton } from "@/components/classgrid/Skeleton";
+import { RecentActivityTable } from "@/components/classgrid/RecentActivityTable";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -428,25 +427,12 @@ export function SupportTicketsPage() {
             <div className="p-8 text-center text-sm text-red-500 border border-border rounded-lg bg-card">
               Failed to load tickets.
             </div>
-          ) : isLoading ? (
-            <div className="p-6 border border-border rounded-lg bg-card">
-              <CgSkeleton lines={6} />
-            </div>
-          ) : tickets.length === 0 ? (
-            <div className="p-12 text-center border border-border rounded-lg bg-card">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 mb-4">
-                <MessageSquare className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-semibold text-foreground">
-                No tickets found
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Adjust your filters or check back later.
-              </p>
-            </div>
           ) : (
-            <ClassgridTable
+            <RecentActivityTable
               columns={ticketCols}
+              isLoading={isLoading}
+              skeletonLines={6}
+              emptyMessage="No tickets found. Adjust your filters or check back later."
               rows={tickets.map((ticket) => {
                 const name =
                   ticket.submittedBy?.name ??
