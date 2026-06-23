@@ -876,10 +876,40 @@ export function SupportTicketsPage() {
                 label="Created"
                 value={fmtDateTime(selectedTicket.createdAt)}
               />
-              <MetaRow
-                label="Assigned to"
-                value={selectedTicket.assignedTo?.name || "Unassigned"}
-              />
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <dt className="font-semibold text-sm text-foreground shrink-0">
+                  Assigned to
+                </dt>
+                <dd className="text-right text-muted-foreground min-w-0 break-all text-sm flex items-center justify-end gap-2 flex-wrap">
+                  {selectedTicket.assignedTo?.name ? (
+                    <span className="text-foreground font-medium">{selectedTicket.assignedTo.name}</span>
+                  ) : (
+                    <>
+                      <span>Unassigned</span>
+                      {currentUser && (
+                        <button
+                          onClick={() => {
+                            updateTicket.mutate(
+                              { id: selectedTicket._id, assignedTo: currentUser._id },
+                              {
+                                onSuccess: (res) => {
+                                  toast.success("Ticket assigned to you");
+                                  if (res.ticket) setSelectedTicket(res.ticket);
+                                },
+                                onError: () => toast.error("Failed to assign ticket"),
+                              }
+                            );
+                          }}
+                          disabled={updateTicket.isPending}
+                          className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50"
+                        >
+                          {updateTicket.isPending ? "Assigning..." : "Assign to me"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </dd>
+              </div>
 
               <hr className="border-border" />
 
