@@ -17,7 +17,9 @@ import {
   Mail,
   X,
 } from "lucide-react";
-import { StatCard } from "@/components/marketing_ui/StatCard";`nimport { RecentActivityTable } from "@/components/marketing_ui/data-table";`nimport { Button } from "@/components/marketing_ui/button";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { RecentActivityTable } from "@/components/marketing_ui/data-table";
+import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
