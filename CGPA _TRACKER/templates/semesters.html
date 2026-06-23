@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h2 class="font-display text-2xl font-bold sm:text-3xl">All Semesters</h2>
+            <p class="mt-1 text-sm text-steel">Track each semester's SGPA and jump into detailed subject-level insights.</p>
+        </div>
+        <a href="{{ url_for('add_semester') }}" class="rounded-xl bg-gradient-to-r from-sea to-surf px-4 py-2.5 text-sm font-bold text-white shadow-glow transition hover:brightness-105">
+            Add Semester
+        </a>
+    </div>
+
+    {% if semesters|length == 0 %}
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center">
+        <p class="font-display text-xl font-bold">No semesters yet</p>
+        <p class="mt-2 text-sm text-steel">Start by adding your first semester to unlock SGPA and CGPA tracking.</p>
+        <a href="{{ url_for('add_semester') }}" class="mt-5 inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-ink transition hover:border-sea/30 hover:text-sea">
+            Create First Semester
+        </a>
+    </div>
+    {% else %}
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left">
+                <thead class="bg-slate-50/90">
+                    <tr>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">ID</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Semester</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">SGPA</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for sem in semesters %}
+                    <tr class="transition hover:bg-slate-50/80">
+                        <td class="px-5 py-4 text-sm font-semibold text-slate-700">#{{ sem["id"] }}</td>
+                        <td class="px-5 py-4 text-sm font-medium text-ink">Semester {{ sem["semester_number"] }}</td>
+                        <td class="px-5 py-4 text-sm">
+                            <span class="rounded-full bg-teal-100 px-3 py-1 font-bold text-teal-700">{{ sem["sgpa"] }}</span>
+                        </td>
+                        <td class="px-5 py-4 text-sm">
+                            <a href="{{ url_for('semester_detail', sem_id=sem['id']) }}" class="font-bold text-sea transition hover:text-surf">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

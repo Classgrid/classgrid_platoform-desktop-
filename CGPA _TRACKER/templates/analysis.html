@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h2 class="font-display text-2xl font-bold sm:text-3xl">Performance Analysis</h2>
+        <p class="mt-2 text-sm text-steel">Spot your strongest and weakest subject outcomes with weighted trend indicators.</p>
+    </div>
+
+    {% if not has_data %}
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-10 text-center">
+        <p class="font-display text-xl font-bold">No analysis data yet</p>
+        <p class="mt-2 text-sm text-steel">Add subjects in a semester to unlock highest, lowest, and average performance insights.</p>
+        <a href="{{ url_for('add_semester') }}" class="mt-5 inline-flex rounded-xl bg-gradient-to-r from-sea to-surf px-4 py-2 text-sm font-bold text-white shadow-glow transition hover:brightness-105">
+            Add Semester
+        </a>
+    </div>
+    {% else %}
+    <div class="grid gap-4 sm:grid-cols-2">
+        <article class="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-100 to-green-50 p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-emerald-700">Highest Scoring Subject</p>
+            <p class="mt-2 font-display text-2xl font-bold text-emerald-900">{{ highest["name"] }}</p>
+            <p class="mt-1 text-sm text-emerald-800">Grade Points: {{ highest["grade_points"] }}</p>
+        </article>
+
+        <article class="rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-100 to-red-50 p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-rose-700">Lowest Scoring Subject</p>
+            <p class="mt-2 font-display text-2xl font-bold text-rose-900">{{ lowest["name"] }}</p>
+            <p class="mt-1 text-sm text-rose-800">Grade Points: {{ lowest["grade_points"] }}</p>
+        </article>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+        <article class="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-100 to-blue-50 p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-sky-700">Total Credits</p>
+            <p class="mt-2 font-display text-4xl font-bold text-sky-900">{{ total_credits }}</p>
+        </article>
+
+        <article class="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-100 to-orange-50 p-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-amber-700">Average Grade Points</p>
+            <p class="mt-2 font-display text-4xl font-bold text-amber-900">{{ avg_gp }}</p>
+        </article>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

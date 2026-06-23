@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <a href="{{ url_for('semesters') }}" class="text-sm font-bold text-sea transition hover:text-surf">Back to Semesters</a>
+            <h2 class="mt-1 font-display text-2xl font-bold sm:text-3xl">Semester {{ semester["semester_number"] }}</h2>
+            <p class="mt-1 text-sm text-steel">Subject-wise score breakdown with weighted credits and live SGPA.</p>
+        </div>
+        <a href="{{ url_for('add_subject', sem_id=sem_id) }}" class="rounded-xl bg-gradient-to-r from-sea to-surf px-4 py-2.5 text-sm font-bold text-white shadow-glow transition hover:brightness-105">
+            Add Subject
+        </a>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-3">
+        <article class="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-100 to-cyan-50 p-4">
+            <p class="text-xs font-bold uppercase tracking-wide text-teal-700">SGPA</p>
+            <p class="mt-2 font-display text-3xl font-bold text-teal-900">{{ sgpa }}</p>
+        </article>
+        <article class="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-100 to-amber-50 p-4">
+            <p class="text-xs font-bold uppercase tracking-wide text-orange-700">Total Credits</p>
+            <p class="mt-2 font-display text-3xl font-bold text-orange-900">{{ total_credits }}</p>
+        </article>
+        <article class="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-100 to-blue-50 p-4">
+            <p class="text-xs font-bold uppercase tracking-wide text-sky-700">Total Points</p>
+            <p class="mt-2 font-display text-3xl font-bold text-sky-900">{{ total_points }}</p>
+        </article>
+    </div>
+
+    <section class="rounded-2xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-100 px-5 py-4">
+            <h3 class="font-display text-xl font-bold">Subjects</h3>
+        </div>
+
+        {% if subjects|length == 0 %}
+        <div class="p-8 text-center">
+            <p class="text-sm text-steel">No subjects added yet for this semester.</p>
+            <a href="{{ url_for('add_subject', sem_id=sem_id) }}" class="mt-4 inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-ink transition hover:border-sea/30 hover:text-sea">
+                Add Your First Subject
+            </a>
+        </div>
+        {% else %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left">
+                <thead class="bg-slate-50/90">
+                    <tr>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Subject</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Credits</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Grade</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Grade Points</th>
+                        <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total Points</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for sub in subjects %}
+                    <tr class="transition hover:bg-slate-50/80">
+                        <td class="px-5 py-4 text-sm font-semibold text-ink">{{ sub["name"] }}</td>
+                        <td class="px-5 py-4 text-sm text-slate-700">{{ sub["credits"] }}</td>
+                        <td class="px-5 py-4 text-sm">
+                            {% set grade_class = "bg-rose-100 text-rose-700" %}
+                            {% if sub["grade"] == "O" %}
+                                {% set grade_class = "bg-emerald-100 text-emerald-700" %}
+                            {% elif sub["grade"] == "A" %}
+                                {% set grade_class = "bg-teal-100 text-teal-700" %}
+                            {% elif sub["grade"] == "B" %}
+                                {% set grade_class = "bg-sky-100 text-sky-700" %}
+                            {% elif sub["grade"] == "C" %}
+                                {% set grade_class = "bg-amber-100 text-amber-700" %}
+                            {% elif sub["grade"] == "D" %}
+                                {% set grade_class = "bg-orange-100 text-orange-700" %}
+                            {% endif %}
+                            <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ grade_class }}">{{ sub["grade"] }}</span>
+                        </td>
+                        <td class="px-5 py-4 text-sm text-slate-700">{{ sub["grade_points"] }}</td>
+                        <td class="px-5 py-4 text-sm font-semibold text-slate-800">{{ sub["credits"] * sub["grade_points"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

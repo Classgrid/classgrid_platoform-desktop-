@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+    <div class="space-y-5">
+        <span class="inline-flex items-center rounded-full border border-sea/20 bg-sea/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sea">
+            Academic Performance Hub
+        </span>
+        <h1 class="font-display text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+            Build your <span class="bg-gradient-to-r from-sea to-surf bg-clip-text text-transparent">world-class grade journey</span>
+        </h1>
+        <p class="max-w-2xl text-base text-steel sm:text-lg">
+            Track each semester with precision, monitor SGPA and CGPA trends, and make every credit count with a clean analytics-first experience.
+        </p>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('add_semester') }}" class="rounded-xl bg-gradient-to-r from-sea to-surf px-5 py-3 text-sm font-bold text-white shadow-glow transition hover:brightness-105">
+                Add Semester
+            </a>
+            <a href="{{ url_for('semesters') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-ink transition hover:border-sea/30 hover:text-sea">
+                Explore Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl border border-sea/20 bg-gradient-to-br from-sea/10 to-surf/10 p-4">
+            <p class="text-xs font-bold uppercase tracking-wider text-sea">Planner</p>
+            <p class="mt-2 font-display text-xl font-bold">Semester Timeline</p>
+            <p class="mt-2 text-sm text-steel">Organize all semesters in one place.</p>
+        </div>
+        <div class="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-100 to-amber-50 p-4">
+            <p class="text-xs font-bold uppercase tracking-wider text-orange-700">Performance</p>
+            <p class="mt-2 font-display text-xl font-bold">SGPA Precision</p>
+            <p class="mt-2 text-sm text-steel">Instant weighted grade calculations.</p>
+        </div>
+        <div class="rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-100 to-cyan-50 p-4 sm:col-span-2">
+            <p class="text-xs font-bold uppercase tracking-wider text-teal-700">Insights</p>
+            <p class="mt-2 font-display text-xl font-bold">CGPA and Subject Analytics</p>
+            <p class="mt-2 text-sm text-steel">Understand strengths and areas to improve.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
