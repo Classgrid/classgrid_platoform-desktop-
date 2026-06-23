@@ -872,7 +872,7 @@ export function SupportTicketsPage() {
                   <dt className="font-semibold text-sm text-foreground shrink-0">
                     Role
                   </dt>
-                  <dd className="text-right min-w-0 text-sm">
+                  <dd className="text-right min-w-0 break-words text-sm">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                       {selectedRequester.role.replace(/_/g, " ")}
                     </span>
@@ -885,7 +885,7 @@ export function SupportTicketsPage() {
                     <Building2 className="w-3.5 h-3.5" />
                     Org
                   </dt>
-                  <dd className="text-right text-muted-foreground min-w-0 text-sm">
+                  <dd className="text-right text-muted-foreground min-w-0 break-words text-sm">
                     {orgName}
                   </dd>
                 </div>
@@ -898,7 +898,7 @@ export function SupportTicketsPage() {
                 <dt className="font-semibold text-sm text-foreground shrink-0">
                   Assigned to
                 </dt>
-                <dd className="text-right text-muted-foreground min-w-0 text-sm flex items-center justify-end gap-2 flex-wrap">
+                <dd className="text-right text-muted-foreground min-w-0 break-words text-sm flex items-center justify-end gap-2 flex-wrap">
                   {selectedTicket.assignedTo?.name ? (
                     <span className="text-foreground font-medium">{selectedTicket.assignedTo.name}</span>
                   ) : (
@@ -932,10 +932,6 @@ export function SupportTicketsPage() {
 
               <hr className="border-border" />
 
-              <MetaRow
-                label="Subject"
-                value={selectedTicket.subject}
-              />
               <MetaRow
                 label="Category"
                 value={selectedTicket.category || "-"}
@@ -1119,7 +1115,7 @@ function MetaRow({
         {label}
       </dt>
       <dd
-        className={`text-right text-muted-foreground min-w-0 ${mono ? "font-mono break-all" : "break-normal"} text-sm`}
+        className={`text-right text-muted-foreground min-w-0 break-words ${mono ? "font-mono" : ""} text-sm`}
       >
         {value}
       </dd>
