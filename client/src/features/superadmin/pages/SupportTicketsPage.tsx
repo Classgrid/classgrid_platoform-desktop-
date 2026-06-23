@@ -265,6 +265,37 @@ const ticketCols = [
   { key: "action", header: "", width: "w-[90px]" },
 ];
 
+const CATEGORY_LABELS: Record<string, string> = {
+  login: "Login & Authentication Issues",
+  dashboard: "Dashboard Not Loading",
+  profile: "Profile & Settings",
+  attendance: "Attendance & Biometric",
+  fee: "Fee Payment & Receipts",
+  examination: "Examination & Results",
+  timetable: "Timetable & Scheduling",
+  assignments: "Assignments & Submissions",
+  "live-classes": "Live Classes & Video",
+  chat: "Chat & Notifications",
+  admission: "Admission & Enrollment",
+  library: "Library & Resources",
+  documents: "Documents & Uploads",
+  erp: "ERP Module Issues",
+  ai: "AI Assistant",
+  bug: "Bug Report",
+  feature: "Feature Request",
+  other: "Other",
+  // Inquiries
+  technical: "Technical Support / ERP / AI / API",
+  billing: "Billing & Subscription",
+  academics: "Academics / Attendance / Admissions",
+  exams: "Examination Systems",
+  communication: "Communication & Scheduling",
+  finance: "HR & Payroll / Finance",
+  getting_started: "Getting Started",
+  account_security: "Account & Security",
+  general: "General Inquiry",
+};
+
 export function SupportTicketsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
@@ -971,7 +1002,7 @@ export function SupportTicketsPage() {
 
               <MetaRow
                 label="Category"
-                value={selectedTicket.category || "-"}
+                value={selectedTicket.category ? CATEGORY_LABELS[selectedTicket.category] || selectedTicket.category : "-"}
               />
               <MetaRow
                 label="Priority"
