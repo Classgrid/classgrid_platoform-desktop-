@@ -147,6 +147,7 @@ function getConversation(ticket: SupportTicket) {
       footer: ticket.submitterEmail
         ? `Email: ${ticket.submitterEmail}`
         : "",
+      attachments: (ticket as any).attachments || [],
     },
     ...(ticket.replies ?? []).map((reply) => ({
       _id: reply._id,
@@ -158,6 +159,7 @@ function getConversation(ticket: SupportTicket) {
       body: reply.message,
       date: reply.createdAt,
       footer: "",
+      attachments: (reply as any).attachments || [],
     })),
   ].filter((message) => message.body);
 }
