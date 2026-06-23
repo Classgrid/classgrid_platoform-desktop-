@@ -20,7 +20,17 @@ import { Slider } from "@/components/marketing_ui/slider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/marketing_ui/alert";
 import { Progress } from "@/components/marketing_ui/progress";
-import { AlertCircle, ArrowUpCircle, Users, Terminal } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/marketing_ui/accordion";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/marketing_ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/marketing_ui/radio-group";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/marketing_ui/hover-card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/marketing_ui/dropdown-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/marketing_ui/collapsible";
+import { ToggleGroup, ToggleGroupItem } from "@/components/marketing_ui/toggle-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/marketing_ui/sheet";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/marketing_ui/context-menu";
+import { AlertCircle, ArrowUpCircle, Users, Terminal, ChevronDown } from "lucide-react";
 
 export function SandboxPage() {
   const { theme, setTheme } = useTheme();
@@ -279,6 +289,175 @@ export function SandboxPage() {
           <h2 className="text-xl font-bold text-primary">20. Progress</h2>
           <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
             <Progress value={33} />
+          </div>
+        </div>
+
+        {/* 21 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">21. Accordion</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Is it accessible?</AccordionTrigger>
+                <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Is it styled?</AccordionTrigger>
+                <AccordionContent>Yes. It comes with beautiful default styles.</AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+
+        {/* 22 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">22. Card</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Card className="w-[350px]">
+              <CardHeader>
+                <CardTitle>Create project</CardTitle>
+                <CardDescription>Deploy your new project in one-click.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Select a framework and connect your repository.</p>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline">Cancel</Button>
+                <Button>Deploy</Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+
+        {/* 23 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">23. Radio Group</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <RadioGroup defaultValue="option-one">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                <label htmlFor="option-one" className="text-sm">Option One</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-two" id="option-two" />
+                <label htmlFor="option-two" className="text-sm">Option Two</label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+
+        {/* 24 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">24. Hover Card</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="link">@nextjs</Button>
+              </HoverCardTrigger>
+              <HoverCardContent>
+                The React Framework – created and maintained by @vercel.
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+        </div>
+
+        {/* 25 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">25. Dropdown Menu</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Open Menu</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Billing</DropdownMenuItem>
+                <DropdownMenuItem>Team</DropdownMenuItem>
+                <DropdownMenuItem>Subscription</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* 26 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">26. Collapsible</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">Toggle Details <ChevronDown size={16}/></Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4 p-4 border rounded-md text-sm">
+                This content is hidden by default and can be toggled!
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+        </div>
+
+        {/* 27 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">27. Toggle Group</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <ToggleGroup type="single" defaultValue="a">
+              <ToggleGroupItem value="a">A</ToggleGroupItem>
+              <ToggleGroupItem value="b">B</ToggleGroupItem>
+              <ToggleGroupItem value="c">C</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
+
+        {/* 28 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">28. Popover</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">Open Popover</Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                Place any content here. It behaves like a dropdown.
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* 29 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">29. Sheet</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline">Open Sidebar Sheet</Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Are you absolutely sure?</SheetTitle>
+                  <SheetDescription>
+                    This action cannot be undone.
+                  </SheetDescription>
+                </SheetHeader>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+
+        {/* 30 */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-primary">30. Context Menu</h2>
+          <div className="p-8 border border-border rounded-xl bg-card shadow-sm">
+            <ContextMenu>
+              <ContextMenuTrigger className="flex h-[150px] w-full items-center justify-center rounded-md border border-dashed text-sm">
+                Right click here
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem>Profile</ContextMenuItem>
+                <ContextMenuItem>Billing</ContextMenuItem>
+                <ContextMenuItem>Team</ContextMenuItem>
+                <ContextMenuItem>Subscription</ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           </div>
         </div>
 
