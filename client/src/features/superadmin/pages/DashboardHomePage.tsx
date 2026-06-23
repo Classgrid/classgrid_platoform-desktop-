@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+import { DataTable } from "@/components/marketing_ui/data-table";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 
 import { dashboardApi, leadsApi, type SuperAdminOrganization } from "../services/superAdminApi";
 
@@ -128,23 +128,23 @@ export function DashboardHomePage() {
       )}
 
       <div className="cg-stats-grid">
-        <CgMetricCard
+        <StatCard
           title="Total Organizations"
           value={isLoading && orgsLoading ? "..." : (overview?.totalOrganizations ?? orgs.length)}
           icon={<Building2 size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="Total Users"
           value={isLoading && orgsLoading ? "..." : (overview?.totalUsers ?? liveUserCount)}
           icon={<Users size={16} />}
           sparkline={[10, 20, 25, 45, 60, 80, 100]}
         />
-        <CgMetricCard
+        <StatCard
           title="Demo Leads Pending"
           value={leadsLoading ? "..." : pendingLeads}
           icon={<ClipboardList size={16} />}
         />
-        <CgMetricCard
+        <StatCard
           title="System Status"
           value={isLoading ? "..." : (isError || orgsError ? "Action needed" : "Healthy")}
           icon={<ShieldCheck size={16} />}
@@ -152,7 +152,7 @@ export function DashboardHomePage() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(280px, 1fr)", gap: "1.5rem", marginTop: "1.5rem" }}>
-        <CgSectionPanel
+        <SectionPanel
           title="Recent Organizations"
           description="Latest provisioned institutions with owner, plan, users, and status."
           noPadding
@@ -162,7 +162,7 @@ export function DashboardHomePage() {
             </Link>
           }
         >
-          <CgDataTable
+          <DataTable
             columns={recentOrgColumns}
             data={orgs.slice(0, 8)}
             pageSize={8}
@@ -184,10 +184,10 @@ export function DashboardHomePage() {
               </Button>
             }
           />
-        </CgSectionPanel>
+        </SectionPanel>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <CgSectionPanel
+          <SectionPanel
             title="Pending Leads"
             description="Demo requests awaiting approval."
             actions={
@@ -228,9 +228,9 @@ export function DashboardHomePage() {
                   ))
               )}
             </div>
-          </CgSectionPanel>
+          </SectionPanel>
 
-          <CgSectionPanel title="Quick Actions">
+          <SectionPanel title="Quick Actions">
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {[
                 { label: "Onboard New Org", to: "/superadmin/onboard", icon: Plus },
@@ -245,7 +245,7 @@ export function DashboardHomePage() {
                 </Link>
               ))}
             </div>
-          </CgSectionPanel>
+          </SectionPanel>
         </div>
       </div>
     </div>
