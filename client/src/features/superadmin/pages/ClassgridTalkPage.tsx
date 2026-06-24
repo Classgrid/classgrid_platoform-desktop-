@@ -940,7 +940,7 @@ export function ClassgridTalkPage() {
                 label="Id"
                 value={`#${selectedTicket._id?.substring(0, 8)}`}
                 mono
-                copyValue={`This request was closed and merged into request #${selectedTicket._id?.substring(0, 8)}.\n\nView here: https://classgrid.in/support/requests/${selectedTicket._id}?email=${encodeURIComponent(selectedRequester?.email || '')}`}
+                copyValue={`https://classgrid.in/support/requests/${selectedTicket._id}?email=${encodeURIComponent(selectedRequester?.email || '')}`}
               />
               <MetaRow
                 label="Requester"
