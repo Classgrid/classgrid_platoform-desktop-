@@ -387,7 +387,7 @@ export function SupportTicketsPage() {
     const currentHTML = replyEditorRef.current?.getHTML() || "";
     const cleanText = currentHTML.replace(/<[^>]+>/g, "").trim();
     const files = replyEditorRef.current?.getFiles() || [];
-    
+
     // Allow submission if there is text OR if there are files attached
     if (!selectedTicket || (!cleanText && files.length === 0)) return;
 
@@ -401,7 +401,7 @@ export function SupportTicketsPage() {
       setReplyBody("");
       replyEditorRef.current?.clear();
       refetch();
-      
+
       setReplySent(true);
       if (replySentTimerRef.current) clearTimeout(replySentTimerRef.current);
       replySentTimerRef.current = setTimeout(() => setReplySent(false), 10000);
@@ -563,13 +563,12 @@ export function SupportTicketsPage() {
                         )}`}
                       />
                       <span
-                        className={`text-xs font-medium ${
-                          ticket.status === "open"
+                        className={`text-xs font-medium ${ticket.status === "open"
                             ? "text-emerald-500"
                             : ticket.status === "waiting_on_user"
-                            ? "text-red-500"
-                            : "text-foreground"
-                        }`}
+                              ? "text-red-500"
+                              : "text-foreground"
+                          }`}
                       >
                         {statusLabel(ticket.status)}
                       </span>
@@ -608,10 +607,10 @@ export function SupportTicketsPage() {
                             </TooltipTrigger>
                             <TooltipContent side="top">
                               {(() => {
-                                const adminReply = 
+                                const adminReply =
                                   ticket.replies?.slice().reverse().find(r => r.authorName === ticket.assignedTo?.name) ||
                                   ticket.messages?.slice().reverse().find(m => m.author === ticket.assignedTo?.name);
-                                
+
                                 if (adminReply) {
                                   return `Replied on ${fmtDateTime(adminReply.createdAt || adminReply.date)}`;
                                 }
@@ -743,13 +742,12 @@ export function SupportTicketsPage() {
                 {/* Avatar */}
                 <div className="relative shrink-0">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${
-                      (msg as any).avatar
+                    className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${(msg as any).avatar
                         ? ""
                         : msg.role === "admin"
-                        ? "bg-emerald-100 dark:bg-emerald-900/40"
-                        : `${getAvatarColor(msg.author)} text-white font-bold text-sm`
-                    }`}
+                          ? "bg-emerald-100 dark:bg-emerald-900/40"
+                          : `${getAvatarColor(msg.author)} text-white font-bold text-sm`
+                      }`}
                   >
                     {(msg as any).avatar ? (
                       <img src={(msg as any).avatar} alt="" className="w-full h-full object-cover" />
@@ -806,12 +804,12 @@ export function SupportTicketsPage() {
                               typeof att !== "string" && att.filename
                                 ? att.filename
                                 : att.name ||
-                                  path.split("/").pop() ||
-                                  `File ${aIdx + 1}`;
+                                path.split("/").pop() ||
+                                `File ${aIdx + 1}`;
                             const fileName = fullFileName.includes("_")
                               ? fullFileName.substring(
-                                  fullFileName.indexOf("_") + 1
-                                )
+                                fullFileName.indexOf("_") + 1
+                              )
                               : fullFileName;
                             const fileUrl = path.startsWith("http")
                               ? path
@@ -1112,21 +1110,21 @@ export function SupportTicketsPage() {
                               typeof attachmentItem === "string"
                                 ? attachmentItem
                                 : attachmentItem?.url ||
-                                  attachmentItem?.path ||
-                                  "";
+                                attachmentItem?.path ||
+                                "";
                             if (!path || typeof path !== "string") return null;
 
                             const fullFileName =
                               typeof attachmentItem !== "string" &&
-                              attachmentItem.filename
+                                attachmentItem.filename
                                 ? attachmentItem.filename
                                 : attachmentItem.name ||
-                                  path.split("/").pop() ||
-                                  `File ${idx + 1}`;
+                                path.split("/").pop() ||
+                                `File ${idx + 1}`;
                             const fileName = fullFileName.includes("_")
                               ? fullFileName.substring(
-                                  fullFileName.indexOf("_") + 1
-                                )
+                                fullFileName.indexOf("_") + 1
+                              )
                               : fullFileName;
                             const fileUrl = path.startsWith("http")
                               ? path
@@ -1144,8 +1142,8 @@ export function SupportTicketsPage() {
                                 >
                                   {fileName.length > 20
                                     ? fileName.slice(0, 8) +
-                                      "..." +
-                                      fileName.slice(-8)
+                                    "..." +
+                                    fileName.slice(-8)
                                     : fileName}
                                 </span>
                                 <button
