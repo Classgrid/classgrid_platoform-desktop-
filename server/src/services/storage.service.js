@@ -41,17 +41,23 @@ class StorageService {
 
     /**
      * Generate a temporary signed URL for viewing private documents
-     * (With R2, we are using public URLs for now, so we just return the full URL)
-     * @param {string} path - Path within the bucket
+     * Backward compatible: New R2 files have full URLs, old Supabase files have relative paths.
+     * @param {string} path - Path within the bucket or full URL
      * @param {number} expiresIn - Expiry in seconds (default 1 hour)
      */
     async getSignedUrl(path, expiresIn = 3600) {
         try {
-            // If it's already a full HTTP url (R2 format), return it.
+            // If it's already a full HTTP url (New R2 format), return it directly.
             if (path && path.startsWith('http')) return path;
             
-            const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || 'https://pub-14d5af5a38c6456da3b086aeea5188e1.r2.dev';
-            return `${R2_PUBLIC_URL}/${path}`;
+            // If it's a relative path, it's an OLD file still living in Supabase!
+            // We must generate a Supabase signed URL so old files don't break.
+            const { data, error } = await primarySupabaseClient.storage
+                .from(this.bucket)
+                .createSignedUrl(path, expiresIn);
+
+            if (error) throw error;
+            return data.signedUrl;
         } catch (error) {
             console.error("❌ StorageService.getSignedUrl Error:", error.message);
             return null;
