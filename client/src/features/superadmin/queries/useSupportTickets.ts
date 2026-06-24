@@ -1,15 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import type { TicketStatus, TicketPriority } from "../services/superAdminApi";
 import { supportApi } from "../services/superAdminApi";
 
 export const TICKETS_KEY = ["super-admin", "support-tickets"] as const;
 
-export function useSupportTickets(params?: {
+interface UseSupportTicketsProps {
   status?: string;
-  priority?: string;
+  type?: "inquiry" | "support";
   page?: number;
   limit?: number;
-}) {
+}
+
+export function useSupportTickets(params?: UseSupportTicketsProps) {
   return useQuery({
     queryKey: [...TICKETS_KEY, params],
     queryFn: () => supportApi.getAllTickets(params),

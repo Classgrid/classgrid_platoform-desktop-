@@ -85,6 +85,7 @@ function serializeTicket(ticket) {
         ...ticket,
         name: ticket.submitterName || ticket.submittedBy?.name || "",
         email: ticket.submitterEmail || ticket.submittedBy?.email || "",
+        submitterRole: ticket.submitterRole || ticket.submittedBy?.role || "",
         messages,
         replies: (ticket.replies || []).map(normalizeTicketMessage),
         events: ticket.events || [],
@@ -92,7 +93,7 @@ function serializeTicket(ticket) {
         requester: {
             name: ticket.submitterName || ticket.submittedBy?.name || "Unknown",
             email: ticket.submitterEmail || ticket.submittedBy?.email || "",
-            role: ticket.submittedBy?.role || null
+            role: ticket.submitterRole || ticket.submittedBy?.role || ""
         }
     };
 }
@@ -122,7 +123,7 @@ function ensureInitialMessage(ticket) {
 // ──────────────────────────────────────────────────────────────
 router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => {
     try {
-        const { name, email, subject, message, category, priority, institution } = req.body;
+        const { name, email, subject, message, category, priority, institution, role: submitterRoleInput } = req.body;
 
         if (!email?.trim() || !subject?.trim() || !message?.trim()) {
             return res.status(400).json({
@@ -199,6 +200,7 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
             priority: priority || "medium",
             submitterEmail,
             submitterName,
+            submitterRole: (submitterRoleInput || "").trim(),
             institution: institution?.trim() || "",
             organization_id,
             messages: [{
@@ -756,10 +758,17 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
 // ══════════════════════════════════════════════════════════════
 router.get("/admin/tickets", isAuthenticated, requireRole("super_admin"), async (req, res) => {
     try {
-        const { status, priority, page = 1, limit = 30 } = req.query;
+        const { status, priority, page = 1, limit = 30, type } = req.query;
         const filter = {};
         if (status) filter.status = status;
         if (priority) filter.priority = priority;
+
+        // Apply type filtering for Classgrid Talk (inquiry) vs Support Tickets (support)
+        if (type === 'inquiry') {
+            filter.organization_id = null; // Inquiries don't have an associated organization
+        } else if (type === 'support') {
+            filter.organization_id = { $ne: null }; // Support tickets require an organization
+        }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -792,11 +801,15 @@ router.get("/admin/tickets", isAuthenticated, requireRole("super_admin"), async 
             }
         }
 
-        // Stats
+        // Stats with base filter
+        const baseFilter = {};
+        if (type === 'inquiry') baseFilter.organization_id = null;
+        else if (type === 'support') baseFilter.organization_id = { $ne: null };
+
         const [openCount, inProgressCount, resolvedCount] = await Promise.all([
-            SupportTicket.countDocuments({ status: "open" }),
-            SupportTicket.countDocuments({ status: "in_progress" }),
-            SupportTicket.countDocuments({ status: "resolved" })
+            SupportTicket.countDocuments({ ...baseFilter, status: "open" }),
+            SupportTicket.countDocuments({ ...baseFilter, status: "in_progress" }),
+            SupportTicket.countDocuments({ ...baseFilter, status: "resolved" })
         ]);
 
         res.json({

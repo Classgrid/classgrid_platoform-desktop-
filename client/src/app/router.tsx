@@ -18,7 +18,7 @@ import { AnalyticsPage } from "@/features/superadmin/pages/AnalyticsPage";
 import { AlertsPage } from "@/features/superadmin/pages/AlertsPage";
 import { OnboardPage } from "@/features/superadmin/pages/OnboardPage";
 import { DirectOnboardPage } from "@/features/superadmin/pages/DirectOnboardPage";
-import { HelpdeskPage } from "@/features/superadmin/pages/HelpdeskPage";
+import { ClassgridTalkPage } from "@/features/superadmin/pages/ClassgridTalkPage";
 import { TeamPage } from "@/features/superadmin/pages/TeamPage";
 import { BillingPage } from "@/features/superadmin/pages/BillingPage";
 import { RevenuePage } from "@/features/superadmin/pages/RevenuePage";
@@ -202,8 +202,8 @@ export function AppRouter() {
         {/* Super Admin — Onboard via pending demo orgs */}
         <Route path="/superadmin/onboard/pending" element={<OnboardPage />} />
 
-        {/* Super Admin — Helpdesk Chat */}
-        <Route path="/superadmin/helpdesk" element={<HelpdeskPage />} />
+        {/* Super Admin — Classgrid Talk */}
+        <Route path="/superadmin/classgrid-talk" element={<ClassgridTalkPage />} />
 
         {/* Super Admin — Platform Team */}
         <Route path="/superadmin/team" element={<TeamPage />} />

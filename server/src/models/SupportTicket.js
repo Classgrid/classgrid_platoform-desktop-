@@ -62,6 +62,11 @@ const supportTicketSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    submitterRole: {
+        type: String,
+        trim: true,
+        default: ""
+    },
     // Organization context
     organization_id: {
         type: mongoose.Schema.Types.ObjectId,

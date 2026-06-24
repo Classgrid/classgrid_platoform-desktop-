@@ -204,7 +204,7 @@ export const supportApi = {
       .post<{ success: boolean; message: string; ticket: SupportTicket }>("/api/support/tickets", payload)
       .then((r) => r.data),
 
-  getAllTickets: (params?: { status?: string; priority?: string; page?: number; limit?: number }) =>
+  getAllTickets: (params?: { status?: string; priority?: string; page?: number; limit?: number; type?: "inquiry" | "support" }) =>
     apiClient
       .get<TicketsResponse>("/api/support/admin/tickets", { params })
       .then((r) => r.data),

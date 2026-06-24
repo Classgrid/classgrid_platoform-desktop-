@@ -300,7 +300,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: "General Inquiry",
 };
 
-export function SupportTicketsPage() {
+export function ClassgridTalkPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(
@@ -321,7 +321,7 @@ export function SupportTicketsPage() {
     status: statusFilter || undefined,
     priority: priorityFilter || undefined,
     limit: 50,
-    type: "support",
+    type: "inquiry",
   });
 
   const updateTicket = useUpdateTicket();
@@ -416,10 +416,9 @@ export function SupportTicketsPage() {
         {/* Header */}
         <div className="cg-page__header">
           <div className="cg-page__header-content">
-            <h1 className="cg-page__title">Support Tickets</h1>
+            <h1 className="cg-page__title">Classgrid Talk Inquiries</h1>
             <p className="cg-page__description">
-              Manage and resolve platform support tickets raised by institution
-              users.
+              Manage inquiries from prospective institutions. All conversations are threaded and tracked.
             </p>
           </div>
           <div className="cg-page__header-actions">
@@ -677,7 +676,7 @@ export function SupportTicketsPage() {
 
   // ── Ticket Detail View (2-column layout like marketing) ───────────────────
   const isClosed = selectedTicket.status === "closed";
-  const orgName = (selectedTicket as any).organization_id?.name || (selectedTicket as any).institution || null;
+  const orgName = (selectedTicket as any).institution || null;
   const SUPABASE_URL = "https://bumxgscngzjadyozdpce.supabase.co";
 
   return (
@@ -694,7 +693,7 @@ export function SupportTicketsPage() {
                   setSelectedTicket(null);
                 }}
               >
-                Tickets
+                Classgrid Talk
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -965,7 +964,7 @@ export function SupportTicketsPage() {
                 <div className="flex items-start justify-between gap-2 min-w-0">
                   <dt className="font-semibold text-sm text-foreground shrink-0 flex items-center gap-1.5">
                     <Building2 className="w-3.5 h-3.5" />
-                    Org
+                    Institution
                   </dt>
                   <dd className="text-right text-muted-foreground min-w-0 break-words text-sm">
                     {orgName}
