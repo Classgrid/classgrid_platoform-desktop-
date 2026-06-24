@@ -681,7 +681,7 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             } else {
                 // Only auto-upgrade to in_progress if it's currently open. 
                 // Do not overwrite if admin hand-picked "waiting_on_user" or left it in progress.
-                if (ticket.status === "open") {
+                if (ticket.status === "open" || ticket.status === "reopened") {
                     ticket.status = "in_progress";
                 }
             }
