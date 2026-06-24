@@ -12,6 +12,8 @@ import Verification from "../models/Verification.js";
 import { classroomClient, studentNotesClient, getChatSb } from "../config/supabaseClient.js";
 import mongoose from "mongoose";
 import connectDB from "../../config/db.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 // ─────────────────────────────────────────────────────────
 // DELETE TOKEN MODEL (for org admin email verification)
@@ -115,7 +117,7 @@ export async function hardDeleteOrganization(orgId) {
         if (org.logo_url && org.logo_url.includes("notes-files")) {
             const logoPath = org.logo_url.split("/notes-files/")[1];
             if (logoPath) {
-                await studentNotesClient.storage.from("notes-files").remove([logoPath]);
+                await Promise.all([logoPath].map(p => deleteFromR2(p)));
             }
         }
 
@@ -127,7 +129,7 @@ export async function hardDeleteOrganization(orgId) {
                     .list(`classroom/${cid}`);
                 if (files && files.length > 0) {
                     const paths = files.map(f => `classroom/${cid}/${f.name}`);
-                    await studentNotesClient.storage.from("notes-files").remove(paths);
+                    await Promise.all(paths.map(p => deleteFromR2(p)));
                 }
             } catch (e) {
                 // Non-fatal — folder may not exist

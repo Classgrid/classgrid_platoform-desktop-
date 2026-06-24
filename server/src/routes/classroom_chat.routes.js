@@ -4,6 +4,8 @@ import { isAuthenticated } from '../middleware/auth.middleware.js';
 import { requireClassroomMember } from '../middleware/classroom.middleware.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import { studentNotesClient, primarySupabaseClient } from '../config/supabaseClient.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 
@@ -120,21 +122,12 @@ router.post('/:id', isAuthenticated, requireClassroomMember, upload.single('file
             const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
             const storagePath = `chat/classroom/${id}/${user._id}/${Date.now()}_${safeName}`;
 
-            const { error: uploadError } = await studentNotesClient.storage
-                .from('notes-files')
-                .upload(storagePath, file.buffer, {
-                    contentType: file.mimetype,
-                    upsert: false,
-                });
+            const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-            if (uploadError) {
-                console.error('Classroom chat file upload error:', uploadError);
-                return res.status(500).json({ message: 'Failed to upload file' });
+            /* Error handled by route try-catch */);
             }
 
-            const { data: { publicUrl } } = studentNotesClient.storage
-                .from('notes-files')
-                .getPublicUrl(storagePath);
+            /* getPublicUrl replaced by R2 */
 
             newMessage.file_url = publicUrl;
             newMessage.file_name = file.originalname;

@@ -80,10 +80,14 @@ export async function deleteFromR2(fileIdentifier) {
  * @param {string} fileName - The intended filename
  * @param {string} mimeType - The file's MIME type
  * @param {number} expiresInSeconds - Link validity duration
+ * @param {string} customPath - Optional custom object Key
  */
-export async function getPresignedUploadUrl(fileName, mimeType, expiresInSeconds = 3600) {
-    const ext = path.extname(fileName) || '';
-    const uniqueFilename = `assets/${Date.now()}-${uuidv4()}${ext}`;
+export async function getPresignedUploadUrl(fileName, mimeType, expiresInSeconds = 3600, customPath = null) {
+    let uniqueFilename = customPath;
+    if (!uniqueFilename) {
+        const ext = path.extname(fileName || '') || '';
+        uniqueFilename = `assets/${Date.now()}-${uuidv4()}${ext}`;
+    }
 
     const command = new PutObjectCommand({
         Bucket: R2_BUCKET_NAME,

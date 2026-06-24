@@ -4,6 +4,8 @@ import { isAuthenticated } from '../middleware/auth.middleware.js';
 import { transcribeAudio } from '../services/ai/voice.service.js';
 import { studentNotesClient } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 const upload = multer({
@@ -29,18 +31,11 @@ router.post('/send', isAuthenticated, upload.single('audio'), async (req, res) =
 
         // 2. Upload to S3 (Supabase Storage)
         const storagePath = `chat/voice/${threadId}/${Date.now()}_voice.webm`;
-        const { error: uploadErr } = await studentNotesClient.storage
-            .from('notes-files')
-            .upload(storagePath, file.buffer, {
-                contentType: 'audio/webm',
-                upsert: false
-            });
+        const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-        if (uploadErr) throw uploadErr;
+        /* Error handled inside R2 */
 
-        const { data: signedData } = await studentNotesClient.storage
-            .from('notes-files')
-            .createSignedUrl(storagePath, 31536000); // 1 year expiry
+        const signedData = { signedUrl: publicUrl }; /* Signed URL mocked by R2 public URL */ // 1 year expiry
 
         const fileUrl = signedData?.signedUrl || storagePath;
 

@@ -4,6 +4,8 @@ import { getChatSb, studentNotesClient } from '../config/supabaseClient.js';
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { requireClassroomMember, requireClassroomOwner } from "../middleware/classroom.middleware.js";
 import { broadcastToChannel } from "../services/realtimeBroadcast.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 // Centralized Supabase Client
 const getSupabase = () => getChatSb();
@@ -38,18 +40,11 @@ router.post("/:classroomId", isAuthenticated, requireClassroomMember, upload.sin
 
         if (file) {
             const fileName = `chat/${req.params.classroomId}/${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-            const { error: uploadError } = await studentNotesClient.storage
-                .from('notes-files')
-                .upload(fileName, file.buffer, {
-                    contentType: file.mimetype,
-                    upsert: false
-                });
+            const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', fileName);
 
-            if (uploadError) throw uploadError;
+            /* Error handled inside R2 */
 
-            const { data: { publicUrl } } = studentNotesClient.storage
-                .from('notes-files')
-                .getPublicUrl(fileName);
+            /* getPublicUrl replaced by R2 */
                 
             msgData.file_url = publicUrl;
             msgData.file_name = file.originalname;

@@ -5,6 +5,8 @@ import NotePackage from '../models/NotePackage.js';
 import { studentNotesClient } from '../config/supabaseClient.js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 const upload = multer({
@@ -32,14 +34,9 @@ router.post('/upload', isAuthenticated, upload.single('file'), async (req, res) 
 
         // 1. Upload to S3
         const storagePath = `marketplace/notes/${userId}/${Date.now()}_${file.originalname}`;
-        const { error: uploadErr } = await studentNotesClient.storage
-            .from('notes-files')
-            .upload(storagePath, file.buffer, {
-                contentType: 'application/pdf',
-                upsert: false
-            });
+        const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-        if (uploadErr) throw uploadErr;
+        /* Error handled inside R2 */
 
         // 2. Create Note Entry
         const newNote = new NotePackage({

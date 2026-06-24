@@ -5,6 +5,8 @@ import pdfParse from 'pdf-parse';
 import Groq from 'groq-sdk';
 import { isAuthenticated } from '../middleware/auth.middleware.js';
 import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -217,13 +219,11 @@ router.post('/admin/:examId/timetable/upload', upload.single('file'), async (req
 
         // Step 1: Upload PDF to Supabase Storage (notes-files bucket for reusability)
         const fileName = `${orgId}/exams/${examId}/${Date.now()}_timetable.pdf`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('notes-files')
-            .upload(fileName, req.file.buffer, { contentType: 'application/pdf', upsert: true });
+        const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.buffer.originalname || 'upload.file', req.file.buffer.mimetype || 'application/octet-stream', fileName);
 
-        if (uploadError) throw uploadError;
+        /* Error handled inside R2 */
 
-        const { data: publicUrlData } = supabase.storage.from('notes-files').getPublicUrl(fileName);
+        /* getPublicUrl replaced by R2 */
         const pdfUrl = publicUrlData.publicUrl;
 
         // Step 2: Extract text using pdf-parse

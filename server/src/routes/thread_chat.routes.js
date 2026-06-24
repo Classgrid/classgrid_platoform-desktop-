@@ -6,6 +6,8 @@ import { primarySupabaseClient } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import { studentNotesClient } from '../config/supabaseClient.js';
 import AIAssistantModule from '../services/ai/AIAssistantModule.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 const sb = primarySupabaseClient;
@@ -471,20 +473,10 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `chat/threads/${threadId}/${Date.now()}_${safeName}`;
 
-      const { error: uploadErr } = await studentNotesClient.storage
-        .from('notes-files')
-        .upload(storagePath, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false,
-        });
-      if (uploadErr) {
-        console.error('File upload error:', uploadErr);
-        continue;
-      }
+      const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
+      /* Error handled by route try-catch */
 
-      const { data: signedData } = await studentNotesClient.storage
-        .from('notes-files')
-        .createSignedUrl(storagePath, 3600);
+      const signedData = { signedUrl: publicUrl }; /* Signed URL mocked by R2 public URL */
 
       const attRecord = {
         message_id: msgId,

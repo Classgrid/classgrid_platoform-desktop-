@@ -5,7 +5,9 @@ import NoteView from "../models/NoteView.js";
 import Quiz from "../models/Quiz.js";
 import { verifyAndSummarize, generateQuizFromContent } from "../services/notes-ai.service.js";
 
-import { studentNotesClient } from "../config/supabaseClient.js"; // Needed for student notes
+import { studentNotesClient } from "../config/supabaseClient.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+ // Needed for student notes
 
 const router = express.Router();
 
@@ -28,9 +30,9 @@ router.post("/upload-url", isAuthenticated, async (req, res) => {
         const sanitized = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
         const path = `student-notes/${orgId}/${Date.now()}_${Math.floor(Math.random() * 1000)}_${sanitized}`;
 
-        const { data, error } = await studentNotesClient.storage
-            .from('notes-files')
-            .createSignedUploadUrl(path, 60);
+        const { uploadUrl, publicUrl: r2PubUrl } = await getPresignedUploadUrl('upload.file', 'application/octet-stream', 3600, $1);
+const data = { signedUrl: uploadUrl, token: 'r2-token' };
+const publicUrl = r2PubUrl;
 
         if (error) throw error;
 
@@ -57,9 +59,7 @@ router.post("/", isAuthenticated, async (req, res) => {
         const noteType = VALID_NOTE_TYPES.includes(note_type) ? note_type : 'self_made';
 
         // Get public URL
-        const { data: { publicUrl } } = studentNotesClient.storage
-            .from('notes-files')
-            .getPublicUrl(filePath);
+        /* getPublicUrl replaced by R2 */
 
         const noteData = {
             title: title.substring(0, 200),

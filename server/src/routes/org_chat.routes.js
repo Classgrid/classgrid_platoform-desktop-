@@ -4,6 +4,8 @@ import { isAuthenticated } from '../middleware/auth.middleware.js';
 import User from '../models/User.js'; // MongoDB User model
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import { studentNotesClient, primarySupabaseClient } from '../config/supabaseClient.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 
@@ -196,21 +198,12 @@ router.post('/messages/:otherUserId', isAuthenticated, upload.single('file'), as
       const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `chat/org_dm/${senderId}/${Date.now()}_${safeName}`;
 
-      const { error: uploadError } = await studentNotesClient.storage
-        .from('notes-files')
-        .upload(storagePath, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false,
-        });
+      const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-      if (uploadError) {
-        console.error('File upload error:', JSON.stringify(uploadError, null, 2));
-        return res.status(500).json({ error: 'Failed to upload file', details: uploadError.message || uploadError.statusCode || 'Unknown' });
+      /* Error handled by route try-catch */);
       }
 
-      const { data: { publicUrl } } = studentNotesClient.storage
-        .from('notes-files')
-        .getPublicUrl(storagePath);
+      /* getPublicUrl replaced by R2 */
 
       newMsg.file_url = publicUrl;
       newMsg.file_name = file.originalname;

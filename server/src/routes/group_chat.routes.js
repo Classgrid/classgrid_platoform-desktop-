@@ -4,6 +4,8 @@ import { isAuthenticated } from '../middleware/auth.middleware.js';
 import User from '../models/User.js';
 import { primarySupabaseClient, studentNotesClient } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 const sb = primarySupabaseClient;
@@ -204,12 +206,10 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
     const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
     const storagePath = `chat/groups/${req.params.id}/${Date.now()}_${safeName}`;
 
-    const { error: uploadErr } = await studentNotesClient.storage
-      .from('notes-files')
-      .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
-    if (uploadErr) throw uploadErr;
+    const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.buffer.originalname || 'upload.file', req.file.buffer.mimetype || 'application/octet-stream', storagePath);
+    /* Error handled inside R2 */
 
-    const { data: { publicUrl } } = studentNotesClient.storage.from('notes-files').getPublicUrl(storagePath);
+    /* getPublicUrl replaced by R2 */
 
     const { data, error } = await sb
       .from('chat_groups')

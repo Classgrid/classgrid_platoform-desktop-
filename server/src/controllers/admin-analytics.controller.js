@@ -4,6 +4,8 @@ import User from "../models/User.js";
 import EmailJob from "../models/EmailJob.js";
 import Classroom from "../models/Classroom.js";
 import { studentNotesClient } from "../config/supabaseClient.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 // GET /api/admin/system-settings
 export const getSystemSettings = async (req, res) => {

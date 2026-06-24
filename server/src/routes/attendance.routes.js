@@ -21,6 +21,8 @@ import { isHoliday } from "../utils/holidayUtils.js";
 import connectDB from "../../config/db.js";
 import { attendanceQueue } from "../workers/attendance.worker.js";
 import { dispatchNotification, bulkDispatchNotification } from "../services/notification.service.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 
@@ -1277,17 +1279,10 @@ router.post(
                 const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
                 const storagePath = `appeals/${sessionId}/${Date.now()}_${safeName}`;
 
-                const { error: uploadErr } = await sb.storage
-                    .from("notes-files")
-                    .upload(storagePath, req.file.buffer, {
-                        contentType: req.file.mimetype,
-                        upsert: false,
-                    });
-                if (uploadErr) throw uploadErr;
+                const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.buffer.originalname || 'upload.file', req.file.buffer.mimetype || 'application/octet-stream', storagePath);
+                /* Error handled inside R2 */
 
-                const { data: { publicUrl } } = sb.storage
-                    .from("notes-files")
-                    .getPublicUrl(storagePath);
+                /* getPublicUrl replaced by R2 */
                 attachmentUrl = publicUrl;
             }
 

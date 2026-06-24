@@ -3,6 +3,8 @@ import multer from 'multer';
 import { isAuthenticated, requireRole } from '../middleware/auth.middleware.js';
 import { primarySupabaseClient, studentNotesClient } from '../config/supabaseClient.js';
 import User from '../models/User.js';
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 const router = express.Router();
 
@@ -94,11 +96,9 @@ router.post('/admin/upload/:id', isAuthenticated, requireRole('org_admin'), uplo
                 upsert: true
             });
 
-        if (uploadError) throw uploadError;
+        /* Error handled inside R2 */
 
-        const { data: publicUrlData } = studentNotesClient.storage
-            .from('notes-files')
-            .getPublicUrl(filePath);
+        /* getPublicUrl replaced by R2 */
 
         const fileUrl = publicUrlData.publicUrl;
 

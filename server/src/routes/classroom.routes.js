@@ -212,22 +212,11 @@ router.put("/:id/cover", isAuthenticated, requireClassroomOwner, upload.single("
         const classroom = await Classroom.findById(req.params.id);
         if (!classroom) return res.status(404).json({ message: "Classroom not found" });
 
-        const { studentNotesClient } = await import("../config/supabaseClient.js");
+        const { uploadBufferToR2 } = await import("../config/r2Client.js");
         const fileExt = file.originalname.split('.').pop() || 'png';
         const path = `banners/${req.params.id}_${Date.now()}.${fileExt}`;
 
-        const { error: uploadError } = await studentNotesClient.storage
-            .from('notes-files')
-            .upload(path, file.buffer, {
-                contentType: file.mimetype,
-                upsert: true
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = studentNotesClient.storage
-            .from('notes-files')
-            .getPublicUrl(path);
+        const publicUrl = await uploadBufferToR2(file.buffer, file.originalname, file.mimetype, path);
 
         classroom.coverImage = publicUrl;
         await classroom.save();
@@ -1313,23 +1302,15 @@ router.post("/:id/upload-urls", isAuthenticated, requireClassroomOwner, async (r
         const urls = [];
         for (const file of files) {
             const path = `${req.params.id}/${Date.now()}_${Math.floor(Math.random() * 1000)}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-            const { data, error } = await studentNotesClient.storage
-                .from('notes-files')
-                .createSignedUploadUrl(path);
-
-            if (error) throw error;
-
-            // Build public URL from the same project that created the signed URL
-            const { data: { publicUrl } } = studentNotesClient.storage
-                .from('notes-files')
-                .getPublicUrl(path);
+            const { getPresignedUploadUrl } = await import("../config/r2Client.js");
+            const { uploadUrl, publicUrl } = await getPresignedUploadUrl(file.name, file.type || 'application/octet-stream', 3600, path);
 
             urls.push({
                 originalname: file.name,
                 path: path,
-                token: data.token,
-                signedUrl: data.signedUrl,  // Full signed upload URL (correct project)
-                publicUrl: publicUrl         // Public URL for after upload
+                token: "r2-token",
+                signedUrl: uploadUrl,
+                publicUrl: publicUrl
             });
         }
         res.json({ urls });
@@ -1751,18 +1732,8 @@ router.put("/:id/content/materials/:contentId/replace", isAuthenticated, require
         // Import the clients we need
         const { studentNotesClient, classroomClient } = await import("../config/supabaseClient.js");
         
-        const { data: uploadData, error: uploadError } = await studentNotesClient.storage
-            .from('notes-files')
-            .upload(path, file.buffer, {
-                contentType: file.mimetype,
-                upsert: false
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = studentNotesClient.storage
-            .from('notes-files')
-            .getPublicUrl(path);
+        const { uploadBufferToR2 } = await import("../config/r2Client.js");
+        const publicUrl = await uploadBufferToR2(file.buffer, file.originalname, file.mimetype, path);
 
         const fileExt = file.originalname.split('.').pop() || 'unknown';
 

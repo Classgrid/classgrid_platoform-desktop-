@@ -80,18 +80,11 @@ router.post('/upload-asset', isAuthenticated, requireRole('teacher', 'faculty'),
         const fileExt = file.originalname.split('.').pop();
         const fileName = `exam_assets/${req.user._id}_${Date.now()}.${fileExt}`;
 
-        const { data, error } = await studentNotesClient.storage
-            .from('notes-files')
-            .upload(fileName, file.buffer, {
-                contentType: file.mimetype,
-                upsert: true
-            });
+        const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', fileName);
 
         if (error) throw error;
 
-        const { data: { publicUrl } } = studentNotesClient.storage
-            .from('notes-files')
-            .getPublicUrl(fileName);
+        /* getPublicUrl replaced by R2 */
 
         res.json({ url: publicUrl });
     } catch (err) {
@@ -800,21 +793,9 @@ router.post("/:examId/proctor/flag", isAuthenticated, requireRole("student"), as
                 const timestamp = Date.now();
                 const filePath = `proctor-evidence/${req.params.examId}/${userId}_${timestamp}.jpg`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('notes-files')
-                    .upload(filePath, imageBuffer, {
-                        contentType: 'image/jpeg',
-                        upsert: false  // Never overwrite evidence
-                    });
+                const publicUrl = await uploadBufferToR2(imageBuffer, imageBuffer.originalname || 'upload.file', imageBuffer.mimetype || 'application/octet-stream', filePath);
 
-                if (!uploadError) {
-                    const { data: publicUrlData } = supabase.storage
-                        .from('notes-files')
-                        .getPublicUrl(filePath);
-                    snapshotUrl = publicUrlData?.publicUrl || null;
-                } else {
-                    console.error("[Proctor] Snapshot upload failed:", uploadError.message);
-                }
+                snapshotUrl = publicUrl || null;
             } catch (uploadErr) {
                 // Don't fail the whole request if storage upload fails
                 console.error("[Proctor] Snapshot storage error:", uploadErr.message);
@@ -1637,6 +1618,8 @@ router.get("/student/topic-analysis", isAuthenticated, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 import { predictCETRank } from "../services/analytics/rank-prediction.service.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 /**
  * GET /api/online-exam/student/rank-prediction

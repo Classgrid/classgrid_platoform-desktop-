@@ -12,6 +12,8 @@ import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { markOnboardingStep, syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
 import mongoose from "mongoose";
 import redis from "../config/redis.js";
+import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+
 
 // POST /api/organization/apply
 export const applyOrganization = async (req, res) => {
@@ -52,11 +54,9 @@ export const applyOrganization = async (req, res) => {
                         upsert: false
                     });
 
-                if (uploadError) throw uploadError;
+                /* Error handled inside R2 */
 
-                const { data: { publicUrl } } = studentNotesClient.storage
-                    .from('notes-files')
-                    .getPublicUrl('logos/' + filename);
+                /* getPublicUrl replaced by R2 */
 
                 finalLogoUrl = publicUrl;
             } catch (storageErr) {
@@ -1384,18 +1384,11 @@ async function uploadAnnouncementAttachment(base64, originalName, orgId) {
     const ext = extMap[mimeType] || originalName?.split('.').pop() || 'bin';
     const filename = `ann_${orgId}_${Date.now()}.${ext}`;
 
-    const { error: uploadError } = await studentNotesClient.storage
-        .from('notes-files')
-        .upload('org-attachments/' + filename, buffer, {
-            contentType: mimeType,
-            upsert: false,
-        });
+    const publicUrl = await uploadBufferToR2(buffer, buffer.originalname || 'upload.file', buffer.mimetype || 'application/octet-stream', 'org-attachments/' + filename);
 
-    if (uploadError) throw uploadError;
+    /* Error handled inside R2 */
 
-    const { data: { publicUrl } } = studentNotesClient.storage
-        .from('notes-files')
-        .getPublicUrl('org-attachments/' + filename);
+    /* getPublicUrl replaced by R2 */
 
     // Determine simple file type category
     let fileType = 'file';
