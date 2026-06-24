@@ -32,12 +32,25 @@ const studentMarkSchema = new mongoose.Schema(
             default: "",
         },
 
+        // Exam seat number is per exam/result, not a global student field
+        seatNo: {
+            type: String,
+            default: "",
+            trim: true,
+        },
+
         // Per-subject marks breakdown
         subjectMarks: [{
             subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "OrgSubject", default: null },
             subjectName: { type: String, required: true },
             marksObtained: { type: Number, required: true, min: 0 },
             maxMarks: { type: Number, required: true, min: 1 },
+            courseCredit: { type: Number, default: 0, min: 0 },
+            creditEarned: { type: Number, default: 0, min: 0 },
+            gradePoint: { type: Number, default: null },
+            isBacklog: { type: Boolean, default: false },
+            passedInReExam: { type: Boolean, default: false },
+            ordinance: { type: String, default: "" },
         }],
 
         // Total marks obtained (sum of all subjectMarks.marksObtained)
@@ -65,6 +78,21 @@ const studentMarkSchema = new mongoose.Schema(
         },
 
         cgpa: {
+            type: Number,
+            default: null,
+        },
+
+        totalCredits: {
+            type: Number,
+            default: null,
+        },
+
+        totalCreditEarned: {
+            type: Number,
+            default: null,
+        },
+
+        totalCreditIntoGradePoint: {
             type: Number,
             default: null,
         },
@@ -99,6 +127,10 @@ const studentMarkSchema = new mongoose.Schema(
             percentage: Number,
             grade: String,
             cgpa: Number,
+            seatNo: String,
+            totalCredits: Number,
+            totalCreditEarned: Number,
+            totalCreditIntoGradePoint: Number,
             isPassed: Boolean
         }],
     },

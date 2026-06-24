@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      alias: "fullName",
     },
 
     email: {
@@ -61,6 +62,31 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    fatherName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    motherName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    // University marksheet / eligibility metadata
+    eligibilityNo: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    pattern: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     // 🎓 Admission & Category (College ERP)
     admission_type: {
       type: String,
@@ -78,6 +104,7 @@ const userSchema = new mongoose.Schema(
     abc_id: {
       type: String,
       default: null,
+      alias: "abcId",
     },
     
     anti_ragging_undertaking_no: {
@@ -110,16 +137,19 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       trim: true,
       default: null,
+      alias: "registrationNumber",
     },
 
     branch: {
       type: String,
       default: null,
+      alias: "program",
     },
 
     batch: {
       type: String,
       default: null,
+      alias: "batchDuration",
     },
 
     profile_completed: {
@@ -137,6 +167,7 @@ const userSchema = new mongoose.Schema(
     profilePicture: {
       type: String,
       default: "",
+      alias: "photoUrl",
     },
 
     profileBanner: {

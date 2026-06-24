@@ -40,6 +40,10 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         subjectsAssigned: user.subjectsAssigned || "",
         prn: user.prn || null,
         abc_id: user.abc_id || null,
+        fatherName: user.fatherName || "",
+        motherName: user.motherName || "",
+        eligibilityNo: user.eligibilityNo || "",
+        pattern: user.pattern || "",
         authProvider: user.authProvider,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
@@ -75,7 +79,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 // =======================
 router.put("/update", isAuthenticated, attachInstitutionProfile({ required: false }), async (req, res) => {
   try {
-    const { name, phoneNumber, profilePicture, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, alternateEmail, signature, admission_type, category } = req.body;
+    const { name, phoneNumber, profilePicture, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, fatherName, motherName, eligibilityNo, pattern, alternateEmail, signature, admission_type, category } = req.body;
 
     // Safety check: Don't allow empty name
     if (name !== undefined && (name === null || name.trim() === "")) {
@@ -110,6 +114,10 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
     // New Profile Fields
     if (dob !== undefined) updateData.dob = dob;
     if (gender !== undefined) updateData.gender = gender;
+    if (fatherName !== undefined) updateData.fatherName = (fatherName || '').trim();
+    if (motherName !== undefined) updateData.motherName = (motherName || '').trim();
+    if (eligibilityNo !== undefined) updateData.eligibilityNo = (eligibilityNo || '').trim();
+    if (pattern !== undefined) updateData.pattern = (pattern || '').trim();
     if (alternateEmail !== undefined) updateData.alternateEmail = (alternateEmail || '').trim().toLowerCase();
     if (signature !== undefined) updateData.signature = signature;
     if (admission_type !== undefined) updateData.admission_type = admission_type;
@@ -345,6 +353,10 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
         branch: user.branch || null,
         batch: user.batch || null,
         dob: user.dob || null,
+        fatherName: user.fatherName || "",
+        motherName: user.motherName || "",
+        eligibilityNo: user.eligibilityNo || "",
+        pattern: user.pattern || "",
         gender: user.gender || null,
         alternateEmail: user.alternateEmail || "",
         signature: user.signature || "",

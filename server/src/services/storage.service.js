@@ -11,7 +11,7 @@ class StorageService {
     }
 
     /**
-     * Upload a file to Supabase Storage
+     * Upload a file to Cloudflare R2
      * @param {Buffer} fileBuffer - The file content
      * @param {string} fileName - Original file name
      * @param {string} mimeType - File MIME type
@@ -20,27 +20,18 @@ class StorageService {
      */
     async uploadDocument(fileBuffer, fileName, mimeType, folderPath, targetBucket = null) {
         try {
-            const fileExt = fileName.split('.').pop();
+            const { uploadBufferToR2 } = await import("../config/r2Client.js");
+            const fileExt = fileName.split('.').pop() || '';
             const uniqueFileName = `${uuidv4()}.${fileExt}`;
             const filePath = `${folderPath}/${uniqueFileName}`;
-            const bucketToUse = targetBucket || this.bucket;
+            const bucketToUse = targetBucket || this.bucket; // R2 ignores targetBucket if we just use our default, but let's keep the signature.
 
-            const { data, error } = await primarySupabaseClient.storage
-                .from(bucketToUse)
-                .upload(filePath, fileBuffer, {
-                    contentType: mimeType,
-                    upsert: true
-                });
-
-            if (error) throw error;
+            const publicUrl = await uploadBufferToR2(fileBuffer, fileName, mimeType, filePath);
 
             return {
-                path: data.path,
-                fullPath: `${bucketToUse}/${data.path}`,
-                // In production, we should probably generate signed URLs on demand
-                // for security, rather than storing public ones.
-                // But for now, we'll return the relative path.
-                storage_path: data.path
+                path: filePath,
+                fullPath: `${bucketToUse}/${filePath}`,
+                storage_path: publicUrl // We return the R2 public URL directly!
             };
         } catch (error) {
             console.error("❌ StorageService.uploadDocument Error:", error.message);
@@ -50,17 +41,17 @@ class StorageService {
 
     /**
      * Generate a temporary signed URL for viewing private documents
+     * (With R2, we are using public URLs for now, so we just return the full URL)
      * @param {string} path - Path within the bucket
      * @param {number} expiresIn - Expiry in seconds (default 1 hour)
      */
     async getSignedUrl(path, expiresIn = 3600) {
         try {
-            const { data, error } = await primarySupabaseClient.storage
-                .from(this.bucket)
-                .createSignedUrl(path, expiresIn);
-
-            if (error) throw error;
-            return data.signedUrl;
+            // If it's already a full HTTP url (R2 format), return it.
+            if (path && path.startsWith('http')) return path;
+            
+            const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || 'https://pub-14d5af5a38c6456da3b086aeea5188e1.r2.dev';
+            return `${R2_PUBLIC_URL}/${path}`;
         } catch (error) {
             console.error("❌ StorageService.getSignedUrl Error:", error.message);
             return null;
@@ -73,11 +64,8 @@ class StorageService {
      */
     async deleteDocument(path) {
         try {
-            const { error } = await primarySupabaseClient.storage
-                .from(this.bucket)
-                .remove([path]);
-
-            if (error) throw error;
+            const { deleteFromR2 } = await import("../config/r2Client.js");
+            await deleteFromR2(path);
             return true;
         } catch (error) {
             console.error("❌ StorageService.deleteDocument Error:", error.message);
