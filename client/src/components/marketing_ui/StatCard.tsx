@@ -6,12 +6,16 @@ type StatCardProps = {
 
 export function StatCard({ title, value, icon }: StatCardProps) {
   return (
-    <article className="ui-card flex items-center justify-between p-6">
+    <article className="flex items-center justify-between p-6 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
       <div>
-        <p className="ui-stat__label text-muted-foreground text-sm font-medium">{title}</p>
-        <strong className="ui-stat__value text-2xl font-bold">{value}</strong>
+        <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
+        <strong className="text-3xl font-extrabold text-foreground">{value}</strong>
       </div>
-      {icon && <div className="text-muted-foreground opacity-50">{icon}</div>}
+      {icon && (
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+          {icon}
+        </div>
+      )}
     </article>
   );
 }
