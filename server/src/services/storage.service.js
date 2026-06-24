@@ -29,9 +29,14 @@ class StorageService {
             const publicUrl = await uploadBufferToR2(fileBuffer, fileName, mimeType, filePath);
 
             return {
+                id: uuidv4(),
+                name: fileName,
+                mimeType: mimeType,
+                size: fileBuffer ? fileBuffer.length : 0,
                 path: filePath,
                 fullPath: `${bucketToUse}/${filePath}`,
-                storage_path: publicUrl // We return the R2 public URL directly!
+                storage_path: publicUrl, // We return the R2 public URL directly!
+                uploadedAt: new Date()
             };
         } catch (error) {
             console.error("❌ StorageService.uploadDocument Error:", error.message);
