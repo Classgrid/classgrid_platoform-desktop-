@@ -20,6 +20,7 @@ import {
   AlignRight,
   AlignJustify,
   Paperclip,
+  Eye,
 } from "lucide-react";
 import LinkModal from "@/app/support/components/LinkModal";
 import { uploadToSupabase } from "@/lib/supabase-storage";
@@ -84,6 +85,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
     const [isPlainText, setIsPlainText] = useState(false);
     const [savedSelection, setSavedSelection] = useState<Range | null>(null);
     const [files, setFiles] = useState<File[]>([]);
+    const [filePreview, setFilePreview] = useState<{ url: string; name: string; type: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const savedHTML = useRef<string>("");
     const tooltipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -664,6 +666,17 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
                 <span className="text-muted-foreground/60 text-[10px]">{(file.size / 1024).toFixed(0)}kb</span>
                 <button
                   type="button"
+                  title="Preview file"
+                  onClick={() => {
+                    const url = URL.createObjectURL(file);
+                    setFilePreview({ url, name: file.name, type: file.type });
+                  }}
+                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors"
+                >
+                  <Eye className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
                   onClick={() => setFiles(f => f.filter((_, i) => i !== idx))}
                   className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors ml-1"
                 >
@@ -744,6 +757,66 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
               className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg border border-border shadow-2xl bg-card"
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        )}
+
+        {/* File Preview Modal */}
+        {filePreview && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            onClick={() => { URL.revokeObjectURL(filePreview.url); setFilePreview(null); }}
+          >
+            {/* Top-right action buttons */}
+            <div className="absolute top-5 right-5 flex items-center gap-3 z-10">
+              <button
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setFiles(f => f.filter(file => file.name !== filePreview.name));
+                  URL.revokeObjectURL(filePreview.url); 
+                  setFilePreview(null); 
+                }}
+                title="Delete file"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors shadow-lg"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); URL.revokeObjectURL(filePreview.url); setFilePreview(null); }}
+                title="Close"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-card border border-border text-foreground hover:bg-muted transition-colors shadow-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {/* File name */}
+            <div className="absolute top-5 left-5 z-10 px-4 py-2 bg-card/90 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm font-medium text-foreground">{filePreview.name}</span>
+              </div>
+            </div>
+            {/* Preview content */}
+            <div onClick={(e) => e.stopPropagation()} className="max-w-[90vw] max-h-[85vh]">
+              {filePreview.type.startsWith('image/') ? (
+                <img
+                  src={filePreview.url}
+                  alt={filePreview.name}
+                  className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg border border-border shadow-2xl bg-card"
+                />
+              ) : filePreview.type === 'application/pdf' ? (
+                <iframe
+                  src={filePreview.url}
+                  title={filePreview.name}
+                  className="w-[80vw] h-[80vh] rounded-lg border border-border shadow-2xl bg-card"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-4 p-12 bg-card border border-border rounded-lg shadow-2xl">
+                  <Paperclip className="w-12 h-12 text-muted-foreground" />
+                  <p className="text-lg font-semibold text-foreground">{filePreview.name}</p>
+                  <p className="text-sm text-muted-foreground">Preview not available for this file type</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </>
