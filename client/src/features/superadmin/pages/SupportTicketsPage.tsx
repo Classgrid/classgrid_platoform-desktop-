@@ -13,6 +13,7 @@ import {
   Eye,
   FileText,
   Building2,
+  Copy,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
@@ -940,6 +941,7 @@ export function SupportTicketsPage() {
                 label="Id"
                 value={`#${selectedTicket._id?.substring(0, 8)}`}
                 mono
+                copyValue={`https://classgrid.in/support/requests/${selectedTicket._id}?email=${encodeURIComponent(selectedRequester?.email || '')}`}
               />
               <MetaRow
                 label="Requester"
@@ -1187,10 +1189,12 @@ function MetaRow({
   label,
   value,
   mono,
+  copyValue,
 }: {
   label: string;
   value: string;
   mono?: boolean;
+  copyValue?: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-2 min-w-0">
@@ -1198,9 +1202,21 @@ function MetaRow({
         {label}
       </dt>
       <dd
-        className={`text-right text-muted-foreground min-w-0 break-words ${mono ? "font-mono" : ""} text-sm`}
+        className={`text-right text-muted-foreground min-w-0 break-words ${mono ? "font-mono" : ""} text-sm flex items-center justify-end gap-1.5`}
       >
-        {value}
+        <span>{value}</span>
+        {copyValue && (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(copyValue);
+              toast.success("Merge URL copied to clipboard");
+            }}
+            className="p-1 rounded bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            title="Copy Merge URL"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+        )}
       </dd>
     </div>
   );
