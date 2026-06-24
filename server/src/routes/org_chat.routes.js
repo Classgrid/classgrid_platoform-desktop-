@@ -200,8 +200,7 @@ router.post('/messages/:otherUserId', isAuthenticated, upload.single('file'), as
 
       const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-      /* Error handled by route try-catch */);
-      }
+      // Error handled by try-catch
 
       /* getPublicUrl replaced by R2 */
 

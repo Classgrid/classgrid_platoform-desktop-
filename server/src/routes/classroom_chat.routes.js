@@ -124,11 +124,6 @@ router.post('/:id', isAuthenticated, requireClassroomMember, upload.single('file
 
             const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
 
-            /* Error handled by route try-catch */);
-            }
-
-            /* getPublicUrl replaced by R2 */
-
             newMessage.file_url = publicUrl;
             newMessage.file_name = file.originalname;
             newMessage.file_type = file.mimetype;
