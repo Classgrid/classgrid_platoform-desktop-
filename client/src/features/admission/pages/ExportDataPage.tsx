@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-    PageShell, 
-    PageHeader,
-    CgBadge
-} from "@/components/classgrid";
+
 import { FiDownloadCloud, FiFileText, FiDatabase, FiLayers } from "react-icons/fi";
 
 const EXPORT_MODULES = [
@@ -94,7 +90,7 @@ export function ExportDataPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         whileHover={{ y: -4 }}
-                        className="cg-card p-6 flex flex-col h-full"
+                        className=" p-6 flex flex-col h-full"
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-4">
@@ -105,9 +101,9 @@ export function ExportDataPage() {
                                     <h3 className="text-lg font-bold">{module.title}</h3>
                                     <div className="flex gap-2 mt-1">
                                         {module.tags.map(tag => (
-                                            <CgBadge key={tag} variant="secondary" className="text-xs">
+                                            <div key={tag} variant="secondary" className="text-xs">
                                                 {tag}
-                                            </CgBadge>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -121,8 +117,8 @@ export function ExportDataPage() {
                         <button
                             onClick={() => handleDownload(module)}
                             disabled={downloadingId === module.id}
-                            className={`cg-btn w-full flex items-center justify-center gap-2 ${
-                                downloadingId === module.id ? "opacity-50 cursor-not-allowed" : "cg-btn--primary"
+                            className={`inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 w-full flex items-center justify-center gap-2 ${
+                                downloadingId === module.id ? "opacity-50 cursor-not-allowed" : "bg-primary text-primary-foreground shadow"
                             }`}
                         >
                             {downloadingId === module.id ? (

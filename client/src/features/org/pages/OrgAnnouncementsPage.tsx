@@ -145,8 +145,8 @@ export function OrgAnnouncementsPage() {
   }
 
   return (
-    <main className="cg-page">
-      <header className="cg-page__header cg-page__header--split">
+    <main className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6 flex justify-between items-center">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Org Admin Overview</p>
           <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>

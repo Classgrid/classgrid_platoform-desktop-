@@ -4,9 +4,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Megaphone, BellRing, Search, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+
+
+
 import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
@@ -94,12 +94,12 @@ export function PlatformAnnouncementsPage() {
 
   return (
     <div className="space-y-6">
-      <CgPageHeader
+      <div
         title="Platform Announcements"
         description="Broadcast push notifications and system alerts to all users or specific roles."
       />
 
-      <CgSectionPanel>
+      <div>
         <div className="mb-4 flex items-center justify-between">
           <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -116,13 +116,13 @@ export function PlatformAnnouncementsPage() {
           </Button>
         </div>
 
-        <CgDataTable
+        <div
           columns={columns}
           data={filteredAnnouncements}
           isLoading={isLoading}
           emptyMessage="No announcements found."
         />
-      </CgSectionPanel>
+      </div>
 
       {/* Broadcast Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

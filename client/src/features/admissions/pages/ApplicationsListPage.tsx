@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Loader2, Eye, MoreHorizontal } from "lucide-react";
-import {
-  CgPageShell,
-  CgFilterToolbar,
-  CgSelect,
-  CgDataTable,
-  CgBadge,
-  CgAvatar,
-  CgAlert,
-} from "@/components/classgrid";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { useApplications } from "../queries/useApplications";
 import type { AdmissionApplication } from "../types";
 
@@ -47,11 +39,13 @@ const columns: ColumnDef<AdmissionApplication>[] = [
     accessorKey: "full_name",
     header: "Applicant",
     cell: ({ row }) => (
-      <div className="cg-table__cell-identity">
-        <CgAvatar name={row.original.full_name} size="sm" />
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+          {row.original.full_name?.[0]?.toUpperCase() || "?"}
+        </div>
         <div>
-          <div className="cg-table__cell-primary">{row.original.full_name}</div>
-          <small className="cg-table__cell-secondary">
+          <div className="font-medium truncate">{row.original.full_name}</div>
+          <small className="text-muted-foreground">
             {row.original.email || row.original.phone || "—"}
           </small>
         </div>
@@ -66,11 +60,20 @@ const columns: ColumnDef<AdmissionApplication>[] = [
   {
     accessorKey: "status",
     header: "Stage",
-    cell: ({ row }) => (
-      <CgBadge variant={statusVariant[row.original.status] ?? "neutral"}>
-        {row.original.status.replace(/_/g, " ")}
-      </CgBadge>
-    ),
+    cell: ({ row }) => {
+      const v = statusVariant[row.original.status] ?? "neutral";
+      let colorClass = "bg-gray-100 text-gray-800";
+      if (v === "success") colorClass = "bg-emerald-100 text-emerald-800";
+      if (v === "info") colorClass = "bg-blue-100 text-blue-800";
+      if (v === "warning") colorClass = "bg-amber-100 text-amber-800";
+      if (v === "danger") colorClass = "bg-red-100 text-red-800";
+      
+      return (
+        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${colorClass}`}>
+          {row.original.status.replace(/_/g, " ")}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "merit_score",
@@ -87,7 +90,9 @@ const columns: ColumnDef<AdmissionApplication>[] = [
     accessorKey: "entry_mode",
     header: "Entry",
     cell: ({ row }) => (
-      <CgBadge variant="outline" size="sm">{row.original.entry_mode}</CgBadge>
+      <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
+        {row.original.entry_mode}
+      </span>
     ),
   },
   {
@@ -95,9 +100,9 @@ const columns: ColumnDef<AdmissionApplication>[] = [
     header: "Fee",
     cell: ({ row }) =>
       row.original.fee_paid ? (
-        <CgBadge variant="success" size="sm">Paid</CgBadge>
+        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800">Paid</span>
       ) : (
-        <CgBadge variant="neutral" size="sm">Unpaid</CgBadge>
+        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">Unpaid</span>
       ),
   },
   {
@@ -123,45 +128,52 @@ export function ApplicationsListPage() {
   });
 
   return (
-    <CgPageShell
-      title="All Applications"
-      description="Complete list of admission applications for the current cycle."
-      breadcrumbs={[
-        { label: "Admissions", to: "/dept/admissions/dashboard" },
-        { label: "All Applications" },
-      ]}
-    >
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">All Applications</h1>
+          <p className="text-muted-foreground mt-1">Complete list of admission applications for the current cycle.</p>
+        </div>
+      </div>
+
       {isError && (
-        <CgAlert variant="danger" title="Error loading applications">
-          Could not fetch applications from server.
-        </CgAlert>
+        <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
+          <strong>Error loading applications</strong>
+          <br/>Could not fetch applications from server.
+        </div>
       )}
 
-      <CgFilterToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search by name, email, EN number..."
-        filters={
-          <CgSelect
-            value={statusFilter}
-            onValueChange={(v) => { setStatusFilter(v); setPage(1); }}
-            options={statusOptions}
-          />
-        }
-      />
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <input 
+          type="search" 
+          placeholder="Search by name, email, EN number..." 
+          className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)} 
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="flex h-10 w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {statusOptions.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
 
       {isLoading ? (
-        <div className="cg-loading">
-          <Loader2 size={24} className="cg-spin cg-loading__spinner" />
+        <div className="flex justify-center items-center py-12">
+          <Loader2 size={24} className="animate-spin text-primary" />
         </div>
       ) : (
-        <CgDataTable
-          columns={columns}
-          data={data?.applications ?? []}
-          pageSize={20}
-          emptyMessage="No applications match your filters."
-        />
+        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+          <DataTable
+            columns={columns}
+            data={data?.applications ?? []}
+          />
+        </div>
       )}
-    </CgPageShell>
+    </div>
   );
 }

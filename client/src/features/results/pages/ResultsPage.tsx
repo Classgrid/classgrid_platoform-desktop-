@@ -11,7 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/marketing_ui/button";
 import { useStudentResults, useStudentCgpa, StudentResult } from "../queries/useStudentResults";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
@@ -48,8 +48,8 @@ export function ResultsPage() {
 
   if (results.length === 0) {
     return (
-      <div className="cg-page max-w-4xl mx-auto">
-        <header className="cg-page__header">
+      <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header className="mb-4 border-b border-border pb-4">
           <p className="text-sm font-medium text-muted-foreground">Academic Performance</p>
           <h1 className="text-2xl font-bold tracking-tight">My Results</h1>
         </header>
@@ -75,9 +75,9 @@ export function ResultsPage() {
   const isCollegeMode = latestResult?.result_schemes?.rules_json?.mode === "college";
 
   return (
-    <div className="cg-page max-w-5xl mx-auto">
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <header className="cg-page__header flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-4 border-b border-border pb-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Academic Performance</p>
           <h1 className="text-2xl font-bold tracking-tight">My Results</h1>
@@ -155,7 +155,7 @@ function SemesterCard({ result, isCollegeMode }: { result: StudentResult; isColl
   const st = statusConfig[result.status] || statusConfig.pass;
 
   return (
-    <div className="cg-card overflow-hidden">
+    <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
       {/* Scheme Header */}
       <div
         className="p-5 flex items-center justify-between cursor-pointer hover:bg-accent/30 transition-colors"
@@ -289,7 +289,7 @@ function CumulativeView({ cgpaData }: { cgpaData: any | null }) {
   return (
     <div className="space-y-6">
       {/* CGPA Header */}
-      <div className="cg-card p-6">
+      <div className="bg-card border border-border rounded-xl shadow-sm p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard icon={<TrendingUp size={20} />} label="Cumulative CGPA" value={cgpaData.cgpa.toFixed(2)} />
           {cgpaData.percentage_equivalent != null && (
@@ -301,7 +301,7 @@ function CumulativeView({ cgpaData }: { cgpaData: any | null }) {
 
       {/* SGPA Progression */}
       {semesters.length > 0 && (
-        <div className="cg-card p-6">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-bold mb-4">SGPA Progression</h3>
           <div className="overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-sm">

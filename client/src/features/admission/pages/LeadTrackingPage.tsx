@@ -2,14 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { createColumnHelper } from "@tanstack/react-table";
-import { 
-    PageShell, 
-    PageHeader,
-    Tabs,
-    ExportMenu,
-    CgDataTable,
-    CgBadge
-} from "@/components/classgrid";
+
 import { FiPhoneCall, FiUserPlus, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 const STAGE_COLORS: Record<string, "default" | "primary" | "secondary" | "success" | "destructive" | "warning"> = {
@@ -74,9 +67,9 @@ export function LeadTrackingPage() {
             cell: info => {
                 const val = info.getValue() as string;
                 return (
-                    <CgBadge variant={STAGE_COLORS[val] || "default"}>
+                    <div variant={STAGE_COLORS[val] || "default"}>
                         {val.replace(/_/g, " ").toUpperCase()}
-                    </CgBadge>
+                    </div>
                 );
             }
         }),
@@ -111,7 +104,7 @@ export function LeadTrackingPage() {
                 <div className="flex gap-4">
                     {/* HIERARCHY FILTER TAB (RULE 8) */}
                     <select 
-                        className="cg-input bg-card"
+                        className=" bg-card"
                         value={selectedHierarchy}
                         onChange={(e) => setSelectedHierarchy(e.target.value)}
                     >
@@ -128,21 +121,21 @@ export function LeadTrackingPage() {
 
             {/* Pipeline Metric Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center border-l-4 border-l-blue-500">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center border-l-4 border-l-blue-500">
                     <div className="flex items-center gap-2 mb-1">
                         <FiUserPlus className="text-blue-500" />
                         <span className="text-sm font-semibold text-muted-foreground">New Inquiries</span>
                     </div>
                     <span className="text-3xl font-bold">{pipelineCounts["inquiry"] || 0}</span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center border-l-4 border-l-orange-500">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center border-l-4 border-l-orange-500">
                     <div className="flex items-center gap-2 mb-1">
                         <FiPhoneCall className="text-orange-500" />
                         <span className="text-sm font-semibold text-muted-foreground">Follow Up</span>
                     </div>
                     <span className="text-3xl font-bold">{pipelineCounts["follow_up"] || 0}</span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center border-l-4 border-l-green-500">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center border-l-4 border-l-green-500">
                     <div className="flex items-center gap-2 mb-1">
                         <FiCheckCircle className="text-green-500" />
                         <span className="text-sm font-semibold text-muted-foreground">Converted</span>
@@ -151,7 +144,7 @@ export function LeadTrackingPage() {
                         {(pipelineCounts["converted"] || 0) + (pipelineCounts["enrolled"] || 0)}
                     </span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center border-l-4 border-l-red-500">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center border-l-4 border-l-red-500">
                     <div className="flex items-center gap-2 mb-1">
                         <FiXCircle className="text-red-500" />
                         <span className="text-sm font-semibold text-muted-foreground">Dropped / Lost</span>
@@ -182,9 +175,9 @@ export function LeadTrackingPage() {
             <motion.div 
                 initial={{ opacity: 0, y: 16 }} 
                 animate={{ opacity: 1, y: 0 }}
-                className="cg-card"
+                className=""
             >
-                <CgDataTable 
+                <div 
                     columns={columns} 
                     data={leadsData?.leads || []}
                     isLoading={isLoading}

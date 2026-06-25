@@ -5,7 +5,7 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgModal, CgModalContent, CgModalFooter } from "@/components/classgrid/Modal";
+
 import { useChangelog, useCreateChangelog, useDeleteChangelog } from "../queries/useChangelog";
 import type { ChangelogEntry, ChangelogType } from "../services/superAdminApi";
 
@@ -95,7 +95,7 @@ function buildColumns(onDelete: (id: string) => void, deleting: boolean): Column
         const entry = row.original;
         return (
           <button
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             style={{ color: "var(--danger)" }}
             disabled={deleting}
             onClick={() => onDelete(entry._id)}
@@ -152,25 +152,25 @@ export function ChangelogPage() {
   };
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Changelog</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Platform Changelog</h1>
+          <p className="text-muted-foreground mt-1">
             Broadcast platform updates, new features, and bug fixes to all users.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <button
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             onClick={() => refetch()}
             disabled={isFetching}
           >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </button>
-          <button className="cg-btn cg-btn--primary" onClick={() => setIsModalOpen(true)}>
+          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" onClick={() => setIsModalOpen(true)}>
             <Plus size={14} />
             New Update
           </button>
@@ -178,7 +178,7 @@ export function ChangelogPage() {
       </div>
 
       {/* Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Updates"
           value={isLoading ? "—" : stats.total}
@@ -202,11 +202,11 @@ export function ChangelogPage() {
       {/* Table */}
       <SectionPanel title="Update History" description="All release notes." noPadding>
         {isError ? (
-          <div className="cg-alert cg-alert--danger">
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Failed to load changelog</span>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
+            <div className="p-4 rounded-md border__body">
+              <span className="p-4 rounded-md border__title">Failed to load changelog</span>
             </div>
-            <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()}>
               Retry
             </button>
           </div>
@@ -221,15 +221,15 @@ export function ChangelogPage() {
       </SectionPanel>
 
       {/* Create Modal */}
-      <CgModal open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <CgModalContent title="Publish New Update" description="This will be visible to all users.">
+      <div open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <div title="Publish New Update" description="This will be visible to all users.">
           <form id="changelog-form" onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
             <div style={{ display: "flex", gap: "1rem" }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: "block", marginBottom: "0.25rem", fontSize: "0.85rem", fontWeight: 500 }}>Version</label>
                 <input
                   required
-                  className="cg-input"
+                  className=""
                   placeholder="v1.2.0"
                   value={form.version}
                   onChange={(e) => setForm({ ...form, version: e.target.value })}
@@ -239,7 +239,7 @@ export function ChangelogPage() {
               <div style={{ flex: 1 }}>
                 <label style={{ display: "block", marginBottom: "0.25rem", fontSize: "0.85rem", fontWeight: 500 }}>Type</label>
                 <select
-                  className="cg-select__trigger"
+                  className=""
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as ChangelogType })}
                   style={{ width: "100%" }}
@@ -272,14 +272,14 @@ export function ChangelogPage() {
               />
             </div>
           </form>
-          <CgModalFooter>
-            <button className="cg-btn cg-btn--outline" onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button type="submit" form="changelog-form" className="cg-btn cg-btn--primary" disabled={createMutation.isPending}>
+          <div>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button type="submit" form="changelog-form" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={createMutation.isPending}>
               {createMutation.isPending ? "Publishing..." : "Publish Update"}
             </button>
-          </CgModalFooter>
-        </CgModalContent>
-      </CgModal>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

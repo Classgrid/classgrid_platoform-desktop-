@@ -6,8 +6,8 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+
+
 import { formatDate, formatTime } from "@/utils/dateUtils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -107,7 +107,7 @@ const columns: ColumnDef<AuditLog>[] = [
           <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>
             {formatDate(d)}
           </div>
-          <div className="cg-table__info">{formatTime(d)}</div>
+          <div className="">{formatTime(d)}</div>
         </div>
       );
     },
@@ -121,7 +121,7 @@ const columns: ColumnDef<AuditLog>[] = [
       return (
         <div>
           <div style={{ fontWeight: 500 }}>{log.actorName}</div>
-          <div className="cg-table__info">{log.actorRole.replace("_", " ")}</div>
+          <div className="">{log.actorRole.replace("_", " ")}</div>
         </div>
       );
     },
@@ -148,7 +148,7 @@ const columns: ColumnDef<AuditLog>[] = [
       return (
         <div>
           <div style={{ fontWeight: 500 }}>{log.targetName || "—"}</div>
-          <div className="cg-table__info" style={{ textTransform: "capitalize" }}>
+          <div className="" style={{ textTransform: "capitalize" }}>
             {log.targetType}
           </div>
         </div>
@@ -217,25 +217,25 @@ export function ActivityLogPage() {
   }, [logs, search]);
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Audit Logs</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
+          <p className="text-muted-foreground mt-1">
             Immutable record of all administrative actions taken on the platform.
           </p>
         </div>
-        <div className="cg-page__header-actions">
-          <button className="cg-btn cg-btn--outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+        <div className="flex gap-2">
+          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </button>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Events" value={isLoading ? "—" : stats.total} icon={<Shield size={16} />} />
         <StatCard title="Super Admin Actions" value={isLoading ? "—" : stats.superAdminActions} icon={<User size={16} />} />
         <StatCard title="High-Risk Events" value={isLoading ? "—" : stats.danger} icon={<Building2 size={16} />} />
@@ -243,14 +243,14 @@ export function ActivityLogPage() {
       </div>
 
       {/* Filters */}
-      <CgFilterToolbar
+      <div
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search actor, target, org…"
         filters={
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <div style={{ width: "220px" }}>
-              <CgSearchableSelect
+              <div
                 value={actionFilter}
                 onValueChange={setActionFilter}
                 placeholder="All Actions"
@@ -259,7 +259,7 @@ export function ActivityLogPage() {
               />
             </div>
             <div style={{ width: "180px" }}>
-              <CgSearchableSelect
+              <div
                 value={targetFilter}
                 onValueChange={setTargetFilter}
                 placeholder="All Targets"
@@ -271,7 +271,7 @@ export function ActivityLogPage() {
         }
         actions={
           (actionFilter || targetFilter || search) && (
-            <button className="cg-btn cg-btn--outline" onClick={() => { setActionFilter(""); setTargetFilter(""); setSearch(""); }}>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => { setActionFilter(""); setTargetFilter(""); setSearch(""); }}>
               Clear
             </button>
           )
@@ -282,11 +282,11 @@ export function ActivityLogPage() {
       {/* Table */}
       <SectionPanel title="Event Timeline" description="Most recent actions first." noPadding>
         {isError ? (
-          <div className="cg-alert cg-alert--danger" style={{ margin: "1rem" }}>
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Failed to load audit logs</span>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+            <div className="p-4 rounded-md border__body">
+              <span className="p-4 rounded-md border__title">Failed to load audit logs</span>
             </div>
-            <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>Retry</button>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()}>Retry</button>
           </div>
         ) : (
           <DataTable

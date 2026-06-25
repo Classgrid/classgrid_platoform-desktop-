@@ -7,12 +7,7 @@ import {
   PieChart as PieIcon, Activity, TrendingUp,
   Play, Users, CheckCircle, AlertTriangle
 } from "lucide-react";
-import {
-  CgPageShell, CgSectionPanel, CgAlert, CgBadge,
-  CgMetricCard, CgSelect,
-  CgTabs, CgTabList, CgTabTrigger, CgTabContent,
-  CgPieChart, CgDonutChart, CgBarChart, CgLineChart, CgHistogram,
-} from "@/components/classgrid";
+
 import {
   getAdmissionConfigFull,
   updateAdmissionConfig,
@@ -137,13 +132,13 @@ export function ScheduleRoundsPage() {
   if (configQ.isLoading) {
     return (
       <div className="p-12 flex items-center justify-center gap-3 text-muted-foreground">
-        <Sparkles className="w-5 h-5 cg-spin text-primary" /> Loading schedule config...
+        <Sparkles className="w-5 h-5 animate-spin text-primary" /> Loading schedule config...
       </div>
     );
   }
 
   return (
-    <CgPageShell
+    <div
       title="Schedule & Admission Rounds"
       description={`Currently on Round ${currentRound} of ${maxRounds}  ·  ${configQ.data?.structure_type?.toUpperCase().replace("_", " ")}`}
       breadcrumbs={[
@@ -156,35 +151,35 @@ export function ScheduleRoundsPage() {
           whileHover={{ scale: 1.03 }}
           onClick={handleSave}
           disabled={saveMut.isPending}
-          className="cg-btn cg-btn--primary flex items-center gap-2"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow flex items-center gap-2"
         >
-          {saveMut.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <Save className="w-4 h-4" />}
+          {saveMut.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Config
         </motion.button>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="cg-grid-1col">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="">
 
         {/* ── KPIs ── */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CgMetricCard
+          <div
             title="Current Round"
             value={`${currentRound} / ${maxRounds}`}
             icon={<Activity className="w-4 h-4" />}
             trend={{ value: 0, label: "Admission rounds" }}
           />
-          <CgMetricCard
+          <div
             title="Total Applications"
             value={totalApps.toLocaleString()}
             icon={<Users className="w-4 h-4" />}
             trend={{ value: 8, label: "This session" }}
           />
-          <CgMetricCard
+          <div
             title="Conversion Rate"
             value={convRate}
             icon={<TrendingUp className="w-4 h-4" />}
           />
-          <CgMetricCard
+          <div
             title="Fee Paid"
             value={`${feePaidCount} students`}
             icon={<CheckCircle className="w-4 h-4" />}
@@ -193,26 +188,26 @@ export function ScheduleRoundsPage() {
 
         {/* ── Charts ── */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Round & Pipeline Analytics" description="Live visualizations of the admission pipeline across rounds">
+          <div title="Round & Pipeline Analytics" description="Live visualizations of the admission pipeline across rounds">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-primary" /> Admission Funnel Status
                 </p>
-                <CgPieChart data={funnelPie.length ? funnelPie : [{ name: "No data", value: 1, color: "#94a3b8" }]} height={240} />
+                <div data={funnelPie.length ? funnelPie : [{ name: "No data", value: 1, color: "#94a3b8" }]} height={240} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-emerald-400" /> Seats: Latest Round
                 </p>
-                <CgDonutChart data={seatsDonut} height={240} />
+                <div data={seatsDonut} height={240} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-blue-400" /> Seats per Round
                 </p>
                 {roundBar.length > 0 ? (
-                  <CgBarChart
+                  <div
                     data={roundBar}
                     indexKey="round"
                     series={[
@@ -235,7 +230,7 @@ export function ScheduleRoundsPage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-violet-400" /> Daily Application Trend
                 </p>
-                <CgLineChart
+                <div
                   data={dailyTrend.length ? dailyTrend : [{ day: "—", applications: 0 }]}
                   indexKey="day"
                   series={[{ key: "applications", name: "Applications", color: "#34d399" }]}
@@ -246,34 +241,34 @@ export function ScheduleRoundsPage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-amber-400" /> Fee Deadline Window
                 </p>
-                <CgHistogram data={deadlineHist} height={200} fill="hsl(var(--primary))" />
+                <div data={deadlineHist} height={200} fill="hsl(var(--primary))" />
               </div>
             </div>
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         {/* ── Config Tabs ── */}
         <motion.div variants={fadeUp}>
-          <CgTabs defaultValue="rounds">
-            <CgTabList>
-              <CgTabTrigger value="rounds">
+          <div defaultValue="rounds">
+            <div>
+              <div value="rounds">
                 <GitCommit className="w-4 h-4" /> Round Setup
-              </CgTabTrigger>
-              <CgTabTrigger value="waitlist">
+              </div>
+              <div value="waitlist">
                 <Settings2 className="w-4 h-4" /> Waitlist & Deadlines
-              </CgTabTrigger>
-              <CgTabTrigger value="history">
+              </div>
+              <div value="history">
                 <Activity className="w-4 h-4" /> Round History
-              </CgTabTrigger>
-              <CgTabTrigger value="actions">
+              </div>
+              <div value="actions">
                 <Play className="w-4 h-4" /> Quick Actions
-              </CgTabTrigger>
-            </CgTabList>
+              </div>
+            </div>
 
             {/* ── Round Setup ── */}
-            <CgTabContent value="rounds">
+            <div value="rounds">
               <div className="mt-4">
-                <CgSectionPanel title="Cap Round Configuration" description="Set cutoff date, round count, and current round">
+                <div title="Cap Round Configuration" description="Set cutoff date, round count, and current round">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium flex items-center gap-2">
@@ -283,7 +278,7 @@ export function ScheduleRoundsPage() {
                         type="date"
                         value={cutoffDate}
                         onChange={(e) => setCutoffDate(e.target.value)}
-                        className="cg-input"
+                        className=""
                       />
                       <p className="text-xs text-muted-foreground">
                         No new applications or admissions after this date.
@@ -297,7 +292,7 @@ export function ScheduleRoundsPage() {
                         max={10}
                         value={maxRounds}
                         onChange={(e) => setMaxRounds(Number(e.target.value))}
-                        className="cg-input"
+                        className=""
                       />
                       <p className="text-xs text-muted-foreground">Total number of merit list rounds.</p>
                     </div>
@@ -309,7 +304,7 @@ export function ScheduleRoundsPage() {
                         max={maxRounds}
                         value={currentRound}
                         onChange={(e) => setCurrentRound(Number(e.target.value))}
-                        className="cg-input"
+                        className=""
                       />
                       <p className="text-xs text-muted-foreground">Active round that candidates are allotted from.</p>
                     </div>
@@ -341,15 +336,15 @@ export function ScheduleRoundsPage() {
                       <span>Round {maxRounds}</span>
                     </div>
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Waitlist & Deadlines ── */}
-            <CgTabContent value="waitlist">
+            <div value="waitlist">
               <div className="mt-4">
-                <CgSectionPanel title="Waitlist & Deadline Policies" description="Configure what happens when candidates miss deadlines or cancel">
-                  <div className="cg-grid-1col gap-4">
+                <div title="Waitlist & Deadline Policies" description="Configure what happens when candidates miss deadlines or cancel">
+                  <div className=" gap-4">
                     {/* Toggles */}
                     {[
                       {
@@ -380,9 +375,9 @@ export function ScheduleRoundsPage() {
                             <p className="text-xs text-muted-foreground">{desc}</p>
                           </div>
                         </div>
-                        <label className="cg-switch">
+                        <label className="">
                           <input type="checkbox" checked={val} onChange={(e) => set(e.target.checked)} />
-                          <span className="cg-switch__slider" />
+                          <span className="" />
                         </label>
                       </motion.div>
                     ))}
@@ -397,7 +392,7 @@ export function ScheduleRoundsPage() {
                             type="number"
                             value={feeDeadlineHours}
                             onChange={(e) => setFeeDeadlineHours(Number(e.target.value))}
-                            className="cg-input pr-16"
+                            className=" pr-16"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
                             hours
@@ -409,7 +404,7 @@ export function ScheduleRoundsPage() {
                       </div>
                       <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium">Seat Cancellation Policy</label>
-                        <CgSelect
+                        <div
                           value={cancellationHandling}
                           onValueChange={(val: any) => setCancellationHandling(val)}
                           options={[
@@ -425,14 +420,14 @@ export function ScheduleRoundsPage() {
                       </div>
                     </div>
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Round History ── */}
-            <CgTabContent value="history">
+            <div value="history">
               <div className="mt-4">
-                <CgSectionPanel title="Round History" description="Historical data of executed admission rounds">
+                <div title="Round History" description="Historical data of executed admission rounds">
                   {roundHistory.length === 0 ? (
                     <div className="p-12 text-center border border-dashed border-border rounded-lg text-muted-foreground">
                       <GitCommit className="w-8 h-8 mx-auto mb-3 opacity-30" />
@@ -469,25 +464,25 @@ export function ScheduleRoundsPage() {
                               <p className="font-semibold text-muted-foreground">{rh.seats_remaining ?? 0}</p>
                               <p className="text-xs text-muted-foreground">Remaining</p>
                             </div>
-                            <CgBadge variant={i === roundHistory.length - 1 ? "success" : "neutral"}>
+                            <div variant={i === roundHistory.length - 1 ? "success" : "neutral"}>
                               {i === roundHistory.length - 1 ? "Latest" : "Done"}
-                            </CgBadge>
+                            </div>
                           </div>
                         </motion.div>
                       ))}
                     </div>
                   )}
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Quick Actions ── */}
-            <CgTabContent value="actions">
+            <div value="actions">
               <div className="mt-4">
-                <CgSectionPanel title="Quick Actions" description="Trigger round advancement and waitlist operations">
-                  <CgAlert variant="warning" title="Caution" className="mb-6">
+                <div title="Quick Actions" description="Trigger round advancement and waitlist operations">
+                  <div variant="warning" title="Caution" className="mb-6">
                     These actions are irreversible. Advancing a round publishes the merit list and notifies candidates.
-                  </CgAlert>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <motion.div whileHover={{ scale: 1.01 }} className="p-5 border border-primary/30 bg-primary/5 rounded-lg">
                       <div className="flex items-center gap-3 mb-3">
@@ -503,9 +498,9 @@ export function ScheduleRoundsPage() {
                         whileHover={{ scale: 1.03 }}
                         disabled={advanceMut.isPending || currentRound >= maxRounds}
                         onClick={() => advanceMut.mutate()}
-                        className="cg-btn cg-btn--primary w-full flex items-center justify-center gap-2"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow w-full flex items-center justify-center gap-2"
                       >
-                        {advanceMut.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <ChevronRight className="w-4 h-4" />}
+                        {advanceMut.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
                         {currentRound >= maxRounds ? "Final Round Reached" : "Advance Round"}
                       </motion.button>
                       {advanceMut.isSuccess && (
@@ -527,9 +522,9 @@ export function ScheduleRoundsPage() {
                         whileHover={{ scale: 1.03 }}
                         disabled={promoteMut.isPending || !waitlistEnabled}
                         onClick={() => promoteMut.mutate()}
-                        className="cg-btn cg-btn--outline w-full flex items-center justify-center gap-2"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground w-full flex items-center justify-center gap-2"
                       >
-                        {promoteMut.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <RefreshCw className="w-4 h-4" />}
+                        {promoteMut.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                         {waitlistEnabled ? "Promote Waitlist" : "Waitlist Disabled"}
                       </motion.button>
                       {promoteMut.isSuccess && (
@@ -537,12 +532,12 @@ export function ScheduleRoundsPage() {
                       )}
                     </motion.div>
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
-          </CgTabs>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

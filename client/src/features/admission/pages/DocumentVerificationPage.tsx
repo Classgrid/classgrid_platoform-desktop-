@@ -3,18 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Loader2, Search, FileText, CheckCircle, XCircle, AlertCircle, Eye, Shield, Clock, Printer } from "lucide-react";
-import {
-  CgPageShell,
-  CgSectionPanel,
-  CgDataTable,
-  CgInput,
-  CgBadge,
-  CgAvatar,
-  CgModal,
-  CgModalContent,
-  CgModalFooter,
-  Button as CgButton,
-} from "@/components/classgrid";
+
 import { useApplications } from "../../admissions/queries/useApplications";
 import { getApplicationById, verifyDocument, updateApplicationStage } from "../../admissions/api";
 
@@ -49,11 +38,11 @@ export function DocumentVerificationPage() {
       accessorKey: "full_name",
       header: "Applicant",
       cell: ({ row }) => (
-        <div className="cg-table__cell-identity">
-          <CgAvatar name={row.original.full_name} size="sm" />
+        <div className="">
+          <div name={row.original.full_name} size="sm" />
           <div>
-            <div className="cg-table__cell-primary font-semibold">{row.original.full_name}</div>
-            <small className="cg-table__cell-secondary font-mono text-muted-foreground">
+            <div className=" font-semibold">{row.original.full_name}</div>
+            <small className=" font-mono text-muted-foreground">
               {row.original.en_number ? `EN: ${row.original.en_number}` : (row.original.phone || "—")}
             </small>
           </div>
@@ -73,13 +62,13 @@ export function DocumentVerificationPage() {
     {
       accessorKey: "status",
       header: "Status",
-      cell: () => <CgBadge variant="warning">Pending Verification</CgBadge>,
+      cell: () => <div variant="warning">Pending Verification</div>,
     },
     {
       id: "actions",
       header: "Action",
       cell: ({ row }) => (
-        <CgButton 
+        <div 
           variant="outline" 
           size="sm"
           onClick={() => setSelectedAppId(row.original._id)}
@@ -87,19 +76,19 @@ export function DocumentVerificationPage() {
         >
           <Shield className="w-4 h-4 text-primary" />
           Verify Docs
-        </CgButton>
+        </div>
       ),
     },
   ], []);
 
   return (
-    <CgPageShell
+    <div
       title="Document Verification"
       description="Review and verify applicant documents to advance them to the merit list."
       breadcrumbs={[{ label: "Admissions" }, { label: "Documents" }]}
     >
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel noPadding>
+        <div noPadding>
           <div className="p-4 border-b border-border bg-card flex items-center justify-between rounded-t-lg">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-amber-500/10 rounded-lg">
@@ -112,7 +101,7 @@ export function DocumentVerificationPage() {
             </div>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <CgInput
+              <div
                 placeholder="Search queue..."
                 value={search}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
@@ -124,7 +113,7 @@ export function DocumentVerificationPage() {
           <div className="min-h-[400px]">
             {isAppsLoading ? (
               <div className="p-12 flex flex-col items-center justify-center text-muted-foreground h-full">
-                <Loader2 className="w-8 h-8 cg-spin mb-4 text-primary" />
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
                 <p>Loading queue...</p>
               </div>
             ) : applications.length === 0 ? (
@@ -138,14 +127,14 @@ export function DocumentVerificationPage() {
                 </p>
               </div>
             ) : (
-              <CgDataTable
+              <div
                 columns={columns}
                 data={applications}
                 pageSize={10}
               />
             )}
           </div>
-        </CgSectionPanel>
+        </div>
       </motion.div>
 
       <AnimatePresence>
@@ -156,7 +145,7 @@ export function DocumentVerificationPage() {
           />
         )}
       </AnimatePresence>
-    </CgPageShell>
+    </div>
   );
 }
 
@@ -195,10 +184,10 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
   const allVerified = documents.length > 0 && documents.every((d: any) => d.status === "verified");
 
   return (
-    <CgModal open={true} onOpenChange={(open) => !open && onClose()}>
-      <CgModalContent title="Verify Documents" className="max-w-3xl p-0 overflow-hidden">
+    <div open={true} onOpenChange={(open) => !open && onClose()}>
+      <div title="Verify Documents" className="max-w-3xl p-0 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 cg-spin text-primary" /></div>
+          <div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
         ) : !printData ? (
           <div className="p-12 text-center text-destructive">Failed to load applicant data.</div>
         ) : (
@@ -212,12 +201,12 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
                   <span className="w-1 h-1 rounded-full bg-border" />
                   <span>{applicant?.category || "General"}</span>
                   <span className="w-1 h-1 rounded-full bg-border" />
-                  <CgBadge variant="warning">Under Verification</CgBadge>
+                  <div variant="warning">Under Verification</div>
                 </div>
               </div>
-              <CgButton variant="outline" size="sm" className="gap-2" onClick={() => window.print()}>
+              <div variant="outline" size="sm" className="gap-2" onClick={() => window.print()}>
                 <Printer className="w-4 h-4" /> Print
-              </CgButton>
+              </div>
             </div>
 
             {/* Document List */}
@@ -302,16 +291,16 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <CgButton 
+                        <div 
                           variant="outline" 
                           size="sm"
                           onClick={() => window.open(`/api/admission/docs/view?path=admissions/temp/${applicationId}/${doc.name}.pdf`, '_blank')}
                         >
                           <Eye className="w-4 h-4 mr-2" /> View
-                        </CgButton>
+                        </div>
                         
                         {doc.status !== "verified" && (
-                          <CgButton 
+                          <div 
                             variant="default"
                             size="sm"
                             className="bg-emerald-500 hover:bg-emerald-600"
@@ -319,18 +308,18 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
                             disabled={verifyMutation.isPending}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" /> Approve
-                          </CgButton>
+                          </div>
                         )}
                         
                         {doc.status !== "rejected" && (
-                          <CgButton 
+                          <div 
                             variant="destructive"
                             size="sm"
                             onClick={() => verifyMutation.mutate({ docName: doc.name, action: "rejected" })}
                             disabled={verifyMutation.isPending}
                           >
                             <XCircle className="w-4 h-4 mr-1" /> Reject
-                          </CgButton>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -340,21 +329,21 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
             </div>
 
             {/* Footer actions */}
-            <CgModalFooter className="justify-between">
-              <CgButton variant="outline" onClick={onClose}>Close</CgButton>
-              <CgButton 
+            <div className="justify-between">
+              <div variant="outline" onClick={onClose}>Close</div>
+              <div 
                 variant="default"
                 disabled={!allVerified || finalizeMutation.isPending}
                 onClick={() => finalizeMutation.mutate()}
                 className="gap-2"
               >
-                {finalizeMutation.isPending && <Loader2 className="w-4 h-4 cg-spin" />}
+                {finalizeMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Mark Application as Verified
-              </CgButton>
-            </CgModalFooter>
+              </div>
+            </div>
           </div>
         )}
-      </CgModalContent>
-    </CgModal>
+      </div>
+    </div>
   );
 }

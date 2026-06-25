@@ -6,12 +6,7 @@ import {
   BarChart2, PieChart as PieIcon, TrendingUp,
   Activity, CheckCircle, AlertTriangle, Clock, Users
 } from "lucide-react";
-import {
-  CgPageShell, CgSectionPanel, CgAlert, CgBadge,
-  CgMetricCard, CgDataTable, CgModal, CgModalContent,
-  CgModalFooter, CgTabs, CgTabList, CgTabTrigger, CgTabContent,
-  CgPieChart, CgDonutChart, CgBarChart, CgLineChart, CgHistogram,
-} from "@/components/classgrid";
+
 import { apiClient } from "@/lib/apiClient";
 import {
   getAdmissionConfigFull,
@@ -150,7 +145,7 @@ export function FeeStructurePage() {
     {
       key: "payment_mode",
       header: "Mode",
-      render: (r: any) => <CgBadge variant={r.payment_mode === "online" ? "success" : "neutral"}>{r.payment_mode}</CgBadge>,
+      render: (r: any) => <div variant={r.payment_mode === "online" ? "success" : "neutral"}>{r.payment_mode}</div>,
     },
     {
       key: "due_date",
@@ -164,7 +159,7 @@ export function FeeStructurePage() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           onClick={() => deleteMut.mutate(r.id)}
-          className="cg-btn cg-btn--outline cg-btn--sm text-destructive border-destructive/30 hover:bg-destructive/10"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm text-destructive border-destructive/30 hover:bg-destructive/10"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </motion.button>
@@ -175,12 +170,12 @@ export function FeeStructurePage() {
   const paymentCols = [
     { key: "payment_date", header: "Date", render: (r: any) => <span className="text-sm">{r.payment_date}</span> },
     { key: "amount", header: "Amount", render: (r: any) => <span className="font-mono font-semibold text-primary">{fmt(r.amount)}</span> },
-    { key: "payment_method", header: "Method", render: (r: any) => <CgBadge variant="neutral">{r.payment_method}</CgBadge> },
+    { key: "payment_method", header: "Method", render: (r: any) => <div variant="neutral">{r.payment_method}</div> },
     { key: "reference_number", header: "Ref", render: (r: any) => <span className="text-xs text-muted-foreground">{r.reference_number || "—"}</span> },
   ];
 
   return (
-    <CgPageShell
+    <div
       title="Fee Structure"
       description="Manage fee structures, collection analytics, and payment records"
       breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Fee Structure" }]}
@@ -188,34 +183,34 @@ export function FeeStructurePage() {
         <motion.button
           whileHover={{ scale: 1.03 }}
           onClick={() => setShowCreate(true)}
-          className="cg-btn cg-btn--primary flex items-center gap-2"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> New Structure
         </motion.button>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="cg-grid-1col">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="">
 
         {/* ── KPI Row ── */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CgMetricCard
+          <div
             title="Total Collected"
             value={fmt(anal?.totalCollection ?? 0)}
             icon={<DollarSign className="w-4 h-4" />}
             trend={{ value: anal?.collectionRate ?? 0, label: "collection rate" }}
           />
-          <CgMetricCard
+          <div
             title="Total Pending"
             value={fmt(anal?.totalPending ?? 0)}
             icon={<AlertTriangle className="w-4 h-4" />}
           />
-          <CgMetricCard
+          <div
             title="Fully Paid"
             value={`${anal?.paidCount ?? 0} students`}
             icon={<CheckCircle className="w-4 h-4" />}
             trend={{ value: anal?.collectionRate ?? 0, label: "% paid" }}
           />
-          <CgMetricCard
+          <div
             title="Overdue"
             value={`${anal?.overdueCount ?? 0} students`}
             icon={<Clock className="w-4 h-4" />}
@@ -224,25 +219,25 @@ export function FeeStructurePage() {
 
         {/* ── Analytics Charts ── */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Collection Analytics" description="Real-time visualizations of fee collection pipeline">
+          <div title="Collection Analytics" description="Real-time visualizations of fee collection pipeline">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-primary" /> Payment Status Distribution
                 </p>
-                <CgPieChart data={statusPie} height={240} valuePrefix="₹" />
+                <div data={statusPie} height={240} valuePrefix="₹" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-emerald-400" /> Collected vs Pending
                 </p>
-                <CgDonutChart data={collectionDonut} height={240} valuePrefix="₹" />
+                <div data={collectionDonut} height={240} valuePrefix="₹" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-blue-400" /> Amount by Structure
                 </p>
-                <CgBarChart
+                <div
                   data={structBar}
                   indexKey="name"
                   series={[{ key: "amount", name: "Amount (₹)", color: "#34d399" }]}
@@ -257,7 +252,7 @@ export function FeeStructurePage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-violet-400" /> Payment Trend (14 days)
                 </p>
-                <CgLineChart
+                <div
                   data={trendData.length ? trendData : [{ day: "No data", amount: 0 }]}
                   indexKey="day"
                   series={[{ key: "amount", name: "Amount Collected", color: "#34d399" }]}
@@ -269,7 +264,7 @@ export function FeeStructurePage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-amber-400" /> Fee Amount Histogram
                 </p>
-                <CgHistogram data={histData} height={220} fill="hsl(var(--primary))" />
+                <div data={histData} height={220} fill="hsl(var(--primary))" />
               </div>
             </div>
 
@@ -278,7 +273,7 @@ export function FeeStructurePage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-indigo-400" /> Collection by Payment Method
                 </p>
-                <CgBarChart
+                <div
                   data={methodBar}
                   indexKey="method"
                   series={[{ key: "total", name: "Total Collected (₹)", color: "#60a5fa" }]}
@@ -287,30 +282,30 @@ export function FeeStructurePage() {
                 />
               </div>
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         {/* ── Main Tabs ── */}
         <motion.div variants={fadeUp}>
-          <CgTabs defaultValue="structures">
-            <CgTabList>
-              <CgTabTrigger value="structures">
+          <div defaultValue="structures">
+            <div>
+              <div value="structures">
                 <DollarSign className="w-4 h-4" /> Fee Structures ({structs.length})
-              </CgTabTrigger>
-              <CgTabTrigger value="payments">
+              </div>
+              <div value="payments">
                 <Activity className="w-4 h-4" /> Recent Payments
-              </CgTabTrigger>
-              <CgTabTrigger value="admission-link">
+              </div>
+              <div value="admission-link">
                 <Users className="w-4 h-4" /> Admission Fee Config
-              </CgTabTrigger>
-            </CgTabList>
+              </div>
+            </div>
 
             {/* Structures Table */}
-            <CgTabContent value="structures">
+            <div value="structures">
               <div className="mt-4">
                 {structures.isLoading ? (
                   <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4 cg-spin text-primary" /> Loading structures...
+                    <Sparkles className="w-4 h-4 animate-spin text-primary" /> Loading structures...
                   </div>
                 ) : structs.length === 0 ? (
                   <div className="p-12 text-center border border-dashed border-border rounded-lg text-muted-foreground">
@@ -319,13 +314,13 @@ export function FeeStructurePage() {
                     <p className="text-sm mt-1">Click "New Structure" to create one.</p>
                   </div>
                 ) : (
-                  <CgDataTable columns={structCols} data={structs} />
+                  <div columns={structCols} data={structs} />
                 )}
               </div>
-            </CgTabContent>
+            </div>
 
             {/* Payments Table */}
-            <CgTabContent value="payments">
+            <div value="payments">
               <div className="mt-4">
                 {payments.isLoading ? (
                   <div className="p-8 text-center text-muted-foreground">Loading payments...</div>
@@ -335,18 +330,18 @@ export function FeeStructurePage() {
                     <p>No payment records found.</p>
                   </div>
                 ) : (
-                  <CgDataTable columns={paymentCols} data={pays.slice(0, 50)} />
+                  <div columns={paymentCols} data={pays.slice(0, 50)} />
                 )}
               </div>
-            </CgTabContent>
+            </div>
 
             {/* Admission Fee Config link */}
-            <CgTabContent value="admission-link">
+            <div value="admission-link">
               <div className="mt-4">
-                <CgSectionPanel title="Admission Registration Fee" description="Sync registration fee with admission portal config">
-                  <CgAlert variant="info" title="Linked Config" className="mb-4">
+                <div title="Admission Registration Fee" description="Sync registration fee with admission portal config">
+                  <div variant="info" title="Linked Config" className="mb-4">
                     The registration fee below is stored in the Admission Config and charged on application submission.
-                  </CgAlert>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Registration Fee (₹)</label>
@@ -356,7 +351,7 @@ export function FeeStructurePage() {
                           type="number"
                           defaultValue={admCfg?.registration_fee ?? 0}
                           id="reg-fee-sync"
-                          className="cg-input pl-9 w-full"
+                          className=" pl-9 w-full"
                           placeholder="e.g. 500"
                         />
                       </div>
@@ -368,7 +363,7 @@ export function FeeStructurePage() {
                         type="text"
                         defaultValue={admCfg?.fee_config?.admission_fee_structure_id ?? ""}
                         id="default-struct-id"
-                        className="cg-input"
+                        className=""
                         placeholder="Paste fee_structure UUID"
                       />
                       <p className="text-xs text-muted-foreground">
@@ -392,33 +387,33 @@ export function FeeStructurePage() {
                           },
                         });
                       }}
-                      className="cg-btn cg-btn--primary flex items-center gap-2"
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow flex items-center gap-2"
                     >
-                      {saveAdmConfig.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <Save className="w-4 h-4" />}
+                      {saveAdmConfig.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       Save to Admission Config
                     </motion.button>
                   </div>
                   {saveAdmConfig.isSuccess && (
-                    <CgAlert variant="success" title="Saved" className="mt-4">
+                    <div variant="success" title="Saved" className="mt-4">
                       Admission fee config updated successfully.
-                    </CgAlert>
+                    </div>
                   )}
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
-          </CgTabs>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ── Create Structure Modal ── */}
-      <CgModal open={showCreate} onClose={() => setShowCreate(false)} title="Create Fee Structure">
-        <CgModalContent>
-          <div className="cg-grid-1col gap-4">
+      <div open={showCreate} onClose={() => setShowCreate(false)} title="Create Fee Structure">
+        <div>
+          <div className=" gap-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Structure Name *</label>
                 <input
-                  className="cg-input"
+                  className=""
                   placeholder="e.g. Standard Engineering Package"
                   value={newStruct.name}
                   onChange={(e) => setNewStruct({ ...newStruct, name: e.target.value })}
@@ -427,7 +422,7 @@ export function FeeStructurePage() {
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Academic Year</label>
                 <input
-                  className="cg-input"
+                  className=""
                   placeholder="e.g. 2025-26"
                   value={newStruct.academic_year}
                   onChange={(e) => setNewStruct({ ...newStruct, academic_year: e.target.value })}
@@ -440,7 +435,7 @@ export function FeeStructurePage() {
                 <label className="text-sm font-medium">Total Amount (₹)</label>
                 <input
                   type="number"
-                  className="cg-input"
+                  className=""
                   value={newStruct.total_amount}
                   onChange={(e) => setNewStruct({ ...newStruct, total_amount: Number(e.target.value) })}
                 />
@@ -449,7 +444,7 @@ export function FeeStructurePage() {
                 <label className="text-sm font-medium">Late Fine per Day (₹)</label>
                 <input
                   type="number"
-                  className="cg-input"
+                  className=""
                   value={newStruct.late_fine_per_day}
                   onChange={(e) => setNewStruct({ ...newStruct, late_fine_per_day: Number(e.target.value) })}
                 />
@@ -461,7 +456,7 @@ export function FeeStructurePage() {
                 <label className="text-sm font-medium">Due Date</label>
                 <input
                   type="date"
-                  className="cg-input"
+                  className=""
                   value={newStruct.due_date}
                   onChange={(e) => setNewStruct({ ...newStruct, due_date: e.target.value })}
                 />
@@ -469,7 +464,7 @@ export function FeeStructurePage() {
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Payment Mode</label>
                 <select
-                  className="cg-input"
+                  className=""
                   value={newStruct.payment_mode}
                   onChange={(e) => setNewStruct({ ...newStruct, payment_mode: e.target.value })}
                 >
@@ -485,7 +480,7 @@ export function FeeStructurePage() {
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm font-medium">Fee Components</label>
                 <button
-                  className="cg-btn cg-btn--outline cg-btn--sm flex items-center gap-1"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm flex items-center gap-1"
                   onClick={() => setNewStruct({
                     ...newStruct,
                     components: [...newStruct.components, { name: "", amount: 0 }],
@@ -498,7 +493,7 @@ export function FeeStructurePage() {
                 {newStruct.components.map((comp, i) => (
                   <div key={i} className="flex gap-2 items-center">
                     <input
-                      className="cg-input flex-1"
+                      className=" flex-1"
                       placeholder="Component name (e.g. Tuition)"
                       value={comp.name}
                       onChange={(e) => {
@@ -509,7 +504,7 @@ export function FeeStructurePage() {
                     />
                     <input
                       type="number"
-                      className="cg-input w-32"
+                      className=" w-32"
                       placeholder="Amount"
                       value={comp.amount}
                       onChange={(e) => {
@@ -532,20 +527,20 @@ export function FeeStructurePage() {
               </div>
             </div>
           </div>
-        </CgModalContent>
-        <CgModalFooter>
-          <button className="cg-btn cg-btn--outline" onClick={() => setShowCreate(false)}>Cancel</button>
+        </div>
+        <div>
+          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setShowCreate(false)}>Cancel</button>
           <motion.button
             whileHover={{ scale: 1.03 }}
-            className="cg-btn cg-btn--primary flex items-center gap-2"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow flex items-center gap-2"
             disabled={createMut.isPending || !newStruct.name}
             onClick={() => createMut.mutate(newStruct)}
           >
-            {createMut.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <Save className="w-4 h-4" />}
+            {createMut.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Create Structure
           </motion.button>
-        </CgModalFooter>
-      </CgModal>
-    </CgPageShell>
+        </div>
+      </div>
+    </div>
   );
 }

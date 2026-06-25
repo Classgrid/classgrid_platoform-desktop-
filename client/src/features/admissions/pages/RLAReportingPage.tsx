@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Loader2, Search, CheckCircle, FileText } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CgPageShell, CgSectionPanel, CgAlert, CgBadge } from "@/components/classgrid";
+
 import { getApplications, reportRLA } from "../api";
 
 export function RLAReportingPage() {
@@ -33,7 +33,7 @@ export function RLAReportingPage() {
   const candidate = data?.applications?.find((a: any) => a.en_number?.toLowerCase() === queryEn.toLowerCase());
 
   return (
-    <CgPageShell
+    <div
       title="RLA Reporting"
       description="Record physical reporting of allotted candidates and verify reporting documents."
       breadcrumbs={[
@@ -41,52 +41,52 @@ export function RLAReportingPage() {
         { label: "RLA Reporting" },
       ]}
     >
-      <CgSectionPanel title="Find Candidate">
+      <div title="Find Candidate">
         <form onSubmit={handleSearch} style={{ display: "flex", gap: "1rem" }}>
-          <div className="cg-form__field" style={{ flex: 1, marginBottom: 0 }}>
-            <div className="cg-form__input-wrapper">
-              <Search className="cg-form__input-icon" size={16} />
+          <div className="" style={{ flex: 1, marginBottom: 0 }}>
+            <div className="">
+              <Search className="" size={16} />
               <input
-                className="cg-form__input cg-form__input--with-icon"
+                className=" "
                 placeholder="Enter EN Number (e.g. EN23123456)"
                 value={enSearch}
                 onChange={(e) => setEnSearch(e.target.value)}
               />
             </div>
           </div>
-          <button type="submit" className="cg-btn cg-btn--primary" disabled={!enSearch.trim() || isLoading}>
-            {isLoading ? <Loader2 size={16} className="cg-spin" /> : "Search"}
+          <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={!enSearch.trim() || isLoading}>
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Search"}
           </button>
         </form>
-      </CgSectionPanel>
+      </div>
 
       {queryEn && !isLoading && !candidate && (
-        <CgAlert variant="warning" title="Not Found">
+        <div variant="warning" title="Not Found">
           No candidate found with EN Number "{queryEn}". They might not be allotted to your institution.
-        </CgAlert>
+        </div>
       )}
 
       {queryEn && isError && (
-        <CgAlert variant="danger" title="Error">
+        <div variant="danger" title="Error">
           Failed to fetch candidate information.
-        </CgAlert>
+        </div>
       )}
 
       {candidate && (
-        <CgSectionPanel title="Candidate Details">
+        <div title="Candidate Details">
           {reportMutation.isSuccess && (
             <div style={{ marginBottom: "1.5rem" }}>
-              <CgAlert variant="success" title="Reported Successfully">
+              <div variant="success" title="Reported Successfully">
                 Candidate has been marked as reported. They can now proceed with fee payment.
-              </CgAlert>
+              </div>
             </div>
           )}
 
           {reportMutation.isError && (
             <div style={{ marginBottom: "1.5rem" }}>
-              <CgAlert variant="danger" title="Failed to Report">
+              <div variant="danger" title="Failed to Report">
                 {(reportMutation.error as any)?.response?.data?.error || "An error occurred while marking the candidate as reported."}
-              </CgAlert>
+              </div>
             </div>
           )}
 
@@ -100,16 +100,16 @@ export function RLAReportingPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>
                 <strong>Current Status:</strong>{" "}
-                <CgBadge variant={candidate.status === "rla_pending" ? "warning" : candidate.status === "fee_pending" ? "success" : "neutral"}>
+                <div variant={candidate.status === "rla_pending" ? "warning" : candidate.status === "fee_pending" ? "success" : "neutral"}>
                   {candidate.status.replace(/_/g, " ")}
-                </CgBadge>
+                </div>
               </div>
               <div>
                 <strong>RLA Status:</strong>{" "}
                 {candidate.rla_status === "reported" ? (
-                  <CgBadge variant="success">Reported</CgBadge>
+                  <div variant="success">Reported</div>
                 ) : (
-                  <CgBadge variant="warning">{candidate.rla_status || "Pending"}</CgBadge>
+                  <div variant="warning">{candidate.rla_status || "Pending"}</div>
                 )}
               </div>
             </div>
@@ -117,14 +117,14 @@ export function RLAReportingPage() {
 
           <div style={{ display: "flex", gap: "1rem", paddingTop: "1.5rem", borderTop: "1px solid hsl(var(--border))" }}>
             <button
-              className="cg-btn cg-btn--primary"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
               disabled={reportMutation.isPending || candidate.rla_status === "reported" || candidate.status !== "rla_pending"}
               onClick={() => reportMutation.mutate(candidate.en_number!)}
             >
-              {reportMutation.isPending ? <Loader2 size={16} className="cg-spin" /> : <CheckCircle size={16} />}
+              {reportMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
               Mark as Reported (RLA)
             </button>
-            <button className="cg-btn cg-btn--outline" disabled>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" disabled>
               <FileText size={16} /> Upload Reporting Reciept
             </button>
           </div>
@@ -134,8 +134,8 @@ export function RLAReportingPage() {
               Candidate is currently in <strong>{candidate.status.replace(/_/g, " ")}</strong> stage. They must reach the RLA Pending stage before reporting can be confirmed.
             </p>
           )}
-        </CgSectionPanel>
+        </div>
       )}
-    </CgPageShell>
+    </div>
   );
 }

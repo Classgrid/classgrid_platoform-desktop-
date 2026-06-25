@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MessageSquare, Search, Bug, Lightbulb, Mail } from "lucide-react";
 import { toast } from "sonner";
 
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
@@ -128,7 +128,7 @@ export function FeedbackPage() {
 
   return (
     <div className="space-y-6">
-      <CgPageHeader
+      <div
         title="Platform Feedback"
         description="Review feature requests, bug reports, and general feedback from platform users."
       />

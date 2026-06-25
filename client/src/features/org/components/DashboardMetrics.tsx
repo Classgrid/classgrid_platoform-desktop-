@@ -1,5 +1,5 @@
 import { ClipboardCheck, GraduationCap, UsersRound, WalletCards } from "lucide-react";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+import { StatCard } from "@/components/marketing_ui/StatCard";
 import { useInstitutionProfile } from "../queries/useInstitutionProfile";
 import {
   getProfileTerm,
@@ -29,29 +29,33 @@ export function DashboardMetrics() {
 
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <CgMetricCard
+      <StatCard
         title={`Total ${learnerLabel}`}
         value="1,247"
         icon={<GraduationCap className="h-4 w-4" />}
-        trend={{ value: 6.8, label: "current cycle" }}
+        trend="+6.8% current cycle"
+        trendDirection="up"
       />
-      <CgMetricCard
+      <StatCard
         title={`Total ${educatorLabel}`}
         value="89"
         icon={<UsersRound className="h-4 w-4" />}
-        trend={{ value: 3.2, label: "active roles" }}
+        trend="+3.2% active roles"
+        trendDirection="up"
       />
-      <CgMetricCard
+      <StatCard
         title={feesEnabled ? `${feeLabel} Collected` : `Active ${programLabel}`}
         value={feesEnabled ? "INR 12.4L / 18L" : "42"}
         icon={<WalletCards className="h-4 w-4" />}
-        meta={feesEnabled ? "69% of current demand" : "Configured for this profile"}
+        trend={feesEnabled ? "69% of current demand" : "Configured for this profile"}
+        trendDirection="neutral"
       />
-      <CgMetricCard
+      <StatCard
         title={`${attendanceLabel} %`}
         value="87%"
         icon={<ClipboardCheck className="h-4 w-4" />}
-        trend={{ value: 4.1, label: "today" }}
+        trend="+4.1% today"
+        trendDirection="up"
       />
     </section>
   );

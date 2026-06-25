@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { Save, Bell, Palette, Shield } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { Button } from "@/components/marketing_ui/button";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import "../styles/settings.css";
@@ -60,8 +60,8 @@ export function SettingsPage() {
   };
 
   return (
-    <form className="cg-settings-page" onSubmit={handleSave} noValidate>
-      <CgPageHeader
+    <form className="" onSubmit={handleSave} noValidate>
+      <div
         title="Settings"
         description="Manage your platform preferences, notifications, and appearance."
         actions={
@@ -72,96 +72,96 @@ export function SettingsPage() {
       />
 
       {/* Appearance */}
-      <div className="cg-settings-card">
-        <div className="cg-settings-card-header">
-          <h2 className="cg-settings-card-title flex items-center gap-2">
+      <div className="">
+        <div className="">
+          <h2 className=" flex items-center gap-2">
             <Palette size={18} /> Appearance
           </h2>
-          <p className="cg-settings-card-description">Customize how Classgrid looks on your device.</p>
+          <p className="">Customize how Classgrid looks on your device.</p>
         </div>
         
-        <div className="cg-settings-row">
-          <div className="cg-settings-row-info">
-            <span className="cg-settings-row-title">Dark Mode</span>
-            <span className="cg-settings-row-desc">Enable dark theme for the dashboard</span>
+        <div className="">
+          <div className="">
+            <span className="">Dark Mode</span>
+            <span className="">Enable dark theme for the dashboard</span>
           </div>
-          <label className="cg-switch-container">
+          <label className="">
             <input
               type="checkbox"
-              className="cg-switch-input"
+              className=""
               checked={theme === "dark"}
               onChange={(e) => setTheme(e.target.checked ? "dark" : "light")}
             />
-            <div className="cg-switch-track">
-              <div className="cg-switch-thumb"></div>
+            <div className="">
+              <div className=""></div>
             </div>
           </label>
         </div>
       </div>
 
       {/* Notifications */}
-      <div className="cg-settings-card">
-        <div className="cg-settings-card-header">
-          <h2 className="cg-settings-card-title flex items-center gap-2">
+      <div className="">
+        <div className="">
+          <h2 className=" flex items-center gap-2">
             <Bell size={18} /> Notifications
           </h2>
-          <p className="cg-settings-card-description">Manage what events trigger email notifications.</p>
+          <p className="">Manage what events trigger email notifications.</p>
         </div>
 
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-4">Loading preferences...</div>
         ) : (
           <>
-            <div className="cg-settings-row">
-              <div className="cg-settings-row-info">
-                <span className="cg-settings-row-title">Global Notifications</span>
-                <span className="cg-settings-row-desc">Master switch to enable or disable all emails</span>
+            <div className="">
+              <div className="">
+                <span className="">Global Notifications</span>
+                <span className="">Master switch to enable or disable all emails</span>
               </div>
-              <label className="cg-switch-container">
+              <label className="">
                 <input
                   type="checkbox"
-                  className="cg-switch-input"
+                  className=""
                   checked={prefs.global}
                   onChange={() => handleToggle("global")}
                 />
-                <div className="cg-switch-track">
-                  <div className="cg-switch-thumb"></div>
+                <div className="">
+                  <div className=""></div>
                 </div>
               </label>
             </div>
 
-            <div className="cg-settings-row" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
-              <div className="cg-settings-row-info">
-                <span className="cg-settings-row-title">Platform Announcements</span>
-                <span className="cg-settings-row-desc">Receive emails about major platform updates</span>
+            <div className="" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
+              <div className="">
+                <span className="">Platform Announcements</span>
+                <span className="">Receive emails about major platform updates</span>
               </div>
-              <label className="cg-switch-container">
+              <label className="">
                 <input
                   type="checkbox"
-                  className="cg-switch-input"
+                  className=""
                   checked={prefs.announcements}
                   onChange={() => handleToggle("announcements")}
                 />
-                <div className="cg-switch-track">
-                  <div className="cg-switch-thumb"></div>
+                <div className="">
+                  <div className=""></div>
                 </div>
               </label>
             </div>
 
-            <div className="cg-settings-row" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
-              <div className="cg-settings-row-info">
-                <span className="cg-settings-row-title">Join Approvals</span>
-                <span className="cg-settings-row-desc">Get notified when new organizations sign up</span>
+            <div className="" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
+              <div className="">
+                <span className="">Join Approvals</span>
+                <span className="">Get notified when new organizations sign up</span>
               </div>
-              <label className="cg-switch-container">
+              <label className="">
                 <input
                   type="checkbox"
-                  className="cg-switch-input"
+                  className=""
                   checked={prefs.joinApproval}
                   onChange={() => handleToggle("joinApproval")}
                 />
-                <div className="cg-switch-track">
-                  <div className="cg-switch-thumb"></div>
+                <div className="">
+                  <div className=""></div>
                 </div>
               </label>
             </div>

@@ -178,7 +178,7 @@ export function ProfilePage() {
   const isLoading = profileLoading || prefsLoading;
 
   return (
-    <div className="cg-profile-container">
+    <div className="">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <Spinner size="lg" />
@@ -186,9 +186,9 @@ export function ProfilePage() {
         </div>
       ) : (
         <>
-          <div className="cg-profile-id-card">
+          <div className="">
             <div 
-              className="cg-profile-banner" 
+              className="" 
               style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
             >
               <div className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 rounded-full cursor-pointer text-white backdrop-blur-md transition-all z-10 group" onClick={() => bannerInputRef.current?.click()}>
@@ -211,7 +211,7 @@ export function ProfilePage() {
               </div>
               <div className="flex flex-col w-full">
                 <div className="flex items-center gap-4">
-                  <h1 className="cg-profile-primary-name">{form.name}</h1>
+                  <h1 className="">{form.name}</h1>
                   <Badge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest">
                     {form.role.replace("platform_", "").toUpperCase()}
                   </Badge>
@@ -225,20 +225,20 @@ export function ProfilePage() {
             </div>
           </div>
 
-          <div className="cg-profile-bento">
+          <div className="">
             <div className="flex flex-col gap-6">
-              <div className="cg-bento-card">
-                <div className="cg-bento-header">
-                  <h3 className="cg-bento-title"><UserIcon size={18} /> Basic Information</h3>
-                  <p className="cg-bento-desc">Standard identification details across the platform.</p>
+              <div className="">
+                <div className="">
+                  <h3 className=""><UserIcon size={18} /> Basic Information</h3>
+                  <p className="">Standard identification details across the platform.</p>
                 </div>
                 <div className="flex flex-col gap-6">
-                  <div className="cg-field-group">
-                    <label className="cg-field-label">Full Display Name</label>
+                  <div className="">
+                    <label className="">Full Display Name</label>
                     <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" />
                   </div>
-                  <div className="cg-field-group">
-                    <label className="cg-field-label">Access Role</label>
+                  <div className="">
+                    <label className="">Access Role</label>
                     <div className="p-3 bg-muted/40 rounded-lg border border-dashed border-border text-sm font-semibold opacity-70">
                       {form.role.toUpperCase()}
                     </div>
@@ -246,30 +246,30 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              <div className="cg-bento-card">
-                <div className="cg-bento-header">
-                  <h3 className="cg-bento-title"><Palette size={18} /> User Experience</h3>
-                  <p className="cg-bento-desc">Manage how you interact with the interface.</p>
+              <div className="">
+                <div className="">
+                  <h3 className=""><Palette size={18} /> User Experience</h3>
+                  <p className="">Manage how you interact with the interface.</p>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <div className="cg-settings-row">
+                  <div className="">
                     <div className="flex flex-col">
-                      <span className="cg-settings-label">Dark Theme</span>
-                      <span className="cg-settings-hint">Optimize UI for low-light.</span>
+                      <span className="">Dark Theme</span>
+                      <span className="">Optimize UI for low-light.</span>
                     </div>
-                    <label className="cg-switch">
+                    <label className="">
                       <input type="checkbox" checked={theme === "dark"} onChange={e => setTheme(e.target.checked ? "dark" : "light")} />
-                      <div className="cg-switch-track"><div className="cg-switch-thumb"></div></div>
+                      <div className=""><div className=""></div></div>
                     </label>
                   </div>
-                  <div className="cg-settings-row">
+                  <div className="">
                     <div className="flex flex-col">
-                      <span className="cg-settings-label">Push Alerts</span>
-                      <span className="cg-settings-hint">Real-time system notifications.</span>
+                      <span className="">Push Alerts</span>
+                      <span className="">Real-time system notifications.</span>
                     </div>
-                    <label className="cg-switch">
+                    <label className="">
                       <input type="checkbox" checked={prefs.global} onChange={() => handlePrefToggle("global")} />
-                      <div className="cg-switch-track"><div className="cg-switch-thumb"></div></div>
+                      <div className=""><div className=""></div></div>
                     </label>
                   </div>
                 </div>
@@ -277,18 +277,18 @@ export function ProfilePage() {
             </div>
 
             <div className="flex flex-col gap-6">
-              <div className="cg-bento-card">
-                <div className="cg-bento-header">
-                  <h3 className="cg-bento-title"><Phone size={18} /> Contact & Support</h3>
-                  <p className="cg-bento-desc">Verified communication channels.</p>
+              <div className="">
+                <div className="">
+                  <h3 className=""><Phone size={18} /> Contact & Support</h3>
+                  <p className="">Verified communication channels.</p>
                 </div>
                 <div className="flex flex-col gap-6">
-                  <div className="cg-field-group">
-                    <label className="cg-field-label">Phone Connectivity</label>
+                  <div className="">
+                    <label className="">Phone Connectivity</label>
                     <Input value={form.phoneNumber} onChange={e => handleInputChange("phoneNumber", e.target.value)} placeholder="+91 " />
                   </div>
-                  <div className="cg-field-group">
-                    <label className="cg-field-label">Verification Email</label>
+                  <div className="">
+                    <label className="">Verification Email</label>
                     <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg border border-success/20">
                       <span className="text-sm font-medium">{form.email}</span>
                       <Badge variant="success" size="sm" dot>Verified</Badge>
@@ -297,13 +297,13 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              <div className="cg-bento-card">
-                <div className="cg-bento-header">
-                  <h3 className="cg-bento-title"><Shield size={18} /> Security Guard</h3>
-                  <p className="cg-bento-desc">Manage account access and 2FA.</p>
+              <div className="">
+                <div className="">
+                  <h3 className=""><Shield size={18} /> Security Guard</h3>
+                  <p className="">Manage account access and 2FA.</p>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <div className="cg-action-card">
+                  <div className="">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-primary/10 rounded-xl"><Lock size={20} className="text-primary" /></div>
                       <div>
@@ -313,7 +313,7 @@ export function ProfilePage() {
                     </div>
                     <Button variant="outline" size="sm" className="h-8 rounded-lg px-4">Manage <ChevronRight size={14} /></Button>
                   </div>
-                  <div className="cg-action-card">
+                  <div className="">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-warning/10 rounded-xl"><Smartphone size={20} className="text-warning" /></div>
                       <div>
@@ -327,24 +327,24 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="cg-card-full">
-              <div className="cg-bento-card">
-                <div className="cg-bento-header">
-                  <h3 className="cg-bento-title"><Activity size={18} /> Account Intelligence</h3>
-                  <p className="cg-bento-desc">Summary of your session and registration data.</p>
+            <div className="">
+              <div className="">
+                <div className="">
+                  <h3 className=""><Activity size={18} /> Account Intelligence</h3>
+                  <p className="">Summary of your session and registration data.</p>
                 </div>
-                <div className="cg-stats-grid">
-                  <div className="cg-stat-box">
-                    <span className="cg-stat-label">Last Successful Login</span>
-                    <span className="cg-stat-value">{form.lastLoginAt ? new Date(form.lastLoginAt).toLocaleString() : "First Login"}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="">
+                    <span className="">Last Successful Login</span>
+                    <span className="">{form.lastLoginAt ? new Date(form.lastLoginAt).toLocaleString() : "First Login"}</span>
                   </div>
-                  <div className="cg-stat-box">
-                    <span className="cg-stat-label">Member Since</span>
-                    <span className="cg-stat-value">{form.createdAt ? new Date(form.createdAt).toLocaleDateString() : "N/A"}</span>
+                  <div className="">
+                    <span className="">Member Since</span>
+                    <span className="">{form.createdAt ? new Date(form.createdAt).toLocaleDateString() : "N/A"}</span>
                   </div>
-                  <div className="cg-stat-box">
-                    <span className="cg-stat-label">Active Presence</span>
-                    <span className="cg-stat-value text-success flex items-center gap-2">
+                  <div className="">
+                    <span className="">Active Presence</span>
+                    <span className=" text-success flex items-center gap-2">
                       <CheckCircle2 size={16} /> 1 Session
                     </span>
                   </div>
@@ -363,7 +363,7 @@ export function ProfilePage() {
           />
 
           {isDirty && (
-            <div className="cg-sticky-save-bar">
+            <div className="">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-bold">Unsaved changes detected</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Profile out of sync</p>

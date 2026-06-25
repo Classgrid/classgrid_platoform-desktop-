@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Loader, UploadCloud, FileText, CheckCircle, AlertCircle } from "lucide-react";
-import { CgButton } from "@/components/classgrid/Button";
+
 import { useSchemes, useUploadMarks, ResultScheme } from "@/features/results/queries/useResultSchemes";
 
 export function ExamGradingPage() {
@@ -21,8 +21,8 @@ export function ExamGradingPage() {
   const activeSchemes = schemes?.filter((s) => s.status !== "locked" && s.status !== "published") || [];
 
   return (
-    <div className="cg-page max-w-5xl mx-auto">
-      <header className="cg-page__header mb-8">
+    <div className=" max-w-5xl mx-auto">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6 mb-8">
         <p className="text-sm font-medium text-muted-foreground">Faculty Dashboard</p>
         <h1 className="text-2xl font-bold tracking-tight">Exam Grading & Marks Upload</h1>
       </header>
@@ -39,7 +39,7 @@ export function ExamGradingPage() {
               {activeSchemes.map((scheme) => (
                 <div 
                   key={scheme.id} 
-                  className="cg-card p-5 cursor-pointer hover:border-primary/50 transition-colors flex justify-between items-center"
+                  className=" p-5 cursor-pointer hover:border-primary/50 transition-colors flex justify-between items-center"
                   onClick={() => setSelectedScheme(scheme)}
                 >
                   <div>
@@ -48,7 +48,7 @@ export function ExamGradingPage() {
                       {scheme.academic_year} • Semester {scheme.semester}
                     </p>
                   </div>
-                  <CgButton variant="secondary" size="sm">Select</CgButton>
+                  <div variant="secondary" size="sm">Select</div>
                 </div>
               ))}
             </div>
@@ -117,7 +117,7 @@ function MarksUploadWorkspace({ scheme, onBack }: { scheme: ResultScheme; onBack
         <h2 className="text-xl font-bold flex items-center">
           <FileText className="mr-2 text-primary" /> {scheme.name}
         </h2>
-        <CgButton variant="secondary" onClick={onBack}>← Back to Exams</CgButton>
+        <div variant="secondary" onClick={onBack}>← Back to Exams</div>
       </div>
 
       <div 

@@ -6,9 +6,9 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
+
+
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/marketing_ui/dialog";
 import { Input } from "@/components/marketing_ui/input";
 
@@ -140,13 +140,13 @@ export function OnboardPage() {
 
   return (
     <div className="space-y-6">
-      <CgPageHeader
+      <div
         title="Organization Onboarding"
         description="Review pending requests and provision organizations through live backend APIs."
         actions={
           <>
             <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw className={`size-4 ${isFetching ? "cg-spin" : ""}`} />
+              <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
               Refresh
             </Button>
             <Button onClick={() => setIsCreating(true)}>
@@ -157,8 +157,8 @@ export function OnboardPage() {
         }
       />
 
-      <CgSectionPanel title="Pending Organization Requests" description="Applications waiting for super-admin review." noPadding>
-        <div className="cg-panel__toolbar">
+      <div title="Pending Organization Requests" description="Applications waiting for super-admin review." noPadding>
+        <div className="flex items-center gap-2 p-2 border-b border-border">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -175,10 +175,10 @@ export function OnboardPage() {
         </div>
 
         {isError ? (
-          <div className="cg-alert cg-alert--danger" style={{ margin: "0 1rem 1rem" }}>
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Could not load pending organizations</span>
-              <p className="cg-alert__message">
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "0 1rem 1rem" }}>
+            <div className="p-4 rounded-md border__body">
+              <span className="p-4 rounded-md border__title">Could not load pending organizations</span>
+              <p className="p-4 rounded-md border__message">
                 {(error as Error)?.message || "The pending organizations endpoint did not return data."}
               </p>
             </div>
@@ -186,7 +186,7 @@ export function OnboardPage() {
           </div>
         ) : null}
 
-        <CgDataTable
+        <div
           columns={columns}
           data={filteredOrgs}
           isLoading={isLoading}
@@ -211,7 +211,7 @@ export function OnboardPage() {
             )
           }
         />
-      </CgSectionPanel>
+      </div>
 
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent className="max-w-md">

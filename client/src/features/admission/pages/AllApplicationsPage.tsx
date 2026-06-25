@@ -3,20 +3,7 @@ import { motion } from "framer-motion";
 import { useApplications } from "../../admissions/queries/useApplications";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Search, Loader2, FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
-import {
-  CgPageShell,
-  CgSectionPanel,
-  CgDataTable,
-  CgInput,
-  CgSelect,
-  CgBadge,
-  CgAvatar,
-  CgButton,
-  CgTabs,
-  CgTabList,
-  CgTabTrigger,
-  ExportMenu,
-} from "@/components/classgrid";
+
 import { useQuery } from "@tanstack/react-query";
 import { getAdmissionConfig } from "../../admissions/api";
 
@@ -103,11 +90,11 @@ export function AllApplicationsPage() {
       accessorKey: "full_name",
       header: "Applicant",
       cell: ({ row }) => (
-        <div className="cg-table__cell-identity">
-          <CgAvatar name={row.original.full_name} size="sm" />
+        <div className="">
+          <div name={row.original.full_name} size="sm" />
           <div>
-            <div className="cg-table__cell-primary font-semibold">{row.original.full_name}</div>
-            <small className="cg-table__cell-secondary font-mono text-muted-foreground">
+            <div className=" font-semibold">{row.original.full_name}</div>
+            <small className=" font-mono text-muted-foreground">
               {row.original.en_number ? `EN: ${row.original.en_number}` : (row.original.phone || "—")}
             </small>
           </div>
@@ -152,7 +139,7 @@ export function AllApplicationsPage() {
           s === "under_verification" ? "warning" : 
           "neutral";
         
-        return <CgBadge variant={variant}>{s.replace("_", " ")}</CgBadge>;
+        return <div variant={variant}>{s.replace("_", " ")}</div>;
       },
     },
     {
@@ -229,36 +216,36 @@ export function AllApplicationsPage() {
   const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
   return (
-    <CgPageShell
+    <div
       title="All Applications"
       description="View, search, and filter all admission applications across the institution."
       breadcrumbs={[{ label: "Admissions" }, { label: "Applications" }]}
       actions={<ExportMenu />}
     >
       {/* ── Hierarchy Tabs ── */}
-      <CgTabs
+      <div
         value={activeDivision}
         onValueChange={(value) => {
           setActiveDivision(value);
           setPage(1);
         }}
       >
-        <CgTabList className="cg-hierarchy-tabs">
+        <div className="">
           {divisions.map((division) => (
-            <CgTabTrigger key={division.id} value={division.id} className="cg-hierarchy-tab">
+            <div key={division.id} value={division.id} className="">
               {division.label}
-            </CgTabTrigger>
+            </div>
           ))}
-        </CgTabList>
-      </CgTabs>
+        </div>
+      </div>
 
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel noPadding>
+        <div noPadding>
           {/* Controls Bar */}
           <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-4 items-center justify-between bg-card rounded-t-lg">
             <div className="relative w-full sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <CgInput
+              <div
                 placeholder="Search by name, EN number, phone, email..."
                 value={search}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -270,7 +257,7 @@ export function AllApplicationsPage() {
             </div>
             
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <CgSelect
+              <div
                 value={status}
                 onValueChange={(value) => {
                   setStatus(value);
@@ -293,7 +280,7 @@ export function AllApplicationsPage() {
               </div>
             ) : isLoading ? (
               <div className="p-12 flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Loader2 className="w-8 h-8 cg-spin mb-4 text-primary" />
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
                 <p>Fetching applications...</p>
               </div>
             ) : applications.length === 0 ? (
@@ -307,12 +294,12 @@ export function AllApplicationsPage() {
                 </p>
               </div>
             ) : (
-              <CgDataTable
+              <div
                 columns={columns}
                 data={applications}
                 pageSize={limit}
                 // Optional: implement manual pagination controls below if needed, 
-                // but CgDataTable handles basic rendering. 
+                // but DataTable handles basic rendering. 
                 // Since we fetch paginated data from server, we would need external pagination controls.
               />
             )}
@@ -325,27 +312,27 @@ export function AllApplicationsPage() {
                 Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, total)} of {total} applications
               </span>
               <div className="flex gap-2">
-                <CgButton
+                <div
                   variant="outline"
                   size="sm"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
                 >
                   Previous
-                </CgButton>
-                <CgButton
+                </div>
+                <div
                   variant="outline"
                   size="sm"
                   onClick={() => setPage(p => Math.min(Math.ceil(total / limit), p + 1))}
                   disabled={page >= Math.ceil(total / limit)}
                 >
                   Next
-                </CgButton>
+                </div>
               </div>
             </div>
           )}
-        </CgSectionPanel>
+        </div>
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

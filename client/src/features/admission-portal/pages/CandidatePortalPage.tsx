@@ -12,8 +12,8 @@ import {
   verifyPhoneOTP, sendEmailOTP, verifyEmailOTP,
 } from "../api";
 import { useEngineConfig, useCandidateSession } from "../queries/useAdmissionEngine";
-import { CgWorkflowStage } from "../components/CgWorkflowStage";
-import { CgAlert } from "@/components/classgrid";
+import { WorkflowStage } from "../components/WorkflowStage";
+
 
 declare global { interface Window { recaptchaVerifier: any; } }
 
@@ -166,7 +166,7 @@ function WelcomeStep({ orgName, config, onNext }: { orgName: string; config: any
         </div>
       </div>
 
-      <button className="cg-btn cg-btn--primary" onClick={onNext} id="portal-start-btn">
+      <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" onClick={onNext} id="portal-start-btn">
         Start Application <ArrowRight size={16} />
       </button>
     </motion.div>
@@ -264,7 +264,7 @@ function AuthGate({
       </div>
 
       <div className="cgp-auth-gate">
-        {error && <div style={{ marginBottom: "1rem" }}><CgAlert variant="danger" title="Error">{error}</CgAlert></div>}
+        {error && <div style={{ marginBottom: "1rem" }}><div variant="danger" title="Error">{error}</div></div>}
 
         {/* CET: EN input */}
         {isCetMode && step === "input" && (
@@ -279,8 +279,8 @@ function AuthGate({
                   value={enNumber} onChange={e => setEnNumber(e.target.value.toUpperCase())} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="cg-btn cg-btn--primary" disabled={loading} id="cet-validate-btn">
-              {loading ? <Loader2 size={15} className="cg-spin" /> : "Validate EN"} <ArrowRight size={15} />
+            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="cet-validate-btn">
+              {loading ? <Loader2 size={15} className="animate-spin" /> : "Validate EN"} <ArrowRight size={15} />
             </button>
           </form>
         )}
@@ -306,8 +306,8 @@ function AuthGate({
                   value={identifier} onChange={e => setIdentifier(e.target.value)} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="cg-btn cg-btn--primary" disabled={loading} id="cet-get-otp-btn">
-              {loading ? <Loader2 size={15} className="cg-spin" /> : "Get OTP"} <ArrowRight size={15} />
+            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="cet-get-otp-btn">
+              {loading ? <Loader2 size={15} className="animate-spin" /> : "Get OTP"} <ArrowRight size={15} />
             </button>
           </form>
         )}
@@ -338,8 +338,8 @@ function AuthGate({
                   value={identifier} onChange={e => setIdentifier(e.target.value)} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="cg-btn cg-btn--primary" disabled={loading} id="get-otp-btn">
-              {loading ? <Loader2 size={15} className="cg-spin" /> : "Get OTP"} <ArrowRight size={15} />
+            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="get-otp-btn">
+              {loading ? <Loader2 size={15} className="animate-spin" /> : "Get OTP"} <ArrowRight size={15} />
             </button>
           </form>
         )}
@@ -355,11 +355,11 @@ function AuthGate({
                 placeholder="000000" value={otp}
                 onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} disabled={loading} />
             </div>
-            <button type="submit" className="cg-btn cg-btn--primary" disabled={loading} id="verify-otp-btn">
-              {loading ? <Loader2 size={15} className="cg-spin" /> : "Verify & Continue"}
+            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="verify-otp-btn">
+              {loading ? <Loader2 size={15} className="animate-spin" /> : "Verify & Continue"}
             </button>
             <div className="cgp-auth-actions">
-              <button type="button" className="cg-btn cg-btn--outline" onClick={() => { setStep("input"); setOtp(""); }}>
+              <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => { setStep("input"); setOtp(""); }}>
                 ← Back
               </button>
               <button type="button" className="cgp-auth-link" style={{ background: "none", border: "none" }}
@@ -386,7 +386,7 @@ export function CandidatePortalPage() {
   const { data: engineConfig, isLoading: configLoading } = useEngineConfig(orgId);
   const { data: appState, isLoading: sessionLoading, error: sessionError, refetch } = useCandidateSession();
 
-  // 0=welcome, 1=signin (auth gate), 2+=handed to CgWorkflowStage
+  // 0=welcome, 1=signin (auth gate), 2+=handed to WorkflowStage
   const [portalStep, setPortalStep] = useState(0);
 
   const isAuthenticated = !!appState;
@@ -420,7 +420,7 @@ export function CandidatePortalPage() {
   if (configLoading || sessionLoading) {
     return (
       <div className="cgp-shell" style={{ alignItems: "center", justifyContent: "center" }}>
-        <Loader2 size={32} className="cg-spin" />
+        <Loader2 size={32} className="animate-spin" />
       </div>
     );
   }
@@ -432,9 +432,9 @@ export function CandidatePortalPage() {
           <div className="cgp-closed__inner">
             <div className="cgp-closed__icon">⚠️</div>
             <h1 className="cgp-closed__title">Portal Not Found</h1>
-            <CgAlert variant="danger" title="Configuration Missing">
+            <div variant="danger" title="Configuration Missing">
               Admission portal configuration not found for this organization.
-            </CgAlert>
+            </div>
           </div>
         </div>
       </div>
@@ -456,9 +456,9 @@ export function CandidatePortalPage() {
           <div className="cgp-closed__inner">
             <div className="cgp-closed__icon">🔒</div>
             <h1 className="cgp-closed__title">Admissions Closed</h1>
-            <CgAlert variant="warning" title="Portal Closed">
+            <div variant="warning" title="Portal Closed">
               The admission portal is currently closed. Please check back later or contact the institution.
-            </CgAlert>
+            </div>
           </div>
         </div>
       </div>
@@ -488,7 +488,7 @@ export function CandidatePortalPage() {
             </div>
           )}
           {isAuthenticated && (
-            <button className="cg-btn cg-btn--outline" onClick={handleSignOut} id="portal-signout-btn">
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={handleSignOut} id="portal-signout-btn">
               <LogOut size={14} /> Sign Out
             </button>
           )}
@@ -555,7 +555,7 @@ export function CandidatePortalPage() {
                       : "Your application is being processed. Track progress below."}
                   </p>
                 </div>
-                <CgWorkflowStage
+                <div
                   app={appState}
                   engineConfig={engineConfig}
                   onRefresh={refetch}

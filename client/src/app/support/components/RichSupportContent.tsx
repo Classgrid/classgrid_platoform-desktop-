@@ -6,7 +6,7 @@ type RichSupportContentProps = {
 export function RichSupportContent({ html = "", className = "" }: RichSupportContentProps) {
   return (
     <div
-      className={`cg-rich-support-content [&_a]:text-emerald-600 dark:[&_a]:text-emerald-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-emerald-700 dark:hover:[&_a]:text-emerald-300 ${className}`.trim()}
+      className={` [&_a]:text-emerald-600 dark:[&_a]:text-emerald-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-emerald-700 dark:hover:[&_a]:text-emerald-300 ${className}`.trim()}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

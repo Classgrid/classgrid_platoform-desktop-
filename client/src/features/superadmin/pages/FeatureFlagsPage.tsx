@@ -3,13 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Power, Plus, Shield, Zap, AlertTriangle, RefreshCw, ChevronDown } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
@@ -167,14 +167,14 @@ export function FeatureFlagsPage() {
   };
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Feature Flags"
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh
+              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
             </Button>
             <Button variant="outline" onClick={() => setNewFlagOpen(true)}>
               <Plus size={14} /> New Flag
@@ -186,7 +186,7 @@ export function FeatureFlagsPage() {
         }
       />
 
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Flags" value={isLoading ? "—" : flags.length} icon={<Shield size={15} />} />
         <StatCard title="Active Features" value={isLoading ? "—" : enabledCount} icon={<Power size={15} />}
           trend={{ value: enabledCount, label: `of ${flags.length} total` }} />
@@ -200,7 +200,7 @@ export function FeatureFlagsPage() {
           noPadding
         >
           <div style={{ padding: "0.75rem 1rem" }}>
-            <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search flags, modules…" />
+            <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search flags, modules…" />
           </div>
           <DataTable
             columns={columns}

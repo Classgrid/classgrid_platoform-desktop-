@@ -53,7 +53,7 @@ export const ORG_ADMIN_MENU: NavigationItem[] = [
   { title: "SARAL / DTE Reports", url: "/org/compliance/reports", icon: "FileUp", section: "COMPLIANCE" },
   { title: "Audit Trail", url: "/org/audit", icon: "Search", section: "COMPLIANCE" },
   
-  { title: "Events & Seminars", url: "/org/events", icon: "CalendarStar", section: "ENGAGEMENT" },
+  { title: "Events & Seminars", url: "/org/events", icon: "CalendarCheck", section: "ENGAGEMENT" },
   { title: "Alumni & Placements", url: "/org/alumni", icon: "GraduationCap", section: "ENGAGEMENT" },
   { title: "Feedback", url: "/org/feedback", icon: "MessageSquare", section: "ENGAGEMENT" },
   { title: "Org Chat", url: "/org/chat", icon: "MessageCircle", section: "ENGAGEMENT" },

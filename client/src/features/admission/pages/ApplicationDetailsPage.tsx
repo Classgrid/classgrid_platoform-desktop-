@@ -13,13 +13,8 @@ import {
   Shield,
 } from "lucide-react";
 import { useApplication, useUpdateStage } from "../../admissions/queries/useApplications";
-import {
-  CgAvatar,
-  CgBadge,
-  CgButton,
-  CgPageShell,
-  CgSectionPanel,
-} from "@/components/classgrid";
+import { Button } from "@/components/marketing_ui/button";
+import { Badge } from "@/components/marketing_ui/badge";
 
 type SchemaField = {
   id: string;
@@ -237,14 +232,17 @@ function buildSchemaSections(formSchema: any): SchemaSection[] {
 
 function EmptyApplicationState({ title, message }: { title: string; message: string }) {
   return (
-    <CgPageShell title={title} breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Application" }]}>
-      <CgSectionPanel>
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="mb-4">
+        <div className="text-sm text-muted-foreground mb-2">Admissions / {title}</div>
+      </div>
+      <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
         <div className="text-center p-8 text-muted-foreground">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>{message}</p>
         </div>
-      </CgSectionPanel>
-    </CgPageShell>
+      </div>
+    </div>
   );
 }
 
@@ -297,11 +295,11 @@ export function ApplicationDetailsPage() {
 
   if (isLoading) {
     return (
-      <CgPageShell title="Loading Application" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Application" }]}>
+      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 cg-spin text-primary" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-      </CgPageShell>
+      </div>
     );
   }
 
@@ -325,54 +323,55 @@ export function ApplicationDetailsPage() {
   };
 
   return (
-    <CgPageShell
-      title={`Application: ${applicant.full_name || "Unknown"}`}
-      description={`${printData.structure_type?.replace(/_/g, " ") || "Admission"} application rendered from Form Builder schema.`}
-      breadcrumbs={[
-        { label: "Admissions", to: "/dept/admissions/dashboard" },
-        { label: "Applications", to: "/dept/admissions/applications" },
-        { label: applicant.en_number || String(printData.application_id).slice(0, 8) },
-      ]}
-      actions={
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="text-sm text-muted-foreground">
+        Admissions / Applications / {applicant.en_number || String(printData.application_id).slice(0, 8)}
+      </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Application: {applicant.full_name || "Unknown"}</h1>
+          <p className="text-muted-foreground mt-1">{printData.structure_type?.replace(/_/g, " ") || "Admission"} application rendered from Form Builder schema.</p>
+        </div>
         <div className="flex gap-2 flex-wrap">
           {status === "applied" && (
-            <CgButton onClick={() => handleStageChange("under_verification")} disabled={isUpdating}>
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 cg-spin" /> : null}
+            <Button onClick={() => handleStageChange("under_verification")} disabled={isUpdating}>
+              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Start Verification
-            </CgButton>
+            </Button>
           )}
           {status === "under_verification" && (
-            <CgButton onClick={() => handleStageChange("verified")} variant="success" disabled={isUpdating}>
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 cg-spin" /> : null}
+            <Button onClick={() => handleStageChange("verified")} className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={isUpdating}>
+              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Mark Verified
-            </CgButton>
+            </Button>
           )}
           {status === "verified" && (
-            <CgButton onClick={() => handleStageChange("fee_pending")} variant="primary" disabled={isUpdating}>
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 cg-spin" /> : null}
+            <Button onClick={() => handleStageChange("fee_pending")} disabled={isUpdating}>
+              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Request Fees
-            </CgButton>
+            </Button>
           )}
           {status === "fee_pending" && (
-            <CgButton onClick={() => handleStageChange("enrolled")} variant="success" disabled={isUpdating}>
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 cg-spin" /> : null}
+            <Button onClick={() => handleStageChange("enrolled")} className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={isUpdating}>
+              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Enroll Student
-            </CgButton>
+            </Button>
           )}
         </div>
-      }
-    >
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6">
           <div className="p-6 flex flex-col items-center text-center bg-card border border-border rounded-lg shadow-sm">
-            <CgAvatar name={applicant.full_name || "?"} size="lg" className="mb-4" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-4">
+              {applicant.full_name?.[0]?.toUpperCase() || "?"}
+            </div>
             <h2 className="text-xl font-bold">{applicant.full_name || EMPTY_VALUE}</h2>
             <p className="text-muted-foreground mb-4">
               {applicant.en_number ? `EN: ${applicant.en_number}` : `ID: ${String(printData.application_id).slice(0, 8)}`}
             </p>
-            <CgBadge variant={statusVariant(status)} className="mb-6 uppercase text-xs px-3 py-1">
+            <span className={`mb-6 uppercase text-xs px-3 py-1 rounded-full font-semibold border ${statusVariant(status) === 'success' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : statusVariant(status) === 'danger' ? 'bg-red-100 text-red-800 border-red-200' : statusVariant(status) === 'warning' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-blue-100 text-blue-800 border-blue-200'}`}>
               {status.replace(/_/g, " ")}
-            </CgBadge>
+            </span>
 
             <div className="w-full space-y-3 text-sm text-left">
               <div className="flex items-center gap-3 text-muted-foreground">
@@ -390,8 +389,11 @@ export function ApplicationDetailsPage() {
             </div>
           </div>
 
-          <CgSectionPanel title="Division And Program">
-            <div className="space-y-4 text-sm">
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="p-5 border-b border-border">
+              <h2 className="text-lg font-bold">Division And Program</h2>
+            </div>
+            <div className="p-5 space-y-4 text-sm">
               <div>
                 <p className="text-muted-foreground text-xs mb-1">Hierarchy Path</p>
                 <p className="font-medium">
@@ -413,13 +415,16 @@ export function ApplicationDetailsPage() {
                 <p className="font-medium">{formatValue(printData.applied_at, "date")}</p>
               </div>
             </div>
-          </CgSectionPanel>
+          </div>
 
-          <CgSectionPanel title="Admission Strategy">
-            <div className="space-y-3 text-sm">
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="p-5 border-b border-border">
+              <h2 className="text-lg font-bold">Admission Strategy</h2>
+            </div>
+            <div className="p-5 space-y-3 text-sm">
               <div className="flex justify-between gap-3">
                 <span className="text-muted-foreground">Structure</span>
-                <CgBadge variant="info">{printData.structure_type?.replace(/_/g, " ") || EMPTY_VALUE}</CgBadge>
+                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800">{printData.structure_type?.replace(/_/g, " ") || EMPTY_VALUE}</span>
               </div>
               <div className="flex justify-between gap-3">
                 <span className="text-muted-foreground">Auth</span>
@@ -434,39 +439,48 @@ export function ApplicationDetailsPage() {
                 <span className="font-medium">{strategy.workflow_variant?.replace(/_/g, " ") || EMPTY_VALUE}</span>
               </div>
             </div>
-          </CgSectionPanel>
+          </div>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
           {renderedSections.length > 0 ? (
             renderedSections.map((section) => (
-              <CgSectionPanel key={section.id} title={section.label}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+              <div key={section.id} className="bg-card border border-border rounded-xl shadow-sm">
+                <div className="p-5 border-b border-border">
+                  <h2 className="text-lg font-bold">{section.label}</h2>
+                </div>
+                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                   {section.fields.map((field) => (
                     <div key={field.id} className="border-b border-border pb-2">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-xs text-muted-foreground">{field.label}</p>
-                        {field.required ? <CgBadge variant="outline" size="sm">Required</CgBadge> : null}
-                        {field.locked ? <CgBadge variant="info" size="sm">CET locked</CgBadge> : null}
+                        {field.required ? <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border border-border">Required</span> : null}
+                        {field.locked ? <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-800">CET locked</span> : null}
                       </div>
                       <p className="font-medium text-sm break-words">{formatValue(field.value, field.type)}</p>
                     </div>
                   ))}
                 </div>
-              </CgSectionPanel>
+              </div>
             ))
           ) : (
-            <CgSectionPanel title="Application Form">
-              <div className="py-8 text-center text-muted-foreground">
+            <div className="bg-card border border-border rounded-xl shadow-sm">
+              <div className="p-5 border-b border-border">
+                <h2 className="text-lg font-bold">Application Form</h2>
+              </div>
+              <div className="p-5 py-8 text-center text-muted-foreground">
                 <Shield className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-sm">No Form Builder schema was returned for this application.</p>
               </div>
-            </CgSectionPanel>
+            </div>
           )}
 
           {extraFields.length > 0 && (
-            <CgSectionPanel title="Additional Stored Data">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+            <div className="bg-card border border-border rounded-xl shadow-sm">
+              <div className="p-5 border-b border-border">
+                <h2 className="text-lg font-bold">Additional Stored Data</h2>
+              </div>
+              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                 {extraFields.map((entry) => (
                   <div key={entry.label} className="border-b border-border pb-2">
                     <p className="text-xs text-muted-foreground mb-1">{labelFromKey(entry.label)}</p>
@@ -474,10 +488,14 @@ export function ApplicationDetailsPage() {
                   </div>
                 ))}
               </div>
-            </CgSectionPanel>
+            </div>
           )}
 
-          <CgSectionPanel title="Documents">
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="p-5 border-b border-border">
+              <h2 className="text-lg font-bold">Documents</h2>
+            </div>
+            <div className="p-5">
             {schemaDocuments.length > 0 || documents.length > 0 ? (
               <div className="space-y-3">
                 {(schemaDocuments.length ? schemaDocuments : documents.map((doc: any) => ({ id: doc.name, label: labelFromKey(doc.name), required: false }))).map((schemaDoc: any) => {
@@ -488,18 +506,18 @@ export function ApplicationDetailsPage() {
                       <div className="flex items-center gap-3 min-w-0">
                         <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
-                          <p className="font-medium text-sm break-words">{schemaDoc.label || labelFromKey(schemaDoc.id)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {schemaDoc.required ? "Required document" : "Optional document"}
-                          </p>
+                           <p className="font-medium text-sm break-words">{schemaDoc.label || labelFromKey(schemaDoc.id)}</p>
+                           <p className="text-xs text-muted-foreground">
+                             {schemaDoc.required ? "Required document" : "Optional document"}
+                           </p>
                         </div>
                       </div>
                       {docStatus === "verified" ? (
-                        <CgBadge variant="success" icon={<CheckCircle className="w-3 h-3" />}>Verified</CgBadge>
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>
                       ) : docStatus === "rejected" ? (
-                        <CgBadge variant="danger" icon={<AlertCircle className="w-3 h-3" />}>Rejected</CgBadge>
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800"><AlertCircle className="w-3 h-3 mr-1" /> Rejected</span>
                       ) : (
-                        <CgBadge variant="warning" icon={<Clock className="w-3 h-3" />}>Pending</CgBadge>
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800"><Clock className="w-3 h-3 mr-1" /> Pending</span>
                       )}
                     </div>
                   );
@@ -511,21 +529,27 @@ export function ApplicationDetailsPage() {
                 <p className="text-sm">No documents are configured for this admission strategy.</p>
               </div>
             )}
-          </CgSectionPanel>
-
-          <CgSectionPanel title="Printable Declaration">
-            <p className="text-sm text-muted-foreground mb-6">{printData.print_declaration}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(printData.signature_lines || []).map((line: any) => (
-                <div key={line.label} className="border border-border rounded-lg p-4">
-                  <p className="text-xs text-muted-foreground mb-8">{line.label}</p>
-                  <p className="font-medium text-sm border-t border-border pt-2">{line.signer || EMPTY_VALUE}</p>
-                </div>
-              ))}
             </div>
-          </CgSectionPanel>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="p-5 border-b border-border">
+              <h2 className="text-lg font-bold">Printable Declaration</h2>
+            </div>
+            <div className="p-5">
+              <p className="text-sm text-muted-foreground mb-6">{printData.print_declaration}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(printData.signature_lines || []).map((line: any) => (
+                  <div key={line.label} className="border border-border rounded-lg p-4">
+                    <p className="text-xs text-muted-foreground mb-8">{line.label}</p>
+                    <p className="font-medium text-sm border-t border-border pt-2">{line.signer || EMPTY_VALUE}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </CgPageShell>
+    </div>
   );
 }

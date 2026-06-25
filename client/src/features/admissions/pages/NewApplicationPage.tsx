@@ -1,14 +1,7 @@
 import { useMemo, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  CgAlert,
-  CgBadge,
-  CgButton,
-  CgEmptyState,
-  CgPageShell,
-  CgSectionPanel,
-} from "@/components/classgrid";
+import { Button } from "@/components/marketing_ui/button";
 import { deskEnroll, getAdmissionConfigFull } from "../api";
 
 type SchemaField = {
@@ -123,133 +116,160 @@ export function NewApplicationPage() {
   };
 
   return (
-    <CgPageShell
-      title="New Application"
-      description="Schema-driven application entry backed by admission strategy and services."
-      breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "New Application" }]}
-    >
-      <CgSectionPanel title="Track Resolution">
-        <div className="flex flex-wrap gap-3 items-center">
-          <CgBadge variant="info">{structureType || "Unknown structure type"}</CgBadge>
-          <CgBadge variant={isCETOrg ? "warning" : "success"}>
-            {isCETOrg ? "CET Track (Engineering/Diploma)" : "Direct Track"}
-          </CgBadge>
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">New Application</h1>
+          <p className="text-muted-foreground mt-1">Schema-driven application entry backed by admission strategy and services.</p>
         </div>
-      </CgSectionPanel>
+      </div>
+
+      <div className="bg-card border border-border rounded-xl shadow-sm">
+        <div className="p-5 border-b border-border">
+          <h2 className="text-lg font-bold">Track Resolution</h2>
+        </div>
+        <div className="p-5">
+          <div className="flex flex-wrap gap-3 items-center">
+            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800">{structureType || "Unknown structure type"}</span>
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${isCETOrg ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+              {isCETOrg ? "CET Track (Engineering/Diploma)" : "Direct Track"}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {configQuery.isLoading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="w-8 h-8 cg-spin text-primary" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : configQuery.isError ? (
-        <CgSectionPanel>
-          <CgEmptyState title="Failed to load form schema" description="Could not fetch admission config." />
-        </CgSectionPanel>
+        <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
+          <div className="text-center p-8 text-muted-foreground">
+            <h2 className="text-lg font-bold text-foreground mb-2">Failed to load form schema</h2>
+            <p>Could not fetch admission config.</p>
+          </div>
+        </div>
       ) : !allFields.length ? (
-        <CgSectionPanel>
-          <CgEmptyState title="No form schema configured" description="Enable fields in Form Builder first." />
-        </CgSectionPanel>
+        <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
+          <div className="text-center p-8 text-muted-foreground">
+            <h2 className="text-lg font-bold text-foreground mb-2">No form schema configured</h2>
+            <p>Enable fields in Form Builder first.</p>
+          </div>
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
-          <CgSectionPanel title="Hierarchy Linkage">
-            <label className="text-sm block">
-              <div className="text-muted-foreground mb-1">Hierarchy ID (Division/Program)</div>
-              <input
-                value={hierarchyId}
-                onChange={(event) => setHierarchyId(event.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2"
-                placeholder="Optional hierarchy id"
-              />
-            </label>
-          </CgSectionPanel>
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="p-5 border-b border-border">
+              <h2 className="text-lg font-bold">Hierarchy Linkage</h2>
+            </div>
+            <div className="p-5">
+              <label className="text-sm block">
+                <div className="text-muted-foreground mb-1">Hierarchy ID (Division/Program)</div>
+                <input
+                  value={hierarchyId}
+                  onChange={(event) => setHierarchyId(event.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2"
+                  placeholder="Optional hierarchy id"
+                />
+              </label>
+            </div>
+          </div>
 
           {visibleSections.map((section) => (
-            <CgSectionPanel key={section.id} title={section.label}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.fields.map((field) => {
-                  const normalizedType = normalizeFieldType(field.type);
-                  const required = requiredFieldIds.has(field.id);
-                  const value = values[field.id] || "";
+            <div key={section.id} className="bg-card border border-border rounded-xl shadow-sm">
+              <div className="p-5 border-b border-border">
+                <h2 className="text-lg font-bold">{section.label}</h2>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {section.fields.map((field) => {
+                    const normalizedType = normalizeFieldType(field.type);
+                    const required = requiredFieldIds.has(field.id);
+                    const value = values[field.id] || "";
 
-                  if (normalizedType === "select") {
+                    if (normalizedType === "select") {
+                      return (
+                        <label key={field.id} className="text-sm">
+                          <div className="mb-1 text-muted-foreground">
+                            {field.label} {required ? "*" : ""}
+                          </div>
+                          <select
+                            value={value}
+                            required={required}
+                            onChange={(event) => onFieldChange(field.id, event.target.value)}
+                            className="w-full rounded-md border border-border bg-background px-3 py-2"
+                          >
+                            <option value="">Select</option>
+                            {(field.options || []).map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      );
+                    }
+
+                    if (normalizedType === "boolean") {
+                      return (
+                        <label key={field.id} className="text-sm flex items-center gap-2 mt-7">
+                          <input
+                            type="checkbox"
+                            checked={value === "true"}
+                            onChange={(event) => onFieldChange(field.id, String(event.target.checked))}
+                          />
+                          <span>{field.label}</span>
+                        </label>
+                      );
+                    }
+
                     return (
                       <label key={field.id} className="text-sm">
                         <div className="mb-1 text-muted-foreground">
                           {field.label} {required ? "*" : ""}
                         </div>
-                        <select
+                        <input
+                          type={toInputType(normalizedType)}
                           value={value}
                           required={required}
                           onChange={(event) => onFieldChange(field.id, event.target.value)}
                           className="w-full rounded-md border border-border bg-background px-3 py-2"
-                        >
-                          <option value="">Select</option>
-                          {(field.options || []).map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    );
-                  }
-
-                  if (normalizedType === "boolean") {
-                    return (
-                      <label key={field.id} className="text-sm flex items-center gap-2 mt-7">
-                        <input
-                          type="checkbox"
-                          checked={value === "true"}
-                          onChange={(event) => onFieldChange(field.id, String(event.target.checked))}
                         />
-                        <span>{field.label}</span>
                       </label>
                     );
-                  }
-
-                  return (
-                    <label key={field.id} className="text-sm">
-                      <div className="mb-1 text-muted-foreground">
-                        {field.label} {required ? "*" : ""}
-                      </div>
-                      <input
-                        type={toInputType(normalizedType)}
-                        value={value}
-                        required={required}
-                        onChange={(event) => onFieldChange(field.id, event.target.value)}
-                        className="w-full rounded-md border border-border bg-background px-3 py-2"
-                      />
-                    </label>
-                  );
-                })}
+                  })}
+                </div>
               </div>
-            </CgSectionPanel>
+            </div>
           ))}
 
           {validationError && (
-            <CgAlert variant="danger" title="Validation Failed">
-              {validationError}
-            </CgAlert>
+            <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
+              <strong>Validation Failed</strong>
+              <br/>{validationError}
+            </div>
           )}
           {mutation.isError && (
-            <CgAlert variant="danger" title="Submission Failed">
-              {(mutation.error as any)?.message || "Could not create application."}
-            </CgAlert>
+            <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
+              <strong>Submission Failed</strong>
+              <br/>{(mutation.error as any)?.message || "Could not create application."}
+            </div>
           )}
           {mutation.isSuccess && (
-            <CgAlert variant="success" title="Application Created">
-              ID: {(mutation.data as any)?.application_id || "created"}
-            </CgAlert>
+            <div className="bg-emerald-100 text-emerald-800 p-4 rounded-md border border-emerald-200">
+              <strong>Application Created</strong>
+              <br/>ID: {(mutation.data as any)?.application_id || "created"}
+            </div>
           )}
 
           <div className="flex justify-end">
-            <CgButton type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? <Loader2 className="w-4 h-4 mr-2 cg-spin" /> : <Send className="w-4 h-4 mr-2" />}
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
               Submit Application
-            </CgButton>
+            </Button>
           </div>
         </form>
       )}
-    </CgPageShell>
+    </div>
   );
 }

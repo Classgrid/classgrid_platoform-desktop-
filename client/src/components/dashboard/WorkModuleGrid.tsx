@@ -11,9 +11,9 @@ type WorkModuleGridProps = {
 
 export function WorkModuleGrid({ modules }: WorkModuleGridProps) {
   return (
-    <section className="cg-module-grid">
+    <section className="">
       {modules.map((module) => (
-        <Link key={module.route} className="cg-module-card" to={module.route}>
+        <Link key={module.route} className="" to={module.route}>
           <span>{module.label}</span>
         </Link>
       ))}

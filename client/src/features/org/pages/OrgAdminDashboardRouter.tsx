@@ -20,7 +20,7 @@ export function OrgAdminDashboardRouter() {
 
 function OrgAdminDashboardFallback() {
   return (
-    <main className="cg-page">
+    <main className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <h1 className="text-xl font-semibold text-foreground">Institution profile unavailable</h1>
         <p className="mt-2 text-sm text-muted-foreground">

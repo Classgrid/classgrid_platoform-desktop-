@@ -4,14 +4,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building2, Plus, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
 import { StatCard } from "@/components/marketing_ui/StatCard";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
+
 import { formatDate } from "@/utils/dateUtils";
 
 import { dashboardApi, type SuperAdminOrganization } from "../services/superAdminApi";
@@ -123,13 +123,13 @@ export function OrganizationsPage() {
 
   return (
     <div className="space-y-6">
-      <CgPageHeader
+      <div
         title="Organizations Directory"
         description="Live organization records from the Classgrid backend, including owner, status, and user counts."
         actions={
           <>
             <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw className={`size-4 ${isFetching ? "cg-spin" : ""}`} />
+              <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
               Refresh
             </Button>
             <Button asChild>
@@ -161,13 +161,13 @@ export function OrganizationsPage() {
         noPadding
       >
         <div style={{ padding: "1rem" }}>
-          <CgFilterToolbar
+          <div
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search name, owner, plan..."
             filters={
               <div style={{ width: "180px" }}>
-                <CgSearchableSelect
+                <div
                   value={statusFilter}
                   onValueChange={setStatusFilter}
                   placeholder="Filter by Status"
@@ -184,10 +184,10 @@ export function OrganizationsPage() {
         </div>
 
         {isError ? (
-          <div className="cg-alert cg-alert--danger" style={{ margin: "0 1rem 1rem" }}>
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Backend request failed</span>
-              <p className="cg-alert__message">
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "0 1rem 1rem" }}>
+            <div className="p-4 rounded-md border__body">
+              <span className="p-4 rounded-md border__title">Backend request failed</span>
+              <p className="p-4 rounded-md border__message">
                 {(error as Error)?.message || "The organizations endpoint did not return data."}
               </p>
             </div>

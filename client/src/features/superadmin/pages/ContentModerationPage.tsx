@@ -3,14 +3,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Flag, RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle, MessageSquare } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
+
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
+
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -146,29 +146,29 @@ export function ContentModerationPage() {
   };
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Content Moderation"
         description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
       />
 
-      <div className="cg-stats-grid">
-        <CgMetricCard title="Pending Reports" value={isLoading ? "—" : pendingCount} icon={<Clock size={15} />} />
-        <CgMetricCard title="High Severity" value={isLoading ? "—" : criticalCount} icon={<AlertTriangle size={15} />} />
-        <CgMetricCard title="Resolved" value={isLoading ? "—" : resolvedCount} icon={<CheckCircle2 size={15} />} />
-        <CgMetricCard title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div title="Pending Reports" value={isLoading ? "—" : pendingCount} icon={<Clock size={15} />} />
+        <div title="High Severity" value={isLoading ? "—" : criticalCount} icon={<AlertTriangle size={15} />} />
+        <div title="Resolved" value={isLoading ? "—" : resolvedCount} icon={<CheckCircle2 size={15} />} />
+        <div title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Content Reports" description="All user-submitted reports across all organizations." noPadding
+        <div title="Content Reports" description="All user-submitted reports across all organizations." noPadding
           actions={
             <div style={{ display: "flex", gap: "0.5rem" }}>
-              <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={[
+              <div value={statusFilter} onValueChange={setStatusFilter} options={[
                 { label: "Pending", value: "pending" }, { label: "Resolved", value: "resolved" },
                 { label: "Dismissed", value: "dismissed" }, { label: "All", value: "" },
               ]} />
-              <CgSearchableSelect value={typeFilter} onValueChange={setTypeFilter} options={[
+              <div value={typeFilter} onValueChange={setTypeFilter} options={[
                 { label: "All Types", value: "" }, { label: "Forum Post", value: "forum_post" },
                 { label: "Forum Comment", value: "forum_comment" }, { label: "Chat", value: "chat_message" },
                 { label: "Notes", value: "note" }, { label: "Review", value: "review" },
@@ -177,11 +177,11 @@ export function ContentModerationPage() {
           }
         >
           <div style={{ padding: "0.75rem 1rem" }}>
-            <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search reporter, accused, content…" />
+            <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search reporter, accused, content…" />
           </div>
-          <CgDataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
+          <div columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
             emptyIcon={<Flag size={32} />} emptyTitle="No reports found" emptyDescription="No content reports match the current filters." emptyMessage="No reports." />
-        </CgSectionPanel>
+        </div>
       </div>
 
       {/* Resolve Dialog */}
@@ -203,7 +203,7 @@ export function ContentModerationPage() {
           <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
             <div>
               <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Action</label>
-              <CgSearchableSelect value={resolveAction} onValueChange={setResolveAction} options={ACTION_OPTIONS} />
+              <div value={resolveAction} onValueChange={setResolveAction} options={ACTION_OPTIONS} />
             </div>
             <div>
               <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Moderation Note</label>

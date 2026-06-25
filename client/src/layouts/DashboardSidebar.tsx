@@ -67,19 +67,19 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
   };
 
   return (
-    <aside className="cg-sidebar">
-      <div className="cg-sidebar__content">
-        <div className="cg-sidebar__brand">
-          <div className={`cg-sidebar__brand-mark ${isSidebarCollapsed ? 'cg-sidebar__brand-mark--collapsed' : ''}`} onClick={() => isSidebarCollapsed && toggleSidebar()}>
+    <aside className="">
+      <div className="">
+        <div className="">
+          <div className={` ${isSidebarCollapsed ? '' : ''}`} onClick={() => isSidebarCollapsed && toggleSidebar()}>
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
               {BrandIcon ? (
-                <span className="cg-sidebar__brand-icon">
+                <span className="">
                   <BrandIcon size={16} />
                 </span>
               ) : null}
-              <div className="cg-sidebar__brand-text">
-                <p className="cg-sidebar__logo">{config.logo}</p>
-                {config.subtitle ? <p className="cg-sidebar__subtitle">{config.subtitle}</p> : null}
+              <div className="">
+                <p className="">{config.logo}</p>
+                {config.subtitle ? <p className="">{config.subtitle}</p> : null}
               </div>
             </div>
 
@@ -88,7 +88,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
                 e.stopPropagation();
                 toggleSidebar();
               }}
-              className="cg-sidebar__collapse-btn"
+              className=""
               title="Toggle Sidebar"
             >
               <PanelLeft
@@ -104,30 +104,30 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
         </div>
 
         {hasMultipleRoles ? (
-          <div className="cg-sidebar__switcher">
+          <div className="">
             <button
               aria-expanded={isSwitcherOpen}
-              className="cg-user-card cg-user-card--switcher"
+              className=" "
               onClick={() => {
                 setIsMenuOpen(false);
                 setIsSwitcherOpen((prev) => !prev);
               }}
               type="button"
             >
-              <span className="cg-user-card__body">
-                <span className="cg-user-card__avatar cg-user-card__avatar--icon">
+              <span className="">
+                <span className=" ">
                   <Layers size={14} />
                 </span>
-                <span className="cg-user-card__meta">
+                <span className="">
                   <strong>{currentRoleLabel}</strong>
                   <small>Switch Role / Portal</small>
                 </span>
               </span>
-              <ChevronDown className="cg-user-card__chevron" size={14} />
+              <ChevronDown className="" size={14} />
             </button>
 
             {isSwitcherOpen ? (
-              <div className="cg-user-menu cg-user-menu--top">
+              <div className=" ">
                 {userRoles.map((roleId) => {
                   const roleName = getPortalLabel(roleId);
                   const isActive = roleId === currentRole;
@@ -135,7 +135,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
                   return (
                     <button
                       key={roleId}
-                      className={`cg-user-menu__button ${isActive ? 'active' : ''}`}
+                      className={` ${isActive ? 'active' : ''}`}
                       onClick={() => {
                         setIsSwitcherOpen(false);
                         if (!isActive) {
@@ -154,11 +154,11 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
           </div>
         ) : null}
 
-        <div className="cg-sidebar__sections">
+        <div className="">
           {visibleSections.map((section, sectionIndex) => (
-            <section key={`${section.label}-${sectionIndex}`} className="cg-sidebar__section">
-              {section.label ? <p className="cg-sidebar__section-label">{section.label}</p> : null}
-              <div className="cg-sidebar__section-items">
+            <section key={`${section.label}-${sectionIndex}`} className="">
+              {section.label ? <p className="">{section.label}</p> : null}
+              <div className="">
                 {section.items.map((item) => {
                   const ItemIcon = item.icon;
 
@@ -166,7 +166,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
                     <NavLink
                       key={item.to}
                       className={({ isActive }) =>
-                        `cg-sidebar__item${isActive ? " cg-sidebar__item--active" : ""}`
+                        `${isActive ? " " : ""}`
                       }
                       to={item.to}
                     >
@@ -175,15 +175,15 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
                           {isActive && (
                             <motion.div
                               layoutId="active-sidebar-nav"
-                              className="cg-sidebar__item-bg"
+                              className=""
                               initial={false}
                               transition={{ type: "spring", stiffness: 400, damping: 30 }}
                             />
                           )}
-                          <div className="cg-sidebar__item-content">
+                          <div className="">
                             {ItemIcon ? <ItemIcon size={16} /> : null}
                             <span>{item.label}</span>
-                            {item.badge ? <span className="cg-sidebar__badge">{item.badge}</span> : null}
+                            {item.badge ? <span className="">{item.badge}</span> : null}
                           </div>
                         </>
                       )}
@@ -196,28 +196,28 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
         </div>
       </div>
 
-      <div className="cg-user-card-wrap">
+      <div className="">
         <button
           aria-expanded={isMenuOpen}
-          className="cg-user-card"
+          className=""
           onClick={() => {
             setIsSwitcherOpen(false);
             setIsMenuOpen((prev) => !prev);
           }}
           type="button"
         >
-          <span className="cg-user-card__body">
+          <span className="">
             {user?.profilePicture ? (
-              <img src={user.profilePicture} alt={cardTitle} className="cg-user-card__avatar" style={{ padding: 0, border: 'none', objectFit: 'cover', borderRadius: '50%' }} />
+              <img src={user.profilePicture} alt={cardTitle} className="" style={{ padding: 0, border: 'none', objectFit: 'cover', borderRadius: '50%' }} />
             ) : (
-              <span className="cg-user-card__avatar">{user?.name?.[0] ?? config.identity.name[0]}</span>
+              <span className="">{user?.name?.[0] ?? config.identity.name[0]}</span>
             )}
-            <span className="cg-user-card__meta">
+            <span className="">
               <strong>{cardTitle}</strong>
               <small>{cardSubtitle}</small>
             </span>
           </span>
-          <ChevronDown className="cg-user-card__chevron" size={14} />
+          <ChevronDown className="" size={14} />
         </button>
 
         <AnimatePresence>
@@ -227,7 +227,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="cg-user-menu shadow-xl border border-white/10"
+              className=" shadow-xl border border-white/10"
               style={{ transformOrigin: "bottom center" }}
             >
               {menuItems.map((item) => {
@@ -236,7 +236,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
                 if (item.to) {
                   return (
                     <div key={item.label}>
-                      {item.dividerBefore ? <div className="cg-user-menu__divider" /> : null}
+                      {item.dividerBefore ? <div className="" /> : null}
                       <NavLink onClick={() => setIsMenuOpen(false)} to={item.to} className="hover:bg-white/5 transition-colors rounded-md">
                         <ItemIcon size={14} />
                         <span>{item.label}</span>
@@ -247,7 +247,7 @@ export function DashboardSidebar({ config }: DashboardSidebarProps) {
 
                 return (
                   <div key={item.label}>
-                    {item.dividerBefore ? <div className="cg-user-menu__divider" /> : null}
+                    {item.dividerBefore ? <div className="" /> : null}
                     <button onClick={() => {
                       if (item.label === "Log out") {
                         void handleLogout();

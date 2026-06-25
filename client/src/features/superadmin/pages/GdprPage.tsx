@@ -3,12 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Shield, Download, Trash2, RefreshCw, AlertTriangle, User } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
@@ -96,11 +96,11 @@ export function GdprPage() {
   };
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
       />
       <div style={{ marginBottom: "1.25rem", padding: "1rem 1.25rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--warning) / 0.4)", background: "hsl(var(--warning) / 0.06)", display: "flex", gap: "0.75rem" }}>
         <AlertTriangle size={18} style={{ color: "hsl(var(--warning))", flexShrink: 0, marginTop: "0.1rem" }} />
@@ -113,7 +113,7 @@ export function GdprPage() {
       </div>
       <SectionPanel title="All Users" description="Perform GDPR actions on any user account." noPadding>
         <div style={{ padding: "0.75rem 1rem" }}>
-          <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search by name or email…" />
+          <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search by name or email…" />
         </div>
         <DataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
           emptyIcon={<User size={32} />} emptyTitle="No users found" emptyDescription="Try a different search." emptyMessage="No users." />

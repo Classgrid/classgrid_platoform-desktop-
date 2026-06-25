@@ -4,7 +4,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgDatePicker } from "@/components/classgrid/DatePicker";
 import { useAuditData } from "../queries/useAudit";
 import { apiClient } from "@/lib/apiClient";
 import { format } from "date-fns";
@@ -88,54 +87,56 @@ export function AuditPage() {
   const academicData = audit?.criterion2?.academicPerformance ?? [];
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Institutional Audit (NAAC / NBA)</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Institutional Audit (NAAC / NBA)</h1>
+          <p className="text-muted-foreground mt-1">
             Automated compliance and data aggregation engine for government reports.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex items-center gap-2 flex-wrap">
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginRight: "1rem" }}>
             <div style={{ width: "160px" }}>
-              <CgDatePicker
-                value={startDate}
-                onChange={setStartDate}
-                placeholder="Start Date"
+              <input
+                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+                type="date"
+                value={startStr}
+                onChange={(e) => setStartDate(e.target.value ? new Date(e.target.value) : undefined)}
               />
             </div>
-            <span style={{ color: "var(--text-muted)" }}>to</span>
+            <span className="text-muted-foreground">to</span>
             <div style={{ width: "160px" }}>
-              <CgDatePicker
-                value={endDate}
-                onChange={setEndDate}
-                placeholder="End Date"
+              <input
+                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+                type="date"
+                value={endStr}
+                onChange={(e) => setEndDate(e.target.value ? new Date(e.target.value) : undefined)}
               />
             </div>
           </div>
-          <button className="cg-btn cg-btn--outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} />
             Refresh
           </button>
-          <button className="cg-btn cg-btn--outline" onClick={handleExportCSV} disabled={isExporting || isLoading}>
-            <Download size={14} />
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2" onClick={handleExportCSV} disabled={isExporting || isLoading}>
+            <Download size={14} className="mr-2" />
             CSV Export
           </button>
-          <button className="cg-btn cg-btn--primary" onClick={handleExportPDF} disabled={isExporting || isLoading}>
-            <FileBarChart size={14} />
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2" onClick={handleExportPDF} disabled={isExporting || isLoading}>
+            <FileBarChart size={14} className="mr-2" />
             PDF Report
           </button>
         </div>
       </div>
 
       {isError ? (
-        <div className="cg-alert cg-alert--danger">Failed to load audit data.</div>
+        <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">Failed to load audit data.</div>
       ) : (
         <>
           {/* Enrollment Metrics */}
-          <div className="cg-stats-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Total Students"
               value={isLoading ? "—" : audit?.enrollment?.totalStudents ?? 0}

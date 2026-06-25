@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw, XCircle, Building2, IndianRupee, Clock } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
+
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 
@@ -124,13 +124,13 @@ export function FailedPaymentsPage() {
   );
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Failed Payments"
         description="All platform billing payments that failed or were not completed. Investigate and follow up with organizations."
         actions={
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
           </Button>
         }
       />
@@ -161,7 +161,7 @@ export function FailedPaymentsPage() {
         </div>
       )}
 
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Failed Payments"
           value={isLoading ? "—" : total}
@@ -185,7 +185,7 @@ export function FailedPaymentsPage() {
           description="All failed or incomplete platform subscription payments."
           noPadding
           actions={
-            <CgSearchableSelect
+            <div
               value={typeFilter}
               onValueChange={setTypeFilter}
               options={[
@@ -197,7 +197,7 @@ export function FailedPaymentsPage() {
           }
         >
           <div style={{ padding: "0.75rem 1rem" }}>
-            <CgFilterToolbar
+            <div
               searchValue={search}
               onSearchChange={setSearch}
               searchPlaceholder="Search org, order ID, payment ID…"

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Loader2, Plus, Search, BookOpen, Clock, Users } from "lucide-react";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgButton } from "@/components/classgrid/Button";
+
+
 import { useMyClassrooms, MyClassroomRecord } from "../queries/useMyClassrooms";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { CreateClassroomModal } from "../components/CreateClassroomModal";
@@ -37,8 +37,8 @@ export function ClassroomsPage() {
   }
 
   return (
-    <div className="cg-page max-w-7xl mx-auto pb-12">
-      <CgPageHeader
+    <div className=" max-w-7xl mx-auto pb-12">
+      <div
         title="My Classrooms"
         description={
           isTeacher
@@ -57,10 +57,10 @@ export function ClassroomsPage() {
                 className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
               />
             </div>
-            <CgButton onClick={() => isTeacher && setIsCreateModalOpen(true)}>
+            <div onClick={() => isTeacher && setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {isTeacher ? "Create Class" : "Join Class"}
-            </CgButton>
+            </div>
           </div>
         }
       />
@@ -85,10 +85,10 @@ export function ClassroomsPage() {
               Create Class
             </button>
           ) : (
-            <CgButton className="mt-6">
+            <div className="mt-6">
               <Plus className="mr-2 h-4 w-4" />
               Join Class
-            </CgButton>
+            </div>
           )}
         </div>
       ) : (

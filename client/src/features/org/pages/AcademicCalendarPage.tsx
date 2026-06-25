@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { format, isToday } from "date-fns";
 import { Loader2, Calendar as CalendarIcon, Clock, Users, MapPin, AlertCircle, Plus } from "lucide-react";
-import { CgCalendar, CalendarEvent } from "@/components/classgrid/CgCalendar";
-import { useAcademicCalendar } from "../queries/useAcademicCalendar";
-import { CgButton } from "@/components/classgrid/Button";
+import { Calendar } from "@/components/marketing_ui/calendar";
+import { Button } from "@/components/marketing_ui/button";
+
+// Define locally since we removed Calendar
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  date: string;
+  type: "lecture" | "exam" | "holiday" | "attendance";
+};
 
 export function AcademicCalendarPage() {
   const { data: events, isLoading } = useAcademicCalendar();
@@ -20,42 +27,46 @@ export function AcademicCalendarPage() {
     }
   }, [events]);
 
-  const handleDateClick = (date: Date, dayEvents: CalendarEvent[]) => {
+  const handleDateClick = (date: Date | undefined) => {
+    if (!date) return;
     setSelectedDate(date);
-    setSelectedEvents(dayEvents);
+    if (events) {
+      const dayEvents = events.filter(e => format(new Date(e.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd"));
+      setSelectedEvents(dayEvents);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="cg-page animate-pulse flex h-[80vh] items-center justify-center">
+      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 h-[80vh] items-center justify-center animate-pulse">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="cg-page h-[calc(100vh-80px)] flex flex-col overflow-hidden">
-      <div className="cg-page__header cg-page__header--split shrink-0">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 h-[calc(100vh-80px)] overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 shrink-0 border-b border-border pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Academic Calendar</h1>
           <p className="text-muted-foreground">Manage organization-wide events, exams, and holidays.</p>
         </div>
         <div className="flex gap-3">
-          <CgButton variant="default">
+          <Button variant="default">
             <Plus className="w-4 h-4 mr-2" />
             Add Event
-          </CgButton>
+          </Button>
         </div>
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 min-h-0 overflow-hidden pb-6">
         
-        {/* Left Side: The Interactive Calendar (Spans 8 columns) */}
-        <div className="lg:col-span-8 h-full flex flex-col min-h-0">
-          <CgCalendar 
-            events={events || []} 
-            onDateClick={handleDateClick}
-            className="h-full"
+        <div className="lg:col-span-8 h-full flex flex-col min-h-0 bg-card border border-border rounded-xl shadow-sm p-4 overflow-auto items-center">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleDateClick}
+            className="rounded-md border p-4 scale-110 mt-8"
           />
         </div>
 
@@ -146,11 +157,10 @@ export function AcademicCalendarPage() {
             )}
           </div>
           
-          {/* Panel Footer */}
           <div className="p-4 border-t border-border bg-background shrink-0">
-            <CgButton variant="outline" className="w-full text-xs font-semibold">
+            <Button variant="outline" className="w-full text-xs font-semibold">
               View Full Weekly Schedule
-            </CgButton>
+            </Button>
           </div>
 
         </div>

@@ -6,14 +6,11 @@ import {
 } from "lucide-react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  CgPageShell, CgSectionPanel, CgDataTable, CgBadge, CgAvatar,
-  CgFilterToolbar, CgAlert, CgEmptyState, CgSelect, ExportMenu,
-} from "@/components/classgrid";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
-import { CgPieChart } from "@/components/classgrid/CgPieChart";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
+
+
+
 import {
   enrollStudent, batchGeneratePRNs, allocateDivisions,
   getSeatMatrix, getExportUrl,
@@ -130,11 +127,11 @@ export function EnrollmentPage() {
       accessorKey: "full_name",
       header: "Candidate",
       cell: ({ row }) => (
-        <div className="cg-table__cell-identity">
-          <CgAvatar name={row.original.full_name} size="sm" />
+        <div className="">
+          <div name={row.original.full_name} size="sm" />
           <div>
-            <div className="cg-table__cell-primary font-semibold">{row.original.full_name}</div>
-            <small className="cg-table__cell-secondary font-mono">
+            <div className=" font-semibold">{row.original.full_name}</div>
+            <small className=" font-mono">
               {row.original.en_number ? `EN: ${row.original.en_number}` : row.original.phone || "—"}
             </small>
           </div>
@@ -147,7 +144,7 @@ export function EnrollmentPage() {
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
           <span className="text-foreground">{row.original.category || "General"}</span>
-          <CgBadge variant="outline" size="sm" className="w-fit">{row.original.entry_mode}</CgBadge>
+          <div variant="outline" size="sm" className="w-fit">{row.original.entry_mode}</div>
         </div>
       ),
     },
@@ -165,9 +162,9 @@ export function EnrollmentPage() {
       header: "Fee Status",
       cell: ({ row }) => (
         row.original.fee_paid ? (
-          <CgBadge variant="success">Paid</CgBadge>
+          <div variant="success">Paid</div>
         ) : (
-          <CgBadge variant="warning">Pending</CgBadge>
+          <div variant="warning">Pending</div>
         )
       ),
     },
@@ -184,7 +181,7 @@ export function EnrollmentPage() {
       cell: ({ row }) => {
         const s = row.original.status;
         const variant = s === "enrolled" ? "success" : s === "verified" ? "info" : s === "fee_pending" ? "warning" : "neutral";
-        return <CgBadge variant={variant}>{s.replace("_", " ")}</CgBadge>;
+        return <div variant={variant}>{s.replace("_", " ")}</div>;
       },
     },
     {
@@ -196,7 +193,7 @@ export function EnrollmentPage() {
         const isThisEnrolling = enrollingId === app._id;
 
         if (app.status === "enrolled") {
-          return <CgBadge variant="success">Enrolled ✓</CgBadge>;
+          return <div variant="success">Enrolled ✓</div>;
         }
 
         if (isThisEnrolling) {
@@ -212,11 +209,11 @@ export function EnrollmentPage() {
               <button
                 onClick={() => enrollMut.mutate(app._id)}
                 disabled={!password || enrollMut.isPending}
-                className="cg-btn cg-btn--primary cg-btn--sm"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm"
               >
-                {enrollMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : "Confirm"}
+                {enrollMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm"}
               </button>
-              <button onClick={() => { setEnrollingId(null); setPassword(""); }} className="cg-btn cg-btn--ghost cg-btn--sm">
+              <button onClick={() => { setEnrollingId(null); setPassword(""); }} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm">
                 ✕
               </button>
             </div>
@@ -227,7 +224,7 @@ export function EnrollmentPage() {
           <button
             onClick={() => setEnrollingId(app._id)}
             disabled={!canEnroll}
-            className="cg-btn cg-btn--outline cg-btn--sm"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm"
           >
             Enroll <ChevronRight className="w-4 h-4 ml-1" />
           </button>
@@ -237,7 +234,7 @@ export function EnrollmentPage() {
   ];
 
   return (
-    <CgPageShell
+    <div
       title="Final Enrollment"
       description="Allocate divisions, generate PRNs, and officially enroll verified candidates."
       breadcrumbs={[
@@ -245,21 +242,21 @@ export function EnrollmentPage() {
         { label: "Enrollment" },
       ]}
       actions={
-        <div className="cg-flex-row">
+        <div className="">
           <button
             onClick={() => divisionMut.mutate()}
             disabled={divisionMut.isPending}
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
           >
-            {divisionMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <LayoutGrid className="w-4 h-4" />}
+            {divisionMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <LayoutGrid className="w-4 h-4" />}
             Allocate Divisions
           </button>
           <button
             onClick={() => prnMut.mutate()}
             disabled={prnMut.isPending}
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
           >
-            {prnMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <Hash className="w-4 h-4" />}
+            {prnMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4" />}
             Batch Generate PRNs
           </button>
           <ExportMenu
@@ -271,16 +268,16 @@ export function EnrollmentPage() {
       }
     >
       {/* ── Hierarchy Tabs ── */}
-      <div className="cg-hierarchy-tabs">
+      <div className="">
         {HIERARCHIES.map(h => (
           <button
             key={h.id}
             onClick={() => setActiveHierarchy(h.id)}
-            className={`cg-hierarchy-tab${activeHierarchy === h.id ? " cg-hierarchy-tab--active" : ""}`}
+            className={`${activeHierarchy === h.id ? " " : ""}`}
           >
             {h.label}
             {activeHierarchy === h.id && (
-              <motion.span className="cg-hierarchy-tab__indicator" layoutId="hierarchy-indicator-enroll" />
+              <motion.span className="" layoutId="hierarchy-indicator-enroll" />
             )}
           </button>
         ))}
@@ -288,64 +285,64 @@ export function EnrollmentPage() {
 
       {/* ── Success / Error Alerts ── */}
       {successMsg && (
-        <CgAlert variant="success" title="Success">{successMsg}</CgAlert>
+        <div variant="success" title="Success">{successMsg}</div>
       )}
       {(enrollMut.isError || prnMut.isError || divisionMut.isError) && (
-        <CgAlert variant="danger" title="Error">
+        <div variant="danger" title="Error">
           {(enrollMut.error as Error)?.message || (prnMut.error as Error)?.message || (divisionMut.error as Error)?.message || "Operation failed."}
-        </CgAlert>
+        </div>
       )}
 
       {/* ── Metric Cards ── */}
-      <motion.div className="cg-grid-4col mb-6" variants={stagger} initial="hidden" animate="show">
+      <motion.div className=" mb-6" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Total Enrolled" value={enrolledCount} icon={<CheckCircle className="w-5 h-5" />} />
+          <div title="Total Enrolled" value={enrolledCount} icon={<CheckCircle className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Fee Collection Pending" value={pendingFeeCount} icon={<DollarSign className="w-5 h-5" />} />
+          <div title="Fee Collection Pending" value={pendingFeeCount} icon={<DollarSign className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Missing PRN" value={missingPrnCount} icon={<UserCheck className="w-5 h-5" />} />
+          <div title="Missing PRN" value={missingPrnCount} icon={<UserCheck className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Conversion Rate" value={`${conversionRate}%`} icon={<Users className="w-5 h-5" />} />
+          <div title="Conversion Rate" value={`${conversionRate}%`} icon={<Users className="w-5 h-5" />} />
         </motion.div>
       </motion.div>
 
       {/* ── Charts ── */}
-      <motion.div className="cg-grid-2col mb-6" variants={stagger} initial="hidden" animate="show">
+      <motion.div className=" mb-6" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Fee Payment Status" description="Paid vs Pending for enrollment candidates.">
+          <div title="Fee Payment Status" description="Paid vs Pending for enrollment candidates.">
             {isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : (feeDonut[0]?.value ?? 0) + (feeDonut[1]?.value ?? 0) > 0 ? (
-              <CgPieChart data={feeDonut} height={220} />
+              <div data={feeDonut} height={220} />
             ) : (
-              <CgEmptyState title="No data" description="No candidates in this filter." />
+              <div title="No data" description="No candidates in this filter." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Category Distribution" description="Reservation category split.">
+          <div title="Category Distribution" description="Reservation category split.">
             {isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : categoryBar.length > 0 ? (
-              <CgBarChart data={categoryBar} indexKey="name" series={[{ key: "count", color: "hsl(var(--accent))", name: "Candidates" }]} height={220} />
+              <div data={categoryBar} indexKey="name" series={[{ key: "count", color: "hsl(var(--accent))", name: "Candidates" }]} height={220} />
             ) : (
-              <CgEmptyState title="No data" description="No category data." />
+              <div title="No data" description="No category data." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ── Seat Matrix (Live from backend) ── */}
       {seatMatrix.data && (
         <motion.div variants={fadeUp} initial="hidden" animate="show" className="mb-6">
-          <CgSectionPanel title="Live Seat Matrix" description="Real-time seat availability from the seat matrix service.">
+          <div title="Live Seat Matrix" description="Real-time seat availability from the seat matrix service.">
             {seatMatrix.isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="cg-spin w-6 h-6" /></div>
+              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : (
-              <div className="cg-grid-3col">
+              <div className="">
                 {(Array.isArray(seatMatrix.data) ? seatMatrix.data : seatMatrix.data?.matrix || []).map((entry: any, i: number) => (
                   <div key={i} className="p-4 bg-card border border-border rounded-lg">
                     <div className="text-sm font-medium text-foreground mb-1">{entry.hierarchy_name || entry.name || `Seat ${i + 1}`}</div>
@@ -360,20 +357,20 @@ export function EnrollmentPage() {
                 ))}
               </div>
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       )}
 
       {/* ── Data Table ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel title="Enrollment Candidates" noPadding>
-          <div className="cg-panel__toolbar">
-            <CgFilterToolbar
+        <div title="Enrollment Candidates" noPadding>
+          <div className="flex items-center gap-2 p-2 border-b border-border">
+            <div
               searchValue={search}
               onSearchChange={setSearch}
               searchPlaceholder="Search by name, EN number, phone..."
               filters={
-                <CgSelect
+                <div
                   value={statusFilter}
                   onValueChange={setStatusFilter}
                   options={[
@@ -389,17 +386,17 @@ export function EnrollmentPage() {
           </div>
 
           {isLoading ? (
-            <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+            <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
           ) : (
-            <CgDataTable
+            <div
               columns={columns}
               data={apps}
               pageSize={15}
               emptyMessage="No candidates match your current filters."
             />
           )}
-        </CgSectionPanel>
+        </div>
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

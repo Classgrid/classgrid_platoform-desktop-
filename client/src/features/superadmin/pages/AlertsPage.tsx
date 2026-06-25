@@ -5,7 +5,7 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgTabs, CgTabList, CgTabTrigger, CgTabContent } from "@/components/classgrid/Tabs";
+
 import { formatDate, formatTime } from "@/utils/dateUtils";
 import { useErrorLogs, useEmailLogs, useResendEmail } from "../queries/useAlerts";
 import type { ErrorLog, EmailLog } from "../services/superAdminApi";
@@ -22,7 +22,7 @@ const errorColumns: ColumnDef<ErrorLog>[] = [
       return (
         <div>
           <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
-          <div className="cg-table__info">{formatTime(d)}</div>
+          <div className="">{formatTime(d)}</div>
         </div>
       );
     },
@@ -95,7 +95,7 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
         return (
           <div>
             <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
-            <div className="cg-table__info">{formatTime(d)}</div>
+            <div className="">{formatTime(d)}</div>
           </div>
         );
       },
@@ -110,7 +110,7 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
 
         return (
           <button
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             disabled={isMutating}
             onClick={() => onResend(email._id)}
           >
@@ -147,29 +147,29 @@ export function AlertsPage() {
   );
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">System Alerts & Logs</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">System Alerts & Logs</h1>
+          <p className="text-muted-foreground mt-1">
             Monitor real-time system errors, worker logs, and email delivery failures.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <button
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             onClick={handleRefresh}
             disabled={isFetching}
           >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh Logs
           </button>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Recent Errors"
           value={errLoading ? "—" : errors.length}
@@ -195,13 +195,13 @@ export function AlertsPage() {
 
       {/* Tabs & Data Tables */}
       <div style={{ marginTop: "1.5rem" }}>
-        <CgTabs value={activeTab} onValueChange={setActiveTab}>
-          <CgTabList>
-            <CgTabTrigger value="system-errors">System Errors</CgTabTrigger>
-            <CgTabTrigger value="email-logs">Email Delivery Logs</CgTabTrigger>
-          </CgTabList>
+        <div value={activeTab} onValueChange={setActiveTab}>
+          <div>
+            <div value="system-errors">System Errors</div>
+            <div value="email-logs">Email Delivery Logs</div>
+          </div>
 
-          <CgTabContent value="system-errors">
+          <div value="system-errors">
             <SectionPanel title="Application Errors" description="Server-side exceptions and unhandled rejections." noPadding>
               <DataTable
                 columns={errorColumns}
@@ -210,9 +210,9 @@ export function AlertsPage() {
                 emptyMessage={errLoading ? "Loading errors…" : "No recent system errors found. System is healthy."}
               />
             </SectionPanel>
-          </CgTabContent>
+          </div>
 
-          <CgTabContent value="email-logs">
+          <div value="email-logs">
             <SectionPanel title="Email Worker Logs" description="Track the status of transactional and background emails." noPadding>
               <DataTable
                 columns={emailColumns}
@@ -221,8 +221,8 @@ export function AlertsPage() {
                 emptyMessage={emailLoading ? "Loading logs…" : "No email logs found."}
               />
             </SectionPanel>
-          </CgTabContent>
-        </CgTabs>
+          </div>
+        </div>
       </div>
     </div>
   );

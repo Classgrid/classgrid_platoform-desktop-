@@ -7,15 +7,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { CgPageHeader }   from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
-import { CgMetricCard }   from "@/components/classgrid/MetricCard";
-import { CgDataTable }    from "@/components/classgrid/DataTable";
-import { CgButton }       from "@/components/classgrid/Button";
-import { CgBadge }        from "@/components/classgrid/Badge";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
-import { CgDatePicker } from "@/components/classgrid/DatePicker";
+
+
+
+
+
+
+
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter, DialogDescription,
@@ -169,21 +169,21 @@ export function BillingPage() {
 
   // ── render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="cg-page cg-animate-in">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
 
-      <CgPageHeader
+      <div
         title="Plans & Billing"
         description="Manage organization subscriptions, quotas, and platform access."
         actions={
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </Button>
         }
       />
 
       {/* ── Summary cards ─────────────────────────────────────────────────── */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Active Orgs"
           value={orgsLoading ? "—" : activeCount}
@@ -218,7 +218,7 @@ export function BillingPage() {
         }
       >
         <div style={{ padding: "1rem" }}>
-          <CgFilterToolbar
+          <div
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search org name, owner, status…"
@@ -254,13 +254,13 @@ export function BillingPage() {
 
           {subLoading ? (
             <div className="py-8 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-              <RefreshCw size={14} className="cg-spin" /> Loading subscription…
+              <RefreshCw size={14} className="animate-spin" /> Loading subscription…
             </div>
           ) : (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Plan Type</label>
-                <CgSearchableSelect
+                <div
                   value={plan}
                   onValueChange={setPlan}
                   options={[
@@ -272,7 +272,7 @@ export function BillingPage() {
 
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Expiration Date (optional)</label>
-                <CgDatePicker
+                <div
                   value={
                     expiresAt ||
                     (subData?.subscription?.expiresAt

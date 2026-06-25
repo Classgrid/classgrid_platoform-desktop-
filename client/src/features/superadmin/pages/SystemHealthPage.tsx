@@ -1,4 +1,4 @@
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
+
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -136,17 +136,19 @@ export function SystemHealthPage() {
   const serverUp = !healthLoading;
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
-        title="System Health"
-        description="Real-time platform monitoring — infrastructure status, background jobs, memory, and error logs."
-        actions={
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">System Health</h1>
+          <p className="text-muted-foreground mt-1">Real-time platform monitoring — infrastructure status, background jobs, memory, and error logs.</p>
+        </div>
+        <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => { refetchMetrics(); refetchLogs(); }} disabled={metricsFetching}>
-            <RefreshCw size={14} className={metricsFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={metricsFetching ? "animate-spin mr-2" : "mr-2"} />
             Refresh
           </Button>
-        }
-      />
+        </div>
+      </div>
 
       {/* Service Status */}
       <SectionPanel title="Service Status" description="Live connectivity of core platform services.">
@@ -179,7 +181,7 @@ export function SystemHealthPage() {
       </SectionPanel>
 
       {/* Metrics Grid */}
-      <div className="cg-stats-grid" style={{ marginTop: "1.25rem" }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
         <StatCard title="Total Users" value={metricsLoading ? "—" : m?.users?.total ?? 0} icon={<Activity size={15} />}
           trend={{ value: m?.users?.new7d ?? 0, label: "new this week" }} />
         <StatCard title="Active Orgs" value={metricsLoading ? "—" : m?.orgs?.active ?? 0} icon={<CheckCircle2 size={15} />}
@@ -211,25 +213,26 @@ export function SystemHealthPage() {
       </div>
 
       {/* Error Logs */}
-      <div style={{ marginTop: "1.25rem" }}>
-        <SectionPanel title="Error Logs" description="Recent system errors and warnings from the platform." noPadding
-          actions={
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <CgSearchableSelect
-                value={logLevel}
-                onValueChange={setLogLevel}
-                options={[
-                  { label: "All Levels", value: "" },
-                  { label: "Errors only", value: "error" },
-                  { label: "Warnings only", value: "warn" },
-                  { label: "Info only", value: "info" },
-                ]}
-              />
-            </div>
-          }
-        >
-          <div style={{ padding: "0.75rem 1rem" }}>
-            <CgFilterToolbar searchValue={logSearch} onSearchChange={setLogSearch} searchPlaceholder="Search messages…" />
+      <div className="mt-5">
+        <SectionPanel title="Error Logs" description="Recent system errors and warnings from the platform.">
+          <div className="flex gap-2 items-center mb-4 pb-4 border-b border-border">
+            <input
+              type="text"
+              className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
+              placeholder="Search messages..."
+              value={logSearch}
+              onChange={(e) => setLogSearch(e.target.value)}
+            />
+            <select
+              className="border border-border rounded-md px-3 py-2 text-sm bg-background w-48"
+              value={logLevel}
+              onChange={(e) => setLogLevel(e.target.value)}
+            >
+              <option value="">All Levels</option>
+              <option value="error">Errors only</option>
+              <option value="warn">Warnings only</option>
+              <option value="info">Info only</option>
+            </select>
           </div>
           <DataTable
             columns={logColumns}

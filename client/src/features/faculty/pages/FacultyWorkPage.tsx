@@ -6,7 +6,7 @@ import { Card } from "@/components/marketing_ui/card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/marketing_ui/breadcrumb";
 import { 
   GraduationCap, FileText, FileEdit, BarChart, Clock, Slash,
-  ClipboardCheck, CalendarX, CalendarStar, MessageSquare, HelpCircle, 
+  ClipboardCheck, CalendarX, CalendarCheck, MessageSquare, HelpCircle, 
   Palmtree, Bot, Home, Library, Coffee, Bus, Store, UserCircle, 
   IdCard, HardDrive, CheckSquare, UserCog, CheckCircle, Globe, Video
 } from "lucide-react";
@@ -35,7 +35,7 @@ export function FacultyWorkPage() {
     { label: "Timetable", route: "/faculty/work/timetable", icon: Clock, condition: true },
     { label: "Attendance", route: "/faculty/work/attendance", icon: ClipboardCheck, condition: true },
     { label: "Leave Requests", route: "/faculty/work/leave", icon: CalendarX, condition: true },
-    { label: "Events", route: "/faculty/work/events", icon: CalendarStar, condition: true },
+    { label: "Events", route: "/faculty/work/events", icon: CalendarCheck, condition: true },
     { label: "Feedback", route: "/faculty/work/feedback", icon: MessageSquare, condition: true },
     { label: "Quizzes", route: "/faculty/work/quizzes", icon: HelpCircle, condition: true },
     { label: "Holidays", route: "/faculty/work/holidays", icon: Palmtree, condition: true },

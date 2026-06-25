@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
-import { CgPageShell, CgSectionPanel, CgAlert, CgEmptyState } from "@/components/classgrid";
+
 import { getSeatMatrix } from "../api";
 
 export function VacancyTrackerPage() {
@@ -13,109 +13,107 @@ export function VacancyTrackerPage() {
   const seatMatrixData = data?.data || [];
 
   return (
-    <CgPageShell
-      title="Vacancy & Seat Tracker"
-      description="Live dashboard monitoring available seats, waitlists, and quotas across branches."
-      breadcrumbs={[
-        { label: "Admissions", to: "/dept/admissions/dashboard" },
-        { label: "Vacancy Tracker" },
-      ]}
-      actions={
-        <button
-          className="cg-btn cg-btn--outline"
-          onClick={() => refetch()}
-          disabled={isRefetching}
-        >
-          <RefreshCw size={14} className={isRefetching ? "cg-spin" : ""} />
-          Refresh Now
-        </button>
-      }
-    >
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Vacancy & Seat Tracker</h1>
+          <p className="text-muted-foreground mt-1">Live dashboard monitoring available seats, waitlists, and quotas across branches.</p>
+        </div>
+        <div>
+          <button
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+          >
+            <RefreshCw size={14} className={`mr-2 ${isRefetching ? "animate-spin" : ""}`} />
+            Refresh Now
+          </button>
+        </div>
+      </div>
+
       {isError && (
-        <CgAlert variant="danger" title="Error">
-          Could not load the live seat matrix.
-        </CgAlert>
+        <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
+          <strong>Error</strong>
+          <br/>Could not load the live seat matrix.
+        </div>
       )}
 
       {isLoading ? (
-        <div className="cg-loading">
-          <Loader2 size={24} className="cg-spin" />
+        <div className="flex justify-center items-center py-12">
+          <Loader2 size={24} className="animate-spin text-primary" />
         </div>
       ) : seatMatrixData.length === 0 ? (
-        <CgEmptyState
-          title="No Seat Matrix Configured"
-          description="Seat quotas and capacities are not currently configured for this admission cycle."
-        />
+        <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
+          <div className="text-center p-8 text-muted-foreground">
+            <h2 className="text-lg font-bold text-foreground mb-2">No Seat Matrix Configured</h2>
+            <p>Seat quotas and capacities are not currently configured for this admission cycle.</p>
+          </div>
+        </div>
       ) : (
-        <div className="cg-flex-col" style={{ gap: "2rem" }}>
+        <div className="flex flex-col gap-8">
           {seatMatrixData.map((branchConfig: any) => (
-            <CgSectionPanel
-              key={branchConfig._id}
-              title={branchConfig.hierarchy_id?.name || "Institution Level"}
-            >
-              <div className="cg-grid-auto-lg">
-                {(branchConfig.quotas || []).map((quota: any) => {
-                  const vacancy = quota.capacity - quota.filled;
-                  const fillRate = (quota.filled / quota.capacity) * 100;
-                  
-                  // Color coding based on vacancy
-                  let statusColor = "hsl(var(--success))";
-                  if (fillRate >= 100) statusColor = "hsl(var(--destructive))";
-                  else if (fillRate >= 80) statusColor = "hsl(var(--warning))";
+            <div key={branchConfig._id} className="bg-card border border-border rounded-xl shadow-sm">
+              <div className="p-5 border-b border-border">
+                <h2 className="text-lg font-bold">{branchConfig.hierarchy_id?.name || "Institution Level"}</h2>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(branchConfig.quotas || []).map((quota: any) => {
+                    const vacancy = quota.capacity - quota.filled;
+                    const fillRate = (quota.filled / quota.capacity) * 100;
+                    
+                    let statusColor = "hsl(var(--emerald-500))";
+                    let bgStatusColor = "bg-emerald-500";
+                    if (fillRate >= 100) { statusColor = "hsl(var(--red-500))"; bgStatusColor = "bg-red-500"; }
+                    else if (fillRate >= 80) { statusColor = "hsl(var(--amber-500))"; bgStatusColor = "bg-amber-500"; }
 
-                  return (
-                    <div
-                      key={quota.name}
-                      className="cg-vacancy-card"
-                    >
-                      {/* Top color bar indicator */}
+                    return (
                       <div
-                        className="cg-vacancy-card__bar"
-                        style={{ backgroundColor: statusColor }}
-                      />
-                      
-                      <div className="cg-vacancy-card__header">
-                        <div className="cg-vacancy-card__name">{quota.name}</div>
-                        {fillRate >= 100 && (
-                          <span className="cg-pill--danger">
-                            FULL
-                          </span>
-                        )}
-                      </div>
+                        key={quota.name}
+                        className="relative border border-border rounded-lg overflow-hidden bg-background shadow-sm flex flex-col"
+                      >
+                        <div className={`h-1 w-full ${bgStatusColor}`} />
+                        <div className="p-4 flex-1">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="font-semibold">{quota.name}</div>
+                            {fillRate >= 100 && (
+                              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-red-100 text-red-800">FULL</span>
+                            )}
+                          </div>
 
-                      <div className="cg-vacancy-card__stats">
-                        <div>
-                          <div className="cg-vacancy-card__stat-label">Total Capacity</div>
-                          <div className="cg-vacancy-card__stat-value">{quota.capacity}</div>
-                        </div>
-                        <div>
-                          <div className="cg-vacancy-card__stat-label">Filled</div>
-                          <div className="cg-vacancy-card__stat-value">{quota.filled}</div>
-                        </div>
-                        <div>
-                          <div className="cg-vacancy-card__stat-label">Vacant</div>
-                          <div className="cg-vacancy-card__stat-value--bold" style={{ color: statusColor }}>{vacancy > 0 ? vacancy : 0}</div>
-                        </div>
-                        <div>
-                          <div className="cg-vacancy-card__stat-label">Waitlist</div>
-                          <div className="cg-vacancy-card__stat-value" style={{ color: quota.waitlist_count > 0 ? "hsl(var(--warning))" : "inherit" }}>
-                            {quota.waitlist_count || 0}
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                            <div>
+                              <div className="text-muted-foreground text-xs">Total Capacity</div>
+                              <div className="font-medium">{quota.capacity}</div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground text-xs">Filled</div>
+                              <div className="font-medium">{quota.filled}</div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground text-xs">Vacant</div>
+                              <div className="font-bold text-lg" style={{ color: statusColor }}>{vacancy > 0 ? vacancy : 0}</div>
+                            </div>
+                            <div>
+                              <div className="text-muted-foreground text-xs">Waitlist</div>
+                              <div className="font-medium" style={{ color: quota.waitlist_count > 0 ? "hsl(var(--amber-600))" : "inherit" }}>
+                                {quota.waitlist_count || 0}
+                              </div>
+                            </div>
                           </div>
                         </div>
+                        <div className="h-1.5 w-full bg-muted mt-auto">
+                          <div className={`h-full ${bgStatusColor}`} style={{ width: `${Math.min(fillRate, 100)}%` }} />
+                        </div>
                       </div>
-
-                      {/* Progress bar */}
-                      <div className="cg-vacancy-card__progress">
-                        <div className="cg-vacancy-card__progress-fill" style={{ backgroundColor: statusColor, width: `${Math.min(fillRate, 100)}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </CgSectionPanel>
+            </div>
           ))}
         </div>
       )}
-    </CgPageShell>
+    </div>
   );
 }

@@ -30,24 +30,24 @@ type ActivityFeedProps = {
 
 export function StatTile({ label, value, meta }: StatTileProps) {
   return (
-    <article className="cg-panel cg-panel--stat">
-      <p className="cg-panel__eyebrow">{label}</p>
-      <strong className="cg-panel__value">{value}</strong>
-      {meta ? <small className="cg-panel__meta">{meta}</small> : null}
+    <article className=" ">
+      <p className="">{label}</p>
+      <strong className="">{value}</strong>
+      {meta ? <small className="">{meta}</small> : null}
     </article>
   );
 }
 
 export function TablePanel({ title, actions = [], columns, rows }: TablePanelProps) {
   return (
-    <article className="cg-panel">
-      <div className="cg-panel__title-row">
+    <article className="">
+      <div className="">
         <div>
           <h3>{title}</h3>
           {actions.length > 0 ? (
-            <div className="cg-inline-actions">
+            <div className="">
               {actions.map((action) => (
-                <span key={action} className="cg-inline-actions__item">
+                <span key={action} className="">
                   {action}
                 </span>
               ))}
@@ -56,7 +56,7 @@ export function TablePanel({ title, actions = [], columns, rows }: TablePanelPro
         </div>
       </div>
 
-      <table className="cg-table">
+      <table className="">
         <thead>
           <tr>
             {columns.map((column) => (
@@ -80,13 +80,13 @@ export function TablePanel({ title, actions = [], columns, rows }: TablePanelPro
 
 export function ActivityFeed({ title, entries, cta }: ActivityFeedProps) {
   return (
-    <article className="cg-panel">
-      <div className="cg-panel__title-row">
+    <article className="">
+      <div className="">
         <h3>{title}</h3>
-        {cta ? <small className="cg-panel__cta">{cta}</small> : null}
+        {cta ? <small className="">{cta}</small> : null}
       </div>
 
-      <ul className="cg-activity-list">
+      <ul className="">
         {entries.map((entry) => {
           const item =
             typeof entry === "string"
@@ -94,12 +94,12 @@ export function ActivityFeed({ title, entries, cta }: ActivityFeedProps) {
               : entry;
 
           return (
-            <li key={`${item.label}-${item.time ?? "item"}`} className="cg-activity-list__item">
-              <div className="cg-activity-list__copy">
+            <li key={`${item.label}-${item.time ?? "item"}`} className="">
+              <div className="">
                 <span>{item.label}</span>
                 {item.detail ? <small>{item.detail}</small> : null}
               </div>
-              {item.time ? <small className="cg-activity-list__time">{item.time}</small> : null}
+              {item.time ? <small className="">{item.time}</small> : null}
             </li>
           );
         })}

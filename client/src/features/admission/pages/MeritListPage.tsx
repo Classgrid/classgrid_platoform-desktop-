@@ -3,15 +3,12 @@ import { motion } from "framer-motion";
 import { Calculator, Award, Loader2, Download, FileSpreadsheet, FileText as FilePdf, ArrowRight, Users } from "lucide-react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CgPageShell, CgSectionPanel, CgDataTable, CgFilterToolbar,
-  CgBadge, CgAvatar, CgAlert, CgEmptyState, ExportMenu,
-} from "@/components/classgrid";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
-import { CgPieChart } from "@/components/classgrid/CgPieChart";
-import { CgLineChart } from "@/components/classgrid/CgLineChart";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
+
+
+
+
 import { getMeritList, generateMerit, getExportUrl, advanceRound, promoteWaitlist } from "../../admissions/api";
 
 const HIERARCHIES = [
@@ -133,7 +130,7 @@ export function MeritListPage() {
       header: "Candidate Name",
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <CgAvatar name={row.original.full_name} size="sm" />
+          <div name={row.original.full_name} size="sm" />
           <div>
             <div className="font-medium">{row.original.full_name}</div>
             {row.original.en_number && <div className="text-xs text-muted-foreground font-mono">EN: {row.original.en_number}</div>}
@@ -160,13 +157,13 @@ export function MeritListPage() {
       cell: ({ row }) => {
         const s = row.original.status;
         const variant = s === "allotted" || s === "enrolled" ? "success" : s === "rejected" ? "danger" : "info";
-        return <CgBadge variant={variant}>{s.replace("_", " ")}</CgBadge>;
+        return <div variant={variant}>{s.replace("_", " ")}</div>;
       },
     },
   ];
 
   return (
-    <CgPageShell
+    <div
       title="Merit Lists & Generation"
       description="Calculate merit scores, assign ranks, and manage round allotments."
       breadcrumbs={[
@@ -183,100 +180,100 @@ export function MeritListPage() {
           <button
             onClick={() => advanceRoundMut.mutate()}
             disabled={advanceRoundMut.isPending}
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
           >
-            {advanceRoundMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <ArrowRight className="w-4 h-4" />}
+            {advanceRoundMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
             Advance Round
           </button>
           <button
             onClick={() => waitlistMut.mutate()}
             disabled={waitlistMut.isPending}
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
           >
-            {waitlistMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <Users className="w-4 h-4" />}
+            {waitlistMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
             Promote Waitlist
           </button>
           <button
             onClick={() => generateMut.mutate()}
             disabled={generateMut.isPending}
-            className="cg-btn cg-btn--primary"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
           >
-            {generateMut.isPending ? <Loader2 className="w-4 h-4 cg-spin" /> : <Calculator className="w-4 h-4" />}
+            {generateMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4" />}
             Generate Rank List
           </button>
         </div>
       }
     >
-      <div className="cg-hierarchy-tabs">
+      <div className="">
         {HIERARCHIES.map(h => (
           <button
             key={h.id}
             onClick={() => setActiveHierarchy(h.id)}
-            className={`cg-hierarchy-tab${activeHierarchy === h.id ? " cg-hierarchy-tab--active" : ""}`}
+            className={`${activeHierarchy === h.id ? " " : ""}`}
           >
             {h.label}
             {activeHierarchy === h.id && (
-              <motion.span className="cg-hierarchy-tab__indicator" layoutId="hierarchy-indicator" />
+              <motion.span className="" layoutId="hierarchy-indicator" />
             )}
           </button>
         ))}
       </div>
 
-      {isError && <CgAlert variant="danger" title="Error">Failed to load merit list.</CgAlert>}
+      {isError && <div variant="danger" title="Error">Failed to load merit list.</div>}
       {(advanceRoundMut.isSuccess || waitlistMut.isSuccess) && (
-        <CgAlert variant="success" title="Success">
+        <div variant="success" title="Success">
           {advanceRoundMut.isSuccess ? "Round advanced successfully." : "Waitlist students promoted."}
-        </CgAlert>
+        </div>
       )}
 
       {/* ── Metric Cards ── */}
-      <motion.div className="cg-grid-3col mb-6" variants={stagger} initial="hidden" animate="show">
+      <motion.div className=" mb-6" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Total Ranked" value={totalCount} icon={<Award className="w-5 h-5" />} />
+          <div title="Total Ranked" value={totalCount} icon={<Award className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Topper Score" value={`${topperScore.toFixed(1)}%`} icon={<Calculator className="w-5 h-5" />} />
+          <div title="Topper Score" value={`${topperScore.toFixed(1)}%`} icon={<Calculator className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Average Score" value={`${avgScore.toFixed(1)}%`} icon={<Users className="w-5 h-5" />} />
+          <div title="Average Score" value={`${avgScore.toFixed(1)}%`} icon={<Users className="w-5 h-5" />} />
         </motion.div>
       </motion.div>
-      <motion.div className="cg-grid-2col mb-6" variants={stagger} initial="hidden" animate="show">
+      <motion.div className=" mb-6" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📊 Score Distribution Histogram" description="Count of students in specific merit score ranges.">
+          <div title="📊 Score Distribution Histogram" description="Count of students in specific merit score ranges.">
             {isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="cg-spin" /></div>
+              <div className=""><Loader2 className="animate-spin" /></div>
             ) : scoreHistogramData.length > 0 ? (
-              <CgBarChart 
+              <div 
                 data={scoreHistogramData} 
                 indexKey="range" 
                 series={[{ key: "count", color: "hsl(var(--accent))", name: "Students" }]} 
                 height={260} 
               />
             ) : (
-              <CgEmptyState title="No data" description="Generate merit list to view distribution." />
+              <div title="No data" description="Generate merit list to view distribution." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="🥧 Category Breakdown" description="Reservation category split in the current rank list.">
+          <div title="🥧 Category Breakdown" description="Reservation category split in the current rank list.">
             {isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="cg-spin" /></div>
+              <div className=""><Loader2 className="animate-spin" /></div>
             ) : categoryDonutData.length > 0 ? (
-              <CgDonutChart data={categoryDonutData as any} height={260} />
+              <div data={categoryDonutData as any} height={260} />
             ) : (
-              <CgEmptyState title="No data" description="Generate merit list to view breakdown." />
+              <div title="No data" description="Generate merit list to view breakdown." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ── DATA TABLE ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel title="Merit Rank Database" noPadding>
-          <div className="cg-panel__toolbar flex justify-between items-center bg-card border-b border-border p-3">
-            <CgFilterToolbar
+        <div title="Merit Rank Database" noPadding>
+          <div className="flex items-center gap-2 p-2 border-b border-border flex justify-between items-center bg-card border-b border-border p-3">
+            <div
               searchValue={search}
               onSearchChange={setSearch}
               searchPlaceholder="Search rank list by name or EN..."
@@ -288,17 +285,17 @@ export function MeritListPage() {
           </div>
           
           {isLoading ? (
-            <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+            <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
           ) : (
-            <CgDataTable
+            <div
               columns={columns}
               data={filteredList}
               pageSize={20}
               emptyMessage="No merit list generated for this division yet."
             />
           )}
-        </CgSectionPanel>
+        </div>
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

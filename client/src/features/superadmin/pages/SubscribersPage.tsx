@@ -1,4 +1,4 @@
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
+
 import { useMemo, useState } from "react";
 import {
   Mail,
@@ -128,7 +128,7 @@ export function SubscribersPage() {
         cell: ({ row }) => (
           <div>
             <div style={{ fontWeight: 600 }}>{row.original.email}</div>
-            <div className="cg-table__info">
+            <div className="">
               Marketing blog and changelog updates
             </div>
           </div>
@@ -220,7 +220,7 @@ export function SubscribersPage() {
         cell: ({ row }) => (
           <div>
             <div style={{ fontWeight: 600 }}>{row.original.email}</div>
-            <div className="cg-table__info">Currently not receiving updates</div>
+            <div className="">Currently not receiving updates</div>
           </div>
         ),
       },
@@ -265,13 +265,13 @@ export function SubscribersPage() {
 
   if (!isUserLoading && !isOwner) {
     return (
-      <div className="cg-page cg-animate-in">
+      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
         
-        <div className="cg-alert cg-alert--danger">
+        <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
           <ShieldAlert size={16} />
-          <div className="cg-alert__body">
-            <span className="cg-alert__title">Access restricted</span>
-            <p className="cg-alert__message">
+          <div className="p-4 rounded-md border__body">
+            <span className="p-4 rounded-md border__title">Access restricted</span>
+            <p className="p-4 rounded-md border__message">
               Sign in as <strong>{OWNER_EMAIL}</strong> to view or manage
               marketing subscribers.
             </p>
@@ -282,8 +282,8 @@ export function SubscribersPage() {
   }
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Subscribers"
         description="Track growth, unsubscribes, and audience health for blog and changelog emails."
         actions={
@@ -292,46 +292,46 @@ export function SubscribersPage() {
             onClick={() => refetch()}
             disabled={isFetching || isMutating}
           >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </Button>
         }
       />
 
-      <div className="cg-stats-grid">
-        <CgMetricCard
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
           title="Total Subscribers"
           value={isLoading ? "—" : stats.total}
           icon={<Users size={15} />}
           meta="All-time audience size"
         />
-        <CgMetricCard
+        <div
           title="Delivery Ready"
           value={isLoading ? "—" : stats.deliveryReady}
           icon={<UserCheck size={15} />}
           meta="Currently active recipients"
         />
-        <CgMetricCard
+        <div
           title="Paused / Unsubscribed"
           value={isLoading ? "—" : stats.inactive}
           icon={<UserMinus size={15} />}
           meta="Hidden from future sends"
         />
-        <CgMetricCard
+        <div
           title="New Subscribers"
           value={isLoading ? "—" : stats.newSubscribers14d}
           icon={<TrendingUp size={15} />}
           meta="Joined in the last 14 days"
           sparkline={subscribeSparkline}
         />
-        <CgMetricCard
+        <div
           title="New Unsubscribes"
           value={isLoading ? "—" : stats.newUnsubscribes14d}
           icon={<TrendingDown size={15} />}
           meta="Paused in the last 14 days"
           sparkline={unsubscribeSparkline}
         />
-        <CgMetricCard
+        <div
           title="Active Rate"
           value={isLoading ? "—" : `${stats.activeRate}%`}
           icon={<Mail size={15} />}
@@ -347,11 +347,11 @@ export function SubscribersPage() {
           marginTop: "1.5rem",
         }}
       >
-        <CgSectionPanel
+        <div
           title="Subscriber Movement"
           description="Daily new subscribes vs unsubscribes over the last 14 days."
         >
-          <CgBarChart
+          <div
             data={trend}
             indexKey="label"
             series={[
@@ -368,9 +368,9 @@ export function SubscribersPage() {
             ]}
             height={300}
           />
-        </CgSectionPanel>
+        </div>
 
-        <CgSectionPanel
+        <div
           title="Audience Health"
           description="A quick read on the email list quality and recent movement."
         >
@@ -384,7 +384,7 @@ export function SubscribersPage() {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              <span className="cg-table__info">Delivery-ready audience</span>
+              <span className="">Delivery-ready audience</span>
               <strong>{isLoading ? "—" : stats.deliveryReady}</strong>
             </div>
             <div
@@ -396,7 +396,7 @@ export function SubscribersPage() {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              <span className="cg-table__info">Active rate</span>
+              <span className="">Active rate</span>
               <strong>{isLoading ? "—" : `${stats.activeRate}%`}</strong>
             </div>
             <div
@@ -408,7 +408,7 @@ export function SubscribersPage() {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              <span className="cg-table__info">Net growth in 14 days</span>
+              <span className="">Net growth in 14 days</span>
               <strong>{isLoading ? "—" : `${stats.netGrowth14d >= 0 ? "+" : ""}${stats.netGrowth14d}`}</strong>
             </div>
             <div
@@ -420,19 +420,19 @@ export function SubscribersPage() {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              <span className="cg-table__info">Latest signup</span>
+              <span className="">Latest signup</span>
               <strong style={{ textAlign: "right" }}>
                 {formatSubscriberDate(activity.lastSubscribedAt)}
               </strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
-              <span className="cg-table__info">Latest unsubscribe</span>
+              <span className="">Latest unsubscribe</span>
               <strong style={{ textAlign: "right" }}>
                 {formatSubscriberDate(activity.lastUnsubscribedAt)}
               </strong>
             </div>
           </div>
-        </CgSectionPanel>
+        </div>
       </div>
 
       <div
@@ -443,7 +443,7 @@ export function SubscribersPage() {
           marginTop: "1.5rem",
         }}
       >
-        <CgSectionPanel
+        <div
           title="Recent Signups"
           description="Latest active subscribers added to the list."
         >
@@ -467,7 +467,7 @@ export function SubscribersPage() {
                 >
                   <div>
                     <div style={{ fontWeight: 600 }}>{subscriber.email}</div>
-                    <div className="cg-table__info">
+                    <div className="">
                       Joined {formatSubscriberDate(subscriber.created_at)}
                     </div>
                   </div>
@@ -478,14 +478,14 @@ export function SubscribersPage() {
               ))}
             </div>
           )}
-        </CgSectionPanel>
+        </div>
 
-        <CgSectionPanel
+        <div
           title="Paused / Unsubscribed List"
           description="People who will not receive the next blog or changelog email."
           noPadding
         >
-          <CgDataTable
+          <div
             columns={inactiveColumns}
             data={inactiveSubscribers}
             pageSize={6}
@@ -494,22 +494,22 @@ export function SubscribersPage() {
             emptyTitle="No paused subscribers"
             emptyDescription="Everyone is currently active."
           />
-        </CgSectionPanel>
+        </div>
       </div>
 
       <div style={{ marginTop: "1.5rem" }}>
-        <CgSectionPanel
+        <div
           title="All Subscribers"
           description={`Showing ${subscribers.length} matching rows from the marketing email list.`}
           noPadding
         >
           <div style={{ padding: "0.85rem 1rem 0" }}>
-            <CgFilterToolbar
+            <div
               searchValue={search}
               onSearchChange={setSearch}
               searchPlaceholder="Search subscriber email..."
               filters={
-                <CgSearchableSelect
+                <div
                   value={statusFilter}
                   onValueChange={setStatusFilter}
                   options={STATUS_OPTIONS}
@@ -519,18 +519,18 @@ export function SubscribersPage() {
           </div>
 
           <div style={{ padding: "0 1rem 1rem" }}>
-            <div className="cg-alert cg-alert--info" style={{ marginBottom: "1rem" }}>
+            <div className="p-4 rounded-md border p-4 rounded-md border--info" style={{ marginBottom: "1rem" }}>
               <Mail size={16} />
-              <div className="cg-alert__body">
-                <span className="cg-alert__title">Management actions</span>
-                <p className="cg-alert__message">
+              <div className="p-4 rounded-md border__body">
+                <span className="p-4 rounded-md border__title">Management actions</span>
+                <p className="p-4 rounded-md border__message">
                   Pause keeps the subscriber but stops sends. Resume reactivates
                   them. Remove permanently deletes the row from Supabase.
                 </p>
               </div>
             </div>
 
-            <CgDataTable
+            <div
               columns={subscriberColumns}
               data={subscribers}
               pageSize={25}
@@ -548,7 +548,7 @@ export function SubscribersPage() {
               emptyDescription="Try a different search or status filter."
             />
           </div>
-        </CgSectionPanel>
+        </div>
       </div>
     </div>
   );

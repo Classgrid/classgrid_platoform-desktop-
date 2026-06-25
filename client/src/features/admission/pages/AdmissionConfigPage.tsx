@@ -8,13 +8,7 @@ import {
   PieChart as PieIcon, BarChart2, Activity, Layers
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CgPageShell, CgSectionPanel, CgAlert,
-  CgBadge, CgMetricCard, CgTabs, CgTabList,
-  CgTabTrigger, CgTabContent,
-  CgPieChart, CgDonutChart, CgBarChart, CgLineChart,
-  CgHistogram, CgFunnelChart
-} from "@/components/classgrid";
+
 import {
   getAdmissionConfigFull,
   updateAdmissionConfig,
@@ -159,7 +153,7 @@ export function AdmissionConfigPage() {
   if (config.isLoading) {
     return (
       <div className="p-12 flex items-center justify-center gap-3 text-muted-foreground">
-        <Sparkles className="w-5 h-5 cg-spin text-primary" />
+        <Sparkles className="w-5 h-5 animate-spin text-primary" />
         Loading admission strategy engine...
       </div>
     );
@@ -171,7 +165,7 @@ export function AdmissionConfigPage() {
   const convRate = analyticsData?.summary?.conversion_rate ?? "0%";
 
   return (
-    <CgPageShell
+    <div
       title="Admission Strategy & Config"
       description={`Configuring for ${structureType.toUpperCase().replace("_", " ")} — ${config.data?.organization}`}
       breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Config" }]}
@@ -179,36 +173,36 @@ export function AdmissionConfigPage() {
         <button
           onClick={() => updateMutation.mutate({ admission_config: formData })}
           disabled={updateMutation.isPending}
-          className="cg-btn cg-btn--primary flex items-center gap-2"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow flex items-center gap-2"
         >
-          {updateMutation.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <Save className="w-4 h-4" />}
+          {updateMutation.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Strategy
         </button>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="cg-grid-1col">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="">
 
         {/* ── KPI Row ── */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CgMetricCard
+          <div
             title="Portal Status"
             value={portalOpen ? "OPEN" : "CLOSED"}
             icon={portalOpen ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
             trend={portalOpen ? { value: 1, label: "Accepting applications" } : { value: 0, label: "Portal closed" }}
           />
-          <CgMetricCard
+          <div
             title="Total Applications"
             value={totalApps.toLocaleString()}
             icon={<Users className="w-4 h-4" />}
             trend={{ value: 12, label: "This session" }}
           />
-          <CgMetricCard
+          <div
             title="Conversion Rate"
             value={convRate}
             icon={<TrendingUp className="w-4 h-4" />}
             trend={{ value: 5, label: "Applied → Enrolled" }}
           />
-          <CgMetricCard
+          <div
             title="Fields Enabled"
             value={`${enabledFieldsCount}F / ${enabledDocsCount}D`}
             icon={<Layers className="w-4 h-4" />}
@@ -217,25 +211,25 @@ export function AdmissionConfigPage() {
 
         {/* ── Visualization Dashboard ── */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Admission Analytics Overview" description="Live data visualization for this session's admission pipeline">
+          <div title="Admission Analytics Overview" description="Live data visualization for this session's admission pipeline">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-primary" /> Category Distribution
                 </p>
-                <CgPieChart data={categoryPieData} height={240} />
+                <div data={categoryPieData} height={240} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <PieIcon className="w-4 h-4 text-amber-400" /> Seat Type Breakdown
                 </p>
-                <CgDonutChart data={seatTypePieData} height={240} />
+                <div data={seatTypePieData} height={240} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-violet-400" /> Admission Funnel
                 </p>
-                <CgFunnelChart data={funnelData} height={240} />
+                <div data={funnelData} height={240} />
               </div>
             </div>
 
@@ -244,7 +238,7 @@ export function AdmissionConfigPage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-emerald-400" /> Daily Application Trend
                 </p>
-                <CgLineChart
+                <div
                   data={dailyTrendData}
                   indexKey="day"
                   series={[{ key: "applications", name: "Applications", color: "#34d399" }]}
@@ -255,7 +249,7 @@ export function AdmissionConfigPage() {
                 <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-blue-400" /> Field Coverage by Section
                 </p>
-                <CgHistogram data={fieldCoverageHistogram} height={220} fill="hsl(var(--primary))" />
+                <div data={fieldCoverageHistogram} height={220} fill="hsl(var(--primary))" />
               </div>
             </div>
 
@@ -263,45 +257,45 @@ export function AdmissionConfigPage() {
               <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-indigo-400" /> Status Pipeline Bar
               </p>
-              <CgBarChart
+              <div
                 data={funnelData.map((f) => ({ stage: f.name, count: f.value }))}
                 indexKey="stage"
                 series={[{ key: "count", name: "Applicants", color: "#34d399" }]}
                 height={200}
               />
             </div>
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         {/* ── Tabs: General / Fields / Documents ── */}
         <motion.div variants={fadeUp}>
-          <CgTabs defaultValue="general">
-            <CgTabList>
-              <CgTabTrigger value="general">
+          <div defaultValue="general">
+            <div>
+              <div value="general">
                 <Settings className="w-4 h-4" /> General
-              </CgTabTrigger>
-              <CgTabTrigger value="fields">
+              </div>
+              <div value="fields">
                 <FileText className="w-4 h-4" /> Field Toggles
-              </CgTabTrigger>
-              <CgTabTrigger value="documents">
+              </div>
+              <div value="documents">
                 <Shield className="w-4 h-4" /> Document Pool
-              </CgTabTrigger>
-              <CgTabTrigger value="danger">
+              </div>
+              <div value="danger">
                 <AlertTriangle className="w-4 h-4" /> Danger Zone
-              </CgTabTrigger>
-            </CgTabList>
+              </div>
+            </div>
 
             {/* ── General ── */}
-            <CgTabContent value="general">
-              <div className="cg-grid-1col mt-4">
-                <CgSectionPanel title="Portal Control" description="Open or close the admission portal and set registration fee">
+            <div value="general">
+              <div className=" mt-4">
+                <div title="Portal Control" description="Open or close the admission portal and set registration fee">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-3">
                       <label className="text-sm font-medium">Portal Status</label>
                       <div className="flex items-center gap-4 p-4 bg-muted/20 rounded-lg border border-border">
-                        <CgBadge variant={portalOpen ? "success" : "danger"}>
+                        <div variant={portalOpen ? "success" : "danger"}>
                           {portalOpen ? "OPEN" : "CLOSED"}
-                        </CgBadge>
+                        </div>
                         <button
                           onClick={() => setFormData({ ...formData, is_portal_open: !portalOpen })}
                           className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
@@ -319,7 +313,7 @@ export function AdmissionConfigPage() {
                         type="number"
                         value={formData?.registration_fee || 0}
                         onChange={(e) => setFormData({ ...formData, registration_fee: parseInt(e.target.value) })}
-                        className="cg-input"
+                        className=""
                       />
                     </div>
                   </div>
@@ -329,13 +323,13 @@ export function AdmissionConfigPage() {
                       rows={4}
                       value={formData?.instructions || ""}
                       onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                      className="cg-input resize-none"
+                      className=" resize-none"
                       placeholder="Welcome message, rules, and guidance for applicants..."
                     />
                   </div>
-                </CgSectionPanel>
+                </div>
 
-                <CgSectionPanel title="Workflow Settings" description="Round management, waitlist, and seat matrix policies">
+                <div title="Workflow Settings" description="Round management, waitlist, and seat matrix policies">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Current Round</label>
@@ -346,7 +340,7 @@ export function AdmissionConfigPage() {
                           ...formData,
                           admission_round: { ...formData?.admission_round, current_round: parseInt(e.target.value) }
                         })}
-                        className="cg-input"
+                        className=""
                         min={1}
                       />
                     </div>
@@ -359,7 +353,7 @@ export function AdmissionConfigPage() {
                           ...formData,
                           admission_round: { ...formData?.admission_round, max_rounds: parseInt(e.target.value) }
                         })}
-                        className="cg-input"
+                        className=""
                         min={1}
                       />
                     </div>
@@ -375,7 +369,7 @@ export function AdmissionConfigPage() {
                             fee_payment_deadline_hours: parseInt(e.target.value)
                           }
                         })}
-                        className="cg-input"
+                        className=""
                       />
                     </div>
                   </div>
@@ -414,22 +408,22 @@ export function AdmissionConfigPage() {
                       );
                     })}
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Fields ── */}
-            <CgTabContent value="fields">
+            <div value="fields">
               <div className="mt-4">
-                <CgAlert variant="info" title="Field Toggle Logic" className="mb-4">
+                <div variant="info" title="Field Toggle Logic" className="mb-4">
                   Fields toggled ON will appear on the student admission portal. "Required" prevents form submission until filled.
-                </CgAlert>
+                </div>
                 {masterFields.isLoading ? (
                   <div className="p-8 text-center text-muted-foreground">Loading master field pool...</div>
                 ) : (
-                  <div className="cg-grid-1col">
+                  <div className="">
                     {Object.entries(masterFields.data || {}).map(([sectionKey, section]: [string, any]) => (
-                      <CgSectionPanel key={sectionKey} title={section.label} description={`${section.fields?.length || 0} fields in this section`}>
+                      <div key={sectionKey} title={section.label} description={`${section.fields?.length || 0} fields in this section`}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                           {section.fields?.map((field: any) => {
                             const on = isFieldOn(field.key, "admission");
@@ -442,9 +436,9 @@ export function AdmissionConfigPage() {
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm font-medium truncate pr-2">{field.label}</span>
-                                  <CgBadge variant="neutral" className="text-[10px] uppercase font-mono shrink-0">
+                                  <div variant="neutral" className="text-[10px] uppercase font-mono shrink-0">
                                     {field.type}
-                                  </CgBadge>
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                   <button
@@ -468,17 +462,17 @@ export function AdmissionConfigPage() {
                             );
                           })}
                         </div>
-                      </CgSectionPanel>
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Documents ── */}
-            <CgTabContent value="documents">
+            <div value="documents">
               <div className="mt-4">
-                <CgSectionPanel title="Document Master Pool" description="Enable required document uploads for admission applications">
+                <div title="Document Master Pool" description="Enable required document uploads for admission applications">
                   {masterDocs.isLoading ? (
                     <div className="p-8 text-center text-muted-foreground">Loading document pool...</div>
                   ) : (
@@ -496,25 +490,25 @@ export function AdmissionConfigPage() {
                               <FileText className={`w-4 h-4 ${on ? "text-primary" : "text-muted-foreground"}`} />
                               <span className="text-sm font-medium">{doc.label}</span>
                             </div>
-                            <CgBadge variant={on ? "success" : "neutral"}>
+                            <div variant={on ? "success" : "neutral"}>
                               {on ? "ON" : "OFF"}
-                            </CgBadge>
+                            </div>
                           </motion.div>
                         );
                       })}
                     </div>
                   )}
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
+            </div>
 
             {/* ── Danger Zone ── */}
-            <CgTabContent value="danger">
+            <div value="danger">
               <div className="mt-4">
-                <CgAlert variant="warning" title="Irreversible Actions" className="mb-4">
+                <div variant="warning" title="Irreversible Actions" className="mb-4">
                   Actions in this section will overwrite current configuration. Proceed with caution.
-                </CgAlert>
-                <CgSectionPanel title="Preset Injection" description="Reset to standard org-type defaults">
+                </div>
+                <div title="Preset Injection" description="Reset to standard org-type defaults">
                   <div className="flex items-center justify-between p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
                     <div className="flex items-center gap-3">
                       <RotateCcw className="w-5 h-5 text-amber-500" />
@@ -528,19 +522,19 @@ export function AdmissionConfigPage() {
                     <button
                       onClick={() => presetMutation.mutate(structureType)}
                       disabled={presetMutation.isPending}
-                      className="cg-btn cg-btn--outline flex items-center gap-2"
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
                     >
-                      {presetMutation.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <ChevronRight className="w-4 h-4" />}
+                      {presetMutation.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
                       Inject Preset
                     </button>
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
-            </CgTabContent>
-          </CgTabs>
+            </div>
+          </div>
         </motion.div>
 
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

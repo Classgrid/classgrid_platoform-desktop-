@@ -1,11 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Loader2, RefreshCw } from "lucide-react";
-import {
-  CgPageShell,
-  CgDataTable,
-  CgBadge,
-  CgAlert,
-} from "@/components/classgrid";
+
 import { useMeritList, useGenerateMerit } from "../queries/useMeritList";
 import type { MeritListEntry } from "../types";
 
@@ -14,14 +9,14 @@ const columns: ColumnDef<MeritListEntry>[] = [
     accessorKey: "general_rank",
     header: "#",
     cell: ({ row }) => (
-      <span className="cg-font-semibold">{(row.original.general_rank ?? row.index + 1)}</span>
+      <span className="">{(row.original.general_rank ?? row.index + 1)}</span>
     ),
     size: 60,
   },
   {
     accessorKey: "full_name",
     header: "Name",
-    cell: ({ row }) => <span className="cg-table__cell-primary">{row.original.full_name}</span>,
+    cell: ({ row }) => <span className="">{row.original.full_name}</span>,
   },
   {
     accessorKey: "merit_score",
@@ -44,7 +39,7 @@ const columns: ColumnDef<MeritListEntry>[] = [
     cell: ({ row }) => {
       const s = row.original.status;
       const v = s === "enrolled" ? "success" : s === "fee_pending" ? "warning" : "neutral";
-      return <CgBadge variant={v as "success" | "warning" | "neutral"}>{s.replace(/_/g, " ")}</CgBadge>;
+      return <div variant={v as "success" | "warning" | "neutral"}>{s.replace(/_/g, " ")}</div>;
     },
   },
 ];
@@ -54,7 +49,7 @@ export function MeritListPage() {
   const generate = useGenerateMerit();
 
   return (
-    <CgPageShell
+    <div
       title="Merit Lists"
       description="Generated merit rankings based on admission configuration."
       breadcrumbs={[
@@ -63,37 +58,37 @@ export function MeritListPage() {
       ]}
       actions={
         <button
-          className="cg-btn cg-btn--primary"
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
           disabled={generate.isPending}
           onClick={() => generate.mutate(undefined)}
         >
-          {generate.isPending ? <Loader2 size={14} className="cg-spin" /> : <RefreshCw size={14} />}
+          {generate.isPending ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           Generate Merit
         </button>
       }
     >
       {isError && (
-        <CgAlert variant="danger" title="Error">Could not load merit list.</CgAlert>
+        <div variant="danger" title="Error">Could not load merit list.</div>
       )}
 
       {generate.isSuccess && (
-        <CgAlert variant="success" title="Merit Generated">
+        <div variant="success" title="Merit Generated">
           Merit list regenerated successfully.
-        </CgAlert>
+        </div>
       )}
 
       {isLoading ? (
-        <div className="cg-loading">
-          <Loader2 size={24} className="cg-spin cg-loading__spinner" />
+        <div className="">
+          <Loader2 size={24} className="animate-spin " />
         </div>
       ) : (
-        <CgDataTable
+        <div
           columns={columns}
           data={data?.merit_list ?? []}
           pageSize={25}
           emptyMessage="No merit list generated yet. Click 'Generate Merit' to create one."
         />
       )}
-    </CgPageShell>
+    </div>
   );
 }

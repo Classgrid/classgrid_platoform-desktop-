@@ -7,19 +7,16 @@ import {
 } from "lucide-react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
-import {
-  CgPageShell, CgSectionPanel, CgDataTable, CgBadge, CgAvatar,
-  CgEmptyState, ExportMenu, CgTabs, CgTabList, CgTabTrigger,
-} from "@/components/classgrid";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
-import { CgFunnelChart } from "@/components/classgrid/CgFunnelChart";
-import { CgPieChart } from "@/components/classgrid/CgPieChart";
-import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
-import { CgHistogram } from "@/components/classgrid/CgHistogram";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgLineChart } from "@/components/classgrid/CgLineChart";
-import { CgAreaChart } from "@/components/classgrid/CgAreaChart";
-import { CgRadarChart } from "@/components/classgrid/CgRadarChart";
+
+
+
+
+
+
+
+
+
+
 import { useAdmissionAnalytics, useCETDashboard } from "../queries/useAdmissionDashboard";
 import { useApplications } from "../../admissions/queries/useApplications";
 import {
@@ -69,11 +66,11 @@ const columns: ColumnDef<any>[] = [
     accessorKey: "full_name",
     header: "Applicant",
     cell: ({ row }) => (
-      <div className="cg-table__cell-identity">
-        <CgAvatar name={row.original.full_name} size="sm" />
+      <div className="">
+        <div name={row.original.full_name} size="sm" />
         <div>
-          <div className="cg-table__cell-primary font-semibold">{row.original.full_name}</div>
-          <small className="cg-table__cell-secondary font-mono">
+          <div className=" font-semibold">{row.original.full_name}</div>
+          <small className=" font-mono">
             {row.original.en_number ? `EN: ${row.original.en_number}` : row.original.phone || "—"}
           </small>
         </div>
@@ -105,7 +102,7 @@ const columns: ColumnDef<any>[] = [
     cell: ({ row }) => {
       const s = row.original.status;
       const variant = s === "enrolled" ? "success" : s === "rejected" ? "danger" : s === "applied" ? "neutral" : "info";
-      return <CgBadge variant={variant}>{s.replace("_", " ")}</CgBadge>;
+      return <div variant={variant}>{s.replace("_", " ")}</div>;
     },
   },
 ];
@@ -312,14 +309,14 @@ export function AdmissionDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="cg-page animate-pulse">
-        <div className="cg-page__header">
+      <div className=" animate-pulse">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
           <div className="h-8 bg-muted rounded w-1/4 mb-2" />
         </div>
-        <div className="cg-grid-4col mt-6">
+        <div className=" mt-6">
           {[1, 2, 3, 4].map(i => <div key={i} className="h-28 bg-card border border-border rounded-lg" />)}
         </div>
-        <div className="cg-grid-2col mt-6">
+        <div className=" mt-6">
           <div className="h-80 bg-card border border-border rounded-lg" />
           <div className="h-80 bg-card border border-border rounded-lg" />
         </div>
@@ -328,22 +325,22 @@ export function AdmissionDashboardPage() {
   }
 
   return (
-    <CgPageShell
+    <div
       title="Admission Dashboard"
       description="Comprehensive admission department performance analytics."
       breadcrumbs={[{ label: "Admissions" }, { label: "Dashboard" }]}
       actions={<ExportMenu />}
     >
       {/* ── Hierarchy Tabs ── */}
-      <CgTabs value={activeDivision} onValueChange={(value) => setActiveDivision(value)}>
-        <CgTabList className="cg-hierarchy-tabs">
+      <div value={activeDivision} onValueChange={(value) => setActiveDivision(value)}>
+        <div className="">
           {availableDivisions.map((division) => (
-            <CgTabTrigger key={division.id} value={division.id} className="cg-hierarchy-tab">
+            <div key={division.id} value={division.id} className="">
               {division.label}
-            </CgTabTrigger>
+            </div>
           ))}
-        </CgTabList>
-      </CgTabs>
+        </div>
+      </div>
 
       {analytics.isError && (
         <div className="p-4 bg-destructive/10 text-destructive rounded-lg border border-destructive/20 mb-6">
@@ -354,147 +351,147 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 1 — METRIC CARDS (4 cols)                                */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-4col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Total Applications" value={totalApps.toLocaleString()} icon={<FileText className="w-5 h-5" />} />
+          <div title="Total Applications" value={totalApps.toLocaleString()} icon={<FileText className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Verified" value={(funnel["verified"] || 0).toLocaleString()} icon={<CheckCircle className="w-5 h-5" />} />
+          <div title="Verified" value={(funnel["verified"] || 0).toLocaleString()} icon={<CheckCircle className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Enrolled" value={(funnel["enrolled"] || 0).toLocaleString()} icon={<Users className="w-5 h-5" />} />
+          <div title="Enrolled" value={(funnel["enrolled"] || 0).toLocaleString()} icon={<Users className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Conversion" value={data?.summary?.conversion_rate || "0%"} icon={<TrendingUp className="w-5 h-5" />} />
+          <div title="Conversion" value={data?.summary?.conversion_rate || "0%"} icon={<TrendingUp className="w-5 h-5" />} />
         </motion.div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 2 — Secondary Metrics (Fee + Docs)                       */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-4col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Fee Collected" value={`₹${(feeSummary.total_collected || 0).toLocaleString()}`} icon={<DollarSign className="w-5 h-5" />} />
+          <div title="Fee Collected" value={`₹${(feeSummary.total_collected || 0).toLocaleString()}`} icon={<DollarSign className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Fee Paid" value={feeSummary.paid_count} icon={<CheckCircle className="w-5 h-5" />} />
+          <div title="Fee Paid" value={feeSummary.paid_count} icon={<CheckCircle className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Rejected" value={(funnel["rejected"] || 0).toLocaleString()} icon={<AlertCircle className="w-5 h-5" />} />
+          <div title="Rejected" value={(funnel["rejected"] || 0).toLocaleString()} icon={<AlertCircle className="w-5 h-5" />} />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard title="Docs Verified" value={data?.document_summary?.verified || 0} icon={<Shield className="w-5 h-5" />} />
+          <div title="Docs Verified" value={data?.document_summary?.verified || 0} icon={<Shield className="w-5 h-5" />} />
         </motion.div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 3 — FUNNEL + LINE CHART (2 cols)                         */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-2col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="Admission Pipeline" description="Application funnel tracking from Applied → Enrolled.">
+          <div title="Admission Pipeline" description="Application funnel tracking from Applied → Enrolled.">
             {charts?.funnelData?.length ? (
-              <CgFunnelChart data={charts.funnelData} height={300} />
+              <div data={charts.funnelData} height={300} />
             ) : (
-              <CgEmptyState title="No pipeline data" description="No applications yet." />
+              <div title="No pipeline data" description="No applications yet." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📈 Daily Application Trend" description="Last 30 days — daily application volume.">
+          <div title="📈 Daily Application Trend" description="Last 30 days — daily application volume.">
             {charts?.lineData?.length ? (
-              <CgLineChart
+              <div
                 data={charts.lineData}
                 indexKey="date"
                 series={[{ key: "Applications", name: "Daily Apps", color: "hsl(var(--primary))" }]}
                 height={300}
               />
             ) : (
-              <CgEmptyState title="No trends" description="Not enough data for trends." />
+              <div title="No trends" description="Not enough data for trends." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 4 — PIE CHART + DONUT CHART (2 cols)                     */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-2col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="🥧 Category Distribution" description="Applications by reservation category (Open, OBC, SC, ST, etc.).">
+          <div title="🥧 Category Distribution" description="Applications by reservation category (Open, OBC, SC, ST, etc.).">
             {charts?.pieData?.length ? (
-              <CgPieChart data={charts.pieData} height={300} />
+              <div data={charts.pieData} height={300} />
             ) : (
-              <CgEmptyState title="No categories" description="No category data available." />
+              <div title="No categories" description="No category data available." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="🍩 Seat Type Breakdown" description="CAP vs Institutional vs Management vs Spot.">
+          <div title="🍩 Seat Type Breakdown" description="CAP vs Institutional vs Management vs Spot.">
             {charts?.donutData?.length ? (
-              <CgDonutChart data={charts.donutData} height={300} />
+              <div data={charts.donutData} height={300} />
             ) : (
-              <CgEmptyState title="No seat data" description="No seat type breakdown available." />
+              <div title="No seat data" description="No seat type breakdown available." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 5 — HISTOGRAM + BAR CHART (2 cols)                       */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-2col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📊 Merit Rounds Histogram" description="Candidates allotted per admission round.">
+          <div title="📊 Merit Rounds Histogram" description="Candidates allotted per admission round.">
             {charts?.histogramData?.length ? (
-              <CgHistogram data={charts.histogramData} height={300} />
+              <div data={charts.histogramData} height={300} />
             ) : (
-              <CgEmptyState title="No round data" description="No merit rounds configured yet." />
+              <div title="No round data" description="No merit rounds configured yet." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📋 Document Verification Status" description="Pending / Verified / Rejected documents across all applications.">
+          <div title="📋 Document Verification Status" description="Pending / Verified / Rejected documents across all applications.">
             {charts?.docBarData?.length ? (
-              <CgBarChart
+              <div
                 data={charts.docBarData}
                 indexKey="status"
                 series={[{ key: "Count", name: "Documents", color: "hsl(var(--primary))" }]}
                 height={300}
               />
             ) : (
-              <CgEmptyState title="No docs" description="No document data." />
+              <div title="No docs" description="No document data." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 6 — AREA CHART + FEE DONUT (2 cols)                      */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-2col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📈 Cumulative Applications" description="Running total of applications over the last 30 days.">
+          <div title="📈 Cumulative Applications" description="Running total of applications over the last 30 days.">
             {charts?.areaData?.length ? (
-              <CgAreaChart
+              <div
                 data={charts.areaData}
                 indexKey="date"
                 series={[{ key: "Cumulative", name: "Total", color: "hsl(var(--primary))" }]}
                 height={300}
               />
             ) : (
-              <CgEmptyState title="No data" description="Not enough data." />
+              <div title="No data" description="Not enough data." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="💰 Fee Collection Status" description="Paid vs Pending fee payments.">
+          <div title="💰 Fee Collection Status" description="Paid vs Pending fee payments.">
             {charts?.feeDonut && feeDonutTotal > 0 ? (
-              <CgPieChart data={charts.feeDonut} height={300} />
+              <div data={charts.feeDonut} height={300} />
             ) : (
-              <CgEmptyState title="No fee data" description="No fee records yet." />
+              <div title="No fee data" description="No fee records yet." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
@@ -502,17 +499,17 @@ export function AdmissionDashboardPage() {
       {/* ROW 7 — RADAR CHART (Full width)                             */}
       {/* ══════════════════════════════════════════════════════════════ */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel title="🎯 Admission Health Radar" description="Multi-dimensional view of admission process health (% of total).">
+        <div title="🎯 Admission Health Radar" description="Multi-dimensional view of admission process health (% of total).">
           {charts?.radarData?.length ? (
-            <CgRadarChart
+            <div
               data={charts.radarData}
               series={[{ key: "value", name: "Health %", color: "hsl(var(--primary))" }]}
               height={350}
             />
           ) : (
-            <CgEmptyState title="No data" description="Not enough data for radar." />
+            <div title="No data" description="Not enough data for radar." />
           )}
-        </CgSectionPanel>
+        </div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
@@ -520,11 +517,11 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {isCETOrg && cetCharts && (
         <>
-          <motion.div className="cg-grid-2col" variants={stagger} initial="hidden" animate="show">
+          <motion.div className="" variants={stagger} initial="hidden" animate="show">
             <motion.div variants={fadeUp}>
-              <CgSectionPanel title="🏗️ CAP Round Status" description="Claimed / Upgraded / Cancelled per CAP round.">
+              <div title="🏗️ CAP Round Status" description="Claimed / Upgraded / Cancelled per CAP round.">
                 {cetCharts.capRoundBar.length > 0 ? (
-                  <CgBarChart
+                  <div
                     data={cetCharts.capRoundBar}
                     indexKey="round"
                     series={[
@@ -535,14 +532,14 @@ export function AdmissionDashboardPage() {
                     height={300}
                   />
                 ) : (
-                  <CgEmptyState title="No CAP data" description="No CAP round data." />
+                  <div title="No CAP data" description="No CAP round data." />
                 )}
-              </CgSectionPanel>
+              </div>
             </motion.div>
             <motion.div variants={fadeUp}>
-              <CgSectionPanel title="🎓 Branch Fill Rates" description="Seat fill progress per branch.">
+              <div title="🎓 Branch Fill Rates" description="Seat fill progress per branch.">
                 {cetCharts.branchBar.length > 0 ? (
-                  <CgBarChart
+                  <div
                     data={cetCharts.branchBar}
                     indexKey="branch"
                     series={[
@@ -552,19 +549,19 @@ export function AdmissionDashboardPage() {
                     height={300}
                   />
                 ) : (
-                  <CgEmptyState title="No branch data" description="No branch data." />
+                  <div title="No branch data" description="No branch data." />
                 )}
-              </CgSectionPanel>
+              </div>
             </motion.div>
           </motion.div>
           <motion.div variants={fadeUp} initial="hidden" animate="show">
-            <CgSectionPanel title="📋 RLA Status Breakdown" description="Reporting / Leaving / Admission status distribution.">
+            <div title="📋 RLA Status Breakdown" description="Reporting / Leaving / Admission status distribution.">
               {cetCharts.rlaDonut.length > 0 ? (
-                <CgDonutChart data={cetCharts.rlaDonut} height={280} />
+                <div data={cetCharts.rlaDonut} height={280} />
               ) : (
-                <CgEmptyState title="No RLA data" description="No RLA status data." />
+                <div title="No RLA data" description="No RLA status data." />
               )}
-            </CgSectionPanel>
+            </div>
           </motion.div>
         </>
       )}
@@ -573,20 +570,20 @@ export function AdmissionDashboardPage() {
       {/* ROW 9 — RECENT APPLICATIONS TABLE                            */}
       {/* ══════════════════════════════════════════════════════════════ */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel title="Recent Applications" description="Latest candidates across the selected hierarchy." noPadding>
+        <div title="Recent Applications" description="Latest candidates across the selected hierarchy." noPadding>
           {recentApps.isLoading ? (
-            <div className="cg-loading--inline">
-              <Loader2 className="w-8 h-8 cg-spin" />
+            <div className="">
+              <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
-            <CgDataTable
+            <div
               columns={columns}
               data={recentApps.data?.applications || []}
               pageSize={5}
               emptyMessage="No applications found."
             />
           )}
-        </CgSectionPanel>
+        </div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
@@ -596,15 +593,15 @@ export function AdmissionDashboardPage() {
       {/*              strategy-selector.js                            */}
       {/*              admission-form-builder.service.js               */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-3col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         {/* SMS Budget — admission-notification.service.js */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="📱 SMS Budget" description="Real-time SMS usage from admission-notification.service.js">
+          <div title="📱 SMS Budget" description="Real-time SMS usage from admission-notification.service.js">
             {smsBudget.isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : smsBudget.data ? (
               <div className="flex flex-col gap-3">
-                <CgMetricCard title="SMS Sent" value={(smsBudget.data as any).messages_sent || (smsBudget.data as any).sent_today || 0} icon={<MessageSquare className="w-5 h-5" />} />
+                <div title="SMS Sent" value={(smsBudget.data as any).messages_sent || (smsBudget.data as any).sent_today || 0} icon={<MessageSquare className="w-5 h-5" />} />
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Budget Used</span>
                   <span className="font-medium">₹{((smsBudget.data as any).used || 0).toFixed(2)} / ₹{((smsBudget.data as any).limit || (smsBudget.data as any).daily_limit || 0)}</span>
@@ -619,16 +616,16 @@ export function AdmissionDashboardPage() {
                 </div>
               </div>
             ) : (
-              <CgEmptyState title="No SMS data" description="SMS budget not configured." />
+              <div title="No SMS data" description="SMS budget not configured." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         {/* Seat Matrix — seat-matrix.service.js */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="🪑 Live Seat Matrix" description="Real-time seat availability from seat-matrix.service.js">
+          <div title="🪑 Live Seat Matrix" description="Real-time seat availability from seat-matrix.service.js">
             {seatMatrix.isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : seatMatrix.data ? (
               <div className="flex flex-col gap-2">
                 {(Array.isArray(seatMatrix.data) ? seatMatrix.data : seatMatrix.data?.matrix || []).slice(0, 5).map((entry: any, i: number) => (
@@ -645,31 +642,31 @@ export function AdmissionDashboardPage() {
                   </div>
                 ))}
                 {(!seatMatrix.data || (Array.isArray(seatMatrix.data) && seatMatrix.data.length === 0)) && (
-                  <CgEmptyState title="No seats" description="No seat configuration found." />
+                  <div title="No seats" description="No seat configuration found." />
                 )}
               </div>
             ) : (
-              <CgEmptyState title="No seat data" description="Seat matrix not configured." />
+              <div title="No seat data" description="Seat matrix not configured." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
 
         {/* Active Config — strategy-selector.js + admission-form-builder.service.js */}
         <motion.div variants={fadeUp}>
-          <CgSectionPanel title="⚙️ Admission Config" description="Active strategy from strategy-selector.js + form-builder.service.js">
+          <div title="⚙️ Admission Config" description="Active strategy from strategy-selector.js + form-builder.service.js">
             {admissionConfig.isLoading ? (
-              <div className="cg-loading--inline"><Loader2 className="w-6 h-6 cg-spin" /></div>
+              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : admissionConfig.data ? (
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Structure Type</span>
-                  <CgBadge variant="info">{(admissionConfig.data as any).structure_type || "N/A"}</CgBadge>
+                  <div variant="info">{(admissionConfig.data as any).structure_type || "N/A"}</div>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Admission Open</span>
-                  <CgBadge variant={(admissionConfig.data as any).config?.is_portal_open ? "success" : "danger"}>
+                  <div variant={(admissionConfig.data as any).config?.is_portal_open ? "success" : "danger"}>
                     {(admissionConfig.data as any).config?.is_portal_open ? "Open" : "Closed"}
-                  </CgBadge>
+                  </div>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Current Round</span>
@@ -683,15 +680,15 @@ export function AdmissionDashboardPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Auto Cancel</span>
-                  <CgBadge variant={(admissionConfig.data as any).config?.waitlist_and_deadlines?.auto_promote_waitlist ? "success" : "neutral"}>
+                  <div variant={(admissionConfig.data as any).config?.waitlist_and_deadlines?.auto_promote_waitlist ? "success" : "neutral"}>
                     {(admissionConfig.data as any).config?.waitlist_and_deadlines?.auto_promote_waitlist ? "Enabled" : "Disabled"}
-                  </CgBadge>
+                  </div>
                 </div>
               </div>
             ) : (
-              <CgEmptyState title="No config" description="Admission config not loaded." />
+              <div title="No config" description="Admission config not loaded." />
             )}
-          </CgSectionPanel>
+          </div>
         </motion.div>
       </motion.div>
 
@@ -703,30 +700,30 @@ export function AdmissionDashboardPage() {
       {/*              scholarship.service.js (via enrolled data)       */}
       {/*              admission-printout.service.js (via print links)  */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="cg-grid-4col" variants={stagger} initial="hidden" animate="show">
+      <motion.div className="" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
-          <CgMetricCard
+          <div
             title="Waitlisted"
             value={funnel["waitlisted"] || 0}
             icon={<Armchair className="w-5 h-5" />}
           />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard
+          <div
             title="Withdrawn"
             value={funnel["withdrawn"] || 0}
             icon={<AlertCircle className="w-5 h-5" />}
           />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard
+          <div
             title="Cancelled"
             value={funnel["cancelled"] || 0}
             icon={<AlertCircle className="w-5 h-5" />}
           />
         </motion.div>
         <motion.div variants={fadeUp}>
-          <CgMetricCard
+          <div
             title="Fee Pending"
             value={funnel["fee_pending"] || 0}
             icon={<DollarSign className="w-5 h-5" />}
@@ -736,22 +733,22 @@ export function AdmissionDashboardPage() {
 
       {/* Quick Export Downloads — govt-export.service.js */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
-        <CgSectionPanel title="📤 Government Data Exports" description="Download admission data in government-mandated formats (powered by govt-export.service.js).">
-          <div className="cg-grid-4col">
+        <div title="📤 Government Data Exports" description="Download admission data in government-mandated formats (powered by govt-export.service.js).">
+          <div className="">
             {exportFormats.map((format) => (
               <a
                 key={format.key}
                 href={getExportUrl(format.key)}
                 target="_blank"
                 rel="noreferrer"
-                className="cg-btn cg-btn--outline justify-center"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground justify-center"
               >
                 <Download className="w-4 h-4" /> {format.label}
               </a>
             ))}
           </div>
-        </CgSectionPanel>
+        </div>
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

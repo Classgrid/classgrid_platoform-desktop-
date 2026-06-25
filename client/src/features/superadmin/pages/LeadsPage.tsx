@@ -9,8 +9,8 @@ import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
+
 import { formatDate } from "@/utils/dateUtils";
 import { useLeads, useApproveLead, useScheduleMeeting, useCreateLead } from "../queries/useLeads";
 import type { Lead, LeadStatus } from "../services/superAdminApi";
@@ -101,7 +101,7 @@ function LeadDrawer({
         position: "relative", width: "520px", maxWidth: "95vw", height: "100%",
         background: "hsl(var(--background))", borderLeft: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))",
         overflowY: "auto", display: "flex", flexDirection: "column",
-        boxShadow: "var(--cg-shadow-lg)",
+        boxShadow: "var(--)",
       }}>
         {/* Header */}
         <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -109,7 +109,7 @@ function LeadDrawer({
             <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>{lead.institutionName}</h2>
             <p style={{ margin: "0.25rem 0 0", color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>{lead.orgType} · {lead.city}</p>
           </div>
-          <button onClick={onClose} className="cg-btn cg-btn--ghost" style={{ padding: "0.3rem" }}><X size={18} /></button>
+          <button onClick={onClose} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost" style={{ padding: "0.3rem" }}><X size={18} /></button>
         </div>
 
         <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -149,7 +149,7 @@ function LeadDrawer({
 
           {/* ✅ Provisioned result */}
           {provisioned && (
-            <div className="cg-alert cg-alert--success" style={{ flexDirection: "column", gap: "0.75rem" }}>
+            <div className="p-4 rounded-md border p-4 rounded-md border--success" style={{ flexDirection: "column", gap: "0.75rem" }}>
               <div style={{ fontWeight: 600 }}>✅ Organization Provisioned Successfully!</div>
               <div style={{ fontSize: "0.85rem" }}>
                 <strong>{provisioned.orgName}</strong> has been created. An activation email was sent to <strong>{provisioned.adminEmail}</strong>.
@@ -160,7 +160,7 @@ function LeadDrawer({
                   <code style={{ flex: 1, background: "hsl(var(--muted))", padding: "0.4rem 0.6rem", borderRadius: "4px", fontSize: "0.75rem", wordBreak: "break-all" }}>
                     {provisioned.activationLink}
                   </code>
-                  <button className="cg-btn cg-btn--outline" style={{ padding: "0.4rem 0.6rem", flexShrink: 0 }}
+                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.4rem 0.6rem", flexShrink: 0 }}
                     onClick={() => copyToClipboard(provisioned.activationLink, "link")}>
                     {copied === "link" ? <Check size={13} /> : <Copy size={13} />}
                   </button>
@@ -172,7 +172,7 @@ function LeadDrawer({
                   <code style={{ background: "hsl(var(--muted))", padding: "0.4rem 0.8rem", borderRadius: "4px", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.2em" }}>
                     {provisioned.activationCode}
                   </code>
-                  <button className="cg-btn cg-btn--outline" style={{ padding: "0.4rem 0.6rem" }}
+                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.4rem 0.6rem" }}
                     onClick={() => copyToClipboard(provisioned.activationCode, "code")}>
                     {copied === "code" ? <Check size={13} /> : <Copy size={13} />}
                   </button>
@@ -188,7 +188,7 @@ function LeadDrawer({
             {/* Approve & Provision */}
             {!isConverted && !provisioned && (
               <button
-                className="cg-btn cg-btn--primary"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
                 style={{ width: "100%", justifyContent: "center", padding: "0.75rem" }}
                 disabled={approving}
                 onClick={handleApprove}
@@ -198,7 +198,7 @@ function LeadDrawer({
             )}
 
             {(isConverted || provisioned) && (
-              <div className="cg-badge cg-badge--success" style={{ padding: "0.6rem 1rem", textAlign: "center", borderRadius: "6px" }}>
+              <div className=" " style={{ padding: "0.6rem 1rem", textAlign: "center", borderRadius: "6px" }}>
                 ✅ Already Provisioned
               </div>
             )}
@@ -206,7 +206,7 @@ function LeadDrawer({
             {/* Schedule Meeting */}
             {!showMeetingForm ? (
               <button
-                className="cg-btn cg-btn--outline"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
                 style={{ width: "100%", justifyContent: "center" }}
                 onClick={() => setShowMeetingForm(true)}
               >
@@ -216,24 +216,24 @@ function LeadDrawer({
               <form onSubmit={handleSchedule} style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div style={{ fontWeight: 600 }}>📅 Schedule Meeting</div>
                 {meetingError && (
-                  <div className="cg-alert cg-alert--danger" style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}>
+                  <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}>
                     <AlertTriangle size={13} /> {meetingError}
                   </div>
                 )}
-                <div className="cg-field">
-                  <label className="cg-field__label">Date & Time *</label>
-                  <input className="cg-input" type="datetime-local" required value={meetingForm.scheduledAt}
+                <div className="">
+                  <label className="">Date & Time *</label>
+                  <input className="" type="datetime-local" required value={meetingForm.scheduledAt}
                     onChange={e => setMeetingForm(f => ({ ...f, scheduledAt: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Meeting Link * (Google Meet / Zoom)</label>
-                  <input className="cg-input" type="url" required placeholder="https://meet.google.com/..."
+                <div className="">
+                  <label className="">Meeting Link * (Google Meet / Zoom)</label>
+                  <input className="" type="url" required placeholder="https://meet.google.com/..."
                     value={meetingForm.meetingUrl}
                     onChange={e => setMeetingForm(f => ({ ...f, meetingUrl: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Platform</label>
-                  <CgSearchableSelect
+                <div className="">
+                  <label className="">Platform</label>
+                  <div
                     value={meetingForm.provider}
                     onValueChange={val => setMeetingForm(f => ({ ...f, provider: val }))}
                     options={[
@@ -244,15 +244,15 @@ function LeadDrawer({
                     ]}
                   />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Notes (optional)</label>
-                  <textarea className="cg-input" rows={2} placeholder="Meeting agenda, topics to cover..."
+                <div className="">
+                  <label className="">Notes (optional)</label>
+                  <textarea className="" rows={2} placeholder="Meeting agenda, topics to cover..."
                     value={meetingForm.notes}
                     onChange={e => setMeetingForm(f => ({ ...f, notes: e.target.value }))} />
                 </div>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button type="button" className="cg-btn cg-btn--outline" style={{ flex: 1 }} onClick={() => setShowMeetingForm(false)}>Cancel</button>
-                  <button type="submit" className="cg-btn cg-btn--primary" style={{ flex: 2 }} disabled={scheduling}>
+                  <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ flex: 1 }} onClick={() => setShowMeetingForm(false)}>Cancel</button>
+                  <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" style={{ flex: 2 }} disabled={scheduling}>
                     {scheduling ? "Scheduling..." : "Send Meeting Invite"}
                   </button>
                 </div>
@@ -261,7 +261,7 @@ function LeadDrawer({
 
             {/* Email contact */}
             <a href={`mailto:${lead.adminEmail}?subject=Classgrid Demo for ${lead.institutionName}`}
-              className="cg-btn cg-btn--outline" style={{ width: "100%", justifyContent: "center" }}>
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ width: "100%", justifyContent: "center" }}>
               ✉️ Email Contact
             </a>
           </div>
@@ -320,7 +320,7 @@ function buildColumns(onOpen: (lead: Lead) => void): ColumnDef<Lead>[] {
       header: "",
       size: 80,
       cell: ({ row }) => (
-        <button onClick={() => onOpen(row.original)} className="cg-btn cg-btn--outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}>
+        <button onClick={() => onOpen(row.original)} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}>
           Manage <ChevronRight size={12} />
         </button>
       ),
@@ -403,13 +403,13 @@ export function LeadsPage() {
   const columns = useMemo(() => buildColumns(setSelectedLead), []);
 
   return (
-    <div className="cg-page">
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Demo Leads</h1>
-          <p className="cg-page__description">Manage inbound demo requests. Click any row to approve, schedule meeting, or contact.</p>
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Demo Leads</h1>
+          <p className="text-muted-foreground mt-1">Manage inbound demo requests. Click any row to approve, schedule meeting, or contact.</p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <Button onClick={() => setShowCreateForm(true)}><Plus size={14} /> Add Lead</Button>
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
             <RefreshCw size={14} /> Refresh
@@ -417,7 +417,7 @@ export function LeadsPage() {
         </div>
       </div>
 
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Leads" value={isLoading ? "—" : stats.total} icon={<ClipboardList size={16} />} />
         <StatCard title="Converted" value={isLoading ? "—" : stats.converted} icon={<CheckCircle size={16} />} />
         <StatCard title="Awaiting Follow-up" value={isLoading ? "—" : stats.pending} icon={<Clock size={16} />} />
@@ -426,16 +426,16 @@ export function LeadsPage() {
 
       <SectionPanel title="Lead Pipeline" description='Click "Manage" on any lead to approve, schedule meeting, or contact.' noPadding>
         <div style={{ padding: "1rem" }}>
-          <CgFilterToolbar
+          <div
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search institution, contact, city…"
           />
         </div>
         {isError ? (
-          <div className="cg-alert cg-alert--danger" style={{ margin: "1rem" }}>
-            <div className="cg-alert__body"><span className="cg-alert__title">Failed to load leads</span></div>
-            <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>Retry</button>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+            <div className="p-4 rounded-md border__body"><span className="p-4 rounded-md border__title">Failed to load leads</span></div>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()}>Retry</button>
           </div>
         ) : (
           <DataTable columns={columns} data={filtered} pageSize={10}
@@ -456,42 +456,42 @@ export function LeadsPage() {
 
       {/* Create Lead Modal */}
       {showCreateForm && (
-        <div className="cg-modal-overlay">
-          <div className="cg-modal cg-modal--md">
-            <div className="cg-modal__header">
-              <h2 className="cg-modal__title">Add Demo Request</h2>
-              <button className="cg-modal__close" onClick={() => setShowCreateForm(false)}><X size={18} /></button>
+        <div className="">
+          <div className=" ">
+            <div className="">
+              <h2 className="">Add Demo Request</h2>
+              <button className="" onClick={() => setShowCreateForm(false)}><X size={18} /></button>
             </div>
-            <form onSubmit={handleCreate} className="cg-modal__body">
-              <div className="cg-form-grid">
-                <div className="cg-field cg-field--full">
-                  <label className="cg-field__label">Institution Name *</label>
-                  <input className="cg-input" required placeholder="Sunrise Public School"
+            <form onSubmit={handleCreate} className="">
+              <div className="">
+                <div className=" ">
+                  <label className="">Institution Name *</label>
+                  <input className="" required placeholder="Sunrise Public School"
                     value={form.institutionName} onChange={e => setForm(f => ({ ...f, institutionName: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Admin Name *</label>
-                  <input className="cg-input" required placeholder="John Doe"
+                <div className="">
+                  <label className="">Admin Name *</label>
+                  <input className="" required placeholder="John Doe"
                     value={form.adminName} onChange={e => setForm(f => ({ ...f, adminName: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Admin Email *</label>
-                  <input className="cg-input" type="email" required placeholder="admin@school.edu"
+                <div className="">
+                  <label className="">Admin Email *</label>
+                  <input className="" type="email" required placeholder="admin@school.edu"
                     value={form.adminEmail} onChange={e => setForm(f => ({ ...f, adminEmail: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Phone</label>
-                  <input className="cg-input" placeholder="+91 9000000000"
+                <div className="">
+                  <label className="">Phone</label>
+                  <input className="" placeholder="+91 9000000000"
                     value={form.adminPhone} onChange={e => setForm(f => ({ ...f, adminPhone: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">City</label>
-                  <input className="cg-input" placeholder="Pune"
+                <div className="">
+                  <label className="">City</label>
+                  <input className="" placeholder="Pune"
                     value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
                 </div>
-                <div className="cg-field">
-                  <label className="cg-field__label">Type</label>
-                  <CgSearchableSelect
+                <div className="">
+                  <label className="">Type</label>
+                  <div
                     value={form.orgType}
                     onValueChange={val => setForm(f => ({ ...f, orgType: val }))}
                     options={[
@@ -503,9 +503,9 @@ export function LeadsPage() {
                   />
                 </div>
               </div>
-              <div className="cg-modal__footer" style={{ marginTop: "1rem" }}>
-                <button type="button" className="cg-btn cg-btn--outline" onClick={() => setShowCreateForm(false)}>Cancel</button>
-                <button type="submit" className="cg-btn cg-btn--primary" disabled={createMutation.isPending}>
+              <div className="" style={{ marginTop: "1rem" }}>
+                <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setShowCreateForm(false)}>Cancel</button>
+                <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Lead"}
                 </button>
               </div>

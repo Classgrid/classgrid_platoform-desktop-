@@ -8,7 +8,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/marketing_ui/breadcrumb";
 import { 
   GraduationCap, FileText, FileEdit, BarChart, Clock, IndianRupee, Slash,
-  ClipboardCheck, CalendarX, CalendarStar, MessageSquare, HelpCircle, 
+  ClipboardCheck, CalendarX, CalendarCheck, MessageSquare, HelpCircle, 
   Palmtree, Bot, Home, Library, Coffee, Bus, Store, Users, UserCircle, 
   IdCard, HardDrive, ScrollText, CheckSquare
 } from "lucide-react";
@@ -32,7 +32,7 @@ export function StudentWorkPage() {
     { label: "Fees", route: "/student/work/fees", icon: IndianRupee, condition: true },
     { label: "Attendance", route: "/student/work/attendance", icon: ClipboardCheck, condition: true },
     { label: "Apply for Leave", route: "/student/work/leave", icon: CalendarX, condition: true },
-    { label: "Events", route: "/student/work/events", icon: CalendarStar, condition: true },
+    { label: "Events", route: "/student/work/events", icon: CalendarCheck, condition: true },
     { label: "Feedback", route: "/student/work/feedback", icon: MessageSquare, condition: true },
     { label: "Examination", route: "/student/work/examination", icon: FileEdit, condition: true },
     { label: "Quizzes", route: "/student/work/quizzes", icon: HelpCircle, condition: true },

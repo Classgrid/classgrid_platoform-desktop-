@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Save } from "lucide-react";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/marketing_ui/button";
 import { SettingsAppearanceCard } from "../components/settings/SettingsAppearanceCard";
 import { SettingsNotificationsCard } from "../components/settings/SettingsNotificationsCard";
 import { SettingsPushCard } from "../components/settings/SettingsPushCard";
@@ -56,16 +55,18 @@ export function SharedSettingsPage() {
   const isPending = updatePrefs.isPending || updateProfile.isPending;
 
   return (
-    <form className="cg-settings-page pb-12" onSubmit={handleSave} noValidate>
-      <CgPageHeader
-        title="Settings"
-        description="Manage your platform preferences, notifications, and appearance."
-        actions={
-          <CgButton type="submit" isLoading={isPending}>
+    <form className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12" onSubmit={handleSave} noValidate>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground mt-1">Manage your platform preferences, notifications, and appearance.</p>
+        </div>
+        <div>
+          <Button type="submit" disabled={isPending}>
             <Save size={14} className="mr-2" /> Save Settings
-          </CgButton>
-        }
-      />
+          </Button>
+        </div>
+      </div>
 
       <SettingsAppearanceCard />
       

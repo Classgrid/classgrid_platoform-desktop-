@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Loader2, Phone, ArrowRight, CheckCircle2, Clock, FileText, CreditCard, Download } from "lucide-react";
 import { parentLogin, getParentStatus, getParentDocuments } from "../api";
 import { useEngineConfig } from "../queries/useAdmissionEngine";
-import { CgPageShell, CgAlert, CgBadge } from "@/components/classgrid";
+
 import type { ApplicationState } from "../types";
 
 // ═══════════════════════════════════════════════════════════════
@@ -67,7 +67,7 @@ export function ParentTrackerPage() {
   if (configLoading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <Loader2 size={32} className="cg-spin" />
+        <Loader2 size={32} className="animate-spin" />
       </div>
     );
   }
@@ -88,20 +88,20 @@ export function ParentTrackerPage() {
           <div style={{ background: "hsl(var(--card))", padding: "2rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))", maxWidth: "400px", margin: "0 auto" }}>
             <h2 style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "1.5rem" }}>Verify Your Phone Number</h2>
             
-            {error && <div style={{ marginBottom: "1rem" }}><CgAlert variant="danger" title="Error">{error}</CgAlert></div>}
+            {error && <div style={{ marginBottom: "1rem" }}><div variant="danger" title="Error">{error}</div></div>}
             
             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div className="cg-form__field">
-                <label className="cg-form__label">Registered Mobile Number</label>
+              <div className="">
+                <label className="">Registered Mobile Number</label>
                 <div style={{ position: "relative" }}>
                   <Phone size={16} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "hsl(var(--muted-foreground))" }} />
-                  <input type="tel" required className="cg-form__input" style={{ paddingLeft: "2.5rem" }}
+                  <input type="tel" required className="" style={{ paddingLeft: "2.5rem" }}
                     placeholder="+91 9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={loading}
                   />
                 </div>
               </div>
-              <button type="submit" className="cg-btn cg-btn--primary" disabled={loading}>
-                {loading ? <Loader2 size={16} className="cg-spin" /> : "View Status"} <ArrowRight size={16} />
+              <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading}>
+                {loading ? <Loader2 size={16} className="animate-spin" /> : "View Status"} <ArrowRight size={16} />
               </button>
             </form>
           </div>
@@ -120,29 +120,29 @@ export function ParentTrackerPage() {
                     {appData.en_number || appData.phone || appData.email}
                   </div>
                 </div>
-                <CgBadge variant={appData.status === "enrolled" ? "success" : appData.status === "rejected" ? "danger" : "info"}>
+                <div variant={appData.status === "enrolled" ? "success" : appData.status === "rejected" ? "danger" : "info"}>
                   {appData.status.replace(/_/g, " ")}
-                </CgBadge>
+                </div>
               </div>
             </div>
 
             {/* Waitlist Alert */}
             {appData.status === "waitlisted" && (
-              <CgAlert variant="warning" title={`Waitlisted — Position WL-${appData.waitlist_number ?? "?"}`}>
+              <div variant="warning" title={`Waitlisted — Position WL-${appData.waitlist_number ?? "?"}`}>
                 Your child is currently on the waitlist. You will be notified when a seat becomes available.
-              </CgAlert>
+              </div>
             )}
 
             {/* Fee Pending Alert */}
             {appData.status === "fee_pending" && (
-              <CgAlert variant="warning" title="Action Required: Fee Payment">
+              <div variant="warning" title="Action Required: Fee Payment">
                 Your child has been selected! Please complete the fee payment to confirm admission.
                 {appData.fee_payment_deadline && (
                   <div style={{ marginTop: "0.5rem", fontWeight: 600 }}>
                     Deadline: {new Date(appData.fee_payment_deadline).toLocaleString("en-IN")}
                   </div>
                 )}
-              </CgAlert>
+              </div>
             )}
 
             {/* Visual Pipeline */}
@@ -199,9 +199,9 @@ export function ParentTrackerPage() {
                       <span style={{ fontSize: "0.85rem", textTransform: "capitalize" }}>
                         {(doc.name || "").replace(/_/g, " ")}
                       </span>
-                      <CgBadge variant={doc.status === "verified" ? "success" : doc.status === "rejected" ? "danger" : "warning"} size="sm">
+                      <div variant={doc.status === "verified" ? "success" : doc.status === "rejected" ? "danger" : "warning"} size="sm">
                         {doc.status}
-                      </CgBadge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -211,11 +211,11 @@ export function ParentTrackerPage() {
             {/* Downloads */}
             {appData.status === "enrolled" && (
               <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                <button className="cg-btn cg-btn--outline" onClick={() => window.print()}>
+                <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => window.print()}>
                   <Download size={16} /> Admission Letter
                 </button>
                 {appData.fee_paid && (
-                  <button className="cg-btn cg-btn--outline" onClick={() => window.print()}>
+                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => window.print()}>
                     <Download size={16} /> Fee Receipt
                   </button>
                 )}
@@ -223,7 +223,7 @@ export function ParentTrackerPage() {
             )}
 
             {/* Sign Out */}
-            <button className="cg-btn cg-btn--ghost cg-btn--sm" style={{ alignSelf: "center" }} onClick={() => { setAppData(null); setDocuments([]); }}>
+            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm" style={{ alignSelf: "center" }} onClick={() => { setAppData(null); setDocuments([]); }}>
               Check another application
             </button>
           </div>

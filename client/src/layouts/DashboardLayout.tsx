@@ -16,11 +16,11 @@ export function DashboardLayout() {
   const { isSidebarCollapsed } = useUiStore();
 
   return (
-    <div className={`cg-shell${isDesktopOnly ? " cg-shell--desktop-only" : ""}${isSidebarCollapsed ? " cg-shell--collapsed" : ""}`}>
+    <div className={`${isDesktopOnly ? " " : ""}${isSidebarCollapsed ? " " : ""}`}>
       <DashboardSidebar config={config} />
-      <div className="cg-main">
+      <div className="">
         {isDesktopOnly ? null : (
-          <header className="cg-mobile-topbar">
+          <header className="">
             <button type="button">
               <Menu size={18} />
             </button>
@@ -35,7 +35,7 @@ export function DashboardLayout() {
             </div>
           </header>
         )}
-        <main className="cg-content">
+        <main className="">
           <Outlet />
         </main>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X, Book, Users, Loader2 } from "lucide-react";
 import { useCreateClassroom } from "../queries/useCreateClassroom";
-import { CgButton } from "@/components/classgrid/Button";
+import { Button } from "@/components/marketing_ui/button";
 
 type CreateClassroomModalProps = {
   isOpen: boolean;
@@ -134,7 +134,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
             >
               Cancel
             </button>
-            <CgButton type="submit" disabled={isPending || !name || !subject}>
+            <Button type="submit" disabled={isPending || !name || !subject}>
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
@@ -142,7 +142,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
               ) : (
                 "Create Classroom"
               )}
-            </CgButton>
+            </Button>
           </div>
         </form>
       </div>

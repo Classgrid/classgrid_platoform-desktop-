@@ -1,4 +1,4 @@
-.cg-settings-page {
+.settings-page {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.cg-settings-card {
+.settings-card {
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -17,69 +17,69 @@
   transition: all 0.2s ease-in-out;
 }
 
-.cg-settings-card:hover {
+.settings-card:hover {
   border-color: var(--border-hover, var(--border));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.cg-settings-card-header {
+.settings-card-header {
   border-bottom: 1px solid var(--border);
   padding-bottom: 1rem;
   margin-bottom: 0.5rem;
 }
 
-.cg-settings-card-title {
+.settings-card-title {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--card-foreground);
   margin: 0;
 }
 
-.cg-settings-card-description {
+.settings-card-description {
   font-size: 0.875rem;
   color: var(--muted-foreground);
   margin-top: 0.25rem;
 }
 
-.cg-settings-row {
+.settings-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
 }
 
-.cg-settings-row-info {
+.settings-row-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.cg-settings-row-title {
+.settings-row-title {
   font-weight: 500;
   font-size: 0.95rem;
   color: var(--foreground);
 }
 
-.cg-settings-row-desc {
+.settings-row-desc {
   font-size: 0.85rem;
   color: var(--muted-foreground);
 }
 
-.cg-switch-container {
+.switch-container {
   position: relative;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
 }
 
-.cg-switch-input {
+.switch-input {
   opacity: 0;
   width: 0;
   height: 0;
   position: absolute;
 }
 
-.cg-switch-track {
+.switch-track {
   width: 44px;
   height: 24px;
   background-color: var(--muted);
@@ -91,16 +91,16 @@
   padding: 2px;
 }
 
-.cg-switch-input:checked + .cg-switch-track {
+.switch-input:checked + .switch-track {
   background-color: var(--primary);
 }
 
-.cg-switch-input:focus-visible + .cg-switch-track {
+.switch-input:focus-visible + .switch-track {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-.cg-switch-thumb {
+.switch-thumb {
   width: 20px;
   height: 20px;
   background-color: white;
@@ -109,6 +109,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.cg-switch-input:checked + .cg-switch-track .cg-switch-thumb {
+.switch-input:checked + .switch-track .switch-thumb {
   transform: translateX(20px);
 }

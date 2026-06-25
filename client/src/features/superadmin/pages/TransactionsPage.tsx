@@ -1,4 +1,4 @@
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
+
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IndianRupee, RefreshCw, Plus, RotateCcw, CheckCircle2, XCircle, Clock, AlertTriangle, Building2 } from "lucide-react";
@@ -141,19 +141,19 @@ export function TransactionsPage() {
   };
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Platform Transactions"
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>
             <Button onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</Button>
           </div>
         }
       />
 
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Revenue" value={isLoading ? "—" : INR(totalRevenue)} icon={<IndianRupee size={15} />} />
         <StatCard title="Total Refunds" value={isLoading ? "—" : INR(totalRefunds)} icon={<RotateCcw size={15} />} />
         <StatCard title="Successful Payments" value={isLoading ? "—" : successCount} icon={<CheckCircle2 size={15} />} />
@@ -164,11 +164,11 @@ export function TransactionsPage() {
         <SectionPanel title="Transaction History" description={`${filtered.length} records`} noPadding
           actions={
             <div style={{ display: "flex", gap: "0.5rem" }}>
-              <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={[
+              <div value={statusFilter} onValueChange={setStatusFilter} options={[
                 { label: "All Status", value: "" }, { label: "Paid", value: "success" },
                 { label: "Refunded", value: "refunded" }, { label: "Failed", value: "failed" },
               ]} />
-              <CgSearchableSelect value={typeFilter} onValueChange={setTypeFilter} options={[
+              <div value={typeFilter} onValueChange={setTypeFilter} options={[
                 { label: "All Types", value: "" }, { label: "Razorpay", value: "razorpay" },
                 { label: "Manual", value: "manual" }, { label: "Refund", value: "refund" },
               ]} />
@@ -176,7 +176,7 @@ export function TransactionsPage() {
           }
         >
           <div style={{ padding: "0.75rem 1rem" }}>
-            <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search org, payment ID, note…" />
+            <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search org, payment ID, note…" />
           </div>
           <DataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
             emptyIcon={<IndianRupee size={32} />} emptyTitle="No transactions yet" emptyDescription="Payments recorded via Razorpay or manually will appear here." emptyMessage="No transactions." />
@@ -213,7 +213,7 @@ export function TransactionsPage() {
           <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
             <div>
               <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Organization</label>
-              <CgSearchableSelect value={manual.organizationId} onValueChange={v => setManual(p => ({ ...p, organizationId: v }))}
+              <div value={manual.organizationId} onValueChange={v => setManual(p => ({ ...p, organizationId: v }))}
                 options={allOrgs.map(o => ({ label: o.name, value: o._id }))} />
             </div>
             <div>

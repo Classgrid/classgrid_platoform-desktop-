@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, RefreshCw, Clock, CheckCircle2, Zap, Send, Megaphone, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
+
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -61,28 +61,28 @@ export function NotificationEnginePage() {
   });
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Notifications Engine"
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>
             <Button variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</Button>
             <Button onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</Button>
           </div>
         }
       />
 
-      <div className="cg-stats-grid">
-        <CgMetricCard title="Scheduled" value={isLoading ? "—" : pending} icon={<Clock size={15} />} />
-        <CgMetricCard title="Sent" value={isLoading ? "—" : sent} icon={<CheckCircle2 size={15} />} />
-        <CgMetricCard title="Total" value={isLoading ? "—" : notifications.length} icon={<Bell size={15} />} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div title="Scheduled" value={isLoading ? "—" : pending} icon={<Clock size={15} />} />
+        <div title="Sent" value={isLoading ? "—" : sent} icon={<CheckCircle2 size={15} />} />
+        <div title="Total" value={isLoading ? "—" : notifications.length} icon={<Bell size={15} />} />
       </div>
 
       {/* Quick Action Cards */}
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Quick Actions" description="Common notification workflows.">
+        <div title="Quick Actions" description="Common notification workflows.">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem", padding: "0.5rem 0" }}>
             {[
               { icon: <Zap size={16} />, label: "Emergency Broadcast", desc: "Send to all users NOW", action: () => setBroadcastOpen(true) },
@@ -103,12 +103,12 @@ export function NotificationEnginePage() {
               </div>
             ))}
           </div>
-        </CgSectionPanel>
+        </div>
       </div>
 
       {/* Scheduled List */}
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Scheduled Notifications" description="Upcoming and past notifications." noPadding>
+        <div title="Scheduled Notifications" description="Upcoming and past notifications." noPadding>
           {isLoading ? (
             <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>Loading…</div>
           ) : notifications.length === 0 ? (
@@ -142,7 +142,7 @@ export function NotificationEnginePage() {
               </div>
             ))
           )}
-        </CgSectionPanel>
+        </div>
       </div>
 
       {/* Broadcast Dialog */}
@@ -158,7 +158,7 @@ export function NotificationEnginePage() {
             <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Message</label>
               <textarea style={textareaStyle} value={broadcast.message} onChange={e => setBroadcast(p => ({ ...p, message: e.target.value }))} placeholder="Message body…" /></div>
             <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Type</label>
-              <CgSearchableSelect value={broadcast.type} onValueChange={v => setBroadcast(p => ({ ...p, type: v }))}
+              <div value={broadcast.type} onValueChange={v => setBroadcast(p => ({ ...p, type: v }))}
                 options={[{ label: "Info", value: "info" }, { label: "Warning", value: "warning" }, { label: "Critical", value: "error" }, { label: "Success", value: "success" }]} /></div>
           </div>
           <DialogFooter>
@@ -183,7 +183,7 @@ export function NotificationEnginePage() {
             <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Message</label>
               <textarea style={textareaStyle} value={scheduled.message} onChange={e => setScheduled(p => ({ ...p, message: e.target.value }))} placeholder="Message…" /></div>
             <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Audience</label>
-              <CgSearchableSelect value={scheduled.audience} onValueChange={v => setScheduled(p => ({ ...p, audience: v }))} options={AUDIENCE_OPTIONS} /></div>
+              <div value={scheduled.audience} onValueChange={v => setScheduled(p => ({ ...p, audience: v }))} options={AUDIENCE_OPTIONS} /></div>
             <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Send At</label>
               <input style={inputStyle} type="datetime-local" value={scheduled.scheduledFor} onChange={e => setScheduled(p => ({ ...p, scheduledFor: e.target.value }))} /></div>
           </div>

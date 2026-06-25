@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
-import { CgButton } from "@/components/classgrid/Button";
-import { CgFieldGroup } from "@/components/classgrid/CgFieldGroup";
+import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -77,7 +76,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <CgFieldGroup label="New Password" error={error}>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">New Password</label>
                 <Input
                   type="password"
                   placeholder="Enter new password (min 8 chars)"
@@ -85,19 +85,20 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={resetMutation.isPending}
                 />
-              </CgFieldGroup>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+              </div>
               <DialogFooter className="mt-4">
-                <CgButton
+                <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   disabled={resetMutation.isPending}
                 >
                   Cancel
-                </CgButton>
-                <CgButton type="submit" isLoading={resetMutation.isPending}>
+                </Button>
+                <Button type="submit" disabled={resetMutation.isPending}>
                   Update Password
-                </CgButton>
+                </Button>
               </DialogFooter>
             </form>
           )}
@@ -105,9 +106,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
         
         {!mustResetPassword && (
           <DialogFooter>
-            <CgButton type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Close
-            </CgButton>
+            </Button>
           </DialogFooter>
         )}
       </DialogContent>

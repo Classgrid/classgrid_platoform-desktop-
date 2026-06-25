@@ -95,13 +95,9 @@ export function useStudentResults() {
  * Connects to: GET /api/results/student/:studentId/cgpa
  */
 export function useStudentCgpa(studentId: string) {
-  return useQuery<CgpaResponse>({
+  return useQuery({
     queryKey: ["student-cgpa", studentId],
-    queryFn: async () => {
-      if (!studentId) return { cgpa: null, percentage_equivalent: null, total_semesters: 0, semesters: [] };
-      const { data } = await apiClient.get<CgpaResponse>(`/api/results/student/${studentId}/cgpa`);
-      return data;
-    },
+    queryFn: () => apiClient.get<CgpaResponse>(`/api/results/student/${studentId}/cgpa`).then(res => res.data),
     enabled: !!studentId,
   });
 }

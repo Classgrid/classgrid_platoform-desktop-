@@ -1,14 +1,14 @@
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
+
 import { ExternalLink, Mail, MessageSquare } from "lucide-react";
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect } from "@/components/classgrid";
+
 
 export function SupportPage() {
   return (
-    <div className="cg-page">
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Help & Support</h1>
-          <p className="cg-page__description">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Help & Support</h1>
+          <p className="text-muted-foreground mt-1">
             Get help, raise support tickets, and track your conversations with the ClassGrid team.
           </p>
         </div>
@@ -16,7 +16,7 @@ export function SupportPage() {
 
       <div className="max-w-4xl mx-auto mt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CgSectionPanel title="Support Portal" icon={<MessageSquare size={18} className="text-emerald-600" />}>
+          <div title="Support Portal" icon={<MessageSquare size={18} className="text-emerald-600" />}>
             <div className="flex flex-col h-full justify-between">
               <div>
                 <p className="text-muted-foreground text-sm mb-6">
@@ -27,15 +27,15 @@ export function SupportPage() {
                 href="https://classgrid.in/support/ticket"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cg-btn cg-btn--primary w-full justify-center"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow w-full justify-center"
               >
                 Go to Support Portal
                 <ExternalLink size={14} className="ml-2 opacity-80" />
               </a>
             </div>
-          </CgSectionPanel>
+          </div>
 
-          <CgSectionPanel title="Contact Us" icon={<Mail size={18} className="text-blue-600" />}>
+          <div title="Contact Us" icon={<Mail size={18} className="text-blue-600" />}>
             <div className="flex flex-col h-full space-y-6">
               <p className="text-muted-foreground text-sm">
                 For immediate assistance, billing inquiries, or general questions, you can always reach out to us directly via email or phone.
@@ -87,7 +87,7 @@ export function SupportPage() {
                 </div>
               </div>
             </div>
-          </CgSectionPanel>
+          </div>
         </div>
       </div>
     </div>

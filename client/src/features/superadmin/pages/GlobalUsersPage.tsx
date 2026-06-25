@@ -3,15 +3,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, ShieldAlert, CheckCircle, RefreshCw, Ban, LogOut, Key, UserCheck } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
-import { CgFilterToolbar } from "@/components/classgrid/FilterToolbar";
-import { CgSearchableSelect } from "@/components/classgrid/SearchableSelect";
+
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -128,13 +128,13 @@ export function GlobalUsersPage() {
   };
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Global User Control"
         description="Search and manage any user across all organizations. All actions are logged."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
       />
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Users" value={isLoading ? "—" : total} icon={<Users size={15} />} />
         <StatCard title="Active" value={isLoading ? "—" : users.filter(u => u.status === "active").length} icon={<CheckCircle size={15} />} />
         <StatCard title="Banned" value={isLoading ? "—" : users.filter(u => u.status === "suspended").length} icon={<ShieldAlert size={15} />} />
@@ -143,10 +143,10 @@ export function GlobalUsersPage() {
         <SectionPanel title="All Users" description={`Showing ${users.length} of ${total}`} noPadding>
           <div style={{ padding: "0.75rem 1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: 220 }}>
-              <CgFilterToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search name or email…" />
+              <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search name or email…" />
             </div>
-            <CgSearchableSelect value={roleFilter} onValueChange={setRoleFilter} options={ROLE_OPTIONS} />
-            <CgSearchableSelect value={statusFilter} onValueChange={setStatusFilter} options={STATUS_OPTIONS} />
+            <div value={roleFilter} onValueChange={setRoleFilter} options={ROLE_OPTIONS} />
+            <div value={statusFilter} onValueChange={setStatusFilter} options={STATUS_OPTIONS} />
           </div>
           <DataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
             emptyIcon={<Users size={32} />} emptyTitle="No users found" emptyDescription="Try different filters." emptyMessage="No users." />
@@ -165,7 +165,7 @@ export function GlobalUsersPage() {
           </DialogHeader>
           {confirm?.action === "change-role" && (
             <div style={{ padding: "0.5rem 0" }}>
-              <CgSearchableSelect value={newRole} onValueChange={setNewRole} options={ROLE_OPTIONS.filter(r => r.value !== "")} />
+              <div value={newRole} onValueChange={setNewRole} options={ROLE_OPTIONS.filter(r => r.value !== "")} />
             </div>
           )}
           <DialogFooter>

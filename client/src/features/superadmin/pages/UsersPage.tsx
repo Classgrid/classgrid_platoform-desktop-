@@ -1,4 +1,3 @@
-import { CgSectionPanel, CgPageHeader, CgDataTable, CgFilterToolbar, CgSearchableSelect, CgMetricCard, CgBarChart } from "@/components/classgrid";
 import { useState, useMemo } from "react";
 import { Users, Building2, ShieldAlert, CheckCircle, RefreshCw, MoreVertical } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -7,6 +6,7 @@ import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
+import { Button } from "@/components/marketing_ui/button";
 import { formatDate } from "@/utils/dateUtils";
 import { useAllUsers, useSuspendUser, useReactivateUser, useImpersonateUser } from "../queries/useUsers";
 import { LogIn } from "lucide-react";
@@ -32,7 +32,7 @@ function buildColumns(
             <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
               <div style={{ fontWeight: 500 }}>{u.name}</div>
-              <div className="cg-table__info">{u.email}</div>
+              <div className="">{u.email}</div>
             </div>
           </div>
         );
@@ -102,23 +102,23 @@ function buildColumns(
         const isActive = s === "active" || (!s && u.isEmailVerified);
 
         return (
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              className={`cg-btn cg-btn--${isActive ? "outline" : "success"}`}
-              style={{ flex: 1, padding: "0.4rem", color: isActive ? "var(--danger)" : undefined }}
+          <div className="flex gap-2">
+            <Button
+              variant={isActive ? "outline" : "default"}
+              className="flex-1"
               disabled={isMutating}
               onClick={() => (isActive ? onSuspend(u._id) : onReactivate(u._id))}
             >
               {isActive ? "Suspend" : "Reactivate"}
-            </button>
-            <button
-              className="cg-btn cg-btn--outline"
-              style={{ flex: 1, padding: "0.4rem" }}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
               disabled={isMutating}
               onClick={() => onImpersonate(u._id)}
             >
-              <LogIn size={14} /> Login As
-            </button>
+              <LogIn size={14} className="mr-2" /> Login As
+            </Button>
           </div>
         );
       },
@@ -175,29 +175,29 @@ export function UsersPage() {
   );
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Users</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Platform Users</h1>
+          <p className="text-muted-foreground mt-1">
             Manage all users across all organizations, including super admins and org admins.
           </p>
         </div>
-        <div className="cg-page__header-actions">
-          <button
-            className="cg-btn cg-btn--outline"
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
             onClick={() => refetch()}
             disabled={isFetching}
           >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} />
             Refresh
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Users"
           value={isLoading ? "—" : stats.total}
@@ -223,39 +223,33 @@ export function UsersPage() {
       <SectionPanel
         title="User Directory"
         description="Search by name, email, or organization."
-        noPadding
       >
-        <div style={{ padding: "1rem" }}>
-          <CgFilterToolbar
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Search users..."
-            filters={
-              <div style={{ width: "180px" }}>
-                <CgSearchableSelect
-                  value={roleFilter}
-                  onValueChange={setRoleFilter}
-                  placeholder="Filter by Role"
-                  options={[
-                    { label: "Super Admin", value: "super_admin" },
-                    { label: "Org Admin", value: "org_admin" },
-                    { label: "Teacher", value: "teacher" },
-                    { label: "Student", value: "student" },
-                  ]}
-                  allowClear
-                />
-              </div>
-            }
+        <div className="p-4 flex gap-2 items-center border-b border-border">
+          <input
+            type="text"
+            className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
+          <select
+            className="border border-border rounded-md px-3 py-2 text-sm bg-background w-48"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="">Filter by Role</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="org_admin">Org Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+          </select>
         </div>
         {isError ? (
-          <div className="cg-alert cg-alert--danger">
-            <div className="cg-alert__body">
-              <span className="cg-alert__title">Failed to load users</span>
-            </div>
-            <button className="cg-btn cg-btn--outline" onClick={() => refetch()}>
+          <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200 flex flex-col items-start gap-2 m-4">
+            <span className="font-bold">Failed to load users</span>
+            <Button variant="outline" onClick={() => refetch()}>
               Retry
-            </button>
+            </Button>
           </div>
         ) : (
           <DataTable

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../services/superAdminApi";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -91,19 +91,19 @@ export function RevenuePage() {
   );
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Platform Revenue"
         description="Monitor Monthly Recurring Revenue (MRR), total platform income, and subscription status."
         actions={
-          <button className="cg-btn cg-btn--outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh Data
           </button>
         }
       />
 
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Monthly Recurring Revenue (MRR)"
           value={isLoading ? "—" : formatCurrency(revenueData.mrr)}
@@ -135,9 +135,9 @@ export function RevenuePage() {
           noPadding
         >
           {isError ? (
-            <div className="cg-alert cg-alert--danger" style={{ margin: "1rem" }}>
-              <div className="cg-alert__body">
-                <span className="cg-alert__title">Failed to load revenue data.</span>
+            <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+              <div className="p-4 rounded-md border__body">
+                <span className="p-4 rounded-md border__title">Failed to load revenue data.</span>
               </div>
             </div>
           ) : (

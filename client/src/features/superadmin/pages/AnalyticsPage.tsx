@@ -17,35 +17,35 @@ export function AnalyticsPage() {
   const totalOrgsGrown = orgGrowth.reduce((acc, curr) => acc + curr.orgs, 0);
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Analytics</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Platform Analytics</h1>
+          <p className="text-muted-foreground mt-1">
             Deep dive into user engagement, growth metrics, and platform usage.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <button
-            className="cg-btn cg-btn--outline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             onClick={() => refetch()}
             disabled={isFetching}
           >
-            <RefreshCw size={14} className={isFetching ? "cg-spin" : ""} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
             Refresh Data
           </button>
         </div>
       </div>
 
       {isError ? (
-        <div className="cg-alert cg-alert--danger" style={{ marginBottom: "1.5rem" }}>
+        <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ marginBottom: "1.5rem" }}>
           Failed to load analytics data. Check your network or permissions.
         </div>
       ) : (
         <>
           {/* Top Metrics */}
-          <div className="cg-stats-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Active Usage Score"
               value={isLoading ? "—" : activeUsage}

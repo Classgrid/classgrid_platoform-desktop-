@@ -7,13 +7,8 @@ import {
   Type, Calendar, List, CheckCircle2, AlertCircle,
   TrendingUp, BarChart2, PieChart as PieIcon, Activity
 } from "lucide-react";
-import {
-  CgPageShell, CgSectionPanel, CgAlert, CgBadge,
-  CgMetricCard, CgSelect, CgTabs, CgTabList,
-  CgTabTrigger, CgTabContent, CgPieChart,
-  CgDonutChart, CgBarChart, CgLineChart, CgHistogram
-} from "@/components/classgrid";
-import { Button as CgButton } from "@/components/classgrid/Button";
+
+
 import {
   getAdmissionConfigFull,
   updateAdmissionConfig,
@@ -135,7 +130,7 @@ export function FormBuilderPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 cg-spin text-primary" />
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
           <p className="text-muted-foreground font-medium">Initializing Form Engine...</p>
         </div>
       </div>
@@ -193,7 +188,7 @@ export function FormBuilderPage() {
   }));
 
   return (
-    <CgPageShell
+    <div
       title="Dynamic Form Builder"
       description="Design the candidate experience. Toggle fields, set requirements, and add custom institutional questions."
       breadcrumbs={[
@@ -203,37 +198,37 @@ export function FormBuilderPage() {
       ]}
       actions={
         <div className="flex gap-3">
-          <CgButton variant="outline" className="gap-2">
+          <div variant="outline" className="gap-2">
             <Eye className="w-4 h-4" /> Preview Portal
-          </CgButton>
-          <CgButton onClick={handleSave} disabled={saveMutation.isPending} className="gap-2">
-            {saveMutation.isPending ? <Sparkles className="w-4 h-4 cg-spin" /> : <Save className="w-4 h-4" />}
+          </div>
+          <div onClick={handleSave} disabled={saveMutation.isPending} className="gap-2">
+            {saveMutation.isPending ? <Sparkles className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Publish Changes
-          </CgButton>
+          </div>
         </div>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="cg-grid-1col">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="">
         
         {/* ── KPIs ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CgMetricCard 
+          <div 
             title="Total Form Fields" 
             value={totalFields.toString()} 
             icon={<LayoutTemplate className="w-4 h-4" />}
             trend={{ value: 12, label: "from default" }}
           />
-          <CgMetricCard 
+          <div 
             title="Required Fields" 
             value={requiredFields.toString()} 
             icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
           />
-          <CgMetricCard 
+          <div 
             title="Required Documents" 
             value={totalDocs.toString()} 
             icon={<FileText className="w-4 h-4 text-blue-500" />}
           />
-          <CgMetricCard 
+          <div 
             title="Custom Questions" 
             value={customFields.length.toString()} 
             icon={<Sparkles className="w-4 h-4 text-amber-500" />}
@@ -241,25 +236,25 @@ export function FormBuilderPage() {
         </div>
 
         {/* ── Analytics Visualizations ── */}
-        <CgSectionPanel title="Form Structure Analytics" description="Visual breakdown of your admission form complexity and data coverage.">
+        <div title="Form Structure Analytics" description="Visual breakdown of your admission form complexity and data coverage.">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
                 <PieIcon className="w-4 h-4" /> Category Distribution
               </p>
-              <CgPieChart data={pieData.length ? pieData : [{ name: "No Fields", value: 1, color: "#333" }]} height={240} />
+              <div data={pieData.length ? pieData : [{ name: "No Fields", value: 1, color: "#333" }]} height={240} />
             </div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
                 <PieIcon className="w-4 h-4" /> Compliance Ratio
               </p>
-              <CgDonutChart data={donutData} height={240} />
+              <div data={donutData} height={240} />
             </div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
                 <BarChart2 className="w-4 h-4" /> Field Type Mix
               </p>
-              <CgBarChart 
+              <div 
                 data={barData.length ? barData : [{ type: "N/A", count: 0 }]} 
                 indexKey="type" 
                 series={[{ key: "count", name: "Field Count", color: "#60a5fa" }]} 
@@ -272,7 +267,7 @@ export function FormBuilderPage() {
               <p className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4" /> Section Complexity (Fields per Category)
               </p>
-              <CgLineChart 
+              <div 
                 data={lineData} 
                 indexKey="step" 
                 series={[{ key: "fields", name: "Fields", color: "#34d399" }]} 
@@ -283,29 +278,29 @@ export function FormBuilderPage() {
               <p className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" /> Master Pool Density
               </p>
-              <CgHistogram data={histData} height={200} fill="#818cf8" />
+              <div data={histData} height={200} fill="#818cf8" />
             </div>
           </div>
-        </CgSectionPanel>
+        </div>
 
         {/* ── Main Builder Interface ── */}
-        <CgTabs defaultValue="fields">
-          <CgTabList>
-            <CgTabTrigger value="fields">
+        <div defaultValue="fields">
+          <div>
+            <div value="fields">
               <Type className="w-4 h-4" /> Standard Fields
-            </CgTabTrigger>
-            <CgTabTrigger value="documents">
+            </div>
+            <div value="documents">
               <FileText className="w-4 h-4" /> Document Checklist
-            </CgTabTrigger>
-            <CgTabTrigger value="custom">
+            </div>
+            <div value="custom">
               <Sparkles className="w-4 h-4" /> Custom Builder
-            </CgTabTrigger>
-            <CgTabTrigger value="settings">
+            </div>
+            <div value="settings">
               <Settings className="w-4 h-4" /> Form Rules
-            </CgTabTrigger>
-          </CgTabList>
+            </div>
+          </div>
 
-          <CgTabContent value="fields" className="mt-6">
+          <div value="fields" className="mt-6">
             <div className="grid grid-cols-12 gap-6">
               {/* Category Sidebar */}
               <div className="col-span-12 md:col-span-3 space-y-1">
@@ -320,16 +315,16 @@ export function FormBuilderPage() {
                     }`}
                   >
                     <span className="capitalize">{cat.replace(/_/g, " ")}</span>
-                    <CgBadge variant={activeCategory === cat ? "neutral" : "neutral"} className={activeCategory === cat ? "bg-white/20 text-white" : ""}>
+                    <div variant={activeCategory === cat ? "neutral" : "neutral"} className={activeCategory === cat ? "bg-white/20 text-white" : ""}>
                       {(masterFields[cat] || []).length}
-                    </CgBadge>
+                    </div>
                   </button>
                 ))}
               </div>
 
               {/* Fields Table */}
               <div className="col-span-12 md:col-span-9">
-                <CgSectionPanel 
+                <div 
                   title={`${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1).replace(/_/g, " ")} Fields`}
                   description="Configure visibility and requirement rules for this section."
                 >
@@ -355,50 +350,50 @@ export function FormBuilderPage() {
                             <p className="text-[10px] text-muted-foreground font-mono">{f.key}</p>
                           </div>
                           <div className="col-span-2 text-center">
-                            <CgBadge variant="neutral" className="text-[10px] uppercase">{f.type}</CgBadge>
+                            <div variant="neutral" className="text-[10px] uppercase">{f.type}</div>
                           </div>
                           <div className="col-span-1.5 flex justify-center">
-                            <label className="cg-switch scale-75">
+                            <label className=" scale-75">
                               <input 
                                 type="checkbox" 
                                 checked={toggle.admission} 
                                 onChange={(e) => updateToggle(f.key, 'admission', e.target.checked)} 
                               />
-                              <span className="cg-switch__slider"></span>
+                              <span className=""></span>
                             </label>
                           </div>
                           <div className="col-span-1.5 flex justify-center">
-                            <label className={`cg-switch scale-75 ${!toggle.admission ? 'opacity-20 pointer-events-none' : ''}`}>
+                            <label className={` scale-75 ${!toggle.admission ? 'opacity-20 pointer-events-none' : ''}`}>
                               <input 
                                 type="checkbox" 
                                 checked={toggle.is_required}
                                 disabled={!toggle.admission}
                                 onChange={(e) => updateToggle(f.key, 'is_required', e.target.checked)} 
                               />
-                              <span className="cg-switch__slider"></span>
+                              <span className=""></span>
                             </label>
                           </div>
                           <div className="col-span-2 flex justify-center">
-                             <label className="cg-switch scale-75">
+                             <label className=" scale-75">
                               <input 
                                 type="checkbox" 
                                 checked={toggle.onboarding}
                                 onChange={(e) => updateToggle(f.key, 'onboarding', e.target.checked)} 
                               />
-                              <span className="cg-switch__slider"></span>
+                              <span className=""></span>
                             </label>
                           </div>
                         </motion.div>
                       );
                     })}
                   </div>
-                </CgSectionPanel>
+                </div>
               </div>
             </div>
-          </CgTabContent>
+          </div>
 
-          <CgTabContent value="documents" className="mt-6">
-            <CgSectionPanel title="Document Verification Pool" description="Choose which documents candidates must upload during the application process.">
+          <div value="documents" className="mt-6">
+            <div title="Document Verification Pool" description="Choose which documents candidates must upload during the application process.">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(masterDocs || []).map((doc: any) => {
                   const toggle = docToggles.find(t => t.key === doc.key) || { admission: false, onboarding: false };
@@ -420,24 +415,24 @@ export function FormBuilderPage() {
                       <div className="flex gap-4">
                         <div className="text-center">
                           <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase">Admission</p>
-                          <label className="cg-switch scale-75">
+                          <label className=" scale-75">
                             <input 
                               type="checkbox" 
                               checked={toggle.admission} 
                               onChange={(e) => updateDocToggle(doc.key, 'admission', e.target.checked)} 
                             />
-                            <span className="cg-switch__slider"></span>
+                            <span className=""></span>
                           </label>
                         </div>
                         <div className="text-center">
                           <p className="text-[10px] font-bold text-muted-foreground mb-1 uppercase">Onboard</p>
-                          <label className="cg-switch scale-75">
+                          <label className=" scale-75">
                             <input 
                               type="checkbox" 
                               checked={toggle.onboarding} 
                               onChange={(e) => updateDocToggle(doc.key, 'onboarding', e.target.checked)} 
                             />
-                            <span className="cg-switch__slider"></span>
+                            <span className=""></span>
                           </label>
                         </div>
                       </div>
@@ -445,19 +440,19 @@ export function FormBuilderPage() {
                   );
                 })}
               </div>
-            </CgSectionPanel>
-          </CgTabContent>
+            </div>
+          </div>
 
-          <CgTabContent value="custom" className="mt-6">
-            <CgSectionPanel 
+          <div value="custom" className="mt-6">
+            <div 
               title="Custom Admission Questions" 
               description="Add unique fields that aren't part of the standard pool. These will appear in the 'Additional Info' section."
             >
               <div className="flex justify-between items-center mb-6">
-                <CgBadge variant="info">Institutional Fields: {customFields.length}</CgBadge>
-                <CgButton variant="primary" size="sm" onClick={addCustomField} className="gap-2">
+                <div variant="info">Institutional Fields: {customFields.length}</div>
+                <div variant="primary" size="sm" onClick={addCustomField} className="gap-2">
                   <Plus className="w-4 h-4" /> Create Field
-                </CgButton>
+                </div>
               </div>
 
               {customFields.length === 0 ? (
@@ -497,7 +492,7 @@ export function FormBuilderPage() {
                               newCf[idx].field_label = e.target.value;
                               setCustomFields(newCf);
                             }}
-                            className="cg-input w-full"
+                            className=" w-full"
                             placeholder="e.g. Hosteller status?"
                           />
                         </div>
@@ -505,7 +500,7 @@ export function FormBuilderPage() {
                           <label className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
                             <List className="w-3 h-3" /> Input Type
                           </label>
-                          <CgSelect
+                          <div
                             value={cf.field_type}
                             onValueChange={(val) => {
                               const newCf = [...customFields];
@@ -534,7 +529,7 @@ export function FormBuilderPage() {
                               newCf[idx].options = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
                               setCustomFields(newCf);
                             }}
-                            className="cg-input w-full"
+                            className=" w-full"
                             placeholder="e.g. Option A, Option B"
                           />
                         </motion.div>
@@ -542,7 +537,7 @@ export function FormBuilderPage() {
 
                       <div className="flex items-center gap-8 pt-4 border-t border-border/50">
                         <label className="flex items-center gap-3 text-sm font-medium cursor-pointer">
-                          <label className="cg-switch scale-75">
+                          <label className=" scale-75">
                             <input 
                               type="checkbox" 
                               checked={cf.is_required}
@@ -552,12 +547,12 @@ export function FormBuilderPage() {
                                 setCustomFields(newCf);
                               }}
                             />
-                            <span className="cg-switch__slider"></span>
+                            <span className=""></span>
                           </label>
                           Required
                         </label>
                         <label className="flex items-center gap-3 text-sm font-medium cursor-pointer text-blue-500">
-                           <label className="cg-switch scale-75">
+                           <label className=" scale-75">
                             <input 
                               type="checkbox" 
                               checked={cf.admission}
@@ -567,12 +562,12 @@ export function FormBuilderPage() {
                                 setCustomFields(newCf);
                               }}
                             />
-                            <span className="cg-switch__slider"></span>
+                            <span className=""></span>
                           </label>
                           Admission Form
                         </label>
                         <label className="flex items-center gap-3 text-sm font-medium cursor-pointer text-emerald-500">
-                           <label className="cg-switch scale-75">
+                           <label className=" scale-75">
                             <input 
                               type="checkbox" 
                               checked={cf.onboarding}
@@ -582,7 +577,7 @@ export function FormBuilderPage() {
                                 setCustomFields(newCf);
                               }}
                             />
-                            <span className="cg-switch__slider"></span>
+                            <span className=""></span>
                           </label>
                           Onboarding Form
                         </label>
@@ -591,11 +586,11 @@ export function FormBuilderPage() {
                   ))}
                 </div>
               )}
-            </CgSectionPanel>
-          </CgTabContent>
+            </div>
+          </div>
 
-          <CgTabContent value="settings" className="mt-6">
-            <CgSectionPanel title="Form Logic & Global Rules" description="Configure global behavior for the admission portal.">
+          <div value="settings" className="mt-6">
+            <div title="Form Logic & Global Rules" description="Configure global behavior for the admission portal.">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="p-6 border border-border rounded-2xl bg-muted/10">
                     <h4 className="font-bold text-sm mb-2 flex items-center gap-2"><CheckSquare className="w-4 h-4 text-primary" /> Application Validation</h4>
@@ -603,11 +598,11 @@ export function FormBuilderPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm">Auto-reject empty documents</span>
-                        <label className="cg-switch"><input type="checkbox" defaultChecked /><span className="cg-switch__slider"></span></label>
+                        <label className=""><input type="checkbox" defaultChecked /><span className=""></span></label>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm">Strict phone verification (OTP)</span>
-                        <label className="cg-switch"><input type="checkbox" defaultChecked /><span className="cg-switch__slider"></span></label>
+                        <label className=""><input type="checkbox" defaultChecked /><span className=""></span></label>
                       </div>
                     </div>
                  </div>
@@ -617,20 +612,20 @@ export function FormBuilderPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm">Close form after cutoff date</span>
-                        <label className="cg-switch"><input type="checkbox" defaultChecked /><span className="cg-switch__slider"></span></label>
+                        <label className=""><input type="checkbox" defaultChecked /><span className=""></span></label>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm">Allow edit after submission</span>
-                        <label className="cg-switch"><input type="checkbox" /><span className="cg-switch__slider"></span></label>
+                        <label className=""><input type="checkbox" /><span className=""></span></label>
                       </div>
                     </div>
                  </div>
               </div>
-            </CgSectionPanel>
-          </CgTabContent>
-        </CgTabs>
+            </div>
+          </div>
+        </div>
 
       </motion.div>
-    </CgPageShell>
+    </div>
   );
 }

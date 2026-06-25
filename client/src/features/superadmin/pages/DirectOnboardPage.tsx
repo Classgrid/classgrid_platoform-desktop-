@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle, Loader } from "lucide-react";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
 import { Badge } from "@/components/marketing_ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi, directProvisionApi } from "../services/superAdminApi";
@@ -88,18 +88,18 @@ export function DirectOnboardPage() {
   }, [orgs]);
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Onboard New Organization</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Onboard New Organization</h1>
+          <p className="text-muted-foreground mt-1">
             Directly provision a new institution without requiring a demo request. Admin credentials will be emailed automatically.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <button
-            className="cg-btn cg-btn--primary"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
             onClick={() => { setShowForm(true); setResult(null); }}
           >
             <Plus size={14} /> Add Organization
@@ -108,31 +108,31 @@ export function DirectOnboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="cg-stats-grid">
-        <CgMetricCard title="Total Organizations" value={orgsLoading ? "—" : stats.total} icon={<Building2 size={16} />} />
-        <CgMetricCard title="Active" value={orgsLoading ? "—" : stats.active} icon={<CheckCircle size={16} />} />
-        <CgMetricCard title="Trial / Demo" value={orgsLoading ? "—" : stats.trial} icon={<Users size={16} />} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div title="Total Organizations" value={orgsLoading ? "—" : stats.total} icon={<Building2 size={16} />} />
+        <div title="Active" value={orgsLoading ? "—" : stats.active} icon={<CheckCircle size={16} />} />
+        <div title="Trial / Demo" value={orgsLoading ? "—" : stats.trial} icon={<Users size={16} />} />
       </div>
 
       {/* Modal Form */}
       {showForm && (
-        <div className="cg-modal-overlay">
-          <div className="cg-modal cg-modal--lg">
-            <div className="cg-modal__header">
-              <h2 className="cg-modal__title">Provision New Organization</h2>
-              <button className="cg-modal__close" onClick={() => setShowForm(false)}>
+        <div className="">
+          <div className=" ">
+            <div className="">
+              <h2 className="">Provision New Organization</h2>
+              <button className="" onClick={() => setShowForm(false)}>
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="cg-modal__body">
+            <form onSubmit={handleSubmit} className="">
               {result && (
-                <div className={`cg-alert cg-alert--${result.success ? "success" : "danger"}`} style={{ marginBottom: "1.25rem" }}>
-                  <div className="cg-alert__body">
-                    <span className="cg-alert__title">{result.success ? "✅ Provisioned!" : "❌ Failed"}</span>
-                    <p className="cg-alert__message">{result.message}</p>
+                <div className={`p-4 rounded-md border p-4 rounded-md border--${result.success ? "success" : "danger"}`} style={{ marginBottom: "1.25rem" }}>
+                  <div className="p-4 rounded-md border__body">
+                    <span className="p-4 rounded-md border__title">{result.success ? "✅ Provisioned!" : "❌ Failed"}</span>
+                    <p className="p-4 rounded-md border__message">{result.message}</p>
                     {result.success && result.activation && (
-                      <p className="cg-alert__message" style={{ marginTop: "0.5rem" }}>
+                      <p className="p-4 rounded-md border__message" style={{ marginTop: "0.5rem" }}>
                         Activation link sent to admin email. Code expires in 5 minutes.
                       </p>
                     )}
@@ -140,11 +140,11 @@ export function DirectOnboardPage() {
                 </div>
               )}
 
-              <div className="cg-form-grid">
-                <div className="cg-field cg-field--full">
-                  <label className="cg-field__label">Institution Name *</label>
+              <div className="">
+                <div className=" ">
+                  <label className="">Institution Name *</label>
                   <input
-                    className="cg-input"
+                    className=""
                     required
                     placeholder="e.g. Sunrise Public School"
                     value={form.institutionName}
@@ -152,24 +152,24 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">Organization Type *</label>
-                  <select className="cg-input" value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
+                <div className="">
+                  <label className="">Organization Type *</label>
+                  <select className="" value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
                     {ORG_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">Plan</label>
-                  <select className="cg-input" value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
+                <div className="">
+                  <label className="">Plan</label>
+                  <select className="" value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
                     {PLAN_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </select>
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">Admin Full Name *</label>
+                <div className="">
+                  <label className="">Admin Full Name *</label>
                   <input
-                    className="cg-input"
+                    className=""
                     required
                     placeholder="Principal / Admin name"
                     value={form.adminName}
@@ -177,10 +177,10 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">Admin Email *</label>
+                <div className="">
+                  <label className="">Admin Email *</label>
                   <input
-                    className="cg-input"
+                    className=""
                     type="email"
                     required
                     placeholder="admin@institution.edu"
@@ -189,40 +189,40 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">Admin Phone</label>
+                <div className="">
+                  <label className="">Admin Phone</label>
                   <input
-                    className="cg-input"
+                    className=""
                     placeholder="+91 9000000000"
                     value={form.adminPhone}
                     onChange={(e) => setForm((f) => ({ ...f, adminPhone: e.target.value }))}
                   />
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">City</label>
+                <div className="">
+                  <label className="">City</label>
                   <input
-                    className="cg-input"
+                    className=""
                     placeholder="Pune"
                     value={form.city}
                     onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                   />
                 </div>
 
-                <div className="cg-field">
-                  <label className="cg-field__label">State</label>
-                  <select className="cg-input" value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
+                <div className="">
+                  <label className="">State</label>
+                  <select className="" value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
                     {INDIA_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
 
-              <div className="cg-modal__footer">
-                <button type="button" className="cg-btn cg-btn--outline" onClick={() => setShowForm(false)}>
+              <div className="">
+                <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="cg-btn cg-btn--primary" disabled={mutation.isPending}>
-                  {mutation.isPending ? <><Loader size={14} className="cg-spin" /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
+                <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={mutation.isPending}>
+                  {mutation.isPending ? <><Loader size={14} className="animate-spin" /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
                 </button>
               </div>
             </form>
@@ -231,21 +231,21 @@ export function DirectOnboardPage() {
       )}
 
       {/* Organizations Table */}
-      <CgSectionPanel
+      <div
         title="All Organizations"
         description="Every institution currently provisioned on Classgrid."
         noPadding
         style={{ marginTop: "1.5rem" }}
       >
         {orgsLoading ? (
-          <div className="cg-empty-state"><Loader size={20} className="cg-spin" /> Loading…</div>
+          <div className=""><Loader size={20} className="animate-spin" /> Loading…</div>
         ) : orgs.length === 0 ? (
-          <div className="cg-empty-state">
-            <Building2 size={32} className="cg-empty-state__icon" />
+          <div className="">
+            <Building2 size={32} className="" />
             <p>No organizations yet. Provision your first one above.</p>
           </div>
         ) : (
-          <table className="cg-table">
+          <table className="">
             <thead>
               <tr>
                 <th>Organization</th>
@@ -279,7 +279,7 @@ export function DirectOnboardPage() {
             </tbody>
           </table>
         )}
-      </CgSectionPanel>
+      </div>
     </div>
   );
 }

@@ -106,19 +106,19 @@ export function ConfigPage() {
   };
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Configuration</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Platform Configuration</h1>
+          <p className="text-muted-foreground mt-1">
             System health overview and global feature flag (kill switch) management.
           </p>
         </div>
       </div>
 
       {/* Metrics (Health) */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Server Status"
           value={healthLoading ? "—" : healthData?.status?.toUpperCase() ?? "UNKNOWN"}
@@ -147,9 +147,9 @@ export function ConfigPage() {
         description="Toggle features across the entire platform globally. Disabling a feature hides it instantly for all organizations."
         noPadding
         actions={
-          <div className="cg-toolbar__search">
+          <div className="">
             <input
-              className="cg-toolbar__search-input"
+              className=""
               placeholder="Search flags or modules…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

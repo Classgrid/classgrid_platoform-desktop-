@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
+
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
@@ -169,8 +169,8 @@ export function BackupPage() {
   ], []);
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Backup & Recovery"
         description="Export platform data collections, run integrity checks, and monitor system storage health."
         actions={
@@ -188,7 +188,7 @@ export function BackupPage() {
       />
 
       {/* Top Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Records" value={statsLoading ? "—" : formatCount(totalRecords)} icon={<Database size={15} />} />
         <StatCard title="Collections" value={statsLoading ? "—" : collections.length} icon={<Shield size={15} />} />
         <StatCard title="Memory" value={metricsLoading ? "—" : `${metrics?.memoryMB ?? 0} MB`} icon={<HardDrive size={15} />} />

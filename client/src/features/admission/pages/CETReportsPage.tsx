@@ -1,13 +1,9 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { 
-    PageShell, 
-    PageHeader,
-    ExportMenu
-} from "@/components/classgrid";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgPieChart } from "@/components/classgrid/CgPieChart";
+
+
+
 
 export function CETReportsPage() {
     const token = localStorage.getItem("token") || "";
@@ -63,11 +59,11 @@ export function CETReportsPage() {
                 {/* 1. Branch Fill Rates */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Branch Fill Rates (Claimed Seats)</h3>
                     <div className="h-[300px]">
-                        <CgBarChart 
+                        <div 
                             data={branchData}
                             xAxisKey="label"
                             series={[
@@ -81,11 +77,11 @@ export function CETReportsPage() {
                 {/* 2. CAP Round Statistics */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">CAP Round Retention</h3>
                     <div className="h-[300px]">
-                        <CgBarChart 
+                        <div 
                             data={capRoundData}
                             xAxisKey="label"
                             series={[
@@ -100,12 +96,12 @@ export function CETReportsPage() {
                 {/* 3. RLA Verification Status */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">RLA Verification Status</h3>
                     <div className="h-[300px]">
                         {rlaData.length > 0 ? (
-                            <CgPieChart data={rlaData} />
+                            <div data={rlaData} />
                         ) : (
                             <div className="h-full flex items-center justify-center text-muted-foreground">
                                 No RLA data available
@@ -117,7 +113,7 @@ export function CETReportsPage() {
                 {/* 4. Live Seat Matrix Snapshot */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Live Seat Matrix (Vacancies)</h3>
                     <div className="h-[300px] overflow-y-auto pr-2">

@@ -47,7 +47,7 @@ const columns: ColumnDef<Review>[] = [
       return (
         <div>
           <div style={{ fontWeight: 500 }}>{r.name}</div>
-          <div className="cg-table__info">{r.college}</div>
+          <div className="">{r.college}</div>
         </div>
       );
     },
@@ -147,16 +147,16 @@ export function ReviewsPage() {
   }, [reviews, search]);
 
   return (
-    <div className="cg-page">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       {/* Header */}
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Reviews</h1>
-          <p className="cg-page__description">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Platform Reviews</h1>
+          <p className="text-muted-foreground mt-1">
             Monitor user feedback, public reviews, and feature suggestions from users.
           </p>
         </div>
-        <div className="cg-page__header-actions">
+        <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
             <RefreshCw size={14} /> Refresh
           </Button>
@@ -164,7 +164,7 @@ export function ReviewsPage() {
       </div>
 
       {/* Metrics */}
-      <div className="cg-stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Reviews"
           value={isLoading ? "—" : stats.total}
@@ -192,10 +192,10 @@ export function ReviewsPage() {
         description="All reviews submitted across the platform."
         noPadding
         actions={
-          <div className="cg-toolbar__search">
-            <TrendingUp size={14} className="cg-toolbar__search-icon" />
+          <div className="">
+            <TrendingUp size={14} className="" />
             <input
-              className="cg-toolbar__search-input"
+              className=""
               placeholder="Search reviewer or college…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

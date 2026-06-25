@@ -3,12 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, RefreshCw, Clock, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { CgPageHeader } from "@/components/classgrid/PageHeader";
-import { CgSectionPanel } from "@/components/classgrid/SectionPanel";
-import { CgMetricCard } from "@/components/classgrid/MetricCard";
+
+
+
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { CgDataTable } from "@/components/classgrid/DataTable";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate, formatTime } from "@/utils/dateUtils";
@@ -112,11 +112,11 @@ export function RollbackPage() {
   const eligible = candidates.filter(c => c.rollbackStatus !== "rolled_back").length;
 
   return (
-    <div className="cg-page cg-animate-in">
-      <CgPageHeader
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div
         title="Rollback Actions"
         description="Undo critical admin actions from the last 7 days. Only destructive/reversible actions are listed here."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "cg-spin" : ""} /> Refresh</Button>}
+        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
       />
 
       {/* Info */}
@@ -130,20 +130,20 @@ export function RollbackPage() {
         </div>
       </div>
 
-      <div className="cg-stats-grid">
-        <CgMetricCard title="Eligible for Rollback" value={isLoading ? "—" : eligible} icon={<RotateCcw size={15} />} />
-        <CgMetricCard title="Already Rolled Back" value={isLoading ? "—" : rolled} icon={<CheckCircle2 size={15} />} />
-        <CgMetricCard title="Total Tracked" value={isLoading ? "—" : candidates.length} icon={<Clock size={15} />} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div title="Eligible for Rollback" value={isLoading ? "—" : eligible} icon={<RotateCcw size={15} />} />
+        <div title="Already Rolled Back" value={isLoading ? "—" : rolled} icon={<CheckCircle2 size={15} />} />
+        <div title="Total Tracked" value={isLoading ? "—" : candidates.length} icon={<Clock size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <CgSectionPanel title="Rollback Candidates" description="Destructive actions from the last 7 days. Click 'Rollback' to reverse." noPadding>
-          <CgDataTable columns={columns} data={candidates} isLoading={isLoading} pageSize={50}
+        <div title="Rollback Candidates" description="Destructive actions from the last 7 days. Click 'Rollback' to reverse." noPadding>
+          <div columns={columns} data={candidates} isLoading={isLoading} pageSize={50}
             emptyIcon={<CheckCircle2 size={32} />}
             emptyTitle="No rollback candidates"
             emptyDescription={data?.note ?? "No reversible actions found in the last 7 days. Actions will appear here as they are performed."}
             emptyMessage="Nothing to roll back." />
-        </CgSectionPanel>
+        </div>
       </div>
 
       {/* Confirm Dialog */}

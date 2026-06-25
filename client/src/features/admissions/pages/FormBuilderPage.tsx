@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Save, FileText, LayoutList } from "lucide-react";
-import { CgPageShell, CgSectionPanel, CgAlert, CgBadge } from "@/components/classgrid";
+
 import { useMasterFieldPool, useMasterDocumentPool, useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
 import indiaLocationsData from "@/data/india-locations.json";
 
@@ -103,21 +103,21 @@ export function FormBuilderPage() {
   if (poolLoading || configLoading || docLoading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
-        <Loader2 size={24} className="cg-spin" />
+        <Loader2 size={24} className="animate-spin" />
       </div>
     );
   }
 
   if (poolError || configError || docError) {
     return (
-      <CgPageShell title="Form Builder">
-        <CgAlert variant="danger" title="API Error">Could not connect to backend services.</CgAlert>
-      </CgPageShell>
+      <div title="Form Builder">
+        <div variant="danger" title="API Error">Could not connect to backend services.</div>
+      </div>
     );
   }
 
   return (
-    <CgPageShell
+    <div
       title="Dynamic Form Builder"
       description="Configure both the textual fields and the required document uploads for your admission pipeline."
       breadcrumbs={[
@@ -126,9 +126,9 @@ export function FormBuilderPage() {
       ]}
     >
       {updateConfig.isSuccess && (
-        <CgAlert variant="success" title="Successfully Saved!">
+        <div variant="success" title="Successfully Saved!">
           Your form fields and required documents have been updated across the entire portal.
-        </CgAlert>
+        </div>
       )}
 
       {/* Floating Save Bar */}
@@ -153,12 +153,12 @@ export function FormBuilderPage() {
           </p>
         </div>
         <button 
-          className="cg-btn cg-btn--primary" 
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" 
           onClick={handleSave} 
           disabled={updateConfig.isPending}
           style={{ padding: "0.75rem 1.5rem", fontSize: "1rem" }}
         >
-          {updateConfig.isPending ? <Loader2 size={18} className="cg-spin" /> : <Save size={18} />}
+          {updateConfig.isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           Save Form Configuration
         </button>
       </div>
@@ -231,7 +231,7 @@ export function FormBuilderPage() {
             if (searchQuery && filteredFields.length === 0) return null;
 
             return (
-            <CgSectionPanel key={sectionKey} title={section.label}>
+            <div key={sectionKey} title={section.label}>
               <div style={{ 
                 display: "grid", 
                 gridTemplateColumns: "2fr 1fr 1fr 1fr", 
@@ -268,7 +268,7 @@ export function FormBuilderPage() {
                       <div>
                         <div style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           {field.label}
-                          {isLocked && <CgBadge variant="warning" size="sm">Locked by CET</CgBadge>}
+                          {isLocked && <div variant="warning" size="sm">Locked by CET</div>}
                         </div>
                         <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", marginTop: "0.25rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
                           <span style={{ background: "hsl(var(--muted))", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
@@ -290,7 +290,7 @@ export function FormBuilderPage() {
                         {/* Interactive Dropdown Previews for Admin Verification */}
                         {field?.key?.endsWith("_country") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select Country</option>
                               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
@@ -299,7 +299,7 @@ export function FormBuilderPage() {
                         
                         {field?.key?.endsWith("_state") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select State</option>
                               {Object.keys(indiaLocationsData.states || {}).map(s => <option key={s} value={s}>{s}</option>)}
                               <option>Other</option>
@@ -309,7 +309,7 @@ export function FormBuilderPage() {
 
                         {field?.key?.endsWith("_district") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select District</option>
                               {Object.values(indiaLocationsData.states || {}).flatMap((stateObj: any) => Object.keys(stateObj || {})).slice(0, 50).map(d => <option key={d} value={d}>{d}</option>)}
                               <option disabled>...</option>
@@ -319,7 +319,7 @@ export function FormBuilderPage() {
 
                         {field?.key?.endsWith("_taluka") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="cg-form__input" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select Taluka</option>
                               <option disabled>Select a District to view Talukas</option>
                             </select>
@@ -361,14 +361,14 @@ export function FormBuilderPage() {
                   );
                 })}
               </div>
-            </CgSectionPanel>
+            </div>
           )})}
         </div>
       )}
 
       {/* ── DOCUMENTS TAB ── */}
       {activeTab === "documents" && (
-        <CgSectionPanel title="Required Documents">
+        <div title="Required Documents">
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: "2fr 1fr 1fr", 
@@ -432,9 +432,9 @@ export function FormBuilderPage() {
               );
             })}
           </div>
-        </CgSectionPanel>
+        </div>
       )}
 
-    </CgPageShell>
+    </div>
   );
 }

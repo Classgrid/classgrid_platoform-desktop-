@@ -1,26 +1,26 @@
 import React from "react";
 import { Palette } from "lucide-react";
 import { useTheme } from "next-themes";
-import { CgSwitch } from "@/components/classgrid/Switch";
+import { Switch } from "@/components/marketing_ui/switch";
 
 export function SettingsAppearanceCard() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="cg-settings-card">
-      <div className="cg-settings-card-header">
-        <h2 className="cg-settings-card-title flex items-center gap-2">
+    <div className="bg-card border border-border rounded-xl shadow-sm mb-6">
+      <div className="p-5 border-b border-border">
+        <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
           <Palette size={18} className="text-foreground" /> Appearance
         </h2>
-        <p className="cg-settings-card-description">Customize how Classgrid looks on your device.</p>
+        <p className="text-sm text-muted-foreground mt-1">Customize how Classgrid looks on your device.</p>
       </div>
       
-      <div className="cg-settings-row">
-        <div className="cg-settings-row-info">
-          <span className="cg-settings-row-title">Dark Mode</span>
-          <span className="cg-settings-row-desc">Enable dark theme for the dashboard</span>
+      <div className="flex items-center justify-between p-5">
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-sm text-foreground">Dark Mode</span>
+          <span className="text-xs text-muted-foreground">Enable dark theme for the dashboard</span>
         </div>
-        <CgSwitch 
+        <Switch 
           checked={theme === "dark"} 
           onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} 
         />

@@ -1,17 +1,12 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { 
-    PageShell, 
-    PageHeader,
-    Tabs,
-    ExportMenu
-} from "@/components/classgrid";
-import { CgPieChart } from "@/components/classgrid/CgPieChart";
-import { CgHistogram } from "@/components/classgrid/CgHistogram";
-import { CgBarChart } from "@/components/classgrid/CgBarChart";
-import { CgLineChart } from "@/components/classgrid/CgLineChart";
-import { CgDonutChart } from "@/components/classgrid/CgDonutChart";
+
+
+
+
+
+
 
 export default function AdmissionAnalyticsPage() {
     const [selectedHierarchy, setSelectedHierarchy] = useState<string>("");
@@ -90,7 +85,7 @@ export default function AdmissionAnalyticsPage() {
                 />
                 <div className="flex gap-4">
                     <select 
-                        className="cg-input"
+                        className=""
                         value={selectedHierarchy}
                         onChange={(e) => setSelectedHierarchy(e.target.value)}
                     >
@@ -105,19 +100,19 @@ export default function AdmissionAnalyticsPage() {
 
             {/* Top Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
                     <span className="text-sm text-muted-foreground">Total Applications</span>
                     <span className="text-3xl font-bold">{analyticsData?.summary?.total_applications || 0}</span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
                     <span className="text-sm text-muted-foreground">Conversion Rate</span>
                     <span className="text-3xl font-bold text-green-500">{analyticsData?.summary?.conversion_rate || "0%"}</span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
                     <span className="text-sm text-muted-foreground">Fee Collected</span>
                     <span className="text-3xl font-bold text-primary">₹{analyticsData?.summary?.fee_total_revenue?.toLocaleString() || 0}</span>
                 </motion.div>
-                <motion.div whileHover={{ y: -4 }} className="cg-card p-4 flex flex-col justify-center">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
                     <span className="text-sm text-muted-foreground">Verified Docs</span>
                     <span className="text-3xl font-bold">{analyticsData?.document_summary?.verified || 0}</span>
                 </motion.div>
@@ -129,11 +124,11 @@ export default function AdmissionAnalyticsPage() {
                 {/* 1. Line Chart: Cumulative Applications Over Time */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Cumulative Applications Over Time</h3>
                     <div className="h-[300px]">
-                        <CgLineChart 
+                        <div 
                             data={formatLineChartData(analyticsData?.daily_trend)}
                             xAxisKey="label"
                             series={[{ key: "value", color: "hsl(var(--primary))", name: "Total Applications" }]}
@@ -144,11 +139,11 @@ export default function AdmissionAnalyticsPage() {
                 {/* 2. Donut Chart: Conversion Funnel */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Conversion Funnel</h3>
                     <div className="h-[300px]">
-                        <CgDonutChart 
+                        <div 
                             data={formatFunnelData(analyticsData?.summary?.funnel)} 
                             centerLabel="Funnel"
                         />
@@ -158,11 +153,11 @@ export default function AdmissionAnalyticsPage() {
                 {/* 3. Histogram: Score Distribution */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Score Distribution (Merit Buckets)</h3>
                     <div className="h-[300px]">
-                        <CgHistogram 
+                        <div 
                             data={formatHistogramData(analyticsData?.score_distribution)}
                             xAxisKey="range"
                             barKey="count"
@@ -174,11 +169,11 @@ export default function AdmissionAnalyticsPage() {
                 {/* 4. Bar Graph: Category Breakdown */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Category Daily Trends</h3>
                     <div className="h-[300px]">
-                        <CgBarChart 
+                        <div 
                             data={formatBarData(analyticsData?.breakdown?.by_category)}
                             xAxisKey="label"
                             series={[{ key: "value", color: "hsl(var(--chart-3))", name: "Count" }]}
@@ -189,22 +184,22 @@ export default function AdmissionAnalyticsPage() {
                 {/* 5. Pie Chart: Seat Type Breakdown */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Seat Type Breakdown</h3>
                     <div className="h-[300px]">
-                        <CgPieChart data={pieSeatData} />
+                        <div data={pieSeatData} />
                     </div>
                 </motion.div>
 
                 {/* 6. Pie Chart: Document Status */}
                 <motion.div 
                     initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                    className="cg-card p-6"
+                    className=" p-6"
                 >
                     <h3 className="text-lg font-semibold mb-4">Document Verification Status</h3>
                     <div className="h-[300px]">
-                        <CgPieChart data={[
+                        <div data={[
                             { id: "Verified", label: "Verified", value: analyticsData?.document_summary?.verified || 0 },
                             { id: "Pending", label: "Pending", value: analyticsData?.document_summary?.pending || 0 },
                             { id: "Rejected", label: "Rejected", value: analyticsData?.document_summary?.rejected || 0 }

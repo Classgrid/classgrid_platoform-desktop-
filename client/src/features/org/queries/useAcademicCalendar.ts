@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CalendarEvent } from "@/components/classgrid/CgCalendar";
+
 import { addDays, subDays } from "date-fns";
 
 export function useAcademicCalendar() {
