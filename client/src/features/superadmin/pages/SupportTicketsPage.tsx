@@ -413,17 +413,17 @@ export function SupportTicketsPage() {
   // ── Ticket List View ──────────────────────────────────────────────────────
   if (!selectedTicket) {
     return (
-      <div className="cg-page">
+      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="cg-page__header">
-          <div className="cg-page__header-content">
-            <h1 className="cg-page__title">Support Tickets</h1>
-            <p className="cg-page__description">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Support Tickets</h1>
+            <p className="text-sm text-muted-foreground">
               Manage and resolve platform support tickets raised by institution
               users.
             </p>
           </div>
-          <div className="cg-page__header-actions">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               onClick={() => refetch()}
@@ -440,7 +440,7 @@ export function SupportTicketsPage() {
         </div>
 
         {/* Metrics */}
-        <div className="cg-stats-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Open"
             value={isLoading ? "—" : displayStats.open}
@@ -465,9 +465,9 @@ export function SupportTicketsPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-2 mb-4">
-          <Filter size={14} className="text-muted-foreground" />
+          <Filter size={14} className="text-muted-foreground shrink-0" />
           <select
-            className="cg-select__trigger"
+            className="flex h-9 w-full sm:w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -478,7 +478,7 @@ export function SupportTicketsPage() {
             ))}
           </select>
           <select
-            className="cg-select__trigger"
+            className="flex h-9 w-full sm:w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
           >
@@ -681,7 +681,7 @@ export function SupportTicketsPage() {
   const SUPABASE_URL = "https://bumxgscngzjadyozdpce.supabase.co";
 
   return (
-    <div className="cg-page" style={{ paddingBottom: 0 }}>
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Breadcrumb */}
       <div className="mb-6">
         <Breadcrumb>
