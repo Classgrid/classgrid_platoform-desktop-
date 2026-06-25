@@ -130,17 +130,17 @@ const TERMINOLOGY_MAP = {
         org_label: "Institute",
         top_level: "Course",
         course: "Course",
-        year: null,  // Coaching has no year concept
-        period: null, // Coaching has no semester concept
-        division: null, // Coaching blocks divisions
+        year: "Year", 
+        period: "Phase", 
+        division: "Batch", 
         sub_batch: null,
         student_id: "Enrollment No",
         student_id_long: "Enrollment Number",
         teacher: "Mentor",
-        classroom: "Batch",
+        classroom: "Classroom",
         add_student: "Enroll Student",
         add_teacher: "Add Mentor",
-        hierarchy: ["Course", "Batch"],
+        hierarchy: ["Course", "Year", "Phase", "Batch"],
         assignment_label: "Practice Set",
         exam_label: "Mock Test",
         id_card_title: "MENTOR IDENTITY CARD",

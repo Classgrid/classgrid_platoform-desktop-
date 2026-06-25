@@ -1,59 +1,49 @@
-import { ActivityFeed, StatTile, TablePanel } from "@/components/dashboard/DashboardWidgets";
+import React from "react";
+import { Users, BedDouble, FileKey, AlertCircle } from "lucide-react";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { DataTable } from "@/components/marketing_ui/data-table";
+
+const hostelColumns = [
+  { accessorKey: "student", header: "Student" },
+  { accessorKey: "room", header: "Room No." },
+  { accessorKey: "status", header: "Status" },
+  { accessorKey: "contact", header: "Contact" },
+];
+
+const hostelData = [
+  { id: "1", student: "Aarav Patel", room: "A-101", status: "Present", contact: "+91 9876543210" },
+  { id: "2", student: "Riya Sharma", room: "B-205", status: "On Leave", contact: "+91 9876543211" },
+  { id: "3", student: "Dev Kumar", room: "A-302", status: "Present", contact: "+91 9876543212" },
+];
 
 export function HostelDashboardPage() {
   return (
-    <div className="cg-page">
-      <div className="cg-page__header cg-page__header--split">
-        <div>
-          <h1>Hostel &amp; Transport Dashboard</h1>
-          <p>Manage rooms, residents, transport routes, and complaints.</p>
-        </div>
-        <div className="cg-page__meta">
-          <span className="cg-page__meta-label">Occupancy</span>
-          <strong>142 rooms</strong>
-        </div>
+    <DashboardLayout role="HOSTEL_MENU">
+      <PageHeader 
+        title="Hostel Management" 
+        description="Manage residents, rooms, and daily operations." 
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <StatCard title="Total Residents" value="450" icon={Users} trend="95% capacity" trendDirection="up" />
+        <StatCard title="Available Beds" value="24" icon={BedDouble} trend="5% vacancy" trendDirection="neutral" />
+        <StatCard title="Pending Passes" value="12" icon={FileKey} trend="Needs approval" trendDirection="neutral" />
+        <StatCard title="Open Complaints" value="3" icon={AlertCircle} trend="Resolved 5 today" trendDirection="up" />
       </div>
 
-      <section className="cg-stats-grid">
-        <StatTile label="Total Residents" value="386" meta="Across all blocks" />
-        <StatTile label="Rooms Occupied" value="142" meta="Out of 180 total" />
-        <StatTile label="Open Complaints" value="17" meta="Pending resolution" />
-        <StatTile label="Bus Routes" value="9" meta="Active routes" />
-      </section>
-
-      <section className="cg-two-col">
-        <TablePanel
-          title="Room Allocation Table"
-          actions={["Search", "Filter", "Export"]}
-          columns={[
-            { key: "block", label: "Block" },
-            { key: "floor", label: "Floor" },
-            { key: "occupied", label: "Occupied" },
-            { key: "vacant", label: "Vacant" }
-          ]}
-          rows={[
-            { block: "Block A", floor: "Ground", occupied: "24", vacant: "4" },
-            { block: "Block A", floor: "First", occupied: "26", vacant: "2" },
-            { block: "Block B", floor: "Ground", occupied: "22", vacant: "6" }
-          ]}
-        />
-        <div style={{ display: "grid", gap: "0.8rem" }}>
-          <ActivityFeed
-            title="Recent Complaints"
-            entries={[
-              { label: "Water issue in Block B room 204", time: "11m ago" },
-              { label: "Bus 3 delayed on Route C this morning", time: "58m ago" }
-            ]}
-          />
-          <article className="cg-panel cg-panel--stack">
-            <div className="cg-panel__title-row"><h3>Transport Routes Summary</h3></div>
-            <p className="cg-panel__text">Route A: <strong>3 buses | 142 students</strong></p>
-            <p className="cg-panel__text">Route B: <strong>2 buses | 96 students</strong></p>
-            <p className="cg-panel__text">Route C: <strong>4 buses | 188 students</strong></p>
-            <p className="cg-panel__text">1 delay reported today</p>
-          </article>
-        </div>
-      </section>
-    </div>
+      <div className="grid grid-cols-1 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Resident Directory</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable columns={hostelColumns} data={hostelData} />
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

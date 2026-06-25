@@ -1,1 +1,0 @@
-export const CgTabs = ({children}:any) => <div>{children}</div>; export const CgTabList = ({children}:any) => <div>{children}</div>; export const CgTabTrigger = ({children}:any) => <div>{children}</div>; export const CgTabContent = ({children}:any) => <div>{children}</div>;

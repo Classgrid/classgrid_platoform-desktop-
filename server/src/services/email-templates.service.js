@@ -6,7 +6,7 @@ const getFrontendUrl = () => {
   return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
 };
 
-const PLATFORM_LOGO_URL = "https://classgrid.in/Classgrid.png";
+const PLATFORM_LOGO_URL = "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
 const providerConfig = {
   manual: { name: "Email & Password" },

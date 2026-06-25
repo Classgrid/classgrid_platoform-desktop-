@@ -1,1 +1,0 @@
-export const CgModal = ({children}:any) => <div>{children}</div>; export const CgModalContent = ({children}:any) => <div>{children}</div>; export const CgModalFooter = ({children}:any) => <div>{children}</div>;

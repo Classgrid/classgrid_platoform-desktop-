@@ -1,21 +1,41 @@
-type StatCardProps = {
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./card";
+
+export interface StatCardProps {
   title: string;
   value: string | number;
   icon?: React.ReactNode;
-};
+  trend?: string;
+  trendDirection?: "up" | "down" | "neutral";
+}
 
-export function StatCard({ title, value, icon }: StatCardProps) {
+export function StatCard({ title, value, icon, trend, trendDirection }: StatCardProps) {
   return (
-    <article className="flex items-center justify-between p-6 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <div>
-        <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-        <strong className="text-3xl font-extrabold text-foreground">{value}</strong>
-      </div>
-      {icon && (
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
-          {icon}
-        </div>
-      )}
-    </article>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon && (
+          <div className="text-muted-foreground [&>svg]:w-4 [&>svg]:h-4">
+            {icon}
+          </div>
+        )}
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-extrabold text-foreground">{value}</div>
+        {trend && (
+          <p
+            className={`text-xs mt-1 font-medium ${
+              trendDirection === "up"
+                ? "text-emerald-500"
+                : trendDirection === "down"
+                ? "text-red-500"
+                : "text-muted-foreground"
+            }`}
+          >
+            {trend}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

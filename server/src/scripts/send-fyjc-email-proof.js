@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 
 const FROM = `"${process.env.BREVO_SENDER_NAME || "Classgrid"}" <${process.env.BREVO_SENDER_EMAIL || "support@classgrid.in"}>`;
 const TO = "nikhilsubsun123@gmail.com";
-const LOGO = "https://classgrid.in/Classgrid.png";
+const LOGO = "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
 function base(title, content, ignore = null) {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${title} - Classgrid</title>

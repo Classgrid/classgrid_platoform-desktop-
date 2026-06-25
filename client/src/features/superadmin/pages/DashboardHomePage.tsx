@@ -8,13 +8,15 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { StatCard } from "@/components/marketing_ui/StatCard";
-import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { dashboardApi, leadsApi, type SuperAdminOrganization } from "../services/superAdminApi";
 
 const orgStatusVariant = (status?: string) => {
   if (status === "active") return "success";
-  if (status === "suspended" || status === "blocked") return "danger";
+  if (status === "suspended" || status === "blocked") return "destructive";
   return "warning";
 };
 
@@ -64,13 +66,13 @@ export function DashboardHomePage() {
         accessorKey: "name",
         header: "Organization",
         cell: ({ row }) => (
-          <div className="cg-table__cell-identity">
-            <span className="inline-flex size-8 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
-              <Building2 size={15} />
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
+              <Building2 size={18} />
             </span>
-            <div>
-              <div className="cg-table__cell-primary">{row.original.name}</div>
-              <small className="cg-table__cell-secondary">{row.original.ownerEmail || "No owner email"}</small>
+            <div className="flex flex-col">
+              <span className="font-medium text-sm text-foreground">{row.original.name}</span>
+              <span className="text-xs text-muted-foreground">{row.original.ownerEmail || "No owner email"}</span>
             </div>
           </div>
         ),
@@ -78,176 +80,180 @@ export function DashboardHomePage() {
       {
         accessorKey: "plan",
         header: "Plan",
-        cell: ({ row }) => <span style={{ textTransform: "capitalize" }}>{row.original.plan || "not set"}</span>,
+        cell: ({ row }) => <span className="capitalize text-sm">{row.original.plan || "not set"}</span>,
       },
       {
         accessorKey: "userCount",
         header: "Users",
-        cell: ({ row }) => <span className="cg-table__cell-value">{row.original.userCount ?? 0}</span>,
+        cell: ({ row }) => <span className="font-medium text-sm">{row.original.userCount ?? 0}</span>,
       },
       {
         accessorKey: "status",
         header: "Status",
-        cell: ({ row }) => (
-          <Badge variant={orgStatusVariant(row.original.status)} dot>
-            {row.original.status ?? "unknown"}
-          </Badge>
-        ),
+        cell: ({ row }) => {
+          const variant = orgStatusVariant(row.original.status) as any;
+          return (
+            <Badge variant={variant === "warning" ? "secondary" : variant}>
+              {row.original.status ?? "unknown"}
+            </Badge>
+          );
+        },
       },
     ],
     []
   );
 
   return (
-    <div className="cg-page">
-      <div className="cg-page__header">
-        <div className="cg-page__header-content">
-          <h1 className="cg-page__title">Platform Overview</h1>
-          <p className="cg-page__description">
-            Live platform metrics, recent organizations, and operational queues from the backend.
-          </p>
-        </div>
-        <div className="cg-page__header-actions">
+    <DashboardLayout role="super_admin" user={{ name: "Super Admin", email: "super@classgrid.in" }}>
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto flex flex-col w-full">
+        <PageHeader 
+          title="Super Admin Overview" 
+          description="Manage all organizations and platform metrics."
+        >
           <Button variant="outline" onClick={() => { refetch(); refetchOrgs(); }} disabled={isFetching || orgsFetching}>
-            <RefreshCw size={14} className={isFetching || orgsFetching ? "cg-spin" : ""} />
+            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching || orgsFetching ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-        </div>
-      </div>
+        </PageHeader>
 
-      {isError && (
-        <div className="cg-alert cg-alert--danger" style={{ marginBottom: "1.5rem" }}>
-          <div className="cg-alert__body">
-            <span className="cg-alert__title">Could not load dashboard metrics</span>
-            <p className="cg-alert__message">
-              Ensure the backend server is running on <code>localhost:3000</code> and you are logged in as Super Admin.
-            </p>
+        {isError && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 mb-6 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive">
+            <div>
+              <h3 className="font-semibold text-sm">Could not load dashboard metrics</h3>
+              <p className="text-xs opacity-90 mt-1">
+                Ensure the backend server is running on localhost:3000 and you are logged in as Super Admin.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => refetch()} className="border-destructive/50 hover:bg-destructive/20 text-destructive">Retry</Button>
           </div>
-          <Button variant="outline" onClick={() => refetch()}>Retry</Button>
-        </div>
-      )}
+        )}
 
-      <div className="cg-stats-grid">
-        <StatCard
-          title="Total Organizations"
-          value={isLoading && orgsLoading ? "..." : (overview?.totalOrganizations ?? orgs.length)}
-          icon={<Building2 size={16} />}
-        />
-        <StatCard
-          title="Total Users"
-          value={isLoading && orgsLoading ? "..." : (overview?.totalUsers ?? liveUserCount)}
-          icon={<Users size={16} />}
-          sparkline={[10, 20, 25, 45, 60, 80, 100]}
-        />
-        <StatCard
-          title="Demo Leads Pending"
-          value={leadsLoading ? "..." : pendingLeads}
-          icon={<ClipboardList size={16} />}
-        />
-        <StatCard
-          title="System Status"
-          value={isLoading ? "..." : (isError || orgsError ? "Action needed" : "Healthy")}
-          icon={<ShieldCheck size={16} />}
-        />
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(280px, 1fr)", gap: "1.5rem", marginTop: "1.5rem" }}>
-        <SectionPanel
-          title="Recent Organizations"
-          description="Latest provisioned institutions with owner, plan, users, and status."
-          noPadding
-          actions={
-            <Link to="/superadmin/orgs" className="cg-btn cg-btn--ghost cg-btn--sm">
-              View all
-            </Link>
-          }
-        >
-          <DataTable
-            columns={recentOrgColumns}
-            data={orgs.slice(0, 8)}
-            pageSize={8}
-            isLoading={orgsLoading}
-            isError={orgsError}
-            onRetry={() => refetchOrgs()}
-            loadingLabel="Syncing recent organizations from backend"
-            errorTitle="Could not load organizations"
-            errorMessage={(orgsErrorData as Error)?.message || "The organizations API did not return a usable response."}
-            emptyIcon={<Building2 size={32} />}
-            emptyTitle="No organizations yet"
-            emptyDescription="Create an organization to see real backend records here."
-            emptyAction={
-              <Button asChild>
-                <Link to="/superadmin/onboard">
-                  <Plus className="size-4" />
-                  Create Organization
-                </Link>
-              </Button>
-            }
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <StatCard
+            title="Total Organizations"
+            value={isLoading && orgsLoading ? "..." : (overview?.totalOrganizations ?? orgs.length)}
+            icon={<Building2 />}
           />
-        </SectionPanel>
+          <StatCard
+            title="Total Users"
+            value={isLoading && orgsLoading ? "..." : (overview?.totalUsers ?? liveUserCount)}
+            icon={<Users />}
+          />
+          <StatCard
+            title="Demo Leads Pending"
+            value={leadsLoading ? "..." : pendingLeads}
+            icon={<ClipboardList />}
+          />
+          <StatCard
+            title="System Status"
+            value={isLoading ? "..." : (isError || orgsError ? "Action needed" : "Healthy")}
+            icon={<ShieldCheck />}
+          />
+        </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <SectionPanel
-            title="Pending Leads"
-            description="Demo requests awaiting approval."
-            actions={
-              <Link to="/superadmin/leads" className="cg-btn cg-btn--ghost cg-btn--sm">
-                View all
-              </Link>
-            }
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {leadsLoading ? (
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                  <RefreshCw size={14} className="cg-spin" />
-                  Loading leads from backend
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader className="flex flex-row items-start sm:items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <CardTitle>Recent Organizations</CardTitle>
+                  <p className="text-sm text-muted-foreground">Latest provisioned institutions with owner, plan, users, and status.</p>
                 </div>
-              ) : leads.filter((lead) => lead.status !== "converted").length === 0 ? (
-                <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", textAlign: "center", padding: "1rem 0" }}>
-                  No pending leads.
+                <Button variant="outline" size="sm" asChild className="shrink-0 mt-4 sm:mt-0">
+                  <Link to="/superadmin/orgs">View all</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  columns={recentOrgColumns}
+                  data={orgs.slice(0, 8)}
+                  pageSize={8}
+                  isLoading={orgsLoading}
+                  isError={orgsError}
+                  onRetry={() => refetchOrgs()}
+                  loadingLabel="Syncing recent organizations from backend"
+                  errorTitle="Could not load organizations"
+                  errorMessage={(orgsErrorData as Error)?.message || "The organizations API did not return a usable response."}
+                  emptyIcon={<Building2 className="w-8 h-8" />}
+                  emptyTitle="No organizations yet"
+                  emptyDescription="Create an organization to see real backend records here."
+                  emptyAction={
+                    <Button asChild>
+                      <Link to="/superadmin/onboard">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Organization
+                      </Link>
+                    </Button>
+                  }
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-start sm:items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <CardTitle>Pending Leads</CardTitle>
+                  <p className="text-sm text-muted-foreground">Demo requests awaiting approval.</p>
                 </div>
-              ) : (
-                leads
-                  .filter((lead) => lead.status !== "converted")
-                  .slice(0, 5)
-                  .map((lead) => (
-                    <div
-                      key={lead._id}
-                      style={{
-                        padding: "0.65rem 0.75rem",
-                        borderRadius: "6px",
-                        border: "1px solid var(--border)",
-                        background: "var(--surface-2)",
-                      }}
-                    >
-                      <div style={{ fontWeight: 500, fontSize: "0.84rem" }}>{lead.institutionName}</div>
-                      <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                        {lead.adminEmail} · {lead.city}
+                <Button variant="outline" size="sm" asChild className="shrink-0">
+                  <Link to="/superadmin/leads">View all</Link>
+                </Button>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                {leadsLoading ? (
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Loading leads from backend
+                  </div>
+                ) : leads.filter((lead) => lead.status !== "converted").length === 0 ? (
+                  <div className="text-muted-foreground text-sm text-center py-4">
+                    No pending leads.
+                  </div>
+                ) : (
+                  leads
+                    .filter((lead) => lead.status !== "converted")
+                    .slice(0, 5)
+                    .map((lead) => (
+                      <div
+                        key={lead._id}
+                        className="flex flex-col p-3 rounded-lg border border-border bg-muted/40"
+                      >
+                        <div className="font-medium text-sm">{lead.institutionName}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {lead.adminEmail} · {lead.city}
+                        </div>
                       </div>
-                    </div>
-                  ))
-              )}
-            </div>
-          </SectionPanel>
+                    ))
+                )}
+              </CardContent>
+            </Card>
 
-          <SectionPanel title="Quick Actions">
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {[
-                { label: "Onboard New Org", to: "/superadmin/onboard", icon: Plus },
-                { label: "View Support Tickets", to: "/superadmin/support", icon: Ticket },
-                { label: "Post Announcement", to: "/superadmin/announcements", icon: Megaphone },
-                { label: "System Config", to: "/superadmin/config", icon: Wrench },
-                { label: "Manage Users", to: "/superadmin/users", icon: Users },
-              ].map(({ label, to, icon: Icon }) => (
-                <Link key={to} to={to} className="cg-btn cg-btn--outline" style={{ justifyContent: "flex-start", width: "100%" }}>
-                  <Icon size={14} />
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </SectionPanel>
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                {[
+                  { label: "Onboard New Org", to: "/superadmin/onboard", icon: Plus },
+                  { label: "View Support Tickets", to: "/superadmin/support", icon: Ticket },
+                  { label: "Post Announcement", to: "/superadmin/announcements", icon: Megaphone },
+                  { label: "System Config", to: "/superadmin/config", icon: Wrench },
+                  { label: "Manage Users", to: "/superadmin/users", icon: Users },
+                ].map(({ label, to, icon: Icon }) => (
+                  <Button key={to} variant="outline" className="justify-start w-full" asChild>
+                    <Link to={to}>
+                      <Icon className="w-4 h-4 mr-2 text-muted-foreground" />
+                      {label}
+                    </Link>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

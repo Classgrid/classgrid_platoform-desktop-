@@ -1,60 +1,49 @@
-import { ActivityFeed, StatTile, TablePanel } from "@/components/dashboard/DashboardWidgets";
+import React from "react";
+import { Users, UserX, Briefcase, FileSignature } from "lucide-react";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { DataTable } from "@/components/marketing_ui/data-table";
+
+const hrColumns = [
+  { accessorKey: "employee", header: "Employee" },
+  { accessorKey: "department", header: "Department" },
+  { accessorKey: "role", header: "Role" },
+  { accessorKey: "status", header: "Status" },
+];
+
+const hrData = [
+  { id: "1", employee: "Dr. A. K. Singh", department: "Computer Science", role: "HOD", status: "Active" },
+  { id: "2", employee: "Mrs. S. Gupta", department: "Administration", role: "Clerk", status: "On Leave" },
+  { id: "3", employee: "Mr. R. Kumar", department: "Maintenance", role: "Staff", status: "Active" },
+];
 
 export function HrDashboardPage() {
   return (
-    <div className="cg-page">
-      <div className="cg-page__header cg-page__header--split">
-        <div>
-          <h1>HR &amp; Payroll Dashboard</h1>
-          <p>Manage staff, leaves, and payroll processing.</p>
-        </div>
-        <div className="cg-page__meta">
-          <span className="cg-page__meta-label">Payroll Run</span>
-          <strong>30th of month</strong>
-        </div>
+    <DashboardLayout role="HR_MENU">
+      <PageHeader 
+        title="HR & Payroll Dashboard" 
+        description="Manage employees, leaves, and recruitment." 
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <StatCard title="Total Employees" value="342" icon={Users} trend="4 new hires" trendDirection="up" />
+        <StatCard title="On Leave Today" value="12" icon={UserX} trend="Normal" trendDirection="neutral" />
+        <StatCard title="Open Positions" value="8" icon={Briefcase} trend="Actively recruiting" trendDirection="neutral" />
+        <StatCard title="Pending Appraisals" value="24" icon={FileSignature} trend="Action required" trendDirection="neutral" />
       </div>
 
-      <section className="cg-stats-grid">
-        <StatTile label="Total Staff" value="214" meta="Active employees" />
-        <StatTile label="On Leave Today" value="12" meta="Across departments" />
-        <StatTile label="Pending Requests" value="9" meta="Leave approvals" />
-        <StatTile label="Payroll Status" value="82% Processed" meta="For this cycle" />
-      </section>
-
-      <section className="cg-two-col">
-        <TablePanel
-          title="Leave Requests Table"
-          actions={["Search", "Filter", "Export"]}
-          columns={[
-            { key: "staff", label: "Staff" },
-            { key: "type", label: "Type" },
-            { key: "from", label: "From" },
-            { key: "to", label: "To" },
-            { key: "status", label: "Status" }
-          ]}
-          rows={[
-            { staff: "Meera Joshi", type: "Casual", from: "2 May", to: "4 May", status: "Pending" },
-            { staff: "Rajesh K.", type: "Sick", from: "28 Apr", to: "29 Apr", status: "Approved" },
-            { staff: "Anita P.", type: "Earned", from: "5 May", to: "10 May", status: "Pending" }
-          ]}
-        />
-        <div style={{ display: "grid", gap: "0.8rem" }}>
-          <article className="cg-panel cg-panel--stack">
-            <div className="cg-panel__title-row"><h3>Payroll Summary</h3></div>
-            <p className="cg-panel__text">Processed: <strong>176 staff</strong></p>
-            <p className="cg-panel__text">Pending: <strong>38 staff</strong></p>
-            <p className="cg-panel__text">Payroll run date: <strong>30th</strong></p>
-          </article>
-          <ActivityFeed
-            title="Recent Activity"
-            entries={[
-              { label: "Casual leave approved for Meera", time: "7m ago" },
-              { label: "Payroll batch processed", time: "41m ago" },
-              { label: "New staff added", time: "2h ago" }
-            ]}
-          />
-        </div>
-      </section>
-    </div>
+      <div className="grid grid-cols-1 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Staff Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable columns={hrColumns} data={hrData} />
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }
