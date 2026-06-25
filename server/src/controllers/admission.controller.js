@@ -2188,3 +2188,72 @@ export const markCETUpgraded = async (req, res) => {
         session.endSession();
     }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 5 MVC: Dashboard Controller Functions (delegating to admission.service.js)
+// ─────────────────────────────────────────────────────────────────────────────
+import {
+    getAdmissionsDashboard,
+    getApplicationDetails,
+    updateApplicationStatus
+} from '../services/admission.service.js';
+
+/**
+ * GET /api/admissions/dashboard
+ * Org Admin: Paginated list of all applications with filters.
+ */
+export const getAdmissions = async (req, res) => {
+    try {
+        const orgId = req.institutionOrganization?._id || req.user.organization_id;
+        const { status, search, page, limit } = req.query;
+
+        const data = await getAdmissionsDashboard(orgId, { status, search, page, limit });
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('[Admission Controller] getAdmissions error:', err);
+        return res.status(500).json({ success: false, message: err.message || 'Failed to fetch admissions.' });
+    }
+};
+
+/**
+ * GET /api/admissions/:id
+ * Org Admin: Full details for a single application.
+ */
+export const getApplication = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const data = await getApplicationDetails(id);
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('[Admission Controller] getApplication error:', err);
+        const statusCode = err.message === 'Admission application not found.' ? 404 : 500;
+        return res.status(statusCode).json({ success: false, message: err.message || 'Failed to fetch application.' });
+    }
+};
+
+/**
+ * PATCH /api/admissions/:id/status
+ * Org Admin: Change application status with audit trail.
+ */
+export const updateStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status: newStatus, reviewNotes } = req.body;
+        const adminUserId = req.user._id;
+
+        if (!newStatus) {
+            return res.status(400).json({ success: false, message: 'New status is required.' });
+        }
+
+        const data = await updateApplicationStatus(id, newStatus, reviewNotes, adminUserId);
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('[Admission Controller] updateStatus error:', err);
+        const statusCode = err.message === 'Admission application not found.' ? 404 : 500;
+        return res.status(statusCode).json({ success: false, message: err.message || 'Failed to update application status.' });
+    }
+};

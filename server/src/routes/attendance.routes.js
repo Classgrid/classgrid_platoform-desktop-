@@ -23,6 +23,18 @@ import { attendanceQueue } from "../workers/attendance.worker.js";
 import { dispatchNotification, bulkDispatchNotification } from "../services/notification.service.js";
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
 
+// Phase 7 Controller Imports
+import { requireRole } from "../middleware/auth.middleware.js";
+import {
+    submitDailyAttendanceController,
+    getAttendanceRegisterController,
+    getStudentAttendancePercentageController,
+    getBatchAttendanceReportController,
+    applyLeaveController,
+    getPendingLeaveRequestsController,
+    getStudentLeaveHistoryController,
+    processLeaveController
+} from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
@@ -1463,5 +1475,33 @@ router.get(
         }
     }
 );
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE 7: NEW DASHBOARD ROUTES (4x2 DNA Architecture)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Admin / Faculty: Submit the daily master attendance register
+router.post('/dashboard/submit', requireRole(['faculty', 'org_admin']), submitDailyAttendanceController);
+
+// Admin / Faculty: View a specific day's submitted attendance register
+router.get('/dashboard/register/:hierarchyId', requireRole(['faculty', 'org_admin']), getAttendanceRegisterController);
+
+// All Authenticated: Get a student's calculated attendance percentage
+router.get('/analytics/student/:studentId/hierarchy/:hierarchyId', getStudentAttendancePercentageController);
+
+// Admin / Faculty: Get the pre-calculated stats and absentees for a batch
+router.get('/analytics/batch/:hierarchyId', requireRole(['faculty', 'org_admin']), getBatchAttendanceReportController);
+
+// Student: Apply for a leave of absence
+router.post('/leave/apply', requireRole('student'), applyLeaveController);
+
+// Admin / Faculty: Get all pending leave requests for their specific batch
+router.get('/leave/pending/:hierarchyId', requireRole(['faculty', 'org_admin']), getPendingLeaveRequestsController);
+
+// All Authenticated: View a student's leave history (Student sees own, Admin sees any)
+router.get('/leave/history/:studentId?', getStudentLeaveHistoryController);
+
+// Admin / Faculty: Approve or reject a leave request
+router.post('/leave/process/:leaveRequestId', requireRole(['faculty', 'org_admin']), processLeaveController);
 
 export default router;

@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/marketing_ui/table";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
+import React from "react";
 
-type Column = { key: string; header: string; width?: string; accent?: boolean };
+type Column = { key: string; header: string; width?: string; accent?: boolean; render?: (value: any, row: any) => React.ReactNode };
 type DataTableProps = {
   columns: Column[];
   rows: any[];
@@ -45,7 +46,7 @@ export function DataTable({ columns, rows, isLoading, skeletonLines = 5, emptyMe
             <TableRow key={i} onClick={() => onRowClick?.(row)} className={onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}>
               {columns.map((c) => (
                 <TableCell key={c.key} className={c.accent ? "font-medium" : ""}>
-                  {row[c.key]}
+                  {c.render ? c.render(row[c.key], row) : row[c.key]}
                 </TableCell>
               ))}
             </TableRow>

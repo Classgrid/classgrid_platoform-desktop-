@@ -1,28 +1,33 @@
 import mongoose from "mongoose";
 
+// ══════════════════════════════════════════════════════════════════════════════
+// LEAVE REQUEST SCHEMA — Optimized for the 4x2 DNA
+// Integrates deeply with the master Attendance Register to mark students as 'leave'
+// ══════════════════════════════════════════════════════════════════════════════
+
 const leaveRequestSchema = new mongoose.Schema(
     {
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        classroom: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Classroom",
-            required: true,
-        },
-        teacher: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
         organization_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Organization",
             required: true,
         },
-        date: {
+        student_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        // The hierarchy context when they applied (helps faculty filtering)
+        hierarchy_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "AcademicHierarchy",
+            default: null,
+        },
+        start_date: {
+            type: Date,
+            required: true,
+        },
+        end_date: {
             type: Date,
             required: true,
         },
@@ -30,9 +35,11 @@ const leaveRequestSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
+            maxlength: 1000,
         },
-        documentUrl: {
-            type: String, // Pointing to Supabase bucket
+        // Pointing to Supabase bucket (e.g. medical certificate)
+        document_url: {
+            type: String, 
             default: null,
         },
         status: {
@@ -40,9 +47,18 @@ const leaveRequestSchema = new mongoose.Schema(
             enum: ["pending", "approved", "rejected"],
             default: "pending",
         },
-        teacherNote: {
+        // Audit trail: Who approved or rejected it
+        approved_by: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+        // Why it was rejected or approved
+        admin_remarks: {
             type: String,
             default: "",
+            trim: true,
+            maxlength: 500,
         }
     },
     {
@@ -50,10 +66,13 @@ const leaveRequestSchema = new mongoose.Schema(
     }
 );
 
-// Indexes for fast lookups by student (their history) or teacher/classroom (dashboard)
-leaveRequestSchema.index({ student: 1, date: -1 });
-leaveRequestSchema.index({ classroom: 1, status: 1 });
-leaveRequestSchema.index({ teacher: 1, status: 1 });
-leaveRequestSchema.index({ organization_id: 1 });
+// Ultra-fast lookup for Admin/Faculty Dashboards (filtering by status)
+leaveRequestSchema.index({ organization_id: 1, hierarchy_id: 1, status: 1 });
+
+// Fast lookup for the Student's personal leave history
+leaveRequestSchema.index({ student_id: 1, start_date: -1 });
+
+// Lookup by approver for audit trails
+leaveRequestSchema.index({ approved_by: 1, updatedAt: -1 });
 
 export default mongoose.model("LeaveRequest", leaveRequestSchema);

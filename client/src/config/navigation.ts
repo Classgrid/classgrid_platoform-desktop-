@@ -188,8 +188,8 @@ export const HOSTEL_MENU: NavigationItem[] = [
 ];
 
 export const FACULTY_MENU: NavigationItem[] = [
-  { title: "Home", url: "/classrooms", icon: "Home", section: "CORE" },
-  { title: "Work", url: "/work", icon: "Briefcase", section: "CORE" },
+  { title: "Home", url: "/faculty/dashboard", icon: "Home", section: "CORE" },
+  { title: "Work", url: "/faculty/work", icon: "Briefcase", section: "CORE" },
   { title: "Schedule", url: "/tools", icon: "Calendar", section: "CORE" },
   
   { title: "Messages", url: "/chat", icon: "MessageCircle", section: "CONNECT" },
@@ -208,8 +208,8 @@ export const FACULTY_MENU: NavigationItem[] = [
 ];
 
 export const STUDENT_MENU: NavigationItem[] = [
-  { title: "Home", url: "/classrooms", icon: "Home", section: "CORE" },
-  { title: "Work", url: "/work", icon: "Briefcase", section: "CORE" },
+  { title: "Home", url: "/student/dashboard", icon: "Home", section: "CORE" },
+  { title: "Work", url: "/student/work", icon: "Briefcase", section: "CORE" },
   { title: "Schedule", url: "/tools", icon: "Calendar", section: "CORE" },
   
   { title: "Messages", url: "/chat", icon: "MessageCircle", section: "CONNECT" },

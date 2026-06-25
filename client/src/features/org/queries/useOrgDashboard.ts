@@ -6,6 +6,8 @@ export interface OrgDashboardOverview {
   totalStudents: number;
   totalClassrooms: number;
   totalMemberships: number;
+  structureMetric: number;
+  structureMetricLabel: string;
 }
 
 export interface DemographicsData {
@@ -25,7 +27,11 @@ export interface EnrollmentTrendData {
 }
 
 export interface OrgDashboardAnalytics {
-  demographics: DemographicsData[];
+  demographics: {
+    male?: number;
+    female?: number;
+    other?: number;
+  };
   branchDistribution: BranchDistributionData[];
   enrollmentTrends: EnrollmentTrendData[];
 }
@@ -34,7 +40,26 @@ export function useOrgDashboardOverview() {
   return useQuery({
     queryKey: ["org-admin", "dashboard", "overview"],
     queryFn: async () => {
-      const { data } = await apiClient.get<OrgDashboardOverview>("/api/org-admin/dashboard/overview");
+      const { data } = await apiClient.get<OrgDashboardOverview>("/api/org-admin/dashboard/metrics");
+      return data;
+    },
+  });
+}
+
+export interface OrgDashboardMetrics {
+  totalFaculty: number;
+  totalStudents: number;
+  totalClassrooms: number;
+  totalMemberships: number;
+  structureMetric: number;
+  structureMetricLabel: string;
+}
+
+export function useOrgDashboardMetrics() {
+  return useQuery({
+    queryKey: ["org-admin", "dashboard", "metrics"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<OrgDashboardMetrics>("/api/org-admin/dashboard/metrics");
       return data;
     },
   });

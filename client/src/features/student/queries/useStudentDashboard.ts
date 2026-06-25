@@ -166,3 +166,35 @@ export function useTodaySchedule() {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export type StudentDashboardSummary = {
+  metrics: {
+    attendancePercentage: number;
+    pendingAssignments: number;
+  };
+  schedule: Array<{
+    _id: string;
+    subject: string;
+    startTime: string;
+    endTime: string;
+    teacher: string;
+    room: string;
+    type?: string;
+  }>;
+  announcements: Array<{
+    _id: string;
+    title: string;
+    createdAt: string;
+    type: string;
+  }>;
+};
+
+export function useStudentDashboardSummary() {
+  return useQuery({
+    queryKey: ["student-dashboard-summary"],
+    queryFn: async () => {
+      const res = await apiClient.get<{ success: boolean; data: StudentDashboardSummary }>("/api/student/dashboard/summary");
+      return res.data.data;
+    },
+  });
+}

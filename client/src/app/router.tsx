@@ -43,8 +43,9 @@ import { OrgStudentsPage } from "@/features/org/pages/OrgStudentsPage";
 import { OrgFacultyPage } from "@/features/org/pages/OrgFacultyPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
 import { OrgClassroomsPage } from "@/features/org/pages/OrgClassroomsPage";
-import { StudentDashboardPage } from "@/features/student/pages/StudentDashboardPage";
+import { StudentHomePage } from "@/features/student/pages/StudentHomePage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
+import { FacultyHomePage } from "@/features/faculty/pages/FacultyHomePage";
 import { FacultyWorkPage } from "@/features/faculty/pages/FacultyWorkPage";
 import { AdmissionDashboardRouter } from "@/features/admission/pages/AdmissionDashboardRouter";
 import { AllApplicationsPage } from "@/features/admission/pages/AllApplicationsPage";
@@ -266,11 +267,12 @@ export function AppRouter() {
         <Route path="/dept/hostel/dashboard" element={<HostelDashboardPage />} />
 
         {/* 10. Faculty Dashboard */}
-        <Route path="/work" element={<FacultyWorkPage />} />
+        <Route path="/faculty/dashboard" element={<FacultyHomePage />} />
+        <Route path="/faculty/work" element={<FacultyWorkPage />} />
         <Route path="/exam/grading" element={<ExamGradingPage />} />
 
         {/* 11. Student Dashboard */}
-        <Route path="/student/dashboard" element={<StudentDashboardPage />} />
+        <Route path="/student/dashboard" element={<StudentHomePage />} />
         <Route path="/student/work" element={<StudentWorkPage />} />
 
         {/* ── Common pages ── */}

@@ -8,6 +8,7 @@ import { logAdminAction } from "../services/auditLog.service.js";
 import { getChatSb } from "../config/supabaseClient.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { buildInstitutionProfile as buildSharedInstitutionProfile } from "../services/institution-profile.service.js";
+import { getOrgDashboardMetrics } from '../controllers/org-dashboard.controller.js';
 import {
     getAdmissionTrack,
     getDefaultQuotaByStructureType,
@@ -1838,6 +1839,12 @@ router.get("/subdomain/check", isAuthenticated, requireRole("org_admin"), async 
         res.status(500).json({ message: "Server error." });
     }
 });
+
+// ======================================================
+// GET /api/org-admin/dashboard/metrics
+// Real MongoDB metrics via Controller layer
+// ======================================================
+router.get('/dashboard/metrics', isAuthenticated, requireOrganization, attachInstitutionProfile, getOrgDashboardMetrics);
 
 export default router;
 

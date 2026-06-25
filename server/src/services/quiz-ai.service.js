@@ -53,12 +53,12 @@ Example JSON:
             });
 
             let content = completion.choices[0].message.content;
-            
+
             // Fix common LLM mistake: single-escaped LaTeX in JSON.
             content = content.replace(/(?<!\\)\\(?=[a-zA-Z])/g, '\\\\');
 
             const rawJson = JSON.parse(content);
-            
+
             if (rawJson.questions && validateAiQuestions(rawJson.questions)) {
                 parsedQuestions = rawJson.questions;
                 break;
@@ -138,7 +138,7 @@ ${subject.toLowerCase().includes('coding') ? 'Include code snippets in markdown 
             content = content.replace(/(?<!\\)\\(?=[a-zA-Z])/g, '\\\\');
 
             const rawJson = JSON.parse(content);
-            
+
             if (rawJson.questions) {
                 parsedQuestions = rawJson.questions;
                 // Add UUIDs
@@ -158,7 +158,7 @@ ${subject.toLowerCase().includes('coding') ? 'Include code snippets in markdown 
 
 function validateAiQuestions(questions) {
     if (!Array.isArray(questions)) return false;
-    
+
     for (const q of questions) {
         if (!q.question || !Array.isArray(q.options) || !q.correct_answer) return false;
         if (q.options.length !== 4) return false;

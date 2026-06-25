@@ -15,7 +15,16 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarFooter,
+  SidebarMenuButton,
 } from "@/components/marketing_ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/marketing_ui/dropdown-menu";
 import {
   SUPER_ADMIN_MENU,
   ORG_ADMIN_MENU,
@@ -139,30 +148,86 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
         </SidebarContent>
 
         {user && (
-          <SidebarFooter className="p-4 border-t border-sidebar-border group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 overflow-hidden">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-emerald-700 font-bold text-xs">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
-                <span className="text-sm font-medium truncate text-foreground">{user.name}</span>
-                {user.email && (
-                  <span className="text-xs text-muted-foreground truncate">
-                    {user.email}
-                  </span>
-                )}
-              </div>
-            </div>
+          <SidebarFooter className="p-2 border-t border-sidebar-border">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton
+                      size="lg"
+                      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 overflow-hidden">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-emerald-700 font-bold text-xs">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-semibold">{user.name}</span>
+                        {user.email && (
+                          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                        )}
+                      </div>
+                      <Icons.ChevronsUpDown className="ml-auto size-4" />
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                    side="bottom"
+                    align="end"
+                    sideOffset={4}
+                  >
+                    <DropdownMenuLabel className="p-0 font-normal">
+                      <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                          <span className="text-emerald-700 font-bold text-xs">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="grid flex-1 text-left text-sm leading-tight">
+                          <span className="truncate font-semibold">{user.name}</span>
+                          {user.email && (
+                            <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                          )}
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer w-full">
+                        <Icons.User className="w-4 h-4" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/organization" className="flex items-center gap-2 cursor-pointer w-full">
+                        <Icons.Building2 className="w-4 h-4" />
+                        <span>Organization Details</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="flex items-center gap-2 cursor-pointer w-full">
+                        <Icons.Settings className="w-4 h-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50 cursor-pointer">
+                      <Icons.LogOut className="w-4 h-4 mr-2" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarFooter>
         )}
       </Sidebar>

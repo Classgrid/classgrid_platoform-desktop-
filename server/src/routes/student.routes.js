@@ -1,6 +1,7 @@
 import express from 'express';
 import { isAuthenticated, requireOrganization } from '../middleware/auth.middleware.js';
 import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
+import { getStudentDashboardData } from '../controllers/student-dashboard.controller.js';
 import { getChatSb } from '../config/supabaseClient.js';
 import User from '../models/User.js';
 import DeviceVerification from '../models/DeviceVerification.js';
@@ -595,5 +596,11 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
     res.status(500).json({ message: 'Batch import failed.' });
   }
 });
+
+// ======================================================
+// GET /api/student/dashboard/summary
+// Real MongoDB data via Controller layer
+// ======================================================
+router.get('/dashboard/summary', isAuthenticated, requireOrganization, attachInstitutionProfile(), getStudentDashboardData);
 
 export default router;

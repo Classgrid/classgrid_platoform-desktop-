@@ -29,7 +29,10 @@ import {
     allotDivisionForCET,
     markCETUpgraded,
     exportAICTE,
-    exportStateBoard
+    exportStateBoard,
+    getAdmissions,
+    getApplication,
+    updateStatus
 } from "../controllers/admission.controller.js";
 import {
     getAdmissionConfig,
@@ -222,5 +225,12 @@ router.post("/round/advance", isAuthenticated, requireAdmissionRole(["org_admin"
 // 🔓 Edge Case 4 Extension: Per-Student Edit Lock Override
 router.patch("/applications/:id/unlock-edit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), unlockStudentEditWindow);
 router.patch("/applications/:id/lock-edit", isAuthenticated, requireAdmissionRole(["org_admin", "admission_head"]), lockStudentEditWindow);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 5 MVC: Org Admin Dashboard Routes
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/dashboard/list", isAuthenticated, requireRole("org_admin"), attachInstitutionProfile(), getAdmissions);
+router.get("/dashboard/:id", isAuthenticated, requireRole("org_admin"), getApplication);
+router.patch("/dashboard/:id/status", isAuthenticated, requireRole("org_admin"), updateStatus);
 
 export default router;
