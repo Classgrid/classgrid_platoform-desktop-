@@ -13,3 +13,4 @@ Every single new UI component must be saved inside: `client/src/components/marke
 1. DELETE the old import: `- import { CgSwitch } from "@/components/classgrid";`
 2. ADD the new import: `+ import { Switch } from "@/components/marketing_ui/switch";`
 3. REPLACE the JSX: Change `<CgSwitch>` to `<Switch>`.
+
