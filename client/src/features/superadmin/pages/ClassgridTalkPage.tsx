@@ -472,7 +472,11 @@ export function ClassgridTalkPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
+              <option 
+                key={o.value} 
+                value={o.value}
+                data-color={o.value ? statusColor(o.value) : undefined}
+              >
                 {o.label}
               </option>
             ))}
@@ -482,11 +486,23 @@ export function ClassgridTalkPage() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
           >
-            {PRIORITY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
+            {PRIORITY_OPTIONS.map((o) => {
+              let pColor;
+              if (o.value === "low") pColor = "bg-zinc-400";
+              else if (o.value === "medium") pColor = "bg-amber-500";
+              else if (o.value === "high") pColor = "bg-orange-500";
+              else if (o.value === "urgent") pColor = "bg-red-500";
+              
+              return (
+                <option 
+                  key={o.value} 
+                  value={o.value}
+                  data-color={pColor}
+                >
+                  {o.label}
+                </option>
+              );
+            })}
           </ResponsiveSelect>
         </div>
 
@@ -1052,7 +1068,11 @@ export function ClassgridTalkPage() {
                     className="flex-1 h-8 px-2 text-sm rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 min-w-0"
                   >
                     {STATUS_CHANGE_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
+                      <option 
+                        key={s} 
+                        value={s}
+                        data-color={statusColor(s)}
+                      >
                         {statusLabel(s)}
                       </option>
                     ))}
