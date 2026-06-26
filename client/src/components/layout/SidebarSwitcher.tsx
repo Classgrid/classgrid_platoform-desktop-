@@ -1,0 +1,128 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  ChevronsUpDown,
+  Check,
+  Building2,
+  Plus
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/marketing_ui/dropdown-menu";
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/marketing_ui/sidebar";
+
+export function SidebarSwitcher({ user }: { user: any }) {
+  const { isMobile } = useSidebar();
+  
+  // 1. Resolve Organization Branding from Backend User Object
+  const orgName = user?.organization?.name || "Classgrid Platform";
+  const orgLogo = user?.organization?.logo_url;
+
+  // 2. Resolve Roles
+  const currentRole = user?.role || "super_admin";
+  const additionalRoles = user?.additional_roles || [];
+  
+  // Deduplicate roles to build the switcher list
+  const allRoles = Array.from(new Set([currentRole, ...additionalRoles]));
+
+  const formatRole = (role: string) => {
+    return role.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm overflow-hidden">
+                {orgLogo ? (
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="size-4 text-white" />
+                )}
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold text-foreground">
+                  {orgName}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {formatRole(currentRole)}
+                </span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl shadow-xl border-border bg-popover text-popover-foreground p-1"
+            align="start"
+            side={isMobile ? "bottom" : "right"}
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
+              Active Context
+            </DropdownMenuLabel>
+            <DropdownMenuItem className="gap-3 p-2 rounded-md">
+              <div className="flex size-8 items-center justify-center rounded-md border border-border bg-emerald-500 overflow-hidden shrink-0">
+                {orgLogo ? (
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="size-4 text-white" />
+                )}
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-medium text-sm text-foreground">{orgName}</span>
+                <span className="text-xs text-muted-foreground">{formatRole(currentRole)} (Active)</span>
+              </div>
+            </DropdownMenuItem>
+            
+            {allRoles.length > 1 && (
+              <>
+                <DropdownMenuSeparator className="mx-1 my-1" />
+                <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
+                  Switch Roles
+                </DropdownMenuLabel>
+                {allRoles.map((role) => (
+                  <DropdownMenuItem key={role} className="gap-3 p-2 cursor-pointer rounded-md">
+                    <div className="flex size-5 items-center justify-center shrink-0">
+                      {role === currentRole ? (
+                        <Check className="size-4 text-blue-500 font-bold" />
+                      ) : (
+                        <div className="size-4" />
+                      )}
+                    </div>
+                    <span className={`text-sm ${role === currentRole ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                      {formatRole(role)}
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
+
+            {currentRole === "super_admin" && (
+              <>
+                <DropdownMenuSeparator className="mx-1 my-1" />
+                <DropdownMenuItem asChild className="p-0">
+                  <Link to="/superadmin/onboard" className="flex items-center gap-2 p-2 w-full cursor-pointer rounded-md text-sm text-blue-500 hover:text-blue-600 font-medium">
+                    <div className="flex size-5 items-center justify-center rounded-md border border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800">
+                      <Plus className="size-3" />
+                    </div>
+                    Onboard New Organization
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}

@@ -37,6 +37,9 @@ interface AppSidebarProps {
   };
 }
 
+import { SidebarSwitcher } from "./SidebarSwitcher";
+import { SidebarSearch } from "./SidebarSearch";
+
 // Helper to safely render dynamic Lucide icons
 const IconRenderer = ({ name, className }: { name: string; className?: string }) => {
   const IconComponent = (Icons as any)[name];
@@ -54,21 +57,9 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
-      <SidebarHeader className="h-16 flex flex-row items-center justify-between px-3">
-        <div className="flex flex-col gap-0.5 justify-center overflow-hidden">
-          <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
-            <Icons.Zap className="h-5 w-5 shrink-0 text-emerald-500" />
-            <span className="truncate group-data-[collapsible=icon]:hidden">
-              {config.logo}
-            </span>
-          </div>
-          {config.subtitle && (
-            <span className="text-xs text-muted-foreground truncate group-data-[collapsible=icon]:hidden pl-7">
-              {config.subtitle}
-            </span>
-          )}
-        </div>
-        <SidebarTrigger />
+      <SidebarHeader>
+        <SidebarSwitcher user={user} />
+        <SidebarSearch />
       </SidebarHeader>
 
       <SidebarContent className="sidebar-scroll-hidden">
