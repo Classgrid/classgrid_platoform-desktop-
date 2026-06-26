@@ -25,6 +25,8 @@ export function SidebarSwitcher({ user }: { user: any }) {
 
   // 2. Resolve Roles
   const currentRole = user?.role || "super_admin";
+  
+  // Use additional_roles from the backend user object
   const additionalRoles = user?.additional_roles || [];
 
   // Deduplicate roles to build the switcher list
@@ -84,28 +86,24 @@ export function SidebarSwitcher({ user }: { user: any }) {
               </div>
             </DropdownMenuItem>
 
-            {allRoles.length > 1 && (
-              <>
-                <DropdownMenuSeparator className="mx-1 my-1" />
-                <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
-                  Switch Roles
-                </DropdownMenuLabel>
-                {allRoles.map((role) => (
-                  <DropdownMenuItem key={role} className="gap-3 p-2 cursor-pointer rounded-md">
-                    <div className="flex size-5 items-center justify-center shrink-0">
-                      {role === currentRole ? (
-                        <Check className="size-4 text-blue-500 font-bold" />
-                      ) : (
-                        <div className="size-4" />
-                      )}
-                    </div>
-                    <span className={`text-sm ${role === currentRole ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                      {formatRole(role)}
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
+            <DropdownMenuSeparator className="mx-1 my-1" />
+            <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
+              Switch Roles
+            </DropdownMenuLabel>
+            {allRoles.map((role) => (
+              <DropdownMenuItem key={role} className="gap-3 p-2 cursor-pointer rounded-md">
+                <div className="flex size-5 items-center justify-center shrink-0">
+                  {role === currentRole ? (
+                    <Check className="size-4 text-blue-500 font-bold" />
+                  ) : (
+                    <div className="size-4" />
+                  )}
+                </div>
+                <span className={`text-sm ${role === currentRole ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                  {formatRole(role)}
+                </span>
+              </DropdownMenuItem>
+            ))}
 
             {currentRole === "super_admin" && (
               <>
