@@ -1,4 +1,4 @@
-import { Phone, Video, MoreVertical, Users, ArrowLeft } from "lucide-react";
+import { MoreVertical, Users, ArrowLeft } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 
 interface ChatHeaderProps {
@@ -61,12 +61,6 @@ export function ChatHeader({ thread, onBack, onShowInfo }: ChatHeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Voice Call">
-          <Phone className="w-4 h-4" />
-        </button>
-        <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Video Call">
-          <Video className="w-4 h-4" />
-        </button>
         <button
           onClick={onShowInfo}
           className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
