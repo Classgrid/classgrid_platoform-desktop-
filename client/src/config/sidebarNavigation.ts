@@ -57,6 +57,20 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
           { title: "Support Tickets", url: "/superadmin/support", icon: "Ticket" },
         ],
       },
+      {
+        label: "FINANCE",
+        items: [
+          { title: "Revenue", url: "/superadmin/revenue", icon: "IndianRupee" },
+          { title: "Transactions", url: "/superadmin/transactions", icon: "CreditCard" },
+          { title: "Failed Payments", url: "/superadmin/failed-payments", icon: "AlertTriangle" },
+        ],
+      },
+      {
+        label: "MODERATION",
+        items: [
+          { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag" },
+        ],
+      },
     ],
   },
   org_admin: {

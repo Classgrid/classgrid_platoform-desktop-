@@ -23,6 +23,12 @@ export const SUPER_ADMIN_MENU: NavigationItem[] = [
   { title: "System Config", url: "/superadmin/config", icon: "Settings", section: "PLATFORM" },
   
   { title: "Support Tickets", url: "/superadmin/support", icon: "Ticket", section: "SUPPORT" },
+  
+  { title: "Revenue", url: "/superadmin/revenue", icon: "IndianRupee", section: "FINANCE" },
+  { title: "Transactions", url: "/superadmin/transactions", icon: "CreditCard", section: "FINANCE" },
+  { title: "Failed Payments", url: "/superadmin/failed-payments", icon: "AlertTriangle", section: "FINANCE" },
+  
+  { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag", section: "MODERATION" },
 ];
 
 export const ORG_ADMIN_MENU: NavigationItem[] = [
