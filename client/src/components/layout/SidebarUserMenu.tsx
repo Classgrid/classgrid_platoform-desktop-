@@ -35,14 +35,14 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         align="end"
         sideOffset={8}
       >
-        <DropdownMenuLabel className="px-3 py-3 font-normal">
+        <div className="px-3 py-3 font-normal">
           <div className="flex flex-col gap-1 text-left text-sm">
             <span className="truncate font-semibold">{user.name}</span>
             {user.email && (
               <span className="truncate text-xs text-muted-foreground">{user.email}</span>
             )}
           </div>
-        </DropdownMenuLabel>
+        </div>
         
         <DropdownMenuSeparator className="mx-1" />
         
