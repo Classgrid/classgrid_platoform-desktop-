@@ -163,6 +163,7 @@ export function AppRouter() {
           <Route path="/superadmin/backup" element={<BackupPage />} />
           <Route path="/superadmin/profile" element={<SharedProfilePage />} />
           <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
+          <Route path="/superadmin/chat" element={<ChatPage />} />
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
