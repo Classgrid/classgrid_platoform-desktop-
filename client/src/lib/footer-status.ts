@@ -113,6 +113,11 @@ export async function fetchLiveStatus(pageId: string): Promise<{ state: FooterSt
       }
     }
 
+    // Safely check if status object exists before reading it
+    if (!data.status || typeof data.status !== "object") {
+      return null;
+    }
+
     // 2. Map Statuspage indicators to our FooterStatusState
     // Statuspage indicators: none, minor, major, critical
     const indicator = data.status.indicator; 
