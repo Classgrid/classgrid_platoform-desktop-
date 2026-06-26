@@ -91,6 +91,19 @@ const passportConfig = () => {
                                 user.linkedProviders.push("google");
                             }
 
+                            // Capture real name from Google if current is a placeholder
+                            const lowerName = user.name ? user.name.toLowerCase() : "";
+                            const isPlaceholder = !user.name || lowerName.includes("admin") || lowerName.includes("student") || lowerName.includes("faculty") || lowerName.includes("teacher") || lowerName === "user";
+                            
+                            if (isPlaceholder && profile.displayName) {
+                                user.name = profile.displayName;
+                            }
+
+                            // Capture profile picture from Google if missing
+                            if (!user.profilePicture && profile.photos && profile.photos.length > 0) {
+                                user.profilePicture = profile.photos[0].value;
+                            }
+
                             user.googleId = profile.id;
                             if (!user.authProvider) {
                                 user.authProvider = "google";
