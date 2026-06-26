@@ -65,10 +65,8 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
         {config.sections.map((section, index) => (
           <SidebarGroup key={section.label || index}>
-            {section.label && (
-              <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground uppercase group-data-[collapsible=icon]:hidden">
-                {section.label}
-              </SidebarGroupLabel>
+            {index > 0 && (
+              <div className="mx-4 my-2 h-px bg-border/50 group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
             )}
             <SidebarGroupContent>
               <SidebarMenu>
