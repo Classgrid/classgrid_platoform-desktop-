@@ -161,6 +161,8 @@ export function AppRouter() {
           <Route path="/superadmin/team" element={<TeamPage />} />
           <Route path="/superadmin/gdpr" element={<GdprPage />} />
           <Route path="/superadmin/backup" element={<BackupPage />} />
+          <Route path="/superadmin/profile" element={<SharedProfilePage />} />
+          <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
