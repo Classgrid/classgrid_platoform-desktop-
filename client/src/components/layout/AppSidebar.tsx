@@ -87,21 +87,19 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
-                        asChild
                         isActive={isActive}
                         tooltip={item.title}
+                        render={<Link to={item.url} className="flex items-center gap-3 w-full justify-between" />}
                       >
-                        <Link to={item.url} className="flex items-center gap-3 w-full justify-between">
-                          <div className="flex items-center gap-3">
-                            <IconRenderer name={item.icon} />
-                            <span className="truncate">{item.title}</span>
-                          </div>
-                          {item.badge && (
-                            <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
-                              {item.badge}
-                            </span>
-                          )}
-                        </Link>
+                        <div className="flex items-center gap-3">
+                          <IconRenderer name={item.icon} />
+                          <span className="truncate">{item.title}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
+                            {item.badge}
+                          </span>
+                        )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );

@@ -94,12 +94,14 @@ export function resolveFooterCopyrightText(
 
   return `© ${currentYear} ${normalizedBody}`;
 }
+
+import { apiClient } from "./apiClient";
+
 export async function fetchLiveStatus(pageId: string): Promise<{ state: FooterStatusState; label: string } | null> {
   try {
-    // Proxy request through backend to avoid CORS
-    const response = await fetch(`/api/system/status?pageId=${pageId}`);
-    if (!response.ok) return null;
-    const data = await response.json();
+    // Proxy request through backend to avoid CORS, using apiClient for correct prod URL
+    const response = await apiClient.get(`/api/system/status?pageId=${pageId}`);
+    const data = response.data;
 
     // 1. Check for active maintenance
     if (data.scheduled_maintenances && data.scheduled_maintenances.length > 0) {
