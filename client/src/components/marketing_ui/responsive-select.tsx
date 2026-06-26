@@ -79,12 +79,14 @@ export function ResponsiveSelect({
         disabled={disabled}
       >
         <SelectTrigger className={className} size={size}>
-          <div className="flex items-center gap-2 text-foreground flex-1 text-left truncate">
-            {selectedOption?.color && (
-              <span className={`shrink-0 w-2 h-2 rounded-full ${selectedOption.color}`} />
-            )}
-            <span className="truncate">{selectedOption ? selectedOption.label : (placeholder || "Select...")}</span>
-          </div>
+          <SelectValue asChild>
+            <div className="flex items-center gap-2 text-foreground flex-1 text-left truncate">
+              {selectedOption?.color && (
+                <span className={`shrink-0 w-2 h-2 rounded-full ${selectedOption.color}`} />
+              )}
+              <span className="truncate">{selectedOption ? selectedOption.label : (placeholder || "Select...")}</span>
+            </div>
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((opt) => (
