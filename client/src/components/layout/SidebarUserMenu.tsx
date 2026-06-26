@@ -116,7 +116,7 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
           <DropdownMenuItem className="p-0">
             <a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
               <span>Support</span>
-              <Icons.MessageCircle className="w-4 h-4 text-muted-foreground" />
+              <Icons.LifeBuoy className="w-4 h-4 text-muted-foreground" />
             </a>
           </DropdownMenuItem>
         </div>
