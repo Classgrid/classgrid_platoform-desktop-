@@ -77,31 +77,31 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
         <div className="p-1">
           <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="https://classgrid.in/" target="_blank" rel="noopener noreferrer">
+            <a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer">
               <span>Home Page</span>
               <Icons.Home className="w-4 h-4 text-muted-foreground" />
-            </Link>
+            </a>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer">
+            <a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer">
               <span>Changelog</span>
-              <Icons.PenLine className="w-4 h-4 text-muted-foreground" />
-            </Link>
+              <Icons.PenTool className="w-4 h-4 text-muted-foreground" />
+            </a>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer">
+            <a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer">
               <span>Help & Support</span>
               <Icons.LifeBuoy className="w-4 h-4 text-muted-foreground" />
-            </Link>
+            </a>
           </DropdownMenuItem>
           
           <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer">
+            <a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer">
               <span>Docs</span>
               <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
-            </Link>
+            </a>
           </DropdownMenuItem>
         </div>
 

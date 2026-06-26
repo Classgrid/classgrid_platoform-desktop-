@@ -44,7 +44,7 @@ export function SidebarNotifications() {
           {/* Sample Notification 1 */}
           <div className="flex items-start gap-3 p-4 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer">
             <div className="mt-0.5 rounded-full p-1 bg-amber-500/10 text-amber-500 shrink-0">
-              <Icons.TriangleAlert className="w-4 h-4" />
+              <Icons.AlertTriangle className="w-4 h-4" />
             </div>
             <div className="flex-1 text-sm leading-tight">
               <span className="font-semibold">System Alert:</span> High CPU usage detected on database cluster.

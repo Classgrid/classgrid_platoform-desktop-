@@ -129,9 +129,38 @@ export function AppRouter() {
         
         {/* NEW SUPER ADMIN SHELL */}
         <Route element={<SuperAdminLayout />}>
+          <Route path="/superadmin/dashboard" element={<DashboardHomePage />} />
+          <Route path="/superadmin/analytics" element={<AnalyticsPage />} />
+          <Route path="/superadmin/alerts" element={<AlertsPage />} />
+          <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
+          <Route path="/superadmin/orgs/:id" element={<OrgDetailPage />} />
+          <Route path="/superadmin/onboard" element={<OnboardPage />} />
+          <Route path="/superadmin/direct-onboard" element={<DirectOnboardPage />} />
+          <Route path="/superadmin/leads" element={<LeadsPage />} />
+          <Route path="/superadmin/billing" element={<BillingPage />} />
+          <Route path="/superadmin/revenue" element={<RevenuePage />} />
+          <Route path="/superadmin/transactions" element={<TransactionsPage />} />
+          <Route path="/superadmin/failed-payments" element={<FailedPaymentsPage />} />
+          <Route path="/superadmin/users" element={<UsersPage />} />
+          <Route path="/superadmin/global-users" element={<GlobalUsersPage />} />
+          <Route path="/superadmin/audit" element={<AuditPage />} />
+          <Route path="/superadmin/activity-log" element={<ActivityLogPage />} />
+          <Route path="/superadmin/announcements" element={<PlatformAnnouncementsPage />} />
+          <Route path="/superadmin/changelog" element={<ChangelogPage />} />
+          <Route path="/superadmin/config" element={<ConfigPage />} />
           <Route path="/superadmin/support" element={<SupportTicketsPage />} />
+          <Route path="/superadmin/feedback" element={<FeedbackPage />} />
+          <Route path="/superadmin/reviews" element={<ReviewsPage />} />
           <Route path="/superadmin/talk" element={<ClassgridTalkPage />} />
           <Route path="/superadmin/classgrid-talk" element={<ClassgridTalkPage />} />
+          <Route path="/superadmin/system-health" element={<SystemHealthPage />} />
+          <Route path="/superadmin/feature-flags" element={<FeatureFlagsPage />} />
+          <Route path="/superadmin/content-moderation" element={<ContentModerationPage />} />
+          <Route path="/superadmin/notification-engine" element={<NotificationEnginePage />} />
+          <Route path="/superadmin/sandbox" element={<SandboxPage />} />
+          <Route path="/superadmin/team" element={<TeamPage />} />
+          <Route path="/superadmin/gdpr" element={<GdprPage />} />
+          <Route path="/superadmin/backup" element={<BackupPage />} />
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
