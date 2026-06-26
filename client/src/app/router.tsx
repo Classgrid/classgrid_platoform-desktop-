@@ -37,12 +37,8 @@ import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformA
 import { ProfilePage } from "@/features/superadmin/pages/ProfilePage";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
-import { OrgAdminDashboardRouter } from "@/features/org/pages/OrgAdminDashboardRouter";
-import { OrgAnnouncementsPage } from "@/features/org/pages/OrgAnnouncementsPage";
-import { OrgStudentsPage } from "@/features/org/pages/OrgStudentsPage";
-import { OrgFacultyPage } from "@/features/org/pages/OrgFacultyPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
-import { OrgClassroomsPage } from "@/features/org/pages/OrgClassroomsPage";
+
 import { StudentHomePage } from "@/features/student/pages/StudentHomePage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
 import { FacultyHomePage } from "@/features/faculty/pages/FacultyHomePage";
@@ -91,7 +87,9 @@ import { getRedirectPath } from "@/features/auth/auth-helpers";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
+import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
 import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
+
 
 export function AppRouter() {
   // ── SUBDOMAIN DETECTION ──
@@ -137,19 +135,17 @@ export function AppRouter() {
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
+        {/* NEW ORG ADMIN SHELL */}
+        <Route element={<OrgAdminLayout />}>
+          <Route path="/org/*" element={<ComingSoonPage />} />
+        </Route>
+
       <Route element={<DashboardLayout />}>
         <Route path="/" element={<DefaultDashboardRedirect />} />
         <Route path="/admin/dashboard" element={<Navigate to="/org/dashboard" replace />} />
 
 
 
-        {/* 2. Org Admin Dashboard */}
-        <Route path="/org/dashboard" element={<OrgAdminDashboardRouter />} />
-        <Route path="/org/announcements" element={<OrgAnnouncementsPage />} />
-        <Route path="/org/students" element={<OrgStudentsPage />} />
-        <Route path="/org/faculty" element={<OrgFacultyPage />} />
-        <Route path="/org/classrooms" element={<OrgClassroomsPage />} />
-        <Route path="/org/admissions" element={<Navigate to="/dept/admissions/dashboard" replace />} />
 
         {/* 3. Admissions Department Dashboard */}
         <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardRouter />} />
@@ -226,7 +222,6 @@ export function AppRouter() {
 
         {/* ── Wildcard sub-routes ── */}
 
-        <Route path="/org/*" element={<GenericPage />} />
         <Route path="/dept/admissions/*" element={<GenericPage title="Admissions Module" />} />
         <Route path="/dept/fees/*" element={<GenericPage title="Fees Module" />} />
         <Route path="/dept/exams/*" element={<GenericPage title="Examination Module" />} />
