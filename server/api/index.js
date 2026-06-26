@@ -88,6 +88,7 @@ import supportRoutes from "../src/routes/support.routes.js";
 import changelogRoutes from "../src/routes/changelog.routes.js";
 import publicRoutes from "../src/routes/public.routes.js";
 import uploadRoutes from "../src/routes/upload.routes.js";
+import systemRoutes from "../src/routes/system.routes.js";
 import { publicTenantRouter, orgWebsiteRouter, superAdminWebsiteRouter } from "../src/routes/org-website.routes.js";
 import extractSubdomain, { resolveTenant, getPublicTenantInfo } from "../src/middleware/subdomain-router.middleware.js";
 import { sendEmail } from "../src/services/brevo.service.js";
@@ -297,6 +298,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/changelog", changelogRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/system", systemRoutes);
 app.use("/api/public/tenant", publicTenantRouter);   // GET /api/public/tenant/resolve?slug=...
 app.use("/api/org-website", orgWebsiteRouter);       // Org admin CMS endpoints
 app.use("/api/super-admin", superAdminWebsiteRouter);// Super admin: list all websites

@@ -33,9 +33,9 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
       <AppSidebar role={role} user={user} />
       {/* Make the inset background match the sidebar so it's a seamless black canvas */}
       <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
-        {/* This is the actual floating Grey Card */}
-        <div className="flex-1 flex flex-col bg-card m-2 lg:m-3 rounded-2xl border border-border shadow-sm overflow-hidden">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 bg-card">
+        {/* This is the actual flush right pane */}
+        <div className="flex-1 flex flex-col bg-card border-l border-border overflow-hidden">
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 bg-background">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -47,7 +47,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
               {/* Topbar placeholder for future breadcrumbs / search / right actions */}
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-card p-4 lg:p-6">
+          <main className="flex-1 overflow-auto bg-background p-4 lg:p-6">
             {children}
           </main>
         </div>
