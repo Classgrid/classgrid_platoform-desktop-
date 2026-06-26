@@ -26,11 +26,9 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={
-        <button className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-          <Icons.MoreHorizontal className="w-4 h-4" />
-        </button>
-      } />
+      <DropdownMenuTrigger className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Icons.MoreHorizontal className="w-4 h-4" />
+      </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-[280px] rounded-xl shadow-xl border border-border bg-popover text-popover-foreground p-1"
         side="bottom"
@@ -49,14 +47,18 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         <DropdownMenuSeparator className="mx-1" />
         
         <div className="p-1">
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<Link to="/profile" />}>
-            <span>Profile</span>
-            <Icons.User className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <Link to="/profile" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Profile</span>
+              <Icons.User className="w-4 h-4 text-muted-foreground" />
+            </Link>
           </DropdownMenuItem>
           
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<Link to="/settings" />}>
-            <span>Settings</span>
-            <Icons.Settings className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <Link to="/settings" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Settings</span>
+              <Icons.Settings className="w-4 h-4 text-muted-foreground" />
+            </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem className="justify-between rounded-md py-1.5 px-3 text-sm focus:bg-transparent">
@@ -72,24 +74,32 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         <DropdownMenuSeparator className="mx-1" />
 
         <div className="p-1">
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer" />}>
-            <span>Home Page</span>
-            <Icons.Home className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Home Page</span>
+              <Icons.Home className="w-4 h-4 text-muted-foreground" />
+            </a>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer" />}>
-            <span>Changelog</span>
-            <Icons.FileText className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Changelog</span>
+              <Icons.FileText className="w-4 h-4 text-muted-foreground" />
+            </a>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer" />}>
-            <span>Help & Support</span>
-            <Icons.MessageCircle className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Help & Support</span>
+              <Icons.MessageCircle className="w-4 h-4 text-muted-foreground" />
+            </a>
           </DropdownMenuItem>
           
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer" />}>
-            <span>Docs</span>
-            <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Docs</span>
+              <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
+            </a>
           </DropdownMenuItem>
         </div>
 

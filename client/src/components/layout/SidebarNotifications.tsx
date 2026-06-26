@@ -9,12 +9,10 @@ import {
 export function SidebarNotifications() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={
-        <button className="relative w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-          <Icons.Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
-        </button>
-      } />
+      <DropdownMenuTrigger className="relative w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Icons.Bell className="w-4 h-4" />
+        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
+      </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-80 min-w-80 rounded-xl shadow-xl border border-border bg-popover text-popover-foreground p-0 overflow-hidden"
         side="bottom"

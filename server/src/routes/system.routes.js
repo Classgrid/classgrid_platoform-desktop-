@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -9,17 +10,12 @@ const router = express.Router();
 router.get("/status", async (req, res) => {
   try {
     const pageId = req.query.pageId || "classgrid";
-    const response = await fetch(`https://${pageId}.statuspage.io/api/v2/summary.json`);
+    const response = await axios.get(`https://${pageId}.statuspage.io/api/v2/summary.json`);
     
-    if (!response.ok) {
-      return res.status(response.status).json({ success: false, message: "Statuspage API error" });
-    }
-    
-    const data = await response.json();
-    return res.json(data);
+    return res.json(response.data);
   } catch (error) {
-    console.error("[System] status fetch error:", error);
-    return res.status(500).json({ success: false, message: "Internal proxy error" });
+    console.error("[System] status fetch error:", error?.message);
+    return res.status(error?.response?.status || 500).json({ success: false, message: "Internal proxy error" });
   }
 });
 
