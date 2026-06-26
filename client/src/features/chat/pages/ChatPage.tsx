@@ -233,7 +233,7 @@ export function ChatPage() {
 
   // -- Layout --
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden bg-background">
+    <div className="flex h-[calc(100vh-56px)] w-full overflow-hidden bg-background">
       {/* Sidebar Panel (Hidden on mobile when a chat is open) */}
       <div className={`${activeThread ? "hidden lg:flex" : "flex"} w-full lg:w-[350px] xl:w-[400px] shrink-0`}>
         <ChatSidebar

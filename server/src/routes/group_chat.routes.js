@@ -43,7 +43,8 @@ router.post('/', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user._id.toString();
     const orgId = req.user.organization_id?.toString();
-    if (!orgId) return res.status(403).json({ error: 'Must be in an organization' });
+    const isSuperAdmin = req.user.role === 'super_admin';
+    if (!orgId && !isSuperAdmin) return res.status(403).json({ error: 'Must be in an organization' });
 
     const { name, description, memberIds } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Group name is required' });
@@ -54,9 +55,17 @@ router.post('/', isAuthenticated, async (req, res) => {
     // Validate all members are in the same org
     const allIds = [...new Set([userId, ...memberIds])];
     const users = await User.find({ _id: { $in: allIds } }).select('organization_id name').lean();
-    const invalidUsers = users.filter(u => u.organization_id?.toString() !== orgId);
-    if (invalidUsers.length > 0) {
-      return res.status(400).json({ error: 'All members must be from the same organization' });
+    
+    let threadOrgId = orgId || null;
+    
+    if (isSuperAdmin) {
+      const firstMemberOrg = users.find(u => u._id.toString() !== userId && u.organization_id)?.organization_id?.toString();
+      threadOrgId = firstMemberOrg || null;
+    } else {
+      const invalidUsers = users.filter(u => u.organization_id?.toString() !== orgId);
+      if (invalidUsers.length > 0) {
+        return res.status(400).json({ error: 'All members must be from the same organization' });
+      }
     }
 
     // Create group
@@ -65,7 +74,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       .insert([{
         name: name.trim(),
         created_by: userId,
-        org_id: orgId,
+        org_id: threadOrgId,
       }])
       .select()
       .single();
@@ -76,7 +85,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       .from('chat_threads')
       .insert([{
         type: 'group',
-        org_id: orgId,
+        org_id: threadOrgId,
         group_id: group.id,
       }])
       .select()

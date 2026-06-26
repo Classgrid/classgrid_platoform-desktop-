@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarInset } from "@/components/marketing_ui/sidebar";
 import { TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbLink } from "@/components/marketing_ui/breadcrumb";
@@ -31,6 +32,9 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
+  const location = useLocation();
+  const isChat = location.pathname.includes("/chat");
+
   return (
     <TooltipProvider>
       <SidebarProvider>
@@ -51,7 +55,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                 {/* Topbar placeholder for future breadcrumbs / search / right actions */}
               </div>
             </header>
-            <main className="flex-1 overflow-auto bg-background p-4 lg:p-6">
+            <main className={`flex-1 overflow-auto bg-background ${isChat ? 'p-0' : 'p-4 lg:p-6'}`}>
               {children}
             </main>
           </div>
