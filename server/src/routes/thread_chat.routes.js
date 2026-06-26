@@ -400,7 +400,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     const thread = threadResult.data;
     if (!thread) return res.status(404).json({ error: 'Thread not found' });
-    if (thread.org_id !== req.user.organization_id?.toString()) {
+    const isSuperAdmin = req.user.role === 'super_admin';
+    if (!isSuperAdmin && thread.org_id && thread.org_id !== req.user.organization_id?.toString()) {
       return res.status(403).json({ error: 'Organization mismatch' });
     }
 
