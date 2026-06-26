@@ -44,6 +44,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "PLATFORM",
         items: [
           { title: "Users & Roles", url: "/superadmin/users", icon: "Users" },
+          { title: "Platform Team", url: "/superadmin/team", icon: "UserCircle" },
           { title: "Audit Logs", url: "/superadmin/audit", icon: "Shield" },
           { title: "Announcements", url: "/superadmin/announcements", icon: "Megaphone" },
           { title: "System Config", url: "/superadmin/config", icon: "Settings" },

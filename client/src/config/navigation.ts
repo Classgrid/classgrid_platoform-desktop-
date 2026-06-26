@@ -16,6 +16,7 @@ export const SUPER_ADMIN_MENU: NavigationItem[] = [
   { title: "Plans & Billing", url: "/superadmin/billing", icon: "CreditCard", section: "ORGANIZATIONS" },
   
   { title: "Users & Roles", url: "/superadmin/users", icon: "Users", section: "PLATFORM" },
+  { title: "Platform Team", url: "/superadmin/team", icon: "UserCircle", section: "PLATFORM" },
   { title: "Audit Logs", url: "/superadmin/audit", icon: "Shield", section: "PLATFORM" },
   { title: "Announcements", url: "/superadmin/announcements", icon: "Megaphone", section: "PLATFORM" },
   { title: "Changelog", url: "/superadmin/changelog", icon: "FileText", section: "PLATFORM" },
