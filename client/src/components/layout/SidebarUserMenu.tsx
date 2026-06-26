@@ -107,13 +107,6 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
         <div className="p-1">
           <DropdownMenuItem className="p-0">
-            <a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-              <span>Home Page</span>
-              <Icons.Home className="w-4 h-4 text-muted-foreground" />
-            </a>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="p-0">
             <a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
               <span>Changelog</span>
               <Icons.FileText className="w-4 h-4 text-muted-foreground" />
@@ -122,15 +115,8 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
           <DropdownMenuItem className="p-0">
             <a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-              <span>Help & Support</span>
+              <span>Support</span>
               <Icons.MessageCircle className="w-4 h-4 text-muted-foreground" />
-            </a>
-          </DropdownMenuItem>
-          
-          <DropdownMenuItem className="p-0">
-            <a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-              <span>Docs</span>
-              <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
             </a>
           </DropdownMenuItem>
         </div>
@@ -146,11 +132,7 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
           </DropdownMenuItem>
         </div>
 
-        <div className="p-2">
-          <Link to={`${basePath}/billing`} className="flex w-full justify-center items-center bg-foreground text-background font-medium rounded-lg text-sm py-2 hover:opacity-90 transition-opacity">
-            Upgrade to Pro
-          </Link>
-        </div>
+
 
         <DropdownMenuSeparator className="mx-0" />
         
