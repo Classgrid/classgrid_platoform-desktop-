@@ -24,7 +24,9 @@ interface NotificationItem {
 export function SidebarNotifications() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"inbox" | "archive">("inbox");
-  const [showPushBanner, setShowPushBanner] = useState(true);
+  const [showPushBanner, setShowPushBanner] = useState(() => {
+    return localStorage.getItem("push_banner_dismissed") !== "true";
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -139,7 +141,10 @@ export function SidebarNotifications() {
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                onClick={() => setShowPushBanner(false)}
+                onClick={() => {
+                  localStorage.setItem("push_banner_dismissed", "true");
+                  setShowPushBanner(false);
+                }}
               >
                 Dismiss
               </Button>
@@ -147,6 +152,7 @@ export function SidebarNotifications() {
                 size="sm"
                 className="flex-1"
                 onClick={() => {
+                  localStorage.setItem("push_banner_dismissed", "true");
                   // Connect actual push notification permission request logic here later
                   setShowPushBanner(false);
                 }}
