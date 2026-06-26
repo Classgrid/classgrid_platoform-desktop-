@@ -489,10 +489,10 @@ export function SupportTicketsPage() {
           >
             {PRIORITY_OPTIONS.map((o) => {
               let pColor;
-              if (o.value === "low") pColor = "bg-zinc-400";
+              if (o.value === "low") pColor = "bg-emerald-500";
               else if (o.value === "medium") pColor = "bg-amber-500";
-              else if (o.value === "high") pColor = "bg-orange-500";
-              else if (o.value === "urgent") pColor = "bg-red-500";
+              else if (o.value === "high") pColor = "bg-red-500";
+              else if (o.value === "urgent") pColor = "bg-red-600";
               
               return (
                 <option 
