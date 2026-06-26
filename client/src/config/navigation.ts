@@ -22,8 +22,6 @@ export const SUPER_ADMIN_MENU: NavigationItem[] = [
   { title: "System Config", url: "/superadmin/config", icon: "Settings", section: "PLATFORM" },
   
   { title: "Support Tickets", url: "/superadmin/support", icon: "Ticket", section: "SUPPORT" },
-  { title: "Feedback", url: "/superadmin/feedback", icon: "MessageSquare", section: "SUPPORT" },
-  { title: "NPS / Reviews", url: "/superadmin/reviews", icon: "Star", section: "SUPPORT" },
 ];
 
 export const ORG_ADMIN_MENU: NavigationItem[] = [

@@ -104,9 +104,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Changelog", to: "/superadmin/changelog", icon: FileText },
           { label: "Subscribers", to: "/superadmin/subscribers", icon: Mail, restrictedToEmail: "support@classgrid.in" },
           { label: "Classgrid Talk", to: "/superadmin/classgrid-talk", icon: MessageSquare },
-          { label: "Support Tickets", to: "/superadmin/support", icon: Ticket },
-          { label: "Feedback", to: "/superadmin/feedback", icon: MessageSquare },
-          { label: "NPS / Reviews", to: "/superadmin/reviews", icon: FileBarChart }
+          { label: "Support Tickets", to: "/superadmin/support", icon: Ticket }
         ]
       },
       {
