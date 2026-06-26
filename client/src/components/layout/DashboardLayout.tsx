@@ -1,5 +1,7 @@
 import React from "react";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/marketing_ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/marketing_ui/sidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbLink } from "@/components/marketing_ui/breadcrumb";
+
 import { AppSidebar } from "./AppSidebar";
 
 export type DashboardRole =
@@ -30,11 +32,17 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
     <SidebarProvider>
       <AppSidebar role={role} user={user} />
       {/* Make the inset background match the sidebar so it's a seamless black canvas */}
-      <SidebarInset className="bg-background flex flex-col min-h-screen overflow-hidden">
+      <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
         {/* This is the actual floating Grey Card */}
         <div className="flex-1 flex flex-col bg-card m-2 lg:m-3 rounded-2xl border border-border shadow-sm overflow-hidden">
           <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 bg-card">
-            <SidebarTrigger className="-ml-1" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
             <div className="w-full flex justify-between items-center">
               {/* Topbar placeholder for future breadcrumbs / search / right actions */}
             </div>

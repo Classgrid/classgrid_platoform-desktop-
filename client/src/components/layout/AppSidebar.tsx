@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarTrigger,
 } from "@/components/marketing_ui/sidebar";
 import {
   DropdownMenu,
@@ -49,8 +50,8 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   }
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="h-16 flex justify-center px-4">
+    <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
+      <SidebarHeader className="h-16 flex flex-row items-center justify-between px-3">
         <div className="flex flex-col gap-0.5 justify-center overflow-hidden">
           <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
             <Icons.Zap className="h-5 w-5 shrink-0 text-emerald-500" />
@@ -64,9 +65,10 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
             </span>
           )}
         </div>
+        <SidebarTrigger />
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="sidebar-scroll-hidden">
         {config.sections.map((section, index) => (
           <SidebarGroup key={section.label || index}>
             {section.label && (

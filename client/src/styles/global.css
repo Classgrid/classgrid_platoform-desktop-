@@ -928,3 +928,22 @@
 .solution-html-content li {
   margin-bottom: 0.35rem;
 }
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+/* Completely hide scrollbar for the sidebar specifically */
+.sidebar-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
