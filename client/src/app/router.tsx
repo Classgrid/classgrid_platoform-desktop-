@@ -34,7 +34,7 @@ import { NotificationEnginePage } from "@/features/superadmin/pages/Notification
 import { OrganizationsPage } from "@/features/superadmin/pages/OrganizationsPage";
 import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
-import { ProfilePage } from "@/features/superadmin/pages/ProfilePage";
+import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
@@ -216,7 +216,7 @@ export function AppRouter() {
         <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
         <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
         <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<SharedProfilePage />} />
         <Route path="/settings" element={<SharedSettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
 
