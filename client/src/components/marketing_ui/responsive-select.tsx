@@ -30,14 +30,22 @@ export function ResponsiveSelect({
   // Extract options from children to use in custom select
   const options = React.useMemo(() => {
     const opts: { value: string; label: React.ReactNode }[] = []
-    React.Children.forEach(children, (child) => {
-      if (React.isValidElement(child) && child.type === "option") {
-        opts.push({
-          value: String(child.props.value || child.props.children),
-          label: child.props.children,
-        })
-      }
-    })
+    
+    const flattenChildren = (kids: any) => {
+      React.Children.forEach(kids, (child) => {
+        if (!React.isValidElement<any>(child)) return;
+        if (child.type === React.Fragment) {
+          flattenChildren(child.props.children);
+        } else if (child.props && (child.props.value !== undefined || child.type === "option")) {
+          opts.push({
+            value: String(child.props.value !== undefined ? child.props.value : child.props.children),
+            label: child.props.children,
+          })
+        }
+      })
+    }
+    
+    flattenChildren(children)
     return opts
   }, [children])
 
@@ -64,7 +72,9 @@ export function ResponsiveSelect({
         disabled={disabled}
       >
         <SelectTrigger className={className} size={size}>
-          <SelectValue placeholder={placeholder || "Select..."} />
+          <span className="text-foreground flex-1 text-left truncate">
+            {selectedOption ? selectedOption.label : (placeholder || "Select...")}
+          </span>
         </SelectTrigger>
         <SelectContent>
           {options.map((opt) => (
