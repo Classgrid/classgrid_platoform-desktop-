@@ -11,6 +11,7 @@ import { formatDate } from "@/utils/dateUtils";
 import { useAllUsers, useSuspendUser, useReactivateUser, useImpersonateUser } from "../queries/useUsers";
 import { LogIn } from "lucide-react";
 import type { SuperAdminUser } from "../services/superAdminApi";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
 // ── columns ───────────────────────────────────────────────────────────────────
 

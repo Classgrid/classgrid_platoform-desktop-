@@ -11,6 +11,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
 import { announcementsApi, type Announcement } from "../services/superAdminApi";
 

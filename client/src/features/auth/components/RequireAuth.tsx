@@ -8,11 +8,7 @@ export function RequireAuth() {
   const { data: user, isLoading } = useCurrentUser();
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        Checking your session...
-      </div>
-    );
+    return null;
   }
 
   if (!user) {

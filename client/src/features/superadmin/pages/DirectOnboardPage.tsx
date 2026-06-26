@@ -6,6 +6,7 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi, directProvisionApi } from "../services/superAdminApi";
 import type { DirectProvisionPayload } from "../services/superAdminApi";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
 // ── Org type options ────────────────────────────────────────────────────────
 
