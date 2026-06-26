@@ -90,6 +90,8 @@ import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { getRedirectPath } from "@/features/auth/auth-helpers";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
+import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
 
 export function AppRouter() {
   // ── SUBDOMAIN DETECTION ──
@@ -126,93 +128,18 @@ export function AppRouter() {
 
       {/* ── DASHBOARD ROUTES ── */}
       <Route element={<RequireAuth />}>
+        
+        {/* NEW SUPER ADMIN SHELL */}
+        <Route element={<SuperAdminLayout />}>
+          <Route path="/superadmin/support" element={<SupportTicketsPage />} />
+          <Route path="/superadmin/talk" element={<ClassgridTalkPage />} />
+          <Route path="/superadmin/classgrid-talk" element={<ClassgridTalkPage />} />
+          <Route path="/superadmin/*" element={<ComingSoonPage />} />
+        </Route>
+
       <Route element={<DashboardLayout />}>
         <Route path="/" element={<DefaultDashboardRedirect />} />
         <Route path="/admin/dashboard" element={<Navigate to="/org/dashboard" replace />} />
-
-        {/* 1. Super Admin Dashboard */}
-        <Route path="/superadmin/dashboard" element={<DashboardHomePage />} />
-
-        {/* Super Admin — Leads */}
-        <Route path="/superadmin/leads" element={<LeadsPage />} />
-
-        {/* Super Admin — Support Tickets */}
-        <Route path="/superadmin/support" element={<SupportTicketsPage />} />
-
-        {/* Super Admin — Reviews */}
-        <Route path="/superadmin/reviews" element={<ReviewsPage />} />
-
-        {/* Super Admin — All Organizations */}
-        <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
-
-        {/* Super Admin — Organization Detail */}
-        <Route path="/superadmin/orgs/:id" element={<OrgDetailPage />} />
-
-        {/* Super Admin — Announcements */}
-        <Route path="/superadmin/announcements" element={<PlatformAnnouncementsPage />} />
-
-        {/* Super Admin — Changelog */}
-        <Route path="/superadmin/changelog" element={<ChangelogPage />} />
-        <Route path="/superadmin/subscribers" element={<SubscribersPage />} />
-
-        {/* Super Admin — Audit (NAAC/NBA Compliance — for org data) */}
-        <Route path="/superadmin/audit" element={<AuditPage />} />
-
-        {/* Super Admin — Activity Logs (Platform admin action trail) */}
-        <Route path="/superadmin/activity-logs" element={<ActivityLogPage />} />
-
-        {/* Super Admin — System */}
-        <Route path="/superadmin/config" element={<ConfigPage />} />
-        <Route path="/superadmin/system-health" element={<SystemHealthPage />} />
-        <Route path="/superadmin/feature-flags" element={<FeatureFlagsPage />} />
-        <Route path="/superadmin/rollback" element={<RollbackPage />} />
-        <Route path="/superadmin/moderation" element={<ContentModerationPage />} />
-
-        {/* Super Admin — Users */}
-        <Route path="/superadmin/users" element={<UsersPage />} />
-        <Route path="/superadmin/global-users" element={<GlobalUsersPage />} />
-        <Route path="/superadmin/gdpr" element={<GdprPage />} />
-        <Route path="/superadmin/backups" element={<BackupPage />} />
-
-        {/* Super Admin — Analytics */}
-        <Route path="/superadmin/analytics" element={<AnalyticsPage />} />
-
-        {/* Super Admin — Alerts */}
-        <Route path="/superadmin/alerts" element={<AlertsPage />} />
-
-        {/* Super Admin — Onboard */}
-        <Route path="/superadmin/onboard" element={<OnboardPage />} />
-
-        {/* Super Admin — Billing */}
-        <Route path="/superadmin/billing" element={<BillingPage />} />
-        
-        {/* Super Admin — Revenue */}
-        <Route path="/superadmin/revenue" element={<RevenuePage />} />
-        <Route path="/superadmin/transactions" element={<TransactionsPage />} />
-        <Route path="/superadmin/failed-payments" element={<FailedPaymentsPage />} />
-
-        {/* Super Admin — Feedback */}
-        <Route path="/superadmin/feedback" element={<FeedbackPage />} />
-
-        {/* Super Admin — Notifications Engine */}
-        <Route path="/superadmin/notifications" element={<NotificationEnginePage />} />
-
-        {/* Super Admin — Direct Onboard (no demo required) */}
-        <Route path="/superadmin/onboard" element={<DirectOnboardPage />} />
-
-        {/* Super Admin — Onboard via pending demo orgs */}
-        <Route path="/superadmin/onboard/pending" element={<OnboardPage />} />
-
-        {/* Super Admin — Classgrid Talk */}
-        <Route path="/superadmin/classgrid-talk" element={<ClassgridTalkPage />} />
-
-        {/* Super Admin — Platform Team */}
-        <Route path="/superadmin/team" element={<TeamPage />} />
-
-        {/* Super Admin — Profile & Settings */}
-        <Route path="/superadmin/profile" element={<ProfilePage />} />
-        <Route path="/superadmin/sandbox" element={<SandboxPage />} />
-        <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
 
 
 
@@ -298,7 +225,7 @@ export function AppRouter() {
         <Route path="/support" element={<SupportPage />} />
 
         {/* ── Wildcard sub-routes ── */}
-        <Route path="/superadmin/*" element={<GenericPage />} />
+
         <Route path="/org/*" element={<GenericPage />} />
         <Route path="/dept/admissions/*" element={<GenericPage title="Admissions Module" />} />
         <Route path="/dept/fees/*" element={<GenericPage title="Fees Module" />} />
