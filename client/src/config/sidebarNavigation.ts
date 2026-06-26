@@ -65,12 +65,6 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
           { title: "Failed Payments", url: "/superadmin/failed-payments", icon: "AlertTriangle" },
         ],
       },
-      {
-        label: "SECURITY & MODERATION",
-        items: [
-          { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag" },
-        ],
-      },
     ],
   },
   org_admin: {

@@ -1,3 +1,4 @@
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";

@@ -1,3 +1,4 @@
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState, useEffect } from "react";
 import { Loader2, Save, FileText, LayoutList } from "lucide-react";
 

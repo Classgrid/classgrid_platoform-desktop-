@@ -1,3 +1,4 @@
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import React, { useState } from "react";
 import { useGetAdmissions, useGetApplicationDetails, useUpdateApplicationStatus } from "../queries/useAdmissions";
 import { useGeneratePRNs, useAllocateDivisions, useDownloadGovtExport } from "../queries/useAdmissionsOperations";

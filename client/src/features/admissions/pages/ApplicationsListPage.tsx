@@ -1,3 +1,4 @@
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Loader2, Eye, MoreHorizontal } from "lucide-react";
