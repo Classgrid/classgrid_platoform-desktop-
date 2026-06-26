@@ -24,6 +24,7 @@ import { BillingPage } from "@/features/superadmin/pages/BillingPage";
 import { RevenuePage } from "@/features/superadmin/pages/RevenuePage";
 import { FeedbackPage } from "@/features/superadmin/pages/FeedbackPage";
 import { SubscribersPage } from "@/features/superadmin/pages/SubscribersPage";
+import { ChatPage } from "@/features/chat/pages/ChatPage";
 import { SystemHealthPage } from "@/features/superadmin/pages/SystemHealthPage";
 import { FeatureFlagsPage } from "@/features/superadmin/pages/FeatureFlagsPage";
 import { TransactionsPage } from "@/features/superadmin/pages/TransactionsPage";
@@ -234,7 +235,7 @@ export function AppRouter() {
         <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
         <Route path="/tools" element={<GenericPage title="Schedule" />} />
-        <Route path="/chat" element={<GenericPage title="Messages" />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/notifications" element={<GenericPage title="Notifications" />} />
         <Route path="/forum" element={<GenericPage title="Forum" />} />
         <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />

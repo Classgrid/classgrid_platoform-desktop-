@@ -1,5 +1,5 @@
 import express from "express";
-import { isAuthenticated } from "../middlewares/auth.middleware.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
 import PushSubscription from "../models/PushSubscription.js";
 
 const router = express.Router();

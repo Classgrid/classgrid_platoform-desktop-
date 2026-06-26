@@ -20,12 +20,29 @@ const upload = multer({
 router.get('/users', isAuthenticated, async (req, res) => {
   const user = req.user;
   try {
-    // 🔐 SECURITY: If user has no org, they should not see ANY users
-    if (!user.organization_id) {
+    // 🔐 SECURITY: Cross-tenant logic for Super Admins
+    let query = {};
+    const topAdminRoles = ['org_admin', 'principal', 'vice_principal', 'hod', 'exam_controller', 'fee_manager', 'admission_head', 'library_manager', 'transport_manager'];
+
+    if (user.role === 'super_admin') {
+      // RULE 1: Super admins see all other super_admins + all top admins from EVERY org
+      query = { role: { $in: ['super_admin', ...topAdminRoles] } };
+    } else if (topAdminRoles.includes(user.role)) {
+      // RULE 2: Org Admins & Dept Heads see their org's users + Platform Support (super_admin)
+      query = {
+        $or: [
+          { organization_id: user.organization_id },
+          { role: 'super_admin' }
+        ]
+      };
+    } else if (user.organization_id) {
+      // RULE 3: Regular students & teachers ONLY see their own org (No super admins)
+      query = { organization_id: user.organization_id };
+    } else {
       return res.json({ users: [] });
     }
 
-    const members = await User.find({ organization_id: user.organization_id }, 'name role email profilePicture profileBanner phoneNumber bio prn _id').lean();
+    const members = await User.find(query, 'name role email profilePicture profileBanner phoneNumber bio prn _id organization_id').lean();
     const formatted = members.map(m => ({
       _id: m._id.toString(),
       name: m.name,

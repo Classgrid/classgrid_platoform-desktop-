@@ -66,7 +66,9 @@ router.get('/', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user._id.toString();
     const orgId = req.user.organization_id?.toString();
-    if (!orgId) return res.json({ threads: [] });
+    const isSuperAdmin = req.user.role === 'super_admin';
+
+    if (!orgId && !isSuperAdmin) return res.json({ threads: [] });
 
     // Get thread IDs where user is a member
     const { data: memberships, error: memErr } = await sb
@@ -79,9 +81,14 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (threadIds.length === 0) return res.json({ threads: [] });
 
     // Run threads + reads + members queries IN PARALLEL
+    let threadQuery = sb.from('chat_threads').select('*').in('id', threadIds);
+    if (!isSuperAdmin) {
+      threadQuery = threadQuery.eq('org_id', orgId);
+    }
+    threadQuery = threadQuery.order('last_message_at', { ascending: false, nullsFirst: false }).limit(50);
+
     const [threadsResult, readsResult] = await Promise.all([
-      sb.from('chat_threads').select('*').in('id', threadIds).eq('org_id', orgId)
-        .order('last_message_at', { ascending: false, nullsFirst: false }).limit(50),
+      threadQuery,
       sb.from('thread_reads').select('thread_id, last_read_at').eq('user_id', userId).in('thread_id', threadIds),
     ]);
 
@@ -195,16 +202,25 @@ router.post('/dm/:userId', isAuthenticated, async (req, res) => {
   try {
     const myId = req.user._id.toString();
     const otherId = req.params.userId;
-    const orgId = req.user.organization_id?.toString();
-    if (!orgId) return res.status(403).json({ error: 'You must be in an organization to chat' });
+    const myOrgId = req.user.organization_id?.toString();
+    const myRole = req.user.role;
+    
     if (myId === otherId) return res.status(400).json({ error: 'Cannot message yourself' });
 
-    // Verify other user exists and is in the same org
+    // Verify other user exists
     const otherUser = await User.findById(otherId).select('name organization_id profilePicture role').lean();
     if (!otherUser) return res.status(404).json({ error: 'User not found' });
-    if (otherUser.organization_id?.toString() !== orgId) {
+
+    const otherOrgId = otherUser.organization_id?.toString();
+    const isCrossTenantAllowed = myRole === 'super_admin' || otherUser.role === 'super_admin';
+
+    if (!isCrossTenantAllowed && (!myOrgId || myOrgId !== otherOrgId)) {
       return res.status(403).json({ error: 'Cannot message users from another organization' });
     }
+
+    // Determine which org_id owns the thread (used for filtering)
+    // If one is super_admin, the thread belongs to the standard user's org. If both super, it's null.
+    const threadOrgId = myRole === 'super_admin' ? (otherOrgId || null) : myOrgId;
 
     // Find existing DM thread between these two users
     const { data: myThreads } = await sb
@@ -238,7 +254,7 @@ router.post('/dm/:userId', isAuthenticated, async (req, res) => {
       .from('chat_threads')
       .insert([{
         type: 'dm',
-        org_id: orgId,
+        org_id: threadOrgId,
         group_id: null,
         last_message: null,
         last_message_at: null,

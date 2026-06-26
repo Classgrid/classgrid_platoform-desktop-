@@ -1,0 +1,162 @@
+import { apiClient } from "@/lib/apiClient";
+
+// ── Thread Types ──
+export interface ChatThread {
+  id: string;
+  type: "dm" | "group";
+  name: string;
+  avatar: string | null;
+  role?: string;
+  otherUserId?: string;
+  groupId?: string;
+  description?: string;
+  email?: string;
+  phoneNumber?: string;
+  bio?: string;
+  prn?: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  unread: number;
+  createdAt: string;
+}
+
+export interface ChatAttachment {
+  id: string;
+  message_id: string;
+  file_url: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  sender_name: string;
+  user_avatar: string | null;
+  message: string;
+  reply_to: { id: string; sender_name: string; message: string } | null;
+  is_deleted: boolean;
+  created_at: string;
+  attachments: ChatAttachment[];
+  reactions: Record<string, { id: string; name: string }[]>;
+  isSeen?: boolean;
+}
+
+export interface OrgUser {
+  _id: string;
+  name: string;
+  email: string | null;
+  role: string;
+  profilePicture: string | null;
+  profileBanner: string | null;
+  phoneNumber: string | null;
+  bio: string | null;
+  prn: string | null;
+}
+
+export interface ChatGroup {
+  id: string;
+  name: string;
+  description?: string;
+  avatar_url?: string;
+  created_by: string;
+  org_id: string;
+}
+
+export interface GroupMember {
+  userId: string;
+  name: string;
+  profilePicture: string | null;
+  role: string;
+  userRole: string;
+  email: string | null;
+  joinedAt: string;
+}
+
+// ── API Functions ──
+
+export async function fetchThreads(): Promise<ChatThread[]> {
+  const res = await apiClient.get<{ threads: ChatThread[] }>("/api/threads");
+  return res.data.threads;
+}
+
+export async function fetchOrgUsers(): Promise<OrgUser[]> {
+  const res = await apiClient.get<{ users: OrgUser[] }>("/api/org-chat/users");
+  return res.data.users;
+}
+
+export async function findOrCreateDM(userId: string) {
+  const res = await apiClient.post<{ thread: any; isNew: boolean }>(`/api/threads/dm/${userId}`);
+  return res.data;
+}
+
+export async function fetchMessages(threadId: string, before?: string): Promise<ChatMessage[]> {
+  const params = before ? { before } : {};
+  const res = await apiClient.get<{ messages: ChatMessage[] }>(`/api/threads/${threadId}/messages`, { params });
+  return res.data.messages;
+}
+
+export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any) {
+  const formData = new FormData();
+  if (message) formData.append("message", message);
+  if (replyTo) formData.append("replyTo", JSON.stringify(replyTo));
+  if (files) {
+    files.forEach((file) => formData.append("files", file));
+  }
+  const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    timeout: 60000,
+  });
+  return res.data.message;
+}
+
+export async function markThreadRead(threadId: string) {
+  await apiClient.post(`/api/threads/${threadId}/read`);
+}
+
+export async function deleteMessage(threadId: string, messageId: string) {
+  await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`);
+}
+
+export async function editMessage(threadId: string, messageId: string, message: string) {
+  await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}`, { message });
+}
+
+export async function toggleReaction(threadId: string, messageId: string, emoji: string) {
+  const res = await apiClient.post(`/api/threads/${threadId}/messages/${messageId}/reactions`, { emoji });
+  return res.data.reactions;
+}
+
+export async function createGroup(name: string, memberIds: string[]) {
+  const res = await apiClient.post("/api/group-chat", { name, memberIds });
+  return res.data;
+}
+
+export async function fetchGroupInfo(groupId: string) {
+  const res = await apiClient.get<{ group: ChatGroup; threadId: string; members: GroupMember[]; myRole: string }>(`/api/group-chat/${groupId}`);
+  return res.data;
+}
+
+export async function addGroupMember(groupId: string, userId: string) {
+  await apiClient.post(`/api/group-chat/${groupId}/members`, { userId });
+}
+
+export async function removeGroupMember(groupId: string, userId: string) {
+  await apiClient.delete(`/api/group-chat/${groupId}/members/${userId}`);
+}
+
+export async function exitGroup(groupId: string) {
+  await apiClient.post(`/api/group-chat/${groupId}/exit`);
+}
+
+export async function createPoll(groupId: string, question: string, options: string[], allowMultiple = false) {
+  const res = await apiClient.post(`/api/group-chat/${groupId}/polls`, { question, options, allowMultiple });
+  return res.data.poll;
+}
+
+export async function votePoll(groupId: string, pollId: string, optionId: string) {
+  const res = await apiClient.post(`/api/group-chat/${groupId}/polls/${pollId}/vote`, { optionId });
+  return res.data;
+}

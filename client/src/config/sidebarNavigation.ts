@@ -53,6 +53,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
       {
         label: "SUPPORT",
         items: [
+          { title: "Platform Chat", url: "/chat", icon: "MessageSquare" },
           { title: "Classgrid Talk", url: "/superadmin/classgrid-talk", icon: "MessageCircle" },
           { title: "Support Tickets", url: "/superadmin/support", icon: "Ticket" },
         ],
@@ -76,6 +77,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         items: [
           { title: "Dashboard", url: "/org/dashboard", icon: "LayoutDashboard" },
           { title: "Announcements", url: "/org/announcements", icon: "Megaphone" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
         ],
       },
       {
@@ -145,6 +147,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "ADMISSIONS",
         items: [
           { title: "Dashboard", url: "/dept/admissions/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "All Applications", url: "/dept/admissions/applications", icon: "Files" },
           { title: "New Application", url: "/dept/admissions/new", icon: "FilePlus" },
           { title: "Document Verification", url: "/dept/admissions/documents", icon: "FolderCheck" },
@@ -187,6 +190,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "FEES",
         items: [
           { title: "Dashboard", url: "/dept/fees/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "Collect Payment", url: "/dept/fees/collect", icon: "CreditCard" },
           { title: "All Transactions", url: "/dept/fees/transactions", icon: "ArrowRightLeft" },
           { title: "Defaulters List", url: "/dept/fees/defaulters", icon: "AlertOctagon" },
@@ -221,6 +225,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "EXAMS",
         items: [
           { title: "Dashboard", url: "/dept/exams/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "Exam Schedule", url: "/dept/exams/schedule", icon: "CalendarClock" },
           { title: "Create Exam", url: "/dept/exams/create", icon: "FilePlus2" },
           { title: "Online Exams", url: "/dept/exams/online", icon: "MonitorPlay" },
@@ -262,6 +267,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "LIBRARY",
         items: [
           { title: "Dashboard", url: "/dept/library/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "All Books", url: "/dept/library/books", icon: "Library" },
           { title: "Add Book", url: "/dept/library/add", icon: "BookPlus" },
           { title: "Search Catalog", url: "/dept/library/search", icon: "Search" },
@@ -301,6 +307,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "ATTENDANCE",
         items: [
           { title: "Dashboard", url: "/dept/attendance/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "Mark Attendance", url: "/dept/attendance/mark", icon: "CheckCircle" },
           { title: "Daily Report", url: "/dept/attendance/daily", icon: "CalendarRange" },
           { title: "Monthly Report", url: "/dept/attendance/monthly", icon: "CalendarDays" },
@@ -332,6 +339,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "STAFF",
         items: [
           { title: "Dashboard", url: "/dept/hr/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "All Staff", url: "/dept/hr/staff", icon: "Users" },
           { title: "Add Staff", url: "/dept/hr/add-staff", icon: "UserPlus" },
           { title: "Departments", url: "/dept/hr/departments", icon: "Building" },
@@ -364,6 +372,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         label: "HOSTEL",
         items: [
           { title: "Dashboard", url: "/dept/hostel/dashboard", icon: "LayoutDashboard" },
+          { title: "Chat", url: "/chat", icon: "MessageSquare" },
           { title: "Room Allocation", url: "/dept/hostel/rooms", icon: "BedDouble" },
           { title: "Residents", url: "/dept/hostel/residents", icon: "Users" },
           { title: "Complaints", url: "/dept/hostel/complaints", icon: "MessageSquareWarning" },
