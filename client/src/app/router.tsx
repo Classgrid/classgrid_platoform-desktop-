@@ -172,7 +172,6 @@ export function AppRouter() {
           <Route path="/org/*" element={<ComingSoonPage />} />
         </Route>
 
-      <Route element={<DashboardLayout />}>
         <Route path="/" element={<DefaultDashboardRedirect />} />
         <Route path="/admin/dashboard" element={<Navigate to="/org/dashboard" replace />} />
 
@@ -263,7 +262,6 @@ export function AppRouter() {
         <Route path="/dept/hostel/*" element={<GenericPage title="Hostel & Transport Module" />} />
         <Route path="/dept/transport/*" element={<GenericPage title="Transport Module" />} />
         <Route path="/student/*" element={<GenericPage title="Student Module" />} />
-      </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
