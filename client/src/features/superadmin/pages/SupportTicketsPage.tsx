@@ -473,7 +473,11 @@ export function SupportTicketsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
+              <option 
+                key={o.value} 
+                value={o.value} 
+                data-color={o.value ? statusColor(o.value) : undefined}
+              >
                 {o.label}
               </option>
             ))}
@@ -483,11 +487,23 @@ export function SupportTicketsPage() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
           >
-            {PRIORITY_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
+            {PRIORITY_OPTIONS.map((o) => {
+              let pColor;
+              if (o.value === "low") pColor = "bg-zinc-400";
+              else if (o.value === "medium") pColor = "bg-amber-500";
+              else if (o.value === "high") pColor = "bg-orange-500";
+              else if (o.value === "urgent") pColor = "bg-red-500";
+              
+              return (
+                <option 
+                  key={o.value} 
+                  value={o.value}
+                  data-color={pColor}
+                >
+                  {o.label}
+                </option>
+              );
+            })}
           </ResponsiveSelect>
         </div>
 
