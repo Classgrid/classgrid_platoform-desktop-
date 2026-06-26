@@ -3,11 +3,13 @@ import * as Icons from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/marketing_ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "@/components/marketing_ui/dropdown-menu";
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/marketing_ui/popover";
 
 interface NotificationItem {
   _id: string;
@@ -51,14 +53,14 @@ export function SidebarNotifications() {
   const displayNotifs = tab === "inbox" ? inboxNotifs : archiveNotifs;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="relative w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Popover>
+      <PopoverTrigger className="relative w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Icons.Bell className="w-4 h-4" />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
         )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+      </PopoverTrigger>
+      <PopoverContent
         className="w-80 min-w-80 rounded-xl shadow-xl border border-border bg-popover text-popover-foreground p-0 overflow-hidden"
         side="bottom"
         align="end"
@@ -80,9 +82,9 @@ export function SidebarNotifications() {
               Archive
             </button>
           </div>
-          <button className="text-muted-foreground hover:text-foreground">
+          <Link to="/superadmin/settings" className="text-muted-foreground hover:text-foreground">
             <Icons.Settings className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {/* Notifications List */}
@@ -133,15 +135,24 @@ export function SidebarNotifications() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button 
+              <Button 
+                variant="outline"
+                size="sm"
+                className="flex-1"
                 onClick={() => setShowPushBanner(false)}
-                className="flex-1 py-1.5 px-3 rounded-md border border-border text-sm font-medium hover:bg-accent transition-colors"
               >
                 Dismiss
-              </button>
-              <button className="flex-1 py-1.5 px-3 rounded-md bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity">
+              </Button>
+              <Button 
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  // Connect actual push notification permission request logic here later
+                  setShowPushBanner(false);
+                }}
+              >
                 Enable
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -149,16 +160,18 @@ export function SidebarNotifications() {
         {/* Footer Action */}
         {tab === "inbox" && inboxNotifs.length > 0 && (
           <div className="p-2 border-t border-border">
-            <button 
+            <Button 
+              variant="ghost"
+              size="sm"
+              className="w-full"
               onClick={() => markAllReadMutation.mutate()}
-              className="w-full py-2 text-sm font-medium hover:bg-accent rounded-md transition-colors"
               disabled={markAllReadMutation.isPending}
             >
               {markAllReadMutation.isPending ? "Archiving..." : "Archive All"}
-            </button>
+            </Button>
           </div>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 }

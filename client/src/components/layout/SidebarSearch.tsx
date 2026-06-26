@@ -9,6 +9,7 @@ export function SidebarSearch() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
+              onClick={() => alert("Search functionality coming soon...")}
               className="bg-transparent border border-border/60 text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border-border h-8 px-2 flex justify-between items-center w-full shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-ring outline-none"
             >
               <div className="flex items-center gap-2">

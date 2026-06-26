@@ -62,7 +62,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
         <SidebarSearch />
       </SidebarHeader>
 
-      <SidebarContent className="sidebar-scroll-hidden">
+      <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
         {config.sections.map((section, index) => (
           <SidebarGroup key={section.label || index}>
             {section.label && (

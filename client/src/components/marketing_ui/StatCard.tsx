@@ -5,11 +5,24 @@ export interface StatCardProps {
   title: string;
   value: string | number;
   icon?: React.ReactNode;
-  trend?: string;
+  trend?: string | { value: string | number; label: string };
   trendDirection?: "up" | "down" | "neutral";
 }
 
 export function StatCard({ title, value, icon, trend, trendDirection }: StatCardProps) {
+  // Determine text content for trend to avoid rendering an object directly
+  const renderTrend = () => {
+    if (!trend) return null;
+    if (typeof trend === "string") return trend;
+    
+    // Handle { value, label } format
+    let prefix = "";
+    if (trendDirection === "up" && typeof trend.value === "number" && trend.value > 0) prefix = "+";
+    else if (trendDirection === "down" && typeof trend.value === "number" && trend.value < 0) prefix = "";
+    
+    return `${prefix}${trend.value} ${trend.label}`;
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -32,7 +45,7 @@ export function StatCard({ title, value, icon, trend, trendDirection }: StatCard
                 : "text-muted-foreground"
             }`}
           >
-            {trend}
+            {renderTrend()}
           </p>
         )}
       </CardContent>

@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import { multipleUploads } from "../middleware/upload.middleware.js";
 import storageService from "../services/storage.service.js";
 import { notifyTicketCreatorOfAdminReply, notifyUserOfTicketCreation, notifyUserOfTalkRequestCreation, notifyTalkCreatorOfAdminReply } from "../services/support-ticket-email.service.js";
+import { dispatchNotification, bulkDispatchNotification } from "../services/notification.service.js";
 
 
 
@@ -230,6 +231,22 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
             } else {
                 await notifyUserOfTicketCreation({ ticket });
             }
+
+            // Notify Super Admins
+            const superAdmins = await User.find({ role: 'super_admin', status: 'active' }).select('_id').lean();
+            if (superAdmins.length > 0) {
+                const superAdminIds = superAdmins.map(admin => admin._id.toString());
+                const typeLabel = isGeneralInquiry ? "Inquiry" : "Support Ticket";
+                await bulkDispatchNotification({
+                    recipientIds: superAdminIds,
+                    type: 'system',
+                    title: `New ${typeLabel}: ${ticket.subject}`,
+                    message: `A new ${typeLabel.toLowerCase()} has been submitted by ${submitterName}.`,
+                    link: `/superadmin/support/view/${ticket._id}`,
+                    relatedId: ticket._id.toString(),
+                    sendPush: true
+                });
+            }
         } catch (emailErr) {
             console.error("[Support] New ticket email notification failed:", emailErr.message);
         }
@@ -423,6 +440,26 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
         }
 
         await ticket.save();
+
+        try {
+            // Notify Super Admins of public reply
+            const superAdmins = await User.find({ role: 'super_admin', status: 'active' }).select('_id').lean();
+            if (superAdmins.length > 0) {
+                const superAdminIds = superAdmins.map(admin => admin._id.toString());
+                await bulkDispatchNotification({
+                    recipientIds: superAdminIds,
+                    type: 'system',
+                    title: `New Reply (Public): ${ticket.subject}`,
+                    message: `${authorName} added a reply.`,
+                    link: `/superadmin/support/view/${ticket._id}`,
+                    relatedId: ticket._id.toString(),
+                    sendPush: true
+                });
+            }
+        } catch (notifErr) {
+            console.error("[Support] Public reply admin notification failed:", notifErr.message);
+        }
+
         res.json({ success: true, message: "Reply added", ticket: serializeTicket(ticket.toObject()) });
     } catch (err) {
         console.error("[Support] Public reply error:", err.message);
@@ -507,6 +544,25 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
                 createdAt: now
             }]
         });
+
+        try {
+            // Notify Super Admins
+            const superAdmins = await User.find({ role: 'super_admin', status: 'active' }).select('_id').lean();
+            if (superAdmins.length > 0) {
+                const superAdminIds = superAdmins.map(admin => admin._id.toString());
+                await bulkDispatchNotification({
+                    recipientIds: superAdminIds,
+                    type: 'system',
+                    title: `New Support Ticket: ${ticket.subject}`,
+                    message: `A new support ticket has been created by ${req.user.name}.`,
+                    link: `/superadmin/support/view/${ticket._id}`,
+                    relatedId: ticket._id.toString(),
+                    sendPush: true
+                });
+            }
+        } catch (notifErr) {
+            console.error("[Support] Admin notification failed:", notifErr.message);
+        }
 
         res.status(201).json({ success: true, message: "Ticket created", ticket: serializeTicket(ticket.toObject()) });
     } catch (err) {
@@ -733,6 +789,41 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
                 }
             } catch (emailErr) {
                 console.error("[Support] Reply email notification failed:", emailErr.message);
+            }
+
+            try {
+                if (ticket.submittedBy) {
+                    await dispatchNotification({
+                        recipientId: ticket.submittedBy.toString(),
+                        type: 'system',
+                        title: `Support Update: ${ticket.subject}`,
+                        message: `An admin has replied to your ticket.`,
+                        link: `/support/${ticket._id}`, // Adjust based on user's frontend view path
+                        relatedId: ticket._id.toString(),
+                        sendPush: true
+                    });
+                }
+            } catch (userNotifErr) {
+                console.error("[Support] Reply user notification failed:", userNotifErr.message);
+            }
+        } else {
+            // User replied -> Notify super admins
+            try {
+                const superAdmins = await User.find({ role: 'super_admin', status: 'active' }).select('_id').lean();
+                if (superAdmins.length > 0) {
+                    const superAdminIds = superAdmins.map(admin => admin._id.toString());
+                    await bulkDispatchNotification({
+                        recipientIds: superAdminIds,
+                        type: 'system',
+                        title: `New Reply: ${ticket.subject}`,
+                        message: `${req.user.name} added a reply.`,
+                        link: `/superadmin/support/view/${ticket._id}`,
+                        relatedId: ticket._id.toString(),
+                        sendPush: true
+                    });
+                }
+            } catch (notifErr) {
+                console.error("[Support] Reply admin notification failed:", notifErr.message);
             }
         }
 

@@ -53,6 +53,7 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
       {
         label: "SUPPORT",
         items: [
+          { title: "Classgrid Talk", url: "/superadmin/classgrid-talk", icon: "MessageCircle" },
           { title: "Support Tickets", url: "/superadmin/support", icon: "Ticket" },
           { title: "Feedback", url: "/superadmin/feedback", icon: "MessageSquare" },
           { title: "NPS / Reviews", url: "/superadmin/reviews", icon: "Star" },
