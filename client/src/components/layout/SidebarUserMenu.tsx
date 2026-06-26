@@ -15,7 +15,7 @@ import { fetchLiveStatus, FooterStatusState, getFooterStatusDotClass } from "@/l
 import { apiClient } from "@/lib/apiClient";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 
-export function SidebarUserMenu({ user }: { user: { name: string; email?: string; avatar?: string } }) {
+export function SidebarUserMenu({ user }: { user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string } }) {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

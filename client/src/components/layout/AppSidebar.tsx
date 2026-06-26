@@ -32,6 +32,8 @@ interface AppSidebarProps {
     name: string;
     email?: string;
     avatar?: string;
+    profilePicture?: string;
+    photoURL?: string;
   };
 }
 
