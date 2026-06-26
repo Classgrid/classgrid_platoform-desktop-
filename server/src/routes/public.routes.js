@@ -7,6 +7,7 @@ import {
   sendDemoMeetingScheduledNotification,
 } from "../services/notification-email.service.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
+import { sendPushToRole } from "../services/push.service.js";
 
 const router = express.Router();
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -234,6 +235,13 @@ router.post("/request-demo", async (req, res) => {
       demoRequest,
       bookingUrl: process.env.DEMO_BOOKING_URL || process.env.NEXT_PUBLIC_DEMO_BOOKING_URL || "",
     });
+
+    // Send Web Push to Super Admins
+    await sendPushToRole("super_admin", {
+      title: "New Demo Request",
+      body: `${demoRequest.institutionName} requested a demo!`,
+      url: `/superadmin/marketing/demo-leads`
+    }).catch(err => console.error("Web Push Error:", err));
 
     return res.status(201).json({
       success: true,

@@ -11,6 +11,21 @@ import {
   PopoverContent,
 } from "@/components/marketing_ui/popover";
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 interface NotificationItem {
   _id: string;
   type: string;
@@ -46,6 +61,35 @@ export function SidebarNotifications() {
     mutationFn: async () => apiClient.put("/api/notifications/read-all"),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
+
+  const handleEnablePush = async () => {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        const vapidRes = await apiClient.get<{ publicKey: string }>("/api/web-push/vapid-public-key");
+        const vapidKey = vapidRes.data.publicKey;
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey)
+        });
+
+        await apiClient.post("/api/web-push/subscribe", {
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.toJSON().keys?.p256dh,
+            auth: subscription.toJSON().keys?.auth,
+          },
+          userAgent: navigator.userAgent
+        });
+      }
+    } catch (e) {
+      console.error("Push subscription failed", e);
+    }
+    localStorage.setItem("push_banner_dismissed", "true");
+    setShowPushBanner(false);
+  };
 
   const unreadCount = data?.unreadCount || 0;
   const notifications = data?.notifications || [];
@@ -151,11 +195,7 @@ export function SidebarNotifications() {
               <Button 
                 size="sm"
                 className="flex-1"
-                onClick={() => {
-                  localStorage.setItem("push_banner_dismissed", "true");
-                  // Connect actual push notification permission request logic here later
-                  setShowPushBanner(false);
-                }}
+                onClick={handleEnablePush}
               >
                 Enable
               </Button>

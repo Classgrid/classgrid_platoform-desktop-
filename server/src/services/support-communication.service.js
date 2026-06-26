@@ -1,4 +1,4 @@
-﻿import SupportConversation from "../models/SupportConversation.js";
+import SupportConversation from "../models/SupportConversation.js";
 import Organization from "../models/Organization.js";
 import User from "../models/User.js";
 import { dispatchNotification } from "./notification.service.js";
@@ -75,7 +75,7 @@ export async function createSupportConversation({ organizationId, createdBy, sub
       message: `${org?.name || "An organization"} opened: ${conversation.subject}`,
       link: `/super-admin/helpdesk/${conversation._id}`,
       relatedId: conversation._id.toString(),
-      sendPush: false,
+      sendPush: true,
       sendEmail: true,
     });
   }
@@ -124,7 +124,7 @@ export async function addSupportMessage({ conversationId, senderId, senderRole, 
         message: `${org?.name || "An organization"} replied: ${conversation.subject}`,
         link: `/super-admin/helpdesk/${conversation._id}`,
         relatedId: conversation._id.toString(),
-        sendPush: false,
+        sendPush: true,
         sendEmail: true,
       });
     }

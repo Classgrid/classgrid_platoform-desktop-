@@ -2,6 +2,7 @@ import Notification from '../models/Notification.js';
 import { sendPushToDevice, sendPushToMultiple } from './firebase.service.js';
 import { primarySupabaseClient as supabase } from '../config/supabaseClient.js';
 import { sendNotificationEmail } from './notification-email.service.js';
+import { sendPushNotification } from './push.service.js';
 
 /**
  * Central Notification Dispatcher
@@ -55,6 +56,9 @@ export async function dispatchNotification({
                 const fcmTokens = tokens.map(t => t.fcm_token);
                 await sendPushToMultiple(fcmTokens, title, message, { link, type, relatedId, isCall });
             }
+
+            // Web Push for Browsers
+            await sendPushNotification(recipientId, { title, body: message, url: link }).catch(e => console.error("WebPush Dispatch Error:", e));
         }
 
         // 3. Handle Email Notifications (Optional)
@@ -110,6 +114,12 @@ export async function bulkDispatchNotification({
                 const fcmTokens = tokens.map(t => t.fcm_token);
                 await sendPushToMultiple(fcmTokens, title, message, { link, type, relatedId });
             }
+
+            // Web Push for Browsers
+            const webPushPromises = recipientIds.map(rid => 
+                sendPushNotification(rid, { title, body: message, url: link }).catch(e => console.error("WebPush Bulk Dispatch Error:", e))
+            );
+            await Promise.allSettled(webPushPromises);
         }
     } catch (err) {
         console.error('[NotificationService] Bulk Dispatch Error:', err.message);
