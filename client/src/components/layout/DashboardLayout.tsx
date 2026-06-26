@@ -43,19 +43,21 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
         <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
           {/* This is the actual flush right pane */}
           <div className="flex-1 flex flex-col bg-card border-l border-border overflow-hidden">
-            <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 bg-background">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Dashboard</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-              <div className="w-full flex justify-between items-center">
-                {/* Topbar placeholder for future breadcrumbs / search / right actions */}
-              </div>
-            </header>
-            <main className={`flex-1 overflow-auto bg-background ${isChat ? 'p-0' : 'p-4 lg:p-6'}`}>
+            {!isChat && (
+              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 bg-background">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+                <div className="w-full flex justify-between items-center">
+                  {/* Topbar placeholder for future breadcrumbs / search / right actions */}
+                </div>
+              </header>
+            )}
+            <main className={`flex-1 overflow-hidden bg-background ${isChat ? 'p-0 flex flex-col h-full' : 'p-4 lg:p-6 overflow-auto'}`}>
               {children}
             </main>
           </div>
