@@ -9,7 +9,7 @@ const router = express.Router();
  */
 router.get("/status", async (req, res) => {
   try {
-    const pageId = req.query.pageId || "classgrid";
+    const pageId = req.query.pageId || "classgrid1";
     const response = await axios.get(`https://${pageId}.statuspage.io/api/v2/summary.json`);
     
     return res.json(response.data);

@@ -44,8 +44,8 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
   });
 
   useEffect(() => {
-    // using 'classgrid' as pageId for statuspage
-    fetchLiveStatus("classgrid").then((res) => {
+    // using 'classgrid1' as pageId for statuspage
+    fetchLiveStatus("classgrid1").then((res) => {
       if (res) setStatus(res);
     });
   }, []);
