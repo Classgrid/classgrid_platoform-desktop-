@@ -290,39 +290,39 @@ export function FormBuilderPage() {
                         {/* Interactive Dropdown Previews for Admin Verification */}
                         {field?.key?.endsWith("_country") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <ResponsiveSelect className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select Country</option>
                               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            </ResponsiveSelect>
                           </div>
                         )}
                         
                         {field?.key?.endsWith("_state") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <ResponsiveSelect className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select State</option>
                               {Object.keys(indiaLocationsData.states || {}).map(s => <option key={s} value={s}>{s}</option>)}
                               <option>Other</option>
-                            </select>
+                            </ResponsiveSelect>
                           </div>
                         )}
 
                         {field?.key?.endsWith("_district") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <ResponsiveSelect className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select District</option>
                               {Object.values(indiaLocationsData.states || {}).flatMap((stateObj: any) => Object.keys(stateObj || {})).slice(0, 50).map(d => <option key={d} value={d}>{d}</option>)}
                               <option disabled>...</option>
-                            </select>
+                            </ResponsiveSelect>
                           </div>
                         )}
 
                         {field?.key?.endsWith("_taluka") && (
                           <div style={{ marginTop: "0.75rem" }}>
-                            <select className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
+                            <ResponsiveSelect className="" defaultValue="" style={{ width: "250px", fontSize: "0.85rem", padding: "0.4rem 0.5rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))" }}>
                               <option value="" disabled>Select Taluka</option>
                               <option disabled>Select a District to view Talukas</option>
-                            </select>
+                            </ResponsiveSelect>
                           </div>
                         )}
 

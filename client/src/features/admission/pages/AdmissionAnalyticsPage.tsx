@@ -84,7 +84,7 @@ export default function AdmissionAnalyticsPage() {
                     subtitle="Comprehensive dashboard with maximum data visualization"
                 />
                 <div className="flex gap-4">
-                    <select 
+                    <ResponsiveSelect 
                         className=""
                         value={selectedHierarchy}
                         onChange={(e) => setSelectedHierarchy(e.target.value)}
@@ -93,7 +93,7 @@ export default function AdmissionAnalyticsPage() {
                         {/* Mock options since actual hierarchy context is elsewhere */}
                         <option value="school">School Division</option>
                         <option value="engineering">Engineering Division</option>
-                    </select>
+                    </ResponsiveSelect>
                     <ExportMenu onExport={(type) => console.log(`Exporting ${type}`)} />
                 </div>
             </div>

@@ -146,7 +146,6 @@ export function AppRouter() {
           <Route path="/superadmin/audit" element={<AuditPage />} />
           <Route path="/superadmin/activity-log" element={<ActivityLogPage />} />
           <Route path="/superadmin/announcements" element={<PlatformAnnouncementsPage />} />
-          <Route path="/superadmin/changelog" element={<ChangelogPage />} />
           <Route path="/superadmin/config" element={<ConfigPage />} />
           <Route path="/superadmin/support" element={<SupportTicketsPage />} />
           <Route path="/superadmin/feedback" element={<FeedbackPage />} />

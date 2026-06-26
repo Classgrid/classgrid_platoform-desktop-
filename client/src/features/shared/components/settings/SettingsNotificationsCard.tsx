@@ -91,7 +91,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
             <span className="text-xs text-muted-foreground">How often should we send non-urgent emails?</span>
           </div>
           <div className="w-[180px]">
-            <select
+            <ResponsiveSelect
               className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               value={prefs.digestMode}
               onChange={(e) => onChange("digestMode", e.target.value)}
@@ -99,7 +99,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
               <option value="instant">Instant</option>
               <option value="daily">Daily Digest</option>
               <option value="weekly">Weekly Digest</option>
-            </select>
+            </ResponsiveSelect>
           </div>
         </div>
       </div>

@@ -472,7 +472,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
                   <SelectItem value="p">Paragraph</SelectItem>
                 </SelectContent>
               </Select>
-              <select
+              <ResponsiveSelect
                 onChange={(e) => {
                   editorRef.current?.focus();
                   document.execCommand("formatBlock", false, e.target.value);
@@ -488,7 +488,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
                 <option value="h2">Heading 2</option>
                 <option value="h3">Heading 3</option>
                 <option value="p">Paragraph</option>
-              </select>
+              </ResponsiveSelect>
             </div>
             <div className="relative">
               <Select
@@ -524,7 +524,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
                   <SelectItem value="7">Size 7</SelectItem>
                 </SelectContent>
               </Select>
-              <select
+              <ResponsiveSelect
                 onChange={(e) => {
                   editorRef.current?.focus();
                   document.execCommand("fontSize", false, e.target.value);
@@ -544,7 +544,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
                 <option value="5">Size 5</option>
                 <option value="6">Size 6</option>
                 <option value="7">Size 7</option>
-              </select>
+              </ResponsiveSelect>
             </div>
             <Sep />
             <ToolBtn icon={<Bold className="w-3.5 h-3.5" />} onClick={() => { ensureEditorFocus(); document.execCommand("bold"); syncContent(); }} title="Bold" />

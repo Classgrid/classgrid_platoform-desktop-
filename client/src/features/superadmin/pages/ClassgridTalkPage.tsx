@@ -465,7 +465,7 @@ export function ClassgridTalkPage() {
         {/* Filters */}
         <div className="flex items-center gap-2 mb-4">
           <Filter size={14} className="text-muted-foreground shrink-0" />
-          <select
+          <ResponsiveSelect
             className="flex h-9 w-full sm:w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -475,8 +475,8 @@ export function ClassgridTalkPage() {
                 {o.label}
               </option>
             ))}
-          </select>
-          <select
+          </ResponsiveSelect>
+          <ResponsiveSelect
             className="flex h-9 w-full sm:w-[180px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
@@ -486,7 +486,7 @@ export function ClassgridTalkPage() {
                 {o.label}
               </option>
             ))}
-          </select>
+          </ResponsiveSelect>
         </div>
 
         {/* Ticket List */}
@@ -1042,7 +1042,7 @@ export function ClassgridTalkPage() {
                   <div
                     className={`w-2 h-2 rounded-full shrink-0 ${statusColor(pendingStatus || selectedTicket.status)}`}
                   />
-                  <select
+                  <ResponsiveSelect
                     value={pendingStatus || selectedTicket.status}
                     onChange={(e) =>
                       setPendingStatus(e.target.value as TicketStatus)
@@ -1055,7 +1055,7 @@ export function ClassgridTalkPage() {
                         {statusLabel(s)}
                       </option>
                     ))}
-                  </select>
+                  </ResponsiveSelect>
                   {pendingStatus && pendingStatus !== selectedTicket.status && (
                     <Button
                       variant="primary"

@@ -199,7 +199,7 @@ export default function PublicApplicationForm() {
                         placeholder="Search 7000+ Indian cities..."
                       />
                     ) : field.type === 'dropdown' ? (
-                      <select
+                      <ResponsiveSelect
                         className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 text-foreground"
                         value={formData[activeStepId]?.[field.key] || ""}
                         onChange={(e) => handleUpdateField(field.key, e.target.value)}
@@ -208,7 +208,7 @@ export default function PublicApplicationForm() {
                         {field.options?.map((opt: string) => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
-                      </select>
+                      </ResponsiveSelect>
                     ) : (
                       <Input
                         type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}

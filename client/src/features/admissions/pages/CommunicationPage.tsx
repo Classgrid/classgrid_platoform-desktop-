@@ -36,7 +36,7 @@ export function CommunicationPage() {
         </div>
         <div className="p-5 flex flex-col gap-4">
           <label className="text-sm font-medium text-foreground">Notification Trigger</label>
-          <select 
+          <ResponsiveSelect 
             value={trigger} 
             onChange={(e) => setTrigger(e.target.value)}
             className="flex h-10 w-full md:max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -44,7 +44,7 @@ export function CommunicationPage() {
             <option value="reminder_fee">Fee Payment Reminder</option>
             <option value="reminder_docs">Document Verification Pending</option>
             <option value="merit_generated">Merit List Generated</option>
-          </select>
+          </ResponsiveSelect>
           <button 
             className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 self-start mt-2"
             disabled={notify.isPending}

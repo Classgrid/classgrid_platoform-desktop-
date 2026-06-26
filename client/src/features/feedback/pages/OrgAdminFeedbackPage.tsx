@@ -84,14 +84,14 @@ function CreateFeedbackSheet() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">Applicability</label>
-              <select 
+              <ResponsiveSelect 
                 value={applicability}
                 onChange={e => setApplicability(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="all">All Students in Organization</option>
                 <option value="division">Specific Division</option>
-              </select>
+              </ResponsiveSelect>
             </div>
             
             <div className="space-y-3 pt-4 border-t border-border/50">

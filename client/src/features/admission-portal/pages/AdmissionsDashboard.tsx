@@ -110,7 +110,7 @@ export default function AdmissionsDashboard() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select 
+          <ResponsiveSelect 
             className="h-10 rounded-md border border-border bg-card px-3 py-2 text-sm shadow-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -121,7 +121,7 @@ export default function AdmissionsDashboard() {
             <option value="verified">Verified / Approved</option>
             <option value="rejected">Rejected</option>
             <option value="enrolled">Enrolled</option>
-          </select>
+          </ResponsiveSelect>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -151,7 +151,7 @@ export default function AdmissionsDashboard() {
               <Users className="w-4 h-4 mr-2" />
               Allocate Divs
             </Button>
-            <select
+            <ResponsiveSelect
               className="h-9 rounded-md border border-border bg-primary text-primary-foreground px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
               onChange={(e) => {
                 if (e.target.value) {
@@ -166,7 +166,7 @@ export default function AdmissionsDashboard() {
               <option value="saral">Export SARAL (School)</option>
               <option value="aicte">Export AICTE</option>
               <option value="state-board">Export State Board</option>
-            </select>
+            </ResponsiveSelect>
           </div>
         </div>
       </div>

@@ -261,7 +261,7 @@ export function OnboardPage() {
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium">Type</label>
-              <select
+              <ResponsiveSelect
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={form.type}
                 onChange={(event) => setForm({ ...form, type: event.target.value })}
@@ -269,7 +269,7 @@ export function OnboardPage() {
                 <option value="school">School</option>
                 <option value="coaching">Coaching</option>
                 <option value="college">College</option>
-              </select>
+              </ResponsiveSelect>
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium">City</label>

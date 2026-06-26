@@ -463,7 +463,7 @@ export function FeeStructurePage() {
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Payment Mode</label>
-                <select
+                <ResponsiveSelect
                   className=""
                   value={newStruct.payment_mode}
                   onChange={(e) => setNewStruct({ ...newStruct, payment_mode: e.target.value })}
@@ -471,7 +471,7 @@ export function FeeStructurePage() {
                   <option value="manual">Manual</option>
                   <option value="online">Online (Razorpay)</option>
                   <option value="both">Both</option>
-                </select>
+                </ResponsiveSelect>
               </div>
             </div>
 

@@ -193,7 +193,7 @@ export function NewApplicationPage() {
                           <div className="mb-1 text-muted-foreground">
                             {field.label} {required ? "*" : ""}
                           </div>
-                          <select
+                          <ResponsiveSelect
                             value={value}
                             required={required}
                             onChange={(event) => onFieldChange(field.id, event.target.value)}
@@ -205,7 +205,7 @@ export function NewApplicationPage() {
                                 {option}
                               </option>
                             ))}
-                          </select>
+                          </ResponsiveSelect>
                         </label>
                       );
                     }

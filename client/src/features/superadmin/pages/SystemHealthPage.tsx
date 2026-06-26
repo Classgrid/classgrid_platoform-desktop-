@@ -223,7 +223,7 @@ export function SystemHealthPage() {
               value={logSearch}
               onChange={(e) => setLogSearch(e.target.value)}
             />
-            <select
+            <ResponsiveSelect
               className="border border-border rounded-md px-3 py-2 text-sm bg-background w-48"
               value={logLevel}
               onChange={(e) => setLogLevel(e.target.value)}
@@ -232,7 +232,7 @@ export function SystemHealthPage() {
               <option value="error">Errors only</option>
               <option value="warn">Warnings only</option>
               <option value="info">Info only</option>
-            </select>
+            </ResponsiveSelect>
           </div>
           <DataTable
             columns={logColumns}

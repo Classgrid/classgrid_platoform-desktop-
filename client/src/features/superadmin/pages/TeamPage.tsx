@@ -253,7 +253,7 @@ export function TeamPage() {
 
             <div className="grid gap-2">
               <label className="text-sm font-medium">Platform Role *</label>
-              <select
+              <ResponsiveSelect
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={form.role}
                 onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as PlatformRole }))}
@@ -261,7 +261,7 @@ export function TeamPage() {
                 {PLATFORM_ROLES.map((r) => (
                   <option key={r.value} value={r.value}>{r.label} — {r.description}</option>
                 ))}
-              </select>
+              </ResponsiveSelect>
             </div>
 
             <DialogFooter className="mt-4">
@@ -319,7 +319,7 @@ export function TeamPage() {
                         <div className="text-xs text-muted-foreground">{m.email}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <select
+                        <ResponsiveSelect
                           className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                           value={m.role}
                           onChange={(e) => roleUpdateMutation.mutate({ id: m._id, role: e.target.value as PlatformRole })}
@@ -328,7 +328,7 @@ export function TeamPage() {
                           {PLATFORM_ROLES.map((r) => (
                             <option key={r.value} value={r.value}>{r.label}</option>
                           ))}
-                        </select>
+                        </ResponsiveSelect>
                       </td>
                       <td className="px-4 py-3">
                         <Badge variant={m.status === "active" ? "success" : m.status === "suspended" ? "danger" : "warning"} dot>

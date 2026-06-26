@@ -103,7 +103,7 @@ export function LeadTrackingPage() {
                 />
                 <div className="flex gap-4">
                     {/* HIERARCHY FILTER TAB (RULE 8) */}
-                    <select 
+                    <ResponsiveSelect 
                         className=" bg-card"
                         value={selectedHierarchy}
                         onChange={(e) => setSelectedHierarchy(e.target.value)}
@@ -113,7 +113,7 @@ export function LeadTrackingPage() {
                         <option value="junior_college">Junior College</option>
                         <option value="engineering">Engineering (CET)</option>
                         <option value="coaching">Coaching Classes</option>
-                    </select>
+                    </ResponsiveSelect>
                     {/* EXPORT DATA (RULE 9) */}
                     <ExportMenu onExport={(type) => console.log(`Exporting Leads as ${type}`)} />
                 </div>

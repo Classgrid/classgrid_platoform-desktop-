@@ -151,7 +151,7 @@ export function PlatformAnnouncementsPage() {
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium">Target Audience</label>
-              <select
+              <ResponsiveSelect
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
@@ -160,7 +160,7 @@ export function PlatformAnnouncementsPage() {
                 <option value="all_students">All Students</option>
                 <option value="all_faculty">All Faculty / Teachers</option>
                 <option value="all_org_admins">All Organization Admins</option>
-              </select>
+              </ResponsiveSelect>
             </div>
           </div>
 

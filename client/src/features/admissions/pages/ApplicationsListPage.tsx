@@ -151,7 +151,7 @@ export function ApplicationsListPage() {
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
         />
-        <select
+        <ResponsiveSelect
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="flex h-10 w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -159,7 +159,7 @@ export function ApplicationsListPage() {
           {statusOptions.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
-        </select>
+        </ResponsiveSelect>
       </div>
 
       {isLoading ? (

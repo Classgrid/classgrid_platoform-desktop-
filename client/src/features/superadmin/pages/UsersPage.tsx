@@ -232,7 +232,7 @@ export function UsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select
+          <ResponsiveSelect
             className="border border-border rounded-md px-3 py-2 text-sm bg-background w-48"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
@@ -242,7 +242,7 @@ export function UsersPage() {
             <option value="org_admin">Org Admin</option>
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
-          </select>
+          </ResponsiveSelect>
         </div>
         {isError ? (
           <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200 flex flex-col items-start gap-2 m-4">

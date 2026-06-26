@@ -52,7 +52,7 @@ export function FacultyFeedbackInsights() {
           {isLoadingForms ? (
             <Skeleton className="h-10 w-full rounded-md" />
           ) : (
-            <select
+            <ResponsiveSelect
               value={selectedFormId || ""}
               onChange={(e) => setSelectedFormId(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
@@ -62,7 +62,7 @@ export function FacultyFeedbackInsights() {
                   {form.title} ({new Date(form.end_date).toLocaleDateString()})
                 </option>
               ))}
-            </select>
+            </ResponsiveSelect>
           )}
         </div>
       </div>

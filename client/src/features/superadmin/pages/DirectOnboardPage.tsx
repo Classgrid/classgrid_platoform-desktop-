@@ -154,16 +154,16 @@ export function DirectOnboardPage() {
 
                 <div className="">
                   <label className="">Organization Type *</label>
-                  <select className="" value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
+                  <ResponsiveSelect className="" value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
                     {ORG_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                  </select>
+                  </ResponsiveSelect>
                 </div>
 
                 <div className="">
                   <label className="">Plan</label>
-                  <select className="" value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
+                  <ResponsiveSelect className="" value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
                     {PLAN_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-                  </select>
+                  </ResponsiveSelect>
                 </div>
 
                 <div className="">
@@ -211,9 +211,9 @@ export function DirectOnboardPage() {
 
                 <div className="">
                   <label className="">State</label>
-                  <select className="" value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
+                  <ResponsiveSelect className="" value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
                     {INDIA_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  </ResponsiveSelect>
                 </div>
               </div>
 
