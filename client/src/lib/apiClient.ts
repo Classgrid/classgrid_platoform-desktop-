@@ -19,6 +19,15 @@ if (isMockApiEnabled) {
   console.info("[Classgrid] Mock API mode enabled. Live MongoDB/Supabase-backed APIs are not called.");
 }
 
+// Intercept requests to inject the Bearer token as a fallback for strict cross-site cookie restrictions
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -15,7 +15,22 @@ export function useCurrentUser() {
     queryKey: ["current-user"],
     queryFn: async () => {
       try {
-        const res = await apiClient.get<CurrentUser | { user: CurrentUser }>("/api/auth/me");
+        // Fallback for OAuth: Extract token from URL if it exists
+        const params = new URLSearchParams(window.location.search);
+        const urlToken = params.get("token");
+        if (urlToken) {
+          localStorage.setItem("token", urlToken);
+          // Remove token from URL for security/cleanliness
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        const res = await apiClient.get<CurrentUser | { user: CurrentUser; token?: string }>("/api/auth/me");
+        
+        // Save refreshed token from /api/auth/me response
+        if ("token" in res.data && res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
+
         const data = "user" in res.data ? res.data.user : res.data;
         if (data && !data._id && data.id) {
           data._id = data.id;
