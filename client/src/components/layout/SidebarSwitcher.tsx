@@ -67,9 +67,9 @@ export function SidebarSwitcher({ user }: { user: any }) {
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
+            <div className="px-1.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
               Active Context
-            </DropdownMenuLabel>
+            </div>
             <DropdownMenuItem className="gap-3 p-2 rounded-md">
               <div className="flex size-8 items-center justify-center rounded-md border border-border bg-emerald-500 overflow-hidden shrink-0">
                 {orgLogo ? (
@@ -87,9 +87,9 @@ export function SidebarSwitcher({ user }: { user: any }) {
             {allRoles.length > 1 && (
               <>
                 <DropdownMenuSeparator className="mx-1 my-1" />
-                <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
+                <div className="px-1.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider py-2">
                   Switch Roles
-                </DropdownMenuLabel>
+                </div>
                 {allRoles.map((role) => (
                   <DropdownMenuItem key={role} className="gap-3 p-2 cursor-pointer rounded-md">
                     <div className="flex size-5 items-center justify-center shrink-0">
