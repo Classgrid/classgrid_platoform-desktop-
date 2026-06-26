@@ -59,7 +59,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply }: 
   };
 
   return (
-    <div className="flex flex-col bg-card border-t border-border">
+    <div className="flex flex-col bg-background border-t border-border">
       {/* Reply Preview */}
       {replyTo && (
         <div className="px-4 py-2 bg-accent/30 border-b border-border flex items-start justify-between gap-3">

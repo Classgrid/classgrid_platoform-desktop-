@@ -29,7 +29,7 @@ export function ChatHeader({ thread, onBack, onShowInfo }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card shrink-0">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background shrink-0">
       {/* Back button (mobile) */}
       <button
         onClick={onBack}
