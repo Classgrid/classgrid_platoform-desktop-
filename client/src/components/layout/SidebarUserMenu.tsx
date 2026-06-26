@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Icons from "lucide-react";
 import {
   DropdownMenu,
@@ -10,8 +12,32 @@ import {
   DropdownMenuItem,
 } from "@/components/marketing_ui/dropdown-menu";
 import { fetchLiveStatus, FooterStatusState, getFooterStatusDotClass } from "@/lib/footer-status";
+import { apiClient } from "@/lib/apiClient";
+import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 
 export function SidebarUserMenu({ user }: { user: { name: string; email?: string; avatar?: string } }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
+  
+  const basePath = location.pathname.startsWith("/superadmin") 
+    ? "/superadmin" 
+    : location.pathname.startsWith("/org") 
+      ? "/org" 
+      : "";
+
+  const handleLogout = async () => {
+    try {
+      await apiClient.post("/api/auth/logout");
+    } catch {}
+    try {
+      window.localStorage.removeItem("classgrid:last-auth-role");
+    } catch {}
+    queryClient.removeQueries({ queryKey: ["current-user"] });
+    navigate(getLoginPathForPath(location.pathname), { replace: true });
+  };
+
   const [status, setStatus] = useState<{ state: FooterStatusState; label: string }>({
     state: "operational",
     label: "All systems normal.",
@@ -48,25 +74,31 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         
         <div className="p-1">
           <DropdownMenuItem className="p-0">
-            <Link to="/profile" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+            <Link to={`${basePath}/profile`} className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
               <span>Profile</span>
               <Icons.User className="w-4 h-4 text-muted-foreground" />
             </Link>
           </DropdownMenuItem>
           
           <DropdownMenuItem className="p-0">
-            <Link to="/settings" className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+            <Link to={`${basePath}/settings`} className="flex items-center justify-between w-full cursor-pointer rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
               <span>Settings</span>
               <Icons.Settings className="w-4 h-4 text-muted-foreground" />
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="justify-between rounded-md py-1.5 px-3 text-sm focus:bg-transparent">
+          <DropdownMenuItem className="justify-between rounded-md py-1.5 px-3 text-sm focus:bg-transparent cursor-default">
             <span>Theme</span>
             <div className="flex items-center gap-1 bg-muted rounded-full p-0.5 border border-border">
-               <div className="p-1 rounded-full hover:bg-background/50 cursor-pointer"><Icons.Monitor className="w-3 h-3 text-muted-foreground" /></div>
-               <div className="p-1 rounded-full hover:bg-background/50 cursor-pointer"><Icons.Sun className="w-3 h-3 text-muted-foreground" /></div>
-               <div className="p-1 rounded-full bg-background shadow-sm border border-border/50 cursor-pointer"><Icons.Moon className="w-3 h-3 text-foreground" /></div>
+               <div onClick={() => setTheme("system")} className={`p-1 rounded-full cursor-pointer ${theme === 'system' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                 <Icons.Monitor className="w-3 h-3" />
+               </div>
+               <div onClick={() => setTheme("light")} className={`p-1 rounded-full cursor-pointer ${theme === 'light' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                 <Icons.Sun className="w-3 h-3" />
+               </div>
+               <div onClick={() => setTheme("dark")} className={`p-1 rounded-full cursor-pointer ${theme === 'dark' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                 <Icons.Moon className="w-3 h-3" />
+               </div>
             </div>
           </DropdownMenuItem>
         </div>
@@ -106,27 +138,29 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         <DropdownMenuSeparator className="mx-1" />
 
         <div className="p-1">
-          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <span>Log Out</span>
-            <Icons.LogOut className="w-4 h-4 text-muted-foreground" />
+          <DropdownMenuItem className="p-0">
+            <button onClick={handleLogout} className="flex w-full items-center cursor-pointer justify-between rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <span>Log Out</span>
+              <Icons.LogOut className="w-4 h-4 text-muted-foreground" />
+            </button>
           </DropdownMenuItem>
         </div>
 
         <div className="p-2">
-          <button className="w-full bg-foreground text-background font-medium rounded-lg text-sm py-2 hover:opacity-90 transition-opacity">
+          <Link to={`${basePath}/billing`} className="flex w-full justify-center items-center bg-foreground text-background font-medium rounded-lg text-sm py-2 hover:opacity-90 transition-opacity">
             Upgrade to Pro
-          </button>
+          </Link>
         </div>
 
         <DropdownMenuSeparator className="mx-0" />
         
-        <div className="px-3 py-3 flex items-center justify-between text-xs">
+        <a href="https://classgrid.statuspage.io/" target="_blank" rel="noopener noreferrer" className="px-3 py-3 flex items-center justify-between text-xs hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer rounded-b-lg outline-none focus-visible:bg-accent">
           <div className="flex flex-col gap-0.5">
-            <span className="text-muted-foreground">Platform Status</span>
+            <span className="text-muted-foreground font-medium">Platform Status</span>
             <span className="text-blue-500 font-medium">{status.label}</span>
           </div>
           <div className={`w-2 h-2 rounded-full ${getFooterStatusDotClass(status.state)}`} />
-        </div>
+        </a>
       </DropdownMenuContent>
     </DropdownMenu>
   );
