@@ -177,27 +177,77 @@ export function SharedProfilePage() {
         <div className="flex flex-col gap-6 w-full animate-pulse">
           {/* Skeleton Header */}
           <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg flex flex-col">
-            <div className="h-[250px] bg-muted w-full" />
-            <div className="px-6 pb-6 pt-16 relative">
-              <div className="absolute -top-16 left-6 w-32 h-32 rounded-full border-4 border-card bg-muted/80" />
-              <div className="flex justify-between items-start mt-2">
-                <div className="space-y-3">
-                  <div className="h-8 bg-muted rounded w-48" />
-                  <div className="h-4 bg-muted rounded w-32" />
+            <div className="h-[250px] relative bg-muted" />
+            <div className="px-8 pb-8 flex flex-col items-start gap-4">
+              <div className="relative -mt-[100px] mb-2 rounded-full overflow-hidden">
+                <div className="w-[160px] h-[160px] border-4 border-background shadow-xl bg-muted" />
+              </div>
+              
+              <div className="flex flex-col w-full gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-64 bg-muted rounded" />
+                  <div className="h-6 w-24 bg-muted rounded-full" />
                 </div>
-                <div className="h-10 bg-muted rounded w-28" />
+                <div className="flex flex-wrap gap-4 mt-1 text-sm">
+                  <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-muted" /><div className="h-4 w-40 bg-muted rounded" /></div>
+                  <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-muted" /><div className="h-4 w-32 bg-muted rounded" /></div>
+                  <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-muted" /><div className="h-4 w-48 bg-muted rounded" /></div>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Skeleton Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1 space-y-6">
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm h-64 bg-muted/50" />
+          {/* Skeleton Bento Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Basic Information */}
+            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+              <div className="border-b border-border pb-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded-full" />
+                  <div className="h-6 w-40 bg-muted rounded" />
+                </div>
+                <div className="h-4 w-64 bg-muted rounded opacity-80" />
+              </div>
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <div className="h-3 w-32 bg-muted rounded" />
+                  <div className="h-10 w-full bg-muted rounded-md" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="h-3 w-24 bg-muted rounded" />
+                  <div className="h-12 w-full bg-muted rounded-lg" />
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2 space-y-6">
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm h-96 bg-muted/50" />
+
+            {/* User Experience */}
+            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm">
+              <div className="border-b border-border pb-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded-full" />
+                  <div className="h-6 w-40 bg-muted rounded" />
+                </div>
+                <div className="h-4 w-64 bg-muted rounded opacity-80" />
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between p-3 border border-transparent">
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 w-24 bg-muted rounded" />
+                    <div className="h-3 w-40 bg-muted rounded opacity-80" />
+                  </div>
+                  <div className="w-11 h-6 bg-muted rounded-full" />
+                </div>
+                <div className="flex items-center justify-between p-3 border border-transparent">
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 w-24 bg-muted rounded" />
+                    <div className="h-3 w-40 bg-muted rounded opacity-80" />
+                  </div>
+                  <div className="w-11 h-6 bg-muted rounded-full" />
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
       ) : (

@@ -11,6 +11,7 @@ import { Button } from "@/components/marketing_ui/button";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/marketing_ui/dialog";
 import { Input } from "@/components/marketing_ui/input";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
 import { onboardingApi, type PendingOrganization } from "../services/superAdminApi";
 
