@@ -248,6 +248,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/platform-feedback", feedbackRoutes); // Added for frontend consistency
 app.use("/api/courses", courseRoutes);
 app.use("/api/meet", meetRoutes);
+app.use("/api/system", systemRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/zoom", zoomRoutes);
 app.use("/api/reviews", reviewRoutes);

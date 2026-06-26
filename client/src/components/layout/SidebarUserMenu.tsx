@@ -26,11 +26,11 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger render={
         <button className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
           <Icons.MoreHorizontal className="w-4 h-4" />
         </button>
-      </DropdownMenuTrigger>
+      } />
       <DropdownMenuContent
         className="w-[280px] rounded-xl shadow-xl border border-border bg-popover text-popover-foreground p-1"
         side="bottom"
@@ -49,18 +49,14 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         <DropdownMenuSeparator className="mx-1" />
         
         <div className="p-1">
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="/profile">
-              <span>Profile</span>
-              <Icons.User className="w-4 h-4 text-muted-foreground" />
-            </Link>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<Link to="/profile" />}>
+            <span>Profile</span>
+            <Icons.User className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
           
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <Link to="/settings">
-              <span>Settings</span>
-              <Icons.Settings className="w-4 h-4 text-muted-foreground" />
-            </Link>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<Link to="/settings" />}>
+            <span>Settings</span>
+            <Icons.Settings className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
 
           <DropdownMenuItem className="justify-between rounded-md py-1.5 px-3 text-sm focus:bg-transparent">
@@ -76,32 +72,24 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
         <DropdownMenuSeparator className="mx-1" />
 
         <div className="p-1">
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer">
-              <span>Home Page</span>
-              <Icons.Home className="w-4 h-4 text-muted-foreground" />
-            </a>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/" target="_blank" rel="noopener noreferrer" />}>
+            <span>Home Page</span>
+            <Icons.Home className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer">
-              <span>Changelog</span>
-              <Icons.PenTool className="w-4 h-4 text-muted-foreground" />
-            </a>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/changelog" target="_blank" rel="noopener noreferrer" />}>
+            <span>Changelog</span>
+            <Icons.FileText className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer">
-              <span>Help & Support</span>
-              <Icons.LifeBuoy className="w-4 h-4 text-muted-foreground" />
-            </a>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/support/ticket" target="_blank" rel="noopener noreferrer" />}>
+            <span>Help & Support</span>
+            <Icons.MessageCircle className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
           
-          <DropdownMenuItem asChild className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground">
-            <a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer">
-              <span>Docs</span>
-              <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
-            </a>
+          <DropdownMenuItem className="cursor-pointer justify-between rounded-md py-2 px-3 text-sm focus:bg-accent focus:text-accent-foreground" render={<a href="https://classgrid.in/docs" target="_blank" rel="noopener noreferrer" />}>
+            <span>Docs</span>
+            <Icons.BookOpen className="w-4 h-4 text-muted-foreground" />
           </DropdownMenuItem>
         </div>
 
