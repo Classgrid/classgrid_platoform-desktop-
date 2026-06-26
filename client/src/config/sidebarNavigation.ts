@@ -66,11 +66,9 @@ export const sidebarNavigation: Record<DashboardRole, RoleSidebarConfig> = {
         ],
       },
       {
-        label: "SECURITY",
+        label: "SECURITY & MODERATION",
         items: [
           { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag" },
-          { title: "Flagged Users", url: "/superadmin/global-users?status=suspended", icon: "AlertTriangle" },
-          { title: "GDPR Erasure", url: "/superadmin/gdpr", icon: "Trash2" },
         ],
       },
     ],

@@ -28,9 +28,7 @@ export const SUPER_ADMIN_MENU: NavigationItem[] = [
   { title: "Transactions", url: "/superadmin/transactions", icon: "CreditCard", section: "FINANCE" },
   { title: "Failed Payments", url: "/superadmin/failed-payments", icon: "AlertTriangle", section: "FINANCE" },
   
-  { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag", section: "SECURITY" },
-  { title: "Flagged Users", url: "/superadmin/global-users?status=suspended", icon: "AlertTriangle", section: "SECURITY" },
-  { title: "GDPR Erasure", url: "/superadmin/gdpr", icon: "Trash2", section: "SECURITY" },
+  { title: "Content Reports", url: "/superadmin/moderation", icon: "Flag", section: "SECURITY & MODERATION" },
 ];
 
 export const ORG_ADMIN_MENU: NavigationItem[] = [
