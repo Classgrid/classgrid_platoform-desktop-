@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
-import { sidebarNavigation } from "@/config/sidebarNavigation";
+import { dashboardConfigs } from "@/config/sidebar";
 import { DashboardRole } from "./DashboardLayout";
 import { SidebarFooterUser } from "./SidebarFooterUser";
 
@@ -40,16 +40,9 @@ interface AppSidebarProps {
 import { SidebarSwitcher } from "./SidebarSwitcher";
 import { SidebarSearch } from "./SidebarSearch";
 
-// Helper to safely render dynamic Lucide icons
-const IconRenderer = ({ name, className }: { name: string; className?: string }) => {
-  const IconComponent = (Icons as any)[name];
-  if (!IconComponent) return <Icons.Circle className={className} />;
-  return <IconComponent className={className} />;
-};
-
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const location = useLocation();
-  const config = sidebarNavigation[role];
+  const config = dashboardConfigs.find(c => c.role === role);
 
   if (!config) {
     return null;
@@ -72,19 +65,19 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
               <SidebarMenu>
                 {section.items.map((item) => {
                   const isActive =
-                    location.pathname === item.url ||
-                    (item.url !== "/" && location.pathname.startsWith(item.url + "/"));
+                    location.pathname === item.to ||
+                    (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
 
                   return (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={item.label}>
                       <SidebarMenuButton
                         isActive={isActive}
-                        tooltip={item.title}
-                        render={<Link to={item.url} className="flex items-center gap-3 w-full justify-between" />}
+                        tooltip={item.label}
+                        render={<Link to={item.to} className="flex items-center gap-3 w-full justify-between" />}
                       >
                         <div className="flex items-center gap-3">
-                          <IconRenderer name={item.icon} />
-                          <span className="truncate">{item.title}</span>
+                          {item.icon && <item.icon size={20} />}
+                          <span className="truncate">{item.label}</span>
                         </div>
                         {item.badge && (
                           <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
