@@ -362,7 +362,7 @@ export function ChatPage() {
 
       {!!profileUserId && (
         <SharedProfilePage 
-          publicUser={orgUsers.find(u => u._id === profileUserId) || undefined} 
+          publicUser={(orgUsers.find(u => u._id === profileUserId) as any) || undefined} 
           onClose={() => setProfileUserId(null)} 
         />
       )}
