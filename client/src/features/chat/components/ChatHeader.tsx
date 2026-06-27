@@ -5,6 +5,7 @@ interface ChatHeaderProps {
   thread: ChatThread;
   onBack: () => void;
   onShowInfo?: () => void;
+  onAvatarClick?: () => void;
 }
 
 function getInitials(name: string) {
@@ -25,7 +26,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
   return (
@@ -39,7 +40,7 @@ export function ChatHeader({ thread, onBack, onShowInfo }: ChatHeaderProps) {
       </button>
 
       {/* Avatar */}
-      <button onClick={onShowInfo} className="shrink-0">
+      <button onClick={onAvatarClick || onShowInfo} className="shrink-0">
         {hasAvatar ? (
           <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
         ) : (

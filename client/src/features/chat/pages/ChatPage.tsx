@@ -266,15 +266,19 @@ export function ChatPage() {
             <ChatHeader
               thread={activeThread}
               onBack={() => setActiveThread(null)}
+              onAvatarClick={() => {
+                if (activeThread.avatar) {
+                  setViewingPhotoUrl(activeThread.avatar);
+                } else {
+                  toast.info("No profile picture available");
+                }
+              }}
               onShowInfo={() => {
                 if (activeThread.type === "group" && activeThread.groupId) {
                   setIsGroupSettingsOpen(true);
                 } else if (activeThread.type === "dm") {
                   if (activeThread.otherUserId) {
                     setProfileUserId(activeThread.otherUserId);
-                  } else {
-                    // Fallback to avatar if no otherUserId somehow
-                    if (activeThread.avatar) setViewingPhotoUrl(activeThread.avatar);
                   }
                 }
               }}
