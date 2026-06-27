@@ -340,7 +340,7 @@ export function CustomDomainCard() {
                                         glowVariant="emerald"
                                     >
                                         {!verifyMutation.isPending && !isPolling && <RefreshCw className="w-3.5 h-3.5" />}
-                                        {isPolling ? "Verifying DNS..." : "Verify DNS Records"}
+                                        {isPolling ? "Verifying..." : "Verify"}
                                     </Button>
                                 </div>
                             </div>
