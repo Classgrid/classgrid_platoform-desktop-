@@ -90,6 +90,7 @@ export function CustomDomainCard() {
     const hasConflicts = domainConfig.status === "verified_with_conflicts";
 
     return (
+        <>
         <div className="w-full bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -363,5 +364,6 @@ export function CustomDomainCard() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+        </>
     );
 }
