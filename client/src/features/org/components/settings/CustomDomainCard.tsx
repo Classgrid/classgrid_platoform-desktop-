@@ -82,21 +82,20 @@ export function CustomDomainCard() {
     return (
         <div className="w-full bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
-            <div className="p-6 border-b border-border/50 bg-gradient-to-r from-card to-accent/20">
-                <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <Globe className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-semibold tracking-tight text-foreground">Custom Domain (White-Label)</h3>
-                            <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                                Use your own domain (e.g., portal.yourcollege.edu) to provide a fully branded experience for your students and staff.
-                            </p>
-                        </div>
+            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shrink-0">
+                        <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
+                    <div>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight">Set up your custom domain</h3>
+                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">This domain will be assigned to your site</p>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
                     {hasDomain && (
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                        <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm ${
                             isVerified 
                             ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
                             : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
@@ -114,27 +113,35 @@ export function CustomDomainCard() {
             <div className="p-6">
                 {!hasDomain ? (
                     <div className="flex flex-col gap-6">
-                        <div className="bg-muted/50 rounded-xl p-5 border border-border/50">
-                            <h4 className="font-medium text-sm text-foreground mb-2">Connect a new domain</h4>
-                            <p className="text-xs text-muted-foreground mb-4">Enter the exact domain or subdomain you want to use. You will need access to your DNS provider (GoDaddy, Cloudflare, etc.) to complete setup.</p>
+                        <div className="bg-background rounded-xl p-5 border border-border/50">
+                            <h4 className="font-semibold text-base text-foreground mb-1">Enter your custom domain</h4>
+                            <p className="text-sm text-muted-foreground mb-5">You can host your domain as a subdomain or a subpath</p>
                             
-                            <div className="flex gap-3">
-                                <Input 
-                                    placeholder="e.g., portal.mycollege.edu" 
-                                    className="flex-1 bg-background"
-                                    value={domainInput}
-                                    onChange={(e) => setDomainInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            handleRegister(e as any);
-                                        }
-                                    }}
-                                    disabled={registerMutation.isPending}
-                                />
-                                <Button type="button" onClick={handleRegister as any} disabled={!domainInput.trim() || registerMutation.isPending} isLoading={registerMutation.isPending} variant="primary" showGlow={true}>
-                                    Add Domain
-                                </Button>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-foreground">Host at</label>
+                                <div className="flex gap-3">
+                                    <div className="relative flex-1 flex items-center bg-background border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden transition-all">
+                                        <div className="flex items-center justify-center px-4 bg-muted/30 border-r border-input text-sm text-foreground font-medium h-full shrink-0">
+                                            https://
+                                        </div>
+                                        <input 
+                                            placeholder="docs.yourdomain.com" 
+                                            className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full"
+                                            value={domainInput}
+                                            onChange={(e) => setDomainInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    handleRegister(e as any);
+                                                }
+                                            }}
+                                            disabled={registerMutation.isPending}
+                                        />
+                                    </div>
+                                    <Button type="button" onClick={handleRegister as any} disabled={!domainInput.trim() || registerMutation.isPending} isLoading={registerMutation.isPending} variant="secondary" className="shrink-0 font-medium">
+                                        + Add domain
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>

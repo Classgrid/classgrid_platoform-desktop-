@@ -73,7 +73,10 @@ export function useRemoveCustomDomain() {
                     cname_verified: false
                 };
             });
-            queryClient.invalidateQueries({ queryKey: ["org-custom-domain"] });
+            toast.success("Custom domain removed successfully.");
         },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || "Failed to remove custom domain.");
+        }
     });
 }
