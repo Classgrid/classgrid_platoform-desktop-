@@ -1841,6 +1841,230 @@ router.get("/subdomain/check", isAuthenticated, requireRole("org_admin"), async 
 });
 
 // ======================================================
+// CUSTOM DOMAIN MANAGEMENT (e.g. portal.xyzcollege.edu)
+// ======================================================
+
+import dns from "dns/promises";
+import crypto from "crypto";
+
+/**
+ * GET /api/org-admin/custom-domain
+ * Returns the current custom domain configuration
+ */
+router.get("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const org = await Organization.findById(orgId).select("custom_domain feature_flags").lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        if (!org.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
+
+        res.json({
+            custom_domain: org.custom_domain || null,
+        });
+    } catch (err) {
+        console.error("[Custom Domain GET] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+/**
+ * POST /api/org-admin/custom-domain
+ * Registers a new custom domain and generates verification tokens
+ */
+router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const { domain } = req.body;
+        if (!domain) return res.status(400).json({ message: "Domain is required." });
+
+        const org = await Organization.findById(orgId).select("custom_domain feature_flags name").lean();
+        if (!org.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
+
+        const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+        // Check if another org is using it
+        const existing = await Organization.findOne({ "custom_domain.domain": cleanDomain, _id: { $ne: orgId } }).lean();
+        if (existing) {
+            return res.status(409).json({ message: "This domain is already registered to another organization." });
+        }
+
+        const verificationToken = crypto.randomBytes(16).toString("hex");
+
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            {
+                $set: {
+                    custom_domain: {
+                        domain: cleanDomain,
+                        status: "pending_verification",
+                        verification_token: verificationToken,
+                        txt_verified: false,
+                        cname_verified: false,
+                        ssl_provisioned: false,
+                        created_at: new Date(),
+                        verified_at: null,
+                    }
+                }
+            },
+            { new: true }
+        ).select("custom_domain name");
+
+        logAdminAction(req, "register_custom_domain", "organization", orgId, updatedOrg.name, { domain: cleanDomain });
+
+        res.json({
+            success: true,
+            message: "Custom domain registered. Please configure your DNS records.",
+            custom_domain: updatedOrg.custom_domain
+        });
+    } catch (err) {
+        console.error("[Custom Domain POST] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+/**
+ * POST /api/org-admin/custom-domain/verify
+ * Performs DNS lookup to verify TXT and CNAME records
+ */
+router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        const org = await Organization.findById(orgId).select("custom_domain").lean();
+
+        if (!org || !org.custom_domain?.domain || !org.custom_domain?.verification_token) {
+            return res.status(400).json({ message: "No pending custom domain found." });
+        }
+
+        const { domain, verification_token } = org.custom_domain;
+        let txtVerified = false;
+        let cnameVerified = false;
+        
+        // 1. Verify TXT Record
+        try {
+            const txtRecords = await dns.resolveTxt(`_classgrid-verify.${domain}`);
+            const flatRecords = txtRecords.flat();
+            txtVerified = flatRecords.some(r => r === `classgrid-verify=${verification_token}`);
+        } catch (err) {
+            console.log(`[DNS Verify] TXT lookup failed for ${domain}:`, err.code);
+        }
+
+        // 2. Verify CNAME Record (Scenario 1 & 3: point to Vercel/Classgrid)
+        try {
+            const cnameRecords = await dns.resolveCname(domain);
+            cnameVerified = cnameRecords.some(r => r.includes("classgrid.in") || r.includes("vercel.app") || r.includes("vercel.com") || r.includes("cname.vercel-dns.com"));
+        } catch (err) {
+            // Also check A record if they mapped APEX domain
+            try {
+                const aRecords = await dns.resolve4(domain);
+                cnameVerified = aRecords.length > 0; // If it points somewhere, we assume they set the A record correctly
+            } catch (aErr) {
+                console.log(`[DNS Verify] CNAME/A lookup failed for ${domain}:`, err.code);
+            }
+        }
+
+        const isFullyVerified = txtVerified && cnameVerified;
+
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            {
+                $set: {
+                    "custom_domain.txt_verified": txtVerified,
+                    "custom_domain.cname_verified": cnameVerified,
+                    "custom_domain.status": isFullyVerified ? "verified" : "pending_verification",
+                    "custom_domain.verified_at": isFullyVerified ? new Date() : null,
+                }
+            },
+            { new: true }
+        ).select("custom_domain");
+
+        if (isFullyVerified) {
+            logAdminAction(req, "verify_custom_domain", "organization", orgId, "Custom Domain Verified", { domain });
+            
+            // ==========================================
+            // AUTOMATED VERCEL INTEGRATION
+            // ==========================================
+            if (process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID) {
+                try {
+                    const vercelRes = await fetch(`https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains`, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${process.env.VERCEL_API_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ name: domain })
+                    });
+                    
+                    if (!vercelRes.ok) {
+                        const errData = await vercelRes.json();
+                        console.error("[Vercel API Error]:", errData);
+                    } else {
+                        console.log(`[Vercel API] Successfully attached ${domain} to project.`);
+                    }
+                } catch (vercelErr) {
+                    console.error("[Vercel Fetch Error]:", vercelErr.message);
+                }
+            } else {
+                console.warn("[Vercel API] VERCEL_API_TOKEN or VERCEL_PROJECT_ID not set in .env. Skipping automated domain attachment.");
+            }
+        }
+
+        res.json({
+            success: true,
+            isFullyVerified,
+            txtVerified,
+            cnameVerified,
+            custom_domain: updatedOrg.custom_domain,
+            message: isFullyVerified 
+                ? "Domain verified successfully! SSL provisioning will begin." 
+                : "Verification pending. Please check your DNS records."
+        });
+    } catch (err) {
+        console.error("[Custom Domain Verify] Error:", err.message);
+        res.status(500).json({ message: "Server error during verification." });
+    }
+});
+
+/**
+ * DELETE /api/org-admin/custom-domain
+ * Removes the custom domain
+ */
+router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        const org = await Organization.findById(orgId).select("custom_domain name").lean();
+        
+        await Organization.findByIdAndUpdate(orgId, {
+            $set: {
+                custom_domain: {
+                    domain: null,
+                    status: "pending_verification",
+                    verification_token: null,
+                    txt_verified: false,
+                    cname_verified: false,
+                    ssl_provisioned: false
+                }
+            }
+        });
+
+        logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { old_domain: org.custom_domain?.domain });
+
+        res.json({ success: true, message: "Custom domain removed." });
+    } catch (err) {
+        console.error("[Custom Domain DELETE] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+// ======================================================
 // GET /api/org-admin/dashboard/metrics
 // Real MongoDB metrics via Controller layer
 // ======================================================

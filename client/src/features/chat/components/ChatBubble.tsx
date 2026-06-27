@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
-import type { ChatMessage } from "../services/chatApi";
+import EmojiPicker from 'emoji-picker-react';
+import { WaveformPlayer } from "./WaveformPlayer";
+import type { ChatMessage, Poll } from "../services/chatApi";
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -12,6 +14,9 @@ interface ChatBubbleProps {
   onEdit: (msgId: string, newText: string) => void;
   onReact: (msgId: string, emoji: string) => void;
   showAvatar?: boolean;
+  currentUserId: string;
+  poll?: Poll;
+  onVotePoll?: (pollId: string, optionId: string) => void;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -40,10 +45,14 @@ export function ChatBubble({
   onEdit,
   onReact,
   showAvatar = true,
+  currentUserId,
+  poll,
+  onVotePoll,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
   const [isHovered, setIsHovered] = useState(false);
+  const [showFullPicker, setShowFullPicker] = useState(false);
 
   const handleEditSubmit = () => {
     if (editValue.trim() && editValue !== message.message) {
@@ -58,7 +67,10 @@ export function ChatBubble({
     <div
       className={`flex w-full ${isMine ? "justify-end" : "justify-start"} mb-4`}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setTimeout(() => setShowFullPicker(false), 200);
+      }}
     >
       <div className={`flex gap-2 max-w-[85%] sm:max-w-[70%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
         {/* Avatar */}
@@ -115,7 +127,7 @@ export function ChatBubble({
             `}
           >
             {message.is_deleted ? (
-              <span className="text-[15px]">🚫 This message was deleted</span>
+              <span className="text-[15px]">This message was deleted</span>
             ) : isEditing ? (
               <div className="flex flex-col gap-2 min-w-[200px]">
                 <textarea
@@ -143,6 +155,10 @@ export function ChatBubble({
                             <Download className="text-white w-6 h-6" />
                           </div>
                         </a>
+                      ) : att.file_type.startsWith("audio/") ? (
+                        <div key={att.id} className="mb-1 w-[280px]">
+                          <WaveformPlayer url={att.file_url} />
+                        </div>
                       ) : (
                         <a key={att.id} href={att.file_url} target="_blank" rel="noreferrer" 
                            className={`flex items-center gap-3 p-2 rounded-lg border transition-colors
@@ -162,10 +178,59 @@ export function ChatBubble({
                 )}
 
                 {/* Text Message */}
-                {message.message && (
+                {message.message && !poll && (
                   <span className="text-[15px] whitespace-pre-wrap leading-relaxed break-words">
                     {message.message}
+                    {message.is_edited && (
+                      <span className="text-[10px] opacity-60 italic ml-2">(edited)</span>
+                    )}
                   </span>
+                )}
+
+                {/* Poll UI */}
+                {poll && (
+                  <div className="flex flex-col gap-3 min-w-[220px] max-w-[320px] pb-1">
+                    <span className="text-[15px] font-semibold leading-relaxed break-words">
+                      {poll.question}
+                    </span>
+                    <div className="flex flex-col gap-2">
+                      {poll.options.map((opt) => {
+                        const count = poll.voteCounts[opt.id] || 0;
+                        const percent = poll.totalVoters > 0 ? Math.round((count / poll.totalVoters) * 100) : 0;
+                        const iVoted = poll.myVotes.includes(opt.id);
+                        return (
+                          <div 
+                            key={opt.id} 
+                            onClick={() => onVotePoll && onVotePoll(poll.id, opt.id)}
+                            className={`relative flex items-center justify-between p-2 rounded-lg cursor-pointer overflow-hidden border transition-colors
+                              ${isMine 
+                                ? (iVoted ? "border-primary-foreground bg-primary-foreground/20" : "border-primary-foreground/20 hover:bg-primary-foreground/10") 
+                                : (iVoted ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50")
+                              }
+                            `}
+                          >
+                            {/* Progress bar background */}
+                            {count > 0 && (
+                              <div 
+                                className={`absolute left-0 top-0 bottom-0 opacity-20 transition-all duration-500
+                                  ${isMine ? "bg-primary-foreground" : "bg-primary"}
+                                `}
+                                style={{ width: `${percent}%` }}
+                              />
+                            )}
+                            <div className="relative z-10 flex items-center gap-2 flex-1 min-w-0 pr-2">
+                              <span className="text-sm font-medium truncate">{opt.text}</span>
+                              {iVoted && <Check className="w-4 h-4 shrink-0" />}
+                            </div>
+                            <span className="relative z-10 text-xs font-bold shrink-0">{percent}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="text-[10px] opacity-70 mt-1">
+                      {poll.totalVoters} {poll.totalVoters === 1 ? 'vote' : 'votes'}
+                    </div>
+                  </div>
                 )}
               </>
             )}
@@ -183,7 +248,7 @@ export function ChatBubble({
           {!message.is_deleted && Object.keys(message.reactions || {}).length > 0 && (
             <div className={`flex flex-wrap gap-1 mt-1 ${isMine ? "justify-end" : "justify-start"} max-w-[200px]`}>
               {Object.entries(message.reactions).map(([emoji, users]) => {
-                const iReacted = users.some(u => isMine ? true : false); // Needs activeUserId for accuracy, approximate for UI here
+                const iReacted = users.some(u => u.id === currentUserId);
                 return (
                   <button
                     key={emoji}
@@ -212,25 +277,40 @@ export function ChatBubble({
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-40 p-1" side={isMine ? "left" : "right"}>
-                <div className="flex px-2 py-2 gap-2 border-b border-border justify-between">
-                  {COMMON_EMOJIS.map(emoji => (
-                    <button key={emoji} onClick={() => onReact(message.id, emoji)} className="hover:scale-125 transition-transform">
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
-                  <CornerUpLeft className="w-4 h-4" /> Reply
-                </button>
-                {isMine && (
+              <PopoverContent className={showFullPicker ? "w-auto p-0 border-none" : "w-40 p-1"} side={isMine ? "left" : "right"}>
+                {showFullPicker ? (
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) => {
+                      onReact(message.id, emojiData.emoji);
+                      setShowFullPicker(false);
+                    }}
+                    theme="auto"
+                  />
+                ) : (
                   <>
-                    <button onClick={() => setIsEditing(true)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
-                      <Edit2 className="w-4 h-4" /> Edit
+                    <div className="flex px-2 py-2 gap-2 border-b border-border justify-between items-center">
+                      {COMMON_EMOJIS.map(emoji => (
+                        <button key={emoji} onClick={() => onReact(message.id, emoji)} className="hover:scale-125 transition-transform">
+                          {emoji}
+                        </button>
+                      ))}
+                      <button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted">
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
+                      <CornerUpLeft className="w-4 h-4" /> Reply
                     </button>
-                    <button onClick={() => onDelete(message.id)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-red-500/10 text-red-500 rounded-sm text-left">
-                      <Trash2 className="w-4 h-4" /> Delete
-                    </button>
+                    {isMine && (
+                      <>
+                        <button onClick={() => setIsEditing(true)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
+                          <Edit2 className="w-4 h-4" /> Edit
+                        </button>
+                        <button onClick={() => onDelete(message.id)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-red-500/10 text-red-500 rounded-sm text-left">
+                          <Trash2 className="w-4 h-4" /> Delete
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </PopoverContent>

@@ -53,6 +53,20 @@ const organizationSchema = new mongoose.Schema(
             lowercase: true,
             trim: true,
         },
+        custom_domain: {
+            domain: { type: String, default: null },
+            status: { 
+                type: String, 
+                enum: ["pending_verification", "verified", "active", "failed"], 
+                default: "pending_verification" 
+            },
+            verification_token: { type: String, default: null },
+            txt_verified: { type: Boolean, default: false },
+            cname_verified: { type: Boolean, default: false },
+            ssl_provisioned: { type: Boolean, default: false },
+            verified_at: { type: Date, default: null },
+            created_at: { type: Date, default: null },
+        },
         address: {
             type: String,
             required: true,
@@ -399,6 +413,7 @@ const organizationSchema = new mongoose.Schema(
             admission_module: { type: Boolean, default: false },   // Admission Engine portal
             canteen_module: { type: Boolean, default: false },     // Canteen Management
             exam_proctoring: { type: Boolean, default: false },    // AI Proctoring for online exams
+            custom_domain_module: { type: Boolean, default: false },
         },
         // 🔄 Academic Promotion Lock — prevents concurrent promotions
         is_promoting: {
@@ -446,6 +461,7 @@ const organizationSchema = new mongoose.Schema(
 organizationSchema.index({ owner_id: 1 });
 organizationSchema.index({ status: 1 });
 organizationSchema.index({ subdomain: 1 });
+organizationSchema.index({ "custom_domain.domain": 1 }, { sparse: true });
 organizationSchema.index({ org_type: 1 });
 // NOTE: organizationCode and honorCode indexes are created automatically
 // via { unique: true, sparse: true } on the field definition above.

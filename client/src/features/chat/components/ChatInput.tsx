@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText } from "lucide-react";
+import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2 } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
 
 interface ChatInputProps {
@@ -8,13 +9,66 @@ interface ChatInputProps {
   isSending: boolean;
   replyTo: ChatMessage | null;
   onCancelReply: () => void;
+  onTyping?: () => void;
+  disabledReason?: string;
+  onOpenPollModal?: () => void;
 }
 
-export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply }: ChatInputProps) {
+export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastTypingTime = useRef(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing mic", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const clearAudio = () => {
+    setAudioBlob(null);
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+  };
 
   // Auto-resize textarea
   useEffect(() => {
@@ -26,15 +80,22 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply }: 
 
   const handleSend = async () => {
     const text = message.trim();
-    if (!text && files.length === 0) return;
+    if (!text && files.length === 0 && !audioBlob) return;
+
+    let finalFiles = [...files];
+    if (audioBlob) {
+      const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: "audio/webm" });
+      finalFiles.push(audioFile);
+    }
 
     setMessage("");
     setFiles([]);
+    clearAudio();
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
 
-    await onSendMessage(text, files);
+    await onSendMessage(text, finalFiles);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -78,6 +139,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply }: 
         </div>
       )}
 
+      {/* Audio Preview */}
+      {audioUrl && (
+        <div className="px-4 py-3 flex items-center justify-between gap-3 border-b border-border bg-muted/30">
+          <WaveformPlayer url={audioUrl} />
+          <button onClick={clearAudio} className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors shrink-0">
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* File Previews */}
       {files.length > 0 && (
         <div className="px-4 py-3 flex gap-3 overflow-x-auto border-b border-border">
@@ -113,44 +184,83 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply }: 
 
       {/* Input Area */}
       <div className="px-4 py-3 flex items-end gap-2">
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5"
-          disabled={isSending}
-        >
-          <Paperclip className="w-5 h-5" />
-        </button>
-        <input
-          type="file"
-          multiple
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-        />
+        {disabledReason ? (
+          <div className="flex-1 py-3 px-4 text-sm text-muted-foreground text-center bg-accent/30 border border-border rounded-2xl italic">
+            {disabledReason}
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5"
+              disabled={isSending}
+              title="Attach File"
+            >
+              <Paperclip className="w-5 h-5" />
+            </button>
+            {onOpenPollModal && (
+              <button
+                onClick={onOpenPollModal}
+                className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5 ml-[-4px]"
+                disabled={isSending}
+                title="Create Poll"
+              >
+                <BarChart2 className="w-5 h-5" />
+              </button>
+            )}
+            <input
+              type="file"
+              multiple
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+            />
 
-        <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end">
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground min-h-[44px] max-h-[120px]"
-            rows={1}
-            disabled={isSending}
-          />
-          {/* <button className="p-3 text-muted-foreground hover:text-foreground shrink-0" disabled={isSending}>
-            <Smile className="w-5 h-5" />
-          </button> */}
-        </div>
+            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end">
+              <textarea
+                ref={textareaRef}
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  const now = Date.now();
+                  if (onTyping && now - lastTypingTime.current > 2000) {
+                    onTyping();
+                    lastTypingTime.current = now;
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
+                className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground min-h-[44px] max-h-[120px]"
+                rows={1}
+                disabled={isSending}
+              />
+            </div>
 
-        <button
-          onClick={handleSend}
-          disabled={(!message.trim() && files.length === 0) || isSending}
-          className="p-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11"
-        >
-          {isSending ? <Spinner className="w-5 h-5 text-current" /> : <Send className="w-5 h-5 ml-0.5" />}
-        </button>
+            {isRecording ? (
+              <button
+                onClick={stopRecording}
+                className="p-3 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 animate-pulse"
+              >
+                <Square className="w-5 h-5 fill-current" />
+              </button>
+            ) : (
+              <button
+                onClick={startRecording}
+                disabled={isSending || !!audioBlob}
+                className="p-3 rounded-full bg-accent text-foreground hover:bg-accent/80 transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 disabled:opacity-50"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              onClick={handleSend}
+              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording || isSending}
+              className="p-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11"
+            >
+              {isSending ? <Spinner className="w-5 h-5 text-current" /> : <Send className="w-5 h-5 ml-0.5" />}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ export interface ChatThread {
   phoneNumber?: string;
   bio?: string;
   prn?: string;
+  avatarColor?: string;
   lastMessage: string | null;
   lastMessageAt: string | null;
   unread: number;
@@ -42,6 +43,7 @@ export interface ChatMessage {
   attachments: ChatAttachment[];
   reactions: Record<string, { id: string; name: string }[]>;
   isSeen?: boolean;
+  is_edited?: boolean;
 }
 
 export interface OrgUser {
@@ -73,6 +75,27 @@ export interface GroupMember {
   userRole: string;
   email: string | null;
   joinedAt: string;
+}
+
+export interface PollOption {
+  id: string;
+  text: string;
+}
+
+export interface Poll {
+  id: string;
+  thread_id: string;
+  message_id: string;
+  question: string;
+  options: PollOption[];
+  allow_multiple: boolean;
+  is_anonymous: boolean;
+  created_by: string;
+  closes_at: string | null;
+  created_at: string;
+  voteCounts: Record<string, number>;
+  totalVoters: number;
+  myVotes: string[];
 }
 
 // ── API Functions ──
@@ -135,8 +158,22 @@ export async function createGroup(name: string, memberIds: string[]) {
 }
 
 export async function fetchGroupInfo(groupId: string) {
-  const res = await apiClient.get<{ group: ChatGroup; threadId: string; members: GroupMember[]; myRole: string }>(`/api/group-chat/${groupId}`);
+  const res = await apiClient.get<{ group: ChatGroup & { permissions?: any }; threadId: string; members: GroupMember[]; myRole: string }>(`/api/group-chat/${groupId}`);
   return res.data;
+}
+
+export async function updateGroupPermissions(groupId: string, permissions: any) {
+  const res = await apiClient.put(`/api/group-chat/${groupId}/permissions`, permissions);
+  return res.data.group;
+}
+
+export async function uploadGroupPhoto(groupId: string, file: File) {
+  const formData = new FormData();
+  formData.append("photo", file);
+  const res = await apiClient.post(`/api/group-chat/${groupId}/photo`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data.group;
 }
 
 export async function addGroupMember(groupId: string, userId: string) {
@@ -151,6 +188,11 @@ export async function exitGroup(groupId: string) {
   await apiClient.post(`/api/group-chat/${groupId}/exit`);
 }
 
+export async function toggleAdminRole(groupId: string, userId: string, role: 'admin' | 'member') {
+  const res = await apiClient.put(`/api/group-chat/${groupId}/admins/${userId}`, { role });
+  return res.data;
+}
+
 export async function createPoll(groupId: string, question: string, options: string[], allowMultiple = false) {
   const res = await apiClient.post(`/api/group-chat/${groupId}/polls`, { question, options, allowMultiple });
   return res.data.poll;
@@ -159,4 +201,9 @@ export async function createPoll(groupId: string, question: string, options: str
 export async function votePoll(groupId: string, pollId: string, optionId: string) {
   const res = await apiClient.post(`/api/group-chat/${groupId}/polls/${pollId}/vote`, { optionId });
   return res.data;
+}
+
+export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
+  const res = await apiClient.get<{ polls: Poll[] }>(`/api/group-chat/${groupId}/polls`);
+  return res.data.polls;
 }

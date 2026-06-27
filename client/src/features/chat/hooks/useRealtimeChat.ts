@@ -85,12 +85,20 @@ export function useThreadChannel(
     onMessageDeleted?: (data: { messageId: string }) => void;
     onReactionUpdate?: (data: { messageId: string; reactions: any }) => void;
     onReadReceipt?: (data: { userId: string; lastReadAt: string }) => void;
+    onTyping?: (data: { userId: string }) => void;
+    onNewPoll?: (data: { poll: any; messageId: string }) => void;
+    onPollVote?: (data: { pollId: string; voteCounts: any; totalVoters: number }) => void;
   }
 ) {
-  useRealtimeChannel(threadId ? `thread:${threadId}` : null, {
+  const channelRef = useRealtimeChannel(threadId ? `thread:${threadId}` : null, {
     new_message: (payload: any) => handlers.onNewMessage?.(payload),
     message_deleted: (payload: any) => handlers.onMessageDeleted?.(payload),
     reaction_update: (payload: any) => handlers.onReactionUpdate?.(payload),
     read_receipt: (payload: any) => handlers.onReadReceipt?.(payload),
+    typing: (payload: any) => handlers.onTyping?.(payload),
+    new_poll: (payload: any) => handlers.onNewPoll?.(payload),
+    poll_vote: (payload: any) => handlers.onPollVote?.(payload),
   });
+
+  return channelRef;
 }

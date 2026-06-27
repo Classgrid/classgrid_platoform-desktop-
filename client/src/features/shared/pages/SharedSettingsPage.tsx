@@ -6,6 +6,7 @@ import { SettingsNotificationsCard } from "../components/settings/SettingsNotifi
 import { SettingsPushCard } from "../components/settings/SettingsPushCard";
 import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../queries/useSettingsQueries";
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
+import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard";
 
 export function SharedSettingsPage() {
   const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
@@ -81,6 +82,10 @@ export function SharedSettingsPage() {
           pushEnabled={pushEnabled} 
           onChange={setPushEnabled} 
         />
+      )}
+
+      {profileData?.role === "org_admin" && (
+        <CustomDomainCard />
       )}
 
       {updatePrefs.isSuccess && (

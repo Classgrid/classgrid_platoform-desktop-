@@ -24,6 +24,7 @@ import { ChatConversation } from "../components/ChatConversation";
 import { ChatInput } from "../components/ChatInput";
 import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
+import { GroupSettingsModal } from "../components/GroupSettingsModal";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -46,6 +47,7 @@ export function ChatPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
 
   // -- Load Initial Data --
   useEffect(() => {
@@ -253,7 +255,13 @@ export function ChatPage() {
             <ChatHeader
               thread={activeThread}
               onBack={() => setActiveThread(null)}
-              onShowInfo={() => toast.info("Group info coming soon")}
+              onShowInfo={() => {
+                if (activeThread.type === "group" && activeThread.groupId) {
+                  setIsGroupSettingsOpen(true);
+                } else {
+                  toast.info("DM info coming soon");
+                }
+              }}
             />
             
             <ChatConversation
@@ -314,6 +322,17 @@ export function ChatPage() {
         onCreateGroup={handleCreateGroup}
         isLoading={usersLoading}
       />
+
+      {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
+        <GroupSettingsModal 
+          groupId={activeThread.groupId} 
+          onClose={() => setIsGroupSettingsOpen(false)}
+          onLeaveGroup={() => {
+            setIsGroupSettingsOpen(false);
+            setActiveThread(null);
+          }}
+        />
+      )}
     </div>
   );
 }

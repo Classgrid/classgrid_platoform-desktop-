@@ -215,7 +215,7 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
     const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
     const storagePath = `chat/groups/${req.params.id}/${Date.now()}_${safeName}`;
 
-    const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.buffer.originalname || 'upload.file', req.file.buffer.mimetype || 'application/octet-stream', storagePath);
+    const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.originalname || 'upload.file', req.file.mimetype || 'application/octet-stream', storagePath);
     /* Error handled inside R2 */
 
     /* getPublicUrl replaced by R2 */
