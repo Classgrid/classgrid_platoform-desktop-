@@ -1902,6 +1902,11 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
             return res.status(400).json({ message: "Invalid domain format. Example: portal.mycollege.edu" });
         }
 
+        // CRITICAL SECURITY PRECAUTION: Never allow our own platform domains to be registered/deleted by clients
+        if (cleanDomain === "classgrid.in" || cleanDomain.endsWith(".classgrid.in")) {
+            return res.status(403).json({ message: "Platform domains cannot be used as custom domains." });
+        }
+
         // Check if another org is using it
         const existing = await Organization.findOne({ "custom_domain.domain": cleanDomain, _id: { $ne: orgId } }).lean();
         if (existing) {
@@ -2074,6 +2079,11 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
         const org = await Organization.findById(orgId).select("custom_domain name").lean();
         
         const domainToDelete = org.custom_domain?.domain;
+
+        // CRITICAL SECURITY PRECAUTION: Never allow the backend to delete our own platform domains from Vercel
+        if (domainToDelete === "classgrid.in" || domainToDelete?.endsWith(".classgrid.in")) {
+            return res.status(403).json({ message: "Security block: Cannot delete core platform domains." });
+        }
 
         await Organization.findByIdAndUpdate(orgId, {
             $set: {
