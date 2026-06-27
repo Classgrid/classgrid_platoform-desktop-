@@ -40,9 +40,11 @@ const columns: ColumnDef<AdmissionApplication>[] = [
   {
     accessorKey: "status",
     header: "Stage",
+    cell: ({ row }) => {
       const s = row.original.status;
       const v = s === "verified" ? "bg-emerald-100 text-emerald-800" : s === "under_verification" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800";
       return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${v}`}>{s.replace(/_/g, " ")}</span>;
+    }
   },
   {
     accessorKey: "createdAt",

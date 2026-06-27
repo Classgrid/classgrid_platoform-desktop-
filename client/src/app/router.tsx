@@ -89,6 +89,7 @@ import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
 import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
+import { DynamicRoleLayout } from "@/components/layout/DynamicRoleLayout";
 import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
 
 
@@ -179,93 +180,92 @@ export function AppRouter() {
         <Route path="/" element={<DefaultDashboardRedirect />} />
         <Route path="/admin/dashboard" element={<Navigate to="/org/dashboard" replace />} />
 
+        {/* ── DYNAMIC ROLE LAYOUT (Wraps all 10 Dept Dashboards & Common Pages) ── */}
+        <Route element={<DynamicRoleLayout />}>
+          {/* 3. Admissions Department Dashboard */}
+          <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardRouter />} />
+          <Route path="/dept/admissions/applications" element={<AllApplicationsPage />} />
+          <Route path="/dept/admissions/applications/:id" element={<ApplicationDetailsPage />} />
+          <Route path="/dept/admissions/new" element={<NewApplicationPage />} />
+          <Route path="/dept/admissions/documents" element={<DocumentVerificationPage />} />
+          <Route path="/dept/admissions/merit" element={<MeritListPage />} />
+          <Route path="/dept/admissions/enroll" element={<EnrollmentPage />} />
+          <Route path="/dept/admissions/config" element={<AdmissionConfigPage />} />
+          <Route path="/dept/admissions/fees" element={<FeeStructurePage />} />
+          <Route path="/dept/admissions/schedule" element={<AdmissionSchedulePage />} />
+          <Route path="/dept/admissions/analytics" element={<AdmissionAnalyticsPage />} />
+          <Route path="/dept/admissions/export" element={<ExportDataPage />} />
+          <Route path="/dept/admissions/cet-dte" element={<CETReportsPage />} />
+          <Route path="/dept/admissions/cet-import" element={<CETImportPage />} />
+          <Route path="/dept/admissions/rla-reporting" element={<RLAReportingPage />} />
+          <Route path="/dept/admissions/cap-upgrade" element={<CAPUpgradePage />} />
+          <Route path="/dept/admissions/vacancy-tracker" element={<VacancyTrackerPage />} />
+          <Route path="/dept/admissions/form-builder" element={<FormBuilderPage />} />
+          <Route path="/dept/admissions/crm" element={<LeadTrackingPage />} />
+          <Route path="/dept/admissions/comm" element={<CommunicationPage />} />
+          <Route path="/dept/admissions/bulk" element={<BulkSmsPage />} />
 
+          {/* 4. Fees Department Dashboard */}
+          <Route path="/dept/fees/dashboard" element={<FeesDashboardRouter />} />
 
+          {/* 5. Examination Department Dashboard */}
+          <Route path="/dept/exams/dashboard" element={<ExamsDashboardRouter />} />
+          <Route path="/dept/exams/results" element={<ResultsProcessingPage />} />
 
-        {/* 3. Admissions Department Dashboard */}
-        <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardRouter />} />
-        <Route path="/dept/admissions/applications" element={<AllApplicationsPage />} />
-        <Route path="/dept/admissions/applications/:id" element={<ApplicationDetailsPage />} />
-        <Route path="/dept/admissions/new" element={<NewApplicationPage />} />
-        <Route path="/dept/admissions/documents" element={<DocumentVerificationPage />} />
-        <Route path="/dept/admissions/merit" element={<MeritListPage />} />
-        <Route path="/dept/admissions/enroll" element={<EnrollmentPage />} />
-        <Route path="/dept/admissions/config" element={<AdmissionConfigPage />} />
-        <Route path="/dept/admissions/fees" element={<FeeStructurePage />} />
-        <Route path="/dept/admissions/schedule" element={<AdmissionSchedulePage />} />
-        <Route path="/dept/admissions/analytics" element={<AdmissionAnalyticsPage />} />
-        <Route path="/dept/admissions/export" element={<ExportDataPage />} />
-        <Route path="/dept/admissions/cet-dte" element={<CETReportsPage />} />
-        <Route path="/dept/admissions/cet-import" element={<CETImportPage />} />
-        <Route path="/dept/admissions/rla-reporting" element={<RLAReportingPage />} />
-        <Route path="/dept/admissions/cap-upgrade" element={<CAPUpgradePage />} />
-        <Route path="/dept/admissions/vacancy-tracker" element={<VacancyTrackerPage />} />
-        <Route path="/dept/admissions/form-builder" element={<FormBuilderPage />} />
-        <Route path="/dept/admissions/crm" element={<LeadTrackingPage />} />
-        <Route path="/dept/admissions/comm" element={<CommunicationPage />} />
-        <Route path="/dept/admissions/bulk" element={<BulkSmsPage />} />
+          {/* 6. Library Department Dashboard */}
+          <Route path="/dept/library/dashboard" element={<LibraryDashboardRouter />} />
 
-        {/* 4. Fees Department Dashboard */}
-        <Route path="/dept/fees/dashboard" element={<FeesDashboardRouter />} />
+          {/* 7. Attendance Department Dashboard */}
+          <Route path="/dept/attendance/dashboard" element={<AttendanceDashboardRouter />} />
 
-        {/* 5. Examination Department Dashboard */}
-        <Route path="/dept/exams/dashboard" element={<ExamsDashboardRouter />} />
-        <Route path="/dept/exams/results" element={<ResultsProcessingPage />} />
+          {/* 8. HR & Payroll Department Dashboard */}
+          <Route path="/dept/hr/dashboard" element={<HRDashboardRouter />} />
 
-        {/* 6. Library Department Dashboard */}
-        <Route path="/dept/library/dashboard" element={<LibraryDashboardRouter />} />
+          {/* 9. Hostel & Transport Dashboard */}
+          <Route path="/dept/hostel/dashboard" element={<HostelDashboardPage />} />
 
-        {/* 7. Attendance Department Dashboard */}
-        <Route path="/dept/attendance/dashboard" element={<AttendanceDashboardRouter />} />
+          {/* 10. Faculty Dashboard */}
+          <Route path="/faculty/dashboard" element={<FacultyHomePage />} />
+          <Route path="/faculty/work" element={<FacultyWorkPage />} />
+          <Route path="/exam/grading" element={<ExamGradingPage />} />
 
-        {/* 8. HR & Payroll Department Dashboard */}
-        <Route path="/dept/hr/dashboard" element={<HRDashboardRouter />} />
+          {/* 11. Student Dashboard */}
+          <Route path="/student/dashboard" element={<StudentHomePage />} />
+          <Route path="/student/work" element={<StudentWorkPage />} />
 
-        {/* 9. Hostel & Transport Dashboard */}
-        <Route path="/dept/hostel/dashboard" element={<HostelDashboardPage />} />
+          {/* ── Common pages ── */}
+          <Route path="/results" element={<ResultsPage />} />
+          <Route path="/classroom" element={<ClassroomsPage />} />
+          <Route path="/classrooms" element={<ClassroomsPage />} />
+          <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
+          <Route path="/tools" element={<GenericPage title="Schedule" />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/notifications" element={<GenericPage title="Notifications" />} />
+          <Route path="/forum" element={<GenericPage title="Forum" />} />
+          <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />
+          <Route path="/drive" element={<GenericPage title="Google Drive" />} />
+          <Route path="/virtual-id" element={<GenericPage title="Virtual ID" />} />
+          <Route path="/join-requests" element={<GenericPage title="Requests" />} />
+          <Route path="/whats-new" element={<GenericPage title="What's New" />} />
+          <Route path="/organization" element={<GenericPage title="Organization" />} />
+          <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
+          <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
+          <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
+          <Route path="/profile" element={<SharedProfilePage />} />
+          <Route path="/settings" element={<SharedSettingsPage />} />
+          <Route path="/support" element={<SupportPage />} />
 
-        {/* 10. Faculty Dashboard */}
-        <Route path="/faculty/dashboard" element={<FacultyHomePage />} />
-        <Route path="/faculty/work" element={<FacultyWorkPage />} />
-        <Route path="/exam/grading" element={<ExamGradingPage />} />
-
-        {/* 11. Student Dashboard */}
-        <Route path="/student/dashboard" element={<StudentHomePage />} />
-        <Route path="/student/work" element={<StudentWorkPage />} />
-
-        {/* ── Common pages ── */}
-        <Route path="/results" element={<ResultsPage />} />
-        <Route path="/classroom" element={<ClassroomsPage />} />
-        <Route path="/classrooms" element={<ClassroomsPage />} />
-        <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
-        <Route path="/tools" element={<GenericPage title="Schedule" />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/notifications" element={<GenericPage title="Notifications" />} />
-        <Route path="/forum" element={<GenericPage title="Forum" />} />
-        <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />
-        <Route path="/drive" element={<GenericPage title="Google Drive" />} />
-        <Route path="/virtual-id" element={<GenericPage title="Virtual ID" />} />
-        <Route path="/join-requests" element={<GenericPage title="Requests" />} />
-        <Route path="/whats-new" element={<GenericPage title="What's New" />} />
-        <Route path="/organization" element={<GenericPage title="Organization" />} />
-        <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
-        <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
-        <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
-        <Route path="/profile" element={<SharedProfilePage />} />
-        <Route path="/settings" element={<SharedSettingsPage />} />
-        <Route path="/support" element={<SupportPage />} />
-
-        {/* ── Wildcard sub-routes ── */}
-
-        <Route path="/dept/admissions/*" element={<GenericPage title="Admissions Module" />} />
-        <Route path="/dept/fees/*" element={<GenericPage title="Fees Module" />} />
-        <Route path="/dept/exams/*" element={<GenericPage title="Examination Module" />} />
-        <Route path="/dept/library/*" element={<GenericPage title="Library Module" />} />
-        <Route path="/dept/attendance/*" element={<GenericPage title="Attendance Module" />} />
-        <Route path="/dept/hr/*" element={<GenericPage title="HR & Payroll Module" />} />
-        <Route path="/dept/hostel/*" element={<GenericPage title="Hostel & Transport Module" />} />
-        <Route path="/dept/transport/*" element={<GenericPage title="Transport Module" />} />
-        <Route path="/student/*" element={<GenericPage title="Student Module" />} />
+          {/* ── Wildcard sub-routes ── */}
+          <Route path="/dept/admissions/*" element={<GenericPage title="Admissions Module" />} />
+          <Route path="/dept/fees/*" element={<GenericPage title="Fees Module" />} />
+          <Route path="/dept/exams/*" element={<GenericPage title="Examination Module" />} />
+          <Route path="/dept/library/*" element={<GenericPage title="Library Module" />} />
+          <Route path="/dept/attendance/*" element={<GenericPage title="Attendance Module" />} />
+          <Route path="/dept/hr/*" element={<GenericPage title="HR & Payroll Module" />} />
+          <Route path="/dept/hostel/*" element={<GenericPage title="Hostel & Transport Module" />} />
+          <Route path="/dept/transport/*" element={<GenericPage title="Transport Module" />} />
+          <Route path="/student/*" element={<GenericPage title="Student Module" />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { 
-  Save, Shield, Camera, Loader, Mail, Phone, 
+import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, CheckCircle2, ShieldAlert,
   User as UserIcon, ChevronRight
@@ -25,6 +25,8 @@ type ProfileData = {
   profileBanner?: string;
   lastLoginAt?: string;
   createdAt?: string;
+  prn?: string;
+  bio?: string;
 };
 
 type EmailPrefs = {
@@ -32,7 +34,12 @@ type EmailPrefs = {
   announcements: boolean;
 };
 
-export function SharedProfilePage() {
+interface SharedProfilePageProps {
+  publicUser?: ProfileData;
+  onClose?: () => void;
+}
+
+export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProps) {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,19 +56,36 @@ export function SharedProfilePage() {
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
 
+  const isReadOnly = !!publicUser;
+
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["global-profile"],
     queryFn: () => apiClient.get("/api/user/profile").then((r) => r.data),
+    enabled: !isReadOnly,
   });
 
   const { data: prefsData, isLoading: prefsLoading } = useQuery({
     queryKey: ["global-settings"],
     queryFn: () => apiClient.get("/api/user/email-preferences").then((r) => r.data),
+    enabled: !isReadOnly,
   });
 
   useEffect(() => {
-    if (profileData?.user) {
+    if (publicUser) {
+      setForm({
+        name: publicUser.name || "",
+        phoneNumber: publicUser.phoneNumber || "",
+        email: publicUser.email || "",
+        role: publicUser.role || "User",
+        profilePicture: publicUser.profilePicture || "",
+        profileBanner: publicUser.profileBanner || "",
+        lastLoginAt: publicUser.lastLoginAt,
+        createdAt: publicUser.createdAt,
+        prn: publicUser.prn,
+        bio: publicUser.bio,
+      });
+    } else if (profileData?.user) {
       setForm({
         name: profileData.user.name || "",
         phoneNumber: profileData.user.phoneNumber || "",
@@ -73,16 +97,16 @@ export function SharedProfilePage() {
         createdAt: profileData.user.createdAt,
       });
     }
-  }, [profileData]);
+  }, [profileData, publicUser]);
 
   useEffect(() => {
-    if (prefsData?.emailNotifications) {
+    if (!isReadOnly && prefsData?.emailNotifications) {
       setPrefs({
         global: prefsData.emailNotifications.global ?? true,
         announcements: prefsData.emailNotifications.announcements ?? true,
       });
     }
-  }, [prefsData]);
+  }, [prefsData, isReadOnly]);
 
   const updateProfile = useMutation({
     mutationFn: (updates: Partial<ProfileData>) => apiClient.put("/api/user/update", updates),
@@ -169,9 +193,9 @@ export function SharedProfilePage() {
     apiClient.put("/api/user/email-preferences", prefs);
   };
 
-  const isLoading = profileLoading || prefsLoading;
+  const isLoading = !isReadOnly && (profileLoading || prefsLoading);
 
-  return (
+  const containerContent = (
     <div className="flex flex-col gap-6 w-full max-w-[1000px] pb-24 mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       {isLoading ? (
         <div className="flex flex-col gap-6 w-full animate-pulse">
@@ -258,22 +282,34 @@ export function SharedProfilePage() {
               className="h-[250px] relative bg-muted" 
               style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
             >
-              <div 
-                className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 rounded-full cursor-pointer text-white backdrop-blur-md transition-all z-10 group" 
-                onClick={() => bannerInputRef.current?.click()}
-              >
-                <Camera size={16} />
-                <span className="absolute -bottom-10 right-0 scale-0 transition-all rounded bg-foreground px-3 py-1.5 text-xs text-background font-medium whitespace-nowrap shadow-lg group-hover:scale-100 pointer-events-none">
-                  Update Banner
-                </span>
-              </div>
-              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-black/70 rounded-full text-white backdrop-blur-md transition-all z-10"
+                >
+                  <X size={20} />
+                </button>
+              )}
+              {!isReadOnly && (
+                <>
+                  <div 
+                    className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 rounded-full cursor-pointer text-white backdrop-blur-md transition-all z-10 group" 
+                    onClick={() => bannerInputRef.current?.click()}
+                  >
+                    <Camera size={16} />
+                    <span className="absolute -bottom-10 right-0 scale-0 transition-all rounded bg-foreground px-3 py-1.5 text-xs text-background font-medium whitespace-nowrap shadow-lg group-hover:scale-100 pointer-events-none">
+                      Update Banner
+                    </span>
+                  </div>
+                  <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                </>
+              )}
             </div>
             
             <div className="px-8 pb-8 flex flex-col items-start gap-4">
               <div 
-                className="relative -mt-[100px] mb-2 cursor-pointer group rounded-full overflow-hidden" 
-                onClick={() => fileInputRef.current?.click()}
+                className={`relative -mt-[100px] mb-2 ${!isReadOnly ? 'cursor-pointer group' : ''} rounded-full overflow-hidden`} 
+                onClick={() => !isReadOnly && fileInputRef.current?.click()}
               >
                 <Avatar className="w-[160px] h-[160px] border-4 border-background shadow-xl bg-card">
                   <AvatarImage src={form.profilePicture} alt={form.name} className="object-cover" />
@@ -281,10 +317,14 @@ export function SharedProfilePage() {
                     {form.name?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                   <Camera className="text-white w-8 h-8" />
-                </div>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                {!isReadOnly && (
+                  <>
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="text-white w-8 h-8" />
+                    </div>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                  </>
+                )}
               </div>
               
               <div className="flex flex-col w-full gap-3">
@@ -315,8 +355,22 @@ export function SharedProfilePage() {
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Display Name</label>
-                  <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" className="bg-background" />
+                  <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" className="bg-background" readOnly={isReadOnly} />
                 </div>
+                {form.prn && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">PRN</label>
+                    <Input value={form.prn} readOnly className="bg-background" />
+                  </div>
+                )}
+                {form.bio && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bio</label>
+                    <div className="p-3 bg-muted/40 rounded-lg border border-border text-sm opacity-90 italic">
+                      {form.bio}
+                    </div>
+                  </div>
+                )}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Access Role</label>
                   <div className="p-3 bg-muted/40 rounded-lg border border-dashed border-border text-sm font-semibold opacity-70 uppercase tracking-wide">
@@ -338,8 +392,8 @@ export function SharedProfilePage() {
                     <span className="text-sm font-medium text-foreground/90">Dark Theme</span>
                     <span className="text-xs text-muted-foreground opacity-80">Optimize UI for low-light.</span>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={theme === "dark"} onChange={e => setTheme(e.target.checked ? "dark" : "light")} />
+                  <label className={`relative inline-flex items-center ${isReadOnly ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}>
+                    <input type="checkbox" className="sr-only peer" checked={theme === "dark"} onChange={e => setTheme(e.target.checked ? "dark" : "light")} disabled={isReadOnly} />
                     <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
@@ -348,8 +402,8 @@ export function SharedProfilePage() {
                     <span className="text-sm font-medium text-foreground/90">Push Alerts</span>
                     <span className="text-xs text-muted-foreground opacity-80">Real-time system notifications.</span>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={prefs.global} onChange={() => handlePrefToggle("global")} />
+                  <label className={`relative inline-flex items-center ${isReadOnly ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}>
+                    <input type="checkbox" className="sr-only peer" checked={prefs.global} onChange={() => handlePrefToggle("global")} disabled={isReadOnly} />
                     <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
@@ -365,7 +419,7 @@ export function SharedProfilePage() {
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone Connectivity</label>
-                  <Input value={form.phoneNumber} onChange={e => handleInputChange("phoneNumber", e.target.value)} placeholder="+91 " className="bg-background" />
+                  <Input value={form.phoneNumber} onChange={e => handleInputChange("phoneNumber", e.target.value)} placeholder="+91 " className="bg-background" readOnly={isReadOnly} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Verification Email</label>
@@ -416,7 +470,7 @@ export function SharedProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Last Successful Login</span>
-                  <span className="text-lg font-semibold">{form.lastLoginAt ? new Date(form.lastLoginAt).toLocaleString() : "First Login"}</span>
+                  <span className="text-lg font-semibold">{form.lastLoginAt ? new Date(form.lastLoginAt).toLocaleString() : "N/A"}</span>
                 </div>
                 <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Member Since</span>
@@ -425,24 +479,26 @@ export function SharedProfilePage() {
                 <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Presence</span>
                   <span className="text-lg font-semibold text-success flex items-center gap-2">
-                    <CheckCircle2 size={16} /> 1 Session
+                    <CheckCircle2 size={16} /> {isReadOnly ? "Active Account" : "1 Session"}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <ImageCropperModal
-            isOpen={cropOpen}
-            onClose={() => setCropOpen(false)}
-            imageSrc={cropSrc}
-            aspectRatio={cropType === "avatar" ? 1 : 1584 / 396}
-            title={cropType === "avatar" ? "Crop Profile Picture" : "Crop Banner"}
-            onCropComplete={(blob) => uploadToR2(blob, cropType)}
-          />
+          {!isReadOnly && (
+            <ImageCropperModal
+              isOpen={cropOpen}
+              onClose={() => setCropOpen(false)}
+              imageSrc={cropSrc}
+              aspectRatio={cropType === "avatar" ? 1 : 1584 / 396}
+              title={cropType === "avatar" ? "Crop Profile Picture" : "Crop Banner"}
+              onCropComplete={(blob) => uploadToR2(blob, cropType)}
+            />
+          )}
 
           {/* Sticky Save Bar */}
-          {isDirty && (
+          {!isReadOnly && isDirty && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[1000px] bg-card border border-primary/50 rounded-2xl p-4 flex items-center justify-between shadow-2xl z-50 animate-in slide-in-from-bottom-12 duration-300">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-bold">Unsaved changes detected</p>
@@ -462,4 +518,19 @@ export function SharedProfilePage() {
       )}
     </div>
   );
+
+  if (isReadOnly) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div 
+          className="w-full h-full md:w-[95vw] md:h-[95vh] md:max-w-6xl md:rounded-3xl bg-background border border-border shadow-2xl overflow-y-auto overflow-x-hidden animate-in zoom-in-95 duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {containerContent}
+        </div>
+      </div>
+    );
+  }
+
+  return containerContent;
 }

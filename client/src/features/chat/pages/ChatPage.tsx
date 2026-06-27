@@ -25,7 +25,7 @@ import { ChatInput } from "../components/ChatInput";
 import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
-import { UserProfileModal } from "../components/UserProfileModal";
+import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -337,11 +337,12 @@ export function ChatPage() {
         />
       )}
 
-      <UserProfileModal 
-        isOpen={!!profileUserId} 
-        onClose={() => setProfileUserId(null)} 
-        user={orgUsers.find(u => u._id === profileUserId) || null} 
-      />
+      {!!profileUserId && (
+        <SharedProfilePage 
+          publicUser={orgUsers.find(u => u._id === profileUserId) || undefined} 
+          onClose={() => setProfileUserId(null)} 
+        />
+      )}
     </div>
   );
 }
