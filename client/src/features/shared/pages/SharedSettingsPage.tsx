@@ -86,16 +86,6 @@ export function SharedSettingsPage() {
 
       <CustomDomainCard />
 
-      {updatePrefs.isSuccess && (
-        <div className="p-3 bg-success/10 text-success text-sm rounded-md border border-success">
-          Settings saved successfully.
-        </div>
-      )}
-      {updatePrefs.isError && (
-        <div className="p-3 bg-danger/10 text-danger text-sm rounded-md border border-danger">
-          Failed to save settings. Please try again.
-        </div>
-      )}
     </form>
   );
 }

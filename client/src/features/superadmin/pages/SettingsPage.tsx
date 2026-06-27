@@ -4,6 +4,8 @@ import { useTheme } from "next-themes";
 import { Save, Bell, Palette, Shield } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
+import toast from "react-hot-toast";
+
 import { Button } from "@/components/marketing_ui/button";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import "../styles/settings.css";
@@ -47,7 +49,11 @@ export function SettingsPage() {
     mutationFn: (newPrefs: EmailPrefs) => apiClient.put("/api/user/email-preferences", newPrefs),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["superadmin-settings"] });
+      toast.success("Settings saved successfully.");
     },
+    onError: () => {
+      toast.error("Failed to save settings. Please try again.");
+    }
   });
 
   const handleToggle = (key: keyof EmailPrefs) => {
@@ -169,16 +175,7 @@ export function SettingsPage() {
         )}
       </div>
 
-      {updatePrefs.isSuccess && (
-        <div className="p-3 bg-success/10 text-success text-sm rounded-md border border-success">
-          Settings saved successfully.
-        </div>
-      )}
-      {updatePrefs.isError && (
-        <div className="p-3 bg-danger/10 text-danger text-sm rounded-md border border-danger">
-          Failed to save settings. Please try again.
-        </div>
-      )}
+      {/* Removed sticky banner, using react-hot-toast instead */}
     </form>
   );
 }

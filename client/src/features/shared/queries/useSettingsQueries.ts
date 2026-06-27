@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
+import toast from "react-hot-toast";
 
 export type EmailPrefs = {
   global: boolean;
@@ -33,7 +34,11 @@ export function useUpdateEmailPreferences() {
     onSuccess: (updatedPrefs) => {
       queryClient.setQueryData(["email-preferences"], updatedPrefs);
       queryClient.invalidateQueries({ queryKey: ["email-preferences"] });
+      toast.success("Settings saved successfully.");
     },
+    onError: () => {
+      toast.error("Failed to save settings. Please try again.");
+    }
   });
 }
 
