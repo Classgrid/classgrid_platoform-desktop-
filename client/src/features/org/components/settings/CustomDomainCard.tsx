@@ -96,15 +96,11 @@ export function CustomDomainCard() {
         });
     };
 
-    const handleRemove = async () => {
-        try {
-            await removeMutation.mutateAsync();
-            toast.success("Custom domain removed. You can re-add it anytime.");
-            setRemoveConfirmOpen(false);
-        } catch (err) {
-            // Error is handled by apiClient globally, or we can add it here if needed
-            toast.error("Failed to remove custom domain.");
-        }
+    const handleRemove = () => {
+        // Optimistically close the dialog immediately for better UX
+        setRemoveConfirmOpen(false);
+        // The success/error toasts are already handled inside useRemoveCustomDomain hook
+        removeMutation.mutate();
     };
 
     const copyToClipboard = (text: string) => {
