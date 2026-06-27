@@ -327,8 +327,8 @@ export function CustomDomainCard() {
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground max-w-[400px]">
                                         {isPolling 
-                                            ? "Checking DNS propagation automatically every 10 seconds. This usually takes 3-5 minutes..." 
-                                            : "DNS propagation usually takes 3-5 minutes. If it fails, please wait a moment and verify again."}
+                                            ? "Checking DNS automatically. This usually takes 3-5 minutes..." 
+                                            : "DNS propagation takes 3-5 minutes. Wait a moment before verifying."}
                                     </span>
                                     <Button 
                                         onClick={handleVerify} 
