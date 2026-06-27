@@ -123,8 +123,8 @@ export function CustomDomainCard() {
                                     }}
                                     disabled={registerMutation.isPending}
                                 />
-                                <Button type="button" onClick={handleRegister as any} disabled={!domainInput.trim() || registerMutation.isPending}>
-                                    {registerMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Add Domain"}
+                                <Button type="button" onClick={handleRegister as any} disabled={!domainInput.trim() || registerMutation.isPending} isLoading={registerMutation.isPending} variant="primary" showGlow={true}>
+                                    Add Domain
                                 </Button>
                             </div>
                         </div>
@@ -211,8 +211,8 @@ export function CustomDomainCard() {
                                 </div>
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground">DNS changes can take up to 24 hours to propagate, though usually much faster.</span>
-                                    <Button onClick={handleVerify} disabled={verifyMutation.isPending} variant="secondary" size="sm">
-                                        {verifyMutation.isPending ? <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+                                    <Button onClick={handleVerify} disabled={verifyMutation.isPending} isLoading={verifyMutation.isPending} variant="default" size="sm" showGlow={true} glowVariant="emerald">
+                                        {!verifyMutation.isPending && <RefreshCw className="w-3.5 h-3.5" />}
                                         Verify DNS Records
                                     </Button>
                                 </div>
