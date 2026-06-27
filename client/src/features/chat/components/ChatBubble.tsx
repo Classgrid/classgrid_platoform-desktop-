@@ -17,6 +17,7 @@ interface ChatBubbleProps {
   currentUserId: string;
   poll?: Poll;
   onVotePoll?: (pollId: string, optionId: string) => void;
+  onUserClick?: (userId: string) => void;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -48,6 +49,7 @@ export function ChatBubble({
   currentUserId,
   poll,
   onVotePoll,
+  onUserClick,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
@@ -77,17 +79,22 @@ export function ChatBubble({
         {!isMine && (
           <div className="shrink-0 w-8 flex justify-center">
             {showAvatar ? (
-              message.user_avatar ? (
-                <img
-                  src={message.user_avatar}
-                  alt={message.sender_name}
-                  className="w-8 h-8 rounded-full object-cover mt-1"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center mt-1">
-                  {getInitials(message.sender_name)}
-                </div>
-              )
+              <button 
+                className="w-8 h-8 rounded-full overflow-hidden mt-1 hover:opacity-80 transition-opacity focus:outline-none"
+                onClick={() => onUserClick?.(message.sender_id)}
+              >
+                {message.user_avatar ? (
+                  <img
+                    src={message.user_avatar}
+                    alt={message.sender_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">
+                    {getInitials(message.sender_name)}
+                  </div>
+                )}
+              </button>
             ) : null}
           </div>
         )}
