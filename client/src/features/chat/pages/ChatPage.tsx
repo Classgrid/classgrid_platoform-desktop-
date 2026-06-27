@@ -26,6 +26,7 @@ import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
+import { PhotoViewerModal } from "../components/PhotoViewerModal";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -49,7 +50,7 @@ export function ChatPage() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [viewingPhotoUrl, setViewingPhotoUrl] = useState<string | null>(null);
 
   // -- Load Initial Data --
   useEffect(() => {
@@ -260,8 +261,12 @@ export function ChatPage() {
               onShowInfo={() => {
                 if (activeThread.type === "group" && activeThread.groupId) {
                   setIsGroupSettingsOpen(true);
-                } else if (activeThread.type === "dm" && activeThread.otherUserId) {
-                  setProfileUserId(activeThread.otherUserId);
+                } else if (activeThread.type === "dm") {
+                  if (activeThread.avatar) {
+                    setViewingPhotoUrl(activeThread.avatar);
+                  } else {
+                    toast.info("No profile picture available");
+                  }
                 }
               }}
             />
@@ -275,7 +280,14 @@ export function ChatPage() {
               onLoadMore={handleLoadMore}
               onReply={setReplyTo}
               onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
-              onUserClick={(userId) => setProfileUserId(userId)}
+              onUserClick={(userId) => {
+                const user = orgUsers.find(u => u._id === userId);
+                if (user?.profilePicture) {
+                  setViewingPhotoUrl(user.profilePicture);
+                } else {
+                  toast.info("No profile picture available");
+                }
+              }}
               onEdit={async (id, text) => {
                 try {
                   await editMessage(activeThread.id, id, text);
@@ -337,10 +349,11 @@ export function ChatPage() {
         />
       )}
 
-      {!!profileUserId && (
-        <SharedProfilePage 
-          publicUser={orgUsers.find(u => u._id === profileUserId) || undefined} 
-          onClose={() => setProfileUserId(null)} 
+      {!!viewingPhotoUrl && (
+        <PhotoViewerModal 
+          src={viewingPhotoUrl} 
+          alt="Profile Photo" 
+          onClose={() => setViewingPhotoUrl(null)} 
         />
       )}
     </div>
