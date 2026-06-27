@@ -488,8 +488,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     // ── RESPOND IMMEDIATELY for text-only messages ──
     if (files.length === 0) {
-      // Guaranteed Server Broadcast (await it to bypass Vercel serverless freezing)
-      await broadcastToChannel(`thread:${threadId}`, 'new_message', broadcastPayload);
+      // Fire and forget server broadcast (do not await)
+      broadcastToChannel(`thread:${threadId}`, 'new_message', broadcastPayload);
       res.status(201).json({ message: broadcastPayload });
       return;
     }
