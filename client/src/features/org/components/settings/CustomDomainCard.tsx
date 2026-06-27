@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
@@ -6,15 +6,40 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/apiClient";
 
 export function CustomDomainCard() {
     const { data: domainConfig, isLoading } = useCustomDomain();
     const registerMutation = useRegisterCustomDomain();
     const verifyMutation = useVerifyCustomDomain();
     const removeMutation = useRemoveCustomDomain();
+    const queryClient = useQueryClient();
 
     const [domainInput, setDomainInput] = useState("");
     const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+
+    // Auto-polling for DNS Verification
+    useEffect(() => {
+        if (!domainConfig) return;
+        
+        // If domain is pending or has conflicts, silently poll every 10 seconds
+        if (domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") {
+            const intervalId = setInterval(async () => {
+                try {
+                    const { data } = await apiClient.post<{ custom_domain: any }>("/api/org-admin/custom-domain/verify");
+                    if (data && data.custom_domain) {
+                        // Silently update the UI without triggering error toasts
+                        queryClient.setQueryData(["org-custom-domain"], data.custom_domain);
+                    }
+                } catch (err) {
+                    // Ignore errors during silent polling, the UI will just stay pending
+                }
+            }, 10000); // 10 seconds
+            
+            return () => clearInterval(intervalId);
+        }
+    }, [domainConfig?.status, queryClient]);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
