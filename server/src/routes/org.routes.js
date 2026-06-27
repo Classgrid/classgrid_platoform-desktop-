@@ -1864,7 +1864,13 @@ router.get("/custom-domain", isAuthenticated, requireRole("org_admin"), async (r
         }
 
         res.json({
-            custom_domain: org.custom_domain || null,
+            custom_domain: org.custom_domain || {
+                domain: null,
+                status: "pending_verification",
+                verification_token: null,
+                txt_verified: false,
+                cname_verified: false
+            },
         });
     } catch (err) {
         console.error("[Custom Domain GET] Error:", err.message);
