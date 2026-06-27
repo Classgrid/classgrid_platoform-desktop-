@@ -213,13 +213,15 @@ export function CustomDomainCard() {
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
                                     <p className="text-xs text-muted-foreground mt-1">Add the following records to your DNS provider to verify ownership and route traffic.</p>
-                                    <div className="mt-3 p-2 bg-info/10 text-info border border-info/20 rounded-md text-xs flex flex-col gap-2">
-                                        <p className="text-amber-700/90 dark:text-amber-400 text-[13px] leading-relaxed font-medium">
-                                            <span className="font-bold">Note for Godaddy/Namecheap users:</span> Enter <strong>only</strong> the exact text shown in the Name (Host) column. Do not add your domain name at the end (e.g. use <code className="bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">_classgrid-verify</code> not <code className="bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">_classgrid-verify.example.com</code>).
-                                        </p>
-                                        <p className="text-amber-700/90 dark:text-amber-400 text-[13px] leading-relaxed font-medium">
-                                            <span className="font-bold">Note for Cloudflare users:</span> Make sure the Proxy Status for the A record is set to <strong>"DNS Only" (Gray Cloud)</strong>. If it is set to "Proxied" (Orange Cloud), the verification will fail.
-                                        </p>
+                                    <div className="mt-3 p-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 rounded-md text-[13px] flex items-start gap-2.5">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
+                                        <div className="flex flex-col gap-1.5">
+                                            <p className="font-semibold text-amber-800 dark:text-amber-300">Common configuration gotchas:</p>
+                                            <ul className="list-disc pl-4 space-y-1 opacity-90 font-medium">
+                                                <li>Some providers auto-append your domain name. Enter <strong>only</strong> the exact text shown in the Name (Host) column.</li>
+                                                <li>If your provider supports proxying or CDN features, ensure the A record is set to <strong>DNS Only</strong> (unproxied).</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 
