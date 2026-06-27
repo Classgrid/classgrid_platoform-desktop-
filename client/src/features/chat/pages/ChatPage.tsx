@@ -131,7 +131,13 @@ export function ChatPage() {
         ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message }
         : null;
       
-      await sendMessage(activeThread.id, text, files, replyData);
+      const sentMessage = await sendMessage(activeThread.id, text, files, replyData);
+      // Instantly add the message to the screen (so we don't have to wait for websocket/refresh)
+      setMessages(prev => {
+        // Prevent duplicate if websocket somehow beat us to it
+        if (prev.find(m => m.id === sentMessage.id)) return prev;
+        return [...prev, sentMessage];
+      });
       setReplyTo(null);
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || "Failed to send message";
