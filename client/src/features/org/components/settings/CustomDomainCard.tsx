@@ -172,6 +172,7 @@ export function CustomDomainCard() {
                                                 <th className="px-4 py-3 font-medium">Type</th>
                                                 <th className="px-4 py-3 font-medium">Name (Host)</th>
                                                 <th className="px-4 py-3 font-medium">Value</th>
+                                                <th className="px-4 py-3 font-medium">TTL</th>
                                                 <th className="px-4 py-3 font-medium text-center">Status</th>
                                             </tr>
                                         </thead>
@@ -216,6 +217,9 @@ export function CustomDomainCard() {
                                                                     </button>
                                                                 </div>
                                                             </td>
+                                                            <td className="px-4 py-4">
+                                                                <span className="text-sm text-foreground">3600 <span className="text-muted-foreground/50 text-xs ml-1">(1 hour)</span></span>
+                                                            </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
@@ -238,6 +242,9 @@ export function CustomDomainCard() {
                                                                         <Copy className="w-3.5 h-3.5" />
                                                                     </button>
                                                                 </div>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <span className="text-sm text-foreground">3600 <span className="text-muted-foreground/50 text-xs ml-1">(1 hour)</span></span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
