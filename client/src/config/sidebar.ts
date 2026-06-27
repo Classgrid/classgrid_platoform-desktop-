@@ -56,7 +56,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "🏠 OVERVIEW",
         items: [
-          { label: "Dashboard", to: "/superadmin/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/superadmin/dashboard", icon: LayoutDashboard },
           { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart },
           { label: "Alerts", to: "/superadmin/alerts", icon: Bell }
         ]
@@ -145,7 +145,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Dashboard", to: "/org/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/org/dashboard", icon: LayoutDashboard },
           { label: "Announcements", to: "/org/announcements", icon: Megaphone }
         ]
       },
@@ -228,7 +228,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ADMISSIONS",
         items: [
-          { label: "Dashboard", to: "/dept/admissions/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/admissions/dashboard", icon: LayoutDashboard },
           { label: "All Applications", to: "/dept/admissions/applications", icon: ClipboardList },
           { label: "New Application", to: "/dept/admissions/new", icon: Plus },
           { label: "Document Verification", to: "/dept/admissions/documents", icon: FileText },
@@ -281,7 +281,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "FEES",
         items: [
-          { label: "Dashboard", to: "/dept/fees/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/fees/dashboard", icon: LayoutDashboard },
           { label: "Collect Payment", to: "/dept/fees/collect", icon: CreditCard },
           { label: "All Transactions", to: "/dept/fees/transactions", icon: FileBarChart },
           { label: "Defaulters List", to: "/dept/fees/defaulters", icon: AlertTriangle },
@@ -326,7 +326,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "EXAMS",
         items: [
-          { label: "Dashboard", to: "/dept/exams/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/exams/dashboard", icon: LayoutDashboard },
           { label: "Exam Schedule", to: "/dept/exams/schedule", icon: Calendar },
           { label: "Create Exam", to: "/dept/exams/create", icon: Plus },
           { label: "Online Exams", to: "/dept/exams/online", icon: Globe },
@@ -378,7 +378,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "LIBRARY",
         items: [
-          { label: "Dashboard", to: "/dept/library/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/library/dashboard", icon: LayoutDashboard },
           { label: "All Books", to: "/dept/library/books", icon: BookOpen },
           { label: "Add Book", to: "/dept/library/add", icon: Plus },
           { label: "Search Catalog", to: "/dept/library/search", icon: Search }
@@ -428,7 +428,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ATTENDANCE",
         items: [
-          { label: "Dashboard", to: "/dept/attendance/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/attendance/dashboard", icon: LayoutDashboard },
           { label: "Mark Attendance", to: "/dept/attendance/mark", icon: CheckSquare },
           { label: "Daily Report", to: "/dept/attendance/daily", icon: FileText },
           { label: "Monthly Report", to: "/dept/attendance/monthly", icon: Calendar }
@@ -470,7 +470,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "STAFF",
         items: [
-          { label: "Dashboard", to: "/dept/hr/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/hr/dashboard", icon: LayoutDashboard },
           { label: "All Staff", to: "/dept/hr/staff", icon: Users },
           { label: "Add Staff", to: "/dept/hr/add-staff", icon: Plus },
           { label: "Departments", to: "/dept/hr/departments", icon: Building2 }
@@ -513,7 +513,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "HOSTEL",
         items: [
-          { label: "Dashboard", to: "/dept/hostel/dashboard", icon: LayoutDashboard },
+          { label: "Overview", to: "/dept/hostel/dashboard", icon: LayoutDashboard },
           { label: "Room Allocation", to: "/dept/hostel/rooms", icon: Home },
           { label: "Residents", to: "/dept/hostel/residents", icon: Users },
           { label: "Complaints", to: "/dept/hostel/complaints", icon: MessageSquare },

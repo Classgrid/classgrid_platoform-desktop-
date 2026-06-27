@@ -328,7 +328,7 @@ export function AdmissionDashboardPage() {
     <div
       title="Admission Dashboard"
       description="Comprehensive admission department performance analytics."
-      breadcrumbs={[{ label: "Admissions" }, { label: "Dashboard" }]}
+      breadcrumbs={[{ label: "Admissions" }, { label: "Overview" }]}
       actions={<ExportMenu />}
     >
       {/* ── Hierarchy Tabs ── */}
