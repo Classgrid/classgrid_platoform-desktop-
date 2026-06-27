@@ -173,6 +173,8 @@ export function CustomDomainCard() {
                         </div>
                     )}
                 </div>
+                
+                <PortalLinksAccordion baseUrl={`${user?.organization?.subdomain}.classgrid.in`} />
             </div>
         </div>
 
@@ -447,16 +449,19 @@ export function CustomDomainCard() {
                         )}
 
                         {isVerified && (
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 flex items-start gap-4">
-                                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            <div className="flex flex-col gap-4">
+                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 flex items-start gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Domain is active and verified</h4>
+                                        <p className="text-sm text-emerald-700/80 dark:text-emerald-400/80 mt-1">
+                                            Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Domain is active and verified</h4>
-                                    <p className="text-sm text-emerald-700/80 dark:text-emerald-400/80 mt-1">
-                                        Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
-                                    </p>
-                                </div>
+                                <PortalLinksAccordion baseUrl={domainConfig.domain} />
                             </div>
                         )}
 
@@ -489,3 +494,44 @@ export function CustomDomainCard() {
         </div>
     );
 }
+
+const PortalLinksAccordion = ({ baseUrl }: { baseUrl: string }) => {
+    const portals = [
+        { name: "Org Admin", path: "/org/admin/dashboard" },
+        { name: "Student", path: "/student/login" },
+        { name: "Faculty", path: "/faculty/login" },
+        { name: "Admissions", path: "/dept/admissions/dashboard" },
+        { name: "Fees", path: "/dept/fees/dashboard" },
+        { name: "Exams", path: "/dept/exams/dashboard" },
+        { name: "Attendance", path: "/dept/attendance/dashboard" },
+        { name: "HR & Payroll", path: "/dept/hr/dashboard" },
+        { name: "Hostel & Transport", path: "/dept/hostel/dashboard" },
+        { name: "Library", path: "/dept/library/dashboard" },
+    ];
+
+    return (
+        <Accordion type="single" collapsible className="w-full mt-4 border-t border-border/50 pt-2">
+            <AccordionItem value="portals" className="border-none">
+                <AccordionTrigger className="hover:no-underline py-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-4 font-medium">
+                    View Portal Links
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+                        {portals.map(portal => (
+                            <a 
+                                key={portal.name}
+                                href={`https://${baseUrl}${portal.path}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex flex-col p-3 rounded-lg hover:bg-muted border border-transparent hover:border-border/50 transition-colors group cursor-pointer"
+                            >
+                                <span className="font-medium text-foreground/90 group-hover:text-foreground text-sm">{portal.name}</span>
+                                <span className="text-xs text-muted-foreground truncate mt-1 group-hover:text-primary transition-colors">{`https://${baseUrl}${portal.path}`}</span>
+                            </a>
+                        ))}
+                    </div>
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+    );
+};
