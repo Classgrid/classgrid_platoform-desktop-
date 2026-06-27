@@ -176,52 +176,76 @@ export function CustomDomainCard() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border/50">
-                                            {/* TXT Record */}
-                                            <tr className="hover:bg-muted/10 transition-colors">
-                                                <td className="px-4 py-4 font-medium text-foreground">TXT</td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">_classgrid-verify.{domainConfig.domain}</code>
-                                                        <button onClick={() => copyToClipboard(`_classgrid-verify.${domainConfig.domain}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
-                                                            <Copy className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center gap-2 group max-w-[300px]">
-                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs break-all">classgrid-verify={domainConfig.verification_token}</code>
-                                                        <button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
-                                                            <Copy className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4 text-center">
-                                                    {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
-                                                </td>
-                                            </tr>
-                                            {/* CNAME Record */}
-                                            <tr className="hover:bg-muted/10 transition-colors">
-                                                <td className="px-4 py-4 font-medium text-foreground">CNAME</td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{domainConfig.domain}</code>
-                                                        <button onClick={() => copyToClipboard(domainConfig.domain!)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
-                                                            <Copy className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">cname.classgrid.in</code>
-                                                        <button onClick={() => copyToClipboard("cname.classgrid.in")} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
-                                                            <Copy className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4 text-center">
-                                                    {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
-                                                </td>
-                                            </tr>
+                                            {(() => {
+                                                // Helper to determine DNS names for easy copy-pasting (like Mintlify)
+                                                const parts = domainConfig.domain!.split('.');
+                                                const isLikelyRoot = parts.length === 2 || (parts.length === 3 && parts[1].length <= 3 && parts[2].length <= 3);
+                                                
+                                                let txtName = '_classgrid-verify';
+                                                let cnameName = '@';
+                                                let targetType = 'A Record';
+                                                let targetValue = '76.76.21.21'; // Vercel standard IP for Apex domains
+                                                
+                                                if (!isLikelyRoot) {
+                                                    const rootPartsCount = (parts.length > 2 && parts[parts.length-2].length <= 3 && parts[parts.length-1].length <= 3) ? 3 : 2;
+                                                    const hostPart = parts.slice(0, parts.length - rootPartsCount).join('.');
+                                                    txtName = `_classgrid-verify.${hostPart}`;
+                                                    cnameName = hostPart;
+                                                    targetType = 'CNAME';
+                                                    targetValue = 'cname.classgrid.in';
+                                                }
+
+                                                return (
+                                                    <>
+                                                        {/* TXT Record */}
+                                                        <tr className="hover:bg-muted/10 transition-colors">
+                                                            <td className="px-4 py-4 font-medium text-foreground">TXT</td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="flex items-center gap-2 group">
+                                                                    <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{txtName}</code>
+                                                                    <button onClick={() => copyToClipboard(txtName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                        <Copy className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="flex items-center gap-2 group max-w-[300px]">
+                                                                    <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs break-all">classgrid-verify={domainConfig.verification_token}</code>
+                                                                    <button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
+                                                                        <Copy className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4 text-center">
+                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                            </td>
+                                                        </tr>
+                                                        {/* CNAME / A Record */}
+                                                        <tr className="hover:bg-muted/10 transition-colors">
+                                                            <td className="px-4 py-4 font-medium text-foreground">{targetType}</td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="flex items-center gap-2 group">
+                                                                    <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{cnameName}</code>
+                                                                    <button onClick={() => copyToClipboard(cnameName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                        <Copy className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="flex items-center gap-2 group">
+                                                                    <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{targetValue}</code>
+                                                                    <button onClick={() => copyToClipboard(targetValue)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                        <Copy className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4 text-center">
+                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                            </td>
+                                                        </tr>
+                                                    </>
+                                                );
+                                            })()}
                                         </tbody>
                                     </table>
                                 </div>
