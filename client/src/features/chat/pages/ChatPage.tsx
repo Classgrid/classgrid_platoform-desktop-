@@ -27,6 +27,7 @@ import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { PhotoViewerModal } from "../components/PhotoViewerModal";
+import { ChatUserProfileSidebar } from "../components/ChatUserProfileSidebar";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -369,12 +370,15 @@ export function ChatPage() {
           onClose={() => setViewingPhotoUrl(null)} 
         />
       )}
-
+      
+      {/* Right Sidebar Panel for User Info */}
       {!!profileUserId && (
-        <SharedProfilePage 
-          publicUser={(orgUsers.find(u => u._id === profileUserId) as any) || undefined} 
-          onClose={() => setProfileUserId(null)} 
-        />
+        <div className="hidden lg:block w-[300px] xl:w-[350px] shrink-0 border-l border-border bg-background">
+          <ChatUserProfileSidebar 
+            user={orgUsers.find(u => u._id === profileUserId)} 
+            onClose={() => setProfileUserId(null)} 
+          />
+        </div>
       )}
     </div>
   );
