@@ -1959,9 +1959,13 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
         let txtVerified = false;
         let cnameVerified = false;
         
+        // Use a custom resolver bypassing local OS cache (hits Cloudflare and Google directly for freshest state)
+        const resolver = new dns.Resolver();
+        resolver.setServers(['1.1.1.1', '8.8.8.8']);
+        
         // 1. Verify TXT Record
         try {
-            const txtRecords = await dns.resolveTxt(`_classgrid-verify.${domain}`);
+            const txtRecords = await resolver.resolveTxt(`_classgrid-verify.${domain}`);
             const flatRecords = txtRecords.flat();
             txtVerified = flatRecords.some(r => r === `classgrid-verify=${verification_token}`);
         } catch (err) {
@@ -1970,11 +1974,11 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
 
         // 2. Verify CNAME Record (Scenario 1 & 3: point to Vercel/Classgrid)
         try {
-            const cnameRecords = await dns.resolveCname(domain);
+            const cnameRecords = await resolver.resolveCname(domain);
             cnameVerified = cnameRecords.some(r => r.includes("classgrid.in") || r.includes("vercel.app") || r.includes("vercel.com") || r.includes("cname.vercel-dns.com"));
         } catch (err) {
             try {
-                const aRecords = await dns.resolve4(domain);
+                const aRecords = await resolver.resolve4(domain);
                 // Vercel's standard anycast IP for apex domains is 76.76.21.21
                 cnameVerified = aRecords.includes("76.76.21.21");
             } catch (aErr) {
