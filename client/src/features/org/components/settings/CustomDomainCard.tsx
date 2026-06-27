@@ -18,10 +18,11 @@ export function CustomDomainCard() {
 
     const [domainInput, setDomainInput] = useState("");
     const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+    const [isPolling, setIsPolling] = useState(false);
 
-    // Auto-polling for DNS Verification
+    // Auto-polling for DNS Verification (only starts after user clicks Verify once)
     useEffect(() => {
-        if (!domainConfig) return;
+        if (!domainConfig || !isPolling) return;
         
         // If domain is pending or has conflicts, silently poll every 10 seconds
         if (domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") {
@@ -31,6 +32,11 @@ export function CustomDomainCard() {
                     if (data && data.custom_domain) {
                         // Silently update the UI without triggering error toasts
                         queryClient.setQueryData(["org-custom-domain"], data.custom_domain);
+                        
+                        // Stop polling if fully verified
+                        if (data.custom_domain.status === "verified") {
+                            setIsPolling(false);
+                        }
                     }
                 } catch (err) {
                     // Ignore errors during silent polling, the UI will just stay pending
@@ -38,8 +44,10 @@ export function CustomDomainCard() {
             }, 10000); // 10 seconds
             
             return () => clearInterval(intervalId);
+        } else {
+            setIsPolling(false);
         }
-    }, [domainConfig?.status, queryClient]);
+    }, [domainConfig?.status, isPolling, queryClient]);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,21 +73,25 @@ export function CustomDomainCard() {
     };
 
     const handleVerify = () => {
+        setIsPolling(true); // Start polling when they manually click verify
+        
         verifyMutation.mutate(undefined, {
             onSuccess: (data) => {
                 if (data.isFullyVerified && !data.hasConflicts) {
                     toast.success("Domain verified successfully!");
+                    setIsPolling(false);
                 } else if (data.hasConflicts) {
                     toast.warning(
                         `DNS records are correct, but we found ${data.conflictingRecords?.length || 0} conflicting A record(s). Remove them from your DNS provider to complete setup.`,
                         { duration: 8000 }
                     );
                 } else {
-                    toast.info("DNS not detected yet. Propagation usually takes 3-5 minutes, please try again shortly.", { duration: 5000 });
+                    toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
             },
             onError: () => {
                 toast.error("An error occurred during verification.");
+                setIsPolling(false);
             }
         });
     };
@@ -314,21 +326,21 @@ export function CustomDomainCard() {
                                 </div>
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground max-w-[400px]">
-                                        {(domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") 
+                                        {isPolling 
                                             ? "Checking DNS propagation automatically every 10 seconds. This usually takes 3-5 minutes..." 
                                             : "DNS propagation usually takes 3-5 minutes. If it fails, please wait a moment and verify again."}
                                     </span>
                                     <Button 
                                         onClick={handleVerify} 
-                                        disabled={verifyMutation.isPending || domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts"} 
-                                        isLoading={verifyMutation.isPending || domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts"} 
+                                        disabled={verifyMutation.isPending || isPolling} 
+                                        isLoading={verifyMutation.isPending || isPolling} 
                                         variant="default" 
                                         size="sm" 
                                         showGlow={true} 
                                         glowVariant="emerald"
                                     >
-                                        {!verifyMutation.isPending && domainConfig.status !== "pending_verification" && domainConfig.status !== "verified_with_conflicts" && <RefreshCw className="w-3.5 h-3.5" />}
-                                        {(domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") ? "Verifying DNS..." : "Verify DNS Records"}
+                                        {!verifyMutation.isPending && !isPolling && <RefreshCw className="w-3.5 h-3.5" />}
+                                        {isPolling ? "Verifying DNS..." : "Verify DNS Records"}
                                     </Button>
                                 </div>
                             </div>
