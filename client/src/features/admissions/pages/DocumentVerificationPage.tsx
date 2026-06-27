@@ -1,133 +1,349 @@
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Loader2, FileCheck, FileX } from "lucide-react";
-import { DataTable } from "@/components/marketing_ui/data-table";
-import { useApplications, useBulkVerify } from "../queries/useApplications";
-import { verifyDocument } from "../api";
-import type { AdmissionApplication } from "../types";
+import { Loader2, Search, FileText, CheckCircle, XCircle, AlertCircle, Eye, Shield, Clock, Printer } from "lucide-react";
 
-const columns: ColumnDef<AdmissionApplication>[] = [
-  {
-    accessorKey: "full_name",
-    header: "Applicant",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-          {row.original.full_name?.[0]?.toUpperCase() || "?"}
-        </div>
-        <span className="font-medium truncate">{row.original.full_name}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "documents",
-    header: "Documents",
-    cell: ({ row }) => {
-      const docs = row.original.documents ?? [];
-      const verified = docs.filter((d) => d.status === "verified").length;
-      const pending = docs.filter((d) => d.status === "pending").length;
-      const rejected = docs.filter((d) => d.status === "rejected").length;
-      return (
-        <div className="flex flex-wrap gap-2">
-          {verified > 0 && <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800">{verified} ✓</span>}
-          {pending > 0 && <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800">{pending} pending</span>}
-          {rejected > 0 && <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800">{rejected} rejected</span>}
-          {docs.length === 0 && <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">None</span>}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Stage",
-    cell: ({ row }) => {
-      const s = row.original.status;
-      const v = s === "verified" ? "bg-emerald-100 text-emerald-800" : s === "under_verification" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800";
-      return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${v}`}>{s.replace(/_/g, " ")}</span>;
-    }
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Applied",
-    cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-        day: "2-digit", month: "short",
-      }),
-  },
-];
+import { useApplications } from "../../admissions/queries/useApplications";
+import { getApplicationById, verifyDocument, updateApplicationStage } from "../../admissions/api";
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
 export function DocumentVerificationPage() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
 
-  // Only show applications that need verification
-  const { data, isLoading, isError } = useApplications({
+  // Fetch only applications that are under verification
+  const { data: appsData, isLoading: isAppsLoading } = useApplications({
     status: "under_verification",
-    search: search || undefined,
-    limit: 20,
+    limit: 100, // Load a sizable queue
   });
 
-  const bulkVerify = useBulkVerify();
+  const applications = useMemo(() => {
+    let list = appsData?.applications || [];
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((a: any) => 
+        a.full_name?.toLowerCase().includes(q) || 
+        a.en_number?.toLowerCase().includes(q) ||
+        a.phone?.includes(q)
+      );
+    }
+    return list;
+  }, [appsData, search]);
+
+  const columns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      accessorKey: "full_name",
+      header: "Applicant",
+      cell: ({ row }) => (
+        <div className="">
+          <div name={row.original.full_name} size="sm" />
+          <div>
+            <div className=" font-semibold">{row.original.full_name}</div>
+            <small className=" font-mono text-muted-foreground">
+              {row.original.en_number ? `EN: ${row.original.en_number}` : (row.original.phone || "—")}
+            </small>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Applied On",
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => <span>{row.original.category || "General"}</span>,
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: () => <div variant="warning">Pending Verification</div>,
+    },
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) => (
+        <div 
+          variant="outline" 
+          size="sm"
+          onClick={() => setSelectedAppId(row.original._id)}
+          className="gap-2"
+        >
+          <Shield className="w-4 h-4 text-primary" />
+          Verify Docs
+        </div>
+      ),
+    },
+  ], []);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Document Verification</h1>
-          <p className="text-muted-foreground mt-1">Review and verify uploaded documents for pending applications.</p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-            disabled={bulkVerify.isPending || !data?.applications?.length}
-            onClick={() => {
-              const ids = (data?.applications ?? []).map((a: any) => a._id);
-              if (ids.length > 0) {
-                bulkVerify.mutate({ ids, comment: "Bulk verification from document queue." });
-              }
-            }}
-          >
-            {bulkVerify.isPending ? <Loader2 size={14} className="animate-spin mr-2" /> : <FileCheck size={14} className="mr-2" />}
-            Verify All Shown
-          </button>
-        </div>
-      </div>
+    <div
+      title="Document Verification"
+      description="Review and verify applicant documents to advance them to the merit list."
+      breadcrumbs={[{ label: "Admissions" }, { label: "Documents" }]}
+    >
+      <motion.div variants={fadeUp} initial="hidden" animate="show">
+        <div noPadding>
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between rounded-t-lg">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Clock className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Verification Queue</h3>
+                <p className="text-sm text-muted-foreground">{applications.length} applications pending</p>
+              </div>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div
+                placeholder="Search queue..."
+                value={search}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
 
-      {isError && (
-        <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
-          <strong>Error</strong>
-          <br/>Could not load document queue.
+          <div className="min-h-[400px]">
+            {isAppsLoading ? (
+              <div className="p-12 flex flex-col items-center justify-center text-muted-foreground h-full">
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+                <p>Loading queue...</p>
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="p-16 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">All caught up!</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  There are no applications pending document verification.
+                </p>
+              </div>
+            ) : (
+              <div
+                columns={columns}
+                data={applications}
+                pageSize={10}
+              />
+            )}
+          </div>
         </div>
-      )}
+      </motion.div>
 
-      {bulkVerify.isSuccess && (
-        <div className="bg-emerald-100 text-emerald-800 p-4 rounded-md border border-emerald-200">
-          <strong>Verification Complete</strong>
-          <br/>{bulkVerify.data?.message ?? "Applications verified."}
-        </div>
-      )}
-
-      <div className="flex items-center mb-4">
-        <input 
-          type="search" 
-          placeholder="Search applicant name..." 
-          className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          value={search} 
-          onChange={(e) => setSearch(e.target.value)} 
-        />
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-          <DataTable
-            columns={columns}
-            data={data?.applications ?? []}
+      <AnimatePresence>
+        {selectedAppId && (
+          <VerificationModal 
+            applicationId={selectedAppId} 
+            onClose={() => setSelectedAppId(null)} 
           />
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Verification Modal Component ──
+
+function VerificationModal({ applicationId, onClose }: { applicationId: string; onClose: () => void }) {
+  const qc = useQueryClient();
+
+  const { data: appData, isLoading } = useQuery({
+    queryKey: ["admission-application-print", applicationId],
+    queryFn: () => getApplicationById(applicationId),
+  });
+
+  const printData = (appData as any)?.print_data;
+  const applicant = printData?.applicant;
+  const documents = printData?.documents || [];
+  const parentDetails = printData?.parent_details || {};
+  const signatureLines = printData?.signature_lines || [];
+
+  const verifyMutation = useMutation({
+    mutationFn: ({ docName, action }: { docName: string, action: "verified" | "rejected" }) => 
+      verifyDocument(applicationId, docName, action),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admission-application-print", applicationId] });
+    }
+  });
+
+  const finalizeMutation = useMutation({
+    mutationFn: () => updateApplicationStage(applicationId, { status: "verified", comment: "All documents verified" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admission-applications"] });
+      onClose();
+    }
+  });
+
+  const allVerified = documents.length > 0 && documents.every((d: any) => d.status === "verified");
+
+  return (
+    <div open={true} onOpenChange={(open) => !open && onClose()}>
+      <div title="Verify Documents" className="max-w-3xl p-0 overflow-hidden">
+        {isLoading ? (
+          <div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+        ) : !printData ? (
+          <div className="p-12 text-center text-destructive">Failed to load applicant data.</div>
+        ) : (
+          <div className="flex flex-col h-[80vh] max-h-[800px]">
+            {/* Header */}
+            <div className="p-6 border-b border-border bg-muted/30 flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{applicant?.full_name}</h2>
+                <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                  <span>{applicant?.en_number ? `EN: ${applicant.en_number}` : applicant?.phone}</span>
+                  <span className="w-1 h-1 rounded-full bg-border" />
+                  <span>{applicant?.category || "General"}</span>
+                  <span className="w-1 h-1 rounded-full bg-border" />
+                  <div variant="warning">Under Verification</div>
+                </div>
+              </div>
+              <div variant="outline" size="sm" className="gap-2" onClick={() => window.print()}>
+                <Printer className="w-4 h-4" /> Print
+              </div>
+            </div>
+
+            {/* Document List */}
+            <div className="p-6 overflow-y-auto flex-1 bg-card">
+              <div className="admission-printout">
+                <div className="admission-printout__header">
+                  <div>
+                    <p className="admission-printout__eyebrow">Admission Application Printout</p>
+                    <h3 className="admission-printout__title">{applicant?.full_name}</h3>
+                  </div>
+                  <p className="admission-printout__id">{String(printData?.application_id || applicationId)}</p>
+                </div>
+
+                <div className="admission-printout__grid">
+                  <div>
+                    <span>Phone</span>
+                    <strong>{applicant?.phone || "Not provided"}</strong>
+                  </div>
+                  <div>
+                    <span>Email</span>
+                    <strong>{applicant?.email || "Not provided"}</strong>
+                  </div>
+                  <div>
+                    <span>Father</span>
+                    <strong>{parentDetails.father_name || "Not provided"}</strong>
+                  </div>
+                  <div>
+                    <span>Mother</span>
+                    <strong>{parentDetails.mother_name || "Not provided"}</strong>
+                  </div>
+                </div>
+
+                <p className="admission-printout__declaration">
+                  {printData?.print_declaration || "I confirm that the admission details and uploaded documents are correct to the best of my knowledge."}
+                </p>
+
+                <div className="admission-printout__signatures">
+                  {signatureLines.map((line: any, index: number) => (
+                    <div className="admission-printout__signature" key={`${line.label}-${index}`}>
+                      <div className="admission-printout__signature-line" />
+                      <strong>{line.label}</strong>
+                      <span>{line.signer}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <h3 className="font-semibold text-foreground mb-4">Uploaded Documents</h3>
+              
+              {documents.length === 0 ? (
+                <div className="p-8 text-center border border-dashed border-border rounded-lg text-muted-foreground">
+                  No documents found for this application.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {documents.map((doc: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm text-foreground capitalize">
+                            {doc.name.replace(/_/g, " ")}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            {doc.status === "verified" ? (
+                              <span className="flex items-center gap-1 text-xs text-emerald-500 font-medium">
+                                <CheckCircle className="w-3 h-3" /> Verified
+                              </span>
+                            ) : doc.status === "rejected" ? (
+                              <span className="flex items-center gap-1 text-xs text-destructive font-medium">
+                                <XCircle className="w-3 h-3" /> Rejected
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-xs text-amber-500 font-medium">
+                                <Clock className="w-3 h-3" /> Pending Review
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(`/api/admission/docs/view?path=admissions/temp/${applicationId}/${doc.name}.pdf`, '_blank')}
+                        >
+                          <Eye className="w-4 h-4 mr-2" /> View
+                        </div>
+                        
+                        {doc.status !== "verified" && (
+                          <div 
+                            variant="default"
+                            size="sm"
+                            className="bg-emerald-500 hover:bg-emerald-600"
+                            onClick={() => verifyMutation.mutate({ docName: doc.name, action: "verified" })}
+                            disabled={verifyMutation.isPending}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                          </div>
+                        )}
+                        
+                        {doc.status !== "rejected" && (
+                          <div 
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => verifyMutation.mutate({ docName: doc.name, action: "rejected" })}
+                            disabled={verifyMutation.isPending}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" /> Reject
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer actions */}
+            <div className="justify-between">
+              <div variant="outline" onClick={onClose}>Close</div>
+              <div 
+                variant="default"
+                disabled={!allVerified || finalizeMutation.isPending}
+                onClick={() => finalizeMutation.mutate()}
+                className="gap-2"
+              >
+                {finalizeMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                Mark Application as Verified
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

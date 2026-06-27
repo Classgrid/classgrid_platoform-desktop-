@@ -1,109 +1,214 @@
-import { Loader2 } from "lucide-react";
-import { StatCard } from "@/components/marketing_ui/StatCard";
-import { useAdmissionAnalytics, useCETDashboard } from "../queries/useAdmissionAnalytics";
-import { Users, BarChart3, TrendingUp, Target } from "lucide-react";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 
-export function AdmissionAnalyticsPage() {
-  const analytics = useAdmissionAnalytics();
-  const cet = useCETDashboard();
-  const isLoading = analytics.isLoading;
 
-  const funnel = analytics.data?.summary?.funnel ?? {};
-  const total = analytics.data?.summary?.total_applications ?? 0;
-  const rate = analytics.data?.summary?.conversion_rate ?? "0%";
+
+
+
+
+
+export default function AdmissionAnalyticsPage() {
+    const [selectedHierarchy, setSelectedHierarchy] = useState<string>("");
+
+    // Use token from local storage (or your auth context)
+    const token = localStorage.getItem("token") || "";
+
+    const { data: analyticsData, isLoading, isError } = useQuery({
+        queryKey: ["admission-analytics", selectedHierarchy],
+        queryFn: async () => {
+            const url = selectedHierarchy 
+                ? `/api/admission/analytics?hierarchy_id=${selectedHierarchy}`
+                : `/api/admission/analytics`;
+            
+            const res = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch analytics");
+            return res.json();
+        }
+    });
+
+    const formatFunnelData = (funnel: Record<string, number> = {}) => {
+        return Object.entries(funnel).map(([stage, count]) => ({
+            name: stage.replace(/_/g, " ").toUpperCase(),
+            value: count
+        }));
+    };
+
+    const formatLineChartData = (dailyTrend: any[] = []) => {
+        let cumulative = 0;
+        return dailyTrend.map(day => {
+            cumulative += day.count;
+            return {
+                label: day._id,
+                value: cumulative
+            };
+        });
+    };
+
+    const formatHistogramData = (buckets: any[] = []) => {
+        return buckets.map(b => ({
+            range: typeof b._id === "number" ? `${b._id}-${b._id + 10}` : "Other",
+            count: b.count
+        }));
+    };
+
+    const formatBarData = (categoryCounts: any[] = []) => {
+        return categoryCounts.map(c => ({
+            label: c._id || "Unspecified",
+            value: c.count
+        }));
+    };
+
+    const pieCategoryData = analyticsData?.breakdown?.by_category?.map((c: any) => ({
+        id: c._id || "None",
+        label: c._id || "None",
+        value: c.count
+    })) || [];
+
+    const pieSeatData = analyticsData?.breakdown?.by_seat_type?.map((s: any) => ({
+        id: s._id || "None",
+        label: s._id || "None",
+        value: s.count
+    })) || [];
+
+    if (isLoading) return <PageShell><div className="p-8 text-center">Loading Analytics...</div></PageShell>;
+    if (isError) return <PageShell><div className="p-8 text-center text-red-500">Error loading data.</div></PageShell>;
 
     return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admission Analytics</h1>
-          <p className="text-muted-foreground mt-1">Funnel analytics, category breakdown, and daily trends.</p>
-        </div>
-      </div>
-
-      {analytics.isError && (
-        <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
-          <strong>Error</strong>
-          <br/>Could not load analytics.
-        </div>
-      )}
-
-      {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}><Loader2 size={24} className="animate-spin text-primary" /></div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Applications" value={total.toLocaleString()} icon={<Users size={20} />} />
-            <StatCard title="Conversion Rate" value={rate} icon={<TrendingUp size={20} />} />
-            <StatCard title="Fee Paid" value={(analytics.data?.summary?.fee_paid_count ?? 0).toLocaleString()} icon={<Target size={20} />} />
-            <StatCard title="Stages Tracked" value={Object.keys(funnel).length.toString()} icon={<BarChart3 size={20} />} />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-            <div className="bg-card border border-border rounded-xl shadow-sm">
-              <div className="p-5 border-b border-border">
-                <h2 className="text-lg font-bold">Funnel Breakdown</h2>
-              </div>
-              <div className="p-5">
-                {Object.keys(funnel).length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {Object.entries(funnel).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([stage, count]) => (
-                      <div key={stage} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid hsl(var(--border))" }}>
-                        <span style={{ textTransform: "capitalize" }}>{stage.replace(/_/g, " ")}</span>
-                        <strong>{count as React.ReactNode}</strong>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <h2 className="text-lg font-bold text-foreground mb-2">No funnel data</h2>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl shadow-sm">
-              <div className="p-5 border-b border-border">
-                <h2 className="text-lg font-bold">Category Breakdown</h2>
-              </div>
-              <div className="p-5">
-                {(analytics.data?.breakdown?.by_category ?? []).length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {(analytics.data?.breakdown?.by_category ?? []).map((cat: any) => (
-                      <div key={cat._id} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid hsl(var(--border))" }}>
-                        <span>{cat._id || "Uncategorized"}</span>
-                        <strong>{cat.count}</strong>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <h2 className="text-lg font-bold text-foreground mb-2">No category data</h2>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {(analytics.data?.daily_trend ?? []).length > 0 && (
-            <div className="bg-card border border-border rounded-xl shadow-sm">
-              <div className="p-5 border-b border-border">
-                <h2 className="text-lg font-bold">Daily Application Trend (Last 30 Days)</h2>
-              </div>
-              <div className="p-5">
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "0.5rem" }}>
-                  {(analytics.data?.daily_trend ?? []).map((day: any) => (
-                    <div key={day._id} className="border border-border rounded-md shadow-sm bg-background" style={{ padding: "0.5rem", textAlign: "center" }}>
-                      <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>{day._id.slice(5)}</div>
-                      <div style={{ fontWeight: 600 }}>{day.count}</div>
-                    </div>
-                  ))}
+        <PageShell>
+            <div className="flex justify-between items-start mb-6">
+                <PageHeader 
+                    title="Admission Analytics" 
+                    subtitle="Comprehensive dashboard with maximum data visualization"
+                />
+                <div className="flex gap-4">
+                    <ResponsiveSelect 
+                        className=""
+                        value={selectedHierarchy}
+                        onChange={(e) => setSelectedHierarchy(e.target.value)}
+                    >
+                        <option value="">All Branches / Global</option>
+                        {/* Mock options since actual hierarchy context is elsewhere */}
+                        <option value="school">School Division</option>
+                        <option value="engineering">Engineering Division</option>
+                    </ResponsiveSelect>
+                    <ExportMenu onExport={(type) => console.log(`Exporting ${type}`)} />
                 </div>
-              </div>
             </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+
+            {/* Top Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Total Applications</span>
+                    <span className="text-3xl font-bold">{analyticsData?.summary?.total_applications || 0}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Conversion Rate</span>
+                    <span className="text-3xl font-bold text-green-500">{analyticsData?.summary?.conversion_rate || "0%"}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Fee Collected</span>
+                    <span className="text-3xl font-bold text-primary">₹{analyticsData?.summary?.fee_total_revenue?.toLocaleString() || 0}</span>
+                </motion.div>
+                <motion.div whileHover={{ y: -4 }} className=" p-4 flex flex-col justify-center">
+                    <span className="text-sm text-muted-foreground">Verified Docs</span>
+                    <span className="text-3xl font-bold">{analyticsData?.document_summary?.verified || 0}</span>
+                </motion.div>
+            </div>
+
+            {/* MANDATORY CHARTS LAYOUT */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                
+                {/* 1. Line Chart: Cumulative Applications Over Time */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Cumulative Applications Over Time</h3>
+                    <div className="h-[300px]">
+                        <div 
+                            data={formatLineChartData(analyticsData?.daily_trend)}
+                            xAxisKey="label"
+                            series={[{ key: "value", color: "hsl(var(--primary))", name: "Total Applications" }]}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 2. Donut Chart: Conversion Funnel */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Conversion Funnel</h3>
+                    <div className="h-[300px]">
+                        <div 
+                            data={formatFunnelData(analyticsData?.summary?.funnel)} 
+                            centerLabel="Funnel"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 3. Histogram: Score Distribution */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Score Distribution (Merit Buckets)</h3>
+                    <div className="h-[300px]">
+                        <div 
+                            data={formatHistogramData(analyticsData?.score_distribution)}
+                            xAxisKey="range"
+                            barKey="count"
+                            color="hsl(var(--chart-2))"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 4. Bar Graph: Category Breakdown */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Category Daily Trends</h3>
+                    <div className="h-[300px]">
+                        <div 
+                            data={formatBarData(analyticsData?.breakdown?.by_category)}
+                            xAxisKey="label"
+                            series={[{ key: "value", color: "hsl(var(--chart-3))", name: "Count" }]}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* 5. Pie Chart: Seat Type Breakdown */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Seat Type Breakdown</h3>
+                    <div className="h-[300px]">
+                        <div data={pieSeatData} />
+                    </div>
+                </motion.div>
+
+                {/* 6. Pie Chart: Document Status */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                    className=" p-6"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Document Verification Status</h3>
+                    <div className="h-[300px]">
+                        <div data={[
+                            { id: "Verified", label: "Verified", value: analyticsData?.document_summary?.verified || 0 },
+                            { id: "Pending", label: "Pending", value: analyticsData?.document_summary?.pending || 0 },
+                            { id: "Rejected", label: "Rejected", value: analyticsData?.document_summary?.rejected || 0 }
+                        ]} />
+                    </div>
+                </motion.div>
+
+            </div>
+        </PageShell>
+    );
 }
