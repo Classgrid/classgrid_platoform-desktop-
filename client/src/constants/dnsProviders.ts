@@ -37,6 +37,12 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     quirks: "Leave the Record Name blank for the apex/root domain."
   },
   {
+    id: "hostinger",
+    name: "Hostinger",
+    guideUrl: "https://support.hostinger.com/en/articles/1583227-how-to-manage-my-dns-records-on-hpanel",
+    quirks: "Use '@' for the root domain. Ensure no other A records exist for '@'."
+  },
+  {
     id: "bluehost",
     name: "Bluehost",
     guideUrl: "https://www.bluehost.com/help/article/dns-management-add-edit-or-delete-dns-entries",
