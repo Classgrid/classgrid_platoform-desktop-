@@ -145,60 +145,6 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     quirks: "Use '@' for the Host Name."
   },
   {
-    id: "vercel",
-    name: "Vercel (External Domain)",
-    guideUrl: "https://vercel.com/docs/concepts/projects/domains/add-a-domain",
-    quirks: "If your domain is managed by Vercel, you do not need to configure DNS records. It will be verified automatically."
-  },
-  {
-    id: "netlify",
-    name: "Netlify DNS",
-    guideUrl: "https://docs.netlify.com/domains-https/netlify-dns/records/",
-    quirks: "Use '@' for the Name field."
-  },
-  {
-    id: "cloudflare_pages",
-    name: "Cloudflare Pages",
-    guideUrl: "https://developers.cloudflare.com/pages/get-started/custom-domains/",
-    quirks: "Ensure Proxy Status is 'DNS Only'."
-  },
-  {
-    id: "firebase",
-    name: "Firebase Hosting",
-    guideUrl: "https://firebase.google.com/docs/hosting/custom-domain",
-    quirks: "Use '@' for the root domain."
-  },
-  {
-    id: "heroku",
-    name: "Heroku",
-    guideUrl: "https://devcenter.heroku.com/articles/custom-domains",
-    quirks: "Heroku typically uses ALIAS or ANAME records for the root domain instead of A records if supported by your provider."
-  },
-  {
-    id: "render",
-    name: "Render",
-    guideUrl: "https://render.com/docs/custom-domains",
-    quirks: "Configure an ALIAS/ANAME record or use the provided A record IP."
-  },
-  {
-    id: "fly_io",
-    name: "Fly.io",
-    guideUrl: "https://fly.io/docs/app-guides/custom-domains-with-fly/",
-    quirks: "Fly provides specific IPv4 and IPv6 addresses. Ensure A and AAAA records are set correctly."
-  },
-  {
-    id: "railway",
-    name: "Railway",
-    guideUrl: "https://docs.railway.app/reference/domains",
-    quirks: "Use the provided CNAME for subdomains or ALIAS/A records for the root domain."
-  },
-  {
-    id: "supabase",
-    name: "Supabase",
-    guideUrl: "https://supabase.com/docs/guides/platform/custom-domains",
-    quirks: "Supabase custom domains usually require CNAME setup."
-  },
-  {
     id: "other",
     name: "Other / Unlisted Provider",
     guideUrl: "https://vercel.com/docs/concepts/projects/domains/add-a-domain",
