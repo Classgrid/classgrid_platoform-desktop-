@@ -125,7 +125,7 @@ export function CustomDomainCard() {
                                             https://
                                         </div>
                                         <input 
-                                            placeholder="docs.yourdomain.com" 
+                                            placeholder="erp.yourdomain.com" 
                                             className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full"
                                             value={domainInput}
                                             onChange={(e) => setDomainInput(e.target.value)}
