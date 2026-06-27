@@ -6,7 +6,7 @@ export interface NavigationItem {
 }
 
 export const SUPER_ADMIN_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/superadmin/dashboard", icon: "LayoutDashboard", section: "OVERVIEW" },
+  { title: "Overview", url: "/superadmin/dashboard", icon: "LayoutDashboard", section: "OVERVIEW" },
   { title: "Analytics", url: "/superadmin/analytics", icon: "TrendingUp", section: "OVERVIEW" },
   { title: "Alerts", url: "/superadmin/alerts", icon: "Bell", section: "OVERVIEW" },
   
@@ -30,7 +30,7 @@ export const SUPER_ADMIN_MENU: NavigationItem[] = [
 ];
 
 export const ORG_ADMIN_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/org/dashboard", icon: "LayoutDashboard", section: "OVERVIEW" },
+  { title: "Overview", url: "/org/dashboard", icon: "LayoutDashboard", section: "OVERVIEW" },
   { title: "Announcements", url: "/org/announcements", icon: "Megaphone", section: "OVERVIEW" },
   
   { title: "Students", url: "/org/students", icon: "Users", section: "ACADEMICS" },
@@ -68,7 +68,7 @@ export const ORG_ADMIN_MENU: NavigationItem[] = [
 ];
 
 export const ADMISSION_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/admissions/dashboard", icon: "LayoutDashboard", section: "ADMISSIONS" },
+  { title: "Overview", url: "/dept/admissions/dashboard", icon: "LayoutDashboard", section: "ADMISSIONS" },
   { title: "All Applications", url: "/dept/admissions/applications", icon: "Files", section: "ADMISSIONS" },
   { title: "New Application", url: "/dept/admissions/new", icon: "FilePlus", section: "ADMISSIONS" },
   { title: "Document Verification", url: "/dept/admissions/documents", icon: "FolderCheck", section: "ADMISSIONS" },
@@ -90,7 +90,7 @@ export const ADMISSION_MENU: NavigationItem[] = [
 ];
 
 export const FEES_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/fees/dashboard", icon: "LayoutDashboard", section: "FEES" },
+  { title: "Overview", url: "/dept/fees/dashboard", icon: "LayoutDashboard", section: "FEES" },
   { title: "Collect Payment", url: "/dept/fees/collect", icon: "CreditCard", section: "FEES" },
   { title: "All Transactions", url: "/dept/fees/transactions", icon: "ArrowRightLeft", section: "FEES" },
   { title: "Defaulters List", url: "/dept/fees/defaulters", icon: "AlertOctagon", section: "FEES" },
@@ -108,7 +108,7 @@ export const FEES_MENU: NavigationItem[] = [
 ];
 
 export const EXAM_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/exams/dashboard", icon: "LayoutDashboard", section: "EXAMS" },
+  { title: "Overview", url: "/dept/exams/dashboard", icon: "LayoutDashboard", section: "EXAMS" },
   { title: "Exam Schedule", url: "/dept/exams/schedule", icon: "CalendarClock", section: "EXAMS" },
   { title: "Create Exam", url: "/dept/exams/create", icon: "FilePlus2", section: "EXAMS" },
   { title: "Online Exams", url: "/dept/exams/online", icon: "MonitorPlay", section: "EXAMS" },
@@ -129,7 +129,7 @@ export const EXAM_MENU: NavigationItem[] = [
 ];
 
 export const LIBRARY_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/library/dashboard", icon: "LayoutDashboard", section: "LIBRARY" },
+  { title: "Overview", url: "/dept/library/dashboard", icon: "LayoutDashboard", section: "LIBRARY" },
   { title: "All Books", url: "/dept/library/books", icon: "Library", section: "LIBRARY" },
   { title: "Add Book", url: "/dept/library/add", icon: "BookPlus", section: "LIBRARY" },
   { title: "Search Catalog", url: "/dept/library/search", icon: "Search", section: "LIBRARY" },
@@ -148,7 +148,7 @@ export const LIBRARY_MENU: NavigationItem[] = [
 ];
 
 export const ATTENDANCE_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/attendance/dashboard", icon: "LayoutDashboard", section: "ATTENDANCE" },
+  { title: "Overview", url: "/dept/attendance/dashboard", icon: "LayoutDashboard", section: "ATTENDANCE" },
   { title: "Mark Attendance", url: "/dept/attendance/mark", icon: "CheckCircle", section: "ATTENDANCE" },
   { title: "Daily Report", url: "/dept/attendance/daily", icon: "CalendarRange", section: "ATTENDANCE" },
   { title: "Monthly Report", url: "/dept/attendance/monthly", icon: "CalendarDays", section: "ATTENDANCE" },
@@ -163,7 +163,7 @@ export const ATTENDANCE_MENU: NavigationItem[] = [
 ];
 
 export const HR_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/hr/dashboard", icon: "LayoutDashboard", section: "STAFF" },
+  { title: "Overview", url: "/dept/hr/dashboard", icon: "LayoutDashboard", section: "STAFF" },
   { title: "All Staff", url: "/dept/hr/staff", icon: "Users", section: "STAFF" },
   { title: "Add Staff", url: "/dept/hr/add-staff", icon: "UserPlus", section: "STAFF" },
   { title: "Departments", url: "/dept/hr/departments", icon: "Building", section: "STAFF" },
@@ -179,7 +179,7 @@ export const HR_MENU: NavigationItem[] = [
 ];
 
 export const HOSTEL_MENU: NavigationItem[] = [
-  { title: "Dashboard", url: "/dept/hostel/dashboard", icon: "LayoutDashboard", section: "HOSTEL" },
+  { title: "Overview", url: "/dept/hostel/dashboard", icon: "LayoutDashboard", section: "HOSTEL" },
   { title: "Room Allocation", url: "/dept/hostel/rooms", icon: "BedDouble", section: "HOSTEL" },
   { title: "Residents", url: "/dept/hostel/residents", icon: "Users", section: "HOSTEL" },
   { title: "Complaints", url: "/dept/hostel/complaints", icon: "MessageSquareWarning", section: "HOSTEL" },
