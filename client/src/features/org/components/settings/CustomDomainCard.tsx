@@ -4,10 +4,12 @@ import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
+import { DNS_PROVIDERS, DnsProvider } from "../../../../constants/dnsProviders";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/marketing_ui/accordion";
 
 export function CustomDomainCard() {
@@ -20,6 +22,9 @@ export function CustomDomainCard() {
     const [domainInput, setDomainInput] = useState("");
     const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
+    const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
+    
+    const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
 
     // Auto-polling for DNS Verification (only starts after user clicks Verify once)
     useEffect(() => {
@@ -213,7 +218,47 @@ export function CustomDomainCard() {
                             <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
-                                    <p className="text-xs text-muted-foreground mt-1">Add the following records to your DNS provider to verify ownership and route traffic.</p>
+                                    <p className="text-xs text-muted-foreground mt-1 mb-4">Add the following records to your DNS provider to verify ownership and route traffic.</p>
+                                    
+                                    <div className="bg-background rounded-lg border border-border/50 p-3 flex flex-col gap-3">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <span className="text-sm font-medium">Need help? Select your DNS provider:</span>
+                                            <div className="w-full sm:w-[220px]">
+                                                <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+                                                    <SelectTrigger className="h-8 text-xs">
+                                                        <SelectValue placeholder="Select provider" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DNS_PROVIDERS.map((provider) => (
+                                                            <SelectItem key={provider.id} value={provider.id}>
+                                                                {provider.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        
+                                        {selectedProvider && selectedProvider.id !== 'other' && (
+                                            <div className="p-2.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 rounded-md text-[13px] flex flex-col gap-1.5 leading-relaxed font-medium">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-500" />
+                                                        <span className="font-bold">Note for {selectedProvider.name} users:</span>
+                                                    </div>
+                                                    <a 
+                                                        href={selectedProvider.guideUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                                                    >
+                                                        Official Guide
+                                                    </a>
+                                                </div>
+                                                <p>{selectedProvider.quirks}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 <div className="p-0 text-sm">
