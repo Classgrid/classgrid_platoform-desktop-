@@ -1986,17 +1986,9 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             }
         }
 
-        // 3. Detect conflicting A records (e.g. GoDaddy parked domain IPs)
-        let conflictingRecords = [];
-        if (cnameVerified) {
-            try {
-                const allARecords = await dns.resolve4(domain);
-                conflictingRecords = allARecords.filter(ip => ip !== "76.76.21.21");
-            } catch (_) { /* no A records is fine */ }
-        }
-
         const isFullyVerified = txtVerified && cnameVerified;
-        const hasConflicts = isFullyVerified && conflictingRecords.length > 0;
+        const hasConflicts = false;
+        const conflictingRecords = [];
 
         // If verified but has conflicting records, mark as a special status
         const resolvedStatus = isFullyVerified

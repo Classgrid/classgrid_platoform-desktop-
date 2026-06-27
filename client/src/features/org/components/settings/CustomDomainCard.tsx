@@ -83,14 +83,8 @@ export function CustomDomainCard() {
         
         verifyMutation.mutate(undefined, {
             onSuccess: (data) => {
-                if (data.isFullyVerified && !data.hasConflicts) {
-                    toast.success("Domain verified successfully!");
-                    setIsPolling(false);
-                } else if (data.hasConflicts) {
-                    toast.warning(
-                        `DNS records are correct, but we found ${data.conflictingRecords?.length || 0} conflicting A record(s). Remove them from your DNS provider to complete setup.`,
-                        { duration: 8000 }
-                    );
+                if (data.isFullyVerified) {
+                    toast.success("Domain verified successfully! SSL provisioning has started.", { duration: 5000 });
                 } else {
                     toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
@@ -152,14 +146,10 @@ export function CustomDomainCard() {
                         <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm ${
                             isVerified 
                             ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
-                            : hasConflicts
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                             : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                         }`}>
                             {isVerified ? (
                                 <><CheckCircle2 className="w-3.5 h-3.5" /> Verified</>
-                            ) : hasConflicts ? (
-                                <><AlertTriangle className="w-3.5 h-3.5" /> Action Needed</>
                             ) : (
                                 <><AlertCircle className="w-3.5 h-3.5" /> Pending Verification</>
                             )}
@@ -216,7 +206,7 @@ export function CustomDomainCard() {
                             </Button>
                         </div>
 
-                        {(!isVerified || hasConflicts) && (
+                        {!isVerified && (
                             <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm text-foreground">Action Required: Configure DNS Records</h4>
@@ -421,36 +411,7 @@ export function CustomDomainCard() {
                             </div>
                         )}
 
-                        {hasConflicts && (
-                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 flex flex-col gap-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-amber-800 dark:text-amber-300">Almost there! Remove conflicting DNS records</h4>
-                                        <p className="text-sm text-amber-700/80 dark:text-amber-400/80 mt-1">
-                                            Your DNS records are correct, but your DNS provider (e.g. GoDaddy) has extra A records that conflict with Classgrid. This may cause your domain to show a "parked" page instead of your platform.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="bg-background/80 rounded-lg border border-border/50 p-4 ml-12">
-                                    <p className="text-sm font-medium text-foreground mb-2">How to fix (takes 1 minute):</p>
-                                    <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
-                                        <li>Go to your DNS provider's management page</li>
-                                        <li>Find all <strong>A Records</strong> with Name <code className="bg-muted px-1 py-0.5 rounded text-xs">@</code></li>
-                                        <li>Delete every A record <strong>except</strong> the one pointing to <code className="bg-muted px-1 py-0.5 rounded text-xs">76.76.21.21</code></li>
-                                        <li>Wait 2-3 minutes, then click Verify again</li>
-                                    </ol>
-                                </div>
-                                <div className="ml-12">
-                                    <Button onClick={handleVerify} disabled={verifyMutation.isPending} isLoading={verifyMutation.isPending} variant="default" size="sm">
-                                        {!verifyMutation.isPending && <RefreshCw className="w-3.5 h-3.5" />}
-                                        Re-verify DNS Records
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
+
                     </div>
                 )}
             </div>
