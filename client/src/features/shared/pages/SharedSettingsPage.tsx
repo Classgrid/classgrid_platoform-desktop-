@@ -84,9 +84,7 @@ export function SharedSettingsPage() {
         />
       )}
 
-      {profileData?.role === "org_admin" && (
-        <CustomDomainCard />
-      )}
+      <CustomDomainCard />
 
       {updatePrefs.isSuccess && (
         <div className="p-3 bg-success/10 text-success text-sm rounded-md border border-success">
