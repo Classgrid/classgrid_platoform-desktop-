@@ -2081,6 +2081,8 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
         const orgId = req.user.organization_id;
         const org = await Organization.findById(orgId).select("custom_domain name").lean();
         
+        const domainToDelete = org.custom_domain?.domain;
+
         await Organization.findByIdAndUpdate(orgId, {
             $set: {
                 custom_domain: {
@@ -2094,7 +2096,27 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
             }
         });
 
-        logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { old_domain: org.custom_domain?.domain });
+        // Remove from Vercel if configured
+        if (domainToDelete && process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID) {
+            try {
+                const vercelRes = await fetch(`https://api.vercel.com/v9/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainToDelete}?teamId=${process.env.VERCEL_TEAM_ID || ''}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${process.env.VERCEL_API_TOKEN}`
+                    }
+                });
+                
+                if (!vercelRes.ok) {
+                    console.error("[Vercel API Error on Delete]:", await vercelRes.json());
+                } else {
+                    console.log(`[Vercel API] Successfully detached ${domainToDelete} from project.`);
+                }
+            } catch (err) {
+                console.error("[Vercel Fetch Error on Delete]:", err.message);
+            }
+        }
+
+        logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { old_domain: domainToDelete });
 
         res.json({ success: true, message: "Custom domain removed." });
     } catch (err) {

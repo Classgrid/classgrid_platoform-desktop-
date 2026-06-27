@@ -102,11 +102,13 @@ export function CustomDomainCard() {
         });
     };
 
-    const handleRemove = () => {
-        // Optimistically close the dialog immediately for better UX
-        setRemoveConfirmOpen(false);
-        // The success/error toasts are already handled inside useRemoveCustomDomain hook
-        removeMutation.mutate();
+    const handleRemove = async () => {
+        try {
+            await removeMutation.mutateAsync();
+            setRemoveConfirmOpen(false);
+        } catch (err) {
+            // Error is handled by the hook's onError
+        }
     };
 
     const copyToClipboard = (text: string) => {
