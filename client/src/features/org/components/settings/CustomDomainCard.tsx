@@ -8,6 +8,7 @@ import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRem
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/marketing_ui/accordion";
 
 export function CustomDomainCard() {
     const { data: domainConfig, isLoading } = useCustomDomain();
@@ -213,16 +214,6 @@ export function CustomDomainCard() {
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
                                     <p className="text-xs text-muted-foreground mt-1">Add the following records to your DNS provider to verify ownership and route traffic.</p>
-                                    <div className="mt-3 p-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 rounded-md text-[13px] flex items-start gap-2.5">
-                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
-                                        <div className="flex flex-col gap-1.5">
-                                            <p className="font-semibold text-amber-800 dark:text-amber-300">Common configuration gotchas:</p>
-                                            <ul className="list-disc pl-4 space-y-1 opacity-90 font-medium">
-                                                <li>Some providers auto-append your domain name. Enter <strong>only</strong> the exact text shown in the Name (Host) column.</li>
-                                                <li>If your provider supports proxying or CDN features, ensure the A record is set to <strong>DNS Only</strong> (unproxied).</li>
-                                            </ul>
-                                        </div>
-                                    </div>
                                 </div>
                                 
                                 <div className="p-0 text-sm">
@@ -345,6 +336,27 @@ export function CustomDomainCard() {
                                         {isPolling ? "Verifying..." : "Verify"}
                                     </Button>
                                 </div>
+                                <Accordion type="single" collapsible className="w-full border-t border-border/50 px-2 bg-muted/5">
+                                    <AccordionItem value="help" className="border-none">
+                                        <AccordionTrigger className="px-2 py-3 text-sm text-muted-foreground hover:text-foreground hover:no-underline font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <AlertCircle className="w-4 h-4" />
+                                                Help: My domain isn't verifying
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent className="px-2 pb-4 text-xs text-muted-foreground space-y-3">
+                                            <div>
+                                                <strong className="text-foreground">Name/Host Format:</strong> Enter exactly <code className="bg-muted px-1 py-0.5 rounded">@</code> or <code className="bg-muted px-1 py-0.5 rounded">_classgrid-verify</code> in your DNS provider. Do not append your full domain name.
+                                            </div>
+                                            <div>
+                                                <strong className="text-foreground">Proxy Settings:</strong> Ensure proxying or CDN features are disabled for these records (set to "DNS Only" or "Gray Cloud").
+                                            </div>
+                                            <div>
+                                                <strong className="text-foreground">Conflicting Records:</strong> Make sure there are no other A records for <code className="bg-muted px-1 py-0.5 rounded">@</code> besides the Classgrid IP.
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
                             </div>
                         )}
 
