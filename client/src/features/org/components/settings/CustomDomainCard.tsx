@@ -483,6 +483,6 @@ export function CustomDomainCard() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-        </>
+        </div>
     );
 }
