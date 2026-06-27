@@ -15,8 +15,17 @@ export function CustomDomainCard() {
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!domainInput.trim()) return;
-        registerMutation.mutate(domainInput, {
+        const trimmedInput = domainInput.trim();
+        if (!trimmedInput) return;
+
+        // Validate domain format (e.g., must not contain spaces, must have a dot)
+        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!domainRegex.test(trimmedInput)) {
+            toast.error("Please enter a valid domain name (e.g., portal.mycollege.edu)");
+            return;
+        }
+
+        registerMutation.mutate(trimmedInput, {
             onSuccess: () => {
                 toast.success("Domain registered! Please configure your DNS.");
                 setDomainInput("");

@@ -1897,6 +1897,11 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
 
         const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
 
+        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!domainRegex.test(cleanDomain)) {
+            return res.status(400).json({ message: "Invalid domain format. Example: portal.mycollege.edu" });
+        }
+
         // Check if another org is using it
         const existing = await Organization.findOne({ "custom_domain.domain": cleanDomain, _id: { $ne: orgId } }).lean();
         if (existing) {
