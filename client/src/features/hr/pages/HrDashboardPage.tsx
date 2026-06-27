@@ -23,7 +23,7 @@ export function HrDashboardPage() {
   return (
     <DashboardLayout role="HR_MENU">
       <PageHeader 
-        title="HR & Payroll Dashboard" 
+        title="HR & Payroll Overview" 
         description="Manage employees, leaves, and recruitment." 
       />
 

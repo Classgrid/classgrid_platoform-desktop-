@@ -15,6 +15,7 @@ import type {
 import { AuthBrandMark } from "./AuthBrandMark";
 import { AuthCard } from "./AuthCard";
 import { LeftPanel } from "./LeftPanel";
+import { DomainEnforcer } from "@/components/DomainEnforcer";
 
 type AuthLayoutProps = {
   authType: AuthType;
@@ -98,28 +99,33 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   const showRoleSwitcher = audience === "user" && !appRole;
 
   return (
-    <main className="auth-container bg-background text-foreground">
-      <LeftPanel />
-      <section className="right-panel px-4 py-2 sm:px-6 lg:px-8 xl:px-10">
-        <div className="w-full">
-          <div className="mb-6 flex justify-center lg:hidden">
-            <AuthBrandMark branding={branding} showSubtitle={false} stacked />
+    <DomainEnforcer 
+      allowClassgridUrl={branding.allowClassgridUrl !== false} 
+      customDomain={branding.customDomain}
+    >
+      <main className="auth-container bg-background text-foreground">
+        <LeftPanel />
+        <section className="right-panel px-4 py-2 sm:px-6 lg:px-8 xl:px-10">
+          <div className="w-full">
+            <div className="mb-6 flex justify-center lg:hidden">
+              <AuthBrandMark branding={branding} showSubtitle={false} stacked />
+            </div>
+            <AuthCard
+              audience={audience}
+              branding={branding}
+              defaultRole={defaultRole}
+              initialMessage={initialMessage}
+              initialMessageTone={initialMessageTone}
+              initialDeviceVerification={initialDeviceVerification}
+              lockedRole={appRole}
+              preferredRole={browserPreferredRole}
+              prefilledEmail={prefilledEmail}
+              rememberedRole={storedRole}
+              showRoleSwitcher={showRoleSwitcher}
+            />
           </div>
-          <AuthCard
-            audience={audience}
-            branding={branding}
-            defaultRole={defaultRole}
-            initialMessage={initialMessage}
-            initialMessageTone={initialMessageTone}
-            initialDeviceVerification={initialDeviceVerification}
-            lockedRole={appRole}
-            preferredRole={browserPreferredRole}
-            prefilledEmail={prefilledEmail}
-            rememberedRole={storedRole}
-            showRoleSwitcher={showRoleSwitcher}
-          />
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </DomainEnforcer>
   );
 }

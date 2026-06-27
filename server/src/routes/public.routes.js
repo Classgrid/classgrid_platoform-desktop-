@@ -107,7 +107,7 @@ router.get("/auth-branding", async (req, res) => {
     }
 
     const org = await Organization.findOne({ subdomain: slug })
-      .select("name subdomain logo_url campus_photo_url branding status")
+      .select("name subdomain logo_url campus_photo_url branding status custom_domain")
       .lean();
 
     if (!org) {
@@ -152,6 +152,8 @@ router.get("/auth-branding", async (req, res) => {
         campusImageUrl,
         leftVariant: campusImageUrl ? "image" : "default",
         subdomain: org.subdomain,
+        customDomain: org.custom_domain?.status === "active" ? org.custom_domain?.domain : null,
+        allowClassgridUrl: org.custom_domain?.allow_classgrid_url !== false,
       },
     });
   } catch (error) {

@@ -1633,7 +1633,8 @@ export const getCurrentUser = async (req, res) => {
                         },
                         rollNumberLabel: userWithOrg.organization_id.rollNumberLabel || "PRN",
                         allowed_domains: userWithOrg.organization_id.allowed_domains || [],
-                        structure_type: userWithOrg.organization_id.structure_type || "engineering"
+                        structure_type: userWithOrg.organization_id.structure_type || "engineering",
+                        custom_domain: userWithOrg.organization_id.custom_domain || null
                     };
                 }
             } catch (orgErr) {

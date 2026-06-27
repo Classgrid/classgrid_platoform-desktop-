@@ -23,7 +23,7 @@ export function AttendanceDashboardPage() {
   return (
     <DashboardLayout role="ATTENDANCE_MENU">
       <PageHeader 
-        title="Attendance Dashboard" 
+        title="Attendance Overview" 
         description="Monitor campus-wide attendance and defaulters." 
       />
 

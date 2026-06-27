@@ -64,6 +64,7 @@ const organizationSchema = new mongoose.Schema(
             txt_verified: { type: Boolean, default: false },
             cname_verified: { type: Boolean, default: false },
             ssl_provisioned: { type: Boolean, default: false },
+            allow_classgrid_url: { type: Boolean, default: true },
             verified_at: { type: Date, default: null },
             created_at: { type: Date, default: null },
         },

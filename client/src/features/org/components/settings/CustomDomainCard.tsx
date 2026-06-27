@@ -5,18 +5,22 @@ import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
-import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain } from "../../queries/useCustomDomainQueries";
+import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { apiClient } from "@/lib/apiClient";
 import { DNS_PROVIDERS, DnsProvider } from "../../../../constants/dnsProviders";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/marketing_ui/accordion";
+import { Switch } from "@/components/marketing_ui/switch";
 
 export function CustomDomainCard() {
+    const { data: user } = useCurrentUser();
     const { data: domainConfig, isLoading } = useCustomDomain();
     const registerMutation = useRegisterCustomDomain();
     const verifyMutation = useVerifyCustomDomain();
     const removeMutation = useRemoveCustomDomain();
+    const updateSettingsMutation = useUpdateCustomDomainSettings();
     const queryClient = useQueryClient();
 
     const [domainInput, setDomainInput] = useState("");
@@ -127,7 +131,49 @@ export function CustomDomainCard() {
     const hasConflicts = domainConfig.status === "verified_with_conflicts";
 
     return (
-        <>
+        <div className="flex flex-col gap-6">
+        {/* Card 1: Default Classgrid Subdomain */}
+        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
+                        <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
+                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        Default
+                    </div>
+                </div>
+            </div>
+            <div className="p-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
+                    <div>
+                        <div className="font-medium text-foreground">{user?.organization?.subdomain}.classgrid.in</div>
+                        <div className="text-sm text-muted-foreground mt-1">If disabled, students and faculty visiting this URL will be redirected to your custom domain. Your Org Admin portals will always remain accessible here.</div>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                        <Switch 
+                            checked={domainConfig.allow_classgrid_url !== false} 
+                            onCheckedChange={(checked) => {
+                                updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
+                                    onSuccess: () => toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled"),
+                                    onError: () => toast.error("Failed to update settings")
+                                });
+                            }}
+                            disabled={!hasDomain || !isVerified || updateSettingsMutation.isPending}
+                        />
+                        <span className="text-sm font-medium w-16">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Card 2: Custom Domain */}
         <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -136,7 +182,7 @@ export function CustomDomainCard() {
                         <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight">Set up your custom domain</h3>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight">Custom Domain</h3>
                         <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">This domain will be assigned to your site</p>
                     </div>
                 </div>

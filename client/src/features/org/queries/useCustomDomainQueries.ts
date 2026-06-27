@@ -8,8 +8,22 @@ export interface CustomDomainConfig {
     txt_verified: boolean;
     cname_verified: boolean;
     ssl_provisioned: boolean;
+    allow_classgrid_url?: boolean;
     verified_at: string | null;
     created_at: string | null;
+}
+
+export function useUpdateCustomDomainSettings() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (settings: { allow_classgrid_url: boolean }) => {
+            const { data } = await apiClient.patch<{ success: boolean; message: string; custom_domain: CustomDomainConfig }>("/api/org-admin/custom-domain/settings", settings);
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(["org-custom-domain"], data.custom_domain);
+        },
+    });
 }
 
 export function useCustomDomain() {

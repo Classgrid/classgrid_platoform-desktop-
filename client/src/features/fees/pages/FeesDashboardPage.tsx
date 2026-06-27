@@ -23,7 +23,7 @@ export function FeesDashboardPage() {
   return (
     <DashboardLayout role="FEES_MENU">
       <PageHeader 
-        title="Fees & Finance" 
+        title="Fees Overview" 
         description="Track payments, dues, and financial reports." 
       />
 

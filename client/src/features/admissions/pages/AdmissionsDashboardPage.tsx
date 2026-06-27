@@ -23,7 +23,7 @@ export function AdmissionsDashboardPage() {
   return (
     <DashboardLayout role="ADMISSION_MENU">
       <PageHeader 
-        title="Admissions Dashboard" 
+        title="Admissions Overview" 
         description="Monitor and manage new student applications." 
       />
 

@@ -23,7 +23,7 @@ export function HostelDashboardPage() {
   return (
     <DashboardLayout role="HOSTEL_MENU">
       <PageHeader 
-        title="Hostel Management" 
+        title="Hostel Overview" 
         description="Manage residents, rooms, and daily operations." 
       />
 

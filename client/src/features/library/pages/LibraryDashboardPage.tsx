@@ -23,7 +23,7 @@ export function LibraryDashboardPage() {
   return (
     <DashboardLayout role="LIBRARY_MENU">
       <PageHeader 
-        title="Library Dashboard" 
+        title="Library Overview" 
         description="Manage books, inventory, and circulations." 
       />
 

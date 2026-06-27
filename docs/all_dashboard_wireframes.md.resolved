@@ -1,11 +1,11 @@
-# Classgrid — All Dashboard Wireframe Layouts
+# Classgrid — All Overview Wireframe Layouts
 
 > **Style:** Agora Console — clean, sharp, square corners, no heavy rounded
 > **Sidebar:** 240px, `#111827` bg | **Content:** `#000000` bg | **Accent:** `#34d399`
 
 ---
 
-## 1. 🔥 SUPER ADMIN Dashboard
+## 1. 🔥 SUPER ADMIN Overview
 
 **Who:** Platform owner (you). Manages ALL organizations.
 **Desktop only.** No mobile needed.
@@ -17,7 +17,7 @@
 │     Super Admin              │  Subtitle
 │                              │
 │  ─ OVERVIEW ─────────────── │
-│  📊 Dashboard                │  /superadmin/dashboard
+│  📊 Overview                │  /superadmin/dashboard
 │  📈 Analytics                │  /superadmin/analytics
 │  🔔 Alerts                  │  /superadmin/alerts
 │                              │
@@ -58,7 +58,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Orgs     │ │ Active Users   │ │ Revenue (MRR)  │ │ Demo Leads     │
@@ -76,7 +76,7 @@
 
 ---
 
-## 2. 🏫 ORG ADMIN Dashboard
+## 2. 🏫 ORG ADMIN Overview
 
 **Who:** School/College principal or IT admin. Sees ALL modules collectively.
 **Desktop only.** No mobile needed.
@@ -92,7 +92,7 @@
 │  └──────────────────────────┘│
 │                              │
 │  ─ OVERVIEW ─────────────── │
-│  📊 Dashboard                │  /org/dashboard
+│  📊 Overview                │  /org/dashboard
 │  📢 Announcements           │  /org/announcements
 │                              │
 │  ─ ACADEMICS ─────────────  │
@@ -153,7 +153,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Students │ │ Total Faculty  │ │ Fee Collected  │ │ Attendance %   │
@@ -174,7 +174,7 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 3. 🎓 ADMISSION DEPARTMENT Dashboard
+## 3. 🎓 ADMISSION DEPARTMENT Overview
 
 **Who:** Admission clerk/officer. Only manages admissions.
 **Desktop only.**
@@ -186,7 +186,7 @@
 │     Admission Dept           │
 │                              │
 │  ─ ADMISSIONS ────────────  │
-│  📊 Dashboard                │  /dept/admissions/dashboard
+│  📊 Overview                │  /dept/admissions/dashboard
 │  📋 All Applications        │  /dept/admissions/applications
 │  📝 New Application         │  /dept/admissions/new
 │  📂 Document Verification   │  /dept/admissions/documents
@@ -215,7 +215,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Apps     │ │ Verified       │ │ Enrolled       │ │ Rejected       │
@@ -241,7 +241,7 @@
 
 ---
 
-## 4. 💰 FEES DEPARTMENT Dashboard
+## 4. 💰 FEES DEPARTMENT Overview
 
 **Who:** Accountant/fees clerk. Only manages fees & payments.
 **Desktop only.**
@@ -253,7 +253,7 @@
 │     Fees & Accounts          │
 │                              │
 │  ─ FEES ──────────────────  │
-│  📊 Dashboard                │  /dept/fees/dashboard
+│  📊 Overview                │  /dept/fees/dashboard
 │  💳 Collect Payment         │  /dept/fees/collect
 │  📋 All Transactions        │  /dept/fees/transactions
 │  ⚠️ Defaulters List         │  /dept/fees/defaulters
@@ -277,7 +277,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Collected│ │ Pending        │ │ Defaulters     │ │ Today's Colln  │
@@ -303,7 +303,7 @@
 
 ---
 
-## 5. 📝 EXAMINATION DEPARTMENT Dashboard
+## 5. 📝 EXAMINATION DEPARTMENT Overview
 
 **Who:** Exam cell/controller. Manages exams, results, hall tickets.
 **Desktop only.**
@@ -315,7 +315,7 @@
 │     Examination Cell         │
 │                              │
 │  ─ EXAMS ─────────────────  │
-│  📊 Dashboard                │  /dept/exams/dashboard
+│  📊 Overview                │  /dept/exams/dashboard
 │  📅 Exam Schedule            │  /dept/exams/schedule
 │  📝 Create Exam              │  /dept/exams/create
 │  📋 Online Exams             │  /dept/exams/online
@@ -343,7 +343,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Upcoming Exams │ │ Results Pending│ │ Hall Tickets   │ │ Papers Created │
@@ -369,7 +369,7 @@
 
 ---
 
-## 6. 📚 LIBRARY DEPARTMENT Dashboard
+## 6. 📚 LIBRARY DEPARTMENT Overview
 
 **Who:** Librarian. Manages books, issues, returns.
 **Desktop only.**
@@ -381,7 +381,7 @@
 │     Library                  │
 │                              │
 │  ─ LIBRARY ───────────────  │
-│  📊 Dashboard                │  /dept/library/dashboard
+│  📊 Overview                │  /dept/library/dashboard
 │  📚 All Books                │  /dept/library/books
 │  ➕ Add Book                 │  /dept/library/add
 │  🔍 Search Catalog           │  /dept/library/search
@@ -407,7 +407,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Books    │ │ Issued         │ │ Overdue        │ │ Available      │
@@ -433,7 +433,7 @@
 
 ---
 
-## 7. 📋 ATTENDANCE DEPARTMENT Dashboard
+## 7. 📋 ATTENDANCE DEPARTMENT Overview
 
 **Who:** Attendance coordinator. Manages attendance across classes.
 **Desktop only.**
@@ -445,7 +445,7 @@
 │     Attendance               │
 │                              │
 │  ─ ATTENDANCE ────────────  │
-│  📊 Dashboard                │  /dept/attendance/dashboard
+│  📊 Overview                │  /dept/attendance/dashboard
 │  ✅ Mark Attendance          │  /dept/attendance/mark
 │  📋 Daily Report             │  /dept/attendance/daily
 │  📅 Monthly Report           │  /dept/attendance/monthly
@@ -466,7 +466,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Today Present %│ │ Low Attendance │ │ Sessions Today │ │ Avg Monthly %  │
@@ -492,7 +492,7 @@
 
 ---
 
-## 8. 📆 HR & LEAVE DEPARTMENT Dashboard
+## 8. 📆 HR & LEAVE DEPARTMENT Overview
 
 **Who:** HR manager. Manages leaves, payroll, staff.
 **Desktop only.**
@@ -504,7 +504,7 @@
 │     HR & Payroll             │
 │                              │
 │  ─ STAFF ─────────────────  │
-│  📊 Dashboard                │  /dept/hr/dashboard
+│  📊 Overview                │  /dept/hr/dashboard
 │  👥 All Staff                │  /dept/hr/staff
 │  ➕ Add Staff                │  /dept/hr/add-staff
 │  📋 Departments              │  /dept/hr/departments
@@ -526,7 +526,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Staff    │ │ On Leave Today │ │ Pending Reqsts │ │ Payroll Status │
@@ -552,7 +552,7 @@
 
 ---
 
-## 9. 🏠 HOSTEL & TRANSPORT Dashboard
+## 9. 🏠 HOSTEL & TRANSPORT Overview
 
 **Who:** Hostel warden / Transport manager.
 **Desktop only.**
@@ -564,7 +564,7 @@
 │     Hostel & Transport       │
 │                              │
 │  ─ HOSTEL ────────────────  │
-│  📊 Dashboard                │  /dept/hostel/dashboard
+│  📊 Overview                │  /dept/hostel/dashboard
 │  🛏️ Room Allocation         │  /dept/hostel/rooms
 │  👥 Residents                │  /dept/hostel/residents
 │  📋 Complaints               │  /dept/hostel/complaints
@@ -581,7 +581,7 @@
 └──────────────────────────────┘
 ```
 
-### Main Content — Dashboard Bento Grid
+### Main Content — Overview Bento Grid
 ```
 ┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
 │ Total Residents│ │ Rooms Occupied │ │ Open Complaints│ │ Bus Routes     │
@@ -607,7 +607,7 @@
 
 ---
 
-## 10. 👨‍🏫 FACULTY Dashboard
+## 10. 👨‍🏫 FACULTY Overview
 
 **Who:** Teacher/Professor. Manages their classes.
 **Desktop + Mobile App.**
@@ -743,7 +743,7 @@ NEW:       [≡]     Classgrid  [☀️] [🔔]
 
 ---
 
-## 11. 🎓 STUDENT Dashboard
+## 11. 🎓 STUDENT Overview
 
 **Who:** Enrolled student. Views their academic data.
 **Desktop + Mobile App.**
@@ -869,7 +869,7 @@ NEW:       [≡]     Classgrid  [☀️] [🔔]
 
 ---
 
-## 🏅 NBA/NAAC COMPLIANCE Dashboard
+## 🏅 NBA/NAAC COMPLIANCE Overview
 
 **Part of Org Admin**, but deep enough for its own view when admin clicks "NBA/NAAC".
 
@@ -900,7 +900,7 @@ Tab pills: [Criteria-wise] [Documents] [Reports] [Timeline]
 
 ## Route Architecture Summary
 
-| Dashboard | Route Prefix | Sidebar Width | Desktop | Mobile |
+| Overview | Route Prefix | Sidebar Width | Desktop | Mobile |
 |---|---|---|---|---|
 | **Super Admin** | `/superadmin/*` | 240px | ✅ | ❌ |
 | **Org Admin** | `/org/*` | 240px | ✅ | ❌ |
@@ -918,10 +918,10 @@ Tab pills: [Criteria-wise] [Documents] [Reports] [Timeline]
 
 ## Sidebar Component Architecture
 
-**One reusable `<DashboardSidebar>` component** that takes a config prop:
+**One reusable `<OverviewSidebar>` component** that takes a config prop:
 
 ```jsx
-<DashboardSidebar
+<OverviewSidebar
   logo="Classgrid"
   subtitle="Admission Dept"
   sections={[

@@ -23,7 +23,7 @@ export function ExamsDashboardPage() {
   return (
     <DashboardLayout role="EXAMS_MENU">
       <PageHeader 
-        title="Examinations Dashboard" 
+        title="Examinations Overview" 
         description="Manage exams, grading, and results." 
       />
 

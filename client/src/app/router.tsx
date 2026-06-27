@@ -173,7 +173,7 @@ export function AppRouter() {
           <Route path="/org/settings" element={<SharedSettingsPage />} />
           <Route path="/org/profile" element={<SharedProfilePage />} />
           <Route path="/org/chat" element={<ChatPage />} />
-          <Route path="/org/dashboard" element={<GenericPage title="Org Dashboard" />} />
+          <Route path="/org/dashboard" element={<GenericPage title="Org Overview" />} />
           <Route path="/org/*" element={<ComingSoonPage />} />
         </Route>
 
