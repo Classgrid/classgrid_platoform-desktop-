@@ -132,8 +132,9 @@ export function ChatPage() {
       
       await sendMessage(activeThread.id, text, files, replyData);
       setReplyTo(null);
-    } catch (err) {
-      toast.error("Failed to send message");
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || "Failed to send message";
+      toast.error(errorMessage);
     } finally {
       setIsSending(false);
     }
