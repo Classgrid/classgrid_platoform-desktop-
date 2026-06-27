@@ -84,7 +84,7 @@ export function SharedSettingsPage() {
         />
       )}
 
-      {(profileData?.role === "org_admin" || profileData?.role === "super_admin") && (
+      {profileData?.role === "org_admin" && (
         <CustomDomainCard />
       )}
 
