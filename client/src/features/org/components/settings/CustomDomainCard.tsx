@@ -218,7 +218,7 @@ export function CustomDomainCard() {
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
-                                                                <span className="text-sm text-foreground">3600 <span className="text-muted-foreground/50 text-xs ml-1">(1 hour)</span></span>
+                                                                <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
@@ -244,7 +244,7 @@ export function CustomDomainCard() {
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
-                                                                <span className="text-sm text-foreground">3600 <span className="text-muted-foreground/50 text-xs ml-1">(1 hour)</span></span>
+                                                                <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
