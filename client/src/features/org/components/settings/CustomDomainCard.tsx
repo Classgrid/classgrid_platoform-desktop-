@@ -109,18 +109,24 @@ export function CustomDomainCard() {
                             <h4 className="font-medium text-sm text-foreground mb-2">Connect a new domain</h4>
                             <p className="text-xs text-muted-foreground mb-4">Enter the exact domain or subdomain you want to use. You will need access to your DNS provider (GoDaddy, Cloudflare, etc.) to complete setup.</p>
                             
-                            <form onSubmit={handleRegister} className="flex gap-3">
+                            <div className="flex gap-3">
                                 <Input 
                                     placeholder="e.g., portal.mycollege.edu" 
                                     className="flex-1 bg-background"
                                     value={domainInput}
                                     onChange={(e) => setDomainInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            handleRegister(e as any);
+                                        }
+                                    }}
                                     disabled={registerMutation.isPending}
                                 />
-                                <Button type="submit" disabled={!domainInput.trim() || registerMutation.isPending}>
+                                <Button type="button" onClick={handleRegister as any} disabled={!domainInput.trim() || registerMutation.isPending}>
                                     {registerMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Add Domain"}
                                 </Button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 ) : (
