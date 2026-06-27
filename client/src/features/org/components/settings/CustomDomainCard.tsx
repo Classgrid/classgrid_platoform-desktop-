@@ -162,10 +162,10 @@ export function CustomDomainCard() {
                                         <tbody className="divide-y divide-border/50">
                                             {/* TXT Record */}
                                             <tr className="hover:bg-muted/10 transition-colors">
-                                                <td className="px-4 py-4 font-medium">TXT</td>
+                                                <td className="px-4 py-4 font-medium text-foreground">TXT</td>
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs">_classgrid-verify.{domainConfig.domain}</code>
+                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">_classgrid-verify.{domainConfig.domain}</code>
                                                         <button onClick={() => copyToClipboard(`_classgrid-verify.${domainConfig.domain}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                             <Copy className="w-3.5 h-3.5" />
                                                         </button>
@@ -173,7 +173,7 @@ export function CustomDomainCard() {
                                                 </td>
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-2 group max-w-[200px]">
-                                                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs truncate">classgrid-verify={domainConfig.verification_token}</code>
+                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs truncate">classgrid-verify={domainConfig.verification_token}</code>
                                                         <button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
                                                             <Copy className="w-3.5 h-3.5" />
                                                         </button>
@@ -188,7 +188,7 @@ export function CustomDomainCard() {
                                                 <td className="px-4 py-4 font-medium">CNAME</td>
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{domainConfig.domain}</code>
+                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{domainConfig.domain}</code>
                                                         <button onClick={() => copyToClipboard(domainConfig.domain!)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                             <Copy className="w-3.5 h-3.5" />
                                                         </button>
@@ -196,7 +196,7 @@ export function CustomDomainCard() {
                                                 </td>
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-2 group">
-                                                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs">cname.classgrid.in</code>
+                                                        <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">cname.classgrid.in</code>
                                                         <button onClick={() => copyToClipboard("cname.classgrid.in")} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                             <Copy className="w-3.5 h-3.5" />
                                                         </button>
