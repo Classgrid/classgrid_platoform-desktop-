@@ -80,21 +80,21 @@ const DASHBOARD_TARGETS = {
     student: "/student/work",
     teacher: "/work",
     faculty: "/work",
-    org_admin: "/org/dashboard",
+    org_admin: "/org/admin/dashboard",
     library_manager: "/dept/library/dashboard",
-    hod: "/org/dashboard",
-    principal: "/org/dashboard",
-    vice_principal: "/org/dashboard",
+    hod: "/org/admin/dashboard",
+    principal: "/org/admin/dashboard",
+    vice_principal: "/org/admin/dashboard",
     exam_controller: "/dept/exams/dashboard",
     fee_manager: "/dept/fees/dashboard",
     admission_head: "/dept/admissions/dashboard",
     admission_verifier: "/dept/admissions/dashboard",
     admission_counselor: "/dept/admissions/dashboard",
     admission_clerk: "/dept/admissions/dashboard",
-    tpo_officer: "/org/dashboard",
+    tpo_officer: "/org/admin/dashboard",
     transport_manager: "/dept/transport/dashboard",
-    counselor: "/org/dashboard",
-    coordinator: "/org/dashboard",
+    counselor: "/org/admin/dashboard",
+    coordinator: "/org/admin/dashboard",
     super_admin: "/superadmin/dashboard",
 };
 
@@ -110,7 +110,7 @@ const getLoginPortalPath = (loginTab) => {
 
 const getFrontendDashboardTarget = (user) => {
     if (user.role === "super_admin") return "/superadmin/dashboard";
-    if (isInstitutionAdminRole(user.role)) return DASHBOARD_TARGETS[user.role] || "/org/dashboard";
+    if (isInstitutionAdminRole(user.role)) return DASHBOARD_TARGETS[user.role] || "/org/admin/dashboard";
     if (["faculty", "teacher"].includes(user.role) && !user.organization_id) return "/enter-org-code";
     return DASHBOARD_TARGETS[user.role] || "/classroom";
 };

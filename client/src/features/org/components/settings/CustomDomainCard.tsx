@@ -132,46 +132,48 @@ export function CustomDomainCard() {
 
     return (
         <div className="flex flex-col gap-6">
-        {/* Card 1: Default Classgrid Subdomain */}
-        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
-                        <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        {/* Card 1: Default Classgrid Subdomain (Only visible if custom domain is active) */}
+        {hasDomain && isVerified && (
+            <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
+                            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
+                            <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
+                    <div className="flex items-center gap-3">
+                        <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                            Default
+                        </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                        Default
+                <div className="p-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
+                        <div>
+                            <div className="font-medium text-foreground">{user?.organization?.subdomain}.classgrid.in</div>
+                            <div className="text-sm text-muted-foreground mt-1">If disabled, students and faculty visiting this URL will be redirected to your custom domain. Your Org Admin portals will always remain accessible here.</div>
+                        </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                            <Switch 
+                                checked={domainConfig.allow_classgrid_url !== false} 
+                                onCheckedChange={(checked) => {
+                                    updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
+                                        onSuccess: () => toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled"),
+                                        onError: () => toast.error("Failed to update settings")
+                                    });
+                                }}
+                                disabled={updateSettingsMutation.isPending}
+                            />
+                            <span className="text-sm font-medium w-16">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="p-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
-                    <div>
-                        <div className="font-medium text-foreground">{user?.organization?.subdomain}.classgrid.in</div>
-                        <div className="text-sm text-muted-foreground mt-1">If disabled, students and faculty visiting this URL will be redirected to your custom domain. Your Org Admin portals will always remain accessible here.</div>
-                    </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                        <Switch 
-                            checked={domainConfig.allow_classgrid_url !== false} 
-                            onCheckedChange={(checked) => {
-                                updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
-                                    onSuccess: () => toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled"),
-                                    onError: () => toast.error("Failed to update settings")
-                                });
-                            }}
-                            disabled={!hasDomain || !isVerified || updateSettingsMutation.isPending}
-                        />
-                        <span className="text-sm font-medium w-16">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        )}
 
         {/* Card 2: Custom Domain */}
         <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
