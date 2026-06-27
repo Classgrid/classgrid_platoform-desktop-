@@ -134,7 +134,7 @@ export function CustomDomainCard() {
 
     return (
         <>
-        <div className="w-full bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -209,7 +209,7 @@ export function CustomDomainCard() {
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
                                 <span className="text-sm text-muted-foreground">Connected Domain</span>
-                                <span className="text-xl font-bold tracking-tight mt-0.5">{domainConfig.domain}</span>
+                                <span className="text-xl font-bold tracking-tight mt-0.5 text-foreground">{domainConfig.domain}</span>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => setRemoveConfirmOpen(true)} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                                 <Trash2 className="w-4 h-4" />
@@ -219,7 +219,7 @@ export function CustomDomainCard() {
                         {(!isVerified || hasConflicts) && (
                             <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
-                                    <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
+                                    <h4 className="font-medium text-sm text-foreground">Action Required: Configure DNS Records</h4>
                                     <p className="text-xs text-muted-foreground mt-1 mb-4">Add the following records to your DNS provider to verify ownership and route traffic.</p>
                                     
                                     <div className="bg-background rounded-lg border border-border/50 p-3 flex flex-col gap-3">
