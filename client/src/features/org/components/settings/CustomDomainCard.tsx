@@ -202,7 +202,7 @@ export function CustomDomainCard() {
                                                 
                                                 let txtName = '_classgrid-verify';
                                                 let cnameName = '@';
-                                                let targetType = 'A Record';
+                                                let targetType = 'A';
                                                 let targetValue = '76.76.21.21'; // Vercel standard IP for Apex domains
                                                 
                                                 if (!isLikelyRoot) {
@@ -268,7 +268,7 @@ export function CustomDomainCard() {
                                                                 {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
-                                                        {targetType === 'A Record' && (
+                                                        {targetType === 'A' && (
                                                             <tr>
                                                                 <td colSpan={5} className="px-4 py-2">
                                                                     <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-2">
