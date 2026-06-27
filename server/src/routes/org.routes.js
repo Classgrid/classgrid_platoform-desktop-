@@ -1982,7 +1982,22 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             }
         }
 
+        // 3. Detect conflicting A records (e.g. GoDaddy parked domain IPs)
+        let conflictingRecords = [];
+        if (cnameVerified) {
+            try {
+                const allARecords = await dns.resolve4(domain);
+                conflictingRecords = allARecords.filter(ip => ip !== "76.76.21.21");
+            } catch (_) { /* no A records is fine */ }
+        }
+
         const isFullyVerified = txtVerified && cnameVerified;
+        const hasConflicts = isFullyVerified && conflictingRecords.length > 0;
+
+        // If verified but has conflicting records, mark as a special status
+        const resolvedStatus = isFullyVerified
+            ? (hasConflicts ? "verified_with_conflicts" : "verified")
+            : "pending_verification";
 
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
@@ -1990,7 +2005,7 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
                 $set: {
                     "custom_domain.txt_verified": txtVerified,
                     "custom_domain.cname_verified": cnameVerified,
-                    "custom_domain.status": isFullyVerified ? "verified" : "pending_verification",
+                    "custom_domain.status": resolvedStatus,
                     "custom_domain.verified_at": isFullyVerified ? new Date() : null,
                 }
             },
@@ -2028,15 +2043,24 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             }
         }
 
+        let message;
+        if (!isFullyVerified) {
+            message = "Verification pending. Please check your DNS records.";
+        } else if (hasConflicts) {
+            message = `Domain records are correct, but we detected ${conflictingRecords.length} conflicting A record(s) (${conflictingRecords.join(", ")}). These are likely parked domain IPs from your DNS provider (e.g. GoDaddy). Please delete all A records for @ except 76.76.21.21, then verify again.`;
+        } else {
+            message = "Domain verified successfully! SSL provisioning will begin.";
+        }
+
         res.json({
             success: true,
             isFullyVerified,
+            hasConflicts,
+            conflictingRecords,
             txtVerified,
             cnameVerified,
             custom_domain: updatedOrg.custom_domain,
-            message: isFullyVerified 
-                ? "Domain verified successfully! SSL provisioning will begin." 
-                : "Verification pending. Please check your DNS records."
+            message
         });
     } catch (err) {
         console.error("[Custom Domain Verify] Error:", err.message);

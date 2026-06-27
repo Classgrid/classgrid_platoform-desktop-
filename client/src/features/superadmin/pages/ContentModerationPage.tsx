@@ -8,9 +8,11 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-
-
-
+import { Input } from "@/components/marketing_ui/input";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { DataTable } from "@/components/marketing_ui/data-table";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -140,28 +142,25 @@ export function ContentModerationPage() {
     },
   ], [dismissMut.isPending]);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "0.5rem 0.75rem", border: "1px solid hsl(var(--border))",
-    borderRadius: "var(--radius)", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: "0.9rem", outline: "none",
-  };
+  // inline styles removed
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div
+      <PageHeader
         title="Content Moderation"
         description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
         actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div title="Pending Reports" value={isLoading ? "—" : pendingCount} icon={<Clock size={15} />} />
-        <div title="High Severity" value={isLoading ? "—" : criticalCount} icon={<AlertTriangle size={15} />} />
-        <div title="Resolved" value={isLoading ? "—" : resolvedCount} icon={<CheckCircle2 size={15} />} />
-        <div title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
+        <StatCard title="Pending Reports" value={isLoading ? "—" : pendingCount} icon={<Clock size={15} />} />
+        <StatCard title="High Severity" value={isLoading ? "—" : criticalCount} icon={<AlertTriangle size={15} />} />
+        <StatCard title="Resolved" value={isLoading ? "—" : resolvedCount} icon={<CheckCircle2 size={15} />} />
+        <StatCard title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <div title="Content Reports" description="All user-submitted reports across all organizations." noPadding
+        <SectionPanel title="Content Reports" description="All user-submitted reports across all organizations." noPadding
           actions={
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <div value={statusFilter} onValueChange={setStatusFilter} options={[
@@ -179,9 +178,9 @@ export function ContentModerationPage() {
           <div style={{ padding: "0.75rem 1rem" }}>
             <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search reporter, accused, content…" />
           </div>
-          <div columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
+          <DataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
             emptyIcon={<Flag size={32} />} emptyTitle="No reports found" emptyDescription="No content reports match the current filters." emptyMessage="No reports." />
-        </div>
+        </SectionPanel>
       </div>
 
       {/* Resolve Dialog */}
@@ -206,8 +205,8 @@ export function ContentModerationPage() {
               <div value={resolveAction} onValueChange={setResolveAction} options={ACTION_OPTIONS} />
             </div>
             <div>
-              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Moderation Note</label>
-              <input style={inputStyle} value={resolveNote} onChange={e => setResolveNote(e.target.value)} placeholder="Internal note (not shown to users)…" />
+              <label className="text-sm font-medium mb-1 block">Moderation Note</label>
+              <Input value={resolveNote} onChange={e => setResolveNote(e.target.value)} placeholder="Internal note (not shown to users)…" />
             </div>
           </div>
           <DialogFooter>

@@ -3,7 +3,7 @@ import { apiClient } from "@/lib/apiClient";
 
 export interface CustomDomainConfig {
     domain: string | null;
-    status: "pending_verification" | "verified" | "active" | "failed";
+    status: "pending_verification" | "verified" | "verified_with_conflicts" | "active" | "failed";
     verification_token: string | null;
     txt_verified: boolean;
     cname_verified: boolean;
@@ -45,7 +45,7 @@ export function useVerifyCustomDomain() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async () => {
-            const { data } = await apiClient.post<{ success: boolean; isFullyVerified: boolean; message: string; custom_domain: CustomDomainConfig }>("/api/org-admin/custom-domain/verify");
+            const { data } = await apiClient.post<{ success: boolean; isFullyVerified: boolean; hasConflicts?: boolean; conflictingRecords?: string[]; message: string; custom_domain: CustomDomainConfig }>("/api/org-admin/custom-domain/verify");
             return data;
         },
         onSuccess: (data) => {

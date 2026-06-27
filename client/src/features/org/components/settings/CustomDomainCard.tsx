@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { Globe, CheckCircle2, AlertCircle, RefreshCw, Copy, Trash2, XCircle } from "lucide-react";
+import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 
@@ -12,6 +14,7 @@ export function CustomDomainCard() {
     const removeMutation = useRemoveCustomDomain();
 
     const [domainInput, setDomainInput] = useState("");
+    const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,10 +42,15 @@ export function CustomDomainCard() {
     const handleVerify = () => {
         verifyMutation.mutate(undefined, {
             onSuccess: (data) => {
-                if (data.isFullyVerified) {
+                if (data.isFullyVerified && !data.hasConflicts) {
                     toast.success("Domain verified successfully!");
+                } else if (data.hasConflicts) {
+                    toast.warning(
+                        `DNS records are correct, but we found ${data.conflictingRecords?.length || 0} conflicting A record(s). Remove them from your DNS provider to complete setup.`,
+                        { duration: 8000 }
+                    );
                 } else {
-                    toast.error("Verification pending. Check your DNS records.");
+                    toast.info("DNS not detected yet. Propagation usually takes 3-5 minutes, please try again shortly.", { duration: 5000 });
                 }
             },
             onError: () => {
@@ -52,10 +60,11 @@ export function CustomDomainCard() {
     };
 
     const handleRemove = () => {
-        if (!window.confirm("Are you sure you want to remove this custom domain? Your users will no longer be able to access the platform via this domain.")) return;
-        
         removeMutation.mutate(undefined, {
-            onSuccess: () => toast.success("Custom domain removed.")
+            onSuccess: () => {
+                toast.success("Custom domain removed. You can re-add it anytime.");
+                setRemoveConfirmOpen(false);
+            }
         });
     };
 
@@ -67,7 +76,7 @@ export function CustomDomainCard() {
     if (isLoading) {
         return (
             <div className="w-full h-32 flex items-center justify-center border border-border/50 rounded-xl bg-card/30 animate-pulse">
-                <RefreshCw className="w-6 h-6 text-muted-foreground animate-spin" />
+                <Spinner className="w-6 h-6 text-muted-foreground" />
             </div>
         );
     }
@@ -78,6 +87,7 @@ export function CustomDomainCard() {
 
     const hasDomain = !!domainConfig.domain;
     const isVerified = domainConfig.status === "verified" || domainConfig.status === "active";
+    const hasConflicts = domainConfig.status === "verified_with_conflicts";
 
     return (
         <div className="w-full bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
@@ -98,10 +108,14 @@ export function CustomDomainCard() {
                         <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm ${
                             isVerified 
                             ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
+                            : hasConflicts
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                             : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                         }`}>
                             {isVerified ? (
                                 <><CheckCircle2 className="w-3.5 h-3.5" /> Verified</>
+                            ) : hasConflicts ? (
+                                <><AlertTriangle className="w-3.5 h-3.5" /> Action Needed</>
                             ) : (
                                 <><AlertCircle className="w-3.5 h-3.5" /> Pending Verification</>
                             )}
@@ -153,16 +167,20 @@ export function CustomDomainCard() {
                                 <span className="text-sm text-muted-foreground">Connected Domain</span>
                                 <span className="text-xl font-bold tracking-tight mt-0.5">{domainConfig.domain}</span>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={handleRemove} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                            <Button variant="ghost" size="icon" onClick={() => setRemoveConfirmOpen(true)} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                         </div>
 
-                        {!isVerified && (
+                        {(!isVerified || hasConflicts) && (
                             <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
                                     <p className="text-xs text-muted-foreground mt-1">Add the following records to your DNS provider to verify ownership and route traffic.</p>
+                                    <div className="mt-3 p-2 bg-info/10 text-info border border-info/20 rounded-md text-xs flex items-start gap-2">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <p><strong>Note for Godaddy/Namecheap users:</strong> Enter <strong>only</strong> the exact text shown in the Name (Host) column. Do not add your domain name at the end (e.g. use <code>_classgrid-verify</code> not <code>_classgrid-verify.example.com</code>).</p>
+                                    </div>
                                 </div>
                                 
                                 <div className="p-0 text-sm">
@@ -257,7 +275,7 @@ export function CustomDomainCard() {
                                     </table>
                                 </div>
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
-                                    <span className="text-xs text-muted-foreground">DNS changes can take up to 24 hours to propagate, though usually much faster.</span>
+                                    <span className="text-xs text-muted-foreground max-w-[400px]">DNS propagation usually takes 3-5 minutes. If it fails, please wait a moment and verify again.</span>
                                     <Button onClick={handleVerify} disabled={verifyMutation.isPending} isLoading={verifyMutation.isPending} variant="default" size="sm" showGlow={true} glowVariant="emerald">
                                         {!verifyMutation.isPending && <RefreshCw className="w-3.5 h-3.5" />}
                                         Verify DNS Records
@@ -279,9 +297,61 @@ export function CustomDomainCard() {
                                 </div>
                             </div>
                         )}
+
+                        {hasConflicts && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 flex flex-col gap-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-amber-800 dark:text-amber-300">Almost there! Remove conflicting DNS records</h4>
+                                        <p className="text-sm text-amber-700/80 dark:text-amber-400/80 mt-1">
+                                            Your DNS records are correct, but your DNS provider (e.g. GoDaddy) has extra A records that conflict with Classgrid. This may cause your domain to show a "parked" page instead of your platform.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="bg-background/80 rounded-lg border border-border/50 p-4 ml-12">
+                                    <p className="text-sm font-medium text-foreground mb-2">How to fix (takes 1 minute):</p>
+                                    <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
+                                        <li>Go to your DNS provider's management page</li>
+                                        <li>Find all <strong>A Records</strong> with Name <code className="bg-muted px-1 py-0.5 rounded text-xs">@</code></li>
+                                        <li>Delete every A record <strong>except</strong> the one pointing to <code className="bg-muted px-1 py-0.5 rounded text-xs">76.76.21.21</code></li>
+                                        <li>Wait 2-3 minutes, then click Verify again</li>
+                                    </ol>
+                                </div>
+                                <div className="ml-12">
+                                    <Button onClick={handleVerify} disabled={verifyMutation.isPending} isLoading={verifyMutation.isPending} variant="default" size="sm">
+                                        {!verifyMutation.isPending && <RefreshCw className="w-3.5 h-3.5" />}
+                                        Re-verify DNS Records
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </div>
+
+        {/* Remove Domain Confirmation Dialog */}
+        <Dialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Remove Custom Domain?</DialogTitle>
+                    <DialogDescription>
+                        Your users will no longer be able to access the platform via <strong>{domainConfig?.domain}</strong>. They'll need to use the default Classgrid URL instead.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-sm text-muted-foreground">
+                    <strong className="text-foreground">💡 Good to know:</strong> You can always re-add this domain later. Just enter it again and reconfigure the DNS records.
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
+                    <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
+                        <Trash2 className="w-3.5 h-3.5" /> Yes, Remove Domain
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

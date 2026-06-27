@@ -8,8 +8,10 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 
@@ -135,14 +137,9 @@ export function TransactionsPage() {
     },
   ], []);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "0.5rem 0.75rem", border: "1px solid hsl(var(--border))",
-    borderRadius: "var(--radius)", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: "0.9rem", outline: "none",
-  };
-
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div
+      <PageHeader
         title="Platform Transactions"
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
@@ -192,7 +189,7 @@ export function TransactionsPage() {
           </DialogHeader>
           <div style={{ padding: "0.5rem 0" }}>
             <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Reason</label>
-            <input style={inputStyle} value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder="Enter refund reason…" />
+            <Input value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder="Enter refund reason…" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRefundTarget(null)}>Cancel</Button>
@@ -218,11 +215,11 @@ export function TransactionsPage() {
             </div>
             <div>
               <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Amount (₹)</label>
-              <input style={inputStyle} type="number" min={0} value={manual.amount} onChange={e => setManual(p => ({ ...p, amount: e.target.value }))} placeholder="e.g. 5000" />
+              <Input type="number" min={0} value={manual.amount} onChange={e => setManual(p => ({ ...p, amount: e.target.value }))} placeholder="e.g. 5000" />
             </div>
             <div>
               <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Note</label>
-              <input style={inputStyle} value={manual.note} onChange={e => setManual(p => ({ ...p, note: e.target.value }))} placeholder="e.g. Bank transfer for Q1 subscription" />
+              <Input value={manual.note} onChange={e => setManual(p => ({ ...p, note: e.target.value }))} placeholder="e.g. Bank transfer for Q1 subscription" />
             </div>
           </div>
           <DialogFooter>

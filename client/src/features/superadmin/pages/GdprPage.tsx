@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
@@ -90,14 +92,11 @@ export function GdprPage() {
     },
   ], []);
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "0.5rem 0.75rem", border: "1px solid hsl(var(--border))",
-    borderRadius: "var(--radius)", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: "0.9rem", outline: "none",
-  };
+  // inline styles removed
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div
+      <PageHeader
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
         actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
@@ -128,8 +127,8 @@ export function GdprPage() {
             </DialogDescription>
           </DialogHeader>
           <div style={{ padding: "0.5rem 0" }}>
-            <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Type <strong>ERASE</strong> to confirm</label>
-            <input style={inputStyle} value={eraseConfirmText} onChange={e => setEraseConfirmText(e.target.value)} placeholder="ERASE" />
+            <label className="text-sm font-medium mb-1 block">Type <strong>ERASE</strong> to confirm</label>
+            <Input value={eraseConfirmText} onChange={e => setEraseConfirmText(e.target.value)} placeholder="ERASE" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEraseTarget(null); setEraseConfirmText(""); }}>Cancel</Button>

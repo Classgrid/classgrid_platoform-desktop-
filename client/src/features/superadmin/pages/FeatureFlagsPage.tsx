@@ -8,7 +8,9 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -159,16 +161,11 @@ export function FeatureFlagsPage() {
     [toggleMut.isPending]
   );
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "0.5rem 0.75rem",
-    border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)",
-    background: "hsl(var(--background))", color: "hsl(var(--foreground))",
-    fontSize: "0.9rem", outline: "none",
-  };
+  // inline styles removed
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div
+      <PageHeader
         title="Feature Flags"
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
@@ -270,11 +267,10 @@ export function FeatureFlagsPage() {
           <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
             {(["key", "name", "module", "description"] as const).map((field) => (
               <div key={field}>
-                <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem", textTransform: "capitalize" }}>
+                <label className="text-sm font-medium mb-1 block capitalize">
                   {field}
                 </label>
-                <input
-                  style={inputStyle}
+                <Input
                   value={newFlag[field]}
                   placeholder={field === "key" ? "e.g. ai_viva_enabled" : ""}
                   onChange={(e) => setNewFlag((p) => ({ ...p, [field]: e.target.value }))}

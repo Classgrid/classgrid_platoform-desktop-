@@ -7,7 +7,9 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-
+import { Input } from "@/components/marketing_ui/input";
+import { Textarea } from "@/components/marketing_ui/textarea";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -18,13 +20,7 @@ const AUDIENCE_OPTIONS = [
   { label: "All Active Orgs", value: "active_orgs" },
 ];
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "0.5rem 0.75rem",
-  border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)",
-  background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: "0.9rem", outline: "none",
-};
-
-const textareaStyle: React.CSSProperties = { ...inputStyle, resize: "vertical" as const, minHeight: "80px", fontFamily: "inherit" };
+// Removed hardcoded styles in favor of marketing_ui components
 
 export function NotificationEnginePage() {
   const qc = useQueryClient();
@@ -62,7 +58,7 @@ export function NotificationEnginePage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div
+      <PageHeader
         title="Notifications Engine"
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
@@ -153,11 +149,11 @@ export function NotificationEnginePage() {
             <DialogDescription>Send a push notification to ALL users immediately.</DialogDescription>
           </DialogHeader>
           <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Title</label>
-              <input style={inputStyle} value={broadcast.title} onChange={e => setBroadcast(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Scheduled maintenance" /></div>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Message</label>
-              <textarea style={textareaStyle} value={broadcast.message} onChange={e => setBroadcast(p => ({ ...p, message: e.target.value }))} placeholder="Message body…" /></div>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Type</label>
+            <div><label className="text-sm font-medium mb-1 block">Title</label>
+              <Input value={broadcast.title} onChange={e => setBroadcast(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Scheduled maintenance" /></div>
+            <div><label className="text-sm font-medium mb-1 block">Message</label>
+              <Textarea value={broadcast.message} onChange={e => setBroadcast(p => ({ ...p, message: e.target.value }))} placeholder="Message body…" /></div>
+            <div><label className="text-sm font-medium mb-1 block">Type</label>
               <div value={broadcast.type} onValueChange={v => setBroadcast(p => ({ ...p, type: v }))}
                 options={[{ label: "Info", value: "info" }, { label: "Warning", value: "warning" }, { label: "Critical", value: "error" }, { label: "Success", value: "success" }]} /></div>
           </div>
@@ -178,14 +174,14 @@ export function NotificationEnginePage() {
             <DialogDescription>Plan a notification for a specific time and audience.</DialogDescription>
           </DialogHeader>
           <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Title</label>
-              <input style={inputStyle} value={scheduled.title} onChange={e => setScheduled(p => ({ ...p, title: e.target.value }))} placeholder="Title…" /></div>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Message</label>
-              <textarea style={textareaStyle} value={scheduled.message} onChange={e => setScheduled(p => ({ ...p, message: e.target.value }))} placeholder="Message…" /></div>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Audience</label>
+            <div><label className="text-sm font-medium mb-1 block">Title</label>
+              <Input value={scheduled.title} onChange={e => setScheduled(p => ({ ...p, title: e.target.value }))} placeholder="Title…" /></div>
+            <div><label className="text-sm font-medium mb-1 block">Message</label>
+              <Textarea value={scheduled.message} onChange={e => setScheduled(p => ({ ...p, message: e.target.value }))} placeholder="Message…" /></div>
+            <div><label className="text-sm font-medium mb-1 block">Audience</label>
               <div value={scheduled.audience} onValueChange={v => setScheduled(p => ({ ...p, audience: v }))} options={AUDIENCE_OPTIONS} /></div>
-            <div><label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Send At</label>
-              <input style={inputStyle} type="datetime-local" value={scheduled.scheduledFor} onChange={e => setScheduled(p => ({ ...p, scheduledFor: e.target.value }))} /></div>
+            <div><label className="text-sm font-medium mb-1 block">Send At</label>
+              <Input type="datetime-local" value={scheduled.scheduledFor} onChange={e => setScheduled(p => ({ ...p, scheduledFor: e.target.value }))} /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setScheduleOpen(false)}>Cancel</Button>
