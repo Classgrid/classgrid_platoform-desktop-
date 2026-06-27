@@ -51,6 +51,7 @@ export function ChatPage() {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
   const [viewingPhotoUrl, setViewingPhotoUrl] = useState<string | null>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   // -- Load Initial Data --
   useEffect(() => {
@@ -263,10 +264,11 @@ export function ChatPage() {
                 if (activeThread.type === "group" && activeThread.groupId) {
                   setIsGroupSettingsOpen(true);
                 } else if (activeThread.type === "dm") {
-                  if (activeThread.avatar) {
-                    setViewingPhotoUrl(activeThread.avatar);
+                  if (activeThread.otherUserId) {
+                    setProfileUserId(activeThread.otherUserId);
                   } else {
-                    toast.info("No profile picture available");
+                    // Fallback to avatar if no otherUserId somehow
+                    if (activeThread.avatar) setViewingPhotoUrl(activeThread.avatar);
                   }
                 }
               }}
@@ -355,6 +357,13 @@ export function ChatPage() {
           src={viewingPhotoUrl} 
           alt="Profile Photo" 
           onClose={() => setViewingPhotoUrl(null)} 
+        />
+      )}
+
+      {!!profileUserId && (
+        <SharedProfilePage 
+          publicUser={orgUsers.find(u => u._id === profileUserId) || undefined} 
+          onClose={() => setProfileUserId(null)} 
         />
       )}
     </div>
