@@ -63,8 +63,8 @@ export function CustomDomainCard() {
         );
     }
 
-    if (domainConfig === null) {
-        return null; // Module not enabled for this org
+    if (!domainConfig) {
+        return null; // Module not enabled for this org or API failed
     }
 
     const hasDomain = !!domainConfig.domain;
