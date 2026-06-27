@@ -311,10 +311,22 @@ export function CustomDomainCard() {
                                     </table>
                                 </div>
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
-                                    <span className="text-xs text-muted-foreground max-w-[400px]">DNS propagation usually takes 3-5 minutes. If it fails, please wait a moment and verify again.</span>
-                                    <Button onClick={handleVerify} disabled={verifyMutation.isPending} isLoading={verifyMutation.isPending} variant="default" size="sm" showGlow={true} glowVariant="emerald">
-                                        {!verifyMutation.isPending && <RefreshCw className="w-3.5 h-3.5" />}
-                                        Verify DNS Records
+                                    <span className="text-xs text-muted-foreground max-w-[400px]">
+                                        {(domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") 
+                                            ? "Checking DNS propagation automatically every 10 seconds. This usually takes 3-5 minutes..." 
+                                            : "DNS propagation usually takes 3-5 minutes. If it fails, please wait a moment and verify again."}
+                                    </span>
+                                    <Button 
+                                        onClick={handleVerify} 
+                                        disabled={verifyMutation.isPending || domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts"} 
+                                        isLoading={verifyMutation.isPending || domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts"} 
+                                        variant="default" 
+                                        size="sm" 
+                                        showGlow={true} 
+                                        glowVariant="emerald"
+                                    >
+                                        {!verifyMutation.isPending && domainConfig.status !== "pending_verification" && domainConfig.status !== "verified_with_conflicts" && <RefreshCw className="w-3.5 h-3.5" />}
+                                        {(domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") ? "Verifying DNS..." : "Verify DNS Records"}
                                     </Button>
                                 </div>
                             </div>
