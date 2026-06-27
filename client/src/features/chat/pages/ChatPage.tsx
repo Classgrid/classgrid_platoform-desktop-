@@ -25,6 +25,7 @@ import { ChatInput } from "../components/ChatInput";
 import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
+import { UserProfileModal } from "../components/UserProfileModal";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -48,6 +49,7 @@ export function ChatPage() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   // -- Load Initial Data --
   useEffect(() => {
@@ -258,8 +260,8 @@ export function ChatPage() {
               onShowInfo={() => {
                 if (activeThread.type === "group" && activeThread.groupId) {
                   setIsGroupSettingsOpen(true);
-                } else {
-                  toast.info("DM info coming soon");
+                } else if (activeThread.type === "dm" && activeThread.otherUserId) {
+                  setProfileUserId(activeThread.otherUserId);
                 }
               }}
             />
@@ -273,6 +275,7 @@ export function ChatPage() {
               onLoadMore={handleLoadMore}
               onReply={setReplyTo}
               onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
+              onUserClick={(userId) => setProfileUserId(userId)}
               onEdit={async (id, text) => {
                 try {
                   await editMessage(activeThread.id, id, text);
@@ -333,6 +336,12 @@ export function ChatPage() {
           }}
         />
       )}
+
+      <UserProfileModal 
+        isOpen={!!profileUserId} 
+        onClose={() => setProfileUserId(null)} 
+        user={orgUsers.find(u => u._id === profileUserId) || null} 
+      />
     </div>
   );
 }

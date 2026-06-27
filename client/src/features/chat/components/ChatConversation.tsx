@@ -14,6 +14,7 @@ interface ChatConversationProps {
   onDelete: (msgId: string) => void;
   onEdit: (msgId: string, newText: string) => void;
   onReact: (msgId: string, emoji: string) => void;
+  onUserClick?: (userId: string) => void;
 }
 
 export function ChatConversation({
@@ -27,6 +28,7 @@ export function ChatConversation({
   onDelete,
   onEdit,
   onReact,
+  onUserClick,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isNearBottom, setIsNearBottom] = useState(true);
@@ -148,6 +150,7 @@ export function ChatConversation({
                   onDelete={onDelete}
                   onEdit={onEdit}
                   onReact={onReact}
+                  onUserClick={onUserClick}
                 />
               );
             })}
