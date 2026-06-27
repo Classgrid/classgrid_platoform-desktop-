@@ -428,17 +428,33 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       } catch { replyData = null; }
     }
 
-    // ATOMIC: Insert message via RPC
+    // Insert message directly
     const now = new Date().toISOString();
-    const { data: msgId, error: rpcErr } = await sb.rpc('send_message_atomic', {
-      p_thread_id: threadId,
-      p_sender_id: userId,
-      p_sender_name: req.user.name || 'User',
-      p_user_avatar: req.user.profilePicture || null,
-      p_msg: msgText || (files.length > 0 ? '' : ''),
-      p_reply: replyData,
-    });
-    if (rpcErr) throw rpcErr;
+    const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
+      thread_id: threadId,
+      sender_id: userId,
+      sender_name: req.user.name || 'User',
+      user_avatar: req.user.profilePicture || null,
+      message: msgText || '',
+      reply_to: replyData,
+      created_at: now
+    }).select('id').single();
+    
+    if (insertErr) {
+      console.error("[Message Insert Error]", insertErr);
+      return res.status(500).json({ error: 'Failed to send message' });
+    }
+    const msgId = insertedMsg.id;
+
+    // Update thread metadata manually
+    sb.from('chat_threads')
+      .update({ 
+        last_message: msgText || (files.length > 0 ? '📎 File' : ''), 
+        last_message_at: now 
+      })
+      .eq('id', threadId)
+      .then(() => {})
+      .catch(() => {});
 
     // ── Build response from known data instead of re-fetching ──
     const broadcastPayload = {
