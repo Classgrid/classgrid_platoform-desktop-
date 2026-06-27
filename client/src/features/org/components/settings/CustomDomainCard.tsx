@@ -213,9 +213,13 @@ export function CustomDomainCard() {
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm">Action Required: Configure DNS Records</h4>
                                     <p className="text-xs text-muted-foreground mt-1">Add the following records to your DNS provider to verify ownership and route traffic.</p>
-                                    <div className="mt-3 p-2 bg-info/10 text-info border border-info/20 rounded-md text-xs flex items-start gap-2">
-                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                                        <p><strong>Note for Godaddy/Namecheap users:</strong> Enter <strong>only</strong> the exact text shown in the Name (Host) column. Do not add your domain name at the end (e.g. use <code>_classgrid-verify</code> not <code>_classgrid-verify.example.com</code>).</p>
+                                    <div className="mt-3 p-2 bg-info/10 text-info border border-info/20 rounded-md text-xs flex flex-col gap-2">
+                                        <p className="text-amber-700/90 dark:text-amber-400 text-[13px] leading-relaxed font-medium">
+                                            <span className="font-bold">Note for Godaddy/Namecheap users:</span> Enter <strong>only</strong> the exact text shown in the Name (Host) column. Do not add your domain name at the end (e.g. use <code className="bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">_classgrid-verify</code> not <code className="bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">_classgrid-verify.example.com</code>).
+                                        </p>
+                                        <p className="text-amber-700/90 dark:text-amber-400 text-[13px] leading-relaxed font-medium">
+                                            <span className="font-bold">Note for Cloudflare users:</span> Make sure the Proxy Status for the A record is set to <strong>"DNS Only" (Gray Cloud)</strong>. If it is set to "Proxied" (Orange Cloud), the verification will fail.
+                                        </p>
                                     </div>
                                 </div>
                                 
