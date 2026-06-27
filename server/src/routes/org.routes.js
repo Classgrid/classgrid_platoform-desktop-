@@ -1973,10 +1973,10 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             const cnameRecords = await dns.resolveCname(domain);
             cnameVerified = cnameRecords.some(r => r.includes("classgrid.in") || r.includes("vercel.app") || r.includes("vercel.com") || r.includes("cname.vercel-dns.com"));
         } catch (err) {
-            // Also check A record if they mapped APEX domain
             try {
                 const aRecords = await dns.resolve4(domain);
-                cnameVerified = aRecords.length > 0; // If it points somewhere, we assume they set the A record correctly
+                // Vercel's standard anycast IP for apex domains is 76.76.21.21
+                cnameVerified = aRecords.includes("76.76.21.21");
             } catch (aErr) {
                 console.log(`[DNS Verify] CNAME/A lookup failed for ${domain}:`, err.code);
             }
