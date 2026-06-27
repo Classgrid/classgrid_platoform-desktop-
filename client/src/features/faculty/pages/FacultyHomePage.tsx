@@ -78,7 +78,7 @@ export function FacultyHomePage() {
   if (isLoading) {
     return (
       <DashboardLayout role="faculty">
-        <PageHeader title="Welcome back!" description="Loading your dashboard..." />
+        <PageHeader title="Welcome back!" description="Loading your overview..." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
         </div>
