@@ -268,6 +268,16 @@ export function CustomDomainCard() {
                                                                 {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
+                                                        {targetType === 'A Record' && (
+                                                            <tr>
+                                                                <td colSpan={5} className="px-4 py-2">
+                                                                    <div className="flex items-start gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-2">
+                                                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                                                        <span><strong>Important:</strong> Make sure this is the <strong>only</strong> A record for <code className="bg-muted px-1 py-0.5 rounded">@</code>. Delete any other A records your DNS provider (e.g. GoDaddy) may have added automatically, otherwise your domain may show a parked page.</span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
                                                     </>
                                                 );
                                             })()}
