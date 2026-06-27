@@ -202,11 +202,61 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
   };
 
   const handleSendMessage = async (text: string, files: File[]) => {
-    setIsSending(true);
+    if (!text.trim() && files.length === 0) return;
+    
+    // Optimistic UI Update instantly!
+    const tempId = `temp-${Date.now()}`;
+    const now = new Date().toISOString();
+    const tempMessage: ChatMessage = {
+      id: tempId,
+      thread_id: threadId,
+      sender_id: currentUserId,
+      sender_name: "You", // Will be replaced by real data
+      user_avatar: null,
+      message: text,
+      reply_to: replyTo ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message } : null,
+      is_deleted: false,
+      created_at: now,
+      attachments: files.map((f, i) => ({
+        id: `temp-att-${i}`,
+        message_id: tempId,
+        file_url: URL.createObjectURL(f),
+        file_name: f.name,
+        file_type: f.type,
+        file_size: f.size
+      })),
+      reactions: {}
+    };
+
+    // Inject directly into React Query cache for instant feedback
+    queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+      if (!oldData || !oldData.pages) return oldData;
+      const newPages = [...oldData.pages];
+      if (newPages.length > 0) {
+        newPages[0] = [tempMessage, ...newPages[0]];
+      }
+      return { ...oldData, pages: newPages };
+    });
+
+    // Only show spinner if we are uploading files, otherwise it should be instant
+    if (files.length > 0) {
+      setIsSending(true);
+    }
+    
     try {
-      await sendMessage(threadId, text, files, replyTo);
+      // Send to server in background
+      const sentMsg = await sendMessage(threadId, text, files, replyTo);
       setReplyTo(null);
-      // The WebSocket onNewMessage will update the cache and render the message.
+      
+      // Replace temporary message with actual server message
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.map((msg) => msg.id === tempId ? sentMsg : msg)
+        );
+        return { ...oldData, pages: newPages };
+      });
+
       if (scrollRef.current) {
         setTimeout(() => {
           if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -214,8 +264,18 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
       }
     } catch (error) {
       console.error("Failed to send message", error);
+      // Remove temporary message on failure
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.filter((msg) => msg.id !== tempId)
+        );
+        return { ...oldData, pages: newPages };
+      });
     } finally {
-      setIsSending(false);
+      if (files.length > 0) {
+        setIsSending(false);
+      }
     }
   };
 
