@@ -129,7 +129,6 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
     files.forEach((file) => formData.append("files", file));
   }
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
     timeout: 10000,
   });
   return res.data.message;
