@@ -423,7 +423,7 @@ export function CustomDomainCard() {
                 <DialogHeader>
                     <DialogTitle>Remove Custom Domain?</DialogTitle>
                     <DialogDescription>
-                        Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain}</strong>. They'll need to use the default Classgrid URL instead.
+                        Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-sm text-muted-foreground">
@@ -432,7 +432,7 @@ export function CustomDomainCard() {
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
                     <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
-                        <Trash2 className="w-3.5 h-3.5" /> Yes, Remove Domain
+                        <Trash2 className="w-3.5 h-3.5" /> Remove Domain
                     </Button>
                 </DialogFooter>
             </DialogContent>
