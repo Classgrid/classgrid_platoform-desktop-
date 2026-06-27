@@ -86,7 +86,7 @@ import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { getRedirectPath } from "@/features/auth/auth-helpers";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
-import { DashboardLayout } from "@/layouts/DashboardLayout";
+
 import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
 import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
 import { DynamicRoleLayout } from "@/components/layout/DynamicRoleLayout";
@@ -170,15 +170,21 @@ export function AppRouter() {
 
         {/* NEW ORG ADMIN SHELL */}
         <Route element={<OrgAdminLayout />}>
-          <Route path="/org/settings" element={<SharedSettingsPage />} />
-          <Route path="/org/profile" element={<SharedProfilePage />} />
-          <Route path="/org/chat" element={<ChatPage />} />
-          <Route path="/org/dashboard" element={<GenericPage title="Org Overview" />} />
-          <Route path="/org/*" element={<ComingSoonPage />} />
+          <Route path="/org/admin/settings" element={<SharedSettingsPage />} />
+          <Route path="/org/admin/profile" element={<SharedProfilePage />} />
+          <Route path="/org/admin/chat" element={<ChatPage />} />
+          <Route path="/org/admin/dashboard" element={<GenericPage title="Org Overview" />} />
+          <Route path="/org/admin/*" element={<ComingSoonPage />} />
+          
+          {/* Legacy redirects for compatibility */}
+          <Route path="/org/settings" element={<Navigate to="/org/admin/settings" replace />} />
+          <Route path="/org/profile" element={<Navigate to="/org/admin/profile" replace />} />
+          <Route path="/org/chat" element={<Navigate to="/org/admin/chat" replace />} />
+          <Route path="/org/dashboard" element={<Navigate to="/org/admin/dashboard" replace />} />
         </Route>
 
         <Route path="/" element={<DefaultDashboardRedirect />} />
-        <Route path="/admin/dashboard" element={<Navigate to="/org/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<Navigate to="/org/admin/dashboard" replace />} />
 
         {/* ── DYNAMIC ROLE LAYOUT (Wraps all 10 Dept Dashboards & Common Pages) ── */}
         <Route element={<DynamicRoleLayout />}>
