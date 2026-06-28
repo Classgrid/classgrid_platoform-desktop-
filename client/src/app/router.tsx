@@ -35,6 +35,7 @@ import { ContentModerationPage } from "@/features/superadmin/pages/ContentModera
 import { NotificationEnginePage } from "@/features/superadmin/pages/NotificationEnginePage";
 import { OrganizationsPage } from "@/features/superadmin/pages/OrganizationsPage";
 import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
+import { OrgDetailsPage } from "@/features/superadmin/pages/OrgDetailsPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
@@ -138,6 +139,7 @@ export function AppRouter() {
           <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
           <Route path="/superadmin/orgs/:id" element={<OrgDetailPage />} />
           <Route path="/superadmin/domains" element={<CustomDomainsPage />} />
+          <Route path="/superadmin/domains/:orgId" element={<OrgDetailsPage />} />
           <Route path="/superadmin/onboard" element={<OnboardPage />} />
           <Route path="/superadmin/direct-onboard" element={<DirectOnboardPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />

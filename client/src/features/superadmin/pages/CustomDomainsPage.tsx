@@ -14,13 +14,13 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { OrgDetailsSheet } from "../components/OrgDetailsSheet";
+import { useNavigate } from "react-router-dom";
 
 export function CustomDomainsPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [showCloudflareModal, setShowCloudflareModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["super-admin-custom-domains"],
@@ -90,7 +90,7 @@ export function CustomDomainsPage() {
         const realName = row.owner_id?.name || row.ownerName || "Unknown Admin";
         return (
           <span 
-            onClick={() => setSelectedOrgId(row._id)}
+            onClick={() => navigate(`/superadmin/domains/${row._id}`)}
             className="text-sm font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1.5"
           >
             {realName} <Info size={14} />
@@ -233,8 +233,6 @@ export function CustomDomainsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <OrgDetailsSheet orgId={selectedOrgId} onClose={() => setSelectedOrgId(null)} />
     </div>
   );
 }
