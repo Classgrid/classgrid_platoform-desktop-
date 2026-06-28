@@ -97,10 +97,78 @@ export function OrgDetailsPage() {
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="w-full justify-start overflow-x-auto flex-nowrap mb-8 bg-secondary/50 p-1.5 rounded-lg border border-border/50">
               <TabsTrigger value="overview" className="text-sm px-6 py-2">Overview & Admin</TabsTrigger>
+              <TabsTrigger value="admins" className="text-sm px-6 py-2">Administrators Directory</TabsTrigger>
               <TabsTrigger value="portals" className="text-sm px-6 py-2">Portals & Links</TabsTrigger>
               <TabsTrigger value="config" className="text-sm px-6 py-2">Configurations</TabsTrigger>
               <TabsTrigger value="modules" className="text-sm px-6 py-2">Premium Modules</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="admins" className="mt-0 animate-in fade-in duration-300">
+              <Section title="Department & Organization Administrators" icon={<ShieldCheck size={20} />}>
+                <div className="text-sm text-muted-foreground mb-6">
+                  Showing all active administrators, HODs, Principals, and coordinators with elevated access inside this organization.
+                </div>
+                
+                {data.adminsList && data.adminsList.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.adminsList.map((admin: any) => (
+                      <div 
+                        key={admin._id} 
+                        className="group relative flex flex-col p-5 rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/50 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 overflow-hidden"
+                      >
+                        {/* Decorative background blur */}
+                        <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-500" />
+                        
+                        <div className="flex items-start gap-4 mb-4 relative z-10">
+                          {admin.profilePicture ? (
+                            <img src={admin.profilePicture} alt={admin.name} className="w-14 h-14 rounded-full object-cover border-2 border-background shadow-sm ring-1 ring-border/50" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-semibold text-lg border-2 border-background shadow-sm ring-1 ring-border/50">
+                              {admin.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <h4 className="font-semibold text-foreground truncate">{admin.name}</h4>
+                            <p className="text-xs text-muted-foreground truncate">{admin.email}</p>
+                            <div className="mt-2">
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-secondary/30">
+                                {admin.role?.replace(/_/g, ' ')}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2 mt-auto pt-4 border-t border-border/30 relative z-10">
+                          {admin.department && (
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">Department</span>
+                              <span className="font-medium">{admin.department}</span>
+                            </div>
+                          )}
+                          {admin.designation && (
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">Designation</span>
+                              <span className="font-medium text-right line-clamp-1" title={admin.designation}>{admin.designation}</span>
+                            </div>
+                          )}
+                          {admin.phoneNumber && (
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">Phone</span>
+                              <span className="font-medium font-mono">{admin.phoneNumber}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-3 bg-secondary/10 rounded-xl border border-dashed border-border/50">
+                    <UserCircle size={40} className="text-muted-foreground/50" />
+                    <p className="text-sm font-medium">No additional administrators found.</p>
+                  </div>
+                )}
+              </Section>
+            </TabsContent>
 
             <TabsContent value="overview" className="mt-0 animate-in fade-in duration-300">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

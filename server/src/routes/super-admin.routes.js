@@ -446,17 +446,22 @@ router.get("/custom-domains/:orgId/full", async (req, res) => {
             return res.status(404).json({ success: false, message: "Organization not found" });
         }
 
-        const [totalStudents, totalFaculty, totalUsers] = await Promise.all([
+        const [totalStudents, totalFaculty, totalUsers, adminsList] = await Promise.all([
             User.countDocuments({ organization_id: orgId, role: "student" }),
             User.countDocuments({ organization_id: orgId, role: { $in: ["faculty", "hod", "principal"] } }),
-            User.countDocuments({ organization_id: orgId })
+            User.countDocuments({ organization_id: orgId }),
+            User.find({
+                organization_id: orgId,
+                role: { $in: ["org_admin", "super_admin", "library_manager", "hod", "principal", "vice_principal", "exam_controller", "fee_manager", "admission_head", "tpo_officer", "coordinator"] }
+            }).select("name email role profilePicture department designation phoneNumber").lean()
         ]);
 
         res.json({
             success: true,
             data: {
                 ...org,
-                stats: { totalStudents, totalFaculty, totalUsers }
+                stats: { totalStudents, totalFaculty, totalUsers },
+                adminsList
             }
         });
     } catch (err) {
