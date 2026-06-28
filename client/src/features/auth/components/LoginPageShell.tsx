@@ -38,8 +38,10 @@ export function LoginPageShell({ leftPanel, rightPanel }: LoginPageShellProps) {
         <div className="hidden w-px bg-white/[0.08] md:block" aria-hidden="true" />
 
         {/* ── Right Panel ── */}
-        <div className="flex w-full flex-col items-center justify-center overflow-y-auto px-6 py-8 md:w-1/2 md:px-12 lg:px-16 relative">
-          {rightPanel}
+        <div className="flex w-full flex-col items-center justify-center overflow-y-auto px-6 py-8 md:w-1/2 relative">
+          <div className="flex w-full max-w-[500px] flex-col items-center justify-center rounded-[24px] border border-white/[0.06] bg-[#121212] p-10 shadow-xl">
+            {rightPanel}
+          </div>
         </div>
       </div>
     </main>
