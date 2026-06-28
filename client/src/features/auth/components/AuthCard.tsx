@@ -350,7 +350,7 @@ export function AuthCard({
             </div>
 
             <TermsText className="pt-2" variant="sentence" />
-            <RecaptchaBadge />
+
           </motion.form>
         ) : step === "device" ? (
           <motion.form
@@ -501,7 +501,7 @@ export function AuthCard({
             </div>
 
             <TermsText className="pt-2" variant="compact" />
-            <RecaptchaBadge />
+
           </motion.form>
         )}
       </AnimatePresence>
@@ -794,15 +794,3 @@ function TermsText({
   );
 }
 
-function RecaptchaBadge() {
-  return (
-    <div className="mt-2 flex items-center justify-center text-[11px] text-white/30">
-      Protected by reCAPTCHA
-      <span className="mx-1.5 flex items-center gap-1">
-        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 hover:underline">Privacy</a>
-        {" - "}
-        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 hover:underline">Terms</a>
-      </span>
-    </div>
-  );
-}
