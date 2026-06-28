@@ -26,6 +26,7 @@ import Meeting from "../models/Meeting.js";
 import OrgSubscription from "../models/OrgSubscription.js";
 import { studentNotesClient } from "../config/supabaseClient.js";
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+import { getOrganizationResourceUsage, recordInternalResourceSnapshot } from "../services/organization-resource-meter.service.js";
 
 
 async function getStatusCounts(Model, match, field = "status") {
@@ -326,10 +327,20 @@ export const getOrgUsage = async (req, res) => {
                 }
             },
             coverage: {
-                providerCostAllocation: "unavailable",
-                reason: "The current backend does not store per-organization Vercel, EC2, Redis, MongoDB byte-cost allocation, or full Cloudflare R2 object allocation across every feature prefix."
+                providerCostAllocation: "partial",
+                reason: "The backend now stores internal per-organization resource meters and env-backed provider readiness. Vercel, EC2, Redis, MongoDB byte-cost, SMS, AI, Razorpay provider fees, and full R2 allocation still need provider/API syncs or tenant-tagged logs."
             }
-        });
+        };
+
+        try {
+            usagePayload.resourceMeters = await recordInternalResourceSnapshot(orgId, usagePayload);
+        } catch (meterError) {
+            console.error("[AdminAnalytics] resource meter snapshot error:", meterError.message);
+            usagePayload.resourceMeters = await getOrganizationResourceUsage(orgId);
+            usagePayload.resourceMeters.captureError = meterError.message;
+        }
+
+        res.status(200).json(usagePayload);
     } catch (err) {
         res.status(500).json({ message: "Server error", error: err.message });
     }
@@ -546,7 +557,7 @@ export const getSystemActivity = async (req, res) => {
 
         const formattedClassrooms = newClassrooms.map(c => ({
             type: 'classroom_created',
-            message: `New classroom: "${c.name}"${c.subject ? ' — ' + c.subject : ''}`,
+            message: `New classroom: "${c.name}"${c.subject ? ' ï¿½ ' + c.subject : ''}`,
             time: c.createdAt
         }));
 
@@ -583,7 +594,7 @@ export const getGlobalStorageUsage = async (req, res) => {
         const assumedBytesPerFile = 2.5 * 1024 * 1024;
         const totalStorageBytes = (count || 0) * assumedBytesPerFile;
 
-        res.status(200).json({
+        const usagePayload = {
             storage: {
                 bytes: totalStorageBytes,
                 mb: (totalStorageBytes / (1024 * 1024)).toFixed(0),

@@ -204,6 +204,51 @@ export interface OrganizationTrackedCollections {
   [key: string]: number | undefined;
 }
 
+export interface OrganizationProviderConfiguration {
+  provider: string;
+  label: string;
+  configured: boolean;
+  requiredEnv?: string[];
+  requiredEnvAny?: string[];
+  optionalEnv?: string[];
+  missingEnv?: string[];
+  presentOptionalEnv?: string[];
+  meterStatus?: string;
+  note?: string;
+}
+
+export interface OrganizationResourceMeter {
+  _id?: string;
+  provider: string;
+  providerLabel?: string;
+  resourceType: string;
+  metricKey: string;
+  metricLabel: string;
+  usageAmount?: number | null;
+  unit?: string;
+  costAmount?: number | null;
+  currency?: string;
+  quality?: string;
+  source?: string;
+  periodStart?: string | null;
+  periodEnd?: string | null;
+  lastSyncedAt?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface OrganizationResourceMeterSummary {
+  records?: OrganizationResourceMeter[];
+  providerConfiguration?: OrganizationProviderConfiguration[];
+  totals?: {
+    knownCostInr?: number;
+    totalMeters?: number;
+    actualMeters?: number;
+    partialMeters?: number;
+    configuredProviders?: number;
+    totalProviders?: number;
+  };
+  captureError?: string;
+}
 export interface OrganizationLegacyUsage {
   storage?: {
     bytes?: number;
@@ -264,6 +309,7 @@ export interface OrganizationLegacyUsage {
       approvedAmount?: number;
     };
   };
+  resourceMeters?: OrganizationResourceMeterSummary;
   coverage?: {
     providerCostAllocation?: string;
     reason?: string;
