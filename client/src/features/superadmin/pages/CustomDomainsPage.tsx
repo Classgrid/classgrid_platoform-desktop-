@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Globe, ShieldAlert, CheckCircle, RefreshCw, Copy, Check, Info } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Globe, ShieldAlert, CheckCircle, RefreshCw, Copy, Check, Info, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
@@ -9,6 +8,7 @@ import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { Skeleton } from "@/components/marketing_ui/skeleton";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
@@ -35,65 +35,64 @@ export function CustomDomainsPage() {
     } 
   });
 
-  const columns: ColumnDef<any>[] = useMemo(() => [
+  // Updated to match the custom DataTable's Column interface
+  const columns = useMemo(() => [
     {
-      accessorKey: "name", 
+      key: "name", 
       header: "Organization", 
-      size: 200,
-      cell: ({ row }) => {
-        const o = row.original;
-        return (
-          <div>
-            <div style={{ fontWeight: 500 }}>{o.name}</div>
-            <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
-              {o.subdomain}.classgrid.in
-            </div>
+      width: "w-[250px]",
+      render: (val: any, row: any) => (
+        <div>
+          <div style={{ fontWeight: 500 }}>{row.name}</div>
+          <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+            {row.subdomain}.classgrid.in
           </div>
-        );
-      },
+        </div>
+      ),
     },
     {
-      accessorKey: "domain", 
+      key: "domain", 
       header: "Custom Domain", 
-      size: 200,
-      cell: ({ row }) => {
-        const domain = row.original.custom_domain?.domain;
-        return <span className="font-mono text-sm">{domain}</span>;
+      width: "w-[250px]",
+      render: (val: any, row: any) => {
+        const domain = row.custom_domain?.domain;
+        return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
       },
     },
     {
-      accessorKey: "status", 
+      key: "status", 
       header: "Status", 
-      size: 150,
-      cell: ({ row }) => {
-        const s = row.original.custom_domain?.status ?? "pending_verification";
+      width: "w-[160px]",
+      render: (val: any, row: any) => {
+        const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
         return <Badge variant="warning">{s.replace("_", " ")}</Badge>;
       },
     },
     {
-      accessorKey: "verified_at", 
+      key: "verified_at", 
       header: "Verified Date", 
-      size: 130,
-      cell: ({ row }) => {
-         const d = row.original.custom_domain?.verified_at;
+      width: "w-[150px]",
+      render: (val: any, row: any) => {
+         const d = row.custom_domain?.verified_at;
          return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
       },
     },
     {
-      id: "actions", 
+      key: "actions", 
       header: "Actions", 
-      size: 120,
-      cell: ({ row }) => {
-        const o = row.original;
-        const isVerifying = verifyMut.isPending && verifyMut.variables === o._id;
-        
+      width: "w-[140px]",
+      render: (val: any, row: any) => {
+        const isVerifying = verifyMut.isPending && verifyMut.variables === row._id;
         return (
           <Button 
             size="sm" 
             variant="outline" 
             isLoading={isVerifying}
-            onClick={() => verifyMut.mutate(o._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              verifyMut.mutate(row._id);
+            }}
           >
             Re-verify
           </Button>
@@ -137,16 +136,39 @@ export function CustomDomainsPage() {
   const totalVerified = orgs.filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active").length;
   const totalPending = orgs.filter(o => o.custom_domain?.status === "pending_verification").length;
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12 animate-in fade-in duration-500">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-64 rounded-md" />
+            <Skeleton className="h-4 w-96 rounded-md" />
+          </div>
+          <div className="flex gap-2">
+             <Skeleton className="h-10 w-48 rounded-lg" />
+             <Skeleton className="h-10 w-28 rounded-lg" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-[100px] rounded-xl" />
+          <Skeleton className="h-[100px] rounded-xl" />
+          <Skeleton className="h-[100px] rounded-xl" />
+        </div>
+        <Skeleton className="h-[400px] rounded-xl mt-6" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Platform Domains</h1>
-          <p className="text-muted-foreground mt-1">Manage and verify custom domains mapped by organizations.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Manage and verify custom domains mapped by organizations.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowCloudflareModal(true)}>
-             Generate Cloudflare JSON
+            <Settings size={14} className="mr-2 text-primary" /> Cloudflare CORS
           </Button>
           <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} /> Refresh
@@ -155,58 +177,58 @@ export function CustomDomainsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard title="Total Domain Requests" value={isLoading ? "—" : orgs.length} icon={<Globe size={15} />} />
-        <StatCard title="Verified & Active" value={isLoading ? "—" : totalVerified} icon={<CheckCircle size={15} />} />
-        <StatCard title="Pending DNS Setup" value={isLoading ? "—" : totalPending} icon={<ShieldAlert size={15} />} />
+        <StatCard title="Total Domain Requests" value={orgs.length} icon={<Globe size={15} />} />
+        <StatCard title="Verified & Active" value={totalVerified} icon={<CheckCircle size={15} />} />
+        <StatCard title="Pending DNS Setup" value={totalPending} icon={<ShieldAlert size={15} />} />
       </div>
 
       <div style={{ marginTop: "1.25rem" }}>
-        <SectionPanel title="Domain Registry" description={`Showing ${orgs.length} domains`} noPadding>
+        <SectionPanel title="Domain Registry" description={`Showing ${orgs.length} registered custom domains`} noPadding>
           <DataTable 
             columns={columns} 
-            data={orgs} 
+            rows={orgs} 
             isLoading={isLoading} 
-            pageSize={50}
-            emptyIcon={<Globe size={32} />} 
-            emptyTitle="No domains found" 
-            emptyDescription="No organizations have requested custom domains yet." 
+            emptyMessage="No organizations have requested custom domains yet." 
           />
         </SectionPanel>
       </div>
 
       <Dialog open={showCloudflareModal} onOpenChange={setShowCloudflareModal}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle>Cloudflare R2 CORS Configuration</DialogTitle>
             <DialogDescription>
               Copy this JSON and paste it into your Cloudflare R2 Bucket CORS settings to allow file uploads from all active custom domains.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-4 rounded-lg flex items-start gap-3 my-2">
-            <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <span className="font-semibold text-primary block mb-1">Why do I need this?</span>
-              <span className="text-foreground/80">When a new organization connects their custom domain, the browser will block them from uploading profile pictures and study materials directly to your Cloudflare R2 bucket due to CORS policies. You must manually add their new domain to Cloudflare R2. This JSON is dynamically generated to include every single active domain.</span>
+          <div className="flex-1 overflow-y-auto pr-2 pb-2 mt-2">
+            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-4 rounded-lg flex items-start gap-3 my-2">
+              <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <span className="font-semibold text-primary block mb-1">Why do I need this?</span>
+                <span className="text-foreground/80">When a new organization connects their custom domain, the browser will block them from uploading profile pictures and study materials directly to your Cloudflare R2 bucket due to CORS policies. You must manually add their new domain to Cloudflare R2. This JSON is dynamically generated to include every single active domain.</span>
+              </div>
+            </div>
+
+            <div className="relative mt-4">
+              <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
+                {cloudflareJSON}
+              </pre>
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                className="absolute top-2 right-2 bg-background/80 backdrop-blur border-border"
+                onClick={copyToClipboard}
+              >
+                {copied ? <Check size={14} className="mr-2 text-green-500" /> : <Copy size={14} className="mr-2" />}
+                {copied ? "Copied!" : "Copy JSON"}
+              </Button>
             </div>
           </div>
-
-          <div className="relative mt-2">
-            <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[400px] overflow-y-auto">
-              {cloudflareJSON}
-            </pre>
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              className="absolute top-2 right-2"
-              onClick={copyToClipboard}
-            >
-              {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
-              {copied ? "Copied!" : "Copy JSON"}
-            </Button>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCloudflareModal(false)}>Close</Button>
+          
+          <DialogFooter className="shrink-0 mt-2">
+            <Button variant="outline" onClick={() => setShowCloudflareModal(false)}>Close Window</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
