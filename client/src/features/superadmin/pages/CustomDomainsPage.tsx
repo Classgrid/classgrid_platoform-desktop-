@@ -27,22 +27,6 @@ export function CustomDomainsPage() {
 
   const orgs: any[] = data?.data ?? [];
 
-  const verifyMut = useMutation({ 
-    mutationFn: (orgId: string) => apiClient.post(`/api/super-admin/custom-domains/${orgId}/verify`), 
-    onSuccess: (res) => { 
-      qc.invalidateQueries({ queryKey: ["super-admin-custom-domains"] }); 
-      toast.success(`Verification result: ${res.data?.status === "verified" ? "Verified!" : "Still pending."}`); 
-    } 
-  });
-
-  const deleteMut = useMutation({ 
-    mutationFn: (orgId: string) => apiClient.delete(`/api/super-admin/custom-domains/${orgId}`), 
-    onSuccess: () => { 
-      qc.invalidateQueries({ queryKey: ["super-admin-custom-domains"] }); 
-      toast.success("Custom domain successfully removed."); 
-    } 
-  });
-
   const columns = useMemo(() => [
     {
       key: "name", 
@@ -60,7 +44,7 @@ export function CustomDomainsPage() {
     {
       key: "domain", 
       header: "Custom Domain", 
-      width: "w-[25%]",
+      width: "w-[30%]",
       render: (val: any, row: any) => {
         const domain = row.custom_domain?.domain;
         return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
@@ -69,7 +53,7 @@ export function CustomDomainsPage() {
     {
       key: "status", 
       header: "Status", 
-      width: "w-[15%]",
+      width: "w-[20%]",
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
@@ -79,54 +63,13 @@ export function CustomDomainsPage() {
     {
       key: "verified_at", 
       header: "Verified Date", 
-      width: "w-[15%]",
+      width: "w-[20%]",
       render: (val: any, row: any) => {
          const d = row.custom_domain?.verified_at;
          return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
       },
     },
-    {
-      key: "actions", 
-      header: "Actions", 
-      width: "w-[15%]",
-      render: (val: any, row: any) => {
-        const isVerifying = verifyMut.isPending && verifyMut.variables === row._id;
-        const isDeleting = deleteMut.isPending && deleteMut.variables === row._id;
-        const status = row.custom_domain?.status;
-
-        return (
-          <div className="flex gap-2">
-            {status !== "verified" && status !== "active" && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                isLoading={isVerifying}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  verifyMut.mutate(row._id);
-                }}
-              >
-                Verify
-              </Button>
-            )}
-            <Button 
-              size="sm" 
-              variant="destructive" 
-              isLoading={isDeleting}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (window.confirm("Are you sure you want to permanently delete this custom domain from the platform and Vercel?")) {
-                  deleteMut.mutate(row._id);
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        );
-      },
-    },
-  ], [verifyMut.isPending, deleteMut.isPending]);
+  ], []);
 
   // Generate Cloudflare JSON
   const activeDomains = useMemo(() => {
