@@ -496,6 +496,55 @@ router.post("/custom-domains/:orgId/verify", async (req, res) => {
     }
 });
 
+router.delete("/custom-domains/:orgId", async (req, res) => {
+    try {
+        const orgId = req.params.orgId;
+        const Organization = (await import("../models/Organization.js")).default;
+        
+        const org = await Organization.findById(orgId);
+        if (!org || !org.custom_domain?.domain) {
+            return res.status(404).json({ success: false, message: "Custom domain not found for this org" });
+        }
+
+        const domain = org.custom_domain.domain;
+
+        // Remove from Vercel API
+        const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
+        const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
+        const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
+
+        if (VERCEL_PROJECT_ID && VERCEL_API_TOKEN) {
+            const fetch = (await import("node-fetch")).default;
+            let url = `https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain}`;
+            if (VERCEL_TEAM_ID) {
+                url += `?teamId=${VERCEL_TEAM_ID}`;
+            }
+
+            const vercelRes = await fetch(url, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${VERCEL_API_TOKEN}`,
+                },
+            });
+
+            if (!vercelRes.ok && vercelRes.status !== 404) {
+                console.error("[SuperAdmin] Failed to delete domain from Vercel", await vercelRes.text());
+            }
+        }
+
+        // Remove from DB
+        org.has_custom_domain = false;
+        org.custom_domain = undefined; // or { domain: null } depending on schema, but undefined works if schema allows
+        
+        await org.save();
+
+        return res.json({ success: true, message: "Custom domain removed successfully" });
+    } catch (err) {
+        console.error("[SuperAdmin] custom domain delete error:", err.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 // -- 8d. ORGANIZATION DETAIL VIEW (for Dashboard / Drilldown)
 import { getOrganizationDetail } from "../controllers/super-admin.controller.js";
 router.get("/organizations/:id", getOrganizationDetail);

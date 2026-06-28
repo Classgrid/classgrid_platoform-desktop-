@@ -35,6 +35,14 @@ export function CustomDomainsPage() {
     } 
   });
 
+  const deleteMut = useMutation({ 
+    mutationFn: (orgId: string) => apiClient.delete(`/api/super-admin/custom-domains/${orgId}`), 
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ["super-admin-custom-domains"] }); 
+      toast.success("Custom domain successfully removed."); 
+    } 
+  });
+
   const columns = useMemo(() => [
     {
       key: "name", 
@@ -52,7 +60,7 @@ export function CustomDomainsPage() {
     {
       key: "domain", 
       header: "Custom Domain", 
-      width: "w-[30%]",
+      width: "w-[25%]",
       render: (val: any, row: any) => {
         const domain = row.custom_domain?.domain;
         return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
@@ -80,30 +88,45 @@ export function CustomDomainsPage() {
     {
       key: "actions", 
       header: "Actions", 
-      width: "w-[10%]",
+      width: "w-[15%]",
       render: (val: any, row: any) => {
-        const status = row.custom_domain?.status;
-        if (status === "verified" || status === "active") {
-          return null; // Hide the button if already verified!
-        }
-        
         const isVerifying = verifyMut.isPending && verifyMut.variables === row._id;
+        const isDeleting = deleteMut.isPending && deleteMut.variables === row._id;
+        const status = row.custom_domain?.status;
+
         return (
-          <Button 
-            size="sm" 
-            variant="outline" 
-            isLoading={isVerifying}
-            onClick={(e) => {
-              e.stopPropagation();
-              verifyMut.mutate(row._id);
-            }}
-          >
-            Verify
-          </Button>
+          <div className="flex gap-2">
+            {status !== "verified" && status !== "active" && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                isLoading={isVerifying}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  verifyMut.mutate(row._id);
+                }}
+              >
+                Verify
+              </Button>
+            )}
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              isLoading={isDeleting}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm("Are you sure you want to permanently delete this custom domain from the platform and Vercel?")) {
+                  deleteMut.mutate(row._id);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
         );
       },
     },
-  ], [verifyMut.isPending]);
+  ], [verifyMut.isPending, deleteMut.isPending]);
 
   // Generate Cloudflare JSON
   const activeDomains = useMemo(() => {
