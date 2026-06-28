@@ -127,7 +127,10 @@ export function AuthLayout({ authType, audience, preferredRole }: AuthLayoutProp
     );
   }
 
-  if (currentUser && !initialDeviceVerification) {
+  // If the user just logged out, don't auto-redirect even if stale user data exists
+  const justLoggedOut = searchParams.get("logged_out") === "true";
+
+  if (currentUser && !initialDeviceVerification && !justLoggedOut) {
     return <Navigate to={getRedirectPath(currentUser.role)} replace />;
   }
 

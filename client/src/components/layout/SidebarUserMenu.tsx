@@ -34,8 +34,16 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
     try {
       window.localStorage.removeItem("classgrid:last-auth-role");
     } catch {}
+    // 1. Cancel any in-flight /me requests to prevent stale data from arriving
+    await queryClient.cancelQueries({ queryKey: ["current-user"] });
+    // 2. Explicitly set the cached user to null so AuthLayout sees no user
+    queryClient.setQueryData(["current-user"], null);
+    // 3. Remove the query entirely so it won't auto-refetch stale data
     queryClient.removeQueries({ queryKey: ["current-user"] });
-    navigate(getLoginPathForPath(location.pathname), { replace: true });
+    // 4. Navigate with a logout flag so the login page won't auto-redirect
+    const loginPath = getLoginPathForPath(location.pathname);
+    const separator = loginPath.includes("?") ? "&" : "?";
+    navigate(`${loginPath}${separator}logged_out=true`, { replace: true });
   };
 
   const [status, setStatus] = useState<{ state: FooterStatusState; label: string }>({
