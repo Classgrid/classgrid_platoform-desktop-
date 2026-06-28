@@ -86,14 +86,17 @@ export function CustomDomainsPage() {
       key: "admin", 
       header: "Admin Name", 
       width: "w-[20%]",
-      render: (val: any, row: any) => (
-        <span 
-          onClick={() => setSelectedOrgId(row._id)}
-          className="text-sm font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1.5"
-        >
-          {row.ownerName || "Unknown Admin"} <Info size={14} />
-        </span>
-      ),
+      render: (val: any, row: any) => {
+        const realName = row.owner_id?.name || row.ownerName || "Unknown Admin";
+        return (
+          <span 
+            onClick={() => setSelectedOrgId(row._id)}
+            className="text-sm font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1.5"
+          >
+            {realName} <Info size={14} />
+          </span>
+        );
+      },
     },
 
   ], []);

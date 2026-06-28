@@ -424,6 +424,7 @@ router.get("/custom-domains", async (req, res) => {
             "custom_domain.domain": { $ne: null, $exists: true }
         })
             .select("name subdomain custom_domain createdAt ownerName ownerEmail owner_id")
+            .populate("owner_id", "name email")
             .sort({ "custom_domain.created_at": -1 })
             .lean();
 
