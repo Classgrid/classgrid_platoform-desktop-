@@ -33,21 +33,13 @@ export function CustomDomainsPage() {
   const columns = useMemo(() => [
     {
       key: "name", 
-      header: "Organization & Admin", 
+      header: "Organization", 
       width: "w-[30%]",
       render: (val: any, row: any) => (
-        <div className="flex flex-col">
-          <div style={{ fontWeight: 500 }} className="text-foreground">{row.name}</div>
-          <div style={{ fontSize: "0.78rem" }} className="text-muted-foreground">
+        <div>
+          <div style={{ fontWeight: 500 }}>{row.name}</div>
+          <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
             {row.subdomain}.classgrid.in
-          </div>
-          <div className="mt-1">
-            <span 
-              onClick={() => setSelectedOrgId(row._id)}
-              className="text-xs font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1"
-            >
-              {row.ownerName || "Unknown Admin"} <Info size={12} />
-            </span>
           </div>
         </div>
       ),
@@ -89,6 +81,19 @@ export function CustomDomainsPage() {
         if (s === "pending_verification") return <Badge variant="warning">Pending</Badge>;
         return <Badge variant="warning">{s}</Badge>;
       },
+    },
+    {
+      key: "admin", 
+      header: "Admin Name", 
+      width: "w-[20%]",
+      render: (val: any, row: any) => (
+        <span 
+          onClick={() => setSelectedOrgId(row._id)}
+          className="text-sm font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1.5"
+        >
+          {row.ownerName || "Unknown Admin"} <Info size={14} />
+        </span>
+      ),
     },
 
   ], []);
