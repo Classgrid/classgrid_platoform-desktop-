@@ -21,7 +21,7 @@ function FieldEditor({
 }: { 
   label: string;
   value: string;
-  onSave: (val: string, onSuccessCallback: () => void) => void;
+  onSave: (val: string) => void;
   isSaving: boolean;
   placeholder: string;
   maxLength?: number;
@@ -34,7 +34,8 @@ function FieldEditor({
   }, [value]);
 
   const handleSave = () => {
-    onSave(localValue, () => setIsEditing(false));
+    onSave(localValue);
+    setIsEditing(false); // Close immediately for optimistic UI
   };
 
   const handleCancel = () => {
@@ -144,9 +145,7 @@ export function OrgNameCard() {
             value={data?.name || ""}
             placeholder="e.g. Classgrid Org"
             isSaving={updateBranding.isPending}
-            onSave={(name, closeEdit) => {
-              updateBranding.mutate({ name }, { onSuccess: closeEdit });
-            }}
+            onSave={(name) => updateBranding.mutate({ name })}
           />
         </div>
 
@@ -158,9 +157,7 @@ export function OrgNameCard() {
             placeholder="e.g. Classgrid"
             maxLength={22}
             isSaving={updateBranding.isPending}
-            onSave={(sidebar_name, closeEdit) => {
-              updateBranding.mutate({ sidebar_name }, { onSuccess: closeEdit });
-            }}
+            onSave={(sidebar_name) => updateBranding.mutate({ sidebar_name })}
           />
         </div>
 
