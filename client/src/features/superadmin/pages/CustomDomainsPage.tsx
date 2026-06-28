@@ -14,11 +14,13 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
+import { OrgDetailsSheet } from "../components/OrgDetailsSheet";
 
 export function CustomDomainsPage() {
   const qc = useQueryClient();
   const [showCloudflareModal, setShowCloudflareModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["super-admin-custom-domains"],
@@ -31,13 +33,21 @@ export function CustomDomainsPage() {
   const columns = useMemo(() => [
     {
       key: "name", 
-      header: "Organization", 
+      header: "Organization & Admin", 
       width: "w-[30%]",
       render: (val: any, row: any) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{row.name}</div>
-          <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+        <div className="flex flex-col">
+          <div style={{ fontWeight: 500 }} className="text-foreground">{row.name}</div>
+          <div style={{ fontSize: "0.78rem" }} className="text-muted-foreground">
             {row.subdomain}.classgrid.in
+          </div>
+          <div className="mt-1">
+            <span 
+              onClick={() => setSelectedOrgId(row._id)}
+              className="text-xs font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1"
+            >
+              {row.ownerName || "Unknown Admin"} <Info size={12} />
+            </span>
           </div>
         </div>
       ),
@@ -234,6 +244,8 @@ export function CustomDomainsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <OrgDetailsSheet orgId={selectedOrgId} onClose={() => setSelectedOrgId(null)} />
     </div>
   );
 }
