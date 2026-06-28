@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Image as ImageIcon, Globe, Shield, Trash2 } from "lucide-react";
+import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
@@ -24,6 +24,8 @@ export function OrgBrandingCard() {
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"logo" | "favicon">("logo");
   const [isRemovingBg, setIsRemovingBg] = useState(false);
+  const [hasRemovedBg, setHasRemovedBg] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
@@ -36,6 +38,19 @@ export function OrgBrandingCard() {
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
     },
   });
+
+  // Dynamically update the favicon in the browser tab
+  React.useEffect(() => {
+    if (data?.favicon_url) {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = data.favicon_url;
+    }
+  }, [data?.favicon_url]);
 
   const openCropper = (file: File, type: "logo" | "favicon") => {
     if (file.size > 5 * 1024 * 1024) {
@@ -108,6 +123,7 @@ export function OrgBrandingCard() {
       
       const transparentBlob = await removeBackground(data.logo_url);
       await uploadToR2(transparentBlob, "logo");
+      setHasRemovedBg(true);
       toast.success("Background removed successfully!", { id: loadingToast });
     } catch (error) {
       console.error("BG Removal Error:", error);
@@ -154,33 +170,51 @@ export function OrgBrandingCard() {
             </p>
           </div>
           <div 
-            className="relative cursor-pointer group rounded-xl overflow-hidden border-2 border-dashed border-border w-[200px] h-[100px] flex items-center justify-center bg-muted/30"
-            onClick={() => fileInputRef.current?.click()}
+            className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border w-[200px] h-[100px] flex items-center justify-center bg-muted/30"
           >
             {data?.logo_url ? (
-              <img src={data.logo_url} alt="Logo" className="w-full h-full object-contain p-2" />
+              <img src={data.logo_url} alt="Logo" className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
             ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 <Camera size={24} />
                 <span className="text-xs font-medium">Upload Logo</span>
               </div>
             )}
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-white text-xs font-semibold">Change Logo</span>
-            </div>
+            
+            {/* Micro-interaction Overlay */}
+            {data?.logo_url && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={() => setPreviewImage(data.logo_url)}>
+                  <Eye size={14} />
+                </Button>
+                <Button size="icon" variant="default" className="h-8 w-8 rounded-full" onClick={() => fileInputRef.current?.click()}>
+                  <Upload size={14} />
+                </Button>
+              </div>
+            )}
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
           </div>
           {data?.logo_url && (
             <div className="flex items-center gap-2 mt-1 w-[200px]">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRemoveBg} 
-                isLoading={isRemovingBg}
-                className="flex-1 text-xs font-semibold"
-              >
-                Remove BG
-              </Button>
+              {hasRemovedBg ? (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 text-xs font-semibold text-green-500 border-green-500/30 cursor-default bg-green-500/5 hover:bg-green-500/5 hover:text-green-500"
+                >
+                  <Check size={14} className="mr-1" /> Removed
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRemoveBg} 
+                  isLoading={isRemovingBg}
+                  className="flex-1 text-xs font-semibold"
+                >
+                  Remove BG
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="icon" 
@@ -213,25 +247,32 @@ export function OrgBrandingCard() {
 
           <div 
             className={`relative rounded-xl overflow-hidden border-2 border-dashed border-border w-[100px] h-[100px] flex items-center justify-center bg-muted/30 ${
-              data?.has_custom_domain ? "cursor-pointer group hover:border-primary/50" : "opacity-50 cursor-not-allowed"
+              data?.has_custom_domain ? "group hover:border-primary/50" : "opacity-50 cursor-not-allowed"
             }`}
-            onClick={() => data?.has_custom_domain && faviconInputRef.current?.click()}
           >
             {data?.favicon_url ? (
-              <img src={data.favicon_url} alt="Favicon" className="w-full h-full object-contain p-2" />
+              <img src={data.favicon_url} alt="Favicon" className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-300" />
             ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div 
+                className={`flex flex-col items-center gap-2 text-muted-foreground ${data?.has_custom_domain ? "cursor-pointer" : ""}`}
+                onClick={() => data?.has_custom_domain && faviconInputRef.current?.click()}
+              >
                 <Globe size={24} />
                 <span className="text-[10px] font-medium text-center px-2">Upload PNG</span>
               </div>
             )}
+            {data?.has_custom_domain && data?.favicon_url && (
+              <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                <Button size="icon" variant="secondary" className="h-7 w-7 rounded-full" onClick={() => setPreviewImage(data.favicon_url)}>
+                  <Eye size={12} />
+                </Button>
+                <Button size="icon" variant="default" className="h-7 w-7 rounded-full" onClick={() => faviconInputRef.current?.click()}>
+                  <Upload size={12} />
+                </Button>
+              </div>
+            )}
             {data?.has_custom_domain && (
-              <>
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-xs font-semibold text-center leading-tight">Change<br/>Favicon</span>
-                </div>
-                <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={handleFaviconUpload} />
-              </>
+              <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={handleFaviconUpload} />
             )}
             {!data?.has_custom_domain && (
                <div className="absolute inset-0 bg-background/80 flex items-center justify-center p-2 text-center backdrop-blur-[1px]">
@@ -242,11 +283,11 @@ export function OrgBrandingCard() {
           {data?.favicon_url && (
             <Button 
               variant="outline" 
-              size="sm" 
-              className="w-[100px] text-xs text-danger hover:text-danger hover:bg-danger/10 mt-1"
+              size="icon" 
+              className="w-[100px] h-8 text-danger hover:text-danger hover:bg-danger/10 mt-1"
               onClick={() => handleDelete("favicon")}
             >
-              <Trash2 size={12} className="mr-1" /> Clear
+              <Trash2 size={14} />
             </Button>
           )}
         </div>
@@ -261,6 +302,31 @@ export function OrgBrandingCard() {
         title={cropType === "favicon" ? "Crop Favicon (Square PNG)" : "Crop College Logo"}
         onCropComplete={(blob) => uploadToR2(blob, cropType)}
       />
+
+      {/* Full Screen Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="absolute -top-12 right-0 rounded-full bg-background/20 text-white border-white/20 hover:bg-white/20 hover:text-white"
+              onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }}
+            >
+              <X size={20} />
+            </Button>
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              className="max-w-full max-h-[85vh] object-contain drop-shadow-2xl rounded-lg" 
+              onClick={(e) => e.stopPropagation()} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
