@@ -89,18 +89,16 @@ export function CustomDomainsPage() {
          const addedText = added ? formatDate(added, "dd MMM, yyyy 'at' hh:mm a") : "-";
          
          return (
-           <TooltipProvider>
-             <Tooltip>
-               <TooltipTrigger asChild>
-                 <div className="cursor-help inline-flex border-b border-dashed border-muted-foreground/50 pb-0.5">
-                   <span style={{ fontSize: "0.82rem" }}>{v ? formatDate(v) : "-"}</span>
-                 </div>
-               </TooltipTrigger>
-               <TooltipContent side="top">
-                 Requested on: {addedText}
-               </TooltipContent>
-             </Tooltip>
-           </TooltipProvider>
+           <div className="flex flex-col gap-0.5">
+             <span style={{ fontSize: "0.82rem" }} className="text-foreground">
+               {v ? formatDate(v) : "-"}
+             </span>
+             {added && (
+               <span style={{ fontSize: "0.75rem" }} className="text-muted-foreground">
+                 Req: {formatDate(added)}
+               </span>
+             )}
+           </div>
          );
       },
     },
@@ -220,17 +218,19 @@ export function CustomDomainsPage() {
               <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
                 {cloudflareJSON}
               </pre>
-              <Button 
-                size="sm" 
-                variant="secondary" 
-                className="absolute top-2 right-2 bg-background/80 backdrop-blur border-border"
-                onClick={copyToClipboard}
-              >
-                {copied ? <Check size={14} className="mr-2 text-green-500" /> : <Copy size={14} className="mr-2" />}
-                {copied ? "Copied!" : "Copy JSON"}
-              </Button>
             </div>
           </div>
+          
+          <DialogFooter className="shrink-0 mt-2">
+            <Button 
+              size="sm" 
+              variant="default" 
+              onClick={copyToClipboard}
+            >
+              {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
+              {copied ? "Copied!" : "Copy JSON"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
