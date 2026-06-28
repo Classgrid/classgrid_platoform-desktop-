@@ -1,4 +1,4 @@
-import { getChatSb } from "../config/supabaseClient.js";
+import { getChatSb, studentNotesClient } from "../config/supabaseClient.js";
 import { sendPushToMultiple } from "../services/firebase.service.js";
 import ScheduledNotification from "../models/ScheduledNotification.js";
 import FeatureFlag from "../models/FeatureFlag.js";
@@ -11,6 +11,61 @@ import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { sendDemoMeetingScheduledNotification } from "../services/notification-email.service.js";
 
 const sb = getChatSb();
+const TEACHING_ROLES = ["teacher", "faculty", "hod", "principal", "vice_principal"];
+const ADMIN_ROLES = [
+    "org_admin",
+    "super_admin",
+    "library_manager",
+    "hod",
+    "principal",
+    "vice_principal",
+    "exam_controller",
+    "fee_manager",
+    "admission_head",
+    "tpo_officer",
+    "coordinator",
+];
+
+async function getLegacyNotesStorageUsage(orgId) {
+    let totalStorageBytes = 0;
+    let fileCount = 0;
+    let offset = 0;
+    const limit = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+        const { data: files, error: storageError } = await studentNotesClient.storage
+            .from("notes-files")
+            .list(`student-notes/${orgId}`, { limit, offset });
+
+        if (storageError) {
+            console.error("[SuperAdmin] notes storage usage error:", storageError.message);
+            break;
+        }
+
+        if (!files || files.length === 0) {
+            hasMore = false;
+            continue;
+        }
+
+        files.forEach((file) => {
+            const size = Number(file?.metadata?.size || 0);
+            if (size > 0) {
+                totalStorageBytes += size;
+                fileCount += 1;
+            }
+        });
+
+        if (files.length < limit) {
+            hasMore = false;
+        } else {
+            offset += limit;
+        }
+    }
+
+    const storageUsedGB = Number((totalStorageBytes / (1024 * 1024 * 1024)).toFixed(4));
+    return { totalStorageBytes, fileCount, storageUsedGB };
+}
 
 // ══════════════════════════════════════════════════════════════
 //  1. GLOBAL BROADCAST — Push to ALL users across ALL orgs
@@ -457,18 +512,34 @@ export const getOrganizationDetail = async (req, res) => {
             return res.status(404).json({ success: false, message: "Organization not found" });
         }
 
-        const [totalStudents, totalAdmins, totalTeachers, totalClasses, emailsSent, subscription] = await Promise.all([
-            User.countDocuments({ organization_id: id, role: "student", status: "active" }),
-            User.countDocuments({ organization_id: id, role: "org_admin", status: "active" }),
-            User.countDocuments({ organization_id: id, role: { $in: ["teacher", "faculty"] }, status: "active" }),
+        const orgUsers = await User.find({ organization_id: id }).select("_id role status").lean();
+        const userIds = orgUsers.map((user) => user._id);
+        const activeOrgUsers = orgUsers.filter((user) => user.status === "active");
+        const countActiveRole = (roles) => activeOrgUsers.filter((user) => roles.includes(user.role)).length;
+        const emailFilter = userIds.length > 0
+            ? {
+                status: "sent",
+                $or: [
+                    { organizationId: id },
+                    { userId: { $in: userIds } }
+                ]
+            }
+            : { organizationId: id, status: "sent" };
+
+        const totalStudents = countActiveRole(["student"]);
+        const totalAdmins = countActiveRole(ADMIN_ROLES);
+        const totalTeachers = countActiveRole(TEACHING_ROLES);
+        const activeUsers = activeOrgUsers.length;
+
+        const [totalClasses, emailsSent, subscription, storageUsage] = await Promise.all([
             Classroom.countDocuments({ organization_id: id }),
-            EmailJob.countDocuments({ organizationId: id, status: "sent" }),
-            OrgSubscription.findOne({ organization_id: id }).lean()
+            EmailJob.countDocuments(emailFilter),
+            OrgSubscription.findOne({ organization_id: id }).lean(),
+            getLegacyNotesStorageUsage(id)
         ]);
 
-        const owner = await User.findById(org.owner_id).select("name email phone").lean();
+        const owner = await User.findById(org.owner_id).select("name email phone phoneNumber").lean();
 
-        // Ensure Usage is tracked
         const usage = await OrganizationUsage.findOneAndUpdate(
             { orgId: id },
             {
@@ -476,8 +547,9 @@ export const getOrganizationDetail = async (req, res) => {
                     totalStudents,
                     totalAdmins,
                     totalTeachers,
+                    storageUsedGB: storageUsage.storageUsedGB,
                     emailsSent,
-                    // Note: storage Used needs file tracking logic which isn't there yet, keeping it 0
+                    activeUsers,
                     lastUpdated: new Date()
                 }
             },
@@ -492,6 +564,9 @@ export const getOrganizationDetail = async (req, res) => {
                 usage: {
                     ...usage.toObject(),
                     totalClasses,
+                    storageBytes: storageUsage.totalStorageBytes,
+                    storageFileCount: storageUsage.fileCount,
+                    storageCoverage: "partial",
                 },
                 subscription: subscription || { plan: "demo" }
             }

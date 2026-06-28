@@ -58,11 +58,18 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   const urlSlug = searchParams.get("slug") || searchParams.get("org") || undefined;
   
   const hostname = window.location.hostname;
-  const subdomain = hostname.includes(".") && !hostname.startsWith("localhost") && !hostname.startsWith("127.0.0.1") 
+  const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
+  const isClassgrid = hostname.endsWith("classgrid.in");
+  
+  // Only extract subdomain if it's a classgrid domain or we are testing locally
+  const subdomain = (isClassgrid || isLocalhost) && hostname.includes(".") 
     ? hostname.split(".")[0] 
     : undefined;
   
   const slug = urlSlug || (subdomain !== "superadmin" ? subdomain : undefined);
+  
+  // If it's NOT a classgrid domain, it's a custom domain
+  const customDomain = (!isClassgrid && !isLocalhost) ? hostname : undefined;
 
   const appRole = getLockedAppRole(searchParams.get("app"));
   const tabRole = getQueryPreferredRole(searchParams.get("tab"));
@@ -82,7 +89,7 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   useEffect(() => {
     let isMounted = true;
 
-    getAuthBranding({ authType, slug, domain: hostname })
+    getAuthBranding({ authType, slug, domain: customDomain })
       .then((result) => {
         if (isMounted) {
           setBranding(result);
