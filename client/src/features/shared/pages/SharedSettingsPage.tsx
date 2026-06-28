@@ -72,11 +72,13 @@ export function SharedSettingsPage() {
 
       <SettingsAppearanceCard />
       
-      <SettingsNotificationsCard 
-        prefs={prefs} 
-        onChange={handlePrefChange} 
-        isLoading={isPrefLoading} 
-      />
+      {profileData?.user?.role !== "org_admin" && (
+        <SettingsNotificationsCard 
+          prefs={prefs} 
+          onChange={handlePrefChange} 
+          isLoading={isPrefLoading} 
+        />
+      )}
       
       {!isProfileLoading && (
         <SettingsPushCard 
