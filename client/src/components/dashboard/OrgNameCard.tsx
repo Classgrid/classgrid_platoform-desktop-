@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { SectionPanel } from "@/components/dashboard/SectionPanel";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 
 type BrandingData = {
   name: string;
