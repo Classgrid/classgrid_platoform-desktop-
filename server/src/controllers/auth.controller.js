@@ -1626,6 +1626,7 @@ export const getCurrentUser = async (req, res) => {
                     orgData = {
                         id: userWithOrg.organization_id._id,
                         name: userWithOrg.organization_id.name,
+                        sidebar_name: userWithOrg.organization_id.sidebar_name,
                         logo_url: userWithOrg.organization_id.logo_url,
                         subdomain: userWithOrg.organization_id.subdomain,
                         branding: userWithOrg.organization_id.branding || {

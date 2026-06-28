@@ -1,4 +1,12 @@
-import { AlertTriangle, CreditCard, GraduationCap, HardDrive, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  CreditCard,
+  GraduationCap,
+  HardDrive,
+  Landmark,
+  Receipt,
+  Users,
+} from "lucide-react";
 
 import {
   Alert,
@@ -78,22 +86,26 @@ export function OrgBillingTab({
     studentRate !== undefined && studentCount !== undefined
       ? studentRate * studentCount
       : undefined;
+  const knownStorageCharge = legacyUsage?.storage?.knownChargeInr;
+  const subtotalParts = [basePrice, knownStudentCharge, knownStorageCharge].filter(
+    (value): value is number => value !== undefined,
+  );
   const knownSubtotal =
-    basePrice !== undefined && knownStudentCharge !== undefined
-      ? basePrice + knownStudentCharge
+    subtotalParts.length > 0
+      ? subtotalParts.reduce((sum, value) => sum + value, 0)
       : undefined;
 
   return (
     <div className="space-y-6">
       <Alert className="border-amber-500/30 bg-amber-500/5 px-4 py-3 text-amber-800 dark:text-amber-200">
         <AlertTriangle aria-hidden="true" />
-        <AlertTitle>The complete bill cannot be calculated yet</AlertTitle>
+        <AlertTitle>The complete bill is still partial</AlertTitle>
         <AlertDescription>
-          The backend returns subscription rates and user counts, but it does not return complete R2, Vercel, EC2, database, email-provider, or other resource costs. The subtotal below includes only components backed by current data.
+          The backend now returns real subscription rates, user counts, legacy tracked storage, and payment volume. Shared-cloud allocation for R2, Vercel, EC2, Redis, MongoDB bytes, and other provider costs is still not stored per organization, so the subtotal below includes only backed metrics.
         </AlertDescription>
       </Alert>
 
-      <section aria-label="Known billing statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Known billing statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <OrgMetricCard
           title="Base monthly rate"
           value={formatCurrency(basePrice)}
@@ -116,10 +128,17 @@ export function OrgBillingTab({
           quality={knownStudentCharge === undefined ? "unavailable" : "actual"}
         />
         <OrgMetricCard
+          title="Known storage charge"
+          value={formatCurrency(knownStorageCharge)}
+          detail="Calculated from the tracked legacy note-storage meter and the configured per-GB rate."
+          icon={<HardDrive className="h-5 w-5" aria-hidden="true" />}
+          quality={knownStorageCharge === undefined ? "unavailable" : "partial"}
+        />
+        <OrgMetricCard
           title="Known subtotal"
           value={formatCurrency(knownSubtotal)}
-          detail="Base plus student charge only; resource charges are excluded."
-          icon={<CreditCard className="h-5 w-5" aria-hidden="true" />}
+          detail="Base, student, and legacy tracked-storage charges only."
+          icon={<Receipt className="h-5 w-5" aria-hidden="true" />}
           quality={knownSubtotal === undefined ? "unavailable" : "partial"}
         />
       </section>
@@ -127,7 +146,7 @@ export function OrgBillingTab({
       <div className="grid gap-6 xl:grid-cols-2">
         <OrgSectionCard
           title="Subscription contract"
-          description="Plan, billing state, limits, and configured resource rates from the live subscription record."
+          description="Plan, billing state, limits, and configured rates from the live subscription record."
           icon={<CreditCard className="h-5 w-5" aria-hidden="true" />}
         >
           <dl>
@@ -147,14 +166,21 @@ export function OrgBillingTab({
             />
             <OrgDataRow label="Renews or expires" value={formatDate(subscription?.expiresAt)} />
             <OrgDataRow label="Storage rate per GB" value={formatCurrency(billing?.pricePerGB)} />
-            <OrgDataRow label="Included storage" value={billing?.freeStorageGB === undefined ? "Unavailable" : `${formatNumber(billing.freeStorageGB)} GB`} />
+            <OrgDataRow
+              label="Included storage"
+              value={legacyUsage?.storage?.includedGb === undefined ? "Unavailable" : `${formatNumber(legacyUsage.storage.includedGb)} GB`}
+            />
+            <OrgDataRow
+              label="Tracked billable storage"
+              value={legacyUsage?.storage?.billableGb === undefined ? "Unavailable" : `${formatNumber(legacyUsage.storage.billableGb)} GB`}
+            />
             <OrgDataRow label="Configured payment method" value={humanizeKey(profile?.paymentMethod)} />
           </dl>
         </OrgSectionCard>
 
         <OrgSectionCard
           title="Limit utilization"
-          description="Usage against subscription limits. Storage is not calculated because the current backend only returns a partial legacy meter."
+          description="Usage against subscription limits, with storage based on the currently tracked legacy note-storage meter."
           icon={<HardDrive className="h-5 w-5" aria-hidden="true" />}
         >
           <div className="space-y-3">
@@ -170,18 +196,44 @@ export function OrgBillingTab({
             />
             <div className="rounded-xl border border-border/60 p-4">
               <div className="flex items-center justify-between gap-4 text-sm">
-                <span className="font-medium">Partial legacy storage</span>
+                <span className="font-medium">Tracked legacy storage</span>
                 <span className="tabular-nums text-muted-foreground">
                   {formatBytes(legacyUsage?.storage?.bytes)}
                 </span>
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Not used for billing because R2 and other storage locations are absent from the endpoint.
+                {legacyUsage?.storage?.scope ?? "Storage coverage details are unavailable."}
               </p>
             </div>
           </div>
         </OrgSectionCard>
       </div>
+
+      <OrgSectionCard
+        title="Live billing volume"
+        description="Actual organization-linked payment and ledger activity already stored in your backend records."
+        icon={<Landmark className="h-5 w-5" aria-hidden="true" />}
+      >
+        <div className="grid gap-6 lg:grid-cols-2">
+          <dl>
+            <OrgDataRow label="Invoices" value={formatNumber(legacyUsage?.finance?.invoices?.total)} />
+            <OrgDataRow label="Total billed" value={formatCurrency(legacyUsage?.finance?.invoices?.totalBilledAmount)} />
+            <OrgDataRow label="Total paid" value={formatCurrency(legacyUsage?.finance?.invoices?.totalPaidAmount)} />
+            <OrgDataRow label="Outstanding" value={formatCurrency(legacyUsage?.finance?.invoices?.totalOutstandingAmount)} />
+            <OrgDataRow label="Fee transactions" value={formatNumber(legacyUsage?.finance?.feeCollections?.totalTransactions)} />
+            <OrgDataRow label="Collected via fee transactions" value={formatCurrency(legacyUsage?.finance?.feeCollections?.successfulAmount)} />
+          </dl>
+          <dl>
+            <OrgDataRow label="Platform billing transactions" value={formatNumber(legacyUsage?.finance?.platformBilling?.totalTransactions)} />
+            <OrgDataRow label="Platform billing collected" value={formatCurrency(legacyUsage?.finance?.platformBilling?.successfulAmount)} />
+            <OrgDataRow label="Refunded platform billing" value={formatCurrency(legacyUsage?.finance?.platformBilling?.refundedAmount)} />
+            <OrgDataRow label="Payment requests" value={formatNumber(legacyUsage?.finance?.paymentRequests?.total)} />
+            <OrgDataRow label="Approved payment-request amount" value={formatCurrency(legacyUsage?.finance?.paymentRequests?.approvedAmount)} />
+            <OrgDataRow label="Active student ledgers" value={formatNumber(legacyUsage?.finance?.studentLedger?.totalLedgers)} />
+            <OrgDataRow label="Ledger balance" value={formatCurrency(legacyUsage?.finance?.studentLedger?.totalBalance)} />
+          </dl>
+        </div>
+      </OrgSectionCard>
     </div>
   );
 }

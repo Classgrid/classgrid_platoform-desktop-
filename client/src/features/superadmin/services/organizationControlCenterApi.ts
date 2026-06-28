@@ -196,14 +196,78 @@ export interface OrganizationInsight {
   }>;
 }
 
+export interface OrganizationStatusMap {
+  [key: string]: number | undefined;
+}
+
+export interface OrganizationTrackedCollections {
+  [key: string]: number | undefined;
+}
+
 export interface OrganizationLegacyUsage {
   storage?: {
     bytes?: number;
     mb?: string;
+    gb?: number;
     fileCount?: number;
+    includedGb?: number;
+    billableGb?: number;
+    configuredRateInr?: number;
+    knownChargeInr?: number;
+    coverage?: string;
+    scope?: string;
   };
-  db?: { notesCount?: number };
-  email?: { totalSent?: number };
+  db?: {
+    notesCount?: number;
+    trackedCollections?: OrganizationTrackedCollections;
+    totalTrackedRecords?: number;
+  };
+  email?: {
+    totalSent?: number;
+    daily?: number;
+    monthly?: number;
+    typeBreakdown?: Record<string, number | undefined>;
+  };
+  support?: {
+    totalTickets?: number;
+    byStatus?: OrganizationStatusMap;
+    highPriorityTickets?: number;
+  };
+  finance?: {
+    invoices?: {
+      total?: number;
+      byStatus?: OrganizationStatusMap;
+      totalBilledAmount?: number;
+      totalPaidAmount?: number;
+      totalOutstandingAmount?: number;
+    };
+    studentLedger?: {
+      totalLedgers?: number;
+      totalPayable?: number;
+      totalPaid?: number;
+      totalBalance?: number;
+    };
+    feeCollections?: {
+      totalTransactions?: number;
+      byStatus?: OrganizationStatusMap;
+      successfulAmount?: number;
+    };
+    platformBilling?: {
+      totalTransactions?: number;
+      byStatus?: OrganizationStatusMap;
+      successfulAmount?: number;
+      refundedAmount?: number;
+    };
+    paymentRequests?: {
+      total?: number;
+      byStatus?: OrganizationStatusMap;
+      approvedAmount?: number;
+    };
+  };
+  coverage?: {
+    providerCostAllocation?: string;
+    reason?: string;
+  };
 }
 
 export interface OrganizationEmailAnalytics {

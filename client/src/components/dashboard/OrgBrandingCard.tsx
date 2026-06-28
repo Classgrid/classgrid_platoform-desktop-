@@ -14,6 +14,8 @@ type BrandingData = {
   favicon_url: string;
   site_title: string;
   has_custom_domain: boolean;
+  name: string;
+  sidebar_name: string;
 };
 
 export function OrgBrandingCard() {
@@ -26,7 +28,10 @@ export function OrgBrandingCard() {
   const [cropType, setCropType] = useState<"logo" | "favicon">("logo");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [localSiteTitle, setLocalSiteTitle] = useState("");
+  const [localName, setLocalName] = useState("");
+  const [localSidebarName, setLocalSidebarName] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingNames, setIsEditingNames] = useState(false);
 
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
@@ -39,6 +44,9 @@ export function OrgBrandingCard() {
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
       if (variables.site_title !== undefined) {
         setIsEditingTitle(false);
+      }
+      if (variables.name !== undefined || variables.sidebar_name !== undefined) {
+        setIsEditingNames(false);
       }
     },
   });
@@ -307,6 +315,83 @@ export function OrgBrandingCard() {
                 className="w-full text-xs font-medium"
               >
                 Edit Title
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Organization Name Settings */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Organization Text
+            </label>
+            <p className="text-[11px] text-muted-foreground">
+              Set your official name and a short name for the sidebar.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground">Full Name</label>
+              <input
+                type="text"
+                value={isEditingNames ? localName : (data?.name || "")}
+                onChange={(e) => setLocalName(e.target.value)}
+                disabled={!isEditingNames}
+                placeholder="e.g. Ambiguity Engineering College"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground">Sidebar Name (Max 22 chars)</label>
+              <input
+                type="text"
+                value={isEditingNames ? localSidebarName : (data?.sidebar_name || "")}
+                onChange={(e) => setLocalSidebarName(e.target.value.slice(0, 22))}
+                disabled={!isEditingNames}
+                maxLength={22}
+                placeholder="e.g. Ambiguity Engg."
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
+              />
+            </div>
+            
+            {isEditingNames ? (
+              <div className="flex items-center gap-2 mt-1">
+                <Button 
+                  size="sm" 
+                  onClick={() => updateBranding.mutate({ name: localName, sidebar_name: localSidebarName })}
+                  disabled={updateBranding.isPending || !localName.trim()}
+                  className="flex-1"
+                >
+                  {updateBranding.isPending ? <Spinner size="sm" /> : "Save Names"}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditingNames(false);
+                    setLocalName(data?.name || "");
+                    setLocalSidebarName(data?.sidebar_name || "");
+                  }}
+                  className="px-3"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  setLocalName(data?.name || "");
+                  setLocalSidebarName(data?.sidebar_name || "");
+                  setIsEditingNames(true);
+                }}
+                className="w-full text-xs font-medium mt-1"
+              >
+                Edit Names
               </Button>
             )}
           </div>

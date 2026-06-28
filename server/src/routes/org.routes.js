@@ -2150,13 +2150,15 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain site_title subdomain");
+        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain site_title subdomain name sidebar_name");
         const responseData = {
             logo_url: org.logo_url || "",
             favicon_url: org.favicon_url || "",
             has_custom_domain: !!org.custom_domain?.domain,
             site_title: org.site_title || "Classgrid ERP",
-            subdomain: org.subdomain
+            subdomain: org.subdomain,
+            name: org.name || "",
+            sidebar_name: org.sidebar_name || ""
         };
 
         await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
@@ -2172,7 +2174,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
  */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const { logo_url, favicon_url, site_title } = req.body;
+        const { logo_url, favicon_url, site_title, name, sidebar_name } = req.body;
         const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
@@ -2181,12 +2183,14 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         if (logo_url !== undefined) updateData.logo_url = logo_url;
         if (favicon_url !== undefined) updateData.favicon_url = favicon_url;
         if (site_title !== undefined) updateData.site_title = site_title;
+        if (name !== undefined) updateData.name = name;
+        if (sidebar_name !== undefined) updateData.sidebar_name = sidebar_name;
 
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select("logo_url favicon_url site_title name");
+        ).select("logo_url favicon_url site_title name sidebar_name");
 
         logAdminAction(req, "update_branding", "organization", orgId, updatedOrg.name, updateData);
 
@@ -2195,7 +2199,9 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             branding: {
                 logo_url: updatedOrg.logo_url,
                 favicon_url: updatedOrg.favicon_url,
-                site_title: updatedOrg.site_title
+                site_title: updatedOrg.site_title,
+                name: updatedOrg.name,
+                sidebar_name: updatedOrg.sidebar_name
             }
         });
         

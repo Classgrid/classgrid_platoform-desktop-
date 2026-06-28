@@ -20,7 +20,7 @@ export function SidebarSwitcher({ user }: { user: any }) {
   const { isMobile } = useSidebar();
 
   // 1. Resolve Organization Branding from Backend User Object
-  const orgName = user?.organization?.name || "Classgrid Platform";
+  const orgName = user?.organization?.sidebar_name || user?.organization?.name || "Classgrid Platform";
   const orgLogo = user?.organization?.logo_url;
 
   // 2. Resolve Roles
@@ -53,7 +53,7 @@ export function SidebarSwitcher({ user }: { user: any }) {
                 )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-foreground">
+                <span className="font-semibold text-foreground whitespace-normal break-words leading-tight">
                   {orgName}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">

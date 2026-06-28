@@ -7,6 +7,12 @@ const organizationSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        sidebar_name: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: 22,
+        },
         org_type: {
             type: String,
             enum: ["school", "junior_college", "engineering", "coaching", "diploma", "other"],
