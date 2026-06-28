@@ -109,14 +109,14 @@ export function OrgNameCard() {
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
     queryFn: async () => {
-      const res = await apiClient.get("/org-admin/branding");
+      const res = await apiClient.get("/api/org-admin/branding");
       return res.data;
     },
   });
 
   const updateBranding = useMutation({
     mutationFn: async (variables: Partial<BrandingData>) => {
-      const res = await apiClient.patch("/org-admin/branding", variables);
+      const res = await apiClient.patch("/api/org-admin/branding", variables);
       return res.data;
     },
     onSuccess: () => {
