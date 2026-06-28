@@ -8,6 +8,7 @@ import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../q
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard";
 import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function SharedSettingsPage() {
   const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
