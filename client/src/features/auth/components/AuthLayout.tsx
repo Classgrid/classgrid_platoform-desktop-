@@ -82,7 +82,7 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   useEffect(() => {
     let isMounted = true;
 
-    getAuthBranding({ authType, slug })
+    getAuthBranding({ authType, slug, domain: hostname })
       .then((result) => {
         if (isMounted) {
           setBranding(result);
@@ -101,7 +101,15 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
     return () => {
       isMounted = false;
     };
-  }, [authType, slug]);
+  }, [authType, slug, hostname]);
+
+  useEffect(() => {
+    if (branding.authType === "institution") {
+      document.title = branding.siteTitle || branding.name || "Classgrid ERP";
+    } else {
+      document.title = "Classgrid ERP";
+    }
+  }, [branding]);
 
   if (brandingError) {
     return (

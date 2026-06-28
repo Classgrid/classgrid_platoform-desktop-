@@ -6,13 +6,15 @@ import type { AuthAudience, AuthBrandingResponse, AuthLoginRole, AuthType, Login
 type BrandingParams = {
   authType: AuthType;
   slug?: string;
+  domain?: string;
 };
 
-export async function getAuthBranding({ authType, slug }: BrandingParams) {
+export async function getAuthBranding({ authType, slug, domain }: BrandingParams) {
   const response = await apiClient.get<AuthBrandingResponse>("/api/public/auth-branding", {
     params: {
       type: authType,
       slug: slug || undefined,
+      domain: domain || undefined,
     },
   });
 

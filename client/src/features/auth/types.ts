@@ -38,6 +38,7 @@ export type AuthBranding = {
   campusImageUrl: string;
   leftVariant: LeftPanelVariant;
   subdomain: string;
+  siteTitle?: string;
 };
 
 export type AuthBrandingResponse = {

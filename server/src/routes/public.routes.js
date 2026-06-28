@@ -101,10 +101,12 @@ router.get("/auth-branding", async (req, res) => {
   try {
     const requestedType = normalizeText(req.query?.type) || "institution";
     const slug = normalizeSlug(req.tenantSlug || req.query?.slug);
+    const domainParam = req.query?.domain;
 
     const query = [];
     if (slug) query.push({ subdomain: slug });
     if (req.tenantHost) query.push({ "custom_domain.domain": req.tenantHost });
+    if (domainParam) query.push({ "custom_domain.domain": domainParam });
 
     if (query.length === 0) {
       if (requestedType === "institution") {
@@ -114,7 +116,7 @@ router.get("/auth-branding", async (req, res) => {
     }
 
     const org = await Organization.findOne({ $or: query })
-      .select("name subdomain logo_url campus_photo_url branding status custom_domain")
+      .select("name subdomain logo_url campus_photo_url branding status custom_domain site_title")
       .lean();
 
     if (!org) {
@@ -161,6 +163,7 @@ router.get("/auth-branding", async (req, res) => {
         subdomain: org.subdomain,
         customDomain: org.custom_domain?.status === "active" ? org.custom_domain?.domain : null,
         allowClassgridUrl: org.custom_domain?.allow_classgrid_url !== false,
+        siteTitle: org.site_title || "Classgrid ERP",
       },
     });
   } catch (error) {
