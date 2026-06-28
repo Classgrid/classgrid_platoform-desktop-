@@ -231,10 +231,6 @@ export function CustomDomainsPage() {
               </Button>
             </div>
           </div>
-          
-          <DialogFooter className="shrink-0 mt-2">
-            <Button variant="outline" onClick={() => setShowCloudflareModal(false)}>Close Window</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
