@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Save } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { Save } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { SettingsAppearanceCard } from "../components/settings/SettingsAppearanceCard";
 import { SettingsNotificationsCard } from "../components/settings/SettingsNotificationsCard";
