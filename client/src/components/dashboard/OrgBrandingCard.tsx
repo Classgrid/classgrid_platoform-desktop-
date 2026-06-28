@@ -23,8 +23,6 @@ export function OrgBrandingCard() {
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"logo" | "favicon">("logo");
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
-  const [hasRemovedBg, setHasRemovedBg] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<BrandingData>({
@@ -115,28 +113,6 @@ export function OrgBrandingCard() {
     }
   };
 
-  const handleRemoveBg = async () => {
-    if (!data?.logo_url) return;
-    setIsRemovingBg(true);
-    const loadingToast = toast.loading("AI is removing background... (This might take a moment)");
-    
-    try {
-      // Dynamically import @imgly to prevent Vercel Rollup AST parse errors on the heavy WASM files
-      const imgly = await import("@imgly/background-removal");
-      const removeBackground = imgly.default || imgly.removeBackground;
-      
-      const transparentBlob = await removeBackground(data.logo_url);
-      await uploadToR2(transparentBlob, "logo");
-      setHasRemovedBg(true);
-      toast.success("Background removed successfully!", { id: loadingToast });
-    } catch (error) {
-      console.error("BG Removal Error:", error);
-      toast.error("Failed to remove background. Please try again.", { id: loadingToast });
-    } finally {
-      setIsRemovingBg(false);
-    }
-  };
-
   const handleDelete = async (type: "logo" | "favicon") => {
     const loadingToast = toast.loading(`Removing ${type}...`);
     try {
@@ -199,30 +175,11 @@ export function OrgBrandingCard() {
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
           </div>
           {data?.logo_url && (
-            <div className="flex items-center gap-2 mt-1 w-[200px]">
-              {hasRemovedBg ? (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 text-xs font-semibold text-green-500 border-green-500/30 cursor-default bg-green-500/5 hover:bg-green-500/5 hover:text-green-500"
-                >
-                  <Check size={14} className="mr-1" /> Removed
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRemoveBg} 
-                  isLoading={isRemovingBg}
-                  className="flex-1 text-xs font-semibold"
-                >
-                  Remove BG
-                </Button>
-              )}
+            <div className="mt-1 w-[200px] flex justify-end">
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-8 w-8 flex-shrink-0 text-danger hover:text-danger hover:bg-danger/10"
+                className="h-8 w-8 text-danger hover:text-danger hover:bg-danger/10"
                 onClick={() => handleDelete("logo")}
               >
                 <Trash2 size={14} />
