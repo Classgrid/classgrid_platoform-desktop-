@@ -12,7 +12,7 @@ import User from "./src/models/User.js";
 
 async function resetAdminPassword() {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to MongoDB.");
 
         const org = await Organization.findOne({ subdomain: "aec" });

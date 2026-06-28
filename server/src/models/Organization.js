@@ -76,6 +76,10 @@ const organizationSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+        favicon_url: {
+            type: String,
+            default: "",
+        },
         campus_photo_url: {
             type: String,
             default: "",

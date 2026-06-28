@@ -2133,5 +2133,61 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
 // ======================================================
 router.get('/dashboard/metrics', isAuthenticated, requireOrganization, attachInstitutionProfile, getOrgDashboardMetrics);
 
+/**
+ * PATH: /api/org/branding (Often prefixed by /api/org-admin in express mounting)
+ * Access: org_admin only
+ * Desc: Retrieves the organization's custom branding (logo and favicon) and custom domain status
+ */
+router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain");
+        res.json({
+            logo_url: org.logo_url || "",
+            favicon_url: org.favicon_url || "",
+            has_custom_domain: !!org.custom_domain?.domain
+        });
+    } catch (err) {
+        console.error("[Org Branding GET Error]:", err.message);
+        res.status(500).json({ message: "Server error fetching branding." });
+    }
+});
+
+/**
+ * PATH: /api/org/branding
+router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const { logo_url, favicon_url } = req.body;
+        const orgId = req.user.organization_id;
+        
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const updateData = {};
+        if (logo_url !== undefined) updateData.logo_url = logo_url;
+        if (favicon_url !== undefined) updateData.favicon_url = favicon_url;
+
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).select("logo_url favicon_url name");
+
+        logAdminAction(req, "update_branding", "organization", orgId, updatedOrg.name, updateData);
+
+        res.json({
+            message: "Organization branding updated successfully",
+            branding: {
+                logo_url: updatedOrg.logo_url,
+                favicon_url: updatedOrg.favicon_url
+            }
+        });
+    } catch (err) {
+        console.error("[Org Branding Error]:", err.message);
+        res.status(500).json({ message: "Server error updating branding." });
+    }
+});
+
 export default router;
 

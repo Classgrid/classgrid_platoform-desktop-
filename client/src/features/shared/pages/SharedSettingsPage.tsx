@@ -7,6 +7,7 @@ import { SettingsPushCard } from "../components/settings/SettingsPushCard";
 import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../queries/useSettingsQueries";
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard";
+import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
 
 export function SharedSettingsPage() {
   const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
@@ -84,7 +85,12 @@ export function SharedSettingsPage() {
         />
       )}
 
-      <CustomDomainCard />
+      {profileData?.user?.role === "org_admin" && (
+        <>
+          <OrgBrandingCard />
+          <CustomDomainCard />
+        </>
+      )}
 
     </form>
   );
