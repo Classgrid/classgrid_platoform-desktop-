@@ -3,16 +3,15 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" id="favicon-32" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" id="favicon-16" />
-  <link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" id="favicon-ico" />
   <script>
     try {
-      const customFavicon = localStorage.getItem('org_favicon');
+      var customFavicon = localStorage.getItem('org_favicon');
       if (customFavicon) {
-        document.getElementById('favicon-32').href = customFavicon;
-        document.getElementById('favicon-16').href = customFavicon;
-        document.getElementById('favicon-ico').href = customFavicon;
+        document.write('<link rel="icon" href="' + customFavicon + '" />');
+      } else {
+        document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
+        document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
+        document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
       }
     } catch(e) {}
   </script>
