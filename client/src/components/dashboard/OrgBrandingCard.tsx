@@ -8,7 +8,6 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "react-hot-toast";
-import { removeBackground } from "@imgly/background-removal";
 
 type BrandingData = {
   logo_url: string;
@@ -103,7 +102,10 @@ export function OrgBrandingCard() {
     const loadingToast = toast.loading("AI is removing background... (This might take a moment)");
     
     try {
-      // The background removal library works directly on URLs or Blobs
+      // Dynamically import @imgly to prevent Vercel Rollup AST parse errors on the heavy WASM files
+      const imgly = await import("@imgly/background-removal");
+      const removeBackground = imgly.default || imgly.removeBackground;
+      
       const transparentBlob = await removeBackground(data.logo_url);
       await uploadToR2(transparentBlob, "logo");
       toast.success("Background removed successfully!", { id: loadingToast });
