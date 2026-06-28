@@ -31,7 +31,7 @@ export function CustomDomainsPage() {
     {
       key: "name", 
       header: "Organization", 
-      width: "w-[30%]",
+      width: "w-[25%]",
       render: (val: any, row: any) => (
         <div>
           <div style={{ fontWeight: 500 }}>{row.name}</div>
@@ -44,7 +44,7 @@ export function CustomDomainsPage() {
     {
       key: "domain", 
       header: "Custom Domain", 
-      width: "w-[30%]",
+      width: "w-[25%]",
       render: (val: any, row: any) => {
         const domain = row.custom_domain?.domain;
         return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
@@ -53,11 +53,22 @@ export function CustomDomainsPage() {
     {
       key: "status", 
       header: "Status", 
-      width: "w-[20%]",
+      width: "w-[15%]",
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
-        return <Badge variant="warning">{s.replace("_", " ")}</Badge>;
+        if (s === "pending_verification") return <Badge variant="warning">Pending</Badge>;
+        return <Badge variant="warning">{s}</Badge>;
+      },
+    },
+    {
+      key: "created_at", 
+      header: "Added Date", 
+      width: "w-[15%]",
+      render: (val: any, row: any) => {
+         // Some orgs might use the main createdAt if custom_domain.created_at isn't set properly
+         const d = row.custom_domain?.created_at || row.createdAt;
+         return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
       },
     },
     {
