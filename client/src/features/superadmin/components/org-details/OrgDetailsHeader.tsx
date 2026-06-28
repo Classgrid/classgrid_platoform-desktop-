@@ -1,6 +1,4 @@
-import { ArrowLeft, Building2, ExternalLink, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
-
+import { Building2, ExternalLink, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 
@@ -74,12 +72,7 @@ export function OrgDetailsHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/superadmin/domains">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Custom domains
-            </Link>
-          </Button>
+
           <Button
             variant="primary"
             size="sm"
