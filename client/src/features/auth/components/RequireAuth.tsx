@@ -41,5 +41,31 @@ export function RequireAuth() {
     return <Navigate to={getRedirectPath(user.role)} replace />;
   }
 
+  // 4. Strict Domain Enforcer (Kill old/invalid subdomains)
+  if (user.organization?.subdomain) {
+    const currentHostname = window.location.hostname;
+    const orgSubdomainHost = `${user.organization.subdomain}.classgrid.in`;
+    const orgCustomDomain = user.organization.custom_domain;
+    
+    const isClassgridSubdomain = currentHostname.endsWith(".classgrid.in") && currentHostname !== "classgrid.in";
+    const systemDomains = ["www.classgrid.in", "app.classgrid.in", "admin.classgrid.in", "api.classgrid.in"];
+
+    // If on a .classgrid.in subdomain (and not a system domain), it MUST be their organization's subdomain
+    if (isClassgridSubdomain && !systemDomains.includes(currentHostname)) {
+      if (currentHostname !== orgSubdomainHost) {
+        window.location.replace(`https://${orgSubdomainHost}${location.pathname}${location.search}`);
+        return null;
+      }
+    }
+
+    // If on a custom domain (not localhost, not vercel, not classgrid), it MUST be their organization's custom domain
+    if (!isClassgridSubdomain && !currentHostname.includes("localhost") && !currentHostname.includes("vercel.app") && currentHostname !== "classgrid.in") {
+      if (!orgCustomDomain || currentHostname !== orgCustomDomain) {
+        window.location.replace(`https://${orgSubdomainHost}${location.pathname}${location.search}`);
+        return null;
+      }
+    }
+  }
+
   return <Outlet />;
 }
