@@ -5,16 +5,21 @@
   <meta charset="UTF-8" />
   <script>
     try {
+      var hostname = window.location.hostname;
+      var isCustomDomain = !hostname.includes('classgrid.in') && hostname !== 'localhost' && hostname !== '127.0.0.1';
+      
       var customFavicon = localStorage.getItem('org_favicon');
-      if (customFavicon) {
+      var customTitle = localStorage.getItem('org_title');
+
+      if (isCustomDomain && customFavicon) {
         document.write('<link rel="icon" href="' + customFavicon + '" />');
       } else {
         document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
         document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
       }
-      var customTitle = localStorage.getItem('org_title');
-      if (customTitle) {
+      
+      if (isCustomDomain && customTitle) {
         document.title = customTitle;
       }
     } catch(e) {}

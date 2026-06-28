@@ -112,7 +112,12 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
 
   useEffect(() => {
     if (branding.authType === "institution") {
-      document.title = branding.siteTitle || branding.name || "Classgrid ERP";
+      const isCustomDomain = !window.location.hostname.includes('classgrid.in') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      if (isCustomDomain) {
+        document.title = branding.siteTitle || branding.name || "Classgrid ERP";
+      } else {
+        document.title = "Classgrid ERP"; // Force default branding on subdomains
+      }
     } else {
       document.title = "Classgrid ERP";
     }
