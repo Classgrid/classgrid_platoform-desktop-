@@ -154,7 +154,7 @@ export function CustomDomainCard() {
                         <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight">{user?.organization?.subdomain}.classgrid.in</h3>
                         <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
                     </div>
                 </div>
@@ -575,12 +575,12 @@ const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseU
     ];
 
     return (
-        <Accordion type="single" collapsible className={`w-full ${!isSubdomain ? 'mt-4 border-t border-border/50 pt-2' : ''}`}>
-            <AccordionItem value="portals" className="border-none">
-                <AccordionTrigger className={`hover:no-underline py-4 text-sm text-muted-foreground hover:text-foreground transition-colors px-6 font-medium ${isSubdomain ? 'text-base' : ''}`}>
-                    {isSubdomain ? "Manage Subdomain & View Links" : "View Portal Links"}
+        <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="links" className="border-none">
+                <AccordionTrigger className="hover:no-underline px-6 py-4 bg-muted/20 hover:bg-muted/40 transition-colors">
+                    <span className="font-medium text-foreground">{isSubdomain ? "Manage URL & View Links" : "View Portal Links"}</span>
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6">
+                <AccordionContent className="px-6 pb-6 pt-4">
                     {subdomainEditUI}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {portals.map(portal => (
