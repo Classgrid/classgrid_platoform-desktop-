@@ -52,6 +52,7 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   const { data: currentUser } = useCurrentUser();
   const [branding, setBranding] = useState<AuthBranding>(platformBranding);
   const [storedRole, setStoredRole] = useState<AuthLoginRole | null>(null);
+  const [brandingError, setBrandingError] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
   const slug = searchParams.get("slug") || searchParams.get("org") || undefined;
@@ -81,7 +82,11 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
       })
       .catch(() => {
         if (isMounted) {
-          setBranding({ ...platformBranding, authType });
+          if (authType === "institution") {
+            setBrandingError(true);
+          } else {
+            setBranding(platformBranding);
+          }
         }
       });
 
@@ -89,6 +94,15 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
       isMounted = false;
     };
   }, [authType, slug]);
+
+  if (brandingError) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-background text-foreground text-center">
+        <h2 className="text-2xl font-semibold mb-2">Institution Not Found</h2>
+        <p className="text-muted-foreground">This login portal does not exist or has been moved.</p>
+      </div>
+    );
+  }
 
   if (currentUser && !initialDeviceVerification) {
     return <Navigate to={getRedirectPath(currentUser.role)} replace />;

@@ -62,16 +62,7 @@ export function TenantLandingPage() {
           setError(true);
         }
       } catch {
-        // Fallback: use subdomain as name
-        setTenant({
-          id: "",
-          name: subdomain.toUpperCase(),
-          subdomain,
-          structure_type: "",
-          logo_url: "",
-          tagline: "Institution ERP Portal",
-          admission_portal_open: false,
-        });
+        setError(true);
       } finally {
         setLoading(false);
       }
