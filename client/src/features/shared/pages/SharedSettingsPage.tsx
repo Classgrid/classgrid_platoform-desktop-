@@ -56,6 +56,15 @@ export function SharedSettingsPage() {
 
   const isPending = updatePrefs.isPending || updateProfile.isPending;
 
+  if (isProfileLoading || isPrefLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full min-h-[60vh] gap-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-muted-foreground text-sm font-medium">Loading settings...</p>
+      </div>
+    );
+  }
+
   return (
     <form className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12" onSubmit={handleSave} noValidate>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">

@@ -128,13 +128,7 @@ export function OrgBrandingCard() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-card border border-border rounded-xl p-6 flex items-center justify-center min-h-[200px]">
-        <Spinner className="text-primary" />
-      </div>
-    );
-  }
+  // Removed individual card spinner to use global page spinner
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md transition-all">

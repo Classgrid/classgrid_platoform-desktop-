@@ -2161,7 +2161,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
         const { logo_url, favicon_url } = req.body;
-        const orgId = req.user.organization_id;
+        const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 

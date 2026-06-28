@@ -116,8 +116,8 @@ export function CustomDomainCard() {
 
     if (isLoading) {
         return (
-            <div className="w-full h-32 flex items-center justify-center border border-border/50 rounded-xl bg-card/30 animate-pulse">
-                <Spinner className="w-6 h-6 text-muted-foreground" />
+            <div className="flex items-center justify-center p-8 bg-card rounded-xl border border-border mt-6">
+              {/* Removed inner spinner to avoid multiple spinners on the page */}
             </div>
         );
     }
