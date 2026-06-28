@@ -45,41 +45,60 @@ function FieldEditor({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-1">
         <label className="text-[10px] uppercase font-bold text-muted-foreground">{label}</label>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {isEditing ? (
+          <input
+            type="text"
+            value={localValue}
+            onChange={(e) => {
+              const val = maxLength ? e.target.value.slice(0, maxLength) : e.target.value;
+              setLocalValue(val);
+            }}
+            maxLength={maxLength}
+            placeholder={placeholder}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
+        ) : (
+          <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground min-h-[38px] flex items-center">
+            {value ? value : <span className="text-muted-foreground italic">Not set</span>}
+          </div>
+        )}
+
         {isEditing ? (
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={handleSave} disabled={isSaving || !localValue.trim()} className="h-6 text-xs px-2">
-              {isSaving ? <Spinner size="sm" className="mr-1" /> : null} Save
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={isSaving || !localValue.trim()} 
+              className="flex-1"
+            >
+              {isSaving ? <Spinner size="sm" className="mr-2" /> : "Save"}
             </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel} disabled={isSaving} className="h-6 text-xs px-2">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleCancel} 
+              disabled={isSaving} 
+              className="px-3"
+            >
               Cancel
             </Button>
           </div>
         ) : (
-          <Button size="sm" variant="outline" onClick={() => setIsEditing(true)} className="h-6 text-xs px-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => setIsEditing(true)} 
+            className="w-full text-xs font-medium mt-1"
+          >
             Edit
           </Button>
         )}
       </div>
-
-      {isEditing ? (
-        <input
-          type="text"
-          value={localValue}
-          onChange={(e) => {
-            const val = maxLength ? e.target.value.slice(0, maxLength) : e.target.value;
-            setLocalValue(val);
-          }}
-          maxLength={maxLength}
-          placeholder={placeholder}
-          className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
-        />
-      ) : (
-        <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground min-h-[38px] flex items-center">
-          {value ? value : <span className="text-muted-foreground italic">Not set</span>}
-        </div>
-      )}
     </div>
   );
 }
