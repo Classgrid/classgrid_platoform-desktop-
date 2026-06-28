@@ -42,13 +42,17 @@ export function OrgBrandingCard() {
   // Dynamically update the favicon in the browser tab
   React.useEffect(() => {
     if (data?.favicon_url) {
-      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
-      link.href = data.favicon_url;
+      localStorage.setItem("org_favicon", data.favicon_url);
+      
+      const link1 = document.getElementById('favicon-32') as HTMLLinkElement;
+      const link2 = document.getElementById('favicon-16') as HTMLLinkElement;
+      const link3 = document.getElementById('favicon-ico') as HTMLLinkElement;
+      
+      if (link1) link1.href = data.favicon_url;
+      if (link2) link2.href = data.favicon_url;
+      if (link3) link3.href = data.favicon_url;
+    } else if (data && !data.favicon_url) {
+      localStorage.removeItem("org_favicon");
     }
   }, [data?.favicon_url]);
 
