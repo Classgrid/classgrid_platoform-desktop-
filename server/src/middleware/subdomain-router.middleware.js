@@ -75,6 +75,7 @@ function extractSlugFromHost(host) {
 // ─── Phase 1: Extract Subdomain (runs on EVERY request) ─────────────
 export const extractSubdomain = (req, res, next) => {
     const host = req.headers.host || "";
+    req.tenantHost = host.split(":")[0].toLowerCase();
     req.tenantSlug = extractSlugFromHost(host) || null;
     next();
 };
@@ -93,15 +94,21 @@ export const resolveTenant = async (req, res, next) => {
             return next();
         }
 
-        // 1. Check cache
-        const cached = getCachedTenant(slug);
+        // 1. Check cache (use host as primary key for custom domains)
+        const cacheKey = req.tenantHost || slug;
+        const cached = getCachedTenant(cacheKey);
         if (cached) {
             req.tenantOrg = cached;
             return next();
         }
 
-        // 2. DB lookup
-        const org = await Organization.findOne({ subdomain: slug })
+        // 2. DB lookup (match either subdomain or custom domain)
+        const org = await Organization.findOne({
+            $or: [
+                { subdomain: slug },
+                { "custom_domain.domain": req.tenantHost }
+            ]
+        })
             .select("_id name subdomain org_type structure_type admission_config subscription_tier logo_url")
             .lean();
 
@@ -112,7 +119,7 @@ export const resolveTenant = async (req, res, next) => {
         }
 
         // 3. Cache and attach
-        setCachedTenant(slug, org);
+        setCachedTenant(cacheKey, org);
         req.tenantOrg = org;
         next();
     } catch (err) {
@@ -126,20 +133,26 @@ export const resolveTenant = async (req, res, next) => {
 export const getPublicTenantInfo = async (req, res) => {
     try {
         const slug = req.tenantSlug || req.query.slug;
-
-        if (!slug) {
-            return res.status(400).json({ error: "No subdomain or slug provided." });
-        }
-
-        // Check cache first
-        let org = getCachedTenant(slug);
+        const host = req.headers.host ? req.headers.host.split(":")[0].toLowerCase() : null;
+        
+        // Check cache first (use host if it's a direct API call without slug, else slug)
+        const cacheKey = host && !req.query.slug ? host : (slug || host);
+        let org = cacheKey ? getCachedTenant(cacheKey) : null;
 
         if (!org) {
-            org = await Organization.findOne({ subdomain: slug })
+            const query = [];
+            if (slug) query.push({ subdomain: slug });
+            if (host) query.push({ "custom_domain.domain": host });
+
+            if (query.length === 0) {
+                return res.status(400).json({ error: "No subdomain, slug, or host provided." });
+            }
+
+            org = await Organization.findOne({ $or: query })
                 .select("_id name subdomain org_type structure_type logo_url tagline admission_config.is_portal_open")
                 .lean();
 
-            if (org) setCachedTenant(slug, org);
+            if (org) setCachedTenant(cacheKey, org);
         }
 
         if (!org) {

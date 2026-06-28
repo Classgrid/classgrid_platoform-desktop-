@@ -102,14 +102,18 @@ router.get("/auth-branding", async (req, res) => {
     const requestedType = normalizeText(req.query?.type) || "institution";
     const slug = normalizeSlug(req.tenantSlug || req.query?.slug);
 
-    if (!slug) {
+    const query = [];
+    if (slug) query.push({ subdomain: slug });
+    if (req.tenantHost) query.push({ "custom_domain.domain": req.tenantHost });
+
+    if (query.length === 0) {
       if (requestedType === "institution") {
         return res.status(404).json({ success: false, message: "Institution not found." });
       }
       return res.json(platformAuthBranding());
     }
 
-    const org = await Organization.findOne({ subdomain: slug })
+    const org = await Organization.findOne({ $or: query })
       .select("name subdomain logo_url campus_photo_url branding status custom_domain")
       .lean();
 
