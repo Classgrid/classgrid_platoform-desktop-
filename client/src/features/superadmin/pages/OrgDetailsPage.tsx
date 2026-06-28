@@ -91,12 +91,12 @@ export function OrgDetailsPage() {
           </div>
         ) : (
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap mb-8 bg-secondary/50 p-1.5 rounded-lg border border-border/50">
-              <TabsTrigger value="overview" className="text-sm px-6 py-2">Overview & Admin</TabsTrigger>
-              <TabsTrigger value="admins" className="text-sm px-6 py-2">Administrators Directory</TabsTrigger>
-              <TabsTrigger value="portals" className="text-sm px-6 py-2">Portals & Links</TabsTrigger>
-              <TabsTrigger value="config" className="text-sm px-6 py-2">Configurations</TabsTrigger>
-              <TabsTrigger value="modules" className="text-sm px-6 py-2">Premium Modules</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2 mb-10 bg-secondary/30 p-2 rounded-xl border border-border/50 shadow-sm">
+              <TabsTrigger value="overview" className="text-sm font-medium py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">Overview & Admin</TabsTrigger>
+              <TabsTrigger value="admins" className="text-sm font-medium py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">Administrators</TabsTrigger>
+              <TabsTrigger value="portals" className="text-sm font-medium py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">Portals & Links</TabsTrigger>
+              <TabsTrigger value="config" className="text-sm font-medium py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">Configurations</TabsTrigger>
+              <TabsTrigger value="modules" className="text-sm font-medium py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">Premium Modules</TabsTrigger>
             </TabsList>
 
             <TabsContent value="admins" className="mt-0 animate-in fade-in duration-300">
