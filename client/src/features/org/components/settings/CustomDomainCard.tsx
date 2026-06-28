@@ -222,8 +222,8 @@ export function CustomDomainCard() {
                             ) : (
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <div className="font-medium text-foreground text-base">Edit Fallback Domain</div>
-                                        <div className="text-sm text-muted-foreground mt-0.5">Customize your fallback .classgrid.in subdomain</div>
+                                        <div className="font-medium text-foreground text-base">Edit Default Domain</div>
+                                        <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
                                     </div>
                                     <Button
                                         variant="outline"
@@ -233,7 +233,7 @@ export function CustomDomainCard() {
                                             setIsEditingSubdomain(true);
                                         }}
                                     >
-                                        Edit Subdomain
+                                        Edit Domain
                                     </Button>
                                 </div>
                             )}
