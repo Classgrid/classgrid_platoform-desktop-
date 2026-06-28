@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { apiClient } from "@/lib/apiClient";
 import { DNS_PROVIDERS, DnsProvider } from "../../../../constants/dnsProviders";
