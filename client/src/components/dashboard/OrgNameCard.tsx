@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import api from "@/lib/api";
+import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { SectionPanel } from "@/components/dashboard/SectionPanel";
@@ -20,14 +20,14 @@ export function OrgNameCard() {
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
     queryFn: async () => {
-      const res = await api.get("/org-admin/branding");
+      const res = await apiClient.get("/org-admin/branding");
       return res.data;
     },
   });
 
   const updateBranding = useMutation({
     mutationFn: async (variables: Partial<BrandingData>) => {
-      const res = await api.patch("/org-admin/branding", variables);
+      const res = await apiClient.patch("/org-admin/branding", variables);
       return res.data;
     },
     onSuccess: (updatedData, variables) => {
