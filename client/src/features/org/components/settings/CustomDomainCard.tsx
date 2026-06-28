@@ -157,73 +157,9 @@ export function CustomDomainCard() {
                         <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
                         <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
                     </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                        Default
-                    </div>
-                </div>
-            </div>
-            <div className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
-                    <div className="flex-1">
-                        {isEditingSubdomain ? (
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        value={subdomainInput}
-                                        onChange={(e) => setSubdomainInput(e.target.value)}
-                                        className="max-w-[200px]"
-                                        placeholder="e.g. aec"
-                                        disabled={updateSubdomainMutation.isPending}
-                                    />
-                                    <span className="text-muted-foreground font-medium">.classgrid.in</span>
-                                </div>
-                                <div className="text-xs text-danger font-medium mt-1">
-                                    Warning: Changing this will instantly break your current login link.
-                                </div>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <Button
-                                        size="sm"
-                                        onClick={() => updateSubdomainMutation.mutate(subdomainInput)}
-                                        disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
-                                    >
-                                        {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
-                                        Save
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => setIsEditingSubdomain(false)}
-                                        disabled={updateSubdomainMutation.isPending}
-                                    >
-                                        Cancel
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="flex items-center gap-3">
-                                    <div className="font-medium text-foreground text-lg">{user?.organization?.subdomain}.classgrid.in</div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 text-xs px-2"
-                                        onClick={() => {
-                                            setSubdomainInput(user?.organization?.subdomain || "");
-                                            setIsEditingSubdomain(true);
-                                        }}
-                                    >
-                                        Edit
-                                    </Button>
-                                </div>
-                                <div className="text-sm text-muted-foreground mt-1">This is your permanent fallback URL. Org Admin portals will always remain accessible here.</div>
-                            </>
-                        )}
-                    </div>
-                    
+                <div className="flex items-center gap-4">
                     {hasDomain && isVerified && (
-                        <div className="flex items-center gap-4 shrink-0 border-l border-border/50 pl-4">
+                        <div className="flex items-center gap-3 shrink-0 border-r border-border/50 pr-4">
                             <Switch 
                                 checked={domainConfig.allow_classgrid_url !== false} 
                                 onCheckedChange={(checked) => {
@@ -234,12 +170,75 @@ export function CustomDomainCard() {
                                 }}
                                 disabled={updateSettingsMutation.isPending}
                             />
-                            <span className="text-sm font-medium w-16">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
+                            <span className="text-sm font-medium w-16 text-muted-foreground">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
                         </div>
                     )}
+                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        Default
+                    </div>
                 </div>
-                
-                <PortalLinksAccordion baseUrl={`${user?.organization?.subdomain}.classgrid.in`} />
+            </div>
+            <div className="p-0">
+                <PortalLinksAccordion 
+                    baseUrl={`${user?.organization?.subdomain}.classgrid.in`} 
+                    isSubdomain={true}
+                    subdomainEditUI={(
+                        <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4">
+                            {isEditingSubdomain ? (
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            value={subdomainInput}
+                                            onChange={(e) => setSubdomainInput(e.target.value)}
+                                            className="max-w-[200px]"
+                                            placeholder="e.g. aec"
+                                            disabled={updateSubdomainMutation.isPending}
+                                        />
+                                        <span className="text-muted-foreground font-medium">.classgrid.in</span>
+                                    </div>
+                                    <div className="text-xs text-danger font-medium mt-1">
+                                        Warning: Changing this will instantly break your current login link.
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <Button
+                                            size="sm"
+                                            onClick={() => updateSubdomainMutation.mutate(subdomainInput)}
+                                            disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
+                                        >
+                                            {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
+                                            Save
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setIsEditingSubdomain(false)}
+                                            disabled={updateSubdomainMutation.isPending}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="font-medium text-foreground text-base">Edit Fallback Domain</div>
+                                        <div className="text-sm text-muted-foreground mt-0.5">Customize your fallback .classgrid.in subdomain</div>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSubdomainInput(user?.organization?.subdomain || "");
+                                            setIsEditingSubdomain(true);
+                                        }}
+                                    >
+                                        Edit Subdomain
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                />
             </div>
         </div>
 
@@ -556,11 +555,10 @@ export function CustomDomainCard() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-        </div>
     );
 }
 
-const PortalLinksAccordion = ({ baseUrl }: { baseUrl: string }) => {
+const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseUrl: string, isSubdomain?: boolean, subdomainEditUI?: React.ReactNode }) => {
     const portals = [
         { name: "Org Admin", path: "/org/admin/dashboard" },
         { name: "Student", path: "/student/login" },
@@ -575,13 +573,14 @@ const PortalLinksAccordion = ({ baseUrl }: { baseUrl: string }) => {
     ];
 
     return (
-        <Accordion type="single" collapsible className="w-full mt-4 border-t border-border/50 pt-2">
+        <Accordion type="single" collapsible className={`w-full ${!isSubdomain ? 'mt-4 border-t border-border/50 pt-2' : ''}`}>
             <AccordionItem value="portals" className="border-none">
-                <AccordionTrigger className="hover:no-underline py-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-4 font-medium">
-                    View Portal Links
+                <AccordionTrigger className={`hover:no-underline py-4 text-sm text-muted-foreground hover:text-foreground transition-colors px-6 font-medium ${isSubdomain ? 'text-base' : ''}`}>
+                    {isSubdomain ? "Manage Subdomain & View Links" : "View Portal Links"}
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2">
+                <AccordionContent className="px-6 pb-6">
+                    {subdomainEditUI}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {portals.map(portal => (
                             <a 
                                 key={portal.name}
