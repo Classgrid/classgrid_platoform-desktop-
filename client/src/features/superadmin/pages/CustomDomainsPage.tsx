@@ -217,11 +217,14 @@ export function CustomDomainsPage() {
           </DialogHeader>
           
           <div className="flex-1 overflow-y-auto pr-2 pb-2 mt-2">
-            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-4 rounded-lg flex items-start gap-3 my-2">
-              <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <span className="font-semibold text-primary block mb-1">Why do I need this?</span>
-                <span className="text-foreground/80">When a new organization connects their custom domain, the browser will block them from uploading profile pictures and study materials directly to your Cloudflare R2 bucket due to CORS policies. You must manually add their new domain to Cloudflare R2. This JSON is dynamically generated to include every single active domain.</span>
+            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-3 rounded-md flex items-start gap-2 my-2">
+              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div className="text-xs">
+                <span className="font-semibold text-primary block mb-0.5">Why do I need this?</span>
+                <span className="text-foreground/80 leading-relaxed">
+                  Browsers block direct R2 uploads from new custom domains due to CORS. 
+                  Copy this dynamically generated JSON into your Cloudflare R2 CORS settings to whitelist all active domains.
+                </span>
               </div>
             </div>
 
