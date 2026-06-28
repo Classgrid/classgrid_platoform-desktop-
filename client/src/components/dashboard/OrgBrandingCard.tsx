@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/a
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 type BrandingData = {
   logo_url: string;

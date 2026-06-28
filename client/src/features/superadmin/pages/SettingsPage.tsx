@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { Save, Bell, Palette, Shield } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import { Button } from "@/components/marketing_ui/button";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";

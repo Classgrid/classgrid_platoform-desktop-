@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
@@ -29,8 +29,6 @@ function FieldEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
 
-  const [showSaved, setShowSaved] = useState(false);
-
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
@@ -38,8 +36,6 @@ function FieldEditor({
   const handleSave = () => {
     onSave(localValue);
     setIsEditing(false); // Close immediately for optimistic UI
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2500); // Hide 'Saved' after 2.5s
   };
 
   const handleCancel = () => {
@@ -93,21 +89,14 @@ function FieldEditor({
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-3 mt-1">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => setIsEditing(true)} 
-              className="w-full text-xs font-medium"
-            >
-              Edit
-            </Button>
-            {showSaved && (
-              <span className="text-xs text-green-500 font-medium flex items-center animate-in fade-in duration-300">
-                ✓ Saved
-              </span>
-            )}
-          </div>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => setIsEditing(true)} 
+            className="w-full text-xs font-medium mt-1"
+          >
+            Edit
+          </Button>
         )}
       </div>
     </div>
