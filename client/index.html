@@ -13,6 +13,10 @@
         document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
       }
+      var customTitle = localStorage.getItem('org_title');
+      if (customTitle) {
+        document.title = customTitle;
+      }
     } catch(e) {}
   </script>
   <link rel="manifest" href="/site.webmanifest" />

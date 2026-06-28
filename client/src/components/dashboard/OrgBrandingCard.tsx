@@ -50,6 +50,9 @@ export function OrgBrandingCard() {
     if (data?.site_title) {
       document.title = data.site_title;
       setLocalSiteTitle(data.site_title);
+      localStorage.setItem("org_title", data.site_title);
+    } else if (data && !data.site_title) {
+      localStorage.removeItem("org_title");
     }
     
     if (data?.favicon_url) {
