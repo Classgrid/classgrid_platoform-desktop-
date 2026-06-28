@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X } from "lucide-react";
+import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X, Plus } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
@@ -12,6 +12,16 @@ import { toast } from "sonner";
 type BrandingData = {
   logo_url: string;
   favicon_url: string;
+  campus_photo_url: string;
+  social_links: {
+    instagram_url?: string;
+    youtube_url?: string;
+    facebook_url?: string;
+    linkedin_url?: string;
+    twitter_url?: string;
+    github_url?: string;
+    website_url?: string;
+  };
   site_title: string;
   has_custom_domain: boolean;
   name: string;
@@ -22,13 +32,17 @@ export function OrgBrandingCard() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const faviconInputRef = useRef<HTMLInputElement>(null);
+  const campusInputRef = useRef<HTMLInputElement>(null);
 
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState("");
-  const [cropType, setCropType] = useState<"logo" | "favicon">("logo");
+  const [cropType, setCropType] = useState<"logo" | "favicon" | "campus">("logo");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [localSiteTitle, setLocalSiteTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  const [selectedPlatform, setSelectedPlatform] = useState("instagram_url");
+  const [platformUrl, setPlatformUrl] = useState("");
 
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
@@ -70,7 +84,7 @@ export function OrgBrandingCard() {
     }
   }, [data?.favicon_url, data?.site_title]);
 
-  const openCropper = (file: File, type: "logo" | "favicon") => {
+  const openCropper = (file: File, type: "logo" | "favicon" | "campus") => {
     if (file.size > 5 * 1024 * 1024) {
       toast.error(`Please select an image smaller than 5MB.`);
       return;
@@ -96,7 +110,13 @@ export function OrgBrandingCard() {
     if (faviconInputRef.current) faviconInputRef.current.value = "";
   };
 
-  const uploadToR2 = async (blob: Blob, type: "logo" | "favicon") => {
+  const handleCampusUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) openCropper(file, "campus");
+    if (campusInputRef.current) campusInputRef.current.value = "";
+  };
+
+  const uploadToR2 = async (blob: Blob, type: "logo" | "favicon" | "campus") => {
     const loadingToast = toast.loading(`Uploading ${type}...`);
     try {
       const ext = blob.type === "image/png" ? "png" : "jpg";
@@ -115,13 +135,15 @@ export function OrgBrandingCard() {
 
       if (!response.ok) throw new Error(`Upload failed`);
 
-      const payload = type === "logo" 
-        ? { logo_url: data.publicUrl } 
-        : { favicon_url: data.publicUrl };
+      let payload = {};
+      if (type === "logo") payload = { logo_url: data.publicUrl };
+      else if (type === "favicon") payload = { favicon_url: data.publicUrl };
+      else if (type === "campus") payload = { campus_photo_url: data.publicUrl };
 
       await updateBranding.mutateAsync(payload);
       
-      toast.success(`${type === "logo" ? "College Logo" : "Favicon"} updated successfully!`, { id: loadingToast });
+      const typeLabel = type === "logo" ? "College Logo" : type === "campus" ? "Campus Photo" : "Favicon";
+      toast.success(`${typeLabel} updated successfully!`, { id: loadingToast });
       setCropOpen(false);
     } catch (err) {
       console.error(err);
@@ -129,15 +151,44 @@ export function OrgBrandingCard() {
     }
   };
 
-  const handleDelete = async (type: "logo" | "favicon") => {
+  const handleDelete = async (type: "logo" | "favicon" | "campus") => {
     const loadingToast = toast.loading(`Removing ${type}...`);
     try {
-      const payload = type === "logo" ? { logo_url: "" } : { favicon_url: "" };
+      let payload = {};
+      if (type === "logo") payload = { logo_url: "" };
+      else if (type === "favicon") payload = { favicon_url: "" };
+      else if (type === "campus") payload = { campus_photo_url: "" };
+
       await updateBranding.mutateAsync(payload);
-      toast.success(`${type === "logo" ? "College Logo" : "Favicon"} removed successfully!`, { id: loadingToast });
+      const typeLabel = type === "logo" ? "College Logo" : type === "campus" ? "Campus Photo" : "Favicon";
+      toast.success(`${typeLabel} removed successfully!`, { id: loadingToast });
     } catch (error) {
       toast.error(`Failed to remove ${type}`, { id: loadingToast });
     }
+  };
+
+  const handleAddSocialLink = async () => {
+    if (!platformUrl.trim() || !platformUrl.startsWith("http")) {
+      toast.error("Please enter a valid HTTP/HTTPS URL");
+      return;
+    }
+    const currentLinks = data?.social_links || {};
+    const payload = {
+      social_links: {
+        ...currentLinks,
+        [selectedPlatform]: platformUrl.trim()
+      }
+    };
+    await updateBranding.mutateAsync(payload);
+    setPlatformUrl("");
+    toast.success("Social link added successfully!");
+  };
+
+  const handleRemoveSocialLink = async (key: string) => {
+    const currentLinks = { ...(data?.social_links || {}) };
+    delete (currentLinks as any)[key];
+    await updateBranding.mutateAsync({ social_links: currentLinks });
+    toast.success("Social link removed!");
   };
 
   // Removed individual card spinner to use global page spinner
@@ -253,6 +304,65 @@ export function OrgBrandingCard() {
           </div>
         </div>
 
+        {/* Campus Photo Upload */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Campus Photo
+              </label>
+              {!data?.has_custom_domain && (
+                <Badge variant="warning" className="h-5 text-[9px] uppercase tracking-wider px-1.5">
+                  Custom Domain Required
+                </Badge>
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Dimensions: 1350x1800px (3:4 ratio). Background for your login page.
+            </p>
+          </div>
+
+          <div 
+            className={`relative rounded-xl overflow-hidden border-2 border-dashed border-border w-[120px] h-[160px] flex items-center justify-center bg-muted/30 ${
+              data?.has_custom_domain ? "group hover:border-primary/50" : "opacity-50 cursor-not-allowed"
+            }`}
+          >
+            {data?.campus_photo_url ? (
+              <img src={data.campus_photo_url} alt="Campus" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            ) : (
+              <div 
+                className={`flex flex-col items-center gap-2 text-muted-foreground ${data?.has_custom_domain ? "cursor-pointer" : ""}`}
+                onClick={() => data?.has_custom_domain && campusInputRef.current?.click()}
+              >
+                <Camera size={24} />
+                <span className="text-[10px] font-medium text-center px-2">Upload Photo</span>
+              </div>
+            )}
+            
+            {data?.has_custom_domain && data?.campus_photo_url && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={() => setPreviewImage(data.campus_photo_url)}>
+                  <Eye size={14} />
+                </Button>
+                <Button size="icon" variant="default" className="h-8 w-8 rounded-full" onClick={() => campusInputRef.current?.click()}>
+                  <Upload size={14} />
+                </Button>
+                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => handleDelete("campus")}>
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+            )}
+            {data?.has_custom_domain && (
+              <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={handleCampusUpload} />
+            )}
+            {!data?.has_custom_domain && (
+               <div className="absolute inset-0 bg-background/80 flex items-center justify-center p-2 text-center backdrop-blur-[1px]">
+                  <Shield size={16} className="text-muted-foreground mb-1" />
+               </div>
+            )}
+          </div>
+        </div>
+
         {/* Site Title Settings */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
@@ -316,15 +426,73 @@ export function OrgBrandingCard() {
             )}
           </div>
         </div>
+      </div>
 
+      <div className="border-t border-border pt-6 mt-2">
+        <div className="flex flex-col gap-1 mb-4">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider">
+            <Globe size={16} /> Social Links
+          </h3>
+          <p className="text-[11px] text-muted-foreground">
+            Connect your institution's social media accounts to display them on the login page. Must start with http:// or https://.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              <select
+                value={selectedPlatform}
+                onChange={(e) => setSelectedPlatform(e.target.value)}
+                className="bg-background border border-border rounded-lg px-2 py-2 text-sm focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="instagram_url">Instagram</option>
+                <option value="youtube_url">YouTube</option>
+                <option value="facebook_url">Facebook</option>
+                <option value="linkedin_url">LinkedIn</option>
+                <option value="twitter_url">Twitter</option>
+                <option value="github_url">GitHub</option>
+                <option value="website_url">Website</option>
+              </select>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={platformUrl}
+                onChange={(e) => setPlatformUrl(e.target.value)}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none"
+              />
+            </div>
+            <Button size="sm" onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="w-fit">
+              <Plus size={14} className="mr-1" /> Add Link
+            </Button>
+          </div>
+
+          <div className="md:col-span-1 lg:col-span-2 flex flex-wrap gap-2">
+            {data?.social_links && Object.entries(data.social_links).map(([key, url]) => {
+              if (!url) return null;
+              const label = key.replace("_url", "").charAt(0).toUpperCase() + key.replace("_url", "").slice(1);
+              return (
+                <div key={key} className="flex items-center gap-2 bg-muted/50 border border-border rounded-full px-3 py-1.5 text-xs">
+                  <span className="font-medium text-foreground">{label}</span>
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary max-w-[150px] truncate" title={url}>
+                    {url}
+                  </a>
+                  <button onClick={() => handleRemoveSocialLink(key)} className="text-muted-foreground hover:text-destructive ml-1">
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <ImageCropperModal
         isOpen={cropOpen}
         onClose={() => setCropOpen(false)}
         imageSrc={cropSrc}
-        aspectRatio={cropType === "favicon" ? 1 : undefined} // Favicon is forced 1:1, Logo is free
-        title={cropType === "favicon" ? "Crop Favicon (Square PNG)" : "Crop College Logo"}
+        aspectRatio={cropType === "favicon" ? 1 : cropType === "campus" ? 0.75 : undefined}
+        title={cropType === "favicon" ? "Crop Favicon (Square PNG)" : cropType === "campus" ? "Crop Campus Photo (3:4)" : "Crop College Logo"}
         onCropComplete={(blob) => uploadToR2(blob, cropType)}
       />
 

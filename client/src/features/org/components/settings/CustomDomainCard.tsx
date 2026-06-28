@@ -532,11 +532,53 @@ export function CustomDomainCard() {
                                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
                                         <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                     </div>
-                                    <div>
-                                        <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Domain is active and verified</h4>
+                                    <div className="w-full">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Domain is active and verified</h4>
+                                        </div>
                                         <p className="text-sm text-emerald-700/80 dark:text-emerald-400/80 mt-1">
                                             Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
                                         </p>
+                                        
+                                        <div className="mt-5 space-y-4 bg-background/50 rounded-lg p-4 border border-emerald-500/10">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <span className="text-sm font-medium text-foreground block">Enable Custom Domain</span>
+                                                    <span className="text-xs text-muted-foreground">Turn off to temporarily pause traffic to your custom domain.</span>
+                                                </div>
+                                                <Switch 
+                                                    checked={domainConfig.is_enabled !== false} 
+                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ is_enabled: checked })}
+                                                    disabled={updateSettingsMutation.isPending}
+                                                />
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between border-t border-border/50 pt-4">
+                                                <div>
+                                                    <span className="text-sm font-medium text-foreground block">Allow Classgrid URL</span>
+                                                    <span className="text-xs text-muted-foreground">Turn off to strictly redirect all default subdomain traffic to your custom domain.</span>
+                                                </div>
+                                                <Switch 
+                                                    checked={domainConfig.allow_classgrid_url !== false} 
+                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ allow_classgrid_url: checked })}
+                                                    disabled={updateSettingsMutation.isPending}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 mt-5 text-sm text-emerald-800 dark:text-emerald-300">
+                                            <div className="flex items-center gap-1.5">
+                                                <CheckCircle2 className="w-4 h-4" /> TXT Record Verified
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <CheckCircle2 className="w-4 h-4" /> CNAME Record Verified
+                                            </div>
+                                        </div>
+                                        {domainConfig.verified_at && (
+                                            <div className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-2">
+                                                Verified at: {new Date(domainConfig.verified_at).toLocaleString()}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <PortalLinksAccordion baseUrl={domainConfig.domain} />

@@ -296,7 +296,7 @@ export function AuthCard({
   };
 
   return (
-    <section className="w-full border border-border bg-card p-5 text-card-foreground sm:p-6 lg:p-8">
+    <section className="w-full">
       <AnimatePresence mode="wait" initial={false}>
         {step === 1 ? (
           <motion.form
@@ -350,6 +350,7 @@ export function AuthCard({
             </div>
 
             <TermsText className="pt-2" variant="sentence" />
+            <RecaptchaBadge />
           </motion.form>
         ) : step === "device" ? (
           <motion.form
@@ -436,20 +437,19 @@ export function AuthCard({
             className="flex flex-col gap-6"
           >
             <div className="grid gap-6">
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                className="w-fit px-0 text-sm text-foreground hover:bg-transparent hover:text-primary"
+                className="inline-flex w-fit items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-emerald-400"
                 onClick={handleBack}
               >
                 <ArrowLeft className="size-4" aria-hidden="true" />
                 Back
-              </Button>
+              </button>
 
               <AuthCardHeader title={stepCopy.title} subtitle={stepCopy.subtitle} />
 
               <FieldGroup label="Email">
-                <div className="border border-border bg-background px-4 py-3 text-sm font-medium text-foreground">
+                <div className="flex h-[58px] w-full items-center rounded-[14px] border border-white/[0.14] bg-[#111111] px-4 text-sm text-[#ededed]">
                   {email.trim()}
                 </div>
               </FieldGroup>
@@ -459,29 +459,37 @@ export function AuthCard({
                   autoCapitalize="none"
                   autoComplete="current-password"
                   icon={LockKeyhole}
-                  inputClassName="h-12 border-border bg-background pl-11 pr-12 sm:h-13"
+                  inputClassName="pr-12"
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Enter your password"
                   rightAdornment={
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 size-9 -translate-y-1/2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                      className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition-colors hover:bg-white/5 hover:text-white"
                       onClick={() => setShowPassword((current) => !current)}
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
+                    </button>
                   }
                   type={showPassword ? "text" : "password"}
                   value={password}
                 />
               </FieldGroup>
 
-              <Link to="/forgot-password" className="justify-self-start text-sm font-medium text-primary">
-                Forgot Password?
-              </Link>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-white/70">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-white/[0.14] bg-transparent text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0"
+                    defaultChecked
+                  />
+                  Remember me
+                </label>
+                <Link to="/forgot-password" className="text-sm font-medium text-emerald-500 hover:text-emerald-400 hover:underline">
+                  Forgot Password?
+                </Link>
+              </div>
 
               {feedback ? <FeedbackMessage {...feedback} /> : null}
 
@@ -493,6 +501,7 @@ export function AuthCard({
             </div>
 
             <TermsText className="pt-2" variant="compact" />
+            <RecaptchaBadge />
           </motion.form>
         )}
       </AnimatePresence>
@@ -602,9 +611,9 @@ function AuthCardHeader({
   subtitle?: string;
 }) {
   return (
-    <div className="grid gap-2 text-center lg:text-left">
-      <h2 className="font-heading text-[1.9rem] font-semibold leading-tight text-foreground">{title}</h2>
-      {subtitle ? <p className="text-sm leading-6 text-muted-foreground">{subtitle}</p> : null}
+    <div className="mb-4 grid gap-1.5 text-center">
+      <h2 className="text-[17px] font-semibold text-[#ededed]">{title}</h2>
+      {subtitle ? <p className="text-[13px] leading-5 text-white/55">{subtitle}</p> : null}
     </div>
   );
 }
@@ -617,10 +626,10 @@ function FieldGroup({
   children: ReactNode;
 }) {
   return (
-    <label className="grid gap-2 text-left text-sm font-medium text-foreground">
-      <span>{label}</span>
+    <div className="grid gap-2 text-left text-sm font-medium">
+      {/* Hide label visually since design uses placeholders, but keep for screen readers if needed. Alternatively just render children. */}
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -632,7 +641,7 @@ function RoleSwitcher({
   onChange: (value: AuthUserRole) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-1 border border-border bg-background p-1">
+    <div className="flex w-full items-center gap-4 pb-2">
       {roleOptions.map((option) => {
         const Icon = option.icon;
         const isActive = value === option.value;
@@ -643,12 +652,14 @@ function RoleSwitcher({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex h-11 items-center justify-center gap-2 border px-3 text-sm font-medium transition-colors",
-              isActive ? "border-primary bg-card text-foreground" : "border-transparent text-muted-foreground hover:border-border"
+              "flex h-[46px] flex-1 items-center justify-center gap-2 rounded-[14px] border text-sm font-medium transition-all duration-200",
+              isActive 
+                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                : "border-white/[0.14] bg-transparent text-white/55 hover:border-white/[0.25] hover:text-[#ededed]"
             )}
             aria-pressed={isActive}
           >
-            <Icon className={cn("size-4", isActive ? "text-primary" : "text-muted-foreground")} aria-hidden="true" />
+            <Icon className="size-[18px]" strokeWidth={2.5} aria-hidden="true" />
             {option.label}
           </button>
         );
@@ -674,16 +685,19 @@ function IconInput({
   placeholder: string;
   inputClassName?: string;
   rightAdornment?: ReactNode;
-} & Omit<React.ComponentProps<typeof Input>, "className" | "onChange" | "placeholder" | "type" | "value">) {
+} & Omit<React.ComponentProps<"input">, "className" | "onChange" | "placeholder" | "type" | "value">) {
   return (
     <div className="relative w-full">
-      <Icon className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-      <Input
+      <Icon className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/45" aria-hidden="true" />
+      <input
         value={value}
         onChange={onChange}
         type={type}
         placeholder={placeholder}
-        className={cn("w-full", inputClassName)}
+        className={cn(
+          "h-[58px] w-full rounded-[14px] border border-white/[0.14] bg-transparent pl-11 pr-4 text-sm text-[#ededed] placeholder:text-white/45 outline-none transition-colors focus:border-emerald-500/50",
+          inputClassName
+        )}
         {...rest}
       />
       {rightAdornment}
@@ -701,35 +715,39 @@ function PrimaryActionButton({
   type: "button" | "submit";
 }) {
   return (
-    <Button type={type} disabled={disabled} className="h-12 w-full justify-between px-4 text-sm sm:h-13">
-      <span>{label}</span>
-      <ArrowRight className="size-5" aria-hidden="true" />
-    </Button>
+    <button
+      type={type}
+      disabled={disabled}
+      className="flex h-[60px] w-full items-center justify-center rounded-[14px] bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+    >
+      {label}
+    </button>
   );
 }
 
 function GoogleActionButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      className="h-12 w-full justify-center gap-3 text-sm sm:h-13"
+      className="flex h-[56px] w-full items-center justify-center gap-3 rounded-[14px] border border-white/[0.14] bg-transparent text-sm font-medium text-[#ededed] transition-colors hover:bg-white/[0.04]"
       onClick={onClick}
     >
-      <span className="inline-flex size-7 items-center justify-center border border-border text-sm font-semibold text-foreground">
-        G
-      </span>
+      <img
+        src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/google.svg"
+        alt="Google"
+        className="size-[18px]"
+      />
       Continue with Google
-    </Button>
+    </button>
   );
 }
 
 function OrDivider() {
   return (
-    <div className="flex w-full items-center gap-4 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-      <Separator className="flex-1" />
-      <span>Or</span>
-      <Separator className="flex-1" />
+    <div className="flex w-full items-center gap-4 text-xs tracking-wider text-white/45">
+      <div className="flex-1 border-t border-white/[0.08]" />
+      <span className="uppercase">Or</span>
+      <div className="flex-1 border-t border-white/[0.08]" />
     </div>
   );
 }
@@ -744,10 +762,11 @@ function FeedbackMessage({
   return (
     <div
       aria-live="polite"
-      className={cn(
-        "border px-4 py-3 text-sm leading-6",
-        tone === "error" ? "border-destructive bg-destructive/10 text-destructive" : "border-primary bg-primary/10 text-foreground"
-      )}
+      className={`rounded-[14px] border px-4 py-3 text-[13px] leading-6 ${
+        tone === "error"
+          ? "border-red-500/35 bg-red-500/10 text-[#fecaca]"
+          : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"
+      }`}
     >
       {message}
     </div>
@@ -761,30 +780,29 @@ function TermsText({
   variant: "sentence" | "compact";
   className?: string;
 }) {
-  if (variant === "compact") {
-    return (
-      <p className={cn("text-center text-[13px] leading-6 text-muted-foreground", className)}>
-        <Link to="/terms" className="font-medium text-primary">
-          Terms
-        </Link>{" | "}
-        <Link to="/privacy-policy" className="font-medium text-primary">
-          Privacy Policy
-        </Link>
-      </p>
-    );
-  }
-
   return (
-    <p className={cn("text-center text-[13px] leading-6 text-muted-foreground", className)}>
-      By continuing, you agree to Classgrid{" "}
-      <Link to="/terms" className="font-medium text-primary">
+    <p className={cn("text-center text-[13px] leading-6 text-white/55", className)}>
+      By signing in, you agree to our{" "}
+      <a href="https://classgrid.in/terms" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">
         Terms
-      </Link>{" "}
-      and{" "}
-      <Link to="/privacy-policy" className="font-medium text-primary">
+      </a>
+      {" & "}
+      <a href="https://classgrid.in/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">
         Privacy Policy
-      </Link>
-      .
+      </a>
     </p>
+  );
+}
+
+function RecaptchaBadge() {
+  return (
+    <div className="mt-2 flex items-center justify-center text-[11px] text-white/30">
+      Protected by reCAPTCHA
+      <span className="mx-1.5 flex items-center gap-1">
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 hover:underline">Privacy</a>
+        {" - "}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 hover:underline">Terms</a>
+      </span>
+    </div>
   );
 }

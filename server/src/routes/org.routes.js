@@ -1857,7 +1857,7 @@ router.get("/custom-domain", isAuthenticated, requireRole("org_admin"), async (r
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
-        const org = await Organization.findById(orgId).select("custom_domain feature_flags").lean();
+        const org = await Organization.findById(orgId).select("custom_domain erp_domain feature_flags purchased_modules").lean();
         if (!org) return res.status(404).json({ message: "Organization not found." });
 
         if (!org.feature_flags?.custom_domain_module) {
@@ -1872,9 +1872,57 @@ router.get("/custom-domain", isAuthenticated, requireRole("org_admin"), async (r
                 txt_verified: false,
                 cname_verified: false
             },
+            erp_domain: org.erp_domain || {
+                domain: null,
+                status: "pending_verification",
+                verification_token: null,
+                txt_verified: false,
+                cname_verified: false
+            },
+            purchased_modules: org.purchased_modules || { college_website: false }
         });
     } catch (err) {
         console.error("[Custom Domain GET] Error:", err.message);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+/**
+ * PATCH /api/org-admin/custom-domain/settings
+ * Updates the settings for the custom domain (allow_classgrid_url and is_enabled)
+ */
+router.patch("/custom-domain/settings", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const { allow_classgrid_url, is_enabled } = req.body;
+        const updateFields = {};
+
+        if (typeof allow_classgrid_url === "boolean") {
+            updateFields["custom_domain.allow_classgrid_url"] = allow_classgrid_url;
+        }
+        if (typeof is_enabled === "boolean") {
+            updateFields["custom_domain.is_enabled"] = is_enabled;
+        }
+
+        const org = await Organization.findOneAndUpdate(
+            { _id: orgId },
+            { $set: updateFields },
+            { new: true }
+        ).select("custom_domain name");
+
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, updateFields);
+
+        res.json({
+            success: true,
+            message: "Custom domain settings updated.",
+            custom_domain: org.custom_domain
+        });
+    } catch (err) {
+        console.error("[Custom Domain Settings PATCH] Error:", err.message);
         res.status(500).json({ message: "Server error." });
     }
 });
@@ -2150,10 +2198,12 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain site_title subdomain name sidebar_name");
+        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain.domain site_title subdomain name sidebar_name");
         const responseData = {
             logo_url: org.logo_url || "",
             favicon_url: org.favicon_url || "",
+            campus_photo_url: org.campus_photo_url || "",
+            social_links: org.social_links || {},
             has_custom_domain: !!org.custom_domain?.domain,
             site_title: org.site_title || "Classgrid ERP",
             subdomain: org.subdomain,
@@ -2174,7 +2224,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
  */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const { logo_url, favicon_url, site_title, name, sidebar_name } = req.body;
+        const { logo_url, favicon_url, campus_photo_url, social_links, site_title, name, sidebar_name } = req.body;
         const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
@@ -2182,6 +2232,8 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         const updateData = {};
         if (logo_url !== undefined) updateData.logo_url = logo_url;
         if (favicon_url !== undefined) updateData.favicon_url = favicon_url;
+        if (campus_photo_url !== undefined) updateData.campus_photo_url = campus_photo_url;
+        if (social_links !== undefined) updateData.social_links = social_links;
         if (site_title !== undefined) updateData.site_title = site_title;
         if (name !== undefined) updateData.name = name;
         if (sidebar_name !== undefined) updateData.sidebar_name = sidebar_name;
@@ -2190,7 +2242,7 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             orgId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select("logo_url favicon_url site_title name sidebar_name");
+        ).select("logo_url favicon_url campus_photo_url social_links site_title name sidebar_name");
 
         logAdminAction(req, "update_branding", "organization", orgId, updatedOrg.name, updateData);
 
@@ -2199,6 +2251,8 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             branding: {
                 logo_url: updatedOrg.logo_url,
                 favicon_url: updatedOrg.favicon_url,
+                campus_photo_url: updatedOrg.campus_photo_url,
+                social_links: updatedOrg.social_links,
                 site_title: updatedOrg.site_title,
                 name: updatedOrg.name,
                 sidebar_name: updatedOrg.sidebar_name

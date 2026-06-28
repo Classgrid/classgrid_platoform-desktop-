@@ -116,7 +116,7 @@ router.get("/auth-branding", async (req, res) => {
     }
 
     const org = await Organization.findOne({ $or: query })
-      .select("name subdomain logo_url campus_photo_url branding status custom_domain site_title")
+      .select("name subdomain logo_url campus_photo_url social_links branding status custom_domain site_title")
       .lean();
 
     if (!org) {
@@ -163,7 +163,9 @@ router.get("/auth-branding", async (req, res) => {
         subdomain: org.subdomain,
         customDomain: org.custom_domain?.status === "active" ? org.custom_domain?.domain : null,
         allowClassgridUrl: org.custom_domain?.allow_classgrid_url !== false,
+        isCustomDomainEnabled: org.custom_domain?.is_enabled !== false,
         siteTitle: org.site_title || "Classgrid ERP",
+        socialLinks: org.social_links || {},
       },
     });
   } catch (error) {

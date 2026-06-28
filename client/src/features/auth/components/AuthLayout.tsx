@@ -10,17 +10,17 @@ import type {
   AuthLoginRole,
   AuthType,
   AuthUserRole,
-  LeftPanelVariant,
 } from "../types";
 import { AuthBrandMark } from "./AuthBrandMark";
 import { AuthCard } from "./AuthCard";
-import { LeftPanel } from "./LeftPanel";
+import { LeftPanelClassgrid } from "./LeftPanelClassgrid";
+import { LeftPanelCustomDomain } from "./LeftPanelCustomDomain";
+import { LoginPageShell } from "./LoginPageShell";
 import { DomainEnforcer } from "@/components/DomainEnforcer";
 
 type AuthLayoutProps = {
   authType: AuthType;
   audience: AuthAudience;
-  leftVariant?: LeftPanelVariant;
   preferredRole?: AuthUserRole;
 };
 
@@ -47,7 +47,7 @@ function getQueryPreferredRole(value: string | null): AuthUserRole | null {
   return null;
 }
 
-export function AuthLayout({ authType, audience, leftVariant, preferredRole }: AuthLayoutProps) {
+export function AuthLayout({ authType, audience, preferredRole }: AuthLayoutProps) {
   const location = useLocation();
   const { data: currentUser } = useCurrentUser();
   const [branding, setBranding] = useState<AuthBranding>(platformBranding);
@@ -120,9 +120,9 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
 
   if (brandingError) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-background text-foreground text-center">
+      <div className="flex h-screen flex-col items-center justify-center bg-[#0f0f0f] text-white text-center">
         <h2 className="text-2xl font-semibold mb-2">Institution Not Found</h2>
-        <p className="text-muted-foreground">This login portal does not exist or has been moved.</p>
+        <p className="text-white/60">This login portal does not exist or has been moved.</p>
       </div>
     );
   }
@@ -132,37 +132,48 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   }
 
   const defaultRole = getDefaultRoleForAudience(audience, storedRole, appRole || browserPreferredRole);
-  const resolvedLeftVariant = authType === "platform" ? "default" : leftVariant || branding.leftVariant;
   const showRoleSwitcher = audience === "user" && !appRole;
+
+  // Determine which left panel to render
+  const isCustomDomainLogin = !!customDomain || branding.customDomain;
+  const leftPanel = isCustomDomainLogin ? (
+    <LeftPanelCustomDomain branding={branding} />
+  ) : (
+    <LeftPanelClassgrid />
+  );
+
+  // Right panel content
+  const rightPanel = (
+    <div className="w-full max-w-[440px]">
+      {/* College Logo & Name */}
+      <div className="mb-6 flex flex-col items-center justify-center text-center">
+        <AuthBrandMark branding={branding} showSubtitle={false} stacked />
+      </div>
+
+      {/* Auth Card */}
+      <AuthCard
+        audience={audience}
+        branding={branding}
+        defaultRole={defaultRole}
+        initialMessage={initialMessage}
+        initialMessageTone={initialMessageTone}
+        initialDeviceVerification={initialDeviceVerification}
+        lockedRole={appRole}
+        preferredRole={browserPreferredRole}
+        prefilledEmail={prefilledEmail}
+        rememberedRole={storedRole}
+        showRoleSwitcher={showRoleSwitcher}
+      />
+    </div>
+  );
 
   return (
     <DomainEnforcer 
-      allowClassgridUrl={branding.allowClassgridUrl !== false} 
+      allowClassgridUrl={branding.allowClassgridUrl !== false}
+      isCustomDomainEnabled={branding.isCustomDomainEnabled !== false}
       customDomain={branding.customDomain}
     >
-      <main className="auth-container bg-background text-foreground">
-        <LeftPanel />
-        <section className="right-panel px-4 py-2 sm:px-6 lg:px-8 xl:px-10">
-          <div className="w-full">
-            <div className="mb-6 flex justify-center lg:hidden">
-              <AuthBrandMark branding={branding} showSubtitle={false} stacked />
-            </div>
-            <AuthCard
-              audience={audience}
-              branding={branding}
-              defaultRole={defaultRole}
-              initialMessage={initialMessage}
-              initialMessageTone={initialMessageTone}
-              initialDeviceVerification={initialDeviceVerification}
-              lockedRole={appRole}
-              preferredRole={browserPreferredRole}
-              prefilledEmail={prefilledEmail}
-              rememberedRole={storedRole}
-              showRoleSwitcher={showRoleSwitcher}
-            />
-          </div>
-        </section>
-      </main>
+      <LoginPageShell leftPanel={leftPanel} rightPanel={rightPanel} />
     </DomainEnforcer>
   );
 }

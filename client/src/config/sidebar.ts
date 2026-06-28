@@ -264,7 +264,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Lead Tracking", to: "/dept/admissions/crm", icon: Target },
           { label: "Communication", to: "/dept/admissions/comm", icon: Mail },
-          { label: "Bulk SMS / WhatsApp", to: "/dept/admissions/bulk", icon: Megaphone }
+          { label: "Bulk SMS / WhatsApp", to: "/dept/admissions/bulk", icon: Megaphone },
+          { label: "Website CMS", to: "/dept/admissions/website", icon: Globe }
         ]
       }
     ],
@@ -309,7 +310,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Collection Analytics", to: "/dept/fees/analytics", icon: FileBarChart },
           { label: "Export Reports", to: "/dept/fees/export", icon: FileBarChart },
           { label: "Class-wise Summary", to: "/dept/fees/summary", icon: ClipboardList },
-          { label: "Bank Reconciliation", to: "/dept/fees/reconciliation", icon: CreditCard }
+          { label: "Bank Reconciliation", to: "/dept/fees/reconciliation", icon: CreditCard },
+          { label: "Website CMS", to: "/dept/fees/website", icon: Globe }
         ]
       }
     ],
@@ -361,7 +363,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Performance Analytics", to: "/dept/exams/analytics", icon: FileBarChart },
           { label: "Export", to: "/dept/exams/export", icon: FileBarChart },
-          { label: "Toppers & Awards", to: "/dept/exams/toppers", icon: Award }
+          { label: "Toppers & Awards", to: "/dept/exams/toppers", icon: Award },
+          { label: "Website CMS", to: "/dept/exams/website", icon: Globe }
         ]
       }
     ],
@@ -411,7 +414,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "REPORTS",
         items: [
           { label: "Usage Analytics", to: "/dept/library/analytics", icon: FileBarChart },
-          { label: "Stock Report", to: "/dept/library/stock", icon: ClipboardList }
+          { label: "Stock Report", to: "/dept/library/stock", icon: ClipboardList },
+          { label: "Website CMS", to: "/dept/library/website", icon: Globe }
         ]
       }
     ],
@@ -453,7 +457,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Analytics", to: "/dept/attendance/analytics", icon: FileBarChart },
           { label: "Export", to: "/dept/attendance/export", icon: FileBarChart },
-          { label: "SARAL Compliance", to: "/dept/attendance/saral", icon: Shield }
+          { label: "SARAL Compliance", to: "/dept/attendance/saral", icon: Shield },
+          { label: "Website CMS", to: "/dept/attendance/website", icon: Globe }
         ]
       }
     ],
@@ -496,7 +501,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Salary Processing", to: "/dept/hr/payroll", icon: CreditCard },
           { label: "Pay Slips", to: "/dept/hr/payslips", icon: FileText },
-          { label: "Payroll Reports", to: "/dept/hr/payroll-reports", icon: FileBarChart }
+          { label: "Payroll Reports", to: "/dept/hr/payroll-reports", icon: FileBarChart },
+          { label: "Website CMS", to: "/dept/hr/website", icon: Globe }
         ]
       }
     ],
@@ -531,7 +537,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Routes & Buses", to: "/dept/transport/routes", icon: Bus },
           { label: "Passengers", to: "/dept/transport/passengers", icon: Users },
-          { label: "Fee Collection", to: "/dept/transport/fees", icon: CreditCard }
+          { label: "Fee Collection", to: "/dept/transport/fees", icon: CreditCard },
+          { label: "Website CMS", to: "/dept/transport/website", icon: Globe }
         ]
       }
     ],

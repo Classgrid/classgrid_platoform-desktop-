@@ -39,6 +39,18 @@ export type AuthBranding = {
   leftVariant: LeftPanelVariant;
   subdomain: string;
   siteTitle?: string;
+  customDomain?: string | null;
+  allowClassgridUrl?: boolean;
+  isCustomDomainEnabled?: boolean;
+  socialLinks?: {
+    instagram_url?: string;
+    youtube_url?: string;
+    facebook_url?: string;
+    linkedin_url?: string;
+    twitter_url?: string;
+    github_url?: string;
+    website_url?: string;
+  };
 };
 
 export type AuthBrandingResponse = {

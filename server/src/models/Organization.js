@@ -71,8 +71,29 @@ const organizationSchema = new mongoose.Schema(
             cname_verified: { type: Boolean, default: false },
             ssl_provisioned: { type: Boolean, default: false },
             allow_classgrid_url: { type: Boolean, default: true },
+            is_enabled: { type: Boolean, default: true },
             verified_at: { type: Date, default: null },
             created_at: { type: Date, default: null },
+        },
+        erp_domain: {
+            domain: { type: String, default: null },
+            status: { 
+                type: String, 
+                enum: ["pending_verification", "verified", "active", "failed"], 
+                default: "pending_verification" 
+            },
+            verification_token: { type: String, default: null },
+            txt_verified: { type: Boolean, default: false },
+            cname_verified: { type: Boolean, default: false },
+            ssl_provisioned: { type: Boolean, default: false },
+            allow_classgrid_url: { type: Boolean, default: true },
+            is_enabled: { type: Boolean, default: true },
+            verified_at: { type: Date, default: null },
+            created_at: { type: Date, default: null },
+        },
+        purchased_modules: {
+            erp_core: { type: Boolean, default: true },
+            college_website: { type: Boolean, default: true } // Default true for testing
         },
         // Custom Browser Tab Title (Premium White-labeling)
         site_title: {
@@ -95,6 +116,16 @@ const organizationSchema = new mongoose.Schema(
         campus_photo_url: {
             type: String,
             default: "",
+        },
+        // 🔗 Social Media Links — displayed on custom domain login pages
+        social_links: {
+            instagram_url: { type: String, default: "" },
+            youtube_url: { type: String, default: "" },
+            facebook_url: { type: String, default: "" },
+            linkedin_url: { type: String, default: "" },
+            twitter_url: { type: String, default: "" },
+            github_url: { type: String, default: "" },
+            website_url: { type: String, default: "" },
         },
         owner_id: {
             type: mongoose.Schema.Types.ObjectId,
