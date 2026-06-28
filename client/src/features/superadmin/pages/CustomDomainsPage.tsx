@@ -10,6 +10,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
 
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
@@ -31,7 +32,7 @@ export function CustomDomainsPage() {
     {
       key: "name", 
       header: "Organization", 
-      width: "w-[25%]",
+      width: "w-[30%]",
       render: (val: any, row: any) => (
         <div>
           <div style={{ fontWeight: 500 }}>{row.name}</div>
@@ -44,7 +45,7 @@ export function CustomDomainsPage() {
     {
       key: "domain", 
       header: "Custom Domain", 
-      width: "w-[25%]",
+      width: "w-[30%]",
       render: (val: any, row: any) => {
         const domain = row.custom_domain?.domain;
         return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
@@ -53,7 +54,7 @@ export function CustomDomainsPage() {
     {
       key: "status", 
       header: "Status", 
-      width: "w-[15%]",
+      width: "w-[20%]",
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
@@ -62,22 +63,28 @@ export function CustomDomainsPage() {
       },
     },
     {
-      key: "created_at", 
-      header: "Added Date", 
-      width: "w-[15%]",
-      render: (val: any, row: any) => {
-         // Some orgs might use the main createdAt if custom_domain.created_at isn't set properly
-         const d = row.custom_domain?.created_at || row.createdAt;
-         return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
-      },
-    },
-    {
       key: "verified_at", 
       header: "Verified Date", 
       width: "w-[20%]",
       render: (val: any, row: any) => {
-         const d = row.custom_domain?.verified_at;
-         return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
+         const v = row.custom_domain?.verified_at;
+         const added = row.custom_domain?.created_at || row.createdAt;
+         const addedText = added ? formatDate(added) : "-";
+         
+         return (
+           <TooltipProvider>
+             <Tooltip>
+               <TooltipTrigger>
+                 <div className="cursor-help inline-flex border-b border-dashed border-muted-foreground/50 pb-0.5">
+                   <span style={{ fontSize: "0.82rem" }}>{v ? formatDate(v) : "-"}</span>
+                 </div>
+               </TooltipTrigger>
+               <TooltipContent>
+                 Domain requested on: {addedText}
+               </TooltipContent>
+             </Tooltip>
+           </TooltipProvider>
+         );
       },
     },
   ], []);
