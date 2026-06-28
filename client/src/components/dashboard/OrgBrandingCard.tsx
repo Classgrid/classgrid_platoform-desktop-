@@ -56,10 +56,10 @@ export function OrgBrandingCard() {
       const link1 = document.getElementById('favicon-32') as HTMLLinkElement;
       const link2 = document.getElementById('favicon-16') as HTMLLinkElement;
       const link3 = document.getElementById('favicon-ico') as HTMLLinkElement;
-      
-      if (link1) link1.href = data.favicon_url;
-      if (link2) link2.href = data.favicon_url;
-      if (link3) link3.href = data.favicon_url;
+      const cacheBustedUrl = `${data.favicon_url}?t=${Date.now()}`;
+      if (link1) link1.href = cacheBustedUrl;
+      if (link2) link2.href = cacheBustedUrl;
+      if (link3) link3.href = cacheBustedUrl;
     } else if (data && !data.favicon_url) {
       localStorage.removeItem("org_favicon");
     }

@@ -207,7 +207,12 @@ export function CustomDomainCard() {
                                     <div className="flex items-center gap-2 mt-2">
                                         <Button
                                             size="sm"
-                                            onClick={() => updateSubdomainMutation.mutate(subdomainInput)}
+                                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
+                                                onSuccess: () => {
+                                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
+                                                    window.location.replace(newUrl);
+                                                }
+                                            })}
                                             disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
                                         >
                                             {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
