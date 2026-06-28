@@ -87,27 +87,37 @@ export function OrgNameCard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
         <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase font-bold text-muted-foreground">Full Name</label>
-          <input
-            type="text"
-            value={isEditingNames ? localName : (data?.name || "")}
-            onChange={(e) => setLocalName(e.target.value)}
-            disabled={!isEditingNames}
-            placeholder="e.g. Ambiguity Engineering College"
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
-          />
+          {isEditingNames ? (
+            <input
+              type="text"
+              value={localName}
+              onChange={(e) => setLocalName(e.target.value)}
+              placeholder="e.g. Ambiguity Engineering College"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+            />
+          ) : (
+            <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground">
+              {data?.name || <span className="text-muted-foreground italic">Not set</span>}
+            </div>
+          )}
         </div>
         
         <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase font-bold text-muted-foreground">Sidebar Name (Max 22 chars)</label>
-          <input
-            type="text"
-            value={isEditingNames ? localSidebarName : (data?.sidebar_name || "")}
-            onChange={(e) => setLocalSidebarName(e.target.value.slice(0, 22))}
-            disabled={!isEditingNames}
-            maxLength={22}
-            placeholder="e.g. Ambiguity Engg."
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
-          />
+          {isEditingNames ? (
+            <input
+              type="text"
+              value={localSidebarName}
+              onChange={(e) => setLocalSidebarName(e.target.value.slice(0, 22))}
+              maxLength={22}
+              placeholder="e.g. Ambiguity Engg."
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+            />
+          ) : (
+            <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground">
+              {data?.sidebar_name || <span className="text-muted-foreground italic">Not set</span>}
+            </div>
+          )}
         </div>
       </div>
     </SectionPanel>
