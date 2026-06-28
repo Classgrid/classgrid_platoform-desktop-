@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle } from "lucide-react";
+import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
@@ -154,7 +154,11 @@ export function CustomDomainCard() {
                         <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight">{user?.organization?.subdomain}.classgrid.in</h3>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight flex items-center gap-1.5">
+                            <a href={`https://${user?.organization?.subdomain}.classgrid.in`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1.5">
+                                {user?.organization?.subdomain}.classgrid.in <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                            </a>
+                        </h3>
                         <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
                     </div>
                 </div>
@@ -315,7 +319,11 @@ export function CustomDomainCard() {
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
                                 <span className="text-sm text-muted-foreground">Connected Domain</span>
-                                <span className="text-xl font-bold tracking-tight mt-0.5 text-foreground">{domainConfig.domain}</span>
+                                <span className="text-xl font-bold tracking-tight mt-0.5 text-foreground">
+                                    <a href={`https://${domainConfig.domain}`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-2">
+                                        {domainConfig.domain} <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                                    </a>
+                                </span>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => setRemoveConfirmOpen(true)} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                                 <Trash2 className="w-4 h-4" />
