@@ -71,6 +71,19 @@ export default [
       }],
       'tailwindcss/classnames-order': 'warn',
 
+      // BAN GENERIC LIBRARIES (Enforce Platform Standards)
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react-hot-toast',
+              message: 'react-hot-toast is forbidden. Use our native dark toast: import { toast } from "sonner" to match platform design.'
+            }
+          ]
+        }
+      ],
+
       // 100% COMPLIANCE ENFORCEMENT
       'no-restricted-syntax': [
         'error',
