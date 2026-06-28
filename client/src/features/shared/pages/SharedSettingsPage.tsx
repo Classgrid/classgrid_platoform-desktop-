@@ -57,37 +57,6 @@ export function SharedSettingsPage() {
 
   const isPending = updatePrefs.isPending || updateProfile.isPending;
 
-  if (isProfileLoading || isPrefLoading) {
-    return (
-      <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12 animate-in fade-in duration-500">
-        {/* Header Skeleton */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-8 w-48 rounded-md" />
-            <Skeleton className="h-4 w-72 rounded-md" />
-          </div>
-          <Skeleton className="h-10 w-24 rounded-lg" />
-        </div>
-        
-        {/* Cards Skeletons */}
-        <div className="flex flex-col gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6">
-              <div className="flex flex-col gap-2 border-b border-border pb-4">
-                <Skeleton className="h-6 w-40 rounded-md" />
-                <Skeleton className="h-3 w-64 rounded-md" />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-6">
-                <Skeleton className="h-24 w-full sm:w-1/2 rounded-xl" />
-                <Skeleton className="h-24 w-full sm:w-1/2 rounded-xl" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <form className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12" onSubmit={handleSave} noValidate>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
