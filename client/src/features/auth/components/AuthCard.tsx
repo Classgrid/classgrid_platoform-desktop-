@@ -305,8 +305,8 @@ export function AuthCard({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            onSubmit={handleContinue}
-            className="flex flex-col gap-6"
+            onSubmit={handleLogin}
+            className="flex flex-col gap-6 w-full max-w-[420px]"
           >
             <div className="grid gap-6">
               <AuthCardHeader title={stepCopy.title} subtitle={stepCopy.subtitle} />
@@ -321,12 +321,16 @@ export function AuthCard({
                 />
               ) : null}
 
+              <GoogleActionButton onClick={handleGoogleContinue} />
+
+              <OrDivider />
+
               <FieldGroup label="Enter Email">
                 <IconInput
                   autoCapitalize="none"
                   autoComplete="email"
                   icon={Mail}
-                  inputClassName="h-12 border-border bg-background pl-11 sm:h-13"
+                  inputClassName="h-[52px] sm:h-[56px]"
                   inputMode="email"
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="Email / Student ID"
@@ -336,18 +340,52 @@ export function AuthCard({
                 />
               </FieldGroup>
 
+              <FieldGroup label="Enter Password">
+                <IconInput
+                  autoCapitalize="none"
+                  autoComplete="current-password"
+                  icon={LockKeyhole}
+                  inputClassName="h-[52px] sm:h-[56px] pr-12"
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Password"
+                  rightAdornment={
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition-colors hover:bg-white/5 hover:text-white"
+                      onClick={() => setShowPassword((current) => !current)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  }
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                />
+              </FieldGroup>
+
+              <div className="flex items-center justify-between px-1">
+                <label className="flex items-center gap-3 text-[14px] text-white/70">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-white/[0.2] bg-transparent text-[#00E590] focus:ring-[#00E590]/50 focus:ring-offset-0"
+                    defaultChecked
+                  />
+                  Remember me
+                </label>
+                {/* 
+                  Link removed because mockup does not show "Forgot Password". 
+                  If needed, add it back here.
+                */}
+              </div>
+
               {feedback ? <FeedbackMessage {...feedback} /> : null}
 
               <PrimaryActionButton
-                disabled={!isEmailValid || isSubmitting}
+                disabled={!isEmailValid || !password || isSubmitting}
                 label={isSubmitting ? "Signing In..." : "Sign In"}
                 type="submit"
-                className="bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:from-emerald-500 hover:to-emerald-600 border-0"
+                className="mt-2 bg-gradient-to-r from-[#00E590] to-[#00C279] text-black shadow-[0_0_20px_rgba(0,229,144,0.3)] hover:brightness-110 hover:-translate-y-0.5 border-0 font-bold"
               />
-
-              <OrDivider />
-
-              <GoogleActionButton onClick={handleGoogleContinue} />
             </div>
 
             <TermsText className="pt-2" variant="sentence" />
@@ -594,8 +632,8 @@ function AuthCardHeader({
 }) {
   return (
     <div className="mb-4 grid gap-1.5 text-center">
-      <h2 className="text-[17px] font-semibold text-[#ededed]">{title}</h2>
-      {subtitle ? <p className="text-[13px] leading-5 text-white/55">{subtitle}</p> : null}
+      <h2 className="text-[17px] font-semibold text-white">{title}</h2>
+      {subtitle ? <p className="text-[14px] leading-5 text-white/55">{subtitle}</p> : null}
     </div>
   );
 }
@@ -636,10 +674,10 @@ function RoleSwitcher({
             className={cn(
               "flex h-[46px] flex-1 items-center justify-center gap-2 rounded-[14px] border text-sm font-medium transition-all duration-200",
               isActive && option.value === "student"
-                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                ? "border-[#00E590] text-[#00E590] bg-[#00E590]/5 shadow-[0_0_15px_rgba(0,229,144,0.1)]"
                 : isActive && option.value === "teacher"
-                ? "border-orange-500/50 bg-orange-500/10 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
-                : "border-white/[0.14] bg-transparent text-white/55 hover:border-white/[0.25] hover:text-[#ededed]"
+                ? "border-orange-500 text-orange-400 bg-orange-500/5 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
+                : "border-white/[0.08] bg-transparent text-white/55 hover:border-white/[0.15] hover:text-[#ededed]"
             )}
             aria-pressed={isActive}
           >
@@ -765,14 +803,10 @@ function TermsText({
   className?: string;
 }) {
   return (
-    <p className={cn("text-center text-[13px] leading-6 text-white/55", className)}>
+    <p className={cn("text-center text-[12px] leading-6 text-white/55", className)}>
       By signing in, you agree to our{" "}
-      <a href="https://classgrid.in/terms" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">
-        Terms
-      </a>
-      {" & "}
-      <a href="https://classgrid.in/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">
-        Privacy Policy
+      <a href="https://classgrid.in/terms" target="_blank" rel="noopener noreferrer" className="text-[#00E590] hover:underline">
+        Terms &amp; Privacy Policy
       </a>
     </p>
   );
