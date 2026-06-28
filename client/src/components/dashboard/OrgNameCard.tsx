@@ -75,7 +75,13 @@ function FieldEditor({
               disabled={isSaving || !localValue.trim()} 
               className="flex-1"
             >
-              {isSaving ? <Spinner size="sm" className="mr-2" /> : "Save"}
+              {isSaving ? (
+                <>
+                  <Spinner size="sm" className="mr-2" /> Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </Button>
             <Button 
               size="sm" 
