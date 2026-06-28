@@ -90,29 +90,7 @@ export function CustomDomainsPage() {
         return <Badge variant="warning">{s}</Badge>;
       },
     },
-    {
-      key: "verified_at", 
-      header: "Verified Date", 
-      width: "w-[20%]",
-      render: (val: any, row: any) => {
-         const v = row.custom_domain?.verified_at;
-         const added = row.custom_domain?.created_at || row.createdAt;
-         const addedText = added ? formatDate(added, "dd MMM, yyyy 'at' hh:mm a") : "-";
-         
-         return (
-           <div className="flex flex-col gap-0.5">
-             <span style={{ fontSize: "0.82rem" }} className="text-foreground">
-               {v ? formatDate(v) : "-"}
-             </span>
-             {added && (
-               <span style={{ fontSize: "0.75rem" }} className="text-muted-foreground">
-                 Req: {formatDate(added)}
-               </span>
-             )}
-           </div>
-         );
-      },
-    },
+
   ], []);
 
   // Generate Cloudflare JSON
