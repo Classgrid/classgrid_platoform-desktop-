@@ -72,7 +72,7 @@ export function SharedSettingsPage() {
 
       <SettingsAppearanceCard />
       
-      {profileData?.user?.role !== "org_admin" && (
+      {profileData?.role !== "org_admin" && (
         <SettingsNotificationsCard 
           prefs={prefs} 
           onChange={handlePrefChange} 
@@ -87,7 +87,7 @@ export function SharedSettingsPage() {
         />
       )}
 
-      {profileData?.user?.role === "org_admin" && (
+      {profileData?.role === "org_admin" && (
         <>
           <OrgBrandingCard />
           <CustomDomainCard />
