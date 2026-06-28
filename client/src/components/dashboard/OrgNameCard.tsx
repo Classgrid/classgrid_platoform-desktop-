@@ -21,7 +21,7 @@ function FieldEditor({
 }: { 
   label: string;
   value: string;
-  onSave: (val: string) => void;
+  onSave: (val: string, onSuccessCallback: () => void) => void;
   isSaving: boolean;
   placeholder: string;
   maxLength?: number;
@@ -34,21 +34,13 @@ function FieldEditor({
   }, [value]);
 
   const handleSave = () => {
-    onSave(localValue);
-    // Don't set isEditing(false) here, let the parent do it or wait for success
+    onSave(localValue, () => setIsEditing(false));
   };
 
   const handleCancel = () => {
     setLocalValue(value);
     setIsEditing(false);
   };
-  
-  // Close edit mode when value is updated successfully from backend
-  useEffect(() => {
-    if (value && isEditing && value === localValue && !isSaving) {
-      setIsEditing(false);
-    }
-  }, [value, isEditing, localValue, isSaving]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -152,7 +144,9 @@ export function OrgNameCard() {
             value={data?.name || ""}
             placeholder="e.g. Classgrid Org"
             isSaving={updateBranding.isPending}
-            onSave={(name) => updateBranding.mutate({ name })}
+            onSave={(name, closeEdit) => {
+              updateBranding.mutate({ name }, { onSuccess: closeEdit });
+            }}
           />
         </div>
 
@@ -164,7 +158,9 @@ export function OrgNameCard() {
             placeholder="e.g. Classgrid"
             maxLength={22}
             isSaving={updateBranding.isPending}
-            onSave={(sidebar_name) => updateBranding.mutate({ sidebar_name })}
+            onSave={(sidebar_name, closeEdit) => {
+              updateBranding.mutate({ sidebar_name }, { onSuccess: closeEdit });
+            }}
           />
         </div>
 
