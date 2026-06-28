@@ -157,6 +157,7 @@ export function CustomDomainCard() {
                         <h3 className="font-semibold text-base text-foreground tracking-tight">Classgrid Subdomain</h3>
                         <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
                     </div>
+                </div>
                 <div className="flex items-center gap-4">
                     {hasDomain && isVerified && (
                         <div className="flex items-center gap-3 shrink-0 border-r border-border/50 pr-4">
@@ -555,6 +556,7 @@ export function CustomDomainCard() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+        </div>
     );
 }
 
