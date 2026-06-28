@@ -68,6 +68,12 @@ const organizationSchema = new mongoose.Schema(
             verified_at: { type: Date, default: null },
             created_at: { type: Date, default: null },
         },
+        // Custom Browser Tab Title (Premium White-labeling)
+        site_title: {
+            type: String,
+            default: "Classgrid ERP",
+            trim: true
+        },
         address: {
             type: String,
             required: true,

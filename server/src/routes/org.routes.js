@@ -2150,11 +2150,13 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain");
+        const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain site_title subdomain");
         const responseData = {
             logo_url: org.logo_url || "",
             favicon_url: org.favicon_url || "",
-            has_custom_domain: !!org.custom_domain?.domain
+            has_custom_domain: !!org.custom_domain?.domain,
+            site_title: org.site_title || "Classgrid ERP",
+            subdomain: org.subdomain
         };
 
         await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
@@ -2170,7 +2172,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
  */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const { logo_url, favicon_url } = req.body;
+        const { logo_url, favicon_url, site_title } = req.body;
         const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
@@ -2178,12 +2180,13 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         const updateData = {};
         if (logo_url !== undefined) updateData.logo_url = logo_url;
         if (favicon_url !== undefined) updateData.favicon_url = favicon_url;
+        if (site_title !== undefined) updateData.site_title = site_title;
 
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select("logo_url favicon_url name");
+        ).select("logo_url favicon_url site_title name");
 
         logAdminAction(req, "update_branding", "organization", orgId, updatedOrg.name, updateData);
 
@@ -2191,7 +2194,8 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             message: "Organization branding updated successfully",
             branding: {
                 logo_url: updatedOrg.logo_url,
-                favicon_url: updatedOrg.favicon_url
+                favicon_url: updatedOrg.favicon_url,
+                site_title: updatedOrg.site_title
             }
         });
         
@@ -2200,6 +2204,48 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
     } catch (err) {
         console.error("[Org Branding Error]:", err.message);
         res.status(500).json({ message: "Server error updating branding." });
+    }
+});
+
+/**
+ * PATH: /api/org/subdomain
+ * METHOD: PATCH
+ */
+router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const { subdomain } = req.body;
+        const orgId = req.user.organization_id?._id || req.user.organization_id;
+        
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+        if (!subdomain) return res.status(400).json({ message: "Subdomain is required." });
+
+        // Validate subdomain strictly
+        const subdomainRegex = /^[a-z\-]{2,15}$/;
+        if (!subdomainRegex.test(subdomain)) {
+            return res.status(400).json({ 
+                message: "Subdomain must be 2-15 characters, containing only lowercase letters (a-z) and hyphens (-)." 
+            });
+        }
+
+        // Check if taken by ANOTHER org
+        const existing = await Organization.findOne({ subdomain: subdomain, _id: { $ne: orgId } });
+        if (existing) {
+            return res.status(409).json({ message: "This subdomain is already taken." });
+        }
+
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            { $set: { subdomain } },
+            { new: true, runValidators: true }
+        );
+
+        logAdminAction(req, "update_subdomain", "organization", orgId, updatedOrg.name, { subdomain });
+        await redis.del(`org:branding:${orgId}`);
+
+        res.json({ message: "Subdomain updated successfully.", subdomain: updatedOrg.subdomain });
+    } catch (err) {
+        console.error("[Org Subdomain Error]:", err.message);
+        res.status(500).json({ message: "Server error updating subdomain." });
     }
 });
 

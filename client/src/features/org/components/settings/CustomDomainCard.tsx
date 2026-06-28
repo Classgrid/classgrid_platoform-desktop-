@@ -27,6 +27,20 @@ export function CustomDomainCard() {
     const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
+    const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
+    const [subdomainInput, setSubdomainInput] = useState("");
+
+    const updateSubdomainMutation = useMutation({
+        mutationFn: (subdomain: string) => apiClient.patch("/api/org-admin/subdomain", { subdomain }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["current-user"] });
+            toast.success("Subdomain updated successfully!");
+            setIsEditingSubdomain(false);
+        },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || "Failed to update subdomain.");
+        }
+    });
     
     const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
 
@@ -151,10 +165,61 @@ export function CustomDomainCard() {
                 </div>
             </div>
             <div className="p-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
-                    <div>
-                        <div className="font-medium text-foreground text-lg">{user?.organization?.subdomain}.classgrid.in</div>
-                        <div className="text-sm text-muted-foreground mt-1">This is your permanent fallback URL. Org Admin portals will always remain accessible here.</div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-border/50 rounded-xl bg-background">
+                    <div className="flex-1">
+                        {isEditingSubdomain ? (
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        value={subdomainInput}
+                                        onChange={(e) => setSubdomainInput(e.target.value)}
+                                        className="max-w-[200px]"
+                                        placeholder="e.g. aec"
+                                        disabled={updateSubdomainMutation.isPending}
+                                    />
+                                    <span className="text-muted-foreground font-medium">.classgrid.in</span>
+                                </div>
+                                <div className="text-xs text-danger font-medium mt-1">
+                                    Warning: Changing this will instantly break your current login link.
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Button
+                                        size="sm"
+                                        onClick={() => updateSubdomainMutation.mutate(subdomainInput)}
+                                        disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
+                                    >
+                                        {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
+                                        Save
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setIsEditingSubdomain(false)}
+                                        disabled={updateSubdomainMutation.isPending}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <div className="font-medium text-foreground text-lg">{user?.organization?.subdomain}.classgrid.in</div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 text-xs px-2"
+                                        onClick={() => {
+                                            setSubdomainInput(user?.organization?.subdomain || "");
+                                            setIsEditingSubdomain(true);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+                                </div>
+                                <div className="text-sm text-muted-foreground mt-1">This is your permanent fallback URL. Org Admin portals will always remain accessible here.</div>
+                            </>
+                        )}
                     </div>
                     
                     {hasDomain && isVerified && (

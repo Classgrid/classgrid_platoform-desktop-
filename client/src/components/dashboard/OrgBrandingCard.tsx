@@ -12,6 +12,7 @@ import { toast } from "react-hot-toast";
 type BrandingData = {
   logo_url: string;
   favicon_url: string;
+  site_title: string;
   has_custom_domain: boolean;
 };
 
@@ -24,6 +25,8 @@ export function OrgBrandingCard() {
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"logo" | "favicon">("logo");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [localSiteTitle, setLocalSiteTitle] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
@@ -32,13 +35,21 @@ export function OrgBrandingCard() {
 
   const updateBranding = useMutation({
     mutationFn: (updates: Partial<BrandingData>) => apiClient.patch("/api/org-admin/branding", updates),
-    onSuccess: () => {
+    onSuccess: (res, variables) => {
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
+      if (variables.site_title !== undefined) {
+        setIsEditingTitle(false);
+      }
     },
   });
 
-  // Dynamically update the favicon in the browser tab
+  // Dynamically update the favicon and title in the browser tab
   React.useEffect(() => {
+    if (data?.site_title) {
+      document.title = data.site_title;
+      setLocalSiteTitle(data.site_title);
+    }
+    
     if (data?.favicon_url) {
       localStorage.setItem("org_favicon", data.favicon_url);
       
@@ -52,7 +63,7 @@ export function OrgBrandingCard() {
     } else if (data && !data.favicon_url) {
       localStorage.removeItem("org_favicon");
     }
-  }, [data?.favicon_url]);
+  }, [data?.favicon_url, data?.site_title]);
 
   const openCropper = (file: File, type: "logo" | "favicon") => {
     if (file.size > 5 * 1024 * 1024) {
@@ -133,11 +144,11 @@ export function OrgBrandingCard() {
           <ImageIcon size={18} /> Organization Branding
         </h3>
         <p className="text-sm text-muted-foreground mt-1 opacity-80">
-          Upload your college logo and custom favicon to white-label the platform.
+          Upload your college logo, custom favicon, and site title to white-label the platform.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         
         {/* College Logo Upload */}
         <div className="flex flex-col gap-4">
@@ -233,6 +244,70 @@ export function OrgBrandingCard() {
                <div className="absolute inset-0 bg-background/80 flex items-center justify-center p-2 text-center backdrop-blur-[1px]">
                   <Shield size={16} className="text-muted-foreground mb-1" />
                </div>
+            )}
+          </div>
+        </div>
+
+        {/* Site Title Settings */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Browser Tab Title
+              </label>
+              {!data?.has_custom_domain && (
+                <Badge variant="warning" className="h-5 text-[9px] uppercase tracking-wider px-1.5">
+                  Custom Domain Required
+                </Badge>
+              )}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Replaces "Classgrid ERP" in the browser tab.
+            </p>
+          </div>
+
+          <div className={`flex flex-col gap-3 ${!data?.has_custom_domain ? "opacity-50 pointer-events-none" : ""}`}>
+            <div className="relative">
+              <input
+                type="text"
+                value={isEditingTitle ? localSiteTitle : (data?.site_title || "Classgrid ERP")}
+                onChange={(e) => setLocalSiteTitle(e.target.value)}
+                disabled={!isEditingTitle}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
+              />
+            </div>
+            
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="sm" 
+                  onClick={() => updateBranding.mutate({ site_title: localSiteTitle })}
+                  disabled={updateBranding.isPending || !localSiteTitle.trim()}
+                  className="flex-1"
+                >
+                  {updateBranding.isPending ? <Spinner size="sm" /> : "Save"}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditingTitle(false);
+                    setLocalSiteTitle(data?.site_title || "Classgrid ERP");
+                  }}
+                  className="px-3"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => setIsEditingTitle(true)}
+                className="w-full text-xs font-medium"
+              >
+                Edit Title
+              </Button>
             )}
           </div>
         </div>

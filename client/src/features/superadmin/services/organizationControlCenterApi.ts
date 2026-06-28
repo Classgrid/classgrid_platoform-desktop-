@@ -1,0 +1,248 @@
+import { apiClient } from "@/lib/apiClient";
+
+export type MetricQuality = "actual" | "partial" | "unavailable";
+
+export interface OrganizationOwner {
+  _id?: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  profilePicture?: string;
+}
+
+export interface OrganizationAdmin extends OrganizationOwner {
+  _id: string;
+  role?: string;
+  department?: string;
+  designation?: string;
+}
+
+export interface OrganizationStats {
+  totalStudents?: number;
+  totalFaculty?: number;
+  totalUsers?: number;
+}
+
+export interface OrganizationCustomDomain {
+  domain?: string | null;
+  status?: string;
+  txt_verified?: boolean;
+  cname_verified?: boolean;
+  ssl_provisioned?: boolean;
+  allow_classgrid_url?: boolean;
+  verified_at?: string | null;
+  created_at?: string | null;
+}
+
+export interface OrganizationBranding {
+  theme_colors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+  };
+  font_preference?: string;
+  tagline?: string;
+}
+
+export interface OrganizationOnboardingProgress {
+  tenant_created?: boolean;
+  branding_configured?: boolean;
+  academic_hierarchy_set?: boolean;
+  staff_imported?: boolean;
+  students_imported?: boolean;
+  fee_structure_configured?: boolean;
+  admission_form_configured?: boolean;
+  first_login_completed?: boolean;
+  current_stage?: string;
+  last_synced_at?: string | null;
+  completed_at?: string | null;
+}
+
+export interface OrganizationAcademicConfig {
+  identifierLabel?: string;
+  prnRequired?: boolean;
+  prnLocked?: boolean;
+  batches?: string[];
+  branches?: string[];
+  requiredFields?: Record<string, boolean | undefined>;
+  idCardFields?: string[];
+}
+
+export interface OrganizationAdmissionConfig {
+  is_portal_open?: boolean;
+  is_merit_list_published?: boolean;
+  registration_fee?: number;
+  max_applications_per_student?: number;
+  cutoff_date?: string | null;
+  instructions?: string;
+  seat_matrix_policy?: { enabled?: boolean };
+  waitlist_and_deadlines?: {
+    waitlist_enabled?: boolean;
+    auto_promote_waitlist?: boolean;
+    fee_payment_deadline_hours?: number;
+  };
+  workflow_execution?: {
+    require_admin_document_verification?: boolean;
+    prn_generation?: string;
+    login_credential_dispatch?: string;
+  };
+}
+
+export interface OrganizationFullProfile {
+  _id: string;
+  name?: string;
+  org_type?: string;
+  structure_type?: string;
+  division_mode?: string;
+  allow_sub_batches?: boolean;
+  subdomain?: string;
+  custom_domain?: OrganizationCustomDomain;
+  address?: string;
+  logo_url?: string;
+  favicon_url?: string;
+  campus_photo_url?: string;
+  owner_id?: OrganizationOwner | string;
+  ownerName?: string;
+  ownerEmail?: string;
+  contactNumber?: string;
+  website?: string;
+  designation?: string;
+  affiliation?: string;
+  allowed_domains?: string[];
+  is_active?: boolean;
+  status?: string;
+  demoExpiresAt?: string | null;
+  rollNumberLabel?: string;
+  branding?: OrganizationBranding;
+  onboarding_progress?: OrganizationOnboardingProgress;
+  academic_config?: OrganizationAcademicConfig;
+  admission_config?: OrganizationAdmissionConfig;
+  feature_flags?: Record<string, boolean | undefined>;
+  paymentMethod?: string;
+  paymentAmount?: number;
+  organizationCode?: string;
+  honorCode?: string;
+  private_code?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  stats?: OrganizationStats;
+  adminsList?: OrganizationAdmin[];
+}
+
+export interface OrganizationUsageSnapshot {
+  totalStudents?: number;
+  totalTeachers?: number;
+  totalAdmins?: number;
+  totalClasses?: number;
+  storageUsedGB?: number;
+  emailsSent?: number;
+  activeUsers?: number;
+  lastUpdated?: string;
+}
+
+export interface OrganizationBillingRates {
+  basePricePerMonth?: number;
+  pricePerStudent?: number;
+  pricePerGB?: number;
+  freeStorageGB?: number;
+}
+
+export interface OrganizationSubscription {
+  plan?: string;
+  status?: string;
+  isPaid?: boolean;
+  expiresAt?: string | null;
+  features?: Record<string, boolean | undefined>;
+  billing?: OrganizationBillingRates;
+  metadata?: {
+    max_students?: number;
+    max_faculty?: number;
+    storage_limit_gb?: number;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrganizationDetailSnapshot {
+  _id: string;
+  name?: string;
+  org_type?: string;
+  structure_type?: string;
+  status?: string;
+  address?: string;
+  logo_url?: string;
+  owner_id?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  owner?: OrganizationOwner;
+  createdAt?: string;
+  usage?: OrganizationUsageSnapshot;
+  subscription?: OrganizationSubscription;
+}
+
+export interface OrganizationInsight {
+  totalFaculty?: number;
+  totalStudents?: number;
+  totalClassrooms?: number;
+  faculty?: Array<OrganizationOwner & {
+    department?: string;
+    classrooms?: Array<{
+      _id: string;
+      name?: string;
+      subject?: string;
+      memberCount?: number;
+      isArchived?: boolean;
+    }>;
+  }>;
+}
+
+export interface OrganizationLegacyUsage {
+  storage?: {
+    bytes?: number;
+    mb?: string;
+    fileCount?: number;
+  };
+  db?: { notesCount?: number };
+  email?: { totalSent?: number };
+}
+
+export interface OrganizationEmailAnalytics {
+  total?: number;
+  daily?: number;
+  monthly?: number;
+  typeBreakdown?: Record<string, number | undefined>;
+  dailyChart?: Array<{ date: string; count: number }>;
+}
+
+export const organizationControlCenterApi = {
+  getFullProfile: (orgId: string) =>
+    apiClient
+      .get<{ success: boolean; data: OrganizationFullProfile }>(
+        `/api/super-admin/custom-domains/${orgId}/full`,
+      )
+      .then((response) => response.data.data),
+
+  getDetail: (orgId: string) =>
+    apiClient
+      .get<{ success: boolean; data: OrganizationDetailSnapshot }>(
+        `/api/super-admin/organizations/${orgId}`,
+      )
+      .then((response) => response.data.data),
+
+  getInsight: (orgId: string) =>
+    apiClient
+      .get<OrganizationInsight>(`/api/admin/org-insight/${orgId}`)
+      .then((response) => response.data),
+
+  getLegacyUsage: (orgId: string) =>
+    apiClient
+      .get<OrganizationLegacyUsage>(`/api/admin/usage/${orgId}`)
+      .then((response) => response.data),
+
+  getEmailAnalytics: (orgId: string) =>
+    apiClient
+      .get<OrganizationEmailAnalytics>("/api/admin/email-analytics", {
+        params: { orgId },
+      })
+      .then((response) => response.data),
+};

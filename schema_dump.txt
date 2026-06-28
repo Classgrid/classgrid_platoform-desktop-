@@ -1,0 +1,899 @@
+
+--- AcademicHierarchy.js ---
+ * Examples by structure_type:
+            type: mongoose.Schema.Types.ObjectId,
+        level_type: {
+            type: String,
+            enum: [
+            type: String,
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Number,
+            type: Boolean,
+--- ActivityLog.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            enum: [
+            type: String,
+            enum: ["material", "announcement", "quiz", "chat", "classroom", "note", "system", "org_announcement"],
+            type: String,
+            type: String,
+            type: mongoose.Schema.Types.Mixed,
+            type: Date,
+--- AdminAuditLog.js ---
+            type: mongoose.Schema.Types.ObjectId,
+        actorName: { type: String, required: true },
+            type: String,
+            enum: ["org_admin", "super_admin"],
+            type: mongoose.Schema.Types.ObjectId,
+        organizationName: { type: String, default: "" },
+            type: String,
+            enum: [
+        targetId: { type: String, default: null },
+        targetName: { type: String, default: "" },
+--- AdmissionApplication.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            enum: ["PORTAL", "DESK", "CET"],
+            type: mongoose.Schema.Types.ObjectId,
+        printout_generated: { type: Boolean, default: false },
+        printout_url: { type: String },
+            type: String,
+            enum: [
+        rejection_reason: { type: String, default: null },
+--- AdmissionConfig.js ---
+            type: mongoose.Schema.Types.ObjectId,
+        strategy_type: {
+            type: String,
+            enum: ["cet_engineering", "merit_based", "fcfs", "rla", "manual"],
+            personal_details: { type: Boolean, default: true },
+            parent_details: { type: Boolean, default: true },
+            address_details: { type: Boolean, default: true },
+            academic_history: { type: Boolean, default: true },
+            allow_edits_until: { type: String, default: "verified" }, // Form locks after this stage
+            field_id: { type: String, required: true },
+--- AdmissionOTP.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: String, // Only for Engineering (CET)
+            type: String, // For School/Coaching forms
+            type: String,
+            type: String,
+            type: Number,
+            type: Date,
+            type: String,
+            enum: ["en_validation", "login_verification", "email_validation", "phone_fallback"],
+--- ApiMetricBucket.js ---
+    route: { type: String, required: true },
+    method: { type: String, required: true },
+    bucket: { type: Date, required: true },   // rounded to hour
+    totalRequests: { type: Number, default: 0 },
+    successCount: { type: Number, default: 0 },   // 2xx
+    clientErrCount: { type: Number, default: 0 },   // 4xx
+    serverErrCount: { type: Number, default: 0 },   // 5xx
+    totalRespTimeMs: { type: Number, default: 0 }, // sum — divide by totalRequests for avg
+    lastFailureAt: { type: Date },
+    updatedAt: { type: Date, default: Date.now },
+--- Assignment.js ---
+            type: String,
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+            type: Number,
+            type: String,
+            enum: ["draft", "published", "archived"],
+--- AssignmentSubmission.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+            type: Number,
+            type: String,
+            type: Date,
+            type: String,
+            enum: ["submitted", "returned", "late"],
+--- Attendance.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+        session_type: {
+            type: String,
+            enum: ["full_day", "morning", "afternoon", "lecture"],
+                    type: mongoose.Schema.Types.ObjectId,
+                    type: String,
+--- AttendanceAppeal.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+--- AttendanceRecord.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+            type: String,
+            enum: ["present", "present_suspicious"],
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Boolean,
+--- AttendanceSession.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: Date,
+            type: Date,
+            type: Number,
+            type: String,
+            type: Number,
+            type: Number,
+            type: Number,
+--- CanteenItem.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: Number,
+            type: String,
+            type: Boolean,
+            type: String,
+            type: Number,
+            type: Boolean,
+            type: [String], // ["Monday", "Wednesday", "Friday"]
+            enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+--- CanteenOrder.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: Number,
+        type: Number,
+            type: String, // Razorpay Payment ID or Order ID
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String, // Displayed to the kitchen staff and student (e.g., T-142)
+            type: Number,
+            type: String,
+--- CETAllotment.js ---
+  organization_id:   { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+  cap_round:         { type: String, enum: ['CAP-I', 'CAP-II', 'CAP-III', 'CAP-IV', 'INSTITUTE', 'SPOT', 'MGMT'], required: true },
+  en_number:         { type: String, index: true },  // Optional for MGMT/Supernumerary without CET
+  candidate_name:    { type: String, required: true },
+  merit_number:      { type: Number },
+  mht_cet_score:     { type: Number },              // e.g., 86.2351996
+  gender:            { type: String, enum: ['M', 'F', 'O'], required: true },
+  category:          { type: String, enum: ['OPEN', 'SC', 'ST', 'VJ/DT(NT-A)', 'NT-B', 'NT-C', 'NT-D', 'OBC', 'SEBC'], required: true },
+  candidature_type:  { type: String, enum: ['Type-A', 'Type-B', 'Type-C', 'Type-D', 'Type-E', 'All-India', 'Minority', 'NRI/OCI/PIO', 'J&K/Ladakh'] },
+  defence_type:      { type: String, enum: ['None', 'DEF-1', 'DEF-2', 'DEF-3'], default: 'None' },
+--- Changelog.js ---
+        type: String,
+        type: String,
+        type: String,
+    type: {
+        type: String,
+        enum: ["feature", "improvement", "bugfix", "launch"],
+        type: String,
+        type: Map,
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        type: Boolean,
+--- Classroom.js ---
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+        course_type: {
+            type: String,
+            enum: ['SCHOOL', 'COLLEGE', 'JUNIOR_COLLEGE', 'ENGINEERING', 'COACHING', 'DIPLOMA'],
+        academic_year: { type: String }, // e.g., 2025-2026
+--- ClassroomMembership.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            type: Date,
+            type: Date,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            type: String, // Supabase UUID
+--- ContentReport.js ---
+      type: mongoose.Schema.Types.ObjectId,
+    reportedByName: { type: String, default: "" }, // denormalized
+      type: mongoose.Schema.Types.ObjectId,
+      type: String,
+      enum: ["forum_post", "forum_comment", "chat_message", "note", "review", "user_profile", "other"],
+    contentId: { type: String, required: true }, // _id of the content
+    contentPreview: { type: String, default: "" }, // First 300 chars of content
+      type: mongoose.Schema.Types.ObjectId,
+    reportedUserName: { type: String, default: "" },
+      type: String,
+--- CoursePlaylist.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            type: Number,
+            type: Boolean,
+            type: mongoose.Schema.Types.ObjectId,
+--- CourseVideo.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+        video_source_type: {
+            type: String,
+            enum: ["youtube", "s3", "agora_recording"],
+            type: String,
+            type: String, // Extracted from URL (e.g., "dQw4w9WgXcQ")
+            type: String, // Direct MP4 or HLS stream URL from S3
+--- DemoRequest.js ---
+    institutionName: { type: String, required: true, trim: true },
+    orgType: { type: String, required: true, trim: true },
+    adminName: { type: String, required: true, trim: true },
+    adminEmail: { type: String, required: true, trim: true, lowercase: true },
+    adminPhone: { type: String, required: true, trim: true },
+    state: { type: String, required: true, trim: true },
+    city: { type: String, required: true, trim: true },
+    message: { type: String, default: "" },
+      type: String,
+      enum: ["pending", "scheduled", "completed", "cancelled"],
+--- DeviceVerification.js ---
+        type: String,
+        type: String,
+        type: String,
+        type: Boolean,
+        type: Number,
+        type: Number,
+        type: Date,
+        type: Date,
+--- EmailJob.js ---
+        to: { type: String, required: true },
+        subject: { type: String, required: true },
+        html: { type: String, required: true },
+        text: { type: String, default: "" },
+        type: {
+            type: String,
+            enum: [
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        classroomId: { type: mongoose.Schema.Types.ObjectId, ref: "Classroom" },
+        organizationId: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
+--- EmailReservation.js ---
+    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+    enum: ['pending', 'provisioned', 'failed'],
+    type: String,
+    enum: ['google_workspace', 'zoho', 'cpanel', 'internal'],
+    type: String,
+    type: String,
+--- Exam.js ---
+            type: String,
+            type: String,
+            type: Date,
+            type: Number,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Number,
+            type: Number,
+--- ExamRecord.js ---
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            enum: ["unit_test", "assignment", "midterm", "final", "practical", "other"],
+            type: Boolean,
+            subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "OrgSubject", default: null },
+            subjectName: { type: String, required: true },
+            maxMarks: { type: Number, required: true, min: 1 },
+--- ExamResult.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Number,
+            type: String,
+            enum: ["pass", "fail", "absent"],
+            type: String,
+--- FacultyBiometricLog.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+        log_type: {
+            type: String,
+            enum: ["IN", "OUT", "UNKNOWN"],
+            type: String,
+            type: String,
+            type: Boolean,
+--- FacultyPayroll.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+--- FeatureFlag.js ---
+        type: String,
+        type: String,
+        type: String,
+        type: Boolean,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        enum: ["SCHOOL", "COLLEGE", "COACHING", "JUNIOR_COLLEGE", "DIPLOMA", "CUSTOM"]
+        type: Boolean,
+        type: mongoose.Schema.Types.ObjectId,
+--- FeeCategory.js ---
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+--- FeeComponent.js ---
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+--- Feedback.model.js ---
+    organization: { type: mongoose.Schema.Types.ObjectId, ref: "Organization", required: true },
+    title: { type: String, required: true },
+    targetType: { type: String, enum: ["teacher", "course", "facility"], default: "teacher" },
+    targetTeacher: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    classroom: { type: mongoose.Schema.Types.ObjectId, ref: "Classroom" },
+    startDate: { type: Date, default: Date.now },
+    endDate: { type: Date, required: true },
+    isAnonymous: { type: Boolean, default: true },
+    status: { type: String, enum: ["active", "closed"], default: "active" },
+        type: { type: String, enum: ["rating", "text"], default: "rating" },
+--- FeedbackForm.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: String,
+        enum: ["teacher", "course", "facility", "overall"],
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        enum: ["all", "department", "division", "classroom"],
+        type: Date,
+        type: Date,
+--- FeedbackResponse.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Boolean,
+        type: String,
+        type: String,
+        submittedAt: { type: Date, default: Date.now },
+--- FeeRecord.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String, // e.g., "Exam Fee Oct 2026", "Lab Monthly Charge"
+            type: String,
+            enum: ['college', 'exam', 'library', 'canteen', 'hostel', 'other'],
+            type: Number,
+            type: Date,
+            type: Number,
+            type: String,
+            enum: ['pending', 'partially_paid', 'paid', 'overdue'],
+--- FeeStructure.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: Number,
+        type: Number,
+        type: Date,
+            name: { type: String, required: true, trim: true },
+            amount: { type: Number, required: true, min: 0 }
+--- FeeTransaction.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: Date,
+        type: String,
+        enum: ['cash', 'upi', 'bank_transfer', 'gateway'],
+        type: String,
+        type: String,
+        enum: ['success', 'pending_verification', 'rejected', 'failed'],
+--- ForumComment.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Boolean,
+--- ForumPost.js ---
+        type: String,
+        type: String,
+        type: String,
+        enum: ["general", "academic", "questions", "ideas", "notice"],
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+--- GoLive.js ---
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String, // String name of the chapter/playlist
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: String,
+        type: String,
+        enum: ["upcoming", "active", "ended"],
+        type: Date,
+--- ImpersonationLog.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+            type: Date,
+--- ImportBatch.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+        import_type: {
+            type: String,
+            enum: ["students", "faculty", "cet_allotments", "fee_structure", "academic_hierarchy"],
+            type: String,
+            type: String,
+            enum: ["dry_run", "committed", "rolled_back", "partial"],
+        total_rows: { type: Number, default: 0 },
+        success_count: { type: Number, default: 0 },
+--- Invoice.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: Number,
+        type: Number,
+        type: String,
+        enum: ["pending", "partial", "paid", "overdue"],
+--- Lead.js ---
+            type: mongoose.Schema.Types.ObjectId,
+        student_name: { type: String, required: true, trim: true },
+        parent_name: { type: String, default: "", trim: true },
+        phone: { type: String, required: true, trim: true },
+        alternate_phone: { type: String, default: "" },
+        email: { type: String, default: "", lowercase: true, trim: true },
+            type: String,
+            enum: ["inquiry", "contacted", "demo_given", "follow_up", "converted", "enrolled", "dropped", "not_interested"],
+            type: String,
+            enum: ["walk_in", "phone_call", "website", "referral", "social_media", "newspaper", "other"],
+--- LeaveRequest.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+            type: Date,
+            type: String,
+            type: String, 
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            type: mongoose.Schema.Types.ObjectId,
+--- Meeting.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            enum: ["google_meet", "zoom", "webex"],
+            type: String,
+            type: String,
+            type: Date,
+            type: Number, // in minutes
+            type: String, // ID of the event in Google Calendar (optional)
+--- MeetingChat.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: Number, // Seconds relative to meeting start time
+    type: {
+        type: String,
+        enum: ['text', 'system'],
+--- Message.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            enum: ["group", "private"],
+        fileUrl: { type: String, default: null },
+        fileName: { type: String, default: null },
+        fileType: { type: String, default: null },
+        fileSize: { type: Number, default: null },
+--- NotePackage.js ---
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    orgId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    title: { type: String, required: true },
+    description: { type: String },
+    subject: { type: String },
+    branch: { type: String },
+    price: { type: Number, default: 0 }, // 0 = Free
+    fileUrl: { type: String, required: true }, // Main PDF Path
+    previewUrls: [{ type: String }], // First 3 pages thumbnails
+    summary: { type: String }, // AI Generated
+--- NoteView.js ---
+            type: String, // Supabase note ID
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            type: String, // Teacher's email or name
+            type: Date,
+--- Notification.js ---
+        type: mongoose.Schema.Types.ObjectId,
+    type: {
+        type: String,
+        enum: ["request_approved", "request_rejected", "new_content", "content_update", "system", "chat", "attendance", "attendance_ended", "assignment", "quiz", "meeting_reminder", "result", "fee_reminder", "join_request", "library", "feedback_assigned", "viva_scheduled", "support_update"],
+        type: String,
+        type: String,
+        type: String, // URL to redirect to (e.g., /view-classroom?id=...)
+        type: String, // ID of the related object (classroom_id, content_id)
+        type: Boolean,
+        type: Boolean,
+--- Notification.model.js ---
+    recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    type: {
+        type: String,
+        enum: ["assignment", "quiz", "result", "chat", "attendance", "system", "request_approved", "request_rejected"],
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    isRead: { type: Boolean, default: false },
+    emailSent: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now, expires: 604800 } // Auto-expire after 7 days
+--- OnboardingEvent.js ---
+      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      type: String,
+      type: String,
+      type: String,
+      type: mongoose.Schema.Types.Mixed,
+--- Organization.js ---
+            type: String,
+        org_type: {
+            type: String,
+            enum: ["school", "junior_college", "engineering", "coaching", "diploma", "other"],
+        structure_type: {
+            type: String,
+            enum: [
+            type: String,
+            enum: ["with_divisions", "without_divisions"],
+            type: Boolean,
+--- OrganizationAnnouncement.js ---
+        type: String,
+        type: String,
+    type: {
+        type: String,
+        enum: ["announcement", "notice", "event", "holiday", "emergency"],
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+    target_type: {
+        type: String,
+        enum: ["specific", "all"],
+--- OrganizationPending.js ---
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+            type: String,
+--- OrganizationRequest.js ---
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  domain: { type: String, required: true },
+  type: { type: String, required: true },
+  city: { type: String, required: true },
+  status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" }
+--- OrganizationUsage.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Number,
+            type: Date,
+--- OrgSubject.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: Number,
+            type: Boolean,
+--- OrgSubscription.js ---
+    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+    enum: ['demo', 'active'], // 🛑 Strict Single-Plan Enterprise Model
+    type: String,
+    enum: ['active', 'expired', 'cancelled', 'grace_period'],
+    type: Boolean,
+    type: Date,
+    type: String,
+    type: String,
+    attendance: { type: Boolean, default: true },
+--- OrgWebsiteContent.js ---
+  primary:     { type: String, default: "#1e3a8a" }, // College picks this
+  primaryDark: { type: String, default: "#1e3085" }, // Auto-derived (20% darker)
+  accent:      { type: String, default: "#ffffff" },
+  icon:  { type: String }, // Lucide icon name: GraduationCap, Trophy, etc.
+  value: { type: String }, // "5000+" or "96%"
+  label: { type: String }, // "Students Enrolled"
+  badge:         { type: String, default: "Admissions Open" },
+  headline:      { type: String },
+  subHeadline:   { type: String },
+  description:   { type: String },
+--- PastPaper.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+        title: { type: String, required: true, trim: true },
+        subject: { type: String, required: true, trim: true, lowercase: true },
+            type: String,
+            enum: ["unit_test", "midterm", "final", "practical", "board", "university", "competitive", "other"],
+        year: { type: Number, required: true },   // e.g. 2024, 2023, 2022
+        month: { type: String, default: "" },       // e.g. "May", "December"
+        semester: { type: Number, default: null },
+--- PaymentRequest.js ---
+      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      type: String,
+      enum: ["PAID"],
+      type: Number,
+      type: String,
+      type: String,
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      type: Date,
+--- Plan.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Date,
+                    type: String,
+                    enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    type: String,
+                    type: String,
+                    type: Boolean,
+--- PlatformTransaction.js ---
+      type: mongoose.Schema.Types.ObjectId,
+    organizationName: { type: String, default: "" }, // denormalized for fast reads
+      type: mongoose.Schema.Types.ObjectId,
+    type: {
+      type: String,
+      enum: ["razorpay", "manual", "refund", "credit", "adjustment"],
+    amount: { type: Number, required: true }, // always stored in rupees
+    currency: { type: String, default: "INR" },
+      type: String,
+      enum: ["success", "failed", "refunded", "pending"],
+--- PushSubscription.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        p256dh: { type: String, required: true },
+        auth: { type: String, required: true },
+        type: String,
+        type: Date,
+        type: Date,
+--- Quiz.js ---
+            type: String, // Supabase note ID
+            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Boolean,
+            type: Number,
+                type: {
+                    type: String,
+                    enum: ["mcq", "short-answer"],
+                question: { type: String, required: true },
+                correctAnswer: { type: String, required: true },
+--- QuizSession.js ---
+            type: mongoose.Schema.Types.ObjectId,
+        subject: { type: String, required: true },
+        topic: { type: String, required: true },
+        difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
+        totalQuestions: { type: Number, required: true },
+                type: { type: String, enum: ["mcq", "written"], required: true },
+                question: { type: String, required: true },
+                correctAnswer: { type: String, required: true },
+                studentAnswer: { type: String, default: "" },
+                isCorrect: { type: Boolean, default: false },
+--- ResultAuditLog.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+--- Review.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: String,
+        type: String,
+        type: Number,
+        type: String,
+        type: String,
+        enum: ["bug", "feature_request", "general"],
+        type: String,
+        enum: ["new", "reviewed", "archived"],
+--- ScheduledNotification.js ---
+        type: String,
+        type: String,
+        type: String,
+        enum: [
+        type: mongoose.Schema.Types.ObjectId,
+        type: Date,
+        type: Boolean,
+        type: String,
+        enum: ["festival", "maintenance", "announcement", "update", "marketing"],
+        type: String,
+--- SchoolReportCard.js ---
+      type: String,
+      enum: ["theory", "practical", "oral", "notebook", "project", "activity", "internal", "external", "other"],
+    marksObtained: { type: Number, default: null },
+    maxMarks: { type: Number, default: null },
+    passMarks: { type: Number, default: null },
+    grade: { type: String, default: "" },
+    remark: { type: String, default: "" },
+    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "OrgSubject", default: null },
+    subjectCode: { type: String, default: "" },
+    subjectName: { type: String, required: true, trim: true },
+--- SeatConfig.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+        academic_year: { type: String, required: true }, // e.g. "2024-25"
+        total_intake: { type: Number, required: true },
+                name: { type: String, required: true }, // e.g. "CAP", "MANAGEMENT", "TFWS", "RTE"
+                capacity: { type: Number, required: true },
+                filled: { type: Number, default: 0 },
+                waitlist_count: { type: Number, default: 0 },
+        is_active: { type: Boolean, default: true },
+--- StudentFeeLedger.js ---
+        type: Date,
+        type: Number,
+        type: Number,
+        type: String,
+        enum: ['pending', 'partially_paid', 'paid'],
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: Number,
+--- StudentMark.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: String,
+            type: String,
+            subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "OrgSubject", default: null },
+            subjectName: { type: String, required: true },
+            marksObtained: { type: Number, required: true, min: 0 },
+            maxMarks: { type: Number, required: true, min: 1 },
+--- SupportConversation.js ---
+    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+    enum: ["org_admin", "super_admin", "department"],
+    type: String,
+    enum: ["general", "onboarding", "admissions", "fees", "technical", "billing", null],
+    type: String,
+    type: Date,
+    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+--- SupportTicket.js ---
+    type: { type: String, enum: ['ticketCreated', 'statusChanged', 'priorityChanged', 'categoryChanged', 'assigned', 'unassigned', 'adminReply', 'userReply', 'internalNote', 'attachmentAdded', 'resolved', 'reopened'] },
+    label: { type: String },
+    from: { type: mongoose.Schema.Types.Mixed },
+    to: { type: mongoose.Schema.Types.Mixed },
+    actorName: { type: String },
+    actorRole: { type: String },
+    createdAt: { type: Date, default: Date.now }
+        type: String,
+        type: String,
+        type: mongoose.Schema.Types.Mixed // Mixed to support legacy String URLs and new structured attachment objects
+--- SystemLog.js ---
+            type: String,
+            enum: ["info", "warn", "error"],
+            type: String,
+            type: String,
+            type: String,
+            type: mongoose.Schema.Types.Mixed,
+--- SystemSettings.js ---
+    maintenanceMode: { type: Boolean, default: false },
+    disableRegistrations: { type: Boolean, default: false },
+    globalLock: { type: Boolean, default: false },
+    aiFeatures: { type: Boolean, default: true },
+    notesSystem: { type: Boolean, default: true },
+    chatSystem: { type: Boolean, default: true }
+--- TeacherPlan.js ---
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
+            type: Number,
+            type: Number,
+            type: String,
+            enum: ['weekly', 'daily'],
+            type: Date, // For exact daily plans
+            isCompleted: { type: Boolean, default: false },
+            status: { type: String, enum: ['pending', 'in_progress', 'completed'], default: 'pending' }
+--- Timetable.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        type: String, // HH:MM
+        type: String, // HH:MM
+        type: String,
+        type: String,
+        type: String,
+--- Transaction.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
+        type: String,
+        enum: ["razorpay", "cash", "bank_transfer"],
+        type: String,
+        type: String,
+        type: String,
+        enum: ["success", "failed", "pending"],
+--- User.js ---
+      type: String,
+      type: String,
+      type: String,
+      type: String,
+      enum: [
+      type: [String],
+      enum: [
+      type: Date,
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say", null],
+--- Verification.js ---
+    type: String,
+    type: String,
+    type: String,
+    type: Boolean,
+    type: Number,
+    type: Date,
+    type: Date,
+--- VideoProgress.js ---
+        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        type: String, // ID of the specific YouTube material in the classroom
+        type: String, // e.g., "dQw4w9WgXcQ" (Only for YouTube sources)
+        type: Number,
+        type: Number,
+        type: Number,
+        type: Boolean,
+        type: Date,
+--- VivaRecord.js ---
+        type: String, // Clerk ID or MongoDB ID string
+        type: mongoose.Schema.Types.ObjectId,
+        type: String,
+        type: String
+        type: String,
+        enum: ['practice', 'exam', 'rapid_fire'],
+        type: Number,
+        knowledge: { type: Number, min: 0, max: 5 },
+        clarity: { type: Number, min: 0, max: 5 },
+        confidence: { type: Number, min: 0, max: 5 },
