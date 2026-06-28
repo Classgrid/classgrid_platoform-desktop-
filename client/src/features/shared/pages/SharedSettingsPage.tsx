@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Save } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Save } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { SettingsAppearanceCard } from "../components/settings/SettingsAppearanceCard";
 import { SettingsNotificationsCard } from "../components/settings/SettingsNotificationsCard";
@@ -8,6 +10,7 @@ import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../q
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard";
 import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
+import { OrgNameCard } from "@/components/dashboard/OrgNameCard";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
 
 export function SharedSettingsPage() {
@@ -114,6 +117,7 @@ export function SharedSettingsPage() {
       {profileData?.role === "org_admin" && (
         <>
           <OrgBrandingCard />
+          <OrgNameCard />
           <CustomDomainCard />
         </>
       )}
