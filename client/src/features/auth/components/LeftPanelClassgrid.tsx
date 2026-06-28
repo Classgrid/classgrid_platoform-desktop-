@@ -43,10 +43,10 @@ const SUPPORT_URL = "https://classgrid.in/support/ticket";
 
 export function LeftPanelClassgrid() {
   return (
-    <div className="relative flex h-full flex-col items-center justify-center px-10 overflow-hidden">
-      {/* ── Dotted Pattern Background (Fades out to the right) ── */}
+    <div className="relative flex h-full flex-col items-center justify-between py-12 px-10 overflow-hidden">
+      {/* ── Dotted Pattern Background ── */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
           backgroundSize: "24px 24px",
@@ -56,82 +56,85 @@ export function LeftPanelClassgrid() {
         aria-hidden="true"
       />
 
-      {/* ── Top-left Teal/Emerald Glow (Matched to mockup) ── */}
+      {/* ── Top-left Teal Glow ── */}
       <div
-        className="pointer-events-none absolute -top-16 -left-16 h-[500px] w-[500px] rounded-full opacity-[0.25] blur-[100px]"
-        style={{ background: "radial-gradient(circle, #0d9488, #10b981, transparent 70%)" }}
+        className="pointer-events-none absolute -top-32 -left-32 h-[600px] w-[600px] rounded-full bg-[#00E590] opacity-[0.12] blur-[130px]"
         aria-hidden="true"
       />
 
-      {/* ── Bottom-right Warm Orange Glow (Matched to mockup) ── */}
+      {/* ── Bottom-right Orange Glow ── */}
       <div
-        className="pointer-events-none absolute -bottom-16 -right-16 h-[400px] w-[400px] rounded-full opacity-[0.25] blur-[100px]"
-        style={{ background: "radial-gradient(circle, #ea580c, #d97706, transparent 70%)" }}
+        className="pointer-events-none absolute -bottom-32 -right-32 h-[550px] w-[550px] rounded-full bg-[#FF6B00] opacity-[0.15] blur-[140px]"
         aria-hidden="true"
       />
 
-      {/* ── Classgrid Logo ── */}
-      <img
-        src={CLASSGRID_LOGO}
-        alt="Classgrid Logo"
-        className="relative z-10 mb-12 h-[220px] w-[220px] object-contain drop-shadow-2xl"
-        draggable={false}
-      />
+      {/* ── Top Spacing ── */}
+      <div className="flex-1" />
 
-      {/* ── Contact Information ── */}
-      <div className="relative z-10 w-full max-w-[380px]">
-        <h3 className="mb-6 text-[22px] font-bold text-white">Contact Information</h3>
+      {/* ── Center Content ── */}
+      <div className="flex flex-col items-center z-10">
+        {/* Classgrid Logo */}
+        <img
+          src={CLASSGRID_LOGO}
+          alt="Classgrid Logo"
+          className="mb-10 h-[180px] w-[180px] object-contain drop-shadow-2xl"
+          draggable={false}
+        />
 
-        {/* Email */}
-        <div className="flex items-center gap-4 pb-5">
-          <Mail size={20} className="shrink-0 text-teal-400" />
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="text-[15px] font-medium text-[#ededed] transition-colors hover:text-teal-400"
-          >
-            {CONTACT_EMAIL}
-          </a>
-        </div>
+        {/* Contact Information */}
+        <div className="w-full max-w-[340px]">
+          <h3 className="mb-5 text-[20px] font-bold text-white">Contact Information</h3>
 
-        {/* Divider */}
-        <div className="mb-5 border-b border-white/[0.10]" />
+          <div className="flex items-center gap-4 pb-4">
+            <Mail size={18} className="shrink-0 text-[#00E590]" />
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="text-[14px] font-medium text-[#ededed] transition-colors hover:text-[#00E590]"
+            >
+              {CONTACT_EMAIL}
+            </a>
+          </div>
 
-        {/* Address */}
-        <div className="flex items-start gap-4">
-          <MapPin size={20} className="mt-0.5 shrink-0 text-orange-500" />
-          <div className="flex flex-col text-[14px] leading-relaxed text-[#d4d4d4]">
-            <span>Sector 26, Pradhikaran, Nigdi,</span>
-            <span>Pune, Maharashtra 411044</span>
+          <div className="mb-4 border-b border-white/[0.08]" />
+
+          <div className="flex items-start gap-4">
+            <MapPin size={18} className="mt-0.5 shrink-0 text-[#FF6B00]" />
+            <div className="flex flex-col text-[13px] leading-relaxed text-[#d4d4d4]">
+              <span>Sector 26, Pradhikaran, Nigdi,</span>
+              <span>Pune, Maharashtra 411044</span>
+            </div>
           </div>
         </div>
+
+        {/* Social Media Card */}
+        <div className="mt-8 flex h-[90px] w-full max-w-[340px] items-center justify-center gap-6 rounded-[18px] border border-white/[0.05] bg-[#121212]/80 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+          {SOCIAL_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={link.label}
+              className={`flex h-[44px] w-[44px] items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-300 hover:scale-110 ${link.textColor}`}
+            >
+              {link.icon}
+            </a>
+          ))}
+        </div>
       </div>
 
-      {/* ── Social Media Card (Dark Glassmorphism) ── */}
-      <div className="relative z-10 mt-10 flex h-[110px] w-full max-w-[380px] items-center justify-center gap-6 rounded-[20px] border border-white/[0.08] bg-gradient-to-br from-[#18181b]/80 to-[#09090b]/80 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-        {SOCIAL_LINKS.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={link.label}
-            className={`flex h-[52px] w-[52px] items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-300 hover:scale-110 ${link.textColor}`}
-          >
-            {link.icon}
-          </a>
-        ))}
+      {/* ── Bottom Spacing & Support Button ── */}
+      <div className="flex-1 flex w-full items-end justify-start pb-2 z-10">
+        <a
+          href={SUPPORT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-fit items-center gap-2.5 rounded-full border border-teal-700/60 bg-teal-950/40 px-5 py-2.5 text-[13px] font-medium text-teal-100 shadow-[0_0_15px_rgba(13,148,136,0.1)] backdrop-blur-md transition-all duration-300 hover:bg-teal-900/60 hover:text-white"
+        >
+          <HelpCircle size={16} className="text-[#00E590]" />
+          Support
+        </a>
       </div>
-
-      {/* ── Support Button (Bottom Left, exactly like mockup) ── */}
-      <a
-        href={SUPPORT_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-10 left-10 z-10 flex w-fit items-center gap-2.5 rounded-full border border-teal-700/80 bg-teal-950/60 px-5 py-2.5 text-[14px] font-medium text-teal-100 shadow-[0_0_15px_rgba(13,148,136,0.15)] backdrop-blur-md transition-all duration-300 hover:bg-teal-900/80 hover:text-white"
-      >
-        <HelpCircle size={18} className="text-teal-400" />
-        Support
-      </a>
     </div>
   );
 }

@@ -364,10 +364,10 @@ export function AuthCard({
               </FieldGroup>
 
               <div className="flex items-center justify-between px-1">
-                <label className="flex items-center gap-3 text-[14px] text-white/70">
+                <label className="flex items-center gap-3 text-[13px] text-white/70 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-white/[0.2] bg-transparent text-[#00E590] focus:ring-[#00E590]/50 focus:ring-offset-0"
+                    className="h-4 w-4 appearance-none rounded border border-white/[0.2] bg-[#1a1a1a] checked:border-[#00E590] checked:bg-[#00E590] focus:ring-[#00E590]/50 focus:ring-offset-0 focus:outline-none transition-colors"
                     defaultChecked
                   />
                   Remember me
@@ -672,7 +672,7 @@ function RoleSwitcher({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex h-[46px] flex-1 items-center justify-center gap-2 rounded-[14px] border text-sm font-medium transition-all duration-200",
+              "flex h-[42px] flex-1 items-center justify-center gap-2 rounded-full border text-[13px] font-medium transition-all duration-200",
               isActive && option.value === "student"
                 ? "border-[#00E590] text-[#00E590] bg-[#00E590]/5 shadow-[0_0_15px_rgba(0,229,144,0.1)]"
                 : isActive && option.value === "teacher"
@@ -681,7 +681,7 @@ function RoleSwitcher({
             )}
             aria-pressed={isActive}
           >
-            <Icon className="size-[18px]" strokeWidth={2.5} aria-hidden="true" />
+            <Icon className="size-[16px]" strokeWidth={2.5} aria-hidden="true" />
             {option.label}
           </button>
         );
