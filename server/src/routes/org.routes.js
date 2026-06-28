@@ -2157,6 +2157,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
 
 /**
  * PATH: /api/org/branding
+ */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
         const { logo_url, favicon_url } = req.body;
