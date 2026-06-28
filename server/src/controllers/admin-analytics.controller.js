@@ -266,7 +266,7 @@ export const getOrgUsage = async (req, res) => {
                 ? Number((billableStorageGb * configuredStorageRate).toFixed(2))
                 : undefined;
 
-        res.status(200).json({
+        const usagePayload = {
             storage: {
                 bytes: totalStorageBytes,
                 mb: (totalStorageBytes / (1024 * 1024)).toFixed(2),
@@ -601,7 +601,8 @@ export const getGlobalStorageUsage = async (req, res) => {
                 fileCount: count || 0,
                 avgMbPerOrg: orgs.length > 0 ? ((totalStorageBytes / (1024 * 1024)) / orgs.length).toFixed(1) : 0
             }
-        });
+        };
+        res.status(200).json(usagePayload);
     } catch (err) {
         res.status(500).json({ message: "Server error", error: err.message });
     }

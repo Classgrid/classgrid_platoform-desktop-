@@ -1,5 +1,8 @@
 import {
   AlertTriangle,
+  CheckCircle2,
+  CircleSlash,
+  Cloud,
   Database,
   HardDrive,
   LifeBuoy,
@@ -17,8 +20,15 @@ import { Badge } from "@/components/marketing_ui/badge";
 import type {
   OrganizationEmailAnalytics,
   OrganizationLegacyUsage,
+  OrganizationResourceMeter,
 } from "../../services/organizationControlCenterApi";
-import { formatBytes, formatNumber, humanizeKey } from "./formatters";
+import {
+  formatBytes,
+  formatCurrency,
+  formatDateTime,
+  formatNumber,
+  humanizeKey,
+} from "./formatters";
 import { OrgDataRow } from "./OrgDataRow";
 import { OrgMetricCard } from "./OrgMetricCard";
 import { OrgSectionCard } from "./OrgSectionCard";
@@ -29,13 +39,31 @@ interface OrgResourcesTabProps {
 }
 
 const missingProviderMeters = [
-  "Cloudflare R2 organization-wide object storage and request allocation",
   "Vercel requests, bandwidth, build, and function-cost allocation",
   "EC2 compute, EBS, and network allocation per organization",
   "MongoDB byte-level storage and query-cost allocation per organization",
   "Redis memory, commands, and queue allocation per organization",
   "SMS, AI, video, and payment-provider cost allocation per organization",
+  "Full Cloudflare R2 object/request allocation across every feature prefix",
 ] as const;
+
+function formatMeterUsage(meter: OrganizationResourceMeter): string {
+  const unit = (meter.unit || "count").toLowerCase();
+  const value = meter.usageAmount;
+
+  if (unit === "bytes") return formatBytes(value);
+  if (unit === "inr") return formatCurrency(value);
+  if (value === null || value === undefined) return "Unavailable";
+
+  return `${formatNumber(value)} ${meter.unit || ""}`.trim();
+}
+
+function formatMeterCost(meter: OrganizationResourceMeter): string {
+  if (meter.costAmount === null || meter.costAmount === undefined) return "Cost not allocated";
+  return meter.currency === "INR" || !meter.currency
+    ? formatCurrency(meter.costAmount)
+    : `${formatNumber(meter.costAmount)} ${meter.currency}`;
+}
 
 export function OrgResourcesTab({
   legacyUsage,
@@ -47,6 +75,9 @@ export function OrgResourcesTab({
   const trackedRecordCount = legacyUsage?.db?.totalTrackedRecords;
   const emailCount = emailAnalytics?.total ?? legacyUsage?.email?.totalSent;
   const supportCount = legacyUsage?.support?.totalTickets;
+  const resourceMeterSummary = legacyUsage?.resourceMeters;
+  const resourceMeters = resourceMeterSummary?.records ?? [];
+  const providerConfiguration = resourceMeterSummary?.providerConfiguration ?? [];
   const supportStatus = legacyUsage?.support?.byStatus;
   const activeSupportCount =
     (supportStatus?.open ?? 0) +
@@ -64,7 +95,7 @@ export function OrgResourcesTab({
         <AlertTriangle aria-hidden="true" />
         <AlertTitle>Resource coverage is broader, but still partial</AlertTitle>
         <AlertDescription>
-          This page now includes live organization-scoped record counts, support volume, and billing inputs from your own database. Shared-cloud allocation across R2, Vercel, EC2, MongoDB bytes, Redis, and other providers is still not stored per organization, so those costs remain intentionally unreported.
+          This page now includes live organization-scoped record counts, support volume, billing inputs, persisted resource meters, and provider env readiness from the backend. Provider costs still stay unreported until those provider APIs or tenant-tagged logs return per-organization allocation.
         </AlertDescription>
       </Alert>
 
@@ -107,6 +138,116 @@ export function OrgResourcesTab({
       </section>
 
       <OrgSectionCard
+        title="Persisted resource meters"
+        description="Organization-level meter records saved by the backend from real app usage. Provider API cost syncs can fill this same model later."
+        icon={<Cloud className="h-5 w-5" aria-hidden="true" />}
+      >
+        <dl>
+          <OrgDataRow label="Saved meters" value={formatNumber(resourceMeterSummary?.totals?.totalMeters)} />
+          <OrgDataRow label="Actual meters" value={formatNumber(resourceMeterSummary?.totals?.actualMeters)} />
+          <OrgDataRow label="Partial meters" value={formatNumber(resourceMeterSummary?.totals?.partialMeters)} />
+          <OrgDataRow label="Known meter cost" value={formatCurrency(resourceMeterSummary?.totals?.knownCostInr)} />
+          <OrgDataRow
+            label="Configured providers"
+            value={
+              resourceMeterSummary?.totals?.configuredProviders === undefined || resourceMeterSummary?.totals?.totalProviders === undefined
+                ? "Unavailable"
+                : `${formatNumber(resourceMeterSummary.totals.configuredProviders)} / ${formatNumber(resourceMeterSummary.totals.totalProviders)}`
+            }
+          />
+        </dl>
+        {resourceMeters.length > 0 ? (
+          <div className="mt-5 grid gap-3 lg:grid-cols-2" aria-label="Saved organization resource meters">
+            {resourceMeters.map((meter) => (
+              <div key={`${meter.provider}-${meter.metricKey}`} className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{meter.metricLabel}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {meter.providerLabel ?? humanizeKey(meter.provider)} / {humanizeKey(meter.resourceType)}
+                    </p>
+                  </div>
+                  <Badge variant={meter.quality === "partial" ? "warning" : "success"} className="shrink-0">
+                    {humanizeKey(meter.quality ?? "actual")}
+                  </Badge>
+                </div>
+                <dl className="mt-3">
+                  <OrgDataRow label="Usage" value={formatMeterUsage(meter)} />
+                  <OrgDataRow label="Cost" value={formatMeterCost(meter)} />
+                  <OrgDataRow label="Synced" value={formatDateTime(meter.lastSyncedAt)} />
+                </dl>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No saved resource meters have been returned yet.</p>
+        )}
+        {resourceMeterSummary?.captureError ? (
+          <p className="mt-4 text-sm text-destructive">Meter capture error: {resourceMeterSummary.captureError}</p>
+        ) : null}
+      </OrgSectionCard>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <OrgSectionCard
+          title="Provider configuration"
+          description="Backend readiness by provider. The API returns only env variable names and configured/missing status, never secret values."
+          icon={<Cloud className="h-5 w-5" aria-hidden="true" />}
+        >
+          {providerConfiguration.length > 0 ? (
+            <div className="space-y-3">
+              {providerConfiguration.map((provider) => (
+                <div key={provider.provider} className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{provider.label}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{provider.note}</p>
+                    </div>
+                    <Badge variant={provider.configured ? "success" : "warning"} className="shrink-0 gap-1.5">
+                      {provider.configured ? (
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <CircleSlash className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                      {provider.configured ? "Configured" : "Missing env"}
+                    </Badge>
+                  </div>
+                  {provider.missingEnv && provider.missingEnv.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2" aria-label={`${provider.label} missing env names`}>
+                      {provider.missingEnv.map((envName) => (
+                        <Badge key={envName} variant="outline">{envName}</Badge>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Provider configuration status has not been returned yet.</p>
+          )}
+        </OrgSectionCard>
+
+        <OrgSectionCard
+          title="Missing billable meters"
+          description="These cloud and provider costs still cannot be allocated to a single organization until a provider sync or tenant-tagged log is added."
+          icon={<Server className="h-5 w-5" aria-hidden="true" />}
+        >
+          <ul className="space-y-3">
+            {missingProviderMeters.map((meter) => (
+              <li key={meter} className="flex items-start justify-between gap-4 rounded-lg border border-border/60 bg-muted/20 p-3">
+                <span className="text-sm leading-relaxed">{meter}</span>
+                <Badge variant="neutral" className="shrink-0">Cost sync pending</Badge>
+              </li>
+            ))}
+          </ul>
+          {legacyUsage?.coverage?.reason ? (
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              {legacyUsage.coverage.reason}
+            </p>
+          ) : null}
+        </OrgSectionCard>
+      </div>
+
+      <OrgSectionCard
         title="Tracked application records"
         description="Live counts from organization-owned collections already present in your backend models."
         icon={<Database className="h-5 w-5" aria-hidden="true" />}
@@ -129,51 +270,29 @@ export function OrgResourcesTab({
         ) : null}
       </OrgSectionCard>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <OrgSectionCard
-          title="Operational activity"
-          description="Real organization-filtered email and support activity from live backend records."
-          icon={<Mail className="h-5 w-5" aria-hidden="true" />}
-        >
-          <dl>
-            <OrgDataRow label="All-time email jobs" value={formatNumber(emailAnalytics?.total ?? legacyUsage?.email?.totalSent)} />
-            <OrgDataRow label="Email jobs today" value={formatNumber(emailAnalytics?.daily ?? legacyUsage?.email?.daily)} />
-            <OrgDataRow label="Email jobs this month" value={formatNumber(emailAnalytics?.monthly ?? legacyUsage?.email?.monthly)} />
-            <OrgDataRow label="Active support tickets" value={formatNumber(activeSupportCount)} />
-            <OrgDataRow label="Resolved support tickets" value={formatNumber(supportStatus?.resolved)} />
-          </dl>
-          {emailBreakdown && Object.keys(emailBreakdown).length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-2" aria-label="Email jobs by type">
-              {Object.entries(emailBreakdown).map(([type, count]) => (
-                <Badge key={type} variant="outline" className="gap-1.5">
-                  {humanizeKey(type)}
-                  <span className="tabular-nums text-muted-foreground">{formatNumber(count)}</span>
-                </Badge>
-              ))}
-            </div>
-          ) : null}
-        </OrgSectionCard>
-
-        <OrgSectionCard
-          title="Missing billable meters"
-          description="These cloud and provider costs still cannot be allocated to a single organization from the current backend records."
-          icon={<Server className="h-5 w-5" aria-hidden="true" />}
-        >
-          <ul className="space-y-3">
-            {missingProviderMeters.map((meter) => (
-              <li key={meter} className="flex items-start justify-between gap-4 rounded-lg border border-border/60 bg-muted/20 p-3">
-                <span className="text-sm leading-relaxed">{meter}</span>
-                <Badge variant="neutral" className="shrink-0">Not instrumented</Badge>
-              </li>
+      <OrgSectionCard
+        title="Operational activity"
+        description="Real organization-filtered email and support activity from live backend records."
+        icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+      >
+        <dl>
+          <OrgDataRow label="All-time email jobs" value={formatNumber(emailAnalytics?.total ?? legacyUsage?.email?.totalSent)} />
+          <OrgDataRow label="Email jobs today" value={formatNumber(emailAnalytics?.daily ?? legacyUsage?.email?.daily)} />
+          <OrgDataRow label="Email jobs this month" value={formatNumber(emailAnalytics?.monthly ?? legacyUsage?.email?.monthly)} />
+          <OrgDataRow label="Active support tickets" value={formatNumber(activeSupportCount)} />
+          <OrgDataRow label="Resolved support tickets" value={formatNumber(supportStatus?.resolved)} />
+        </dl>
+        {emailBreakdown && Object.keys(emailBreakdown).length > 0 ? (
+          <div className="mt-5 flex flex-wrap gap-2" aria-label="Email jobs by type">
+            {Object.entries(emailBreakdown).map(([type, count]) => (
+              <Badge key={type} variant="outline" className="gap-1.5">
+                {humanizeKey(type)}
+                <span className="tabular-nums text-muted-foreground">{formatNumber(count)}</span>
+              </Badge>
             ))}
-          </ul>
-          {legacyUsage?.coverage?.reason ? (
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              {legacyUsage.coverage.reason}
-            </p>
-          ) : null}
-        </OrgSectionCard>
-      </div>
+          </div>
+        ) : null}
+      </OrgSectionCard>
     </div>
   );
 }
