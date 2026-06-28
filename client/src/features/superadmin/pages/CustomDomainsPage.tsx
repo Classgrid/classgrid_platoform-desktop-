@@ -58,11 +58,8 @@ export function CustomDomainsPage() {
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") {
-          const domain = row.custom_domain?.domain || "";
-          // Simple heuristic: if more than 2 parts (e.g. sub.domain.com), it's likely using CNAME. Otherwise A record.
-          // Note: some country codes have 3 parts like domain.co.uk, but this is a quick helper for the Super Admin.
-          const isSubdomain = domain.split('.').length > 2 && !domain.endsWith(".co.uk") && !domain.endsWith(".com.au");
-          const dnsInfo = isSubdomain ? "CNAME → cname.vercel-dns.com" : "A Record → 76.76.21.21";
+          const v = row.custom_domain?.verified_at;
+          const verifiedText = v ? formatDate(v, "dd MMM, yyyy 'at' hh:mm a") : "-";
           
           return (
             <TooltipProvider>
@@ -73,10 +70,7 @@ export function CustomDomainsPage() {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="font-semibold">DNS Target:</span>
-                    <span className="font-mono text-xs text-muted-foreground">{dnsInfo}</span>
-                  </div>
+                  Verified on: {verifiedText}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
