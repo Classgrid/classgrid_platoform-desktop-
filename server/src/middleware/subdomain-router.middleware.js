@@ -88,8 +88,12 @@ export const resolveTenant = async (req, res, next) => {
     try {
         const slug = req.tenantSlug;
         
-        if (!slug) {
-            // No subdomain detected — this may be a direct API call
+        // If no slug is detected, we only proceed if there is a host that could be a custom domain
+        // Avoid doing DB lookups for API/admin system routes.
+        const isSystemHost = req.tenantHost && (req.tenantHost.includes("api.classgrid.in") || req.tenantHost.includes("admin.classgrid.in") || req.tenantHost.includes("superadmin.classgrid.in"));
+
+        if (!slug && (!req.tenantHost || isSystemHost)) {
+            // No subdomain detected and not a valid custom domain candidate
             // Let downstream auth middleware handle org resolution via JWT
             return next();
         }
