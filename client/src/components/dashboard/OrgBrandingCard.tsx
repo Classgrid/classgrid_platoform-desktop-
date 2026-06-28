@@ -170,22 +170,13 @@ export function OrgBrandingCard() {
                 <Button size="icon" variant="default" className="h-8 w-8 rounded-full" onClick={() => fileInputRef.current?.click()}>
                   <Upload size={14} />
                 </Button>
+                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => handleDelete("logo")}>
+                  <Trash2 size={14} />
+                </Button>
               </div>
             )}
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
           </div>
-          {data?.logo_url && (
-            <div className="mt-1 w-[200px] flex justify-end">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 text-danger hover:text-danger hover:bg-danger/10"
-                onClick={() => handleDelete("logo")}
-              >
-                <Trash2 size={14} />
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Custom Favicon Upload */}
@@ -223,12 +214,15 @@ export function OrgBrandingCard() {
               </div>
             )}
             {data?.has_custom_domain && data?.favicon_url && (
-              <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
                 <Button size="icon" variant="secondary" className="h-7 w-7 rounded-full" onClick={() => setPreviewImage(data.favicon_url)}>
                   <Eye size={12} />
                 </Button>
                 <Button size="icon" variant="default" className="h-7 w-7 rounded-full" onClick={() => faviconInputRef.current?.click()}>
                   <Upload size={12} />
+                </Button>
+                <Button size="icon" variant="destructive" className="h-7 w-7 rounded-full" onClick={() => handleDelete("favicon")}>
+                  <Trash2 size={12} />
                 </Button>
               </div>
             )}
@@ -241,16 +235,6 @@ export function OrgBrandingCard() {
                </div>
             )}
           </div>
-          {data?.favicon_url && (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="w-[100px] h-8 text-danger hover:text-danger hover:bg-danger/10 mt-1"
-              onClick={() => handleDelete("favicon")}
-            >
-              <Trash2 size={14} />
-            </Button>
-          )}
         </div>
 
       </div>
