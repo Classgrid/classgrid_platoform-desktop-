@@ -74,12 +74,12 @@ export function CustomDomainsPage() {
          return (
            <TooltipProvider>
              <Tooltip>
-               <TooltipTrigger>
+               <TooltipTrigger asChild>
                  <div className="cursor-help inline-flex border-b border-dashed border-muted-foreground/50 pb-0.5">
                    <span style={{ fontSize: "0.82rem" }}>{v ? formatDate(v) : "-"}</span>
                  </div>
                </TooltipTrigger>
-               <TooltipContent>
+               <TooltipContent side="top">
                  Domain requested on: {addedText}
                </TooltipContent>
              </Tooltip>
