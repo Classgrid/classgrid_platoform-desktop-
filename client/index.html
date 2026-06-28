@@ -5,13 +5,10 @@
   <meta charset="UTF-8" />
   <script>
     try {
-      var hostname = window.location.hostname;
-      var isCustomDomain = !hostname.includes('classgrid.in') && hostname !== 'localhost' && hostname !== '127.0.0.1';
-      
       var customFavicon = localStorage.getItem('org_favicon');
       var customTitle = localStorage.getItem('org_title');
 
-      if (isCustomDomain && customFavicon) {
+      if (customFavicon) {
         document.write('<link rel="icon" href="' + customFavicon + '" />');
       } else {
         document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
@@ -19,7 +16,7 @@
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
       }
       
-      if (isCustomDomain && customTitle) {
+      if (customTitle) {
         document.title = customTitle;
       }
     } catch(e) {}
