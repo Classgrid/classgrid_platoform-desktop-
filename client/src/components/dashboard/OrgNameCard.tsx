@@ -11,11 +11,81 @@ type BrandingData = {
   sidebar_name: string;
 };
 
+function FieldEditor({ 
+  label, 
+  value, 
+  onSave, 
+  isSaving,
+  placeholder, 
+  maxLength 
+}: { 
+  label: string;
+  value: string;
+  onSave: (val: string) => void;
+  isSaving: boolean;
+  placeholder: string;
+  maxLength?: number;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleSave = () => {
+    onSave(localValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setLocalValue(value);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <label className="text-[10px] uppercase font-bold text-muted-foreground">{label}</label>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={handleSave} disabled={isSaving || !localValue.trim()} className="h-6 text-xs px-2">
+              {isSaving ? <Spinner size="sm" className="mr-1" /> : null} Save
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleCancel} disabled={isSaving} className="h-6 text-xs px-2">
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button size="sm" variant="outline" onClick={() => setIsEditing(true)} className="h-6 text-xs px-2">
+            Edit
+          </Button>
+        )}
+      </div>
+
+      {isEditing ? (
+        <input
+          type="text"
+          value={localValue}
+          onChange={(e) => {
+            const val = maxLength ? e.target.value.slice(0, maxLength) : e.target.value;
+            setLocalValue(val);
+          }}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+        />
+      ) : (
+        <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground min-h-[38px] flex items-center">
+          {value ? value : <span className="text-muted-foreground italic">Not set</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function OrgNameCard() {
   const queryClient = useQueryClient();
-  const [localName, setLocalName] = useState("");
-  const [localSidebarName, setLocalSidebarName] = useState("");
-  const [isEditingNames, setIsEditingNames] = useState(false);
 
   const { data, isLoading } = useQuery<BrandingData>({
     queryKey: ["org-branding"],
@@ -30,96 +100,46 @@ export function OrgNameCard() {
       const res = await apiClient.patch("/org-admin/branding", variables);
       return res.data;
     },
-    onSuccess: (updatedData, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
-      // Invalidate user profile so sidebar updates
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      toast.success("Organization names updated successfully");
-      setIsEditingNames(false);
+      toast.success("Organization name updated successfully");
     },
   });
 
-  useEffect(() => {
-    if (data) {
-      setLocalName(data.name || "");
-      setLocalSidebarName(data.sidebar_name || "");
-    }
-  }, [data]);
-
   return (
-    <SectionPanel
-      title="Organization Name"
-      description="Set your official name and a short name for the sidebar."
-      loading={isLoading}
-      actions={
-        isEditingNames ? (
-          <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => {
-                setIsEditingNames(false);
-                setLocalName(data?.name || "");
-                setLocalSidebarName(data?.sidebar_name || "");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => updateBranding.mutate({ name: localName, sidebar_name: localSidebarName })}
-              disabled={updateBranding.isPending || !localName.trim()}
-            >
-              {updateBranding.isPending ? <Spinner size="sm" className="mr-2" /> : null} Save Names
-            </Button>
-          </div>
-        ) : (
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => setIsEditingNames(true)}
-          >
-            Edit Names
-          </Button>
-        )
-      }
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
-        <div className="flex flex-col gap-2">
-          <label className="text-[10px] uppercase font-bold text-muted-foreground">Full Name</label>
-          {isEditingNames ? (
-            <input
-              type="text"
-              value={localName}
-              onChange={(e) => setLocalName(e.target.value)}
-              placeholder="e.g. Ambiguity Engineering College"
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
-            />
-          ) : (
-            <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground">
-              {data?.name || <span className="text-muted-foreground italic">Not set</span>}
-            </div>
-          )}
-        </div>
+    <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <div className="flex flex-col gap-2">
-          <label className="text-[10px] uppercase font-bold text-muted-foreground">Sidebar Name (Max 22 chars)</label>
-          {isEditingNames ? (
-            <input
-              type="text"
-              value={localSidebarName}
-              onChange={(e) => setLocalSidebarName(e.target.value.slice(0, 22))}
-              maxLength={22}
-              placeholder="e.g. Ambiguity Engg."
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
-            />
-          ) : (
-            <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground">
-              {data?.sidebar_name || <span className="text-muted-foreground italic">Not set</span>}
-            </div>
-          )}
+        {/* Left Column */}
+        <div className="flex flex-col gap-6">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Organization Name</h3>
+            <p className="text-sm text-muted-foreground mt-1">Set your official name and a short name for the sidebar.</p>
+          </div>
+          
+          <FieldEditor
+            label="Full Name"
+            value={data?.name || ""}
+            placeholder="e.g. Ambiguity Engineering College"
+            isSaving={updateBranding.isPending}
+            onSave={(name) => updateBranding.mutate({ name })}
+          />
         </div>
+
+        {/* Right Column */}
+        <div className="flex flex-col justify-end">
+          <FieldEditor
+            label="Sidebar Name (Max 22 chars)"
+            value={data?.sidebar_name || ""}
+            placeholder="e.g. Ambiguity Engg."
+            maxLength={22}
+            isSaving={updateBranding.isPending}
+            onSave={(sidebar_name) => updateBranding.mutate({ sidebar_name })}
+          />
+        </div>
+
       </div>
-    </SectionPanel>
+    </div>
   );
 }
