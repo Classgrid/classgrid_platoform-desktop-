@@ -7,6 +7,8 @@ import { attachInstitutionProfile } from "../middleware/institution-profile.midd
 import { getChatSb } from "../config/supabaseClient.js";
 import { generateR2UploadUrl } from "../services/r2.service.js";
 
+import redis from "../config/redis.js";
+
 const router = express.Router();
 
 // =======================
@@ -14,6 +16,12 @@ const router = express.Router();
 // =======================
 router.get("/profile", isAuthenticated, async (req, res) => {
   try {
+    const cacheKey = `user:profile:${req.user._id}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.json(JSON.parse(cached));
+    }
+
     const user = await User.findById(req.user._id)
       .populate("organization_id")
       .select("-password -verificationToken");
@@ -22,7 +30,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({
+    const responseData = {
       user: {
         id: user._id,
         name: user.name,
@@ -67,7 +75,10 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         profile_completed: user.profile_completed,
         pushNotifications: user.pushNotifications || { global: true }
       },
-    });
+    };
+
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 1800);
+    res.json(responseData);
   } catch (error) {
     console.error("PROFILE ERROR:", error.message);
     res.status(500).json({ message: "Server error" });
@@ -332,6 +343,12 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
       { $set: updateData },
       { returnDocument: "after", runValidators: true } // Return updated doc, validate
     ).select("-password -verificationToken");
+
+    if (user.password) {
+      user.password = undefined; // Do not send password back
+    }
+
+    await redis.del(`user:profile:${req.user._id}`);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

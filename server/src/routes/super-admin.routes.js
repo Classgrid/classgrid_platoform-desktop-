@@ -423,13 +423,43 @@ router.get("/custom-domains", async (req, res) => {
         const orgsWithDomains = await Organization.find({
             "custom_domain.domain": { $ne: null, $exists: true }
         })
-            .select("name subdomain custom_domain createdAt")
+            .select("name subdomain custom_domain createdAt ownerName ownerEmail owner_id")
             .sort({ "custom_domain.created_at": -1 })
             .lean();
 
         res.json({ success: true, data: orgsWithDomains });
     } catch (err) {
         console.error("[SuperAdmin] custom domains list error:", err.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+router.get("/custom-domains/:orgId/full", async (req, res) => {
+    try {
+        const { orgId } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const User = (await import("../models/User.js")).default;
+
+        const org = await Organization.findById(orgId).populate("owner_id", "name email profilePicture").lean();
+        if (!org) {
+            return res.status(404).json({ success: false, message: "Organization not found" });
+        }
+
+        const [totalStudents, totalFaculty, totalUsers] = await Promise.all([
+            User.countDocuments({ organization_id: orgId, role: "student" }),
+            User.countDocuments({ organization_id: orgId, role: { $in: ["faculty", "hod", "principal"] } }),
+            User.countDocuments({ organization_id: orgId })
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                ...org,
+                stats: { totalStudents, totalFaculty, totalUsers }
+            }
+        });
+    } catch (err) {
+        console.error("[SuperAdmin] fetch full org error:", err.message);
         res.status(500).json({ success: false, message: "Server error" });
     }
 });

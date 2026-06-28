@@ -9,6 +9,7 @@ import { getChatSb } from "../config/supabaseClient.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { buildInstitutionProfile as buildSharedInstitutionProfile } from "../services/institution-profile.service.js";
 import { getOrgDashboardMetrics } from '../controllers/org-dashboard.controller.js';
+import redis from '../config/redis.js';
 import {
     getAdmissionTrack,
     getDefaultQuotaByStructureType,
@@ -2143,12 +2144,21 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
+        const cacheKey = `org:branding:${orgId}`;
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+            return res.json(JSON.parse(cached));
+        }
+
         const org = await Organization.findById(orgId).select("logo_url favicon_url custom_domain.domain");
-        res.json({
+        const responseData = {
             logo_url: org.logo_url || "",
             favicon_url: org.favicon_url || "",
             has_custom_domain: !!org.custom_domain?.domain
-        });
+        };
+
+        await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
+        res.json(responseData);
     } catch (err) {
         console.error("[Org Branding GET Error]:", err.message);
         res.status(500).json({ message: "Server error fetching branding." });
@@ -2184,6 +2194,9 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
                 favicon_url: updatedOrg.favicon_url
             }
         });
+        
+        await redis.del(`org:branding:${orgId}`);
+        
     } catch (err) {
         console.error("[Org Branding Error]:", err.message);
         res.status(500).json({ message: "Server error updating branding." });
