@@ -35,13 +35,20 @@ function FieldEditor({
 
   const handleSave = () => {
     onSave(localValue);
-    setIsEditing(false);
+    // Don't set isEditing(false) here, let the parent do it or wait for success
   };
 
   const handleCancel = () => {
     setLocalValue(value);
     setIsEditing(false);
   };
+  
+  // Close edit mode when value is updated successfully from backend
+  useEffect(() => {
+    if (value && isEditing && value === localValue && !isSaving) {
+      setIsEditing(false);
+    }
+  }, [value, isEditing, localValue, isSaving]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -124,6 +131,9 @@ export function OrgNameCard() {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       toast.success("Organization name updated successfully");
     },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to update organization name");
+    }
   });
 
   return (
