@@ -35,12 +35,11 @@ export function CustomDomainsPage() {
     } 
   });
 
-  // Updated to match the custom DataTable's Column interface
   const columns = useMemo(() => [
     {
       key: "name", 
       header: "Organization", 
-      width: "w-[250px]",
+      width: "w-[30%]",
       render: (val: any, row: any) => (
         <div>
           <div style={{ fontWeight: 500 }}>{row.name}</div>
@@ -53,7 +52,7 @@ export function CustomDomainsPage() {
     {
       key: "domain", 
       header: "Custom Domain", 
-      width: "w-[250px]",
+      width: "w-[30%]",
       render: (val: any, row: any) => {
         const domain = row.custom_domain?.domain;
         return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
@@ -62,7 +61,7 @@ export function CustomDomainsPage() {
     {
       key: "status", 
       header: "Status", 
-      width: "w-[160px]",
+      width: "w-[15%]",
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
         if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
@@ -72,7 +71,7 @@ export function CustomDomainsPage() {
     {
       key: "verified_at", 
       header: "Verified Date", 
-      width: "w-[150px]",
+      width: "w-[15%]",
       render: (val: any, row: any) => {
          const d = row.custom_domain?.verified_at;
          return <span style={{ fontSize: "0.82rem" }}>{d ? formatDate(d) : "-"}</span>;
@@ -81,8 +80,13 @@ export function CustomDomainsPage() {
     {
       key: "actions", 
       header: "Actions", 
-      width: "w-[140px]",
+      width: "w-[10%]",
       render: (val: any, row: any) => {
+        const status = row.custom_domain?.status;
+        if (status === "verified" || status === "active") {
+          return null; // Hide the button if already verified!
+        }
+        
         const isVerifying = verifyMut.isPending && verifyMut.variables === row._id;
         return (
           <Button 
@@ -94,7 +98,7 @@ export function CustomDomainsPage() {
               verifyMut.mutate(row._id);
             }}
           >
-            Re-verify
+            Verify
           </Button>
         );
       },
