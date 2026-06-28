@@ -97,6 +97,12 @@ export const dashboardConfigs: DashboardConfig[] = [
         ]
       },
       {
+        label: "🌐 PLATFORM DOMAINS",
+        items: [
+          { label: "Custom Domains", to: "/superadmin/domains", icon: Globe }
+        ]
+      },
+      {
         label: "📢 PLATFORM",
         items: [
           { label: "Notifications Engine", to: "/superadmin/notifications", icon: Bell },

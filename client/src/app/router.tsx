@@ -14,6 +14,7 @@ import { UsersPage } from "@/features/superadmin/pages/UsersPage";
 import { GlobalUsersPage } from "@/features/superadmin/pages/GlobalUsersPage";
 import { GdprPage } from "@/features/superadmin/pages/GdprPage";
 import { BackupPage } from "@/features/superadmin/pages/BackupPage";
+import { CustomDomainsPage } from "@/features/superadmin/pages/CustomDomainsPage";
 import { AnalyticsPage } from "@/features/superadmin/pages/AnalyticsPage";
 import { AlertsPage } from "@/features/superadmin/pages/AlertsPage";
 import { OnboardPage } from "@/features/superadmin/pages/OnboardPage";
@@ -136,6 +137,7 @@ export function AppRouter() {
           <Route path="/superadmin/alerts" element={<AlertsPage />} />
           <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
           <Route path="/superadmin/orgs/:id" element={<OrgDetailPage />} />
+          <Route path="/superadmin/domains" element={<CustomDomainsPage />} />
           <Route path="/superadmin/onboard" element={<OnboardPage />} />
           <Route path="/superadmin/direct-onboard" element={<DirectOnboardPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />
