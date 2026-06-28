@@ -329,7 +329,7 @@ export function AuthCard({
                   inputClassName="h-12 border-border bg-background pl-11 sm:h-13"
                   inputMode="email"
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Email / Student ID"
                   spellCheck={false}
                   type="email"
                   value={email}
@@ -340,8 +340,9 @@ export function AuthCard({
 
               <PrimaryActionButton
                 disabled={!isEmailValid || isSubmitting}
-                label={isSubmitting ? "Checking..." : "Continue"}
+                label={isSubmitting ? "Signing In..." : "Sign In"}
                 type="submit"
+                className="bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:from-emerald-500 hover:to-emerald-600 border-0"
               />
 
               <OrDivider />
@@ -578,28 +579,9 @@ function getStepCopy({
       subtitle: `This session is locked to the ${getPortalLabel(lockedRole).toLowerCase()}.`,
     };
   }
-
-  if (step === 1 && isUserRole(rememberedRole)) {
-    return {
-      title: `Welcome back, ${getRoleLabel(rememberedRole)}`,
-      subtitle: `Use your institution email to continue to ${branding.name}.`,
-    };
-  }
-
-  if (step === 1) {
-    return {
-      title: "Sign in",
-      subtitle: "Choose Student or Faculty access and continue with your institution email.",
-    };
-  }
-
   return {
-    title: isUserRole(rememberedRole)
-      ? `Welcome back, ${getRoleLabel(rememberedRole)}`
-      : preferredRole
-        ? `${getRoleLabel(preferredRole)} Sign In`
-        : "Welcome back",
-    subtitle: `Enter your password to continue to ${branding.name}.`,
+    title: "Welcome back!",
+    subtitle: "Sign in to continue to your Classgrid portal",
   };
 }
 
@@ -653,8 +635,10 @@ function RoleSwitcher({
             onClick={() => onChange(option.value)}
             className={cn(
               "flex h-[46px] flex-1 items-center justify-center gap-2 rounded-[14px] border text-sm font-medium transition-all duration-200",
-              isActive 
-                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+              isActive && option.value === "student"
+                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                : isActive && option.value === "teacher"
+                ? "border-orange-500/50 bg-orange-500/10 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
                 : "border-white/[0.14] bg-transparent text-white/55 hover:border-white/[0.25] hover:text-[#ededed]"
             )}
             aria-pressed={isActive}

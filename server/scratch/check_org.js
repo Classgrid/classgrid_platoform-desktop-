@@ -16,15 +16,18 @@ async function checkOrg() {
         // We can just list all orgs if there are few, or find by some known fields
         const orgs = await db.collection("organizations").find({}).toArray();
         
-        console.log("=== CURRENT ORGANIZATIONS IN DATABASE ===");
-        orgs.forEach(org => {
-            console.log(`\nID: ${org._id}`);
-            console.log(`Full Name: ${org.name}`);
-            console.log(`Sidebar Name: ${org.sidebar_name || "N/A"}`);
-            console.log(`Subdomain (Classgrid URL): ${org.subdomain ? org.subdomain + ".classgrid.in" : "N/A"}`);
-            console.log(`Custom Domain: ${org.custom_domain?.domain || "N/A"}`);
-            console.log(`Site Title: ${org.site_title || "N/A"}`);
-        });
+        console.log("=== ORGS WITHOUT CUSTOM DOMAIN ===");
+        const orgsWithoutCustomDomain = orgs.filter(org => !org.custom_domain || !org.custom_domain.domain);
+        
+        if (orgsWithoutCustomDomain.length === 0) {
+             console.log("No organizations found without a custom domain.");
+        } else {
+             orgsWithoutCustomDomain.forEach(org => {
+                console.log(`\nID: ${org._id}`);
+                console.log(`Full Name: ${org.name}`);
+                console.log(`Subdomain: ${org.subdomain ? org.subdomain + ".classgrid.in" : "N/A"}`);
+             });
+        }
         
         process.exit(0);
     } catch (error) {

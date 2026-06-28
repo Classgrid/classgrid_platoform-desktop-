@@ -31,18 +31,18 @@ export function AuthBrandMark({
     <div className={cn("flex items-center gap-3", stacked && "flex-col text-center", className)}>
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius)] border border-border bg-card",
-          stacked ? "size-24" : hero ? "size-20" : "size-11"
+          "flex shrink-0 items-center justify-center overflow-visible",
+          stacked ? "size-32 mb-2" : hero ? "size-24" : "size-12"
         )}
       >
         {logo ? (
           <img
             src={logo}
             alt={`${branding.name} logo`}
-            className={cn("size-full object-contain", stacked ? "p-3" : hero ? "p-2" : "p-1")}
+            className="size-full object-contain drop-shadow-lg"
           />
         ) : (
-          <Building2 className="size-5 text-primary" aria-hidden="true" />
+          <Building2 className="size-8 text-primary" aria-hidden="true" />
         )}
       </div>
       <div className={cn("min-w-0", stacked && "grid gap-1")}>

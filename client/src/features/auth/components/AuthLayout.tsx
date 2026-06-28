@@ -86,6 +86,22 @@ export function AuthLayout({ authType, audience, preferredRole }: AuthLayoutProp
     setStoredRole(readStoredAuthRole());
   }, []);
 
+  // Load Google reCAPTCHA v3 on login pages (shows official badge at bottom-right)
+  useEffect(() => {
+    const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
+
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Clean up: remove script and badge when leaving login page
+      try { document.head.removeChild(script); } catch {}
+      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
+    };
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
