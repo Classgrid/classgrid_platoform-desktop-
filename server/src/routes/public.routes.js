@@ -103,6 +103,9 @@ router.get("/auth-branding", async (req, res) => {
     const slug = normalizeSlug(req.tenantSlug || req.query?.slug);
 
     if (!slug) {
+      if (requestedType === "institution") {
+        return res.status(404).json({ success: false, message: "Institution not found." });
+      }
       return res.json(platformAuthBranding());
     }
 

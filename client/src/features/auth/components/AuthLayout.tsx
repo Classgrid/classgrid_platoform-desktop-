@@ -55,7 +55,15 @@ export function AuthLayout({ authType, audience, leftVariant, preferredRole }: A
   const [brandingError, setBrandingError] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const slug = searchParams.get("slug") || searchParams.get("org") || undefined;
+  const urlSlug = searchParams.get("slug") || searchParams.get("org") || undefined;
+  
+  const hostname = window.location.hostname;
+  const subdomain = hostname.includes(".") && !hostname.startsWith("localhost") && !hostname.startsWith("127.0.0.1") 
+    ? hostname.split(".")[0] 
+    : undefined;
+  
+  const slug = urlSlug || (subdomain !== "superadmin" ? subdomain : undefined);
+
   const appRole = getLockedAppRole(searchParams.get("app"));
   const tabRole = getQueryPreferredRole(searchParams.get("tab"));
   const browserPreferredRole = preferredRole || tabRole;
