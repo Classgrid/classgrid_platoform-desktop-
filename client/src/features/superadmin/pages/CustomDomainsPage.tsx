@@ -57,7 +57,24 @@ export function CustomDomainsPage() {
       width: "w-[20%]",
       render: (val: any, row: any) => {
         const s = row.custom_domain?.status ?? "pending_verification";
-        if (s === "verified" || s === "active") return <Badge variant="success" dot>Verified</Badge>;
+        if (s === "verified" || s === "active") {
+          const v = row.custom_domain?.verified_at;
+          const verifiedText = v ? formatDate(v, "dd MMM, yyyy 'at' hh:mm a") : "-";
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help inline-flex">
+                    <Badge variant="success" dot>Verified</Badge>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Verified on: {verifiedText}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        }
         if (s === "pending_verification") return <Badge variant="warning">Pending</Badge>;
         return <Badge variant="warning">{s}</Badge>;
       },
@@ -69,7 +86,7 @@ export function CustomDomainsPage() {
       render: (val: any, row: any) => {
          const v = row.custom_domain?.verified_at;
          const added = row.custom_domain?.created_at || row.createdAt;
-         const addedText = added ? formatDate(added) : "-";
+         const addedText = added ? formatDate(added, "dd MMM, yyyy 'at' hh:mm a") : "-";
          
          return (
            <TooltipProvider>
@@ -80,7 +97,7 @@ export function CustomDomainsPage() {
                  </div>
                </TooltipTrigger>
                <TooltipContent side="top">
-                 Domain requested on: {addedText}
+                 Requested on: {addedText}
                </TooltipContent>
              </Tooltip>
            </TooltipProvider>
