@@ -140,7 +140,7 @@ export function OrgNameCard() {
           <FieldEditor
             label="Full Name"
             value={data?.name || ""}
-            placeholder="e.g. Ambiguity Engineering College"
+            placeholder="e.g. Greenfield University"
             isSaving={updateBranding.isPending}
             onSave={(name) => updateBranding.mutate({ name })}
           />
@@ -151,7 +151,7 @@ export function OrgNameCard() {
           <FieldEditor
             label="Sidebar Name (Max 22 chars)"
             value={data?.sidebar_name || ""}
-            placeholder="e.g. Ambiguity Engg."
+            placeholder="e.g. Greenfield Uni"
             maxLength={22}
             isSaving={updateBranding.isPending}
             onSave={(sidebar_name) => updateBranding.mutate({ sidebar_name })}
