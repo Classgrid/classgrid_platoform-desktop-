@@ -598,18 +598,9 @@ export function SupportTicketsPage() {
                   ),
                   date: (
                     <div className="flex flex-col items-start gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="text-xs text-muted-foreground cursor-help border-b border-dashed border-muted-foreground/50 pb-0.5">
-                              {getRelativeTime(ticket.createdAt)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            Created on: {fmtDateTime(ticket.createdAt)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <span className="text-xs text-muted-foreground">
+                        {getRelativeTime(ticket.createdAt)}
+                      </span>
                     </div>
                   ),
                   assigned: (
