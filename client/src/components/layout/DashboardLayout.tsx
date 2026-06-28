@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarInset } from "@/components/marketing_ui/sidebar";
 import { TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbLink } from "@/components/marketing_ui/breadcrumb";
+import { Link } from "react-router-dom";
+import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 import { AppSidebar } from "./AppSidebar";
 
@@ -34,6 +36,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
   const location = useLocation();
   const isChat = location.pathname.includes("/chat");
+  const { items, showBreadcrumbs } = useBreadcrumbStore();
 
   return (
     <TooltipProvider>
@@ -42,14 +45,31 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
         {/* Make the inset background match the sidebar so it's a seamless black canvas */}
         <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
           {/* This is the actual flush right pane */}
-          <div className={`flex-1 flex flex-col overflow-hidden ${isChat ? 'bg-background border-none' : 'bg-card border-l border-border'}`}>
-            {!isChat && (
-              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4 bg-background">
+          <div className={`flex-1 flex flex-col overflow-hidden relative ${isChat ? 'bg-background border-none' : 'bg-card border-l border-border'}`}>
+            {!isChat && showBreadcrumbs && (
+              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <Breadcrumb>
                   <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Overview</BreadcrumbPage>
-                    </BreadcrumbItem>
+                    {items.length > 0 ? (
+                      items.map((item, index) => (
+                        <React.Fragment key={index}>
+                          <BreadcrumbItem>
+                            {item.href ? (
+                              <BreadcrumbLink asChild>
+                                <Link to={item.href}>{item.label}</Link>
+                              </BreadcrumbLink>
+                            ) : (
+                              <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                            )}
+                          </BreadcrumbItem>
+                          {index < items.length - 1 && <BreadcrumbSeparator />}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>Overview</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    )}
                   </BreadcrumbList>
                 </Breadcrumb>
                 <div className="w-full flex justify-between items-center">
@@ -57,7 +77,8 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                 </div>
               </header>
             )}
-            <main className={`flex-1 overflow-hidden bg-background ${isChat ? 'p-0 m-0 border-none flex flex-col h-full' : 'p-4 lg:p-6 overflow-auto'}`}>
+            <main className={`flex-1 overflow-x-hidden overflow-y-auto bg-background ${isChat ? 'p-0 m-0 border-none flex flex-col h-full' : 'p-4 lg:p-6'}`}>
+
               {children}
             </main>
           </div>

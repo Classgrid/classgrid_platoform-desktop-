@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/apiClient";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ExternalLink, CheckCircle2, XCircle, AlertCircle, Building2, UserCircle, Settings2, ShieldCheck, GraduationCap, Link2, CreditCard, ChevronRight, Home } from "lucide-react";
+import { PageBreadcrumbs } from "@/components/layout/PageBreadcrumbs";
 
 const DetailRow = ({ label, value, fallback = "-" }: { label: string; value: any; fallback?: string }) => (
   <div className="flex flex-col sm:flex-row sm:justify-between py-2 border-b border-border/50 last:border-0 gap-1 sm:gap-4">
@@ -48,18 +49,13 @@ export function OrgDetailsPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 pb-12">
+      <PageBreadcrumbs 
+        items={[
+          { label: "Custom Domains", href: "/superadmin/domains" },
+          { label: isLoading ? "Loading..." : data?.name || "Organization Details" }
+        ]} 
+      />
       
-      {/* Breadcrumb Navigation */}
-      <nav className="flex items-center text-sm text-muted-foreground mb-6">
-        <Link to="/superadmin/domains" className="hover:text-primary transition-colors flex items-center gap-1.5">
-          <Home size={14} /> Custom Domains
-        </Link>
-        <ChevronRight size={14} className="mx-2" />
-        <span className="text-foreground font-medium truncate">
-          {isLoading ? "Loading..." : data?.name || "Organization Details"}
-        </span>
-      </nav>
-
       {/* Header */}
       <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border">
         {data?.logo_url ? (
