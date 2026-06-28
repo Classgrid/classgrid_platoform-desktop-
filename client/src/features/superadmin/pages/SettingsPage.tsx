@@ -56,25 +56,19 @@ export function SettingsPage() {
     }
   });
 
-  const handleToggle = (key: keyof EmailPrefs) => {
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  const handlePrefChange = (field: keyof EmailPrefs, value: any) => {
+    const newPrefs = { ...prefs, [field]: value };
+    setPrefs(newPrefs);
+    updatePrefs.mutate(newPrefs);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    updatePrefs.mutate(prefs);
-  };
+  const isPending = updatePrefs.isPending;
 
   return (
-    <form className="" onSubmit={handleSave} noValidate>
-      <div
+    <div className="">
+      <SectionPanel
         title="Settings"
         description="Manage your platform preferences, notifications, and appearance."
-        actions={
-          <Button type="submit" isLoading={updatePrefs.isPending}>
-            <Save size={14} /> Save Settings
-          </Button>
-        }
       />
 
       {/* Appearance */}
@@ -128,7 +122,7 @@ export function SettingsPage() {
                   type="checkbox"
                   className=""
                   checked={prefs.global}
-                  onChange={() => handleToggle("global")}
+                  onChange={() => handlePrefChange("global", !prefs.global)}
                 />
                 <div className="">
                   <div className=""></div>
@@ -146,7 +140,7 @@ export function SettingsPage() {
                   type="checkbox"
                   className=""
                   checked={prefs.announcements}
-                  onChange={() => handleToggle("announcements")}
+                  onChange={() => handlePrefChange("announcements", !prefs.announcements)}
                 />
                 <div className="">
                   <div className=""></div>
@@ -164,7 +158,7 @@ export function SettingsPage() {
                   type="checkbox"
                   className=""
                   checked={prefs.joinApproval}
-                  onChange={() => handleToggle("joinApproval")}
+                  onChange={() => handlePrefChange("joinApproval", !prefs.joinApproval)}
                 />
                 <div className="">
                   <div className=""></div>
@@ -176,6 +170,6 @@ export function SettingsPage() {
       </div>
 
       {/* Removed sticky banner, using react-hot-toast instead */}
-    </form>
+    </div>
   );
 }
