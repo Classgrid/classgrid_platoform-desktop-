@@ -32,6 +32,7 @@ const emailJobSchema = new mongoose.Schema(
                 "support_ticket_new",
                 "talk_request_new",
                 "talk_request_reply",
+                "domain_change",
                 "other",
             ],
             default: "other",
