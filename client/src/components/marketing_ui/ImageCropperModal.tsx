@@ -37,7 +37,7 @@ export function ImageCropperModal({
   onClose, 
   imageSrc, 
   onCropComplete, 
-  aspectRatio = 1, 
+  aspectRatio, 
   title = "Crop Image",
   minWidth,
   minHeight

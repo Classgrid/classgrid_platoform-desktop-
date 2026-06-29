@@ -212,6 +212,7 @@ export function AppRouter() {
           <Route path="/org/website" element={<WebsiteCMSPage />} />
           <Route path="/org/admin/dashboard" element={<GenericPage title="Org Overview" />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
+          <Route path="/org/*" element={<ComingSoonPage />} />
           
           {/* Legacy redirects for compatibility */}
           <Route path="/org/settings" element={<Navigate to="/org/admin/settings" replace />} />

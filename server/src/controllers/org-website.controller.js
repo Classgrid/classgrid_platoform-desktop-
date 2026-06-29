@@ -126,7 +126,7 @@ export async function resolveTenantBySlug(req, res) {
 
 export async function getMyWebsiteContent(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const site = await OrgWebsiteContent.findOne({ organization_id: orgId }).lean();
@@ -151,7 +151,7 @@ export async function getMyWebsiteContent(req, res) {
 
 export async function setupWebsiteContent(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const existing = await OrgWebsiteContent.findOne({ organization_id: orgId });
@@ -202,7 +202,7 @@ export async function setupWebsiteContent(req, res) {
 
 export async function updateWebsiteContent(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     // Fields NOT allowed to be changed directly via this endpoint
@@ -231,7 +231,7 @@ export async function updateWebsiteContent(req, res) {
 
 export async function togglePublish(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const site = await OrgWebsiteContent.findOne({ organization_id: orgId });
@@ -256,7 +256,7 @@ export async function togglePublish(req, res) {
 // POST /api/org-website/notices
 export async function addNotice(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const notice = {
@@ -290,7 +290,7 @@ export async function addNotice(req, res) {
 // DELETE /api/org-website/notices/:noticeId
 export async function deleteNotice(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     const noticeId = req.params?.noticeId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
@@ -310,7 +310,7 @@ export async function deleteNotice(req, res) {
 // POST /api/org-website/gallery
 export async function addGalleryImage(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const image = {
@@ -338,7 +338,7 @@ export async function addGalleryImage(req, res) {
 // POST /api/org-website/gallery/video
 export async function addGalleryVideo(req, res) {
   try {
-    const orgId = req.user?.organizationId;
+    const orgId = req.user?.organization_id || req.effectiveOrganizationId;
     if (!orgId) return res.status(403).json({ success: false, message: "Unauthorized" });
 
     const youtubeUrl = safeText(req.body?.youtubeUrl);
