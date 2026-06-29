@@ -1,10 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, ArrowLeft } from "lucide-react";
+import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, ArrowLeft, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, getAuthBranding, requestPasswordReset } from "../api";
-import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
-import type { AuthUserRole, AuthBranding } from "../types";
+import { getRedirectPath, saveStoredAuthRole, readStoredAuthRole, getRoleLabel, getPortalLabel, isInstitutionAdminRole } from "../auth-helpers";
+import type { AuthUserRole, AuthLoginRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
 /* ── Constants ── */
@@ -13,12 +13,11 @@ const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
-export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole }) {
+export function ClassgridSubdomainAdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const [activeRole, setActiveRole] = useState<AuthUserRole>(preferredRole || "student");
   const [showPassword, setShowPassword] = useState(false);
 
   // ── Branding State ──
@@ -36,9 +35,11 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  const [rememberedRole, setRememberedRole] = useState<AuthLoginRole | null>(null);
+
   useEffect(() => {
-    if (preferredRole) setActiveRole(preferredRole);
-  }, [preferredRole]);
+    setRememberedRole(readStoredAuthRole());
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -64,6 +65,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
   useEffect(() => {
     document.title = "Classgrid";
 
+    // Handle Google OAuth device verification redirect
     const params = new URLSearchParams(location.search);
     if (params.get("device_verify") === "true") {
       const redirectEmail = params.get("email") || "";
@@ -84,6 +86,16 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
     const timer = window.setInterval(() => setOtpCooldownSeconds((c) => Math.max(0, c - 1)), 1000);
     return () => window.clearInterval(timer);
   }, [otpCooldownSeconds, step]);
+
+  const effectiveRole = isInstitutionAdminRole(rememberedRole) ? rememberedRole : "org_admin";
+
+  const titleText = isInstitutionAdminRole(rememberedRole)
+    ? `Welcome back, ${getRoleLabel(rememberedRole)}`
+    : "Admin Portal";
+
+  const subtitleText = isInstitutionAdminRole(rememberedRole)
+    ? `Continue to the ${getPortalLabel(rememberedRole)} for ${branding?.name || "your institution"}.`
+    : `Sign in to access your administrative workspace`;
 
   const rememberLoggedInUser = (result: any) => {
     if (!result.user) return;
@@ -108,8 +120,8 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
       const result = await loginWithPassword({
         email: email.trim(),
         password,
-        audience: "user",
-        role: activeRole,
+        audience: "admin",
+        role: effectiveRole,
       });
 
       if (result.needsDeviceOtp) {
@@ -125,7 +137,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
       }
 
       rememberLoggedInUser(result);
-      saveStoredAuthRole(result.user?.role || activeRole);
+      saveStoredAuthRole(result.user?.role || effectiveRole);
       navigate(getRedirectPath(result.user?.role), { replace: true });
     } catch (error: any) {
       if (error && typeof error === "object" && "needsDeviceOtp" in error) {
@@ -156,7 +168,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
     try {
       const result = await verifyDeviceOtp({ email: email.trim(), otp: otp.trim() });
       rememberLoggedInUser(result);
-      saveStoredAuthRole(result.user?.role || activeRole);
+      saveStoredAuthRole(result.user?.role || effectiveRole);
       navigate(getRedirectPath(result.user?.role), { replace: true });
     } catch (error: any) {
       setFeedback({ message: error?.message || "Device verification failed.", tone: "error" });
@@ -196,8 +208,8 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
   };
 
   const handleGoogleContinue = () => {
-    saveStoredAuthRole(activeRole);
-    window.location.assign(getGoogleAuthUrl({ audience: "user", role: activeRole }));
+    saveStoredAuthRole(effectiveRole);
+    window.location.assign(getGoogleAuthUrl({ audience: "admin", role: effectiveRole }));
   };
 
   // Load Google reCAPTCHA v3 — shows official badge at bottom-right
@@ -421,21 +433,11 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
                   {branding.logoUrl && (
                     <img src={branding.logoUrl} alt={branding.name} className="mx-auto h-[75px] w-[75px] object-contain" />
                   )}
-                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">{branding.name}</h1>
+                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">
+                    {branding.name || titleText}
+                  </h1>
                   <p className="mt-2 text-center text-[13px] text-white/65">Welcome back!</p>
-                  <p className="mt-0.5 text-center text-[13px] text-white/65">Sign in to continue to your Classgrid portal</p>
-
-                  {/* 11. Student / Faculty Toggle */}
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => setActiveRole("student")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-[#ededed] transition-colors ${activeRole === "student" ? "border-[#10b981] bg-[#10b981]/10" : "border-white/[0.14] bg-[#111111] hover:bg-[#222222]"}`}>
-                      <GraduationCap className="h-[18px] w-[18px] text-[#10b981]" />
-                      Student
-                    </button>
-                    <button type="button" onClick={() => setActiveRole("teacher")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-[#ededed] transition-colors ${activeRole === "teacher" ? "border-[#f97316] bg-[#f97316]/10" : "border-white/[0.14] bg-[#111111] hover:bg-[#222222]"}`}>
-                      <Users className="h-[18px] w-[18px] text-[#f97316]" />
-                      Faculty
-                    </button>
-                  </div>
+                  <p className="mt-0.5 text-center text-[13px] text-white/65">{subtitleText}</p>
 
                   {/* 12. Google Button */}
                   <button type="button" onClick={handleGoogleContinue} className="mt-4 flex h-[44px] w-full items-center justify-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#111111] text-[14px] font-medium text-[#ededed] transition-colors hover:bg-[#222222]">
@@ -452,7 +454,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
                   {/* 14. Email Input */}
                   <div className="flex h-[44px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                     <Mail className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email / Student ID" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email Address" />
                   </div>
 
                   {/* Password Input */}
@@ -460,7 +462,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
                     <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
                     <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-white/70 transition-colors hover:text-white">
-                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                      {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                     </button>
                   </div>
 

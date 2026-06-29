@@ -2,7 +2,12 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import { SidebarGroup, SidebarGroupContent } from "@/components/marketing_ui/sidebar";
 
-export function SidebarSearch() {
+interface SidebarSearchProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
+export function SidebarSearch({ searchQuery, setSearchQuery }: SidebarSearchProps) {
   return (
     <SidebarGroup className="py-2">
       <SidebarGroupContent>
@@ -11,6 +16,8 @@ export function SidebarSearch() {
           <input 
             type="text"
             placeholder="Search..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="flex h-8 w-full rounded-md border border-border/60 bg-transparent px-3 pl-8 py-1 text-xs shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
         </div>

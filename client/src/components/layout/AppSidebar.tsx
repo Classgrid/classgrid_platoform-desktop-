@@ -40,28 +40,43 @@ interface AppSidebarProps {
 
 import { SidebarSwitcher } from "./SidebarSwitcher";
 import { SidebarSearch } from "./SidebarSearch";
+import { useState } from "react";
 
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const config = dashboardConfigs.find(c => c.role === role);
 
   if (!config) {
     return null;
   }
 
+  // Filter sections based on search query
+  const filteredSections = config.sections.map(section => {
+    const filteredItems = section.items.filter(item => 
+      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return { ...section, items: filteredItems };
+  }).filter(section => section.items.length > 0);
+
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
       <SidebarHeader>
         <SidebarSwitcher user={user} />
-        <SidebarSearch />
+        <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
-        {config.sections.map((section, index) => (
+        {filteredSections.map((section, index) => (
           <SidebarGroup key={section.label || index}>
             {index > 0 && (
               <div className="mx-4 my-2 h-px bg-border/50 group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
+            )}
+            {section.label && (
+              <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mt-2 mb-1">
+                {section.label}
+              </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
               <SidebarMenu>
@@ -107,6 +122,11 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {filteredSections.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No matching items found.
+          </div>
+        )}
       </SidebarContent>
 
       {user && <SidebarFooterUser user={user} />}

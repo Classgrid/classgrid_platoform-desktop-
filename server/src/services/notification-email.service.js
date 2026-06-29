@@ -579,7 +579,7 @@ export async function sendDemoLeadNotification({ demoRequest, bookingUrl = "" })
             city: demoRequest.city,
             message: demoRequest.message || "",
             createdAt: demoRequest.createdAt || new Date(),
-            dashboardUrl: `${FRONTEND_URL()}/super-admin-dashboard`,
+            dashboardUrl: `${FRONTEND_URL()}/superadmin/dashboard`,
             bookingUrl: normalizedBookingUrl,
         };
 

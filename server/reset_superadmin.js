@@ -23,11 +23,13 @@ async function resetAdminPassword() {
 
         console.log(`Found Super Admin User: ${admin.email}`);
         
-        // Reset password to a known value
-        const newPassword = "Password123!";
+        // Reset password and UNLOCK account
+        const newPassword = "Nikhil@5049";
         admin.password = await bcrypt.hash(newPassword, 10);
         admin.mustResetPassword = false;
         admin.isEmailVerified = true;
+        admin.loginAttempts = 0;
+        admin.lockUntil = null;
         await admin.save();
 
         console.log("=========================================");
@@ -36,6 +38,7 @@ async function resetAdminPassword() {
         console.log(`Password: ${newPassword}`);
         console.log(`Role: ${admin.role}`);
         console.log(`Status: ${admin.status}`);
+        console.log("ACCOUNT UNLOCKED SUCCESSFULLY!");
         console.log("=========================================");
 
         process.exit(0);

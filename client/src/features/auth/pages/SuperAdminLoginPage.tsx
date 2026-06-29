@@ -5,7 +5,7 @@ import { loginWithPassword, getGoogleAuthUrl, requestPasswordReset } from "../ap
 import { saveStoredAuthRole, getRedirectPath } from "../auth-helpers";
 import "./SuperAdminVanilla.css";
 
-export function PlatformLoginPage() {
+export function SuperAdminLoginPage() {
   const navigate = useNavigate();
   
   const [email, setEmail] = useState("");
@@ -54,8 +54,8 @@ export function PlatformLoginPage() {
       // Optionally update query cache here if needed, but cookie is set by backend.
       toast.success("Login successful!");
       
-      // Default to /super-admin-dashboard as per HTML file
-      navigate("/super-admin-dashboard");
+      // Default to /superadmin/dashboard as per router configuration
+      navigate("/superadmin/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials. Please try again.");
     } finally {
@@ -194,7 +194,7 @@ export function PlatformLoginPage() {
                     className="password-toggle" 
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                    <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>
                   </button>
                 </div>
               </div>

@@ -1,7 +1,7 @@
-import { MainAdminLoginPage } from "./MainAdminLoginPage";
+import { ClassgridSubdomainAdminLoginPage } from "./ClassgridSubdomainAdminLoginPage";
 import { CustomDomainAdminLoginPage } from "./CustomDomainAdminLoginPage";
 
-export function InstitutionAdminLoginPage() {
+export function AdminLoginRouter() {
   const hostname = window.location.hostname;
   const isCustomDomain =
     hostname !== "localhost" &&
@@ -13,5 +13,5 @@ export function InstitutionAdminLoginPage() {
     return <CustomDomainAdminLoginPage />;
   }
 
-  return <MainAdminLoginPage />;
+  return <ClassgridSubdomainAdminLoginPage />;
 }

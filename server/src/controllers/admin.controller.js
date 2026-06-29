@@ -125,14 +125,20 @@ export const approveOrganization = async (req, res) => {
             getAdminOrgApprovalNotificationPlainText,
             getConsolidatedApprovalEmailHtml,
             getConsolidatedApprovalEmailPlainText,
+
+        const {
+            getAdminOrgApprovalNotificationHtml,
+            getAdminOrgApprovalNotificationPlainText,
+            getConsolidatedApprovalEmailHtml,
+            getConsolidatedApprovalEmailPlainText,
         } = await import("../services/email-templates.service.js");
 
         // Email 1: Super admin internal notification
         await sendEmail({
             to: superAdminEmail,
             subject: `[Classgrid] Org Approved (${plan}): ${savedOrg.name}`,
-            html: getAdminOrgApprovalNotificationHtml(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/super-admin-dashboard`),
-            text: getAdminOrgApprovalNotificationPlainText(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/super-admin-dashboard`),
+            html: getAdminOrgApprovalNotificationHtml(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/superadmin/dashboard`),
+            text: getAdminOrgApprovalNotificationPlainText(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/superadmin/dashboard`),
         });
 
         // Single consolidated email: approval + org codes + activation link

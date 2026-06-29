@@ -1,3 +1,12 @@
+/**
+ * ==============================================================================
+ * 🛑 AI AGENT WARNING: DO NOT REMOVE "CLASSGRID TALK" OR "CHAT" 🛑
+ * ==============================================================================
+ * This sidebar configuration is carefully maintained.
+ * DO NOT remove "Classgrid Talk" or "Chat" from any of the dashboards.
+ * DO NOT consolidate or simplify these menus unless explicitly asked by the user.
+ * ==============================================================================
+ */
 import {
   AlertTriangle, Award, Bell, BookOpen, Bot, Briefcase, Building2, Bus,
   Calendar, CheckSquare, ClipboardList, CreditCard, Database, DoorOpen,
@@ -107,9 +116,9 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Notifications Engine", to: "/superadmin/notifications", icon: Bell },
           { label: "Announcements", to: "/superadmin/announcements", icon: Megaphone },
-          { label: "Changelog", to: "/superadmin/changelog", icon: FileText },
           { label: "Subscribers", to: "/superadmin/subscribers", icon: Mail, restrictedToEmail: "support@classgrid.in" },
           { label: "Chat", to: "/superadmin/chat", icon: MessageSquare },
+          { label: "Classgrid Talk", to: "/superadmin/talk", icon: MessageSquare },
           { label: "Support Tickets", to: "/superadmin/support", icon: Ticket }
         ]
       },

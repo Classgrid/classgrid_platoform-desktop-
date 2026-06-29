@@ -1,3 +1,18 @@
+/**
+ * ==============================================================================
+ * 🛑 AI AGENT WARNING: DO NOT MODIFY THE 5 LOGIN PAGES ROUTING 🛑
+ * ==============================================================================
+ * This application intentionally uses 5 distinct login pages:
+ * 1. PlatformLoginPage.tsx (Super Admin)
+ * 2. MainLoginPage.tsx (Subdomain Users)
+ * 3. MainAdminLoginPage.tsx (Subdomain Admins)
+ * 4. CustomDomainLoginPage.tsx (Custom Domain Users)
+ * 5. CustomDomainAdminLoginPage.tsx (Custom Domain Admins)
+ * 
+ * DO NOT attempt to "simplify" or consolidate these login routes.
+ * DO NOT overwrite the dynamic subdomain routing logic.
+ * ==============================================================================
+ */
 import { Navigate, Route, Routes } from "react-router-dom";
 import { CandidatePortalPage } from "@/features/admission-portal/pages/CandidatePortalPage";
 import { ParentTrackerPage } from "@/features/admission-portal/pages/ParentTrackerPage";
@@ -82,9 +97,9 @@ import { SupportPage } from "@/features/support/pages/SupportPage";
 import { GenericPage } from "@/features/system/pages/GenericPage";
 import { GlobeDemoPage } from "@/features/system/pages/GlobeDemoPage";
 import { NotFoundPage } from "@/features/system/pages/NotFoundPage";
-import { InstitutionAdminLoginPage } from "@/features/auth/pages/InstitutionAdminLoginPage";
-import { InstitutionUserLoginPage } from "@/features/auth/pages/InstitutionUserLoginPage";
-import { PlatformLoginPage } from "@/features/auth/pages/PlatformLoginPage";
+import { AdminLoginRouter } from "@/features/auth/pages/AdminLoginRouter";
+import { UserLoginRouter } from "@/features/auth/pages/UserLoginRouter";
+import { SuperAdminLoginPage } from "@/features/auth/pages/SuperAdminLoginPage";
 
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
@@ -118,18 +133,18 @@ export function AppRouter() {
         element={
           subdomain === "app" 
             ? <PlatformHubPage /> 
-            : (isSuperAdmin ? <PlatformLoginPage /> : <InstitutionUserLoginPage />)
+            : (isSuperAdmin ? <SuperAdminLoginPage /> : <UserLoginRouter />)
         } 
       />
-      <Route path="/auth/user" element={<InstitutionUserLoginPage />} />
-      <Route path="/student/login" element={<InstitutionUserLoginPage preferredRole="student" />} />
-      <Route path="/faculty/login" element={<InstitutionUserLoginPage preferredRole="teacher" />} />
-      <Route path="/admin-login" element={<InstitutionAdminLoginPage />} />
-      <Route path="/admin/login" element={<InstitutionAdminLoginPage />} />
-      <Route path="/org/login" element={<InstitutionAdminLoginPage />} />
-      <Route path="/auth/admin" element={<InstitutionAdminLoginPage />} />
-      <Route path="/superadmin" element={<PlatformLoginPage />} />
-      <Route path="/superadmin/login" element={<PlatformLoginPage />} />
+      <Route path="/auth/user" element={<UserLoginRouter />} />
+      <Route path="/student/login" element={<UserLoginRouter preferredRole="student" />} />
+      <Route path="/faculty/login" element={<UserLoginRouter preferredRole="teacher" />} />
+      <Route path="/admin-login" element={<AdminLoginRouter />} />
+      <Route path="/admin/login" element={<AdminLoginRouter />} />
+      <Route path="/org/login" element={<AdminLoginRouter />} />
+      <Route path="/auth/admin" element={<AdminLoginRouter />} />
+      <Route path="/superadmin" element={<SuperAdminLoginPage />} />
+      <Route path="/superadmin/login" element={<SuperAdminLoginPage />} />
       <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
       <Route path="/privacy" element={<GenericPage title="Privacy Policy" />} />
       <Route path="/privacy-policy" element={<GenericPage title="Privacy Policy" />} />

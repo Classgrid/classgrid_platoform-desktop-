@@ -392,7 +392,7 @@ export function CustomDomainAdminLoginPage() {
                     <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
                     <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-white/70 transition-colors hover:text-white">
-                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                      {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                     </button>
                   </div>
 
