@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 const organizationSchema = new mongoose.Schema(
     {
         name: {
@@ -116,6 +120,20 @@ const organizationSchema = new mongoose.Schema(
         campus_photo_url: {
             type: String,
             default: "",
+        },
+        brand_colors: {
+            primary: {
+                type: String,
+                default: "#6366f1",
+                trim: true,
+                match: [HEX_COLOR_PATTERN, "Primary brand color must be a valid hex color."],
+            },
+            secondary: {
+                type: String,
+                default: "#4f46e5",
+                trim: true,
+                match: [HEX_COLOR_PATTERN, "Secondary brand color must be a valid hex color."],
+            },
         },
         // 🔗 Social Media Links — displayed on custom domain login pages
         social_links: {
@@ -270,8 +288,18 @@ const organizationSchema = new mongoose.Schema(
         // 🎨 Branding Configuration — managed by org_admin for dynamic themes
         branding: {
             theme_colors: {
-                primary: { type: String, default: "#6366f1" },   // Indigo
-                secondary: { type: String, default: "#4f46e5" }, // Dark Indigo
+                primary: {
+                    type: String,
+                    default: "#6366f1",
+                    trim: true,
+                    match: [HEX_COLOR_PATTERN, "Primary theme color must be a valid hex color."],
+                },   // Indigo
+                secondary: {
+                    type: String,
+                    default: "#4f46e5",
+                    trim: true,
+                    match: [HEX_COLOR_PATTERN, "Secondary theme color must be a valid hex color."],
+                }, // Dark Indigo
                 accent: { type: String, default: "#f43f5e" },    // Rose
             },
             font_preference: { type: String, default: "Inter" },

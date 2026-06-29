@@ -180,6 +180,19 @@ export function CustomDomainAdminLoginPage() {
     window.location.assign(getGoogleAuthUrl({ audience: "admin", role: effectiveRole }));
   };
 
+  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      try { document.head.removeChild(script); } catch {}
+      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
+    };
+  }, []);
+
   if (brandingError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-[#080808] text-white text-center">
@@ -194,18 +207,7 @@ export function CustomDomainAdminLoginPage() {
     return <div className="h-screen w-screen bg-[#080808]" />;
   }
 
-  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.head.appendChild(script);
 
-    return () => {
-      try { document.head.removeChild(script); } catch {}
-      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
-    };
-  }, []);
 
   return (
     /* 1. Full Screen — fills exactly the viewport, never scrolls */
@@ -310,7 +312,9 @@ export function CustomDomainAdminLoginPage() {
                   {branding.logoUrl && (
                     <img src={branding.logoUrl} alt={branding.name} className="mx-auto h-[75px] w-[75px] object-contain" />
                   )}
-                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">{titleText}</h1>
+                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">
+                    {branding.name || titleText}
+                  </h1>
                   <p className="mt-2 text-center text-[13px] text-white/65">Welcome back!</p>
                   <p className="mt-0.5 text-center text-[13px] text-white/65">{subtitleText}</p>
 
