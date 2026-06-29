@@ -1337,7 +1337,7 @@ export const oauthCallback = async (req, res) => {
 export const forgotPassword = async (req, res) => {
     try {
         await connectDB();
-        const { email } = req.body;
+        const { email, origin } = req.body;
         if (!email) {
             return res.status(400).json({ message: "Email is required." });
         }
@@ -1375,7 +1375,18 @@ export const forgotPassword = async (req, res) => {
         user.resetPasswordExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
         await user.save();
 
-        const resetLink = `${getFrontendUrl()}/reset-password?token=${rawToken}`;
+        let baseUrl = getFrontendUrl();
+        if (origin) {
+            try {
+                // Ensure the origin is a valid URL to prevent injection attacks
+                const parsedUrl = new URL(origin);
+                baseUrl = parsedUrl.origin;
+            } catch (e) {
+                // Fallback to default if invalid
+            }
+        }
+
+        const resetLink = `${baseUrl}/reset-password?token=${rawToken}`;
 
         sendEmail({
             to: email,

@@ -52,7 +52,10 @@ export async function checkEmailForLogin(email: string) {
 }
 
 export async function requestPasswordReset(email: string) {
-  const response = await apiClient.post<{ message: string }>("/api/auth/forgot-password", { email });
+  const response = await apiClient.post<{ message: string }>("/api/auth/forgot-password", { 
+    email,
+    origin: window.location.origin
+  });
   return response.data;
 }
 
