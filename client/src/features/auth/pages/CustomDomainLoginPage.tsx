@@ -62,15 +62,24 @@ export function CustomDomainLoginPage({ preferredRole }: { preferredRole?: AuthU
   }, [location.search]);
 
   useEffect(() => {
-    if (branding?.name) document.title = branding.name;
+    if (branding?.siteTitle) {
+      document.title = branding.siteTitle;
+      localStorage.setItem("org_title", branding.siteTitle);
+    } else if (branding?.name) {
+      document.title = branding.name;
+      localStorage.setItem("org_title", branding.name);
+    }
+
     if (branding?.faviconUrl) {
-      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "icon";
-        document.head.appendChild(link);
-      }
-      link.href = branding.faviconUrl;
+      localStorage.setItem("org_favicon", branding.faviconUrl);
+      
+      const existingLinks = document.querySelectorAll("link[rel~='icon']");
+      existingLinks.forEach(link => link.remove());
+      
+      const newLink = document.createElement("link");
+      newLink.rel = "icon";
+      newLink.href = branding.faviconUrl;
+      document.head.appendChild(newLink);
     }
   }, [branding]);
 
