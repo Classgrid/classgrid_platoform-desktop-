@@ -173,8 +173,8 @@ export function ResetPasswordPage() {
           </div>
         )}
 
-        {token && (
-          <form onSubmit={handleSubmit} className="mt-8">
+        {token ? (
+          <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(e); }} className="mt-8">
             <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
               New Password
             </label>
@@ -199,15 +199,6 @@ export function ResetPasswordPage() {
                 <p className={`mt-2 text-sm font-semibold ${current.text}`}>
                   {current.label}
                 </p>
-
-                <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
-                  <RuleCheck active={passwordRules.minLength} text="Minimum 8 characters" />
-                  <RuleCheck active={passwordRules.maxLength} text="Maximum 64 characters" />
-                  <RuleCheck active={passwordRules.uppercase} text="One uppercase letter A-Z" />
-                  <RuleCheck active={passwordRules.lowercase} text="One lowercase letter a-z" />
-                  <RuleCheck active={passwordRules.number} text="One number 0-9" />
-                  <RuleCheck active={passwordRules.special} text="One special character @ # $ % ^ & * ! ? _ - ." />
-                </div>
               </>
             )}
 
@@ -248,6 +239,13 @@ export function ResetPasswordPage() {
               </div>
             )}
 
+            {/* Validation Error if they try to click update but it's weak */}
+            {!isStrongPassword && password.length > 0 && (
+              <p className="mt-4 text-[12px] text-red-400">
+                Password must include uppercase, lowercase, number, and special character.
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={!canSubmit}
@@ -260,21 +258,8 @@ export function ResetPasswordPage() {
               {isSubmitting ? "Updating..." : "Update Password"}
             </button>
           </form>
-        )}
+        ) : null}
       </div>
     </main>
-  );
-}
-
-function RuleCheck({ active, text }: { active: boolean; text: string }) {
-  return (
-    <div
-      className={`flex items-center gap-2 ${
-        active ? "text-emerald-400" : "text-gray-500"
-      }`}
-    >
-      <span>{active ? "✓" : "○"}</span>
-      <span>{text}</span>
-    </div>
   );
 }
