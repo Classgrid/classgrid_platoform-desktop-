@@ -87,6 +87,11 @@ export function CustomDomainCard() {
                                 <Switch 
                                     checked={domainsData.erp_domain?.allow_classgrid_url !== false} 
                                     onCheckedChange={(checked) => {
+                                        if (!checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled === false) {
+                                            toast.error("You must have at least one domain active! Please turn on your Custom Domain first.");
+                                            return;
+                                        }
+
                                         let settingsToUpdate: any = { allow_classgrid_url: checked };
                                         
                                         if (checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false) {
@@ -735,6 +740,11 @@ function DomainConfigCard({
                                                 <Switch 
                                                     checked={domainConfig.is_enabled !== false} 
                                                     onCheckedChange={(checked) => {
+                                                        if (!checked && domainConfig.allow_classgrid_url === false) {
+                                                            toast.error("You must have at least one domain active! Please turn on the Default Classgrid URL first.");
+                                                            return;
+                                                        }
+
                                                         let settingsToUpdate: any = { is_enabled: checked };
                                                         
                                                         if (checked && domainConfig.allow_classgrid_url !== false) {
