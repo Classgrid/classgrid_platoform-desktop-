@@ -84,7 +84,7 @@ import { NotFoundPage } from "@/features/system/pages/NotFoundPage";
 import { InstitutionAdminLoginPage } from "@/features/auth/pages/InstitutionAdminLoginPage";
 import { InstitutionUserLoginPage } from "@/features/auth/pages/InstitutionUserLoginPage";
 import { PlatformLoginPage } from "@/features/auth/pages/PlatformLoginPage";
-import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
+
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { getRedirectPath } from "@/features/auth/auth-helpers";
@@ -95,9 +95,7 @@ import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
 import { DynamicRoleLayout } from "@/components/layout/DynamicRoleLayout";
 import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
 
-import { TestForgotPassword } from "@/features/auth/pages/TestForgotPassword";
-import { TestSuperAdmin } from "@/features/auth/pages/TestSuperAdmin";
-import { TestResetPassword } from "@/features/auth/pages/TestResetPassword";
+
 
 
 export function AppRouter() {
@@ -112,10 +110,7 @@ export function AppRouter() {
 
   return (
     <Routes>
-      {/* ── TEST UI ROUTE ── */}
-      <Route path="/test-forgot-password" element={<TestForgotPassword />} />
-      <Route path="/test-super-admin" element={<TestSuperAdmin />} />
-      <Route path="/test-reset-password" element={<TestResetPassword />} />
+
 
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 
@@ -134,7 +129,7 @@ export function AppRouter() {
       <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
       <Route path="/privacy" element={<GenericPage title="Privacy Policy" />} />
       <Route path="/privacy-policy" element={<GenericPage title="Privacy Policy" />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      {/* TODO: Build ForgotPasswordPage */}
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/demo/globe" element={<GlobeDemoPage />} />
 

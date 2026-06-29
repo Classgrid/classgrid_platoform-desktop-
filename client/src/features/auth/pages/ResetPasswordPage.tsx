@@ -1,6 +1,6 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 
 import { resetPasswordWithToken } from "../api";
 
@@ -12,6 +12,9 @@ export function ResetPasswordPage() {
   const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -113,8 +116,17 @@ export function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
-        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl">
+      <main 
+        className="relative flex min-h-screen flex-col items-center justify-center px-4" 
+        style={{ 
+          backgroundColor: "#111111",
+          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
+          backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
+          backgroundSize: "80px 80px",
+          backgroundRepeat: "repeat"
+        }}
+      >
+        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10">
           {/* Animated tick circle */}
           <div
             className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
@@ -149,13 +161,26 @@ export function ResetPasswordPage() {
             100% { opacity: 1; }
           }
         `}</style>
+        
+        <footer className="absolute bottom-6 text-center text-xs text-gray-500">
+          © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+        </footer>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
-      <div className="w-full max-w-[430px] rounded-[28px] border border-white/10 bg-[#111111] p-8 shadow-2xl">
+    <main 
+      className="relative flex min-h-screen flex-col items-center justify-center px-4" 
+      style={{ 
+        backgroundColor: "#111111",
+        backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
+        backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
+        backgroundSize: "80px 80px",
+        backgroundRepeat: "repeat"
+      }}
+    >
+      <div className="relative z-10 w-full max-w-[430px] rounded-[28px] border border-white/10 bg-[#111111] p-8 shadow-2xl">
         {/* Logo */}
         <img
           src={CLASSGRID_LOGO}
@@ -179,14 +204,51 @@ export function ResetPasswordPage() {
               New Password
             </label>
 
-            <input
-              type="password"
-              value={password}
-              maxLength={64}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
-              className={`mt-3 h-14 w-full rounded-2xl border bg-[#111111] px-5 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
-            />
+            <div className="relative mt-3">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                maxLength={64}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
+                placeholder="Enter new password"
+                className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+              </button>
+
+              {/* Floating Rules Popover */}
+              {isPasswordFocused && password.length >= 2 && (
+                <div className="absolute left-[calc(100%+16px)] top-1/2 z-50 w-[260px] -translate-y-1/2 rounded-xl border border-white/10 bg-[#1e1e1e] p-4 shadow-xl hidden md:block">
+                  <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-b border-l border-white/10 bg-[#1e1e1e]" />
+                  <p className="text-[13px] font-semibold text-white">Password must contain:</p>
+                  <ul className="mt-2 flex flex-col gap-1 text-[12px] text-gray-300">
+                    <li className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${passwordRules.minLength ? "bg-emerald-500" : "bg-gray-500"}`} />
+                      Between 8 and 64 characters
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${passwordRules.uppercase && passwordRules.lowercase ? "bg-emerald-500" : "bg-gray-500"}`} />
+                      Uppercase & lowercase letters
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${passwordRules.number ? "bg-emerald-500" : "bg-gray-500"}`} />
+                      At least 1 number
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${passwordRules.special ? "bg-emerald-500" : "bg-gray-500"}`} />
+                      At least 1 special character
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
 
             {password && (
               <>
@@ -203,14 +265,23 @@ export function ResetPasswordPage() {
                 Confirm Password
               </label>
 
-              <input
-                type="password"
-                value={confirmPassword}
-                maxLength={64}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-                className={`mt-3 h-14 w-full rounded-2xl border bg-[#111111] px-5 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
-              />
+              <div className="relative mt-3">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  maxLength={64}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
+                >
+                  {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                </button>
+              </div>
 
               {isConfirmTouched && (
                 <p
@@ -238,7 +309,7 @@ export function ResetPasswordPage() {
             {/* Validation Error if they try to click update but it's weak */}
             {!isStrongPassword && password.length > 0 && (
               <p className="mt-4 text-[12px] text-red-400">
-                Password must include uppercase, lowercase, number, and special character.
+                Password must be at least 8 characters long and include an uppercase letter, lowercase letter, number, and special character.
               </p>
             )}
 
@@ -256,6 +327,10 @@ export function ResetPasswordPage() {
           </form>
         ) : null}
       </div>
+
+      <footer className="absolute bottom-6 text-center text-xs text-gray-500">
+        © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+      </footer>
     </main>
   );
 }
