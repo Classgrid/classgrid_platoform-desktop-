@@ -1,6 +1,7 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Icons from "lucide-react";
+import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 import {
   Sidebar,
   SidebarHeader,
@@ -42,6 +43,7 @@ import { SidebarSearch } from "./SidebarSearch";
 
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const config = dashboardConfigs.find(c => c.role === role);
 
   if (!config) {
@@ -73,7 +75,20 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                       <SidebarMenuButton
                         isActive={isActive}
                         tooltip={item.label}
-                        render={<Link to={item.to} className="flex items-center gap-3 w-full justify-between" />}
+                        render={
+                          item.label === "Log out" ? (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const loginPath = getLoginPathForPath(location.pathname);
+                                navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
+                              }}
+                              className="flex items-center gap-3 w-full justify-between"
+                            />
+                          ) : (
+                            <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between" />
+                          )
+                        }
                       >
                         <div className="flex items-center gap-3">
                           {item.icon && <item.icon size={20} />}
