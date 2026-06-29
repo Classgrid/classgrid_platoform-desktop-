@@ -115,8 +115,8 @@ export function CustomDomainCard() {
                         subdomainEditUI={(
                             <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4 flex items-center justify-between">
                                 <div>
-                                    <div className="font-medium text-foreground text-base">Edit Default Domain</div>
-                                    <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
+                                    <div className="font-medium text-foreground text-base">Edit Classgrid Organization URL</div>
+                                    <div className="text-sm text-muted-foreground mt-0.5">Customize your Classgrid Organization URL</div>
                                 </div>
                                 <Button
                                     variant="outline"
@@ -755,9 +755,9 @@ function DomainConfigCard({
             <Dialog open={showEditDomainModal} onOpenChange={setShowEditDomainModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Edit Default Domain</DialogTitle>
+                        <DialogTitle>Edit Classgrid Organization URL</DialogTitle>
                         <DialogDescription>
-                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing login links pointing to it. You and your users will be logged out and need to log in via the new domain. 
+                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing links pointing to it. You will be instantly redirected to your new domain.
                         </DialogDescription>
                     </DialogHeader>
 

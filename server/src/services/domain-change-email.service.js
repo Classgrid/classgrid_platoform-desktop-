@@ -60,7 +60,7 @@ function buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain,
 <tr>
 <td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(adminName)},</p>
-<p style="color:#cccccc;margin:0 0 15px;">Your organization's default Classgrid domain has been successfully changed. This action takes effect <strong style="color:#ffffff;">immediately</strong>.</p>
+<p style="color:#cccccc;margin:0 0 15px;">Your Classgrid Organization URL has been successfully changed. This action takes effect <strong style="color:#ffffff;">immediately</strong>.</p>
 <p style="color:#cccccc;margin:0 0 30px;">Please review the details below and update any bookmarks, saved links, or shared URLs for your students and staff.</p>
 
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Domain Change Details</h3>
@@ -92,8 +92,8 @@ function buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain,
   <p style="color:#fde68a;font-size:13px;line-height:1.7;margin:0;">The old domain <strong style="color:#ef4444;text-decoration:line-through;">${escapeHtml(oldDomain)}.classgrid.in</strong> is now permanently dead. It cannot be recovered or re-assigned. All existing bookmarks, login links, and shared URLs pointing to the old domain will stop working immediately.</p>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">🛡️ Your Emergency Admin Login</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">Save this URL. It is your unbreakable backdoor to access the admin dashboard, even if your custom DNS breaks:</p>
+<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">🔑 Your New Admin Login URL</h3>
+<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">You can now access your dashboard using your new domain:</p>
 <div style="padding:16px 20px;background:#0f2318;border-radius:8px;border:1px solid #14532d;margin:0 0 25px;text-align:center;">
   <a href="https://${escapeHtml(newDomain)}.classgrid.in/org/login" style="color:#34d399;font-size:16px;font-weight:700;text-decoration:none;word-break:break-all;">https://${escapeHtml(newDomain)}.classgrid.in/org/login</a>
 </div>
@@ -101,8 +101,7 @@ function buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain,
 <h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Should Do Now</h3>
 <ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 <li style="margin-bottom:10px;"><strong>Update all shared links:</strong> Notify students, faculty, and staff about the new domain URL.</li>
-<li style="margin-bottom:10px;"><strong>Update your custom domain CNAME:</strong> If you have a custom domain (e.g., erp.mycollege.edu), update the CNAME target to point to <strong>${escapeHtml(newDomain)}.classgrid.in</strong>.</li>
-<li style="margin-bottom:10px;"><strong>Bookmark the backdoor URL:</strong> Save the emergency admin login link above in a safe place.</li>
+<li style="margin-bottom:10px;"><strong>Bookmark your new URL:</strong> Save the new admin login link above for quick access.</li>
 <li style="margin-bottom:10px;"><strong>Test the new domain:</strong> Visit your new URL in the browser to verify everything works.</li>
 </ul>
 
@@ -140,7 +139,7 @@ function buildDomainChangePlainText({ orgName, adminName, adminEmail, oldDomain,
         "",
         `Dear ${adminName},`,
         "",
-        "Your organization's default Classgrid domain has been successfully changed. This action takes effect IMMEDIATELY.",
+        "Your Classgrid Organization URL has been successfully changed. This action takes effect IMMEDIATELY.",
         "",
         "DOMAIN CHANGE DETAILS",
         `Organization: ${orgName}`,
@@ -153,14 +152,13 @@ function buildDomainChangePlainText({ orgName, adminName, adminEmail, oldDomain,
         `The old domain ${oldDomain}.classgrid.in is now permanently dead. It cannot be recovered.`,
         "All existing bookmarks, login links, and shared URLs pointing to the old domain will stop working immediately.",
         "",
-        "🛡️ YOUR EMERGENCY ADMIN LOGIN",
-        "Save this URL — it is your unbreakable backdoor:",
+        "🔑 YOUR NEW ADMIN LOGIN URL",
+        "You can now access your dashboard using your new domain:",
         backdoorUrl,
         "",
         "WHAT YOU SHOULD DO NOW",
         "- Update all shared links: Notify students, faculty, and staff about the new domain URL.",
-        `- Update your custom domain CNAME: If you have one, point it to ${newDomain}.classgrid.in`,
-        "- Bookmark the backdoor URL: Save the emergency admin login link in a safe place.",
+        "- Bookmark your new URL: Save the new admin login link for quick access.",
         "- Test the new domain: Visit your new URL in the browser to verify everything works.",
         "",
         "If you did not authorize this change, please contact Classgrid support immediately.",
