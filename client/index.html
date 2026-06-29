@@ -7,10 +7,12 @@
     try {
       var customFavicon = localStorage.getItem('org_favicon');
       var customTitle = localStorage.getItem('org_title');
+      var hostname = window.location.hostname;
+      var isMainPlatform = hostname === 'app.classgrid.in' || hostname === 'localhost' || hostname === '127.0.0.1';
 
       if (customFavicon) {
         document.write('<link rel="icon" href="' + customFavicon + '" />');
-      } else {
+      } else if (isMainPlatform) {
         document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
         document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
@@ -18,11 +20,13 @@
       
       if (customTitle) {
         document.write('<title>' + customTitle + '</title>');
-      } else {
+      } else if (isMainPlatform) {
         document.write('<title>Classgrid ERP</title>');
+      } else {
+        document.write('<title>Loading...</title>');
       }
     } catch(e) {
-      document.write('<title>Classgrid ERP</title>');
+      document.write('<title>Loading...</title>');
     }
   </script>
   <link rel="manifest" href="/site.webmanifest" />
