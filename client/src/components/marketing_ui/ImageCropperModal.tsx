@@ -101,7 +101,10 @@ export function ImageCropperModal({
         cropHeight
       );
 
-      // Export as a high-quality JPEG Blob (quality: 0.95)
+      const isPng = imageSrc.startsWith("data:image/png");
+      const exportFormat = isPng ? "image/png" : "image/jpeg";
+
+      // Export as a high-quality Blob (preserves transparency if PNG)
       canvas.toBlob(
         async (blob) => {
           try {
@@ -121,8 +124,8 @@ export function ImageCropperModal({
             }, 2000);
           }
         },
-        "image/jpeg",
-        0.95
+        exportFormat,
+        1.0
       );
     } catch (error) {
       console.error("Cropping failed", error);
