@@ -8,7 +8,7 @@
       var customFavicon = localStorage.getItem('org_favicon');
       var customTitle = localStorage.getItem('org_title');
       var hostname = window.location.hostname;
-      var isMainPlatform = hostname.endsWith('.classgrid.in') || hostname === 'localhost' || hostname === '127.0.0.1';
+      var isMainPlatform = hostname.endsWith('classgrid.in') || hostname === 'localhost' || hostname === '127.0.0.1';
 
       if (customFavicon) {
         document.write('<link rel="icon" href="' + customFavicon + '" />');
