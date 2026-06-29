@@ -43,7 +43,7 @@ export function PlatformLoginPage() {
       // Set the intended role so the user object gets updated properly in backend (based on existing logic)
       saveStoredAuthRole("super_admin");
       
-      const result = await loginWithPassword(email, password, "super_admin");
+      const result = await loginWithPassword({ email, password, audience: "super_admin", role: "super_admin" });
       
       if (!result.user || result.user.role !== "super_admin") {
          toast.error("Access denied. Super Admin only.");
