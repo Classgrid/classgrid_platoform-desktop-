@@ -125,12 +125,6 @@ export const approveOrganization = async (req, res) => {
             getAdminOrgApprovalNotificationPlainText,
             getConsolidatedApprovalEmailHtml,
             getConsolidatedApprovalEmailPlainText,
-
-        const {
-            getAdminOrgApprovalNotificationHtml,
-            getAdminOrgApprovalNotificationPlainText,
-            getConsolidatedApprovalEmailHtml,
-            getConsolidatedApprovalEmailPlainText,
         } = await import("../services/email-templates.service.js");
 
         // Email 1: Super admin internal notification
