@@ -26,6 +26,7 @@ import { RevenuePage } from "@/features/superadmin/pages/RevenuePage";
 import { FeedbackPage } from "@/features/superadmin/pages/FeedbackPage";
 import { SubscribersPage } from "@/features/superadmin/pages/SubscribersPage";
 import { ChatPage } from "@/features/chat/pages/ChatPage";
+import { LogoutPage } from "@/features/auth/pages/LogoutPage";
 import { SystemHealthPage } from "@/features/superadmin/pages/SystemHealthPage";
 import { FeatureFlagsPage } from "@/features/superadmin/pages/FeatureFlagsPage";
 import { TransactionsPage } from "@/features/superadmin/pages/TransactionsPage";
@@ -274,6 +275,7 @@ export function AppRouter() {
           <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
           <Route path="/tools" element={<GenericPage title="Schedule" />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/logout" element={<LogoutPage />} />
           <Route path="/notifications" element={<GenericPage title="Notifications" />} />
           <Route path="/forum" element={<GenericPage title="Forum" />} />
           <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />

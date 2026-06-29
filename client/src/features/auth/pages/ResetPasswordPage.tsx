@@ -306,12 +306,7 @@ export function ResetPasswordPage() {
               </div>
             )}
 
-            {/* Validation Error if they try to click update but it's weak */}
-            {!isStrongPassword && password.length > 0 && (
-              <p className="mt-4 text-[12px] text-red-400">
-                Password must be at least 8 characters long and include an uppercase letter, lowercase letter, number, and special character.
-              </p>
-            )}
+
 
             <button
               type="submit"

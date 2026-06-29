@@ -14,6 +14,7 @@ import {
 import { fetchLiveStatus, FooterStatusState, getFooterStatusDotClass, getFooterStatusTextClass } from "@/lib/footer-status";
 import { apiClient } from "@/lib/apiClient";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function SidebarUserMenu({ user }: { user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string } }) {
   const location = useLocation();
@@ -27,40 +28,9 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
       ? "/org" 
       : "";
 
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    // Wait for 3 seconds to show the spinner before clearing data
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    try {
-      await apiClient.post("/api/auth/logout");
-    } catch {}
-    try {
-      window.localStorage.removeItem("classgrid:last-auth-role");
-    } catch {}
-
-    // Aggressively clear the token cookie from the browser side as a fallback
-    // (in case the server's clearCookie doesn't match the exact domain/path)
-    try {
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.classgrid.in;";
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
-    } catch {}
-
-    // 1. Cancel any in-flight /me requests to prevent stale data from arriving
-    await queryClient.cancelQueries({ queryKey: ["current-user"] });
-    // 2. Explicitly set the cached user to null so AuthLayout sees no user
-    queryClient.setQueryData(["current-user"], null);
-    // 3. Remove the query entirely so it won't auto-refetch stale data
-    queryClient.removeQueries({ queryKey: ["current-user"] });
-    // 4. Clear ALL cached queries to prevent any stale authenticated data
-    queryClient.clear();
-    // 5. Navigate with a logout flag so the login page won't auto-redirect
+  const handleLogout = () => {
     const loginPath = getLoginPathForPath(location.pathname);
-    const separator = loginPath.includes("?") ? "&" : "?";
-    navigate(`${loginPath}${separator}logged_out=true`, { replace: true });
+    navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
   };
 
   const [status, setStatus] = useState<{ state: FooterStatusState; label: string }>({
@@ -77,12 +47,6 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
   return (
     <>
-      {isLoggingOut && (
-        <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
-          <Icons.Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-          <p className="text-sm font-medium text-foreground">Logging out securely...</p>
-        </div>
-      )}
       <DropdownMenu>
       <DropdownMenuTrigger className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Icons.MoreHorizontal className="w-4 h-4" />
