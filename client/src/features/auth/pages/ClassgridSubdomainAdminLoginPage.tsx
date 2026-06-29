@@ -55,7 +55,7 @@ export function ClassgridSubdomainAdminLoginPage() {
       .then((result) => {
         if (isMounted) {
           setBranding(result);
-          document.title = result.name ? `${result.name} - Classgrid` : "Classgrid ERP";
+          document.title = "Classgrid ERP";
         }
       })
       .catch(() => {

@@ -10,21 +10,21 @@
       var hostname = window.location.hostname;
       var isMainPlatform = hostname.endsWith('classgrid.in') || hostname === 'localhost' || hostname === '127.0.0.1';
 
-      if (customFavicon) {
-        document.write('<link rel="icon" href="' + customFavicon + '" />');
-      } else if (isMainPlatform) {
+      if (isMainPlatform) {
         document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
         document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
+      } else if (customFavicon) {
+        document.write('<link rel="icon" href="' + customFavicon + '" />');
       } else {
         // Generic Icon (Globe) to override default browser behavior which looks for /favicon.ico
         document.write('<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>" />');
       }
       
-      if (customTitle) {
-        document.write('<title>' + customTitle + '</title>');
-      } else if (isMainPlatform) {
+      if (isMainPlatform) {
         document.write('<title>Classgrid ERP</title>');
+      } else if (customTitle) {
+        document.write('<title>' + customTitle + '</title>');
       } else {
         document.write('<title>Loading...</title>');
       }
