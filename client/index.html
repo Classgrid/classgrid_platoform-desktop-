@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Classgrid ERP</title>
   <script>
     try {
       var customFavicon = localStorage.getItem('org_favicon');
@@ -18,9 +17,13 @@
       }
       
       if (customTitle) {
-        document.title = customTitle;
+        document.write('<title>' + customTitle + '</title>');
+      } else {
+        document.write('<title>Classgrid ERP</title>');
       }
-    } catch(e) {}
+    } catch(e) {
+      document.write('<title>Classgrid ERP</title>');
+    }
   </script>
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
