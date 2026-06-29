@@ -719,17 +719,56 @@ function DomainConfigCard({
                                             Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
                                         </p>
                                         
-                                        <div className={`mt-5 space-y-4 bg-background/50 rounded-lg p-4 border ${borderClasses}`}>
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <span className="text-sm font-medium text-foreground block">Enable Custom Domain</span>
-                                                    <span className="text-xs text-muted-foreground">Turn off to temporarily pause traffic to your custom domain.</span>
+                                        <div className={`mt-6 space-y-3`}>
+                                            <h5 className="font-semibold text-foreground text-sm">Primary Public Domain</h5>
+                                            <p className="text-xs text-muted-foreground mb-3">
+                                                Choose which domain your students and staff use to access the platform. Only one can be active at a time.
+                                            </p>
+                                            
+                                            {/* Option 1: Custom Domain */}
+                                            <div 
+                                                onClick={() => {
+                                                    if (domainConfig.is_enabled === false) {
+                                                        updateSettingsMutation.mutate({ domainType, settings: { is_enabled: true } });
+                                                    }
+                                                }}
+                                                className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
+                                                    domainConfig.is_enabled !== false 
+                                                        ? "border-primary bg-primary/5 ring-1 ring-primary/20" 
+                                                        : "border-border bg-background hover:bg-muted/30"
+                                                }`}
+                                            >
+                                                <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${domainConfig.is_enabled !== false ? 'border-primary' : 'border-muted-foreground'}`}>
+                                                    {domainConfig.is_enabled !== false && <div className="h-2 w-2 rounded-full bg-primary" />}
                                                 </div>
-                                                <Switch 
-                                                    checked={domainConfig.is_enabled !== false} 
-                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ domainType, settings: { is_enabled: checked } })}
-                                                    disabled={updateSettingsMutation.isPending}
-                                                />
+                                                <div className="flex-1">
+                                                    <span className="text-sm font-bold text-foreground block">Custom Domain</span>
+                                                    <span className="text-xs font-mono text-muted-foreground block mt-1">https://{domainConfig.domain}</span>
+                                                    <span className="text-xs text-primary/80 block mt-1.5 font-medium">Active: Your default Classgrid URL strictly redirects here.</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Option 2: Classgrid Domain */}
+                                            <div 
+                                                onClick={() => {
+                                                    if (domainConfig.is_enabled !== false) {
+                                                        updateSettingsMutation.mutate({ domainType, settings: { is_enabled: false } });
+                                                    }
+                                                }}
+                                                className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
+                                                    domainConfig.is_enabled === false 
+                                                        ? "border-primary bg-primary/5 ring-1 ring-primary/20" 
+                                                        : "border-border bg-background hover:bg-muted/30"
+                                                }`}
+                                            >
+                                                <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${domainConfig.is_enabled === false ? 'border-primary' : 'border-muted-foreground'}`}>
+                                                    {domainConfig.is_enabled === false && <div className="h-2 w-2 rounded-full bg-primary" />}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="text-sm font-bold text-foreground block">Default Classgrid URL</span>
+                                                    <span className="text-xs font-mono text-muted-foreground block mt-1">https://{user?.organization?.subdomain}.classgrid.in</span>
+                                                    <span className="text-xs text-muted-foreground block mt-1.5">Traffic to your custom domain will be temporarily paused.</span>
+                                                </div>
                                             </div>
                                         </div>
 

@@ -33,14 +33,14 @@ export function DomainEnforcer({
     const hostname = window.location.hostname;
     const isClassgridUrl = hostname.includes("classgrid.in");
 
-    // If Classgrid URL is disabled, the Custom Domain is enabled, and they have an active custom domain
-    if (isClassgridUrl && allowClassgridUrl === false && isCustomDomainEnabled !== false && customDomain) {
-      console.log(`[Domain Enforcer] Classgrid URL is disabled. Redirecting to custom domain: ${customDomain}`);
+    // If they have an active custom domain, unconditionally enforce the white-label redirect
+    if (isClassgridUrl && isCustomDomainEnabled !== false && customDomain) {
+      console.log(`[Domain Enforcer] Custom domain active. Enforcing strict white-label redirect to: ${customDomain}`);
       // Preserve the path and query string when redirecting
       const targetUrl = `https://${customDomain}${window.location.pathname}${window.location.search}`;
       window.location.replace(targetUrl);
     }
-  }, [allowClassgridUrl, isCustomDomainEnabled, customDomain]);
+  }, [isCustomDomainEnabled, customDomain]);
 
   return <>{children}</>;
 }
