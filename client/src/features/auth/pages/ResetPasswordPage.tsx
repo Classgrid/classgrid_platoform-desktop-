@@ -1,6 +1,6 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Lock, Eye, EyeOff, Check, X, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, Check, X } from "lucide-react";
 
 import { resetPasswordWithToken } from "../api";
 
@@ -60,43 +60,29 @@ export function ResetPasswordPage() {
   if (isSuccess) {
     return (
       <main className="flex min-h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-        <div className="flex flex-col items-center gap-6 text-center px-6">
-          {/* Animated success circle */}
+        <div className="flex flex-col items-center gap-5 text-center px-6">
+          {/* Animated tick circle */}
           <div
-            className="flex h-[120px] w-[120px] items-center justify-center rounded-full"
+            className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
             style={{
               background: "linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)",
               border: "2px solid rgba(16,185,129,0.4)",
               animation: "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
             }}
           >
-            <CheckCircle2
-              className="h-[56px] w-[56px] text-[#10b981]"
-              style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
+            <Check
+              className="h-[48px] w-[48px] text-[#10b981]"
+              strokeWidth={3}
+              style={{ animation: "fadeIn 0.4s ease 0.3s both" }}
             />
           </div>
 
-          <h1
-            className="text-[28px] font-bold text-[#ededed]"
-            style={{ animation: "fadeInUp 0.6s ease 0.3s both" }}
-          >
-            Password Reset Successfully!
-          </h1>
-
           <p
-            className="max-w-[360px] text-[14px] leading-6 text-white/55"
-            style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
+            className="text-[18px] font-semibold text-[#ededed]"
+            style={{ animation: "fadeIn 0.4s ease 0.5s both" }}
           >
-            Your password has been updated. You can now log in with your new password.
+            Password Set
           </p>
-
-          <a
-            href="/login"
-            className="mt-2 inline-flex h-[46px] items-center justify-center rounded-[12px] bg-[#10b981] px-8 text-[15px] font-bold text-white transition-colors hover:bg-[#059669]"
-            style={{ animation: "fadeInUp 0.6s ease 0.5s both" }}
-          >
-            Go to Login
-          </a>
         </div>
 
         <style>{`
@@ -104,9 +90,9 @@ export function ResetPasswordPage() {
             0% { transform: scale(0); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
           }
-          @keyframes fadeInUp {
-            0% { transform: translateY(16px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+          @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
           }
         `}</style>
       </main>
