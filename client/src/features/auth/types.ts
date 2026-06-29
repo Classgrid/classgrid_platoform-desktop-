@@ -35,6 +35,7 @@ export type AuthBranding = {
   shortName: string;
   tagline: string;
   logoUrl: string;
+  faviconUrl?: string;
   campusImageUrl: string;
   leftVariant: LeftPanelVariant;
   subdomain: string;

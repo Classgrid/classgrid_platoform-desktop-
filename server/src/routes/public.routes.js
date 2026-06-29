@@ -116,7 +116,7 @@ router.get("/auth-branding", async (req, res) => {
     }
 
     const org = await Organization.findOne({ $or: query })
-      .select("name subdomain logo_url campus_photo_url social_links branding status custom_domain site_title")
+      .select("name subdomain logo_url favicon_url campus_photo_url social_links branding status custom_domain site_title")
       .lean();
 
     if (!org) {
@@ -158,6 +158,7 @@ router.get("/auth-branding", async (req, res) => {
         shortName: site?.institution?.shortName || org.name,
         tagline,
         logoUrl,
+        faviconUrl: org.favicon_url || "",
         campusImageUrl,
         leftVariant: campusImageUrl ? "image" : "default",
         subdomain: org.subdomain,
