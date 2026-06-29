@@ -13,6 +13,7 @@ import {
   type OrgUser,
 } from "../services/chatApi";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import { Switch } from "@/components/marketing_ui/switch";
 import { toast } from "sonner";
 import { PhotoViewerModal } from "./PhotoViewerModal";
 import { Megaphone } from "lucide-react";
@@ -418,18 +419,13 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                       </div>
                       
                       {/* Toggle Switch */}
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="sr-only peer" 
-                          checked={data.group.permissions?.send_messages === 'admin_only'}
-                          disabled={isUpdatingPermissions}
-                          onChange={(e) => {
-                            handleUpdatePermissions({ send_messages: e.target.checked ? 'admin_only' : 'all' });
-                          }}
-                        />
-                        <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      </label>
+                      <Switch
+                        checked={data.group.permissions?.send_messages === 'admin_only'}
+                        disabled={isUpdatingPermissions}
+                        onCheckedChange={(checked) => {
+                          handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
+                        }}
+                      />
                     </div>
                   </div>
                 )}

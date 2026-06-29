@@ -90,7 +90,12 @@ export default [
         {
           // BLOCK: raw HTML inputs/buttons (Force system components)
           selector: "JSXOpeningElement[name.name=/^(input|button|select)$/]",
-          message: "Raw HTML elements (<input>, <button>, <select>) are forbidden. Use system components (<Input />, <Button />) for 100% design system compliance."
+          message: "Raw HTML elements (<input>, <button>, <select>) are forbidden. Use system components (<Input />, <Button />, <Switch />) for 100% design system compliance."
+        },
+        {
+          // BLOCK: Inline CSS toggles (e.g. peer-checked:after:translate-x-full on divs or input type="checkbox" role="switch")
+          selector: "JSXAttribute[name.name='className'] > Literal[value=/peer-checked:.*translate-x-full/]",
+          message: "Custom inline toggles are forbidden. You MUST import and use the <Switch /> component from @/components/marketing_ui/switch for all toggles/switches."
         },
         {
           // BLOCK: style={{ width: '100px' }} (ALLOW: CSS variables --*)

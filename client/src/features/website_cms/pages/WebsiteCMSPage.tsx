@@ -9,6 +9,7 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import CMSPageEditor from "@/features/website_cms/components/CMSPageEditor";
 import {
   fetchOrgWebsiteContent,
+  setupOrgWebsiteContent,
   updateOrgWebsiteContent,
   type OrgWebsiteContent,
   type WebsiteCMSPageKey,
@@ -215,6 +216,7 @@ export function WebsiteCMSPage() {
   const [draftHtml, setDraftHtml] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSettingUp, setIsSettingUp] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const activePage = pages.find((page) => page.id === activePageId) ?? pages[0] ?? createEmptyPages()[0]!;
@@ -238,6 +240,19 @@ export function WebsiteCMSPage() {
       toast.error(message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSetupWebsite = async () => {
+    setIsSettingUp(true);
+    try {
+      await setupOrgWebsiteContent();
+      toast.success("Website initialized in draft mode");
+      await loadWebsiteContent();
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to setup website"));
+    } finally {
+      setIsSettingUp(false);
     }
   };
 
@@ -393,9 +408,16 @@ export function WebsiteCMSPage() {
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 <span>{loadError}</span>
               </div>
-              <Button size="sm" variant="outline" onClick={loadWebsiteContent} disabled={isLoading}>
-                <RefreshCw className="h-4 w-4" /> Retry
-              </Button>
+              <div className="flex items-center gap-3">
+                {loadError.toLowerCase().includes("not set up") && (
+                  <Button size="sm" variant="primary" onClick={handleSetupWebsite} isLoading={isSettingUp}>
+                    Create Website Content
+                  </Button>
+                )}
+                <Button size="sm" variant="outline" onClick={loadWebsiteContent} disabled={isLoading || isSettingUp}>
+                  <RefreshCw className="h-4 w-4" /> Retry
+                </Button>
+              </div>
             </div>
           ) : isEditing ? (
             <div className="flex flex-1 flex-col gap-4 p-5">

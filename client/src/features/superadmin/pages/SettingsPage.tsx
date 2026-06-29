@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/marketing_ui/button";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { Switch } from "@/components/marketing_ui/switch";
 import "../styles/settings.css";
 
 type EmailPrefs = {
@@ -86,15 +87,10 @@ export function SettingsPage() {
             <span className="">Enable dark theme for the dashboard</span>
           </div>
           <label className="">
-            <input
-              type="checkbox"
-              className=""
+            <Switch
               checked={theme === "dark"}
-              onChange={(e) => setTheme(e.target.checked ? "dark" : "light")}
+              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
             />
-            <div className="">
-              <div className=""></div>
-            </div>
           </label>
         </div>
       </div>
@@ -118,15 +114,10 @@ export function SettingsPage() {
                 <span className="">Master switch to enable or disable all emails</span>
               </div>
               <label className="">
-                <input
-                  type="checkbox"
-                  className=""
+                <Switch
                   checked={prefs.global}
-                  onChange={() => handlePrefChange("global", !prefs.global)}
+                  onCheckedChange={(checked) => handlePrefChange("global", checked)}
                 />
-                <div className="">
-                  <div className=""></div>
-                </div>
               </label>
             </div>
 
@@ -136,15 +127,10 @@ export function SettingsPage() {
                 <span className="">Receive emails about major platform updates</span>
               </div>
               <label className="">
-                <input
-                  type="checkbox"
-                  className=""
+                <Switch
                   checked={prefs.announcements}
-                  onChange={() => handlePrefChange("announcements", !prefs.announcements)}
+                  onCheckedChange={(checked) => handlePrefChange("announcements", checked)}
                 />
-                <div className="">
-                  <div className=""></div>
-                </div>
               </label>
             </div>
 
@@ -154,15 +140,10 @@ export function SettingsPage() {
                 <span className="">Get notified when new organizations sign up</span>
               </div>
               <label className="">
-                <input
-                  type="checkbox"
-                  className=""
+                <Switch
                   checked={prefs.joinApproval}
-                  onChange={() => handlePrefChange("joinApproval", !prefs.joinApproval)}
+                  onCheckedChange={(checked) => handlePrefChange("joinApproval", checked)}
                 />
-                <div className="">
-                  <div className=""></div>
-                </div>
               </label>
             </div>
           </>

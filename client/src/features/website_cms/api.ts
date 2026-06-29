@@ -77,6 +77,11 @@ export async function fetchOrgWebsiteContent() {
   return response.data.data ?? null;
 }
 
+export async function setupOrgWebsiteContent(payload = {}) {
+  const response = await apiClient.post<OrgWebsiteContentResponse>("/api/org-website/setup", payload);
+  return response.data.data ?? null;
+}
+
 export async function updateOrgWebsiteContent(payload: OrgWebsiteUpdatePayload) {
   const response = await apiClient.patch<OrgWebsiteContentResponse>("/api/org-website/update", payload);
   return response.data.data ?? null;

@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/a
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
+import { Switch } from "@/components/marketing_ui/switch";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "sonner";
 
@@ -391,20 +392,24 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     <span className="text-sm font-medium text-foreground/90">Dark Theme</span>
                     <span className="text-xs text-muted-foreground opacity-80">Optimize UI for low-light.</span>
                   </div>
-                  <label className={`relative inline-flex items-center ${isReadOnly ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}>
-                    <input type="checkbox" className="sr-only peer" checked={theme === "dark"} onChange={e => setTheme(e.target.checked ? "dark" : "light")} disabled={isReadOnly} />
-                    <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                  </label>
+                  <Switch
+                    checked={theme === "dark"}
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                    disabled={isReadOnly}
+                    className={isReadOnly ? 'opacity-50 pointer-events-none' : ''}
+                  />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-transparent hover:bg-white/10 hover:border-border transition-colors">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground/90">Push Alerts</span>
                     <span className="text-xs text-muted-foreground opacity-80">Real-time system notifications.</span>
                   </div>
-                  <label className={`relative inline-flex items-center ${isReadOnly ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}>
-                    <input type="checkbox" className="sr-only peer" checked={prefs.global} onChange={() => handlePrefToggle("global")} disabled={isReadOnly} />
-                    <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                  </label>
+                  <Switch
+                    checked={prefs.global}
+                    onCheckedChange={() => handlePrefToggle("global")}
+                    disabled={isReadOnly}
+                    className={isReadOnly ? 'opacity-50 pointer-events-none' : ''}
+                  />
                 </div>
               </div>
             </div>
