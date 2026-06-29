@@ -4,7 +4,16 @@
 
 ---
 
-## STEP 1: Establish the "Agora Console" Theme (Phase 0)
+## THE 5 LOGIN PAGES (MASTER SOURCE OF TRUTH)
+Every AI agent and developer MUST strictly follow this hardcoded architecture for the 5 distinct login pages and their domains/routes:
+
+1. **Super Admin**: `/superadmin/login` (Platform Super Admin)
+2. **Standard Classgrid Domain (Student + Faculty)**: `[orgname].classgrid.in/login` (or base `/login`)
+3. **Standard Classgrid Domain (Admins)**: `[orgname].classgrid.in/org/login` or `[orgname].classgrid.in/dept/admin` (Org Admin + Department Admins)
+4. **Custom Domain (Student + Faculty)**: `[org].com/login` (or base `/login`)
+5. **Custom Domain (Admins)**: `[org].com/org/login` or `[org].com/dept/admin` (Org Admin + Department Admins)
+
+---
 Before building any pages, we must lock in the visual identity so every subsequent page looks perfect automatically.
 
 1. **Update Tailwind Config:** 
