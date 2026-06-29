@@ -101,9 +101,7 @@ export function PlatformLoginPage() {
             <div className="contact-item"><i className="fas fa-envelope"></i><span>support@classgrid.in</span></div>
             <div className="contact-item"><i className="fas fa-map-marker-alt"></i><span>Sector 26, Pradhikaran, Nigdi, Pune, Maharashtra 411044</span></div>
           </div>
-          <div className="security-link">
-            <a href="/security"><i className="fas fa-shield-alt"></i><span>Security &amp; Privacy</span></a>
-          </div>
+
           <div className="social-links">
             <a href="https://www.instagram.com/classgridedu/" className="social-link" target="_blank" rel="noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
             <a href="https://github.com/nikhilnick5050" className="social-link" target="_blank" rel="noreferrer" aria-label="GitHub"><i className="fab fa-github"></i></a>
@@ -163,7 +161,7 @@ export function PlatformLoginPage() {
                 <button 
                   type="button" 
                   onClick={() => {
-                    const url = getGoogleAuthUrl("super_admin");
+                    const url = getGoogleAuthUrl({ audience: "super_admin", role: "super_admin" });
                     if (url) window.location.href = url;
                   }}
                   style={{
