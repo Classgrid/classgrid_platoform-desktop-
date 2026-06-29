@@ -195,10 +195,6 @@ export function ResetPasswordPage() {
                     className={`h-full rounded-full transition-all duration-300 ${current.bar}`}
                   />
                 </div>
-
-                <p className={`mt-2 text-sm font-semibold ${current.text}`}>
-                  {current.label}
-                </p>
               </>
             )}
 
