@@ -577,7 +577,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Classgrid AI", to: "/classgrid-ai", icon: Bot },
           { label: "Google Drive", to: "/drive", icon: Briefcase },
-          { label: "Virtual ID", to: "/virtual-id", icon: User }
+          { label: "Virtual ID", to: "/virtual-id", icon: User },
+          { label: "Website CMS", to: "/faculty/website", icon: Globe }
         ]
       },
       {

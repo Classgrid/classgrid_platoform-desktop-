@@ -185,6 +185,20 @@ export function CustomDomainLoginPage({ preferredRole }: { preferredRole?: AuthU
     }
   };
 
+  const handleForgotPasswordClick = async () => {
+    if (!email) {
+      toast.error("Please enter your email address first.");
+      return;
+    }
+    const toastId = toast.loading("Sending reset link...");
+    try {
+      const response = await requestPasswordReset(email.trim());
+      toast.success(response?.message || "If that email is registered, a password reset link has been sent.", { id: toastId });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to send reset link.", { id: toastId });
+    }
+  };
+
   const handleGoogleContinue = () => {
     saveStoredAuthRole(activeRole);
     window.location.assign(getGoogleAuthUrl({ audience: "user", role: activeRole }));
