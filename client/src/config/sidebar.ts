@@ -109,7 +109,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Announcements", to: "/superadmin/announcements", icon: Megaphone },
           { label: "Changelog", to: "/superadmin/changelog", icon: FileText },
           { label: "Subscribers", to: "/superadmin/subscribers", icon: Mail, restrictedToEmail: "support@classgrid.in" },
-          { label: "Classgrid Talk", to: "/superadmin/classgrid-talk", icon: MessageSquare },
+          { label: "Chat", to: "/superadmin/chat", icon: MessageSquare },
           { label: "Support Tickets", to: "/superadmin/support", icon: Ticket }
         ]
       },
@@ -200,7 +200,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Events & Seminars", to: "/org/events", icon: Calendar },
           { label: "Alumni & Placements", to: "/org/alumni", icon: GraduationCap },
           { label: "Feedback", to: "/org/feedback", icon: MessageSquare },
-          { label: "Org Chat", to: "/org/chat", icon: MessageSquare }
+          { label: "Chat", to: "/org/chat", icon: MessageSquare }
         ]
       },
       {
@@ -265,7 +265,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Lead Tracking", to: "/dept/admissions/crm", icon: Target },
           { label: "Communication", to: "/dept/admissions/comm", icon: Mail },
           { label: "Bulk SMS / WhatsApp", to: "/dept/admissions/bulk", icon: Megaphone },
-          { label: "Website CMS", to: "/dept/admissions/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/admissions/website", icon: Globe },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       }
     ],
@@ -311,7 +312,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Export Reports", to: "/dept/fees/export", icon: FileBarChart },
           { label: "Class-wise Summary", to: "/dept/fees/summary", icon: ClipboardList },
           { label: "Bank Reconciliation", to: "/dept/fees/reconciliation", icon: CreditCard },
-          { label: "Website CMS", to: "/dept/fees/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/fees/website", icon: Globe },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       }
     ],
@@ -364,7 +366,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Performance Analytics", to: "/dept/exams/analytics", icon: FileBarChart },
           { label: "Export", to: "/dept/exams/export", icon: FileBarChart },
           { label: "Toppers & Awards", to: "/dept/exams/toppers", icon: Award },
-          { label: "Website CMS", to: "/dept/exams/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/exams/website", icon: Globe },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       }
     ],
@@ -415,7 +418,8 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "Usage Analytics", to: "/dept/library/analytics", icon: FileBarChart },
           { label: "Stock Report", to: "/dept/library/stock", icon: ClipboardList },
-          { label: "Website CMS", to: "/dept/library/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/library/website", icon: Globe },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       }
     ],
@@ -458,7 +462,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Analytics", to: "/dept/attendance/analytics", icon: FileBarChart },
           { label: "Export", to: "/dept/attendance/export", icon: FileBarChart },
           { label: "SARAL Compliance", to: "/dept/attendance/saral", icon: Shield },
-          { label: "Website CMS", to: "/dept/attendance/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/attendance/website", icon: Globe },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       }
     ],
@@ -484,7 +489,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Overview", to: "/dept/hr/dashboard", icon: LayoutDashboard },
           { label: "All Staff", to: "/dept/hr/staff", icon: Users },
           { label: "Add Staff", to: "/dept/hr/add-staff", icon: Plus },
-          { label: "Departments", to: "/dept/hr/departments", icon: Building2 }
+          { label: "Departments", to: "/dept/hr/departments", icon: Building2 },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       },
       {
@@ -529,7 +535,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Room Allocation", to: "/dept/hostel/rooms", icon: Home },
           { label: "Residents", to: "/dept/hostel/residents", icon: Users },
           { label: "Complaints", to: "/dept/hostel/complaints", icon: MessageSquare },
-          { label: "Mess Menu", to: "/dept/hostel/mess", icon: UtensilsCrossed }
+          { label: "Mess Menu", to: "/dept/hostel/mess", icon: UtensilsCrossed },
+          { label: "Chat", to: "/chat", icon: MessageSquare }
         ]
       },
       {

@@ -94,7 +94,7 @@ import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
 import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
 import { DynamicRoleLayout } from "@/components/layout/DynamicRoleLayout";
 import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
-
+import { PlatformHubPage } from "@/features/system/pages/PlatformHubPage";
 
 
 
@@ -115,7 +115,11 @@ export function AppRouter() {
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 
         path="/login" 
-        element={isSuperAdmin ? <PlatformLoginPage /> : <InstitutionUserLoginPage />} 
+        element={
+          subdomain === "app" 
+            ? <PlatformHubPage /> 
+            : (isSuperAdmin ? <PlatformLoginPage /> : <InstitutionUserLoginPage />)
+        } 
       />
       <Route path="/auth/user" element={<InstitutionUserLoginPage />} />
       <Route path="/student/login" element={<InstitutionUserLoginPage preferredRole="student" />} />

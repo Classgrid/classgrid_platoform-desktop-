@@ -60,41 +60,41 @@ export function DashboardHomePage() {
   const pendingLeads = leads.filter((lead) => lead.status !== "converted").length;
   const liveUserCount = orgs.reduce((sum, org) => sum + (org.userCount ?? 0), 0);
 
-  const recentOrgColumns = useMemo<ColumnDef<SuperAdminOrganization>[]>(
+  const recentOrgColumns = useMemo(
     () => [
       {
-        accessorKey: "name",
+        key: "name",
         header: "Organization",
-        cell: ({ row }) => (
+        render: (_: any, row: SuperAdminOrganization) => (
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
               <Building2 size={18} />
             </span>
             <div className="flex flex-col">
-              <span className="font-medium text-sm text-foreground">{row.original.name}</span>
-              <span className="text-xs text-muted-foreground">{row.original.ownerEmail || "No owner email"}</span>
+              <span className="font-medium text-sm text-foreground">{row.name}</span>
+              <span className="text-xs text-muted-foreground">{row.ownerEmail || "No owner email"}</span>
             </div>
           </div>
         ),
       },
       {
-        accessorKey: "plan",
+        key: "plan",
         header: "Plan",
-        cell: ({ row }) => <span className="capitalize text-sm">{row.original.plan || "not set"}</span>,
+        render: (_: any, row: SuperAdminOrganization) => <span className="capitalize text-sm">{row.plan || "not set"}</span>,
       },
       {
-        accessorKey: "userCount",
+        key: "userCount",
         header: "Users",
-        cell: ({ row }) => <span className="font-medium text-sm">{row.original.userCount ?? 0}</span>,
+        render: (_: any, row: SuperAdminOrganization) => <span className="font-medium text-sm">{row.userCount ?? 0}</span>,
       },
       {
-        accessorKey: "status",
+        key: "status",
         header: "Status",
-        cell: ({ row }) => {
-          const variant = orgStatusVariant(row.original.status) as any;
+        render: (_: any, row: SuperAdminOrganization) => {
+          const variant = orgStatusVariant(row.status) as any;
           return (
             <Badge variant={variant === "warning" ? "secondary" : variant}>
-              {row.original.status ?? "unknown"}
+              {row.status ?? "unknown"}
             </Badge>
           );
         },
@@ -104,7 +104,6 @@ export function DashboardHomePage() {
   );
 
   return (
-    <DashboardLayout role="super_admin" user={{ name: "Super Admin", email: "super@classgrid.in" }}>
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto flex flex-col w-full">
         <PageHeader 
           title="Super Admin Overview" 
@@ -166,25 +165,9 @@ export function DashboardHomePage() {
               <CardContent>
                 <DataTable
                   columns={recentOrgColumns}
-                  data={orgs.slice(0, 8)}
-                  pageSize={8}
+                  rows={orgs.slice(0, 8)}
                   isLoading={orgsLoading}
-                  isError={orgsError}
-                  onRetry={() => refetchOrgs()}
-                  loadingLabel="Syncing recent organizations from backend"
-                  errorTitle="Could not load organizations"
-                  errorMessage={(orgsErrorData as Error)?.message || "The organizations API did not return a usable response."}
-                  emptyIcon={<Building2 className="w-8 h-8" />}
-                  emptyTitle="No organizations yet"
-                  emptyDescription="Create an organization to see real backend records here."
-                  emptyAction={
-                    <Button asChild>
-                      <Link to="/superadmin/onboard">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Organization
-                      </Link>
-                    </Button>
-                  }
+                  emptyMessage="No organizations yet. Create an organization to see real backend records here."
                 />
               </CardContent>
             </Card>
@@ -254,6 +237,5 @@ export function DashboardHomePage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

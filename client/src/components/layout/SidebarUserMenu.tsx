@@ -27,7 +27,13 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
       ? "/org" 
       : "";
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = async () => {
+    setIsLoggingOut(true);
+    // Wait for 3 seconds to show the spinner before clearing data
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     try {
       await apiClient.post("/api/auth/logout");
     } catch {}
@@ -70,7 +76,14 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
   }, []);
 
   return (
-    <DropdownMenu>
+    <>
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Icons.Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+          <p className="text-sm font-medium text-foreground">Logging out securely...</p>
+        </div>
+      )}
+      <DropdownMenu>
       <DropdownMenuTrigger className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Icons.MoreHorizontal className="w-4 h-4" />
       </DropdownMenuTrigger>
@@ -155,14 +168,15 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
         <DropdownMenuSeparator className="mx-0" />
         
-        <a href="https://classgrid1.statuspage.io/" target="_blank" rel="noopener noreferrer" className="px-3 py-3 flex items-center justify-between text-xs hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer rounded-b-lg outline-none focus-visible:bg-accent">
+        <div className="px-3 py-3 flex items-center justify-between text-xs hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer rounded-b-lg outline-none focus-visible:bg-accent">
           <div className="flex flex-col gap-0.5">
             <span className="text-muted-foreground font-medium">Platform Status</span>
             <span className={`${getFooterStatusTextClass(status.state)} font-medium`}>{status.label}</span>
           </div>
           <div className={`w-2 h-2 rounded-full ${getFooterStatusDotClass(status.state)}`} />
-        </a>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }
