@@ -59,8 +59,8 @@ export function ResetPasswordPage() {
   /* ── SUCCESS STATE — Big tick mark ── */
   if (isSuccess) {
     return (
-      <main className="flex min-h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-        <div className="flex flex-col items-center gap-5 text-center px-6">
+      <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
+        <div className="flex w-full max-w-[400px] flex-col items-center justify-center rounded-[24px] border border-white/[0.15] bg-[#0f0f0f] px-7 py-12 shadow-xl">
           {/* Animated tick circle */}
           <div
             className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
@@ -78,7 +78,7 @@ export function ResetPasswordPage() {
           </div>
 
           <p
-            className="text-[18px] font-semibold text-[#ededed]"
+            className="mt-5 text-[18px] font-semibold text-[#ededed]"
             style={{ animation: "fadeIn 0.4s ease 0.5s both" }}
           >
             Password Set
@@ -101,8 +101,8 @@ export function ResetPasswordPage() {
 
   /* ── FORM STATE ── */
   return (
-    <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#0a0a0a" }}>
-      <div className="w-full max-w-[420px]">
+    <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
+      <div className="flex w-full max-w-[400px] flex-col rounded-[24px] border border-white/[0.15] bg-[#0f0f0f] px-7 py-6 shadow-xl">
         {/* Logo */}
         <img
           src={CLASSGRID_LOGO}
@@ -114,9 +114,6 @@ export function ResetPasswordPage() {
         <h1 className="mt-4 text-center text-[24px] font-bold text-[#ededed]">
           Reset Your Password
         </h1>
-        <p className="mt-1.5 text-center text-[13px] text-white/55">
-          Create a strong new password for your account.
-        </p>
 
         {/* No token error */}
         {!token && (
@@ -226,20 +223,12 @@ export function ResetPasswordPage() {
 
             {/* Submit Button */}
             <button
-              type="submit"
-              disabled={!canSubmit}
-              className="mt-5 h-[46px] w-full rounded-[12px] bg-[#10b981] text-[15px] font-bold text-white transition-colors hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
+               type="submit"
+               disabled={!canSubmit}
+               className="mt-5 h-[46px] w-full rounded-[12px] bg-[#10b981] text-[15px] font-bold text-white transition-colors hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Updating..." : "Update Password"}
             </button>
-
-            {/* Back to login */}
-            <a
-              href="/login"
-              className="mt-4 text-center text-[13px] text-white/55 transition-colors hover:text-[#10b981]"
-            >
-              ← Back to Login
-            </a>
           </form>
         )}
       </div>
