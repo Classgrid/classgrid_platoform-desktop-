@@ -25,6 +25,9 @@ export function CustomDomainCard() {
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
     const [hasCopiedBackdoorUrl, setHasCopiedBackdoorUrl] = useState(false);
 
+    const [showEditDomainModal, setShowEditDomainModal] = useState(false);
+    const [confirmOldDomainInput, setConfirmOldDomainInput] = useState("");
+
     const updateSubdomainMutation = useMutation({
         mutationFn: (subdomain: string) => apiClient.patch("/api/org-admin/subdomain", { subdomain }),
         onSuccess: () => {
@@ -110,64 +113,22 @@ export function CustomDomainCard() {
                         baseUrl={`${user?.organization?.subdomain}.classgrid.in`} 
                         isSubdomain={true}
                         subdomainEditUI={(
-                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4">
-                                {isEditingSubdomain ? (
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                value={subdomainInput}
-                                                onChange={(e) => setSubdomainInput(e.target.value)}
-                                                className="max-w-[200px]"
-                                                placeholder="e.g. aec"
-                                                disabled={updateSubdomainMutation.isPending}
-                                            />
-                                            <span className="text-muted-foreground font-medium">.classgrid.in</span>
-                                        </div>
-                                        <div className="text-xs text-danger font-medium mt-1">
-                                            Warning: Changing this will instantly break your current login link.
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <Button
-                                                size="sm"
-                                                onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
-                                                    onSuccess: () => {
-                                                        const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
-                                                        window.location.replace(newUrl);
-                                                    }
-                                                })}
-                                                disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
-                                            >
-                                                {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
-                                                Save
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => setIsEditingSubdomain(false)}
-                                                disabled={updateSubdomainMutation.isPending}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <div className="font-medium text-foreground text-base">Edit Default Domain</div>
-                                            <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setSubdomainInput(user?.organization?.subdomain || "");
-                                                setIsEditingSubdomain(true);
-                                            }}
-                                        >
-                                            Edit Domain
-                                        </Button>
-                                    </div>
-                                )}
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4 flex items-center justify-between">
+                                <div>
+                                    <div className="font-medium text-foreground text-base">Edit Default Domain</div>
+                                    <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setSubdomainInput("");
+                                        setConfirmOldDomainInput("");
+                                        setShowEditDomainModal(true);
+                                    }}
+                                >
+                                    Edit Domain
+                                </Button>
                             </div>
                         )}
                     />
@@ -185,16 +146,15 @@ export function CustomDomainCard() {
                         <DialogDescription className="text-base text-foreground/90 space-y-4 pt-4 pb-2">
                             <p>
                                 By disabling the default <span className="font-semibold text-primary">{user?.organization?.subdomain}.classgrid.in</span> URL, 
-                                your entire platform will now rely <strong>exclusively</strong> on your custom DNS settings.
+                                your institution's ERP will now rely <strong>exclusively</strong> on your custom DNS settings.
                             </p>
                             <p>
-                                If your custom domain breaks or expires, <strong className="text-destructive">everyone will be locked out</strong>.
+                                If your custom domain expires or experiences downtime, <strong className="text-destructive">your students and staff will temporarily lose access</strong>.
                             </p>
                             <div className="bg-destructive/10 border-l-4 border-destructive p-4 rounded-md">
-                                <p className="font-semibold text-destructive mb-1">The Unbreakable Backdoor</p>
+                                <p className="font-semibold text-destructive mb-1">Emergency Administrator Access</p>
                                 <p className="text-sm">
-                                    The Org Admin login portal is immune to this rule. You MUST copy and save this URL now. 
-                                    It is the only way you can get back in to fix your DNS if something goes wrong.
+                                    The Organization Admin portal remains accessible via the default URL. We strongly recommend saving this emergency access URL. It ensures you can always log in to manage your DNS and ERP settings during a domain outage.
                                 </p>
                             </div>
                         </DialogDescription>
@@ -249,7 +209,7 @@ export function CustomDomainCard() {
                 user={user}
                 showPortalLinks={false}
                 icon={Monitor}
-                iconColor="purple"
+                iconColor="emerald"
             />
         </div>
     );
@@ -787,6 +747,73 @@ function DomainConfigCard({
                             className="w-full"
                         >
                             I understand & Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showEditDomainModal} onOpenChange={setShowEditDomainModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Edit Default Domain</DialogTitle>
+                        <DialogDescription>
+                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing login links pointing to it. You and your users will be logged out and need to log in via the new domain. 
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col gap-5 py-2">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium text-foreground">
+                                To confirm, type the old domain: "{user?.organization?.subdomain}"
+                            </label>
+                            <Input
+                                value={confirmOldDomainInput}
+                                onChange={(e) => setConfirmOldDomainInput(e.target.value)}
+                                placeholder={`Type "${user?.organization?.subdomain}" here`}
+                            />
+                        </div>
+
+                        {confirmOldDomainInput === user?.organization?.subdomain && (
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-foreground">
+                                    Now, enter the new domain:
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        value={subdomainInput}
+                                        onChange={(e) => setSubdomainInput(e.target.value)}
+                                        placeholder="e.g. aec"
+                                        className="flex-1"
+                                    />
+                                    <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg flex gap-3 text-danger mt-2">
+                            <AlertTriangle className="w-5 h-5 shrink-0" />
+                            <div className="text-sm">
+                                <strong>Warning:</strong> You will be instantly redirected to the new URL. An email with the new links will be sent to the admin.
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDomainModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
+                                onSuccess: () => {
+                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
+                                    window.location.replace(newUrl);
+                                }
+                            })}
+                            disabled={updateSubdomainMutation.isPending || confirmOldDomainInput !== user?.organization?.subdomain || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
+                        >
+                            {updateSubdomainMutation.isPending && <Spinner className="mr-2" size="sm" />}
+                            Update Domain
                         </Button>
                     </DialogFooter>
                 </DialogContent>

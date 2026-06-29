@@ -7,7 +7,7 @@ import { useEffect } from "react";
  * If the organization has disabled the Classgrid URL and they are accessing via 
  * *.classgrid.in, they will be forcibly redirected to their custom domain.
  * 
- * NOTE: This should NEVER wrap the Org Admin routes, providing an unbreakable backdoor.
+ * NOTE: This should NEVER wrap the Org Admin routes, providing an emergency admin access path.
  */
 export function DomainEnforcer({
   allowClassgridUrl,
@@ -21,7 +21,7 @@ export function DomainEnforcer({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    // 🛡️ The Unbreakable Backdoor
+    // 🛡️ Emergency Admin Access
     // Never enforce custom domain redirects for the Org Admin portal.
     // This ensures IT Admins can always access the dashboard via the default Classgrid URL 
     // even if their DNS breaks or they accidentally disable the Classgrid URL.

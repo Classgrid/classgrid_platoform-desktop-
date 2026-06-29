@@ -1799,6 +1799,24 @@ router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req
             invalidateTenantCache(slug);
         } catch (_) { /* best effort */ }
 
+        // Send email notification to admin
+        try {
+            const { notifyDomainChange } = await import("../services/domain-change-email.service.js");
+            await notifyDomainChange({
+                to: req.user.email,
+                orgName: updatedOrg.name,
+                adminName: req.user.name || "Admin",
+                adminEmail: req.user.email,
+                oldDomain: oldSlug || "none",
+                newDomain: slug,
+                organizationId: orgId,
+                userId: req.user._id
+            });
+        } catch (emailErr) {
+            console.error("[Subdomain PATCH] Failed to send domain change email:", emailErr);
+            // Non-fatal, continue with response
+        }
+
         logAdminAction(req, "update_subdomain", "organization", orgId, updatedOrg.name, {
             old: oldSlug || null,
             new: slug,
