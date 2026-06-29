@@ -1,53 +1,96 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Lock, Eye, EyeOff, Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { resetPasswordWithToken } from "../api";
 
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
-const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
-const calculateStrength = (p: string) => {
-  let score = 0;
-  if (p.length > 0) score += 10;
-  if (p.length >= 8) score += 10;
-  if (/[A-Z]/.test(p)) score += 20;
-  if (/[a-z]/.test(p)) score += 20;
-  if (/\d/.test(p)) score += 20;
-  if (/[@$!%*?&]/.test(p)) score += 20;
-  return Math.min(100, score);
-};
-
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const isStrong = useMemo(() => strongPassword.test(password), [password]);
-  const passwordsMatch = useMemo(() => password === confirmPassword && confirmPassword.length > 0, [password, confirmPassword]);
-  const canSubmit = !!token && password.length > 0 && confirmPassword.length > 0 && !isSubmitting;
+  const passwordRules = useMemo(() => {
+    return {
+      minLength: password.length >= 8,
+      maxLength: password.length > 0 && password.length <= 64,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[@#$%^&*!?_.\-]/.test(password),
+    };
+  }, [password]);
+
+  const passedRules = Object.values(passwordRules).filter(Boolean).length;
+
+  const strength = useMemo(() => {
+    if (!password) return "empty";
+    if (passedRules <= 3) return "weak";
+    if (passedRules <= 5) return "medium";
+    return "strong";
+  }, [password, passedRules]);
+
+  const isStrongPassword =
+    passwordRules.minLength &&
+    passwordRules.maxLength &&
+    passwordRules.uppercase &&
+    passwordRules.lowercase &&
+    passwordRules.number &&
+    passwordRules.special;
+
+  const isConfirmTouched = confirmPassword.length > 0;
+  const isPasswordMatch = password === confirmPassword && isConfirmTouched;
+
+  const canSubmit = !!token && isStrongPassword && isPasswordMatch && !isSubmitting;
+
+  const strengthStyles = {
+    empty: {
+      border: "border-white/10",
+      glow: "",
+      text: "text-gray-400",
+      bar: "bg-white/10 w-0",
+      label: "",
+    },
+    weak: {
+      border: "border-red-500/70",
+      glow: "shadow-[0_0_18px_rgba(239,68,68,0.20)]",
+      text: "text-red-400",
+      bar: "bg-red-500 w-1/3",
+      label: "Weak password",
+    },
+    medium: {
+      border: "border-orange-500/70",
+      glow: "shadow-[0_0_18px_rgba(249,115,22,0.20)]",
+      text: "text-orange-400",
+      bar: "bg-orange-500 w-2/3",
+      label: "Medium password",
+    },
+    strong: {
+      border: "border-emerald-500/80",
+      glow: "shadow-[0_0_20px_rgba(16,185,129,0.25)]",
+      text: "text-emerald-400",
+      bar: "bg-emerald-500 w-full",
+      label: "Strong password",
+    },
+  };
+
+  const current = strengthStyles[strength];
+
+  const confirmBorder = !isConfirmTouched
+    ? "border-white/10"
+    : isPasswordMatch
+    ? "border-emerald-500/80 shadow-[0_0_18px_rgba(16,185,129,0.22)]"
+    : "border-red-500/70 shadow-[0_0_18px_rgba(239,68,68,0.20)]";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) return;
-
-    if (!isStrong) {
-      setFeedback({ message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", tone: "error" });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setFeedback({ message: "Passwords do not match.", tone: "error" });
-      return;
-    }
 
     setFeedback(null);
     setIsSubmitting(true);
@@ -68,16 +111,10 @@ export function ResetPasswordPage() {
     }
   };
 
-  const strength = calculateStrength(password);
-  let strengthColor = "bg-red-500";
-  if (strength > 40) strengthColor = "bg-orange-500";
-  if (strength > 80) strengthColor = "bg-[#10b981]";
-
-  /* ── SUCCESS STATE — Big tick mark ── */
   if (isSuccess) {
     return (
       <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
-        <div className="flex w-full max-w-[400px] flex-col items-center justify-center rounded-[24px] border border-white/[0.15] bg-[#0f0f0f] px-7 py-12 shadow-xl">
+        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl">
           {/* Animated tick circle */}
           <div
             className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
@@ -116,10 +153,9 @@ export function ResetPasswordPage() {
     );
   }
 
-  /* ── FORM STATE ── */
   return (
     <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#111111" }}>
-      <div className="flex w-full max-w-[400px] flex-col rounded-[24px] border border-white/[0.15] bg-[#0f0f0f] px-7 py-6 shadow-xl">
+      <div className="w-full max-w-[430px] rounded-[28px] border border-white/10 bg-[#111111] p-8 shadow-2xl">
         {/* Logo */}
         <img
           src={CLASSGRID_LOGO}
@@ -127,12 +163,10 @@ export function ResetPasswordPage() {
           className="mx-auto h-[56px] w-[56px] object-contain"
         />
 
-        {/* Header */}
-        <h1 className="mt-4 text-center text-[24px] font-bold text-[#ededed]">
+        <h1 className="mt-6 text-center text-3xl font-bold text-white">
           Reset Your Password
         </h1>
 
-        {/* No token error */}
         {!token && (
           <div className="mt-6 rounded-[12px] border border-red-500/35 bg-red-500/10 px-4 py-3 text-[13px] leading-5 text-red-200">
             This reset link is missing a token. Please request a new reset link.
@@ -140,69 +174,68 @@ export function ResetPasswordPage() {
         )}
 
         {token && (
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col">
-            {/* New Password */}
-            <label className="text-[12px] font-semibold uppercase tracking-wider text-white/50">
+          <form onSubmit={handleSubmit} className="mt-8">
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
               New Password
             </label>
-            <div className="mt-1.5 flex h-[44px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
-              <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40"
-                placeholder="Enter new password"
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="shrink-0 text-white/70 transition-colors hover:text-white"
-              >
-                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
-              </button>
-            </div>
 
-            {/* Password Strength Meter */}
-            {password.length > 0 && (
-              <div className="mt-3 flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-white/50">Password strength</span>
-                  <span className={`text-[11px] font-medium ${strength > 80 ? "text-[#10b981]" : strength > 40 ? "text-orange-400" : "text-red-400"}`}>
-                    {strength > 80 ? "Strong" : strength > 40 ? "Medium" : "Weak"}
-                  </span>
+            <input
+              type="password"
+              value={password}
+              maxLength={64}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter new password"
+              className={`mt-3 h-14 w-full rounded-2xl border bg-[#111111] px-5 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
+            />
+
+            {password && (
+              <>
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${current.bar}`}
+                  />
                 </div>
-                <div className="h-[4px] w-full overflow-hidden rounded-full bg-[#222]">
-                  <div className={`h-full transition-all duration-300 ${strengthColor}`} style={{ width: \`\${strength}%\` }} />
+
+                <p className={`mt-2 text-sm font-semibold ${current.text}`}>
+                  {current.label}
+                </p>
+
+                <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
+                  <RuleCheck active={passwordRules.minLength} text="Minimum 8 characters" />
+                  <RuleCheck active={passwordRules.maxLength} text="Maximum 64 characters" />
+                  <RuleCheck active={passwordRules.uppercase} text="One uppercase letter A-Z" />
+                  <RuleCheck active={passwordRules.lowercase} text="One lowercase letter a-z" />
+                  <RuleCheck active={passwordRules.number} text="One number 0-9" />
+                  <RuleCheck active={passwordRules.special} text="One special character @ # $ % ^ & * ! ? _ - ." />
                 </div>
-              </div>
+              </>
             )}
 
-            {/* Confirm Password */}
-            <label className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-white/50">
-              Confirm Password
-            </label>
-            <div className="mt-1.5 flex h-[44px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
-              <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
+            <div className="mt-6">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                Confirm Password
+              </label>
+
               <input
-                type={showConfirmPassword ? "text" : "password"}
+                type="password"
                 value={confirmPassword}
+                maxLength={64}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40"
                 placeholder="Re-enter password"
-                autoComplete="new-password"
+                className={`mt-3 h-14 w-full rounded-2xl border bg-[#111111] px-5 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="shrink-0 text-white/70 transition-colors hover:text-white"
-              >
-                {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
-              </button>
+
+              {isConfirmTouched && (
+                <p
+                  className={`mt-2 text-sm font-semibold ${
+                    isPasswordMatch ? "text-emerald-400" : "text-red-400"
+                  }`}
+                >
+                  {isPasswordMatch ? "Passwords match" : "Passwords do not match"}
+                </p>
+              )}
             </div>
 
-            {/* Error feedback */}
             {feedback && (
               <div
                 className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${
@@ -215,11 +248,14 @@ export function ResetPasswordPage() {
               </div>
             )}
 
-            {/* Submit Button */}
             <button
-               type="submit"
-               disabled={!canSubmit}
-               className="mt-5 h-[46px] w-full rounded-[12px] bg-[#10b981] text-[15px] font-bold text-white transition-colors hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={!canSubmit}
+              className={`mt-7 h-14 w-full rounded-2xl font-bold transition-all duration-300 ${
+                canSubmit
+                  ? "bg-emerald-500 text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] hover:bg-emerald-400"
+                  : "cursor-not-allowed bg-emerald-700/60 text-gray-400"
+              }`}
             >
               {isSubmitting ? "Updating..." : "Update Password"}
             </button>
@@ -227,5 +263,18 @@ export function ResetPasswordPage() {
         )}
       </div>
     </main>
+  );
+}
+
+function RuleCheck({ active, text }: { active: boolean; text: string }) {
+  return (
+    <div
+      className={`flex items-center gap-2 ${
+        active ? "text-emerald-400" : "text-gray-500"
+      }`}
+    >
+      <span>{active ? "✓" : "○"}</span>
+      <span>{text}</span>
+    </div>
   );
 }
