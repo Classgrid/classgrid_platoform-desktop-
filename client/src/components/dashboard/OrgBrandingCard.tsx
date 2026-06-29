@@ -103,6 +103,11 @@ export function OrgBrandingCard() {
   const updateBranding = useMutation({
     mutationFn: (updates: Partial<BrandingData>) => apiClient.patch("/api/org-admin/branding", updates),
     onSuccess: (res, variables) => {
+      if (res.data?.branding) {
+        queryClient.setQueryData(["org-branding"], (old: any) => ({ ...old, ...res.data.branding }));
+      } else {
+        queryClient.setQueryData(["org-branding"], (old: any) => ({ ...old, ...variables }));
+      }
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
       if (variables.site_title !== undefined) {
         setIsEditingTitle(false);
