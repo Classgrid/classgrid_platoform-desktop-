@@ -63,6 +63,20 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
 
   useEffect(() => {
     document.title = "Classgrid";
+
+    const params = new URLSearchParams(location.search);
+    if (params.get("device_verify") === "true") {
+      const redirectEmail = params.get("email") || "";
+      if (redirectEmail) {
+        setEmail(redirectEmail);
+        setStep("device");
+        setOtpCooldownSeconds(60);
+        setFeedback({
+          message: "New device detected. A verification code has been sent to your email.",
+          tone: "info",
+        });
+      }
+    }
   }, []);
 
   useEffect(() => {
