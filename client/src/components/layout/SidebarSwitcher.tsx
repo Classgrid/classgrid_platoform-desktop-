@@ -45,9 +45,9 @@ export function SidebarSwitcher({ user }: { user: any }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm overflow-hidden">
+              <div className={`flex aspect-square size-8 items-center justify-center rounded-lg shadow-sm overflow-hidden shrink-0 ${orgLogo ? 'bg-white p-0.5' : 'bg-emerald-500 text-white'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
                 ) : (
                   <Building2 className="size-4 text-white" />
                 )}
@@ -73,9 +73,9 @@ export function SidebarSwitcher({ user }: { user: any }) {
               Active Context
             </DropdownMenuLabel>
             <DropdownMenuItem className="gap-3 p-2 rounded-md">
-              <div className="flex size-8 items-center justify-center rounded-md border border-border bg-emerald-500 overflow-hidden shrink-0">
+              <div className={`flex aspect-square size-8 items-center justify-center rounded-md border border-border overflow-hidden shrink-0 ${orgLogo ? 'bg-white p-0.5' : 'bg-emerald-500 text-white'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
                 ) : (
                   <Building2 className="size-4 text-white" />
                 )}
