@@ -1,80 +1,253 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { CheckCircle2, FileText, Globe2, Pencil, Send, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileText, Globe2, Pencil, RefreshCw, Send, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 import CMSPageEditor from "@/features/website_cms/components/CMSPageEditor";
+import {
+  fetchOrgWebsiteContent,
+  updateOrgWebsiteContent,
+  type OrgWebsiteContent,
+  type WebsiteCMSPageKey,
+  type WebsiteCMSPageStatus,
+} from "@/features/website_cms/api";
 
 type CMSMode = "view" | "edit";
 
-type CMSPageRecord = {
-  id: string;
+type CMSPageDefinition = {
+  id: WebsiteCMSPageKey;
   title: string;
   slug: string;
-  status: "published" | "draft";
+};
+
+type CMSPageRecord = CMSPageDefinition & {
+  status: WebsiteCMSPageStatus;
   updatedAt: string;
   html: string;
 };
 
-const INITIAL_PAGES: CMSPageRecord[] = [
-  {
-    id: "home",
-    title: "Home",
-    slug: "/",
-    status: "published",
-    updatedAt: "Today, 10:30 AM",
-    html: "<h2>Welcome to your college website</h2><p>This homepage introduces the institution, highlights admissions, and gives visitors a clear path to explore programs, notices, and campus life.</p><ul><li>Hero announcement and admission callout</li><li>Featured programs and campus highlights</li><li>Quick links for students and parents</li></ul>",
-  },
-  {
-    id: "about",
-    title: "About Us",
-    slug: "/about",
-    status: "published",
-    updatedAt: "Yesterday, 4:15 PM",
-    html: "<h2>About the institution</h2><p>Use this page to share the college history, mission, leadership message, accreditation details, and the values that shape the student experience.</p>",
-  },
-  {
-    id: "admissions",
-    title: "Admissions",
-    slug: "/admissions",
-    status: "draft",
-    updatedAt: "Jun 28, 2026",
-    html: "<h2>Admissions information</h2><p>Publish eligibility criteria, application timelines, required documents, fee payment guidance, and contact details for the admissions office.</p>",
-  },
-  {
-    id: "facilities",
-    title: "Facilities",
-    slug: "/facilities",
-    status: "published",
-    updatedAt: "Jun 27, 2026",
-    html: "<h2>Campus facilities</h2><p>Showcase classrooms, laboratories, library resources, sports areas, hostel services, transport, and student support spaces.</p>",
-  },
-  {
-    id: "contact",
-    title: "Contact",
-    slug: "/contact",
-    status: "published",
-    updatedAt: "Jun 26, 2026",
-    html: "<h2>Contact the college</h2><p>Add office hours, phone numbers, email addresses, map details, and enquiry instructions for visitors.</p>",
-  },
+const PAGE_DEFINITIONS: CMSPageDefinition[] = [
+  { id: "home", title: "Home", slug: "/" },
+  { id: "about", title: "About Us", slug: "/about" },
+  { id: "admissions", title: "Admissions", slug: "/admissions" },
+  { id: "facilities", title: "Facilities", slug: "/facilities" },
+  { id: "contact", title: "Contact", slug: "/contact" },
 ];
 
-const DEFAULT_PAGE = INITIAL_PAGES[0]!;
+const DEFAULT_PAGE_ID: WebsiteCMSPageKey = "home";
+const NOT_SAVED_LABEL = "Not saved yet";
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (char) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[char] ?? char;
+  });
+
+const textValue = (value?: string | number | null) => String(value ?? "").trim();
+
+const textToParagraphs = (value?: string | null) => {
+  const text = textValue(value);
+  if (!text) return "";
+
+  return text
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+};
+
+const sectionHtml = (heading: string, value?: string | null) => {
+  const body = textToParagraphs(value);
+  if (!body) return "";
+  return `<h2>${escapeHtml(heading)}</h2>${body}`;
+};
+
+const listHtml = (items: string[]) => {
+  const validItems = items.map(textValue).filter(Boolean);
+  if (!validItems.length) return "";
+  return `<ul>${validItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+};
+
+const joinSections = (sections: string[]) => sections.filter(Boolean).join("");
+
+const formatUpdatedAt = (value?: string) => {
+  if (!value) return NOT_SAVED_LABEL;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return NOT_SAVED_LABEL;
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return fallback;
+};
+
+const createEmptyPages = (): CMSPageRecord[] =>
+  PAGE_DEFINITIONS.map((page) => ({
+    ...page,
+    status: "draft",
+    updatedAt: NOT_SAVED_LABEL,
+    html: "",
+  }));
+
+const getStoredPageHtml = (pageKey: WebsiteCMSPageKey, content?: OrgWebsiteContent | null) => {
+  const storedPage = content?.pages?.[pageKey];
+  if (typeof storedPage?.html === "string" && (storedPage.html.trim() || storedPage.updatedAt)) {
+    return storedPage.html;
+  }
+  return null;
+};
+
+const buildLegacyHomeHtml = (content?: OrgWebsiteContent | null) =>
+  joinSections([
+    sectionHtml(content?.hero?.headline || content?.institution?.name || "", content?.hero?.subHeadline),
+    textToParagraphs(content?.hero?.description),
+  ]);
+
+const buildLegacyAboutHtml = (content?: OrgWebsiteContent | null) =>
+  joinSections([
+    sectionHtml("About", content?.story),
+    sectionHtml("Vision", content?.vision),
+    sectionHtml("Mission", content?.mission),
+    sectionHtml(
+      content?.principal?.name ? `Message from ${content.principal.name}` : "Principal Message",
+      content?.principal?.message
+    ),
+  ]);
+
+const buildLegacyAdmissionsHtml = (content?: OrgWebsiteContent | null) => {
+  const programItems =
+    content?.programs?.map((program) => {
+      const details = [program.duration, program.intake, program.eligibility].map(textValue).filter(Boolean).join(" | ");
+      const description = textValue(program.description);
+      const suffix = [description, details].filter(Boolean).join(" - ");
+      return [program.name, suffix].map(textValue).filter(Boolean).join(": ");
+    }) ?? [];
+
+  return joinSections([
+    sectionHtml(content?.admissionBanner?.title || "Admissions", content?.admissionBanner?.description),
+    programItems.length ? `<h2>Programs</h2>${listHtml(programItems)}` : "",
+  ]);
+};
+
+const buildLegacyFacilitiesHtml = (content?: OrgWebsiteContent | null) => {
+  const facilities =
+    content?.infrastructure
+      ?.map((facility) => {
+        const heading = [facility.category, facility.name].map(textValue).filter(Boolean).join(" - ");
+        const body = textToParagraphs(facility.description);
+        if (!heading && !body) return "";
+        return `${heading ? `<h2>${escapeHtml(heading)}</h2>` : ""}${body}`;
+      })
+      .filter(Boolean) ?? [];
+
+  return facilities.join("");
+};
+
+const buildLegacyContactHtml = (content?: OrgWebsiteContent | null) =>
+  joinSections([
+    listHtml([
+      content?.institution?.address ? `Address: ${content.institution.address}` : "",
+      content?.institution?.phone ? `Phone: ${content.institution.phone}` : "",
+      content?.institution?.whatsapp ? `WhatsApp: ${content.institution.whatsapp}` : "",
+      content?.institution?.email ? `Email: ${content.institution.email}` : "",
+      content?.contactPage?.officeHours ? `Office Hours: ${content.contactPage.officeHours}` : "",
+    ]),
+    content?.contactPage?.mapEmbedUrl
+      ? `<p><a href="${escapeHtml(content.contactPage.mapEmbedUrl)}" target="_blank" rel="noopener noreferrer">View map</a></p>`
+      : "",
+  ]);
+
+const resolvePageHtml = (pageKey: WebsiteCMSPageKey, content?: OrgWebsiteContent | null) => {
+  const storedHtml = getStoredPageHtml(pageKey, content);
+  if (storedHtml !== null) return storedHtml;
+
+  switch (pageKey) {
+    case "home":
+      return buildLegacyHomeHtml(content);
+    case "about":
+      return buildLegacyAboutHtml(content);
+    case "admissions":
+      return buildLegacyAdmissionsHtml(content);
+    case "facilities":
+      return buildLegacyFacilitiesHtml(content);
+    case "contact":
+      return buildLegacyContactHtml(content);
+    default:
+      return "";
+  }
+};
+
+const mapWebsiteContentToPages = (content?: OrgWebsiteContent | null): CMSPageRecord[] =>
+  PAGE_DEFINITIONS.map((definition) => {
+    const storedPage = content?.pages?.[definition.id];
+    return {
+      ...definition,
+      status: storedPage?.status ?? (content?.isPublished ? "published" : "draft"),
+      updatedAt: formatUpdatedAt(storedPage?.updatedAt ?? content?.updatedAt),
+      html: resolvePageHtml(definition.id, content),
+    };
+  });
 
 export function WebsiteCMSPage() {
   const location = useLocation();
-  const [pages, setPages] = useState<CMSPageRecord[]>(INITIAL_PAGES);
-  const [activePageId, setActivePageId] = useState(DEFAULT_PAGE.id);
+  const [pages, setPages] = useState<CMSPageRecord[]>(() => createEmptyPages());
+  const [activePageId, setActivePageId] = useState<WebsiteCMSPageKey>(DEFAULT_PAGE_ID);
   const [mode, setMode] = useState<CMSMode>("view");
-  const [draftHtml, setDraftHtml] = useState(DEFAULT_PAGE.html);
+  const [draftHtml, setDraftHtml] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const activePage = pages.find((page) => page.id === activePageId) ?? DEFAULT_PAGE;
+  const activePage = pages.find((page) => page.id === activePageId) ?? pages[0] ?? createEmptyPages()[0]!;
   const isEditing = mode === "edit";
 
-  const selectPage = (pageId: string) => {
+  const loadWebsiteContent = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      const content = await fetchOrgWebsiteContent();
+      const mappedPages = mapWebsiteContentToPages(content);
+      const nextActivePage = mappedPages.find((page) => page.id === activePageId) ?? mappedPages[0]!;
+
+      setPages(mappedPages);
+      setActivePageId(nextActivePage.id);
+      setDraftHtml(nextActivePage.html);
+    } catch (error) {
+      const message = getErrorMessage(error, "Failed to load website content.");
+      setLoadError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadWebsiteContent();
+  }, []);
+
+  const selectPage = (pageId: WebsiteCMSPageKey) => {
     const nextPage = pages.find((page) => page.id === pageId);
-    if (!nextPage) return;
+    if (!nextPage || isSaving) return;
     setActivePageId(pageId);
     setDraftHtml(nextPage.html);
     setMode("view");
@@ -90,20 +263,35 @@ export function WebsiteCMSPage() {
     setMode("view");
   };
 
-  const publishDraft = () => {
-    setPages((currentPages) =>
-      currentPages.map((page) =>
-        page.id === activePage.id
-          ? {
-              ...page,
-              html: draftHtml,
-              status: "published",
-              updatedAt: "Just now",
-            }
-          : page
-      )
-    );
-    setMode("view");
+  const publishDraft = async () => {
+    setIsSaving(true);
+    const publishedAt = new Date().toISOString();
+
+    try {
+      const updatedContent = await updateOrgWebsiteContent({
+        [`pages.${activePage.id}.html`]: draftHtml,
+        [`pages.${activePage.id}.status`]: "published",
+        [`pages.${activePage.id}.updatedAt`]: publishedAt,
+      });
+
+      const mappedPages = updatedContent
+        ? mapWebsiteContentToPages(updatedContent)
+        : pages.map((page) =>
+            page.id === activePage.id
+              ? { ...page, html: draftHtml, status: "published", updatedAt: formatUpdatedAt(publishedAt) }
+              : page
+          );
+      const updatedPage = mappedPages.find((page) => page.id === activePage.id);
+
+      setPages(mappedPages);
+      if (updatedPage) setDraftHtml(updatedPage.html);
+      setMode("view");
+      toast.success("Page updated successfully");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to update page."));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -118,8 +306,8 @@ export function WebsiteCMSPage() {
             Manage public website pages from one split-screen workspace. Current route: {location.pathname}
           </p>
         </div>
-        <Badge variant={isEditing ? "warning" : "success"} className="w-fit">
-          {isEditing ? "Editing draft" : "View mode"}
+        <Badge variant={isLoading ? "neutral" : isEditing ? "warning" : "success"} className="w-fit">
+          {isLoading ? "Loading content" : isEditing ? "Editing draft" : "View mode"}
         </Badge>
       </header>
 
@@ -132,33 +320,39 @@ export function WebsiteCMSPage() {
             </div>
           </div>
           <nav className="flex flex-col p-2" aria-label="Website pages">
-            {pages.map((page) => {
-              const isActive = page.id === activePage.id;
-              return (
-                <button
-                  key={page.id}
-                  type="button"
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={() => selectPage(page.id)}
-                  className={`flex w-full items-start gap-3 rounded-md px-3 py-3 text-left transition-colors ${
-                    isActive
-                      ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-                      : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
-                  }`}
-                >
-                  <FileText className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">{page.title}</span>
-                    <span className="mt-1 block truncate text-xs">{page.slug}</span>
-                  </span>
-                  <span
-                    className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                      page.status === "published" ? "bg-emerald-500" : "bg-amber-500"
+            {isLoading ? (
+              <div className="flex items-center gap-2 rounded-md px-3 py-4 text-sm text-muted-foreground">
+                <Spinner /> Loading pages...
+              </div>
+            ) : (
+              pages.map((page) => {
+                const isActive = page.id === activePage.id;
+                return (
+                  <button
+                    key={page.id}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => selectPage(page.id)}
+                    className={`flex w-full items-start gap-3 rounded-md px-3 py-3 text-left transition-colors ${
+                      isActive
+                        ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                        : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
                     }`}
-                  />
-                </button>
-              );
-            })}
+                  >
+                    <FileText className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold">{page.title}</span>
+                      <span className="mt-1 block truncate text-xs">{page.slug}</span>
+                    </span>
+                    <span
+                      className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                        page.status === "published" ? "bg-emerald-500" : "bg-amber-500"
+                      }`}
+                    />
+                  </button>
+                );
+              })
+            )}
           </nav>
         </aside>
 
@@ -179,24 +373,34 @@ export function WebsiteCMSPage() {
 
             {isEditing ? (
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={cancelEditing}>
+                <Button size="sm" variant="outline" onClick={cancelEditing} disabled={isSaving}>
                   <X className="h-4 w-4" /> Cancel
                 </Button>
-                <Button size="sm" variant="primary" onClick={publishDraft}>
-                  <Send className="h-4 w-4" /> Publish
+                <Button size="sm" variant="primary" onClick={publishDraft} isLoading={isSaving}>
+                  <Send className="h-4 w-4" /> {isSaving ? "Publishing" : "Publish"}
                 </Button>
               </div>
             ) : (
-              <Button size="sm" onClick={startEditing}>
+              <Button size="sm" onClick={startEditing} disabled={isLoading || Boolean(loadError)}>
                 <Pencil className="h-4 w-4" /> Edit Page
               </Button>
             )}
           </div>
 
-          {isEditing ? (
+          {loadError ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+              <div className="flex max-w-xl items-center gap-3 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                <span>{loadError}</span>
+              </div>
+              <Button size="sm" variant="outline" onClick={loadWebsiteContent} disabled={isLoading}>
+                <RefreshCw className="h-4 w-4" /> Retry
+              </Button>
+            </div>
+          ) : isEditing ? (
             <div className="flex flex-1 flex-col gap-4 p-5">
               <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-                <Pencil className="h-4 w-4" /> Editing local draft content. Database publishing comes in Part 2.
+                <Pencil className="h-4 w-4" /> Editing MongoDB-backed draft content.
               </div>
               <CMSPageEditor
                 key={activePage.id}
@@ -212,12 +416,22 @@ export function WebsiteCMSPage() {
                 <div className="flex items-center gap-2 font-medium text-foreground">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Page preview
                 </div>
-                <p className="mt-1">This is a static Part 1 preview. It will load and save MongoDB content in Part 2.</p>
+                <p className="mt-1">
+                  {activePage.html.trim()
+                    ? "This content is loaded from the organization website CMS document."
+                    : "No content has been saved for this page yet."}
+                </p>
               </div>
-              <article
-                className="prose prose-sm max-w-none rounded-md border border-border bg-background p-5 text-foreground dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: activePage.html }}
-              />
+              {activePage.html.trim() ? (
+                <article
+                  className="prose prose-sm max-w-none rounded-md border border-border bg-background p-5 text-foreground dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: activePage.html }}
+                />
+              ) : (
+                <div className="flex min-h-[260px] items-center justify-center rounded-md border border-dashed border-border bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+                  Select Edit Page to create content for {activePage.title}.
+                </div>
+              )}
             </div>
           )}
         </main>

@@ -98,6 +98,7 @@ export async function resolveTenantBySlug(req, res) {
         contactPage:      site.contactPage,
         socialLinks:      site.socialLinks,
         footer:           site.footer,
+        pages:            site.pages,
 
         // NEW: Governance, Infrastructure, Academics & Student Corner
         mandatoryDisclosures: site.mandatoryDisclosures,

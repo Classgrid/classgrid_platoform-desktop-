@@ -7,16 +7,18 @@ import { resetPasswordWithToken } from "../api";
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
-/* ── Password validation rules ── */
-const rules = [
-  { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
-  { label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
-  { label: "One number", test: (p: string) => /\d/.test(p) },
-  { label: "One special character (@$!%*?&)", test: (p: string) => /[@$!%*?&]/.test(p) },
-];
-
 const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+const calculateStrength = (p: string) => {
+  let score = 0;
+  if (p.length > 0) score += 10;
+  if (p.length >= 8) score += 10;
+  if (/[A-Z]/.test(p)) score += 20;
+  if (/[a-z]/.test(p)) score += 20;
+  if (/\d/.test(p)) score += 20;
+  if (/[@$!%*?&]/.test(p)) score += 20;
+  return Math.min(100, score);
+};
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -29,7 +31,7 @@ export function ResetPasswordPage() {
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const allRulesPassed = useMemo(() => strongPassword.test(password), [password]);
+  const isStrong = useMemo(() => strongPassword.test(password), [password]);
   const passwordsMatch = useMemo(() => password === confirmPassword && confirmPassword.length > 0, [password, confirmPassword]);
   const canSubmit = !!token && password.length > 0 && confirmPassword.length > 0 && !isSubmitting;
 
@@ -37,7 +39,7 @@ export function ResetPasswordPage() {
     event.preventDefault();
     if (!canSubmit) return;
 
-    if (!strongPassword.test(password)) {
+    if (!isStrong) {
       setFeedback({ message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", tone: "error" });
       return;
     }
@@ -65,6 +67,11 @@ export function ResetPasswordPage() {
       setIsSubmitting(false);
     }
   };
+
+  const strength = calculateStrength(password);
+  let strengthColor = "bg-red-500";
+  if (strength > 40) strengthColor = "bg-orange-500";
+  if (strength > 80) strengthColor = "bg-[#10b981]";
 
   /* ── SUCCESS STATE — Big tick mark ── */
   if (isSuccess) {
@@ -156,6 +163,21 @@ export function ResetPasswordPage() {
                 {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
               </button>
             </div>
+
+            {/* Password Strength Meter */}
+            {password.length > 0 && (
+              <div className="mt-3 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-white/50">Password strength</span>
+                  <span className={`text-[11px] font-medium ${strength > 80 ? "text-[#10b981]" : strength > 40 ? "text-orange-400" : "text-red-400"}`}>
+                    {strength > 80 ? "Strong" : strength > 40 ? "Medium" : "Weak"}
+                  </span>
+                </div>
+                <div className="h-[4px] w-full overflow-hidden rounded-full bg-[#222]">
+                  <div className={`h-full transition-all duration-300 ${strengthColor}`} style={{ width: \`\${strength}%\` }} />
+                </div>
+              </div>
+            )}
 
             {/* Confirm Password */}
             <label className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-white/50">

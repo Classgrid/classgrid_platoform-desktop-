@@ -10,6 +10,11 @@ const ThemeSchema = new Schema({
   accent:      { type: String, default: "#ffffff" },
 }, { _id: false });
 
+const PageContentSchema = new Schema({
+  html:      { type: String, default: "" },
+  status:    { type: String, enum: ["draft", "published"], default: "draft" },
+  updatedAt: { type: Date },
+}, { _id: false });
 const StatSchema = new Schema({
   icon:  { type: String }, // Lucide icon name: GraduationCap, Trophy, etc.
   value: { type: String }, // "5000+" or "96%"
@@ -278,6 +283,15 @@ const OrgWebsiteContentSchema = new Schema({
 
   // ── Theme ────────────────────────────────────────────────────────────────
   theme: { type: ThemeSchema, default: () => ({}) },
+
+  // Rich page content edited from the ERP Website CMS.
+  pages: {
+    home:       { type: PageContentSchema, default: () => ({}) },
+    about:      { type: PageContentSchema, default: () => ({}) },
+    admissions: { type: PageContentSchema, default: () => ({}) },
+    facilities: { type: PageContentSchema, default: () => ({}) },
+    contact:    { type: PageContentSchema, default: () => ({}) },
+  },
 
   // ── Institution Info ─────────────────────────────────────────────────────
   institution: {
