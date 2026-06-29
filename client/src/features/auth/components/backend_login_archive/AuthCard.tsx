@@ -18,7 +18,7 @@ import { Input } from "@/components/marketing_ui/input";
 import { Separator } from "@/components/marketing_ui/separator";
 import { cn } from "@/lib/utils";
 
-import { checkEmailForLogin, getGoogleAuthUrl, loginWithPassword, resendDeviceOtp, verifyDeviceOtp } from "../api";
+import { checkEmailForLogin, getGoogleAuthUrl, loginWithPassword, requestPasswordReset, resendDeviceOtp, verifyDeviceOtp } from "../../api";
 import {
   getPortalLabel,
   getRedirectPath,
@@ -26,8 +26,8 @@ import {
   isInstitutionAdminRole,
   isUserRole,
   saveStoredAuthRole,
-} from "../auth-helpers";
-import type { AuthAudience, AuthBranding, AuthLoginRole, AuthUserRole } from "../types";
+} from "../../auth-helpers";
+import type { AuthAudience, AuthBranding, AuthLoginRole, AuthUserRole } from "../../types";
 
 type RoleOption = {
   value: AuthUserRole;
@@ -81,11 +81,33 @@ export function AuthCard({
   const [role, setRole] = useState<AuthLoginRole>(defaultRole);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showForgotPwd, setShowForgotPwd] = useState(false);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(initialDeviceVerification ? 60 : 0);
   const [feedback, setFeedback] = useState<{ message: string; tone: MessageTone } | null>(
     initialMessage ? { message: initialMessage, tone: initialMessageTone } : null
   );
+
+  const handleForgotPassword = async () => {
+    if (!email) return;
+    setIsResetting(true);
+    setFeedback(null);
+    try {
+      await requestPasswordReset(email);
+      setFeedback({
+        message: "Reset link sent to your email!",
+        tone: "info"
+      });
+    } catch (error: any) {
+      setFeedback({
+        message: error.response?.data?.message || "Could not send reset link.",
+        tone: "error"
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   useEffect(() => {
     setRole(defaultRole);
@@ -218,17 +240,14 @@ export function AuthCard({
       rememberLoggedInUser(result);
       saveStoredAuthRole(result.user?.role || effectiveRole);
       navigate(getRedirectPath(result.user?.role), { replace: true });
-    } catch (error) {
-      if (error && typeof error === "object" && "needsDeviceOtp" in error) {
-        const message = "message" in error ? String(error.message) : undefined;
-        moveToDeviceVerification(message, getRetryAfterSeconds(error));
-        return;
-      }
-
+    } catch (error: any) {
       const message =
-        error && typeof error === "object" && "message" in error ? String(error.message) : "Login failed. Please try again.";
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        (error instanceof Error ? error.message : "Invalid email or password. Please try again.");
 
       setFeedback({ message, tone: "error" });
+      setShowForgotPwd(true); // Show forgot password when login fails
     } finally {
       setIsSubmitting(false);
     }
@@ -372,10 +391,16 @@ export function AuthCard({
                   />
                   Remember me
                 </label>
-                {/* 
-                  Link removed because mockup does not show "Forgot Password". 
-                  If needed, add it back here.
-                */}
+                {showForgotPwd && (
+                  <button 
+                    type="button" 
+                    onClick={handleForgotPassword}
+                    disabled={isResetting}
+                    className="text-[13px] font-medium text-emerald-500 hover:text-emerald-400 hover:underline disabled:opacity-50"
+                  >
+                    {isResetting ? "Sending..." : "Forgot Password?"}
+                  </button>
+                )}
               </div>
 
               {feedback ? <FeedbackMessage {...feedback} /> : null}

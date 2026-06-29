@@ -3,8 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, LockKeyhole } from "lucide-react";
 
 import { resetPasswordWithToken } from "../api";
-import { LoginPageShell } from "../components/LoginPageShell";
-import { LeftPanelClassgrid } from "../components/LeftPanelClassgrid";
+import { LoginPageShell } from "../components/backend_login_archive/LoginPageShell";
+import { LeftPanelClassgrid } from "../components/backend_login_archive/LeftPanelClassgrid";
 
 const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 

@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-import { getAuthBranding } from "../api";
-import { getDefaultRoleForAudience, getRedirectPath, readStoredAuthRole } from "../auth-helpers";
-import { useCurrentUser } from "../queries/useCurrentUser";
+import { getAuthBranding } from "../../api";
+import { getDefaultRoleForAudience, getRedirectPath, readStoredAuthRole } from "../../auth-helpers";
+import { useCurrentUser } from "../../queries/useCurrentUser";
 import type {
   AuthAudience,
   AuthBranding,
   AuthLoginRole,
   AuthType,
   AuthUserRole,
-} from "../types";
+} from "../../types";
 import { AuthBrandMark } from "./AuthBrandMark";
 import { AuthCard } from "./AuthCard";
 import { LeftPanelClassgrid } from "./LeftPanelClassgrid";

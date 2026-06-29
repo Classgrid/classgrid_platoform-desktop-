@@ -94,15 +94,28 @@ import { OrgAdminLayout } from "@/components/layout/OrgAdminLayout";
 import { DynamicRoleLayout } from "@/components/layout/DynamicRoleLayout";
 import { ComingSoonPage } from "@/features/system/pages/ComingSoonPage";
 
+import { TestForgotPassword } from "@/features/auth/pages/TestForgotPassword";
+import { TestSuperAdmin } from "@/features/auth/pages/TestSuperAdmin";
+import { TestResetPassword } from "@/features/auth/pages/TestResetPassword";
+
 
 export function AppRouter() {
   // ── SUBDOMAIN DETECTION ──
   const hostname = window.location.hostname;
+  const isCustomDomain =
+    hostname !== "localhost" &&
+    hostname !== "classgrid.in" &&
+    !hostname.endsWith(".classgrid.in");
   const subdomain = hostname.split(".")[0];
   const isSuperAdmin = subdomain === "superadmin";
 
   return (
     <Routes>
+      {/* ── TEST UI ROUTE ── */}
+      <Route path="/test-forgot-password" element={<TestForgotPassword />} />
+      <Route path="/test-super-admin" element={<TestSuperAdmin />} />
+      <Route path="/test-reset-password" element={<TestResetPassword />} />
+
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 
         path="/login" 

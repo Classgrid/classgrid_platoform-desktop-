@@ -15,17 +15,28 @@ type LoginPageShellProps = {
 export function LoginPageShell({ leftPanel, rightPanel }: LoginPageShellProps) {
   return (
     <main className="relative flex min-h-screen w-full overflow-hidden bg-[#0a0a0a]">
-      {/* ── Background Glow Effects ── */}
-      <div
-        className="pointer-events-none absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]"
-        style={{ background: "radial-gradient(circle, #10b981 0%, transparent 70%)" }}
+      {/* ── Background Glow Effects (Opposite Sides) ── */}
+      
+      {/* Top-Left Emerald Glow (Copied from CommunityClient.tsx) */}
+      <div 
+        className="pointer-events-none absolute top-0 left-0 -z-10 -translate-x-1/3 -translate-y-1/4 transform-gpu blur-[100px]" 
         aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute -bottom-24 left-1/4 h-[400px] w-[400px] rounded-full opacity-15 blur-[120px]"
-        style={{ background: "radial-gradient(circle, #ea580c 0%, transparent 70%)" }}
+      >
+        <div 
+          className="aspect-[1097/845] w-[55rem] bg-emerald-500 opacity-20" 
+          style={{ clipPath: "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" }} 
+        />
+      </div>
+      {/* Bottom-Right Orange Glow (Copied from CommunityClient.tsx) */}
+      <div 
+        className="pointer-events-none absolute bottom-0 right-0 -z-10 translate-x-1/3 translate-y-1/4 transform-gpu blur-[100px]" 
         aria-hidden="true"
-      />
+      >
+        <div 
+          className="aspect-[1097/845] w-[55rem] bg-[#ea580c] opacity-[0.15]" 
+          style={{ clipPath: "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" }} 
+        />
+      </div>
 
       {/* ── Main Container (Full Screen) ── */}
       <div className="relative z-10 flex w-full min-h-screen overflow-hidden">

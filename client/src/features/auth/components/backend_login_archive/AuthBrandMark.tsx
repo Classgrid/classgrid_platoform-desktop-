@@ -2,7 +2,7 @@ import { Building2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import type { AuthBranding } from "../types";
+import type { AuthBranding } from "../../types";
 
 type AuthBrandMarkProps = {
   branding: AuthBranding;

@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Mail } from "lucide-react";
 
 import { requestPasswordReset } from "../api";
-import { LoginPageShell } from "../components/LoginPageShell";
-import { LeftPanelClassgrid } from "../components/LeftPanelClassgrid";
+import { LoginPageShell } from "../components/backend_login_archive/LoginPageShell";
+import { LeftPanelClassgrid } from "../components/backend_login_archive/LeftPanelClassgrid";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

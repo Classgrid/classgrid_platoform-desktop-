@@ -1,10 +1,22 @@
 import type { AuthUserRole } from "../types";
-import { AuthLayout } from "../components/AuthLayout";
+import { MainLoginPage } from "./MainLoginPage";
+import { CustomDomainLoginPage } from "./CustomDomainLoginPage";
 
 type InstitutionUserLoginPageProps = {
   preferredRole?: AuthUserRole;
 };
 
 export function InstitutionUserLoginPage({ preferredRole }: InstitutionUserLoginPageProps) {
-  return <AuthLayout authType="institution" audience="user" preferredRole={preferredRole} />;
+  const hostname = window.location.hostname;
+  const isCustomDomain =
+    hostname !== "localhost" &&
+    hostname !== "classgrid.in" &&
+    !hostname.endsWith(".classgrid.in") &&
+    !hostname.startsWith("127.0.0.1");
+
+  if (isCustomDomain) {
+    return <CustomDomainLoginPage preferredRole={preferredRole} />;
+  }
+
+  return <MainLoginPage preferredRole={preferredRole} />;
 }

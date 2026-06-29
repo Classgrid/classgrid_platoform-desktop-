@@ -9,7 +9,7 @@ import {
   Youtube,
 } from "lucide-react";
 
-import type { AuthBranding } from "../types";
+import type { AuthBranding } from "../../types";
 
 const SUPPORT_URL = "https://classgrid.in/support/ticket";
 

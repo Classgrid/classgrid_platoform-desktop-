@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 
 import { useOrgDetail, useSaveBillingRates, useCreateRazorpayOrder, useVerifyRazorpayPayment } from "../queries/useOrgDetail";
