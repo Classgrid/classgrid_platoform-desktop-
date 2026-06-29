@@ -1345,7 +1345,7 @@ export const forgotPassword = async (req, res) => {
         const user = await User.findOne({ email: email.toLowerCase().trim() });
 
         // Security: always return the same message to prevent user enumeration
-        const safeResponse = () => res.json({ message: "If that email is registered, a password reset link has been sent." });
+        const safeResponse = () => res.json({ message: "If the email is registered, a password reset link has been sent." });
 
         if (!user) return safeResponse();
 

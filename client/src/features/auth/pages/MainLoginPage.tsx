@@ -175,7 +175,7 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
     const toastId = toast.loading("Sending reset link...");
     try {
       const response = await requestPasswordReset(email.trim());
-      toast.success(response?.message || "If that email is registered, a password reset link has been sent.", { id: toastId });
+      toast.success(response?.message || "If the email is registered, a password reset link has been sent.", { id: toastId });
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || "Failed to send reset link.", { id: toastId });
     }
