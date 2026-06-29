@@ -53,7 +53,10 @@ export function ClassgridSubdomainAdminLoginPage() {
 
     getAuthBranding({ authType: "institution", slug })
       .then((result) => {
-        if (isMounted) setBranding(result);
+        if (isMounted) {
+          setBranding(result);
+          document.title = result.name ? `${result.name} - Classgrid` : "Classgrid ERP";
+        }
       })
       .catch(() => {
         if (isMounted) setBrandingError(true);
@@ -63,8 +66,6 @@ export function ClassgridSubdomainAdminLoginPage() {
   }, [location.search]);
 
   useEffect(() => {
-    document.title = "Classgrid";
-
     // Handle Google OAuth device verification redirect
     const params = new URLSearchParams(location.search);
     if (params.get("device_verify") === "true") {

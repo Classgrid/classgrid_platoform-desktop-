@@ -52,7 +52,10 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
 
     getAuthBranding({ authType: "institution", slug })
       .then((result) => {
-        if (isMounted) setBranding(result);
+        if (isMounted) {
+          setBranding(result);
+          document.title = result.name ? `${result.name} - Classgrid` : "Classgrid ERP";
+        }
       })
       .catch((err) => {
         if (!isMounted) return;
@@ -67,8 +70,6 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
   }, [location.search]);
 
   useEffect(() => {
-    document.title = "Classgrid";
-
     const params = new URLSearchParams(location.search);
     if (params.get("device_verify") === "true") {
       const redirectEmail = params.get("email") || "";
