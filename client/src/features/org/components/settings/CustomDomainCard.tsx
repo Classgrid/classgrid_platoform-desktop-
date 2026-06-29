@@ -569,26 +569,7 @@ export function CustomDomainCard() {
                                                 />
                                             </div>
                                             
-                                            <div className="flex items-center justify-between border-t border-border/50 pt-4">
-                                                <div>
-                                                    <span className="text-sm font-medium text-foreground block">Allow Classgrid URL</span>
-                                                    <span className="text-xs text-muted-foreground">Turn off to strictly redirect all default subdomain traffic to your custom domain.</span>
-                                                </div>
-                                                <Switch 
-                                                    checked={domainConfig.allow_classgrid_url !== false} 
-                                                    onCheckedChange={(checked) => {
-                                                        updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
-                                                            onSuccess: () => {
-                                                                if (!checked) {
-                                                                    setHasCopiedBackdoorUrl(false);
-                                                                    setShowBackdoorWarning(true);
-                                                                }
-                                                            }
-                                                        });
-                                                    }}
-                                                    disabled={updateSettingsMutation.isPending}
-                                                />
-                                            </div>
+
                                         </div>
 
                                         <div className="flex items-center gap-4 mt-5 text-sm text-emerald-800 dark:text-emerald-300">
