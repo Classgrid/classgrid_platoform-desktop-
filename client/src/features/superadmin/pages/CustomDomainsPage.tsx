@@ -20,6 +20,7 @@ export function CustomDomainsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [showCloudflareModal, setShowCloudflareModal] = useState(false);
+  const [showRecaptchaModal, setShowRecaptchaModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -126,10 +127,17 @@ export function CustomDomainsPage() {
     ], null, 2);
   }, [activeDomains]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(cloudflareJSON);
+  const recaptchaDomainsList = useMemo(() => {
+    const domains = orgs
+      .filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active")
+      .map(o => o.custom_domain.domain);
+    return domains.join("\n");
+  }, [orgs]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success("JSON copied to clipboard!");
+    toast.success("Copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -167,6 +175,9 @@ export function CustomDomainsPage() {
           <p className="text-muted-foreground mt-1 text-sm">Manage and verify custom domains mapped by organizations.</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowRecaptchaModal(true)}>
+            <ShieldAlert size={14} className="mr-2 text-primary" /> reCAPTCHA Domains
+          </Button>
           <Button variant="outline" onClick={() => setShowCloudflareModal(true)}>
             <Settings size={14} className="mr-2 text-primary" /> Cloudflare CORS
           </Button>
@@ -225,10 +236,50 @@ export function CustomDomainsPage() {
             <Button 
               size="sm" 
               variant="default" 
-              onClick={copyToClipboard}
+              onClick={() => copyToClipboard(cloudflareJSON)}
             >
               {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
               {copied ? "Copied!" : "Copy JSON"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRecaptchaModal} onOpenChange={setShowRecaptchaModal}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="shrink-0">
+            <DialogTitle>Google reCAPTCHA Domains</DialogTitle>
+            <DialogDescription>
+              Copy this list and paste it into the "Domains" section of your Google reCAPTCHA v3 Admin Console.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto pr-2 pb-2 mt-2">
+            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-3 rounded-md flex items-start gap-2 my-2">
+              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div className="text-xs">
+                <span className="font-semibold text-primary block mb-0.5">How to use this?</span>
+                <span className="text-foreground/80 leading-relaxed">
+                  To prevent the "Invalid domain for site key" error without sacrificing security, paste this list directly into Google reCAPTCHA. It contains every verified custom domain on your platform.
+                </span>
+              </div>
+            </div>
+
+            <div className="relative mt-4">
+              <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
+                {recaptchaDomainsList}
+              </pre>
+            </div>
+          </div>
+          
+          <DialogFooter className="shrink-0 mt-2">
+            <Button 
+              size="sm" 
+              variant="default" 
+              onClick={() => copyToClipboard(recaptchaDomainsList)}
+            >
+              {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
+              {copied ? "Copied!" : "Copy List"}
             </Button>
           </DialogFooter>
         </DialogContent>
