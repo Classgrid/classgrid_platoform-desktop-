@@ -151,6 +151,14 @@ export function ResetPasswordPage() {
     }
   };
 
+  if (isVerifying) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#111111]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+      </main>
+    );
+  }
+
   if (isTokenDead) {
     return (
       <main 

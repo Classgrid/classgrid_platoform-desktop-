@@ -28,8 +28,8 @@ export function LogoutPage() {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
       
-      // 4. Redirect to the root page, letting the router decide the login screen
-      const redirectTo = searchParams.get("redirectTo") || "/";
+      // 4. Redirect to the correct login page
+      const redirectTo = searchParams.get("redirectTo") || "/platform-login";
       
       // Hard redirect to clear React Query cache and memory state completely
       window.location.href = redirectTo + "?logout=success";
@@ -47,11 +47,13 @@ export function LogoutPage() {
       className="fixed inset-0 flex flex-col items-center justify-center"
       style={{ backgroundColor: "#0f0f0f", zIndex: 999999 }}
     >
-      {/* Top-left Classgrid Logo (Triangle) */}
+      {/* Top-left Classgrid Logo */}
       <div className="absolute top-8 left-8">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L22 20H2L12 2Z" fill="white" />
-        </svg>
+        <img 
+          src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" 
+          alt="Classgrid Logo" 
+          className="w-10 h-10 object-contain"
+        />
       </div>
       
       {/* Center Spinner & Text */}

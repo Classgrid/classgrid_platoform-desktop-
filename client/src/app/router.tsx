@@ -112,7 +112,6 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/logout" element={<LogoutPage />} />
-
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 
         path="/login" 

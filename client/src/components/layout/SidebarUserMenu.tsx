@@ -45,6 +45,8 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
     });
   }, []);
 
+  if (!user) return null;
+
   return (
     <>
       <DropdownMenu>
