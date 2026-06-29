@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X, Plus } from "lucide-react";
+import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X, Plus, Palette } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
@@ -8,6 +8,11 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "sonner";
+
+type BrandColorSettings = {
+  primary?: string;
+  secondary?: string;
+};
 
 type BrandingData = {
   logo_url: string;
@@ -26,7 +31,52 @@ type BrandingData = {
   has_custom_domain: boolean;
   name: string;
   sidebar_name: string;
+  brand_colors?: BrandColorSettings;
+  theme_colors?: BrandColorSettings;
+  branding?: {
+    theme_colors?: BrandColorSettings;
+  };
 };
+
+const DEFAULT_BRAND_COLORS = {
+  primary: "#6366f1",
+  secondary: "#4f46e5",
+};
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+const normalizeHexInput = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+};
+
+const isValidHexColor = (value: string) => HEX_COLOR_PATTERN.test(normalizeHexInput(value));
+
+const toColorPickerValue = (value: string) => {
+  const color = normalizeHexInput(value);
+  const shortHex = color.match(/^#([0-9a-fA-F]{3})$/);
+  if (shortHex?.[1]) {
+    const [r = "", g = "", b = ""] = shortHex[1].split("");
+    return `#${r}${r}${g}${g}${b}${b}`;
+  }
+  if (/^#[0-9a-fA-F]{6}/.test(color)) return color.slice(0, 7);
+  return "#000000";
+};
+
+const resolveBrandColors = (branding?: BrandingData) => ({
+  primary: normalizeHexInput(
+    branding?.brand_colors?.primary ||
+      branding?.theme_colors?.primary ||
+      branding?.branding?.theme_colors?.primary ||
+      DEFAULT_BRAND_COLORS.primary
+  ),
+  secondary: normalizeHexInput(
+    branding?.brand_colors?.secondary ||
+      branding?.theme_colors?.secondary ||
+      branding?.branding?.theme_colors?.secondary ||
+      DEFAULT_BRAND_COLORS.secondary
+  ),
+});
 
 export function OrgBrandingCard() {
   const queryClient = useQueryClient();
@@ -40,6 +90,7 @@ export function OrgBrandingCard() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [localSiteTitle, setLocalSiteTitle] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [brandColors, setBrandColors] = useState(DEFAULT_BRAND_COLORS);
 
   const [selectedPlatform, setSelectedPlatform] = useState("instagram_url");
   const [platformUrl, setPlatformUrl] = useState("");
@@ -83,6 +134,10 @@ export function OrgBrandingCard() {
       localStorage.removeItem("org_favicon");
     }
   }, [data?.favicon_url, data?.site_title]);
+
+  React.useEffect(() => {
+    if (data) setBrandColors(resolveBrandColors(data));
+  }, [data]);
 
   const openCropper = (file: File, type: "logo" | "favicon" | "campus") => {
     if (file.size > 5 * 1024 * 1024) {
@@ -191,6 +246,48 @@ export function OrgBrandingCard() {
     toast.success("Social link removed!");
   };
 
+  const savedBrandColors = resolveBrandColors(data);
+  const normalizedBrandColors = {
+    primary: normalizeHexInput(brandColors.primary),
+    secondary: normalizeHexInput(brandColors.secondary),
+  };
+  const brandColorsAreValid = isValidHexColor(brandColors.primary) && isValidHexColor(brandColors.secondary);
+  const brandColorsChanged =
+    normalizedBrandColors.primary !== savedBrandColors.primary ||
+    normalizedBrandColors.secondary !== savedBrandColors.secondary;
+
+  const handleBrandColorChange = (key: keyof BrandColorSettings, value: string) => {
+    setBrandColors((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleBrandColorBlur = (key: keyof BrandColorSettings) => {
+    setBrandColors((current) => ({ ...current, [key]: normalizeHexInput(current[key] || "") }));
+  };
+
+  const handleResetBrandColors = () => {
+    setBrandColors(savedBrandColors);
+  };
+
+  const handleSaveBrandColors = async () => {
+    const payload = {
+      primary: normalizeHexInput(brandColors.primary),
+      secondary: normalizeHexInput(brandColors.secondary),
+    };
+
+    if (!HEX_COLOR_PATTERN.test(payload.primary) || !HEX_COLOR_PATTERN.test(payload.secondary)) {
+      toast.error("Enter valid hex colors like #00E590.");
+      return;
+    }
+
+    try {
+      await updateBranding.mutateAsync({ brand_colors: payload });
+      setBrandColors(payload);
+      toast.success("Brand colors updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update brand colors.");
+    }
+  };
+
   // Removed individual card spinner to use global page spinner
 
   return (
@@ -200,7 +297,7 @@ export function OrgBrandingCard() {
           <ImageIcon size={18} /> Organization Branding
         </h3>
         <p className="text-sm text-muted-foreground mt-1 opacity-80">
-          Upload your college logo, custom favicon, and site title to white-label the platform.
+          Upload your college logo, custom favicon, site title, and brand colors to white-label the platform.
         </p>
       </div>
 
@@ -400,7 +497,7 @@ export function OrgBrandingCard() {
                   disabled={updateBranding.isPending || !localSiteTitle.trim()}
                   className="flex-1"
                 >
-                  {updateBranding.isPending ? <Spinner size="sm" /> : "Save"}
+                  {updateBranding.isPending ? <Spinner /> : "Save"}
                 </Button>
                 <Button 
                   size="sm" 
@@ -424,6 +521,98 @@ export function OrgBrandingCard() {
                 Edit Title
               </Button>
             )}
+          </div>
+        </div>
+
+        {/* Website Theme Colors */}
+        <div className="flex flex-col gap-4 md:col-span-2 lg:col-span-2">
+          <div className="flex flex-col gap-1">
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Palette size={14} /> Website Theme Colors
+            </label>
+            <p className="text-[11px] text-muted-foreground">
+              Primary and secondary hex colors for the public college website.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="primary-brand-color" className="text-xs font-medium text-foreground">
+                Primary Brand Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  aria-label="Primary brand color swatch"
+                  type="color"
+                  value={toColorPickerValue(brandColors.primary)}
+                  onChange={(e) => handleBrandColorChange("primary", e.target.value)}
+                  className="h-10 w-11 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
+                />
+                <input
+                  id="primary-brand-color"
+                  type="text"
+                  inputMode="text"
+                  value={brandColors.primary}
+                  placeholder="#00E590"
+                  onChange={(e) => handleBrandColorChange("primary", e.target.value)}
+                  onBlur={() => handleBrandColorBlur("primary")}
+                  className={`w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none transition-all ${
+                    brandColors.primary && !isValidHexColor(brandColors.primary)
+                      ? "border-destructive focus:ring-1 focus:ring-destructive"
+                      : "border-border focus:ring-1 focus:ring-primary"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="secondary-brand-color" className="text-xs font-medium text-foreground">
+                Secondary Brand Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  aria-label="Secondary brand color swatch"
+                  type="color"
+                  value={toColorPickerValue(brandColors.secondary)}
+                  onChange={(e) => handleBrandColorChange("secondary", e.target.value)}
+                  className="h-10 w-11 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
+                />
+                <input
+                  id="secondary-brand-color"
+                  type="text"
+                  inputMode="text"
+                  value={brandColors.secondary}
+                  placeholder="#4f46e5"
+                  onChange={(e) => handleBrandColorChange("secondary", e.target.value)}
+                  onBlur={() => handleBrandColorBlur("secondary")}
+                  className={`w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none transition-all ${
+                    brandColors.secondary && !isValidHexColor(brandColors.secondary)
+                      ? "border-destructive focus:ring-1 focus:ring-destructive"
+                      : "border-border focus:ring-1 focus:ring-primary"
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleSaveBrandColors}
+              disabled={isLoading || updateBranding.isPending || !brandColorsAreValid || !brandColorsChanged}
+              className="w-fit"
+            >
+              {updateBranding.isPending ? <Spinner /> : "Save Colors"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleResetBrandColors}
+              disabled={isLoading || updateBranding.isPending || !brandColorsChanged}
+              className="w-fit"
+            >
+              Reset
+            </Button>
           </div>
         </div>
       </div>

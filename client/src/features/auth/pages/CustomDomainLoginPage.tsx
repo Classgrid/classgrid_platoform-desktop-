@@ -2,9 +2,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Globe, Facebook, Instagram, Linkedin, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, getAuthBranding } from "../api";
+import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, getAuthBranding, requestPasswordReset } from "../api";
 import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
 import type { AuthUserRole, AuthBranding } from "../types";
+import { toast } from "sonner";
 
 /* ── Constants ── */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
@@ -32,6 +33,7 @@ export function CustomDomainLoginPage({ preferredRole }: { preferredRole?: AuthU
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(0);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   useEffect(() => {
     if (preferredRole) setActiveRole(preferredRole);
@@ -124,6 +126,7 @@ export function CustomDomainLoginPage({ preferredRole }: { preferredRole?: AuthU
         return;
       }
       setFeedback({ message: error?.message || "Login failed. Please try again.", tone: "error" });
+      setShowForgotPassword(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -344,12 +347,17 @@ export function CustomDomainLoginPage({ preferredRole }: { preferredRole?: AuthU
                     </button>
                   </div>
 
-                  {/* 15. Remember Me */}
+                  {/* 15. Remember Me & Forgot Password */}
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
                       <span className="text-[13px] text-[#ededed]">Remember me</span>
                     </div>
+                    {showForgotPassword && (
+                      <button type="button" onClick={handleForgotPasswordClick} className="text-[13px] font-medium text-[#10b981] hover:underline">
+                        Forgot password?
+                      </button>
+                    )}
                   </div>
 
                   {feedback && (
