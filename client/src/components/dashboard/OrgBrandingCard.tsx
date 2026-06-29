@@ -686,6 +686,7 @@ export function OrgBrandingCard() {
         onClose={() => setCropOpen(false)}
         imageSrc={cropSrc}
         aspectRatio={cropType === "favicon" ? 1 : cropType === "campus" ? 0.75 : undefined}
+        circularCrop={cropType === "favicon"}
         title={cropType === "favicon" ? "Crop Favicon (Square PNG)" : cropType === "campus" ? "Crop Campus Photo (3:4)" : "Crop College Logo"}
         onCropComplete={(blob) => uploadToR2(blob, cropType)}
       />

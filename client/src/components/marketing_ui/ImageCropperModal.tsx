@@ -14,6 +14,7 @@ type ImageCropperModalProps = {
   title?: string;
   minWidth?: number;
   minHeight?: number;
+  circularCrop?: boolean;
 };
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
@@ -38,6 +39,7 @@ export function ImageCropperModal({
   imageSrc, 
   onCropComplete, 
   aspectRatio, 
+  circularCrop = false,
   title = "Crop Image",
   minWidth,
   minHeight
@@ -145,7 +147,7 @@ export function ImageCropperModal({
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               onComplete={(c) => setCompletedCrop(c)}
               aspect={aspectRatio}
-              circularCrop={aspectRatio === 1}
+              circularCrop={circularCrop}
               minWidth={minWidth}
               minHeight={minHeight}
             >
