@@ -48,6 +48,18 @@ export function CustomDomainCard() {
         return null; // Module not enabled for this org or API failed
     }
 
+    const getOrgTypeString = (structureType: string | undefined) => {
+        if (!structureType) return "Organization";
+        if (structureType.includes("school")) return "School";
+        if (structureType.includes("college")) return "College";
+        if (structureType.includes("engineering")) return "Institute";
+        if (structureType.includes("coaching")) return "Academy";
+        if (structureType.includes("diploma")) return "Polytechnic";
+        return "Organization";
+    };
+
+    const orgTypeString = getOrgTypeString(user?.organization?.structure_type);
+
     return (
         <div className="flex flex-col gap-6">
             {/* Card 1: Default Classgrid Subdomain */}
@@ -67,10 +79,10 @@ export function CustomDomainCard() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        {domainsData.erp_domain?.domain && domainsData.erp_domain.status === "verified" && (
+                        {(domainsData.erp_domain?.domain || domainsData.custom_domain?.domain) && (
                             <div className="flex items-center gap-3 shrink-0 border-r border-border/50 pr-4">
                                 <Switch 
-                                    checked={domainsData.erp_domain.allow_classgrid_url !== false} 
+                                    checked={domainsData.erp_domain?.allow_classgrid_url !== false} 
                                     onCheckedChange={(checked) => {
                                         updateSettingsMutation.mutate({ domainType: "erp_domain", settings: { allow_classgrid_url: checked } }, {
                                             onSuccess: () => {
@@ -85,7 +97,7 @@ export function CustomDomainCard() {
                                     }}
                                     disabled={updateSettingsMutation.isPending}
                                 />
-                                <span className="text-sm font-medium w-16 text-muted-foreground">{domainsData.erp_domain.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
+                                <span className="text-sm font-medium w-16 text-muted-foreground">{domainsData.erp_domain?.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
                             </div>
                         )}
                         <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -164,26 +176,37 @@ export function CustomDomainCard() {
 
             {/* Backdoor Warning Dialog */}
             <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
-                <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+                <DialogContent className="sm:max-w-md [&>button]:hidden">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                            <AlertTriangle className="w-5 h-5" />
-                            Important: Save Your Emergency URL
+                        <DialogTitle className="text-destructive flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5" />
+                            CRITICAL: Save the Emergency URL
                         </DialogTitle>
-                        <DialogDescription className="text-sm mt-2 text-foreground/80">
-                            Your default Classgrid URL is now disabled. Because the moment your custom DNS breaks (domain expires, CNAME deleted, DNS propagation issue) — your custom domain is DEAD. Students can't login. Faculty can't login. 
-                            <br/><br/>
-                            And if you haven't saved the backdoor URL, you will be locked out of your own ERP forever. Classgrid support would have to manually restore access, which can take days.
-                            <br/><br/>
-                            <strong className="text-foreground">You must copy it as a "break glass in emergency" URL.</strong>
+                        <DialogDescription className="text-base text-foreground/90 space-y-4 pt-4 pb-2">
+                            <p>
+                                By disabling the default <span className="font-semibold text-primary">{user?.organization?.subdomain}.classgrid.in</span> URL, 
+                                your entire platform will now rely <strong>exclusively</strong> on your custom DNS settings.
+                            </p>
+                            <p>
+                                If your custom domain breaks or expires, <strong className="text-destructive">everyone will be locked out</strong>.
+                            </p>
+                            <div className="bg-destructive/10 border-l-4 border-destructive p-4 rounded-md">
+                                <p className="font-semibold text-destructive mb-1">The Unbreakable Backdoor</p>
+                                <p className="text-sm">
+                                    The Org Admin login portal is immune to this rule. You MUST copy and save this URL now. 
+                                    It is the only way you can get back in to fix your DNS if something goes wrong.
+                                </p>
+                            </div>
                         </DialogDescription>
                     </DialogHeader>
                     
-                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
-                        <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                    <div className="flex items-center space-x-2 bg-muted/50 p-3 rounded-lg border font-mono text-sm">
+                        <span className="flex-1 overflow-x-auto whitespace-nowrap">
+                            https://{user?.organization?.subdomain}.classgrid.in/org/login
+                        </span>
                     </div>
-                    
-                    <DialogFooter className="mt-4 flex flex-col gap-2">
+
+                    <DialogFooter className="sm:justify-start gap-2 sm:gap-0 mt-4 flex-col sm:flex-row">
                         <Button 
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
@@ -209,7 +232,7 @@ export function CustomDomainCard() {
 
             <DomainConfigCard
                 title="ERP Login Portal Domain"
-                description="This domain will be used for students and faculty to login (e.g. erp.mycollege.edu)"
+                description="This domain will be used for students and faculty to login (e.g. erp.myschool.edu)"
                 domainType="erp_domain"
                 domainConfig={domainsData.erp_domain}
                 user={user}
@@ -219,8 +242,8 @@ export function CustomDomainCard() {
             />
 
             <DomainConfigCard
-                title="Marketing Website Domain"
-                description="This domain will be used for your public-facing marketing website (e.g. www.mycollege.edu)"
+                title={`${orgTypeString} Website Domain`}
+                description={`This domain will be used for your public-facing ${orgTypeString.toLowerCase()} website (e.g. www.my${orgTypeString.toLowerCase()}.edu)`}
                 domainType="custom_domain"
                 domainConfig={domainsData.custom_domain}
                 user={user}

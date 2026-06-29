@@ -29,7 +29,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             "h-6 w-11 rounded-full bg-zinc-300 dark:bg-zinc-800",
             "transition-colors duration-150 ease-in-out motion-reduce:transition-none",
             "group-hover:bg-zinc-400 dark:group-hover:bg-zinc-700",
-            "peer-checked:bg-primary peer-checked:group-hover:bg-primary/90",
+            "peer-checked:bg-blue-600 peer-checked:group-hover:bg-blue-700",
             "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 peer-focus-visible:ring-offset-2",
             "peer-disabled:opacity-50 peer-disabled:group-hover:bg-zinc-300 dark:peer-disabled:group-hover:bg-zinc-800",
             "after:content-[''] after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm",
