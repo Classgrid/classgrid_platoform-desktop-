@@ -844,8 +844,16 @@ export const login = async (req, res) => {
             }
         }
 
-        // 🛡️ Login Law: Enforce Tenant Matching
-        if (tenantOrgId && user.role !== "super_admin") {
+        // 🛡️ Login Law: Enforce Tenant Matching (NO EXCEPTIONS — not even Super Admin)
+        if (tenantOrgId) {
+            // Super Admins must ONLY use superadmin.classgrid.in — block them on org subdomains
+            if (user.role === "super_admin") {
+                return res.status(403).json({ 
+                    message: "Super Admin accounts can only log in from the Super Admin portal (superadmin.classgrid.in).",
+                    suggestion: "Please go to superadmin.classgrid.in to log in."
+                });
+            }
+            // Org users must belong to this specific org's tenant
             if (!user.organization_id || user.organization_id.toString() !== tenantOrgId.toString()) {
                 return res.status(403).json({ 
                     message: "Unauthorized. This account is not registered to this institution's portal.",

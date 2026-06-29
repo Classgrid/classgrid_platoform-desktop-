@@ -3,10 +3,10 @@
  * 🛑 AI AGENT WARNING: DO NOT MODIFY THE 5 LOGIN PAGES ROUTING 🛑
  * ==============================================================================
  * This application intentionally uses 5 distinct login pages:
- * 1. PlatformLoginPage.tsx (Super Admin)
- * 2. MainLoginPage.tsx (Subdomain Users)
- * 3. MainAdminLoginPage.tsx (Subdomain Admins)
- * 4. CustomDomainLoginPage.tsx (Custom Domain Users)
+ * 1. SuperAdminLoginPage.tsx (Super Admin)
+ * 2. ClassgridSubdomainUserLoginPage.tsx (Subdomain Users)
+ * 3. ClassgridSubdomainAdminLoginPage.tsx (Subdomain Admins)
+ * 4. CustomDomainUserLoginPage.tsx (Custom Domain Users)
  * 5. CustomDomainAdminLoginPage.tsx (Custom Domain Admins)
  * 
  * DO NOT attempt to "simplify" or consolidate these login routes.
