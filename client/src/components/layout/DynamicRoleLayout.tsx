@@ -15,9 +15,13 @@ export function DynamicRoleLayout() {
   
   return (
     <DomainEnforcer 
-      allowClassgridUrl={user.organization?.custom_domain?.allow_classgrid_url !== false}
-      isCustomDomainEnabled={user.organization?.custom_domain?.is_enabled !== false}
-      customDomain={user.organization?.custom_domain?.status === "active" ? user.organization?.custom_domain?.domain : null}
+      allowClassgridUrl={(user.organization?.erp_domain?.allow_classgrid_url ?? user.organization?.custom_domain?.allow_classgrid_url) !== false}
+      isCustomDomainEnabled={(user.organization?.erp_domain?.is_enabled ?? user.organization?.custom_domain?.is_enabled) !== false}
+      customDomain={
+        (user.organization?.erp_domain?.status === "active" || user.organization?.erp_domain?.status === "verified") 
+          ? user.organization?.erp_domain?.domain 
+          : (user.organization?.custom_domain?.status === "active" ? user.organization?.custom_domain?.domain : null)
+      }
     >
       <DashboardLayout role={role} user={user}>
         <Outlet />

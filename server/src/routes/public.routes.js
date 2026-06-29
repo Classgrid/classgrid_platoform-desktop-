@@ -105,8 +105,14 @@ router.get("/auth-branding", async (req, res) => {
 
     const query = [];
     if (slug) query.push({ subdomain: slug });
-    if (req.tenantHost) query.push({ "custom_domain.domain": req.tenantHost });
-    if (domainParam) query.push({ "custom_domain.domain": domainParam });
+    if (req.tenantHost) {
+      query.push({ "custom_domain.domain": req.tenantHost });
+      query.push({ "erp_domain.domain": req.tenantHost });
+    }
+    if (domainParam) {
+      query.push({ "custom_domain.domain": domainParam });
+      query.push({ "erp_domain.domain": domainParam });
+    }
 
     if (query.length === 0) {
       if (requestedType === "institution") {
@@ -116,7 +122,7 @@ router.get("/auth-branding", async (req, res) => {
     }
 
     const org = await Organization.findOne({ $or: query })
-      .select("name subdomain logo_url favicon_url campus_photo_url social_links branding status custom_domain site_title")
+      .select("name subdomain logo_url favicon_url campus_photo_url social_links branding status custom_domain erp_domain site_title")
       .lean();
 
     if (!org) {
@@ -150,6 +156,15 @@ router.get("/auth-branding", async (req, res) => {
       site?.hero?.subHeadline ||
       "Smart Campus. Better Learning.";
 
+    // For login branding, use erp_domain (the domain students/faculty use).
+    // Fall back to custom_domain for backwards compatibility.
+    const erpDomain = org.erp_domain;
+    const mktDomain = org.custom_domain;
+    // The "active" ERP domain is used for login redirects and branding
+    const activeErpDomain = (erpDomain?.status === "verified" || erpDomain?.status === "active") ? erpDomain?.domain : null;
+    // The "active" marketing domain (for reference only)
+    const activeMktDomain = (mktDomain?.status === "verified" || mktDomain?.status === "active") ? mktDomain?.domain : null;
+
     return res.json({
       success: true,
       branding: {
@@ -162,9 +177,12 @@ router.get("/auth-branding", async (req, res) => {
         campusImageUrl,
         leftVariant: campusImageUrl ? "image" : "default",
         subdomain: org.subdomain,
-        customDomain: org.custom_domain?.status === "active" ? org.custom_domain?.domain : null,
-        allowClassgridUrl: org.custom_domain?.allow_classgrid_url !== false,
-        isCustomDomainEnabled: org.custom_domain?.is_enabled !== false,
+        // customDomain = ERP domain (used for login redirect when classgrid URL is disabled)
+        customDomain: activeErpDomain || activeMktDomain,
+        allowClassgridUrl: erpDomain?.allow_classgrid_url !== false,
+        isCustomDomainEnabled: erpDomain?.is_enabled !== false,
+        // Also expose the marketing domain separately
+        marketingDomain: activeMktDomain,
         siteTitle: org.site_title || "Classgrid ERP",
         socialLinks: org.social_links || {},
       },
