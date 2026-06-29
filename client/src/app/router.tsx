@@ -41,6 +41,7 @@ import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
+import { WebsiteCMSPage } from "@/features/website_cms/pages/WebsiteCMSPage";
 
 import { StudentHomePage } from "@/features/student/pages/StudentHomePage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
@@ -190,6 +191,7 @@ export function AppRouter() {
           <Route path="/org/admin/settings" element={<SharedSettingsPage />} />
           <Route path="/org/admin/profile" element={<SharedProfilePage />} />
           <Route path="/org/admin/chat" element={<ChatPage />} />
+          <Route path="/org/website" element={<WebsiteCMSPage />} />
           <Route path="/org/admin/dashboard" element={<GenericPage title="Org Overview" />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
           
@@ -205,6 +207,16 @@ export function AppRouter() {
 
         {/* ── DYNAMIC ROLE LAYOUT (Wraps all 10 Dept Dashboards & Common Pages) ── */}
         <Route element={<DynamicRoleLayout />}>
+          {/* Website CMS */}
+          <Route path="/dept/admissions/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/fees/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/exams/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/library/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/attendance/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/hr/website" element={<WebsiteCMSPage />} />
+          <Route path="/dept/transport/website" element={<WebsiteCMSPage />} />
+          <Route path="/faculty/website" element={<WebsiteCMSPage />} />
+
           {/* 3. Admissions Department Dashboard */}
           <Route path="/dept/admissions/dashboard" element={<AdmissionDashboardRouter />} />
           <Route path="/dept/admissions/applications" element={<AllApplicationsPage />} />

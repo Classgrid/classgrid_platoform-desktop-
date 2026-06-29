@@ -1,10 +1,20 @@
 import { type FormEvent, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Lock, Eye, EyeOff, Check, X, CheckCircle2 } from "lucide-react";
 
 import { resetPasswordWithToken } from "../api";
-import { LoginPageShell } from "../components/backend_login_archive/LoginPageShell";
-import { LeftPanelClassgrid } from "../components/backend_login_archive/LeftPanelClassgrid";
+
+const CLASSGRID_LOGO =
+  "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
+
+/* ── Password validation rules ── */
+const rules = [
+  { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+  { label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+  { label: "One number", test: (p: string) => /\d/.test(p) },
+  { label: "One special character (@$!%*?&)", test: (p: string) => /[@$!%*?&]/.test(p) },
+];
 
 const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
@@ -14,20 +24,14 @@ export function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const validationMessage = useMemo(() => {
-    if (!token) return "This reset link is missing a token. Please request a new reset link.";
-    if (!password) return null;
-    if (!strongPassword.test(password)) {
-      return "Use at least 8 characters with uppercase, lowercase, number, and special character.";
-    }
-    if (confirmPassword && password !== confirmPassword) return "Passwords do not match.";
-    return null;
-  }, [confirmPassword, password, token]);
-
-  const canSubmit = !!token && strongPassword.test(password) && password === confirmPassword && !isSubmitting;
+  const allRulesPassed = useMemo(() => strongPassword.test(password), [password]);
+  const passwordsMatch = useMemo(() => password === confirmPassword && confirmPassword.length > 0, [password, confirmPassword]);
+  const canSubmit = !!token && allRulesPassed && passwordsMatch && !isSubmitting;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,136 +41,222 @@ export function ResetPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await resetPasswordWithToken({ token, password });
+      await resetPasswordWithToken({ token, password });
       setPassword("");
       setConfirmPassword("");
-      setFeedback({ message: result.message || "Password reset successful. You can now log in.", tone: "info" });
+      setIsSuccess(true);
     } catch (error) {
       const message =
         error && typeof error === "object" && "message" in error
           ? String(error.message)
           : "Could not reset password right now.";
-
       setFeedback({ message, tone: "error" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const rightPanel = (
-    <div className="w-full max-w-[440px]">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        {/* Back to Login */}
-        <Link
-          to="/login"
-          className="inline-flex w-fit items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-emerald-400"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to login
-        </Link>
+  /* ── SUCCESS STATE — Big tick mark ── */
+  if (isSuccess) {
+    return (
+      <main className="flex min-h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
+        <div className="flex flex-col items-center gap-6 text-center px-6">
+          {/* Animated success circle */}
+          <div
+            className="flex h-[120px] w-[120px] items-center justify-center rounded-full"
+            style={{
+              background: "linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)",
+              border: "2px solid rgba(16,185,129,0.4)",
+              animation: "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+            }}
+          >
+            <CheckCircle2
+              className="h-[56px] w-[56px] text-[#10b981]"
+              style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
+            />
+          </div>
+
+          <h1
+            className="text-[28px] font-bold text-[#ededed]"
+            style={{ animation: "fadeInUp 0.6s ease 0.3s both" }}
+          >
+            Password Reset Successfully!
+          </h1>
+
+          <p
+            className="max-w-[360px] text-[14px] leading-6 text-white/55"
+            style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
+          >
+            Your password has been updated. You can now log in with your new password.
+          </p>
+
+          <a
+            href="/login"
+            className="mt-2 inline-flex h-[46px] items-center justify-center rounded-[12px] bg-[#10b981] px-8 text-[15px] font-bold text-white transition-colors hover:bg-[#059669]"
+            style={{ animation: "fadeInUp 0.6s ease 0.5s both" }}
+          >
+            Go to Login
+          </a>
+        </div>
+
+        <style>{`
+          @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes fadeInUp {
+            0% { transform: translateY(16px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+          }
+        `}</style>
+      </main>
+    );
+  }
+
+  /* ── FORM STATE ── */
+  return (
+    <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#0a0a0a" }}>
+      <div className="w-full max-w-[420px]">
+        {/* Logo */}
+        <img
+          src={CLASSGRID_LOGO}
+          alt="Classgrid"
+          className="mx-auto h-[56px] w-[56px] object-contain"
+        />
 
         {/* Header */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-[#ededed]">Create new password</h1>
-          <p className="text-sm leading-6 text-white/55">
-            Set a secure password for your Classgrid account.
-          </p>
-        </div>
+        <h1 className="mt-4 text-center text-[24px] font-bold text-[#ededed]">
+          Reset Your Password
+        </h1>
+        <p className="mt-1.5 text-center text-[13px] text-white/55">
+          Create a strong new password for your account.
+        </p>
 
-        {/* Password Inputs */}
-        <div className="flex flex-col gap-4">
-          <PasswordField
-            label="New Password"
-            onChange={setPassword}
-            showPassword={showPassword}
-            toggleShowPassword={() => setShowPassword((current) => !current)}
-            value={password}
-          />
-          <PasswordField
-            label="Confirm Password"
-            onChange={setConfirmPassword}
-            showPassword={showPassword}
-            toggleShowPassword={() => setShowPassword((current) => !current)}
-            value={confirmPassword}
-          />
-        </div>
-
-        {/* Feedback Messages */}
-        {validationMessage && (
-          <div className="rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm leading-6 text-[#fecaca]">
-            {validationMessage}
-          </div>
-        )}
-        
-        {feedback && (
-          <div
-            aria-live="polite"
-            className={`rounded-xl px-4 py-3 text-sm leading-6 ${
-              feedback.tone === "error"
-                ? "border border-red-500/35 bg-red-500/10 text-[#fecaca]"
-                : "border border-emerald-500/35 bg-emerald-500/10 text-emerald-200"
-            }`}
-          >
-            {feedback.message}
+        {/* No token error */}
+        {!token && (
+          <div className="mt-6 rounded-[12px] border border-red-500/35 bg-red-500/10 px-4 py-3 text-[13px] leading-5 text-red-200">
+            This reset link is missing a token. Please request a new reset link.
           </div>
         )}
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="flex h-[60px] w-full items-center justify-center rounded-[14px] bg-gradient-to-r from-emerald-500 to-emerald-600 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-        >
-          {isSubmitting ? "Updating..." : "Update password"}
-        </button>
-      </form>
-    </div>
-  );
+        {token && (
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col">
+            {/* New Password */}
+            <label className="text-[12px] font-semibold uppercase tracking-wider text-white/50">
+              New Password
+            </label>
+            <div className="mt-1.5 flex h-[44px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
+              <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40"
+                placeholder="Enter new password"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="shrink-0 text-white/70 transition-colors hover:text-white"
+              >
+                {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
 
-  return (
-    <LoginPageShell
-      leftPanel={<LeftPanelClassgrid />}
-      rightPanel={rightPanel}
-    />
-  );
-}
+            {/* Password Strength Rules */}
+            {password.length > 0 && (
+              <div className="mt-3 flex flex-col gap-1.5">
+                {rules.map((rule) => {
+                  const passed = rule.test(password);
+                  return (
+                    <div key={rule.label} className="flex items-center gap-2">
+                      {passed ? (
+                        <Check className="h-[14px] w-[14px] text-[#10b981]" />
+                      ) : (
+                        <X className="h-[14px] w-[14px] text-red-400" />
+                      )}
+                      <span className={`text-[12px] ${passed ? "text-[#10b981]" : "text-red-300"}`}>
+                        {rule.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-function PasswordField({
-  label,
-  onChange,
-  showPassword,
-  toggleShowPassword,
-  value,
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  showPassword: boolean;
-  toggleShowPassword: () => void;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-[#ededed]">{label}</label>
-      <div className="relative w-full">
-        <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/45" aria-hidden="true" />
-        <input
-          autoCapitalize="none"
-          autoComplete="new-password"
-          className="h-[58px] w-full rounded-[14px] border border-white/[0.14] bg-[#111111] pl-11 pr-12 text-sm text-[#ededed] placeholder:text-white/45 outline-none transition-colors focus:border-emerald-500/50"
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={label}
-          type={showPassword ? "text" : "password"}
-          value={value}
-        />
-        <button
-          type="button"
-          className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition-colors hover:bg-white/5 hover:text-white"
-          onClick={toggleShowPassword}
-          aria-label={showPassword ? "Hide password" : "Show password"}
-        >
-          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-        </button>
+            {/* Confirm Password */}
+            <label className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-white/50">
+              Confirm Password
+            </label>
+            <div className="mt-1.5 flex h-[44px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
+              <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40"
+                placeholder="Re-enter password"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="shrink-0 text-white/70 transition-colors hover:text-white"
+              >
+                {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              </button>
+            </div>
+
+            {/* Confirm match indicator */}
+            {confirmPassword.length > 0 && (
+              <div className="mt-2 flex items-center gap-2">
+                {passwordsMatch ? (
+                  <>
+                    <Check className="h-[14px] w-[14px] text-[#10b981]" />
+                    <span className="text-[12px] text-[#10b981]">Passwords match</span>
+                  </>
+                ) : (
+                  <>
+                    <X className="h-[14px] w-[14px] text-red-400" />
+                    <span className="text-[12px] text-red-300">Passwords do not match</span>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Error feedback */}
+            {feedback && (
+              <div
+                className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${
+                  feedback.tone === "error"
+                    ? "border-red-500/35 bg-red-500/10 text-red-200"
+                    : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"
+                }`}
+              >
+                {feedback.message}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="mt-5 h-[46px] w-full rounded-[12px] bg-[#10b981] text-[15px] font-bold text-white transition-colors hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Updating..." : "Update Password"}
+            </button>
+
+            {/* Back to login */}
+            <a
+              href="/login"
+              className="mt-4 text-center text-[13px] text-white/55 transition-colors hover:text-[#10b981]"
+            >
+              ← Back to Login
+            </a>
+          </form>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
