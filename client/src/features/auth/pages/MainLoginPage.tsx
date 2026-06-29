@@ -169,6 +169,19 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
     window.location.assign(getGoogleAuthUrl({ audience: "user", role: activeRole }));
   };
 
+  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      try { document.head.removeChild(script); } catch {}
+      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
+    };
+  }, []);
+
   if (brandingError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-[#080808] text-white text-center">
@@ -182,19 +195,6 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
   if (!branding) {
     return <div className="h-screen w-screen bg-[#080808]" />;
   }
-
-  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      try { document.head.removeChild(script); } catch {}
-      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
-    };
-  }, []);
 
   return (
     /* 1. Full Screen — fills exactly the viewport, never scrolls */
