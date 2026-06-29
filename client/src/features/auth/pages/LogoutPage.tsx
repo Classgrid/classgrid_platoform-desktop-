@@ -28,8 +28,8 @@ export function LogoutPage() {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
       
-      // 4. Redirect to the correct login page
-      const redirectTo = searchParams.get("redirectTo") || "/platform-login";
+      // 4. Redirect to the root page, letting the router decide the login screen
+      const redirectTo = searchParams.get("redirectTo") || "/";
       
       // Hard redirect to clear React Query cache and memory state completely
       window.location.href = redirectTo + "?logout=success";
@@ -43,7 +43,10 @@ export function LogoutPage() {
   }, [searchParams]);
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0f0f0f]">
+    <div 
+      className="fixed inset-0 flex flex-col items-center justify-center"
+      style={{ backgroundColor: "#0f0f0f", zIndex: 999999 }}
+    >
       {/* Top-left Classgrid Logo (Triangle) */}
       <div className="absolute top-8 left-8">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

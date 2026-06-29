@@ -1,8 +1,8 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Check, Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff, XCircle, AlertCircle } from "lucide-react";
 
-import { resetPasswordWithToken } from "../api";
+import { resetPasswordWithToken, verifyResetToken } from "../api";
 
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
@@ -17,8 +17,39 @@ export function ResetPasswordPage() {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(() => {
+    return localStorage.getItem(`reset_success_${token}`) === "true";
+  });
+  const [isTokenDead, setIsTokenDead] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
 
+  useEffect(() => {
+    if (!token) {
+      setIsVerifying(false);
+      return;
+    }
+    
+    // Check local storage first for instant feedback if they just set it
+    if (localStorage.getItem(`reset_success_${token}`) === "true") {
+      setIsVerifying(false);
+      return;
+    }
+
+    // Verify token with backend
+    const checkToken = async () => {
+      try {
+        const response = await verifyResetToken(token);
+        if (!response.valid) {
+          setIsTokenDead(true);
+        }
+      } catch (err) {
+        setIsTokenDead(true);
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+    checkToken();
+  }, [token]);
   const passwordRules = useMemo(() => {
     return {
       minLength: password.length >= 8,
@@ -102,6 +133,7 @@ export function ResetPasswordPage() {
       await resetPasswordWithToken({ token, password });
       setPassword("");
       setConfirmPassword("");
+      localStorage.setItem(`reset_success_${token}`, "true");
       setIsSuccess(true);
     } catch (error) {
       const message =
@@ -109,10 +141,45 @@ export function ResetPasswordPage() {
           ? String(error.message)
           : "Could not reset password right now.";
       setFeedback({ message, tone: "error" });
+      
+      const lowerMsg = message.toLowerCase();
+      if (lowerMsg.includes("expire") || lowerMsg.includes("invalid")) {
+        setIsTokenDead(true);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isTokenDead) {
+    return (
+      <main 
+        className="relative flex min-h-screen flex-col items-center justify-center px-4" 
+        style={{ 
+          backgroundColor: "#111111",
+          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
+          backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
+          backgroundSize: "80px 80px",
+          backgroundRepeat: "repeat"
+        }}
+      >
+        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10 text-center">
+          <div
+            className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-red-500/10 border border-red-500/30"
+          >
+            <AlertCircle className="h-[40px] w-[40px] text-red-500" />
+          </div>
+          <h2 className="mt-5 text-[20px] font-bold text-white">Link Expired</h2>
+          <p className="mt-3 text-[14px] text-gray-400">
+            This password reset link is invalid or has expired. Please request a new link to reset your password.
+          </p>
+        </div>
+        <footer className="absolute bottom-6 text-center text-xs text-gray-500">
+          © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+        </footer>
+      </main>
+    );
+  }
 
   if (isSuccess) {
     return (

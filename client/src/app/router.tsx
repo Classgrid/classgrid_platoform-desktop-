@@ -111,7 +111,7 @@ export function AppRouter() {
 
   return (
     <Routes>
-
+      <Route path="/logout" element={<LogoutPage />} />
 
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 
@@ -275,7 +275,6 @@ export function AppRouter() {
           <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
           <Route path="/tools" element={<GenericPage title="Schedule" />} />
           <Route path="/chat" element={<ChatPage />} />
-          <Route path="/logout" element={<LogoutPage />} />
           <Route path="/notifications" element={<GenericPage title="Notifications" />} />
           <Route path="/forum" element={<GenericPage title="Forum" />} />
           <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />

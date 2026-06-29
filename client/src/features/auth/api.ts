@@ -68,6 +68,11 @@ export async function resetPasswordWithToken({ token, password }: { token: strin
   return response.data;
 }
 
+export async function verifyResetToken(token: string) {
+  const response = await apiClient.get<{ valid: boolean; message?: string }>(`/api/auth/verify-reset-token/${token}`);
+  return response.data;
+}
+
 export async function verifyDeviceOtp({ email, otp }: { email: string; otp: string }) {
   const response = await apiClient.post<LoginResponse>("/api/auth/verify-device", {
     email,

@@ -1415,6 +1415,28 @@ export const forgotPassword = async (req, res) => {
     }
 };
 
+// Verify Reset Token
+export const verifyResetToken = async (req, res) => {
+    try {
+        const { token } = req.params;
+        if (!token) return res.status(400).json({ valid: false, message: "No token provided" });
+        
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+        
+        if (!user) {
+            return res.status(400).json({ valid: false, message: "Link has expired or already been used." });
+        }
+        
+        res.json({ valid: true });
+    } catch (err) {
+        res.status(500).json({ valid: false, message: "Server error" });
+    }
+};
+
 // Reset Password
 export const resetPassword = async (req, res) => {
     try {

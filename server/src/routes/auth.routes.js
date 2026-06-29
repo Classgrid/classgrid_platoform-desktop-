@@ -42,6 +42,7 @@ router.post("/logout", authController.logout);
 router.get("/me", isAuthenticated, authController.getCurrentUser);
 
 router.post("/forgot-password", resetPasswordLimiter, authController.forgotPassword);
+router.get("/verify-reset-token/:token", authController.verifyResetToken);
 router.post("/reset-password", resetPasswordLimiter, authController.resetPassword);
 router.post("/faculty-activate", resetPasswordLimiter, authController.facultyActivate);
 router.post("/force-reset-password", isAuthenticated, authController.forceResetPassword);
