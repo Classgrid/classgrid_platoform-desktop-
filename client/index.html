@@ -8,7 +8,7 @@
       var customFavicon = localStorage.getItem('org_favicon');
       var customTitle = localStorage.getItem('org_title');
       var hostname = window.location.hostname;
-      var isMainPlatform = hostname === 'app.classgrid.in' || hostname === 'localhost' || hostname === '127.0.0.1';
+      var isMainPlatform = hostname.endsWith('.classgrid.in') || hostname === 'localhost' || hostname === '127.0.0.1';
 
       if (customFavicon) {
         document.write('<link rel="icon" href="' + customFavicon + '" />');
@@ -16,6 +16,9 @@
         document.write('<link rel="icon" type="image/png" sizes="32x32" href="/logos/favicon-32x32.png?v=2" />');
         document.write('<link rel="icon" type="image/png" sizes="16x16" href="/logos/favicon-16x16.png?v=2" />');
         document.write('<link rel="icon" href="/logos/favicon.ico?v=2" sizes="48x48" />');
+      } else {
+        // Generic Icon (Globe) to override default browser behavior which looks for /favicon.ico
+        document.write('<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>" />');
       }
       
       if (customTitle) {
@@ -25,11 +28,15 @@
       } else {
         document.write('<title>Loading...</title>');
       }
+
+      // Only load Classgrid manifest on the main platform
+      if (isMainPlatform) {
+        document.write('<link rel="manifest" href="/site.webmanifest" />');
+      }
     } catch(e) {
       document.write('<title>Loading...</title>');
     }
   </script>
-  <link rel="manifest" href="/site.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Fonts and Icons for Legacy matching -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
