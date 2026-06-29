@@ -190,6 +190,73 @@ export function CustomDomainCard() {
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={showEditDomainModal} onOpenChange={setShowEditDomainModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Edit Classgrid Organization URL</DialogTitle>
+                        <DialogDescription>
+                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing links pointing to it. You will be instantly redirected to your new domain.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col gap-5 py-2">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium text-foreground">
+                                To confirm, type the old domain: "{user?.organization?.subdomain}"
+                            </label>
+                            <Input
+                                value={confirmOldDomainInput}
+                                onChange={(e) => setConfirmOldDomainInput(e.target.value)}
+                                placeholder={`Type "${user?.organization?.subdomain}" here`}
+                            />
+                        </div>
+
+                        {confirmOldDomainInput === user?.organization?.subdomain && (
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-foreground">
+                                    Now, enter the new domain:
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        value={subdomainInput}
+                                        onChange={(e) => setSubdomainInput(e.target.value)}
+                                        placeholder="e.g. aec"
+                                        className="flex-1"
+                                    />
+                                    <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg flex gap-3 text-danger mt-2">
+                            <AlertTriangle className="w-5 h-5 shrink-0" />
+                            <div className="text-sm">
+                                <strong>Warning:</strong> You will be instantly redirected to the new URL. An email with the new links will be sent to the admin.
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDomainModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
+                                onSuccess: () => {
+                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
+                                    window.location.replace(newUrl);
+                                }
+                            })}
+                            disabled={updateSubdomainMutation.isPending || confirmOldDomainInput !== user?.organization?.subdomain || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
+                        >
+                            {updateSubdomainMutation.isPending && <Spinner className="mr-2" size="sm" />}
+                            Update Domain
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <DomainConfigCard
                 title="ERP Login Portal Domain"
                 description="This domain will be used for students and faculty to login (e.g. erp.myschool.edu)"
@@ -752,72 +819,6 @@ function DomainConfigCard({
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={showEditDomainModal} onOpenChange={setShowEditDomainModal}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Edit Classgrid Organization URL</DialogTitle>
-                        <DialogDescription>
-                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing links pointing to it. You will be instantly redirected to your new domain.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="flex flex-col gap-5 py-2">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-foreground">
-                                To confirm, type the old domain: "{user?.organization?.subdomain}"
-                            </label>
-                            <Input
-                                value={confirmOldDomainInput}
-                                onChange={(e) => setConfirmOldDomainInput(e.target.value)}
-                                placeholder={`Type "${user?.organization?.subdomain}" here`}
-                            />
-                        </div>
-
-                        {confirmOldDomainInput === user?.organization?.subdomain && (
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Now, enter the new domain:
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        value={subdomainInput}
-                                        onChange={(e) => setSubdomainInput(e.target.value)}
-                                        placeholder="e.g. aec"
-                                        className="flex-1"
-                                    />
-                                    <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
-                                </div>
-                            </div>
-                        )}
-                        
-                        <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg flex gap-3 text-danger mt-2">
-                            <AlertTriangle className="w-5 h-5 shrink-0" />
-                            <div className="text-sm">
-                                <strong>Warning:</strong> You will be instantly redirected to the new URL. An email with the new links will be sent to the admin.
-                            </div>
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowEditDomainModal(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
-                                onSuccess: () => {
-                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
-                                    window.location.replace(newUrl);
-                                }
-                            })}
-                            disabled={updateSubdomainMutation.isPending || confirmOldDomainInput !== user?.organization?.subdomain || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
-                        >
-                            {updateSubdomainMutation.isPending && <Spinner className="mr-2" size="sm" />}
-                            Update Domain
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }
