@@ -34,13 +34,24 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
     try {
       window.localStorage.removeItem("classgrid:last-auth-role");
     } catch {}
+
+    // Aggressively clear the token cookie from the browser side as a fallback
+    // (in case the server's clearCookie doesn't match the exact domain/path)
+    try {
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.classgrid.in;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname + ";";
+    } catch {}
+
     // 1. Cancel any in-flight /me requests to prevent stale data from arriving
     await queryClient.cancelQueries({ queryKey: ["current-user"] });
     // 2. Explicitly set the cached user to null so AuthLayout sees no user
     queryClient.setQueryData(["current-user"], null);
     // 3. Remove the query entirely so it won't auto-refetch stale data
     queryClient.removeQueries({ queryKey: ["current-user"] });
-    // 4. Navigate with a logout flag so the login page won't auto-redirect
+    // 4. Clear ALL cached queries to prevent any stale authenticated data
+    queryClient.clear();
+    // 5. Navigate with a logout flag so the login page won't auto-redirect
     const loginPath = getLoginPathForPath(location.pathname);
     const separator = loginPath.includes("?") ? "&" : "?";
     navigate(`${loginPath}${separator}logged_out=true`, { replace: true });

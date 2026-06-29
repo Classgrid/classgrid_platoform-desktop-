@@ -273,13 +273,25 @@ const setTokenCookie = (res, token, req = null, rememberMe = false) => {
         maxAge = 7 * 24 * 60 * 60 * 1000;   // 7 days (remember me)
     }
 
-    res.cookie("token", token, {
+    // In production, scope cookie to .classgrid.in so it works across all subdomains
+    // and can be properly cleared on logout from any subdomain
+    const cookieOptions = {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "None" : "Lax",
         path: "/",
         maxAge,
-    });
+    };
+
+    // Only set domain for *.classgrid.in subdomains, NOT for custom domains
+    if (isProd && req) {
+        const origin = req.headers.origin || req.headers.referer || "";
+        if (origin.includes("classgrid.in")) {
+            cookieOptions.domain = ".classgrid.in";
+        }
+    }
+
+    res.cookie("token", token, cookieOptions);
 };
 
 // ─────────────────────────────────────────────
@@ -1529,12 +1541,25 @@ export const facultyActivate = async (req, res) => {
 // Logout
 export const logout = (req, res) => {
     const isProd = process.env.NODE_ENV === "production";
+
+    // Clear cookie WITHOUT domain (covers api.classgrid.in-scoped legacy cookies)
     res.clearCookie('token', {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "None" : "Lax",
         path: "/",
     });
+
+    // Also clear cookie WITH domain (covers .classgrid.in-scoped cookies from new setTokenCookie)
+    if (isProd) {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            path: "/",
+            domain: ".classgrid.in",
+        });
+    }
 
     // Subdomain-aware logout redirect hint
     const redirectPath = "/login";
