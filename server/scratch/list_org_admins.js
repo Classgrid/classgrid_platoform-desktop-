@@ -44,36 +44,7 @@ async function listOrgAdmins() {
             }
         }
 
-        // Now reset ONE admin from each org to a known password for testing
-        const testPassword = "Test1234!";
-        const hashedPassword = await bcrypt.hash(testPassword, 10);
 
-        console.log("\n" + "=".repeat(80));
-        console.log("RESETTING ALL ORG ADMIN PASSWORDS FOR TESTING");
-        console.log("=".repeat(80));
-
-        for (const org of orgs) {
-            const admin = await User.findOne({ 
-                organization_id: org._id, 
-                role: "org_admin" 
-            });
-            
-            if (admin) {
-                admin.password = hashedPassword;
-                admin.mustResetPassword = false;
-                admin.isEmailVerified = true;
-                await admin.save();
-                console.log(`✅ ${org.subdomain}.classgrid.in → ${admin.email} → Password: ${testPassword}`);
-            }
-        }
-
-        console.log("\n" + "=".repeat(80));
-        console.log("SECURITY TEST INSTRUCTIONS:");
-        console.log("=".repeat(80));
-        console.log("Try logging in as Admin of ORG-A on ORG-B's subdomain.");
-        console.log("Example: Go to bill.classgrid.in/admin/login and enter aps admin's email.");
-        console.log("Expected result: BLOCKED with 'not registered to this institution's portal'");
-        console.log("=".repeat(80));
 
         process.exit(0);
     } catch (err) {

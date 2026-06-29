@@ -2077,6 +2077,7 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
                     "custom_domain.cname_verified": cnameVerified,
                     "custom_domain.status": resolvedStatus,
                     "custom_domain.verified_at": isFullyVerified ? new Date() : null,
+                    ...(isFullyVerified && { "custom_domain.allow_classgrid_url": false })
                 }
             },
             { new: true }
@@ -2162,7 +2163,8 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
                     verification_token: null,
                     txt_verified: false,
                     cname_verified: false,
-                    ssl_provisioned: false
+                    ssl_provisioned: false,
+                    allow_classgrid_url: true
                 }
             }
         });

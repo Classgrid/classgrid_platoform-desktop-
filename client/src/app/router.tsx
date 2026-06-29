@@ -100,6 +100,8 @@ import { NotFoundPage } from "@/features/system/pages/NotFoundPage";
 import { AdminLoginRouter } from "@/features/auth/pages/AdminLoginRouter";
 import { UserLoginRouter } from "@/features/auth/pages/UserLoginRouter";
 import { SuperAdminLoginPage } from "@/features/auth/pages/SuperAdminLoginPage";
+import { TestFullScreenLoginPage } from "@/features/auth/pages/TestFullScreenLoginPage";
+
 
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
@@ -126,6 +128,8 @@ export function AppRouter() {
 
   return (
     <Routes>
+      <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
+
       <Route path="/logout" element={<LogoutPage />} />
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
       <Route 

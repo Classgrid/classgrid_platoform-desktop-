@@ -45,7 +45,8 @@ export function RequireAuth() {
   if (user.organization?.subdomain) {
     const currentHostname = window.location.hostname;
     const orgSubdomainHost = `${user.organization.subdomain}.classgrid.in`;
-    const orgCustomDomain = user.organization.custom_domain;
+    const orgCustomDomainObj = user.organization.custom_domain as any;
+    const orgCustomDomain = orgCustomDomainObj?.domain;
     
     const isClassgridSubdomain = currentHostname.endsWith(".classgrid.in") && currentHostname !== "classgrid.in";
     const systemDomains = ["www.classgrid.in", "app.classgrid.in", "admin.classgrid.in", "api.classgrid.in"];

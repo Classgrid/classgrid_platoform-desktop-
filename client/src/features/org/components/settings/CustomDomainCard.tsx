@@ -29,6 +29,8 @@ export function CustomDomainCard() {
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
     const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
+    const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [hasCopiedBackdoorUrl, setHasCopiedBackdoorUrl] = useState(false);
 
     const updateSubdomainMutation = useMutation({
         mutationFn: (subdomain: string) => apiClient.patch("/api/org-admin/subdomain", { subdomain }),
@@ -60,6 +62,10 @@ export function CustomDomainCard() {
                         // Stop polling if fully verified
                         if (data.custom_domain.status === "verified") {
                             setIsPolling(false);
+                            setTimeout(() => {
+                                setHasCopiedBackdoorUrl(false);
+                                setShowBackdoorWarning(true);
+                            }, 800);
                         }
                     }
                 } catch (err) {
@@ -103,6 +109,10 @@ export function CustomDomainCard() {
             onSuccess: (data) => {
                 if (data.isFullyVerified) {
                     toast.success("Domain verified successfully! SSL provisioning has started.", { duration: 5000 });
+                    setTimeout(() => {
+                        setHasCopiedBackdoorUrl(false);
+                        setShowBackdoorWarning(true);
+                    }, 800);
                 } else {
                     toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
@@ -169,7 +179,13 @@ export function CustomDomainCard() {
                                 checked={domainConfig.allow_classgrid_url !== false} 
                                 onCheckedChange={(checked) => {
                                     updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
-                                        onSuccess: () => toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled"),
+                                        onSuccess: () => {
+                                            toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled");
+                                            if (!checked) {
+                                                setHasCopiedBackdoorUrl(false);
+                                                setShowBackdoorWarning(true);
+                                            }
+                                        },
                                         onError: () => toast.error("Failed to update settings")
                                     });
                                 }}
@@ -560,7 +576,16 @@ export function CustomDomainCard() {
                                                 </div>
                                                 <Switch 
                                                     checked={domainConfig.allow_classgrid_url !== false} 
-                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ allow_classgrid_url: checked })}
+                                                    onCheckedChange={(checked) => {
+                                                        updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
+                                                            onSuccess: () => {
+                                                                if (!checked) {
+                                                                    setHasCopiedBackdoorUrl(false);
+                                                                    setShowBackdoorWarning(true);
+                                                                }
+                                                            }
+                                                        });
+                                                    }}
                                                     disabled={updateSettingsMutation.isPending}
                                                 />
                                             </div>
@@ -607,6 +632,50 @@ export function CustomDomainCard() {
                     <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
                     <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
                         <Trash2 className="w-3.5 h-3.5" /> Remove Domain
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        {/* Backdoor Warning Dialog */}
+        <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
+            <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                        <AlertTriangle className="w-5 h-5" />
+                        Important: Save Your Emergency URL
+                    </DialogTitle>
+                    <DialogDescription className="text-sm mt-2 text-foreground/80">
+                        Your default Classgrid URL is now disabled. Because the moment your custom DNS breaks (domain expires, CNAME deleted, DNS propagation issue) — your custom domain is DEAD. Students can't login. Faculty can't login. 
+                        <br/><br/>
+                        And if you haven't saved the backdoor URL, you will be locked out of your own ERP forever. Classgrid support would have to manually restore access, which can take days.
+                        <br/><br/>
+                        <strong className="text-foreground">You must copy it as a "break glass in emergency" URL.</strong>
+                    </DialogDescription>
+                </DialogHeader>
+                
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
+                    <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                </div>
+                
+                <DialogFooter className="mt-4 flex flex-col gap-2">
+                    <Button 
+                        onClick={() => {
+                            navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
+                            toast.success("Emergency URL copied!");
+                            setHasCopiedBackdoorUrl(true);
+                        }} 
+                        variant={hasCopiedBackdoorUrl ? "outline" : "default"}
+                        className="w-full font-bold"
+                    >
+                        <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
+                    </Button>
+                    <Button 
+                        onClick={() => setShowBackdoorWarning(false)} 
+                        disabled={!hasCopiedBackdoorUrl}
+                        variant="secondary"
+                        className="w-full"
+                    >
+                        I understand & Close
                     </Button>
                 </DialogFooter>
             </DialogContent>

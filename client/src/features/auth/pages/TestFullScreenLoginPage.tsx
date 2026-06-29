@@ -12,7 +12,7 @@ const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
 
 const DEFAULT_CAMPUS = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=550&h=720&auto=format&fit=crop";
 
-export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: AuthUserRole }) {
+export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: AuthUserRole }) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -21,7 +21,13 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   const [showPassword, setShowPassword] = useState(false);
 
   // ── Branding State ──
-  const [branding, setBranding] = useState<AuthBranding | null>(null);
+  const [branding, setBranding] = useState<AuthBranding | null>({
+    name: 'Greenfield University',
+    siteTitle: 'Greenfield Portal',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/800px-User_icon_2.svg.png',
+    faviconUrl: '',
+    campusImageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=550&h=720&auto=format&fit=crop'
+  });
   const [brandingError, setBrandingError] = useState(false);
 
   // ── Backend State ──
@@ -50,13 +56,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
     const slug = searchParams.get("slug") || searchParams.get("org") || (subdomain !== "superadmin" ? subdomain : undefined);
     const customDomain = (!isClassgrid && !isLocalhost) ? hostname : undefined;
 
-    getAuthBranding({ authType: "institution", slug, domain: customDomain })
-      .then((result) => {
-        if (isMounted) setBranding(result);
-      })
-      .catch(() => {
-        if (isMounted) setBrandingError(true);
-      });
+    // getAuthBranding API call temporarily removed to use placeholder testing data
 
     return () => { isMounted = false; };
   }, [location.search]);
@@ -341,7 +341,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                 <form onSubmit={handleLogin} className="flex flex-col">
                   {/* 10. College Header */}
                   {branding.logoUrl && (
-                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[85px] w-auto max-w-[240px] object-contain rounded-[12px]" />
+                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto h-[75px] w-[75px] object-contain" />
                   )}
                   <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">{branding.name}</h1>
                   <p className="mt-2 text-center text-[13px] text-white/65">Welcome back!</p>
