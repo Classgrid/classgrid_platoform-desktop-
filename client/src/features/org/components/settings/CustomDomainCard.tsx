@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle, ExternalLink } from "lucide-react";
+import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle, ExternalLink, Monitor, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
-import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings } from "../../queries/useCustomDomainQueries";
+import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings, CustomDomainConfig } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -16,17 +16,10 @@ import { Switch } from "@/components/marketing_ui/switch";
 
 export function CustomDomainCard() {
     const { data: user } = useCurrentUser();
-    const { data: domainConfig, isLoading } = useCustomDomain();
-    const registerMutation = useRegisterCustomDomain();
-    const verifyMutation = useVerifyCustomDomain();
-    const removeMutation = useRemoveCustomDomain();
-    const updateSettingsMutation = useUpdateCustomDomainSettings();
+    const { data: domainsData, isLoading } = useCustomDomain();
     const queryClient = useQueryClient();
+    const updateSettingsMutation = useUpdateCustomDomainSettings();
 
-    const [domainInput, setDomainInput] = useState("");
-    const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
-    const [isPolling, setIsPolling] = useState(false);
-    const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
     const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
@@ -43,29 +36,257 @@ export function CustomDomainCard() {
             toast.error(err.response?.data?.message || "Failed to update subdomain.");
         }
     });
-    
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center p-8 bg-card rounded-xl border border-border mt-6">
+            </div>
+        );
+    }
+
+    if (!domainsData) {
+        return null; // Module not enabled for this org or API failed
+    }
+
+    return (
+        <div className="flex flex-col gap-6">
+            {/* Card 1: Default Classgrid Subdomain */}
+            <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
+                            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-base text-foreground tracking-tight flex items-center gap-1.5">
+                                <a href={`https://${user?.organization?.subdomain}.classgrid.in`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1.5">
+                                    {user?.organization?.subdomain}.classgrid.in <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                                </a>
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {domainsData.erp_domain?.domain && domainsData.erp_domain.status === "verified" && (
+                            <div className="flex items-center gap-3 shrink-0 border-r border-border/50 pr-4">
+                                <Switch 
+                                    checked={domainsData.erp_domain.allow_classgrid_url !== false} 
+                                    onCheckedChange={(checked) => {
+                                        updateSettingsMutation.mutate({ domainType: "erp_domain", settings: { allow_classgrid_url: checked } }, {
+                                            onSuccess: () => {
+                                                toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled");
+                                                if (!checked) {
+                                                    setHasCopiedBackdoorUrl(false);
+                                                    setShowBackdoorWarning(true);
+                                                }
+                                            },
+                                            onError: () => toast.error("Failed to update settings")
+                                        });
+                                    }}
+                                    disabled={updateSettingsMutation.isPending}
+                                />
+                                <span className="text-sm font-medium w-16 text-muted-foreground">{domainsData.erp_domain.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
+                            </div>
+                        )}
+                        <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                            Default
+                        </div>
+                    </div>
+                </div>
+                <div className="p-0">
+                    <PortalLinksAccordion 
+                        baseUrl={`${user?.organization?.subdomain}.classgrid.in`} 
+                        isSubdomain={true}
+                        subdomainEditUI={(
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4">
+                                {isEditingSubdomain ? (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                value={subdomainInput}
+                                                onChange={(e) => setSubdomainInput(e.target.value)}
+                                                className="max-w-[200px]"
+                                                placeholder="e.g. aec"
+                                                disabled={updateSubdomainMutation.isPending}
+                                            />
+                                            <span className="text-muted-foreground font-medium">.classgrid.in</span>
+                                        </div>
+                                        <div className="text-xs text-danger font-medium mt-1">
+                                            Warning: Changing this will instantly break your current login link.
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Button
+                                                size="sm"
+                                                onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
+                                                    onSuccess: () => {
+                                                        const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
+                                                        window.location.replace(newUrl);
+                                                    }
+                                                })}
+                                                disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
+                                            >
+                                                {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
+                                                Save
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setIsEditingSubdomain(false)}
+                                                disabled={updateSubdomainMutation.isPending}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="font-medium text-foreground text-base">Edit Default Domain</div>
+                                            <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setSubdomainInput(user?.organization?.subdomain || "");
+                                                setIsEditingSubdomain(true);
+                                            }}
+                                        >
+                                            Edit Domain
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    />
+                </div>
+            </div>
+
+            {/* Backdoor Warning Dialog */}
+            <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
+                <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                            <AlertTriangle className="w-5 h-5" />
+                            Important: Save Your Emergency URL
+                        </DialogTitle>
+                        <DialogDescription className="text-sm mt-2 text-foreground/80">
+                            Your default Classgrid URL is now disabled. Because the moment your custom DNS breaks (domain expires, CNAME deleted, DNS propagation issue) — your custom domain is DEAD. Students can't login. Faculty can't login. 
+                            <br/><br/>
+                            And if you haven't saved the backdoor URL, you will be locked out of your own ERP forever. Classgrid support would have to manually restore access, which can take days.
+                            <br/><br/>
+                            <strong className="text-foreground">You must copy it as a "break glass in emergency" URL.</strong>
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
+                        <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                    </div>
+                    
+                    <DialogFooter className="mt-4 flex flex-col gap-2">
+                        <Button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
+                                toast.success("Emergency URL copied!");
+                                setHasCopiedBackdoorUrl(true);
+                            }} 
+                            variant={hasCopiedBackdoorUrl ? "outline" : "default"}
+                            className="w-full font-bold"
+                        >
+                            <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
+                        </Button>
+                        <Button 
+                            onClick={() => setShowBackdoorWarning(false)} 
+                            disabled={!hasCopiedBackdoorUrl}
+                            variant="secondary"
+                            className="w-full"
+                        >
+                            I understand & Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <DomainConfigCard
+                title="ERP Login Portal Domain"
+                description="This domain will be used for students and faculty to login (e.g. erp.mycollege.edu)"
+                domainType="erp_domain"
+                domainConfig={domainsData.erp_domain}
+                user={user}
+                showPortalLinks={true}
+                icon={LayoutDashboard}
+                iconColor="emerald"
+            />
+
+            <DomainConfigCard
+                title="Marketing Website Domain"
+                description="This domain will be used for your public-facing marketing website (e.g. www.mycollege.edu)"
+                domainType="custom_domain"
+                domainConfig={domainsData.custom_domain}
+                user={user}
+                showPortalLinks={false}
+                icon={Monitor}
+                iconColor="purple"
+            />
+        </div>
+    );
+}
+
+function DomainConfigCard({
+    title,
+    description,
+    domainType,
+    domainConfig,
+    user,
+    showPortalLinks,
+    icon: Icon,
+    iconColor
+}: {
+    title: string;
+    description: string;
+    domainType: "custom_domain" | "erp_domain";
+    domainConfig: CustomDomainConfig | null;
+    user: any;
+    showPortalLinks: boolean;
+    icon: any;
+    iconColor: "emerald" | "purple"
+}) {
+    const registerMutation = useRegisterCustomDomain();
+    const verifyMutation = useVerifyCustomDomain();
+    const removeMutation = useRemoveCustomDomain();
+    const updateSettingsMutation = useUpdateCustomDomainSettings();
+    const queryClient = useQueryClient();
+
+    const [domainInput, setDomainInput] = useState("");
+    const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+    const [isPolling, setIsPolling] = useState(false);
+    const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
+    const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [hasCopiedBackdoorUrl, setHasCopiedBackdoorUrl] = useState(false);
+
     const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
 
-    // Auto-polling for DNS Verification (only starts after user clicks Verify once)
     useEffect(() => {
         if (!domainConfig || !isPolling) return;
         
-        // If domain is pending or has conflicts, silently poll every 10 seconds
         if (domainConfig.status === "pending_verification" || domainConfig.status === "verified_with_conflicts") {
             const intervalId = setInterval(async () => {
                 try {
-                    const { data } = await apiClient.post<{ custom_domain: any }>("/api/org-admin/custom-domain/verify");
-                    if (data && data.custom_domain) {
-                        // Silently update the UI without triggering error toasts
-                        queryClient.setQueryData(["org-custom-domain"], data.custom_domain);
+                    const { data } = await apiClient.post<{ custom_domain: any, erp_domain: any }>("/api/org-admin/custom-domain/verify", { domainType });
+                    if (data && data[domainType]) {
+                        queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
+                            ...old,
+                            [domainType]: data[domainType]
+                        }));
                         
-                        // Stop polling if fully verified
-                        if (data.custom_domain.status === "verified") {
+                        if (data[domainType].status === "verified") {
                             setIsPolling(false);
-                            setTimeout(() => {
-                                setHasCopiedBackdoorUrl(false);
-                                setShowBackdoorWarning(true);
-                            }, 800);
+                            if (domainType === "erp_domain") {
+                                setTimeout(() => {
+                                    setHasCopiedBackdoorUrl(false);
+                                    setShowBackdoorWarning(true);
+                                }, 800);
+                            }
                         }
                     }
                 } catch (err) {
@@ -77,21 +298,20 @@ export function CustomDomainCard() {
         } else {
             setIsPolling(false);
         }
-    }, [domainConfig?.status, isPolling, queryClient]);
+    }, [domainConfig?.status, isPolling, queryClient, domainType]);
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
         const trimmedInput = domainInput.trim();
         if (!trimmedInput) return;
 
-        // Validate domain format (e.g., must not contain spaces, must have a dot)
         const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!domainRegex.test(trimmedInput)) {
             toast.error("Please enter a valid domain name (e.g., portal.mycollege.edu)");
             return;
         }
 
-        registerMutation.mutate(trimmedInput, {
+        registerMutation.mutate({ domainType, domain: trimmedInput }, {
             onSuccess: () => {
                 toast.success("Domain registered! Please configure your DNS.");
                 setDomainInput("");
@@ -103,16 +323,18 @@ export function CustomDomainCard() {
     };
 
     const handleVerify = () => {
-        setIsPolling(true); // Start polling when they manually click verify
+        setIsPolling(true);
         
-        verifyMutation.mutate(undefined, {
+        verifyMutation.mutate({ domainType }, {
             onSuccess: (data) => {
                 if (data.isFullyVerified) {
                     toast.success("Domain verified successfully! SSL provisioning has started.", { duration: 5000 });
-                    setTimeout(() => {
-                        setHasCopiedBackdoorUrl(false);
-                        setShowBackdoorWarning(true);
-                    }, 800);
+                    if (domainType === "erp_domain") {
+                        setTimeout(() => {
+                            setHasCopiedBackdoorUrl(false);
+                            setShowBackdoorWarning(true);
+                        }, 800);
+                    }
                 } else {
                     toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
@@ -126,7 +348,7 @@ export function CustomDomainCard() {
 
     const handleRemove = async () => {
         try {
-            await removeMutation.mutateAsync();
+            await removeMutation.mutateAsync({ domainType });
             setRemoveConfirmOpen(false);
         } catch (err) {
             // Error is handled by the hook's onError
@@ -138,147 +360,41 @@ export function CustomDomainCard() {
         toast.success("Copied to clipboard!");
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-8 bg-card rounded-xl border border-border mt-6">
-              {/* Removed inner spinner to avoid multiple spinners on the page */}
-            </div>
-        );
-    }
+    const hasDomain = !!domainConfig?.domain;
+    const isVerified = domainConfig?.status === "verified" || domainConfig?.status === "active";
+    const hasConflicts = domainConfig?.status === "verified_with_conflicts";
 
-    if (!domainConfig) {
-        return null; // Module not enabled for this org or API failed
-    }
+    const colorClasses = iconColor === "emerald" 
+        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+        : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+        
+    const bgClasses = iconColor === "emerald" 
+        ? "bg-emerald-500/20"
+        : "bg-purple-500/20";
 
-    const hasDomain = !!domainConfig.domain;
-    const isVerified = domainConfig.status === "verified" || domainConfig.status === "active";
-    const hasConflicts = domainConfig.status === "verified_with_conflicts";
+    const textClasses = iconColor === "emerald" 
+        ? "text-emerald-800 dark:text-emerald-300"
+        : "text-purple-800 dark:text-purple-300";
+
+    const textSubClasses = iconColor === "emerald" 
+        ? "text-emerald-700/80 dark:text-emerald-400/80"
+        : "text-purple-700/80 dark:text-purple-400/80";
+
+    const borderClasses = iconColor === "emerald" 
+        ? "border-emerald-500/10"
+        : "border-purple-500/10";
 
     return (
-        <div className="flex flex-col gap-6">
-        {/* Card 1: Default Classgrid Subdomain (Always visible, toggle hidden until verified) */}
-        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
-                        <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight flex items-center gap-1.5">
-                            <a href={`https://${user?.organization?.subdomain}.classgrid.in`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1.5">
-                                {user?.organization?.subdomain}.classgrid.in <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                            </a>
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">Your platform's default URL</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    {hasDomain && isVerified && (
-                        <div className="flex items-center gap-3 shrink-0 border-r border-border/50 pr-4">
-                            <Switch 
-                                checked={domainConfig.allow_classgrid_url !== false} 
-                                onCheckedChange={(checked) => {
-                                    updateSettingsMutation.mutate({ allow_classgrid_url: checked }, {
-                                        onSuccess: () => {
-                                            toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled");
-                                            if (!checked) {
-                                                setHasCopiedBackdoorUrl(false);
-                                                setShowBackdoorWarning(true);
-                                            }
-                                        },
-                                        onError: () => toast.error("Failed to update settings")
-                                    });
-                                }}
-                                disabled={updateSettingsMutation.isPending}
-                            />
-                            <span className="text-sm font-medium w-16 text-muted-foreground">{domainConfig.allow_classgrid_url !== false ? 'Enabled' : 'Disabled'}</span>
-                        </div>
-                    )}
-                    <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                        Default
-                    </div>
-                </div>
-            </div>
-            <div className="p-0">
-                <PortalLinksAccordion 
-                    baseUrl={`${user?.organization?.subdomain}.classgrid.in`} 
-                    isSubdomain={true}
-                    subdomainEditUI={(
-                        <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4">
-                            {isEditingSubdomain ? (
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            value={subdomainInput}
-                                            onChange={(e) => setSubdomainInput(e.target.value)}
-                                            className="max-w-[200px]"
-                                            placeholder="e.g. aec"
-                                            disabled={updateSubdomainMutation.isPending}
-                                        />
-                                        <span className="text-muted-foreground font-medium">.classgrid.in</span>
-                                    </div>
-                                    <div className="text-xs text-danger font-medium mt-1">
-                                        Warning: Changing this will instantly break your current login link.
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Button
-                                            size="sm"
-                                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
-                                                onSuccess: () => {
-                                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
-                                                    window.location.replace(newUrl);
-                                                }
-                                            })}
-                                            disabled={updateSubdomainMutation.isPending || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
-                                        >
-                                            {updateSubdomainMutation.isPending ? <Spinner size="sm" className="mr-2" /> : null}
-                                            Save
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setIsEditingSubdomain(false)}
-                                            disabled={updateSubdomainMutation.isPending}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="font-medium text-foreground text-base">Edit Default Domain</div>
-                                        <div className="text-sm text-muted-foreground mt-0.5">Customize your default .classgrid.in domain</div>
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setSubdomainInput(user?.organization?.subdomain || "");
-                                            setIsEditingSubdomain(true);
-                                        }}
-                                    >
-                                        Edit Domain
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                />
-            </div>
-        </div>
-
-        {/* Card 2: Custom Domain */}
         <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shrink-0">
-                        <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <div className={`p-2.5 rounded-xl border shrink-0 ${colorClasses}`}>
+                        <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-base text-foreground tracking-tight">Custom Domain</h3>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">This domain will be assigned to your site</p>
+                        <h3 className="font-semibold text-base text-foreground tracking-tight">{title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 max-w-[500px]">{description}</p>
                     </div>
                 </div>
                 
@@ -286,8 +402,8 @@ export function CustomDomainCard() {
                     {hasDomain && (
                         <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm ${
                             isVerified 
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
-                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                            ? `${colorClasses}` 
+                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
                         }`}>
                             {isVerified ? (
                                 <><CheckCircle2 className="w-3.5 h-3.5" /> Verified</>
@@ -411,7 +527,6 @@ export function CustomDomainCard() {
                                         </thead>
                                         <tbody className="divide-y divide-border/50">
                                             {(() => {
-                                                // Helper to determine DNS names for easy copy-pasting (like Mintlify)
                                                 const parts = domainConfig.domain!.split('.');
                                                 const isLikelyRoot = parts.length === 2 || (parts.length === 3 && parts[1].length <= 3 && parts[2].length <= 3);
                                                 
@@ -431,7 +546,6 @@ export function CustomDomainCard() {
 
                                                 return (
                                                     <>
-                                                        {/* TXT Record */}
                                                         <tr className="hover:bg-muted/10 transition-colors">
                                                             <td className="px-4 py-4 font-medium text-foreground">TXT</td>
                                                             <td className="px-4 py-4">
@@ -457,7 +571,6 @@ export function CustomDomainCard() {
                                                                 {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
-                                                        {/* CNAME / A Record */}
                                                         <tr className="hover:bg-muted/10 transition-colors">
                                                             <td className="px-4 py-4 font-medium text-foreground">{targetType}</td>
                                                             <td className="px-4 py-4">
@@ -544,19 +657,19 @@ export function CustomDomainCard() {
 
                         {isVerified && (
                             <div className="flex flex-col gap-4">
-                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 flex items-start gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                <div className={`${colorClasses} rounded-xl p-5 flex items-start gap-4`}>
+                                    <div className={`w-8 h-8 rounded-full ${bgClasses} flex items-center justify-center shrink-0 mt-0.5`}>
+                                        <CheckCircle2 className={`w-4 h-4 ${textClasses}`} />
                                     </div>
                                     <div className="w-full">
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-emerald-800 dark:text-emerald-300">Domain is active and verified</h4>
+                                            <h4 className={`font-semibold ${textClasses}`}>Domain is active and verified</h4>
                                         </div>
-                                        <p className="text-sm text-emerald-700/80 dark:text-emerald-400/80 mt-1">
+                                        <p className={`text-sm ${textSubClasses} mt-1`}>
                                             Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
                                         </p>
                                         
-                                        <div className="mt-5 space-y-4 bg-background/50 rounded-lg p-4 border border-emerald-500/10">
+                                        <div className={`mt-5 space-y-4 bg-background/50 rounded-lg p-4 border ${borderClasses}`}>
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <span className="text-sm font-medium text-foreground block">Enable Custom Domain</span>
@@ -564,15 +677,13 @@ export function CustomDomainCard() {
                                                 </div>
                                                 <Switch 
                                                     checked={domainConfig.is_enabled !== false} 
-                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ is_enabled: checked })}
+                                                    onCheckedChange={(checked) => updateSettingsMutation.mutate({ domainType, settings: { is_enabled: checked } })}
                                                     disabled={updateSettingsMutation.isPending}
                                                 />
                                             </div>
-                                            
-
                                         </div>
 
-                                        <div className="flex items-center gap-4 mt-5 text-sm text-emerald-800 dark:text-emerald-300">
+                                        <div className={`flex items-center gap-4 mt-5 text-sm ${textClasses}`}>
                                             <div className="flex items-center gap-1.5">
                                                 <CheckCircle2 className="w-4 h-4" /> TXT Record Verified
                                             </div>
@@ -581,86 +692,82 @@ export function CustomDomainCard() {
                                             </div>
                                         </div>
                                         {domainConfig.verified_at && (
-                                            <div className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-2">
+                                            <div className={`text-xs ${textSubClasses} mt-2`}>
                                                 Verified at: {new Date(domainConfig.verified_at).toLocaleString()}
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                                <PortalLinksAccordion baseUrl={domainConfig.domain} />
+                                {showPortalLinks && <PortalLinksAccordion baseUrl={domainConfig.domain || ""} />}
                             </div>
                         )}
-
-
                     </div>
                 )}
             </div>
-        </div>
 
-        {/* Remove Domain Confirmation Dialog */}
-        <Dialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
-            <DialogContent className="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Remove Custom Domain?</DialogTitle>
-                    <DialogDescription>
-                        Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-sm text-muted-foreground">
-                    <strong className="text-foreground">💡 Good to know:</strong> You can always re-add this domain later. Just enter it again and reconfigure the DNS records.
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
-                    <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
-                        <Trash2 className="w-3.5 h-3.5" /> Remove Domain
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-        {/* Backdoor Warning Dialog */}
-        <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
-            <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                        <AlertTriangle className="w-5 h-5" />
-                        Important: Save Your Emergency URL
-                    </DialogTitle>
-                    <DialogDescription className="text-sm mt-2 text-foreground/80">
-                        Your default Classgrid URL is now disabled. Because the moment your custom DNS breaks (domain expires, CNAME deleted, DNS propagation issue) — your custom domain is DEAD. Students can't login. Faculty can't login. 
-                        <br/><br/>
-                        And if you haven't saved the backdoor URL, you will be locked out of your own ERP forever. Classgrid support would have to manually restore access, which can take days.
-                        <br/><br/>
-                        <strong className="text-foreground">You must copy it as a "break glass in emergency" URL.</strong>
-                    </DialogDescription>
-                </DialogHeader>
-                
-                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
-                    <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
-                </div>
-                
-                <DialogFooter className="mt-4 flex flex-col gap-2">
-                    <Button 
-                        onClick={() => {
-                            navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
-                            toast.success("Emergency URL copied!");
-                            setHasCopiedBackdoorUrl(true);
-                        }} 
-                        variant={hasCopiedBackdoorUrl ? "outline" : "default"}
-                        className="w-full font-bold"
-                    >
-                        <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
-                    </Button>
-                    <Button 
-                        onClick={() => setShowBackdoorWarning(false)} 
-                        disabled={!hasCopiedBackdoorUrl}
-                        variant="secondary"
-                        className="w-full"
-                    >
-                        I understand & Close
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+            {/* Remove Domain Confirmation Dialog */}
+            <Dialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Remove {title}?</DialogTitle>
+                        <DialogDescription>
+                            Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-sm text-muted-foreground">
+                        <strong className="text-foreground">💡 Good to know:</strong> You can always re-add this domain later. Just enter it again and reconfigure the DNS records.
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
+                        <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
+                            <Trash2 className="w-3.5 h-3.5" /> Remove Domain
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Backdoor Warning Dialog for ERP Domain */}
+            <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
+                <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+                            <AlertTriangle className="w-5 h-5" />
+                            Important: Save Your Emergency URL
+                        </DialogTitle>
+                        <DialogDescription className="text-sm mt-2 text-foreground/80">
+                            Because you verified an ERP custom domain, if your custom DNS breaks (domain expires, CNAME deleted) — your ERP login is DEAD. 
+                            <br/><br/>
+                            <strong className="text-foreground">You must copy this as a "break glass in emergency" URL.</strong>
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
+                        <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                    </div>
+                    
+                    <DialogFooter className="mt-4 flex flex-col gap-2">
+                        <Button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
+                                toast.success("Emergency URL copied!");
+                                setHasCopiedBackdoorUrl(true);
+                            }} 
+                            variant={hasCopiedBackdoorUrl ? "outline" : "default"}
+                            className="w-full font-bold"
+                        >
+                            <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
+                        </Button>
+                        <Button 
+                            onClick={() => setShowBackdoorWarning(false)} 
+                            disabled={!hasCopiedBackdoorUrl}
+                            variant="secondary"
+                            className="w-full"
+                        >
+                            I understand & Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

@@ -1916,30 +1916,35 @@ router.patch("/custom-domain/settings", isAuthenticated, requireRole("org_admin"
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
-        const { allow_classgrid_url, is_enabled } = req.body;
+        const { allow_classgrid_url, is_enabled, domainType = "custom_domain" } = req.body;
+        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+            return res.status(400).json({ message: "Invalid domainType" });
+        }
+        
         const updateFields = {};
 
         if (typeof allow_classgrid_url === "boolean") {
-            updateFields["custom_domain.allow_classgrid_url"] = allow_classgrid_url;
+            updateFields[`${domainType}.allow_classgrid_url`] = allow_classgrid_url;
         }
         if (typeof is_enabled === "boolean") {
-            updateFields["custom_domain.is_enabled"] = is_enabled;
+            updateFields[`${domainType}.is_enabled`] = is_enabled;
         }
 
         const org = await Organization.findOneAndUpdate(
             { _id: orgId },
             { $set: updateFields },
             { new: true }
-        ).select("custom_domain name");
+        ).select("custom_domain erp_domain name");
 
         if (!org) return res.status(404).json({ message: "Organization not found." });
 
-        logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, updateFields);
+        logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, { domainType, ...updateFields });
 
         res.json({
             success: true,
             message: "Custom domain settings updated.",
-            custom_domain: org.custom_domain
+            custom_domain: org.custom_domain,
+            erp_domain: org.erp_domain
         });
     } catch (err) {
         console.error("[Custom Domain Settings PATCH] Error:", err.message);
@@ -1956,10 +1961,13 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
-        const { domain } = req.body;
+        const { domain, domainType = "custom_domain" } = req.body;
         if (!domain) return res.status(400).json({ message: "Domain is required." });
+        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+            return res.status(400).json({ message: "Invalid domainType" });
+        }
 
-        const org = await Organization.findById(orgId).select("custom_domain feature_flags name").lean();
+        const org = await Organization.findById(orgId).select("custom_domain erp_domain feature_flags name").lean();
         if (!org.feature_flags?.custom_domain_module) {
             return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
         }
@@ -1977,38 +1985,46 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
         }
 
         // Check if another org is using it
-        const existing = await Organization.findOne({ "custom_domain.domain": cleanDomain, _id: { $ne: orgId } }).lean();
+        const existing = await Organization.findOne({
+            $or: [
+                { "custom_domain.domain": cleanDomain },
+                { "erp_domain.domain": cleanDomain }
+            ],
+            _id: { $ne: orgId }
+        }).lean();
         if (existing) {
             return res.status(409).json({ message: "This domain is already registered to another organization." });
         }
 
         const verificationToken = crypto.randomBytes(16).toString("hex");
 
+        const updateObj = {};
+        updateObj[domainType] = {
+            domain: cleanDomain,
+            status: "pending_verification",
+            verification_token: verificationToken,
+            txt_verified: false,
+            cname_verified: false,
+            ssl_provisioned: false,
+            created_at: new Date(),
+            verified_at: null,
+            allow_classgrid_url: true,
+            is_enabled: true
+        };
+
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
-            {
-                $set: {
-                    custom_domain: {
-                        domain: cleanDomain,
-                        status: "pending_verification",
-                        verification_token: verificationToken,
-                        txt_verified: false,
-                        cname_verified: false,
-                        ssl_provisioned: false,
-                        created_at: new Date(),
-                        verified_at: null,
-                    }
-                }
-            },
+            { $set: updateObj },
             { new: true }
-        ).select("custom_domain name");
+        ).select("custom_domain erp_domain name");
 
-        logAdminAction(req, "register_custom_domain", "organization", orgId, updatedOrg.name, { domain: cleanDomain });
+        logAdminAction(req, "register_custom_domain", "organization", orgId, updatedOrg.name, { domainType, domain: cleanDomain });
 
         res.json({
             success: true,
             message: "Custom domain registered. Please configure your DNS records.",
-            custom_domain: updatedOrg.custom_domain
+            custom_domain: updatedOrg.custom_domain,
+            erp_domain: updatedOrg.erp_domain
         });
     } catch (err) {
         console.error("[Custom Domain POST] Error:", err.message);
@@ -2022,14 +2038,20 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
  */
 router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const orgId = req.user.organization_id;
-        const org = await Organization.findById(orgId).select("custom_domain").lean();
+        const { domainType = "custom_domain" } = req.body;
+        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+            return res.status(400).json({ message: "Invalid domainType" });
+        }
 
-        if (!org || !org.custom_domain?.domain || !org.custom_domain?.verification_token) {
+        const orgId = req.user.organization_id;
+        const org = await Organization.findById(orgId).select("custom_domain erp_domain").lean();
+
+        const domainConfig = org[domainType];
+        if (!domainConfig || !domainConfig.domain || !domainConfig.verification_token) {
             return res.status(400).json({ message: "No pending custom domain found." });
         }
 
-        const { domain, verification_token } = org.custom_domain;
+        const { domain, verification_token } = domainConfig;
         let txtVerified = false;
         let cnameVerified = false;
         
@@ -2069,22 +2091,24 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             ? (hasConflicts ? "verified_with_conflicts" : "verified")
             : "pending_verification";
 
+        const updateObj = {
+            [`${domainType}.txt_verified`]: txtVerified,
+            [`${domainType}.cname_verified`]: cnameVerified,
+            [`${domainType}.status`]: resolvedStatus,
+            [`${domainType}.verified_at`]: isFullyVerified ? new Date() : null,
+        };
+        if (isFullyVerified) {
+            updateObj[`${domainType}.allow_classgrid_url`] = false;
+        }
+
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
-            {
-                $set: {
-                    "custom_domain.txt_verified": txtVerified,
-                    "custom_domain.cname_verified": cnameVerified,
-                    "custom_domain.status": resolvedStatus,
-                    "custom_domain.verified_at": isFullyVerified ? new Date() : null,
-                    ...(isFullyVerified && { "custom_domain.allow_classgrid_url": false })
-                }
-            },
+            { $set: updateObj },
             { new: true }
-        ).select("custom_domain");
+        ).select("custom_domain erp_domain");
 
         if (isFullyVerified) {
-            logAdminAction(req, "verify_custom_domain", "organization", orgId, "Custom Domain Verified", { domain });
+            logAdminAction(req, "verify_custom_domain", "organization", orgId, "Custom Domain Verified", { domainType, domain });
             
             // ==========================================
             // AUTOMATED VERCEL INTEGRATION
@@ -2131,6 +2155,7 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             txtVerified,
             cnameVerified,
             custom_domain: updatedOrg.custom_domain,
+            erp_domain: updatedOrg.erp_domain,
             message
         });
     } catch (err) {
@@ -2145,28 +2170,36 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
  */
 router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
+        const resolvedDomainType = req.body.domainType || req.query.domainType || "custom_domain";
+        if (!["custom_domain", "erp_domain"].includes(resolvedDomainType)) {
+            return res.status(400).json({ message: "Invalid domainType" });
+        }
+
         const orgId = req.user.organization_id;
-        const org = await Organization.findById(orgId).select("custom_domain name").lean();
+        const org = await Organization.findById(orgId).select("custom_domain erp_domain name").lean();
         
-        const domainToDelete = org.custom_domain?.domain;
+        const domainToDelete = org[resolvedDomainType]?.domain;
 
         // CRITICAL SECURITY PRECAUTION: Never allow the backend to delete our own platform domains from Vercel
         if (domainToDelete === "classgrid.in" || domainToDelete?.endsWith(".classgrid.in")) {
             return res.status(403).json({ message: "Security block: Cannot delete core platform domains." });
         }
 
-        await Organization.findByIdAndUpdate(orgId, {
-            $set: {
-                custom_domain: {
-                    domain: null,
-                    status: "pending_verification",
-                    verification_token: null,
-                    txt_verified: false,
-                    cname_verified: false,
-                    ssl_provisioned: false,
-                    allow_classgrid_url: true
-                }
+        const updateObj = {
+            [resolvedDomainType]: {
+                domain: null,
+                status: "pending_verification",
+                verification_token: null,
+                txt_verified: false,
+                cname_verified: false,
+                ssl_provisioned: false,
+                allow_classgrid_url: true,
+                is_enabled: true
             }
+        };
+
+        await Organization.findByIdAndUpdate(orgId, {
+            $set: updateObj
         });
 
         // Remove from Vercel if configured
@@ -2189,7 +2222,7 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
             }
         }
 
-        logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { old_domain: domainToDelete });
+        logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { domainType: resolvedDomainType, old_domain: domainToDelete });
 
         res.json({ success: true, message: "Custom domain removed." });
     } catch (err) {
