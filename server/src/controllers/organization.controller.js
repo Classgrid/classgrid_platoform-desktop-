@@ -2108,7 +2108,7 @@ export const deleteTestAccount = async (req, res) => {
     }
 };
 
-// GET /api/organization/branding — Public branding resolver for subdomains
+// GET /api/organization/branding - Public branding resolver for subdomains
 export const getOrgBranding = async (req, res) => {
     try {
         await connectDB();
@@ -2128,10 +2128,10 @@ export const getOrgBranding = async (req, res) => {
         }
 
         // 2. Fetch from DB
-        const org = await Organization.findOne({ 
-            subdomain: slug.toLowerCase().trim() 
+        const org = await Organization.findOne({
+            subdomain: slug.toLowerCase().trim()
         })
-        .select("name logo_url branding structure_type status")
+        .select("name site_title logo_url brand_colors branding structure_type status")
         .lean();
 
         if (!org) {
@@ -2142,15 +2142,34 @@ export const getOrgBranding = async (req, res) => {
             return res.status(403).json({ message: "This institute portal is currently suspended or inactive." });
         }
 
+        const themeColors = org.branding?.theme_colors || {};
+        const brandColors = {
+            primary: org.brand_colors?.primary || themeColors.primary || "#6366f1",
+            secondary: org.brand_colors?.secondary || themeColors.secondary || "#4f46e5",
+        };
+        const resolvedThemeColors = {
+            ...themeColors,
+            primary: brandColors.primary,
+            secondary: brandColors.secondary,
+            accent: themeColors.accent || "#f43f5e",
+        };
+        const branding = {
+            ...(org.branding || {}),
+            theme_colors: resolvedThemeColors,
+        };
+
         const result = {
             name: org.name,
+            site_title: org.site_title || "",
             logo: org.logo_url,
-            branding: org.branding || {
-                theme_colors: { primary: "#6366f1", secondary: "#4f46e5", accent: "#f43f5e" },
-                font_preference: "Inter"
-            },
+            logo_url: org.logo_url,
+            brand_colors: brandColors,
+            theme_colors: resolvedThemeColors,
+            branding,
             structure_type: org.structure_type
         };
+
+
 
         // 3. Store in Cache (TTL: 1 hour)
         await redis.set(cacheKey, JSON.stringify(result), 'EX', 3600);

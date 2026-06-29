@@ -36,6 +36,26 @@ import {
 
 const router = express.Router();
 
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+function normalizeBrandHex(value) {
+    return typeof value === "string" ? value.trim() : "";
+}
+
+function getThemeColors(org = {}) {
+    const themeColors = org.branding?.theme_colors;
+    if (themeColors && typeof themeColors.toObject === "function") return themeColors.toObject();
+    return themeColors || {};
+}
+
+function resolveBrandColors(org = {}) {
+    const themeColors = getThemeColors(org);
+    return {
+        primary: org.brand_colors?.primary || themeColors.primary || "#6366f1",
+        secondary: org.brand_colors?.secondary || themeColors.secondary || "#4f46e5",
+    };
+}
+
 const PROFILE_BY_ORG_TYPE = {
     school: {
         dashboardVariant: "school",
@@ -2185,7 +2205,7 @@ router.get('/dashboard/metrics', isAuthenticated, requireOrganization, attachIns
 /**
  * PATH: /api/org/branding (Often prefixed by /api/org-admin in express mounting)
  * Access: org_admin only
- * Desc: Retrieves the organization's custom branding (logo and favicon) and custom domain status
+ * Desc: Retrieves the organization's custom branding (logo, favicon, theme colors) and custom domain status
  */
 router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
@@ -2198,7 +2218,11 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain.domain site_title subdomain name sidebar_name");
+        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain.domain site_title subdomain name sidebar_name brand_colors branding.theme_colors");
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        const themeColors = getThemeColors(org);
+        const brandColors = resolveBrandColors(org);
         const responseData = {
             logo_url: org.logo_url || "",
             favicon_url: org.favicon_url || "",
@@ -2208,7 +2232,15 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             site_title: org.site_title || "Classgrid ERP",
             subdomain: org.subdomain,
             name: org.name || "",
-            sidebar_name: org.sidebar_name || ""
+            sidebar_name: org.sidebar_name || "",
+            brand_colors: brandColors,
+            branding: {
+                theme_colors: {
+                    ...themeColors,
+                    primary: brandColors.primary,
+                    secondary: brandColors.secondary,
+                },
+            },
         };
 
         await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
@@ -2224,7 +2256,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
  */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const { logo_url, favicon_url, campus_photo_url, social_links, site_title, name, sidebar_name } = req.body;
+        const { logo_url, favicon_url, campus_photo_url, social_links, site_title, name, sidebar_name, brand_colors } = req.body;
         const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
@@ -2238,13 +2270,39 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         if (name !== undefined) updateData.name = name;
         if (sidebar_name !== undefined) updateData.sidebar_name = sidebar_name;
 
+        if (brand_colors !== undefined) {
+            if (!brand_colors || typeof brand_colors !== "object" || Array.isArray(brand_colors)) {
+                return res.status(400).json({ message: "brand_colors must be an object with primary and secondary hex colors." });
+            }
+
+            for (const colorKey of ["primary", "secondary"]) {
+                if (brand_colors[colorKey] === undefined) continue;
+                const color = normalizeBrandHex(brand_colors[colorKey]);
+                if (!HEX_COLOR_PATTERN.test(color)) {
+                    return res.status(400).json({ message: `${colorKey} brand color must be a valid hex value (example: #00E590).` });
+                }
+                updateData[`brand_colors.${colorKey}`] = color;
+                updateData[`branding.theme_colors.${colorKey}`] = color;
+            }
+        }
+
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select("logo_url favicon_url campus_photo_url social_links site_title name sidebar_name");
+        ).select("logo_url favicon_url campus_photo_url social_links site_title name sidebar_name subdomain brand_colors branding.theme_colors");
+
+        if (!updatedOrg) return res.status(404).json({ message: "Organization not found." });
 
         logAdminAction(req, "update_branding", "organization", orgId, updatedOrg.name, updateData);
+
+        const themeColors = getThemeColors(updatedOrg);
+        const brandColors = resolveBrandColors(updatedOrg);
+
+        await redis.del(`org:branding:${orgId}`);
+        if (updatedOrg.subdomain) {
+            await redis.del(`branding:${String(updatedOrg.subdomain).toLowerCase().trim()}`);
+        }
 
         res.json({
             message: "Organization branding updated successfully",
@@ -2255,18 +2313,20 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
                 social_links: updatedOrg.social_links,
                 site_title: updatedOrg.site_title,
                 name: updatedOrg.name,
-                sidebar_name: updatedOrg.sidebar_name
+                sidebar_name: updatedOrg.sidebar_name,
+                brand_colors: brandColors,
+                theme_colors: {
+                    ...themeColors,
+                    primary: brandColors.primary,
+                    secondary: brandColors.secondary,
+                },
             }
         });
-        
-        await redis.del(`org:branding:${orgId}`);
-        
     } catch (err) {
         console.error("[Org Branding Error]:", err.message);
         res.status(500).json({ message: "Server error updating branding." });
     }
 });
-
 /**
  * PATH: /api/org/subdomain
  * METHOD: PATCH

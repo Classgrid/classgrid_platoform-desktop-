@@ -15,9 +15,9 @@ async function resetAdminPassword() {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to MongoDB.");
 
-        const org = await Organization.findOne({ subdomain: "aps" });
+        const org = await Organization.findOne({ subdomain: "bill" });
         if (!org) {
-            console.log("Organization 'aps' not found.");
+            console.log("Organization 'bill' not found.");
             process.exit(1);
         }
         console.log(`Found Org: ${org.name} (ID: ${org._id})`);
@@ -41,7 +41,7 @@ async function resetAdminPassword() {
         console.log("ADMIN LOGIN DETAILS:");
         console.log(`Email: ${admin.email}`);
         console.log(`Password: ${newPassword}`);
-        console.log(`Login URL: https://aps.classgrid.in/admin/login`);
+        console.log(`Login URL: https://nikhil.quantumchem.site/admin/login`);
         console.log("=========================================");
 
         process.exit(0);

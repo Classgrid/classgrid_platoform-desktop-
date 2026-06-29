@@ -16,16 +16,18 @@ async function checkOrg() {
         // We can just list all orgs if there are few, or find by some known fields
         const orgs = await db.collection("organizations").find({}).toArray();
         
-        console.log("=== ORGS WITHOUT CUSTOM DOMAIN ===");
-        const orgsWithoutCustomDomain = orgs.filter(org => !org.custom_domain || !org.custom_domain.domain);
+        console.log("=== ORGS WITH CUSTOM DOMAIN ===");
+        const orgsWithCustomDomain = orgs.filter(org => org.custom_domain && org.custom_domain.domain);
         
-        if (orgsWithoutCustomDomain.length === 0) {
-             console.log("No organizations found without a custom domain.");
+        if (orgsWithCustomDomain.length === 0) {
+             console.log("No organizations found with a custom domain.");
         } else {
-             orgsWithoutCustomDomain.forEach(org => {
+             orgsWithCustomDomain.forEach(org => {
                 console.log(`\nID: ${org._id}`);
                 console.log(`Full Name: ${org.name}`);
                 console.log(`Subdomain: ${org.subdomain ? org.subdomain + ".classgrid.in" : "N/A"}`);
+                console.log(`Custom Domain: ${org.custom_domain.domain}`);
+                console.log(`Status: ${org.custom_domain.status}`);
              });
         }
         
