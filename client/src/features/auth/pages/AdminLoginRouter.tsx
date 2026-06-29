@@ -27,10 +27,22 @@ export function AdminLoginRouter() {
 
     getAuthBranding({ authType: "institution", slug, domain: customDomain })
       .then((result) => {
-        if (isMounted) {
-          setBranding(result);
-          setIsLoading(false);
+        if (!isMounted) return;
+
+        // If the org has a custom domain and disabled the default .classgrid.in URL,
+        // we must immediately redirect them to their custom domain.
+        if (
+          !isCustomDomain &&
+          result.customDomain &&
+          result.isCustomDomainEnabled &&
+          result.allowClassgridUrl === false
+        ) {
+          window.location.href = `https://${result.customDomain}${window.location.pathname}${window.location.search}`;
+          return;
         }
+
+        setBranding(result);
+        setIsLoading(false);
       })
       .catch(() => {
         if (isMounted) setIsLoading(false);
@@ -43,6 +55,9 @@ export function AdminLoginRouter() {
     return <div className="h-screen w-screen bg-[#080808]" />;
   }
 
+  // Show the white-labeled page if the hostname IS a custom domain,
+  // OR if the org has an active custom domain (even on .classgrid.in).
+  // Orgs WITHOUT a custom domain will always see the Classgrid-branded page.
   const shouldUseCustomDomainPage = isCustomDomain || (branding?.customDomain && branding?.isCustomDomainEnabled);
 
   if (shouldUseCustomDomainPage) {

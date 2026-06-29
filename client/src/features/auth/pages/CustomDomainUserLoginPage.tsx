@@ -286,32 +286,38 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
           {/* 3. Bottom Content (over the photo) */}
           <div className="relative z-10 px-10 pb-12">
             
-            {/* 4. Fake Social Links */}
+            {/* 4. Real Social Links */}
             <div className="flex items-center gap-4">
-              <a
-                href="#"
-                className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30"
-              >
-                <Globe size={20} />
-              </a>
-              <a
-                href="#"
-                className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href="#"
-                className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="#"
-                className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30"
-              >
-                <Linkedin size={20} />
-              </a>
+              {branding.socialLinks?.website_url && (
+                <a href={branding.socialLinks.website_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <Globe size={20} />
+                </a>
+              )}
+              {branding.socialLinks?.facebook_url && (
+                <a href={branding.socialLinks.facebook_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <Facebook size={20} />
+                </a>
+              )}
+              {branding.socialLinks?.instagram_url && (
+                <a href={branding.socialLinks.instagram_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <Instagram size={20} />
+                </a>
+              )}
+              {branding.socialLinks?.linkedin_url && (
+                <a href={branding.socialLinks.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <Linkedin size={20} />
+                </a>
+              )}
+              {branding.socialLinks?.twitter_url && (
+                <a href={branding.socialLinks.twitter_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <span className="font-bold text-[18px]">X</span>
+                </a>
+              )}
+              {branding.socialLinks?.youtube_url && (
+                <a href={branding.socialLinks.youtube_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <span className="font-bold text-[14px]">YT</span>
+                </a>
+              )}
             </div>
           </div>
 
