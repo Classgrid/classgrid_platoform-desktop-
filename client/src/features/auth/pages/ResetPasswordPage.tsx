@@ -31,11 +31,21 @@ export function ResetPasswordPage() {
 
   const allRulesPassed = useMemo(() => strongPassword.test(password), [password]);
   const passwordsMatch = useMemo(() => password === confirmPassword && confirmPassword.length > 0, [password, confirmPassword]);
-  const canSubmit = !!token && allRulesPassed && passwordsMatch && !isSubmitting;
+  const canSubmit = !!token && password.length > 0 && confirmPassword.length > 0 && !isSubmitting;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) return;
+
+    if (!strongPassword.test(password)) {
+      setFeedback({ message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", tone: "error" });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setFeedback({ message: "Passwords do not match.", tone: "error" });
+      return;
+    }
 
     setFeedback(null);
     setIsSubmitting(true);
@@ -147,27 +157,6 @@ export function ResetPasswordPage() {
               </button>
             </div>
 
-            {/* Password Strength Rules */}
-            {password.length > 0 && (
-              <div className="mt-3 flex flex-col gap-1.5">
-                {rules.map((rule) => {
-                  const passed = rule.test(password);
-                  return (
-                    <div key={rule.label} className="flex items-center gap-2">
-                      {passed ? (
-                        <Check className="h-[14px] w-[14px] text-[#10b981]" />
-                      ) : (
-                        <X className="h-[14px] w-[14px] text-red-400" />
-                      )}
-                      <span className={`text-[12px] ${passed ? "text-[#10b981]" : "text-red-300"}`}>
-                        {rule.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Confirm Password */}
             <label className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-white/50">
               Confirm Password
@@ -190,23 +179,6 @@ export function ResetPasswordPage() {
                 {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
               </button>
             </div>
-
-            {/* Confirm match indicator */}
-            {confirmPassword.length > 0 && (
-              <div className="mt-2 flex items-center gap-2">
-                {passwordsMatch ? (
-                  <>
-                    <Check className="h-[14px] w-[14px] text-[#10b981]" />
-                    <span className="text-[12px] text-[#10b981]">Passwords match</span>
-                  </>
-                ) : (
-                  <>
-                    <X className="h-[14px] w-[14px] text-red-400" />
-                    <span className="text-[12px] text-red-300">Passwords do not match</span>
-                  </>
-                )}
-              </div>
-            )}
 
             {/* Error feedback */}
             {feedback && (
