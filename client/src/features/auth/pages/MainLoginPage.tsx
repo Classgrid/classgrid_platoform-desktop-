@@ -363,12 +363,12 @@ export function MainLoginPage({ preferredRole }: { preferredRole?: AuthUserRole 
           <div className="flex-1" />
 
           {/* 7. Support Button */}
-          <div className="relative z-10 pb-6">
+          <div className="relative z-10 pb-6 flex justify-start">
             <a 
               href="https://classgrid.in/support/ticket"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[46px] items-center gap-2 rounded-full border border-[#10b981]/50 bg-[#047857] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#059669]"
+              className="flex w-fit h-[46px] items-center gap-2 rounded-full border border-[#10b981]/50 bg-[#047857] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#059669]"
             >
               <HelpCircle className="h-5 w-5" />
               Support

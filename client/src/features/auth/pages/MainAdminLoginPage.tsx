@@ -374,12 +374,12 @@ export function MainAdminLoginPage() {
           <div className="flex-1" />
 
           {/* 7. Support Button */}
-          <div className="relative z-10 pb-6">
+          <div className="relative z-10 pb-6 flex justify-start">
             <a 
               href="https://classgrid.in/support/ticket"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[46px] items-center gap-2 rounded-full border border-[#10b981]/50 bg-[#047857] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#059669]"
+              className="flex w-fit h-[46px] items-center gap-2 rounded-full border border-[#10b981]/50 bg-[#047857] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[#059669]"
             >
               <HelpCircle className="h-5 w-5" />
               Support
@@ -401,7 +401,9 @@ export function MainAdminLoginPage() {
                   {branding.logoUrl && (
                     <img src={branding.logoUrl} alt={branding.name} className="mx-auto h-[75px] w-[75px] object-contain" />
                   )}
-                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">{titleText}</h1>
+                  <h1 className="mt-3 text-center text-[20px] font-bold text-[#ededed]">
+                    {branding.name || titleText}
+                  </h1>
                   <p className="mt-2 text-center text-[13px] text-white/65">Welcome back!</p>
                   <p className="mt-0.5 text-center text-[13px] text-white/65">{subtitleText}</p>
 
