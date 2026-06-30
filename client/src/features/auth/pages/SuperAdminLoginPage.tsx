@@ -56,10 +56,15 @@ export function SuperAdminLoginPage() {
         localStorage.setItem("token", result.token);
       }
 
-      toast.success("Login successful!");
+      // Update global user state
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
       
-      // Default to /superadmin/dashboard as per router configuration
-      navigate("/superadmin/dashboard");
+      // Redirect to dashboard based on role
+      setTimeout(() => {
+        navigate(result.user?.role === "super_admin" ? "/superadmin/dashboard" : "/");
+      }, 500);
+
+      toast.success("Login successful!");
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials. Please try again.");
     } finally {
