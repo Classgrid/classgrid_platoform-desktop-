@@ -607,17 +607,17 @@ function DomainConfigCard({
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{txtName}</code>
-                                                                    <Button onClick={() => copyToClipboard(txtName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <button type="button" onClick={() => copyToClipboard(txtName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </Button>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group max-w-[300px]">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs break-all">classgrid-verify={domainConfig.verification_token}</code>
-                                                                    <Button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
+                                                                    <button type="button" onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0 p-1 rounded hover:bg-muted">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </Button>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
@@ -632,17 +632,17 @@ function DomainConfigCard({
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{cnameName}</code>
-                                                                    <Button onClick={() => copyToClipboard(cnameName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <button type="button" onClick={() => copyToClipboard(cnameName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </Button>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{targetValue}</code>
-                                                                    <Button onClick={() => copyToClipboard(targetValue)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <button type="button" onClick={() => copyToClipboard(targetValue)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </Button>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
