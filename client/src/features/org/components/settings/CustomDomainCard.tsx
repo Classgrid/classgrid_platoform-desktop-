@@ -65,8 +65,8 @@ export function CustomDomainCard() {
     return (
         <div className="flex flex-col gap-6">
             {/* Card 1: Default Classgrid Subdomain */}
-            <div className="w-full bg-black border border-white/10 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-4">
                         <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
                             <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -130,15 +130,14 @@ export function CustomDomainCard() {
                         baseUrl={`${user?.organization?.subdomain}.classgrid.in`} 
                         isSubdomain={true}
                         subdomainEditUI={(
-                        <div className="bg-[#0a0a0a] p-4 rounded-xl border border-white/10 mb-4 flex items-center justify-between">
-                            <div>
-                                <div className="font-medium text-zinc-200 text-base">Edit Classgrid Organization URL</div>
-                                <div className="text-sm text-zinc-400 mt-0.5">Customize your Classgrid Organization URL</div>
-                            </div>
+                            <div className="bg-muted/30 p-4 rounded-xl border border-border/50 mb-4 flex items-center justify-between">
+                                <div>
+                                    <div className="font-medium text-foreground text-base">Edit Classgrid Organization URL</div>
+                                    <div className="text-sm text-muted-foreground mt-0.5">Customize your Classgrid Organization URL</div>
+                                </div>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="border-white/10 bg-black text-white hover:bg-white/5"
                                     onClick={() => {
                                         setSubdomainInput("");
                                         setShowEditDomainModal(true);
@@ -204,7 +203,7 @@ export function CustomDomainCard() {
                 variant="danger"
             >
                 <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-zinc-300">
+                    <label className="text-sm font-medium text-foreground">
                         Enter the new domain:
                     </label>
                     <div className="flex items-center gap-2">
@@ -212,9 +211,9 @@ export function CustomDomainCard() {
                             value={subdomainInput}
                             onChange={(e) => setSubdomainInput(e.target.value)}
                             placeholder="e.g. aec"
-                            className="flex-1 bg-black border-white/10 text-white focus-visible:ring-1 focus-visible:ring-white/30 h-10"
+                            className="flex-1"
                         />
-                        <span className="text-zinc-400 font-medium bg-[#0a0a0a] px-3 py-2 rounded-md border border-white/10 shrink-0 h-10 flex items-center">.classgrid.in</span>
+                        <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
                     </div>
                 </div>
             </DangerConfirmDialog>
@@ -398,9 +397,9 @@ function DomainConfigCard({
         : "border-purple-500/10";
 
     return (
-        <div className="w-full bg-black border border-white/10 rounded-xl overflow-hidden shadow-sm">
+        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
-            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                     <div className={`p-2.5 rounded-xl border shrink-0 ${colorClasses}`}>
                         <Icon className="w-5 h-5" />
@@ -428,23 +427,23 @@ function DomainConfigCard({
                 </div>
             </div>
 
-            <div className="p-6 border-t border-white/10 bg-[#0f0f0f]">
+            <div className="p-6">
                 {!hasDomain ? (
                     <div className="flex flex-col gap-6">
-                        <div className="bg-black rounded-xl p-5 border border-white/10 shadow-sm">
-                            <h4 className="font-semibold text-base text-zinc-200 mb-1">Enter your custom domain</h4>
-                            <p className="text-sm text-zinc-400 mb-5">You can host your domain as a subdomain or a subpath</p>
+                        <div className="bg-background rounded-xl p-5 border border-border/50">
+                            <h4 className="font-semibold text-base text-foreground mb-1">Enter your custom domain</h4>
+                            <p className="text-sm text-muted-foreground mb-5">You can host your domain as a subdomain or a subpath</p>
                             
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-zinc-300">Host at</label>
+                                <label className="text-sm font-medium text-foreground">Host at</label>
                                 <div className="flex gap-3">
-                                    <div className="relative flex-1 flex items-center bg-black border border-white/10 rounded-md focus-within:ring-1 focus-within:ring-white/30 overflow-hidden transition-all">
-                                        <div className="flex items-center justify-center px-4 bg-[#0a0a0a] border-r border-white/10 text-sm text-zinc-400 font-medium h-full shrink-0">
+                                    <div className="relative flex-1 flex items-center bg-background border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden transition-all">
+                                        <div className="flex items-center justify-center px-4 bg-muted/30 border-r border-input text-sm text-foreground font-medium h-full shrink-0">
                                             https://
                                         </div>
                                         <input 
                                             placeholder="erp.yourdomain.com" 
-                                            className="flex-1 px-3 py-2 bg-transparent text-sm text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-zinc-600 h-full w-full"
+                                            className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full"
                                             value={domainInput}
                                             onChange={(e) => setDomainInput(e.target.value)}
                                             onKeyDown={(e) => {
@@ -682,11 +681,11 @@ function DomainConfigCard({
                                             Your custom domain is successfully pointing to Classgrid. SSL certificates have been provisioned and your platform is now accessible at <strong>https://{domainConfig.domain}</strong>.
                                         </p>
                                         
-                                        <div className={`mt-5 space-y-4 bg-[#0a0a0a] rounded-lg p-4 border border-white/10`}>
+                                        <div className={`mt-5 space-y-4 bg-background/50 rounded-lg p-4 border ${borderClasses}`}>
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <span className="text-sm font-medium text-zinc-200 block">Enable Custom Domain</span>
-                                                    <span className="text-xs text-zinc-400">Turn off to temporarily pause traffic to your custom domain.</span>
+                                                    <span className="text-sm font-medium text-foreground block">Enable Custom Domain</span>
+                                                    <span className="text-xs text-muted-foreground">Turn off to temporarily pause traffic to your custom domain.</span>
                                                 </div>
                                                 <Switch 
                                                     checked={domainConfig.is_enabled !== false} 
@@ -822,10 +821,10 @@ const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseU
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="links" className="border-none">
-                <AccordionTrigger className="hover:no-underline px-6 py-4 bg-[#0f0f0f] border-t border-white/10 hover:bg-white/5 transition-colors">
-                    <span className="font-medium text-zinc-300">{isSubdomain ? "Manage URL & View Links" : "View Portal Links"}</span>
+                <AccordionTrigger className="hover:no-underline px-6 py-4 bg-muted/20 hover:bg-muted/40 transition-colors">
+                    <span className="font-medium text-foreground">{isSubdomain ? "Manage URL & View Links" : "View Portal Links"}</span>
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 pt-4 bg-[#0f0f0f]">
+                <AccordionContent className="px-6 pb-6 pt-4">
                     {subdomainEditUI}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {portals.map(portal => (
@@ -834,10 +833,10 @@ const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseU
                                 href={`https://${baseUrl}${portal.path}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex flex-col p-3 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors group cursor-pointer"
+                                className="flex flex-col p-3 rounded-lg hover:bg-muted border border-transparent hover:border-border/50 transition-colors group cursor-pointer"
                             >
-                                <span className="font-medium text-zinc-300 group-hover:text-white text-sm">{portal.name}</span>
-                                <span className="text-xs text-zinc-500 truncate mt-1 group-hover:text-primary transition-colors">{`https://${baseUrl}${portal.path}`}</span>
+                                <span className="font-medium text-foreground/90 group-hover:text-foreground text-sm">{portal.name}</span>
+                                <span className="text-xs text-muted-foreground truncate mt-1 group-hover:text-primary transition-colors">{`https://${baseUrl}${portal.path}`}</span>
                             </a>
                         ))}
                     </div>
