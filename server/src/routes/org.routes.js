@@ -2256,6 +2256,30 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
 router.get('/dashboard/metrics', isAuthenticated, requireOrganization, attachInstitutionProfile, getOrgDashboardMetrics);
 
 /**
+ * PATH: /api/org-admin/join-codes
+ * Access: org_admin only
+ * Desc: Retrieves the organization codes (organizationCode and honorCode)
+ */
+router.get("/join-codes", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const org = await Organization.findById(orgId).select("organizationCode honorCode private_code _id");
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        res.json({
+            tenantId: org._id.toString(),
+            organizationCode: org.organizationCode || org.private_code || "",
+            honorCode: org.honorCode || "",
+        });
+    } catch (err) {
+        console.error("[Join Codes Error]:", err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+/**
  * PATH: /api/org/branding (Often prefixed by /api/org-admin in express mounting)
  * Access: org_admin only
  * Desc: Retrieves the organization's custom branding (logo, favicon, theme colors) and custom domain status

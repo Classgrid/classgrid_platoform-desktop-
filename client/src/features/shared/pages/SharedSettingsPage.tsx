@@ -7,9 +7,11 @@ import { SettingsPushCard } from "../components/settings/SettingsPushCard";
 import { useEmailPreferences, useUpdateEmailPreferences, EmailPrefs } from "../queries/useSettingsQueries";
 import { useUserProfile, useUpdateProfile } from "../queries/useUserProfile";
 import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard";
+import { OrgCodesCard } from "../../org/components/settings/OrgCodesCard";
 import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
 import { OrgNameCard } from "@/components/dashboard/OrgNameCard";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
+import { DeleteOrgCard } from "../../org/components/settings/DeleteOrgCard";
 
 export function SharedSettingsPage() {
   const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
@@ -117,6 +119,8 @@ export function SharedSettingsPage() {
           <OrgBrandingCard />
           <OrgNameCard />
           <CustomDomainCard />
+          <OrgCodesCard />
+          <DeleteOrgCard />
         </>
       )}
     </div>
