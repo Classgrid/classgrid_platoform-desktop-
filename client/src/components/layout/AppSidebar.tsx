@@ -59,7 +59,9 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
           </div>
           <SidebarTrigger className="mx-auto" />
         </div>
-        <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <div className="group-data-[collapsible=icon]:hidden">
+          <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">

@@ -42,9 +42,9 @@ export function SidebarFooterUser({ role, user }: SidebarFooterUserProps) {
 
   return (
     <SidebarFooter className="p-3 border-t border-sidebar-border mt-auto">
-      <div className="flex items-center justify-between w-full">
+      <div className={`flex items-center w-full ${isCollapsed ? "justify-center" : "justify-between"}`}>
         {isCollapsed ? (
-          <div className="mx-auto flex flex-col gap-4 items-center">
+          <div className="flex flex-col gap-4 items-center justify-center">
             <SidebarUserMenu user={user} customTrigger={avatarNode} />
             {showNotifications && <SidebarNotifications settingsPath={settingsPath} />}
           </div>
