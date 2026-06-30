@@ -57,7 +57,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
             <SidebarSwitcher user={user ?? null} />
           </div>
-          <SidebarTrigger className="h-7 w-7 shrink-0 text-muted-foreground [&>svg]:size-3.5 hover:bg-accent hover:text-foreground rounded-md" />
+          <SidebarTrigger className="shrink-0" />
         </div>
         <div className="group-data-[collapsible=icon]:hidden">
           <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
