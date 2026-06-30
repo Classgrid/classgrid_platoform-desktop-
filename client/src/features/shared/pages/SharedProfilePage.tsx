@@ -467,12 +467,12 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
     return (
       <div className="w-full h-full pb-12">
         <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 md:px-6">
-          <Button variant="ghost" size="sm" className="gap-2 -ml-2 text-muted-foreground hover:text-foreground" onClick={onClose}>
-            <ArrowLeft size={16} />
-            Back to Chat
-          </Button>
-          <div className="flex-1 text-center text-sm font-semibold text-foreground mr-[100px]">
-            User Profile
+          <div className="flex items-center text-sm text-muted-foreground">
+            <span className="cursor-pointer hover:text-foreground hover:underline transition-colors" onClick={onClose}>Chat</span>
+            <ChevronRight size={14} className="mx-2 opacity-50" />
+            <span className="cursor-pointer hover:text-foreground hover:underline transition-colors" onClick={onClose}>{form.name || "User"}</span>
+            <ChevronRight size={14} className="mx-2 opacity-50" />
+            <span className="font-semibold text-foreground">Profile</span>
           </div>
         </div>
         <div className="pt-6">

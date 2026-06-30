@@ -171,20 +171,19 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="bg-background rounded-xl shadow-xl w-full max-w-md flex flex-col max-h-[85vh] border border-border animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-            Group Info
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <div className="absolute inset-0 z-50 bg-background overflow-y-auto animate-in fade-in duration-200">
+      {/* Breadcrumb Header */}
+      <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 md:px-6">
+        <div className="flex items-center text-sm text-muted-foreground">
+          <span className="cursor-pointer hover:text-foreground hover:underline transition-colors" onClick={onClose}>Chat</span>
+          <Crown size={14} className="mx-2 opacity-50" />
+          <span className="cursor-pointer hover:text-foreground hover:underline transition-colors" onClick={onClose}>{data?.group?.name || "Group"}</span>
+          <Crown size={14} className="mx-2 opacity-50" />
+          <span className="font-semibold text-foreground">Settings</span>
         </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-8">
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
