@@ -9,6 +9,8 @@ import { dashboardApi, directProvisionApi } from "../services/superAdminApi";
 import type { DirectProvisionPayload } from "../services/superAdminApi";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
+import { Button } from "@/components/marketing_ui/button";
+
 // ── Org type options ────────────────────────────────────────────────────────
 
 const ORG_TYPES = [

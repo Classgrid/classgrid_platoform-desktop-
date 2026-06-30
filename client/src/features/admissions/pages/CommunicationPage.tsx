@@ -5,6 +5,8 @@ import { Loader2, Mail } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { sendNotification } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function CommunicationPage() {
   const [trigger, setTrigger] = useState("reminder_fee");
   const [statusMsg, setStatusMsg] = useState<{ type: "success" | "danger"; text: string } | null>(null);

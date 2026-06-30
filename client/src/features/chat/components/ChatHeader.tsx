@@ -1,6 +1,8 @@
 import { MoreVertical, Users, ArrowLeft } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface ChatHeaderProps {
   thread: ChatThread;
   onBack: () => void;

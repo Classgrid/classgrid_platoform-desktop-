@@ -4,6 +4,8 @@ import { Check, Eye, EyeOff, XCircle, AlertCircle } from "lucide-react";
 
 import { resetPasswordWithToken, verifyResetToken } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 

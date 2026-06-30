@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { PhotoViewerModal } from "./PhotoViewerModal";
 import { Megaphone } from "lucide-react";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface GroupSettingsModalProps {
   groupId: string;
   onClose: () => void;

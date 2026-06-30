@@ -5,6 +5,8 @@ import { formatDistanceToNow } from "date-fns";
 import { fetchThreads } from "../services/chatApi";
 import { CreateGroupModal } from "./CreateGroupModal";
 
+import { Button } from "@/components/marketing_ui/button";
+
 function getInitials(name: string) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);

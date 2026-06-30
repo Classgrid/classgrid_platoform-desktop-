@@ -2,6 +2,8 @@ import { X, Mail, Phone, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import type { OrgUser } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface ChatUserProfileSidebarProps {
   user: OrgUser | undefined;
   onClose: () => void;

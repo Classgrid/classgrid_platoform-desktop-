@@ -4,6 +4,8 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface ChatInputProps {
   onSendMessage: (message: string, files: File[]) => Promise<void>;
   isSending: boolean;

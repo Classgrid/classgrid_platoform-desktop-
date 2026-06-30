@@ -4,6 +4,8 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { useMeritList, useGenerateMerit } from "../queries/useMeritList";
 import type { MeritListEntry } from "../types";
 
+import { Button } from "@/components/marketing_ui/button";
+
 const columns: ColumnDef<MeritListEntry>[] = [
   {
     accessorKey: "general_rank",

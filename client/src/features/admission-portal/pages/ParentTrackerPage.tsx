@@ -7,6 +7,8 @@ import { useEngineConfig } from "../queries/useAdmissionEngine";
 
 import type { ApplicationState } from "../types";
 
+import { Button } from "@/components/marketing_ui/button";
+
 // ═══════════════════════════════════════════════════════════════
 // ParentTrackerPage — Public parent portal for tracking child's
 // admission status. Authenticates via phone OTP.

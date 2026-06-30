@@ -6,6 +6,8 @@ import { loginWithPassword, getGoogleAuthUrl, requestPasswordReset } from "../ap
 import { saveStoredAuthRole, getRedirectPath } from "../auth-helpers";
 import "./SuperAdminVanilla.css";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function SuperAdminLoginPage() {
   const navigate = useNavigate();
   

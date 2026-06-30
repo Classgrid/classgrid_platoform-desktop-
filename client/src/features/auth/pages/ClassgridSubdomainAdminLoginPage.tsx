@@ -8,6 +8,8 @@ import { getRedirectPath, saveStoredAuthRole, readStoredAuthRole, getRoleLabel, 
 import type { AuthUserRole, AuthLoginRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
+import { Button } from "@/components/marketing_ui/button";
+
 /* ── Constants ── */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
 

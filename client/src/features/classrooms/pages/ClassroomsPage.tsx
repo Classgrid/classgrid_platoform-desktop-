@@ -6,6 +6,8 @@ import { useMyClassrooms, MyClassroomRecord } from "../queries/useMyClassrooms";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { CreateClassroomModal } from "../components/CreateClassroomModal";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function ClassroomsPage() {
   const { data: user } = useCurrentUser();
   const { data: classroomsData, isLoading } = useMyClassrooms();

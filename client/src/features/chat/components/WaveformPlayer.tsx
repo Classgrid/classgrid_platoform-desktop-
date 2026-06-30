@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import { Play, Pause } from 'lucide-react';
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface WaveformPlayerProps {
   url: string;
 }

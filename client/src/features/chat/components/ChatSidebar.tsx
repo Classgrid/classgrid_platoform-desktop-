@@ -3,6 +3,8 @@ import { Search, Plus, Users, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface ChatSidebarProps {
   threads: ChatThread[];
   activeThreadId: string | null;

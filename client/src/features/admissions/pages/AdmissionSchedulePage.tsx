@@ -4,6 +4,8 @@ import { useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmi
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { advanceRound } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function AdmissionSchedulePage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
   const update = useUpdateAdmissionConfig();

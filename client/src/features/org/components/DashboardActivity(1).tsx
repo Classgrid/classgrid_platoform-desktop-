@@ -8,6 +8,8 @@ import {
 import { useOrgDashboardActivity } from "../queries/useOrgDashboard";
 import { formatDistanceToNow } from "date-fns";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function DashboardActivity() {
   const { data: profile, isLoading: isProfileLoading } = useInstitutionProfile();
   const { data: activityData, isLoading: isActivityLoading } = useOrgDashboardActivity();

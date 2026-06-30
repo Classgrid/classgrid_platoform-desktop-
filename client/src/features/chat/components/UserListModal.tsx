@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/m
 import { Spinner } from "@/components/marketing_ui/spinner";
 import type { OrgUser } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface UserListModalProps {
   isOpen: boolean;
   onClose: () => void;

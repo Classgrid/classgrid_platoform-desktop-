@@ -11,6 +11,8 @@ import {
     Send
 } from "lucide-react";
 import { 
+import { Button } from "@/components/marketing_ui/button";
+
     useGetStudentAttendancePercentage,
     useGetStudentLeaveHistory,
     useApplyForLeave

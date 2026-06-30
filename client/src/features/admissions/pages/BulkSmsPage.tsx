@@ -3,6 +3,8 @@ import { Loader2, MessageSquare } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { getSmsBudget } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function BulkSmsPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["sms-budget"],

@@ -18,6 +18,8 @@ import {
 import { useApplications } from "../../admissions/queries/useApplications";
 import type { AdmissionApplication } from "../../admissions/types";
 
+import { Button } from "@/components/marketing_ui/button";
+
 // ── Hierarchy config ──
 const HIERARCHIES = [
   { id: "all",         label: "All Divisions" },

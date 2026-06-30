@@ -16,6 +16,8 @@ import { useEngineConfig, useCandidateSession } from "../queries/useAdmissionEng
 import { WorkflowStage } from "../components/WorkflowStage";
 
 
+import { Button } from "@/components/marketing_ui/button";
+
 declare global { interface Window { recaptchaVerifier: any; } }
 
 // ── Step definitions ─────────────────────────────────────────────

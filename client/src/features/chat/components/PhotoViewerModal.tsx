@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface PhotoViewerModalProps {
   src: string;
   alt?: string;

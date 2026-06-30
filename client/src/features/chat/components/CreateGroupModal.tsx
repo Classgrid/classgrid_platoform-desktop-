@@ -5,6 +5,8 @@ import { X, Search, Check, Users } from "lucide-react";
 import { fetchOrgUsers, createGroup } from "../services/chatApi";
 import { Spinner } from "@/components/marketing_ui/spinner";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface CreateGroupModalProps {
   onClose: () => void;
 }

@@ -1,6 +1,8 @@
 import { CheckCircle2, FileText, WalletCards } from "lucide-react";
 import { useInstitutionProfile } from "../queries/useInstitutionProfile";
 import {
+import { Button } from "@/components/marketing_ui/button";
+
   getProfileTerm,
   isModuleEnabled,
   lowerLabel,

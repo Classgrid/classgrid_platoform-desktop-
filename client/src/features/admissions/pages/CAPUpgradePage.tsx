@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getApplications, requestNOC, confirmUpgrade } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function CAPUpgradePage() {
   const [enSearch, setEnSearch] = useState("");
   const [queryEn, setQueryEn] = useState("");

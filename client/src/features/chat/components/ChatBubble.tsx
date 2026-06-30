@@ -6,6 +6,8 @@ import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage, Poll } from "../services/chatApi";
 
+import { Button } from "@/components/marketing_ui/button";
+
 interface ChatBubbleProps {
   message: ChatMessage;
   isMine: boolean;

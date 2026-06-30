@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getApplications, reportRLA } from "../api";
 
+import { Button } from "@/components/marketing_ui/button";
+
 export function RLAReportingPage() {
   const [enSearch, setEnSearch] = useState("");
   const [queryEn, setQueryEn] = useState("");
