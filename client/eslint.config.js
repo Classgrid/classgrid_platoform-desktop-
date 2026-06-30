@@ -66,9 +66,9 @@ export default tseslint.config(
       'no-restricted-syntax': [
         'error',
         {
-          // BLOCK: raw HTML inputs/buttons (Force system components)
-          selector: "JSXOpeningElement[name.name=/^(input|button|select)$/]",
-          message: "Raw HTML elements (<input>, <button>, <select>) are forbidden. Use system components (<Input />, <Button />, <Switch />) for 100% design system compliance."
+          // BLOCK: raw HTML elements (Force system components)
+          selector: "JSXOpeningElement[name.name=/^(input|button|select|a|img|form|label|table|thead|tbody|tr|td|th)$/]",
+          message: "Raw HTML elements are forbidden. Use system components for 100% design system compliance."
         },
         {
           // BLOCK: Inline CSS toggles (e.g. peer-checked:after:translate-x-full on divs or input type="checkbox" role="switch")

@@ -714,7 +714,7 @@ export function ClassgridTalkPage() {
         <RefreshButton
             onClick={() => refetch()}
             isFetching={isFetching}
-            className="ml-auto rounded-full border-none bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+            className="ml-auto"
           />
       </div>
 
