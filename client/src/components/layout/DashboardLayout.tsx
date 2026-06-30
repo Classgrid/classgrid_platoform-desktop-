@@ -85,6 +85,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
   const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website");
   const { items, showBreadcrumbs } = useBreadcrumbStore();
   const dashboardRole = normalizeDashboardRole(role, location.pathname);
+  const { data: currentUser } = useCurrentUser();
   const sidebarUser = user ?? currentUser ?? undefined;
 
   return (
