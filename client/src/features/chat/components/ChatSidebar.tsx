@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 interface ChatSidebarProps {
   threads: ChatThread[];

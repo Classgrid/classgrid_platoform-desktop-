@@ -6,6 +6,7 @@ import { fetchThreads } from "../services/chatApi";
 import { CreateGroupModal } from "./CreateGroupModal";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 function getInitials(name: string) {
   if (!name) return "?";

@@ -2310,7 +2310,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain.domain site_title subdomain name sidebar_name brand_colors branding.theme_colors");
+        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain erp_domain site_title subdomain name sidebar_name brand_colors branding.theme_colors");
         if (!org) return res.status(404).json({ message: "Organization not found." });
 
         const themeColors = getThemeColors(org);
@@ -2321,6 +2321,7 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             campus_photo_url: org.campus_photo_url || "",
             social_links: org.social_links || {},
             has_custom_domain: !!org.custom_domain?.domain,
+            has_erp_domain: !!org.erp_domain?.domain,
             site_title: org.site_title || "Classgrid ERP",
             subdomain: org.subdomain,
             name: org.name || "",

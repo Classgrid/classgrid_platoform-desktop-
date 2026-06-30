@@ -29,6 +29,7 @@ type BrandingData = {
   };
   site_title: string;
   has_custom_domain: boolean;
+  has_erp_domain: boolean;
   name: string;
   sidebar_name: string;
   brand_colors?: BrandColorSettings;
@@ -349,7 +350,7 @@ export function OrgBrandingCard() {
         </div>
 
         {/* Custom Favicon Upload */}
-        {data?.has_custom_domain && (
+        {data?.has_erp_domain && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
@@ -393,7 +394,7 @@ export function OrgBrandingCard() {
         )}
 
         {/* Campus Photo Upload */}
-        {data?.has_custom_domain && (
+        {data?.has_erp_domain && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
@@ -438,7 +439,7 @@ export function OrgBrandingCard() {
         )}
 
         {/* Site Title Settings */}
-        {data?.has_custom_domain && (
+        {data?.has_erp_domain && (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
@@ -593,7 +594,7 @@ export function OrgBrandingCard() {
         )}
       </div>
 
-      {data?.has_custom_domain && (
+      {data?.has_website_domain && (
         <div className="border-t border-border pt-6 mt-2">
           <div className="flex flex-col gap-1 mb-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider">
