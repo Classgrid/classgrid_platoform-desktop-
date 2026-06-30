@@ -63,9 +63,12 @@ export function ChatPage() {
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [polls, setPolls] = useState<Poll[]>([]);
-  const [typingUsers, setTypingUsers] = useState<Record<string, NodeJS.Timeout>>({});
+  const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
 
-  const activeTypingUserIds = Object.keys(typingUsers);
+  const activeTypingUsers = Object.entries(typingUsers).map(([id, data]) => ({
+    id,
+    type: data.type
+  }));
   const onlineUsers = usePresence(currentUserId || null);
 
   // -- Load Initial Data --
@@ -369,22 +372,23 @@ export function ChatPage() {
         );
       }
     },
-    onTyping: (data: { userId: string; isTyping?: boolean }) => {
-      if (data.userId === currentUserId) return; // Ignore own typing
+    onTyping: (data) => {
+      if (data.userId === currentUserId) return;
       setTypingUsers((prev) => {
         const next = { ...prev };
-        if (data.isTyping === false) {
-          if (next[data.userId]) clearTimeout(next[data.userId]);
+        if (!data.isTyping) {
+          if (next[data.userId]) clearTimeout(next[data.userId].timeout);
           delete next[data.userId];
         } else {
-          if (next[data.userId]) clearTimeout(next[data.userId]);
-          next[data.userId] = setTimeout(() => {
+          if (next[data.userId]) clearTimeout(next[data.userId].timeout);
+          const timeout = setTimeout(() => {
             setTypingUsers((p) => {
               const pNext = { ...p };
               delete pNext[data.userId];
               return pNext;
             });
-          }, 3000);
+          }, data.activityType === 'recording' || data.activityType === 'uploading' ? 10000 : 3000);
+          next[data.userId] = { timeout, type: data.activityType || 'typing' };
         }
         return next;
       });
@@ -464,7 +468,7 @@ export function ChatPage() {
               onUserClick={(userId) => setProfileUserId(userId)}
               orgUsers={orgUsers}
               onViewMedia={(attachment) => setViewingMedia(attachment)}
-              typingUserIds={activeTypingUserIds}
+              typingUsers={activeTypingUsers}
               polls={polls}
               onVotePoll={handleVotePoll}
             />
@@ -474,7 +478,7 @@ export function ChatPage() {
               isSending={isSending}
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
-              onTyping={(isTyping) => sendTyping && sendTyping(isTyping)}
+              onTyping={(isTyping, type) => sendTyping && sendTyping(isTyping, type)}
               onOpenPollModal={() => setIsPollModalOpen(true)}
             />
           </>

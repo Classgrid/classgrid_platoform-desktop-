@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import type { ChatMessage, ChatThread, OrgUser, Poll } from "../services/chatApi";
@@ -15,7 +16,7 @@ interface ChatConversationProps {
   onEdit: (msgId: string, newText: string) => void;
   onReact: (msgId: string, emoji: string) => void;
   onUserClick?: (userId: string) => void;
-  typingUserIds?: string[];
+  typingUsers?: { id: string; type: 'typing' | 'recording' | 'uploading' }[];
   orgUsers?: OrgUser[];
   onViewMedia?: (attachment: any) => void;
   polls?: Poll[];
@@ -34,7 +35,7 @@ export function ChatConversation({
   onEdit,
   onReact,
   onUserClick,
-  typingUserIds = [],
+  typingUsers = [],
   orgUsers = [],
   onViewMedia,
   polls = [],
@@ -74,9 +75,12 @@ export function ChatConversation({
   // Scroll to bottom on first load or when new messages arrive (if already at bottom)
   useEffect(() => {
     if (scrollRef.current && isNearBottomRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth"
+      });
     }
-  }, [messages]);
+  }, [messages, typingUsers.length]);
 
   // Group messages by date
   const groupedMessages: { date: string; messages: ChatMessage[] }[] = [];
@@ -151,21 +155,28 @@ export function ChatConversation({
               }
 
               return (
-                <ChatBubble
+                <motion.div
                   key={msg.id}
-                  message={msg}
-                  isMine={isMine}
-                  showAvatar={showAvatar}
-                  currentUserId={currentUserId}
-                  onReply={onReply}
-                  onDelete={onDelete}
-                  onEdit={onEdit}
-                  onReact={onReact}
-                  onUserClick={onUserClick}
-                  onViewMedia={onViewMedia}
-                  poll={polls.find(p => p.message_id === msg.id)}
-                  onVotePoll={onVotePoll}
-                />
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  layout
+                  transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                >
+                  <ChatBubble
+                    message={msg}
+                    isMine={isMine}
+                    showAvatar={showAvatar}
+                    currentUserId={currentUserId}
+                    onReply={onReply}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                    onReact={onReact}
+                    onUserClick={onUserClick}
+                    onViewMedia={onViewMedia}
+                    poll={polls.find(p => p.message_id === msg.id)}
+                    onVotePoll={onVotePoll}
+                  />
+                </motion.div>
               );
             })}
           </div>
@@ -173,26 +184,47 @@ export function ChatConversation({
       </div>
 
       {/* Typing Indicator */}
-      {typingUserIds.length > 0 && (
-        <div className="flex items-end gap-2 mt-4 ml-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-            <span className="text-xs">💬</span>
+      <AnimatePresence>
+        {typingUsers.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            layout
+            className="flex items-end gap-2 mt-4 ml-2 mb-2"
+          >
+          <div className="flex -space-x-2 relative z-10 shrink-0">
+            {typingUsers.slice(0, 3).map((user, index) => {
+              const u = orgUsers.find(ou => ou._id === user.id);
+              return (
+                <div key={user.id} className="w-8 h-8 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden z-10 relative shadow-sm">
+                  {u?.profilePicture ? (
+                    <img src={u.profilePicture} className="w-full h-full object-cover" alt={u.name} />
+                  ) : (
+                    <span className="text-[10px] font-bold text-muted-foreground">{u?.name?.[0]?.toUpperCase() || "?"}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <div className="bg-card border border-border text-foreground px-4 py-2.5 rounded-2xl rounded-bl-sm w-fit flex items-center gap-2">
-            <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"></span>
+          <div className="bg-card border border-border text-foreground px-4 py-2.5 rounded-2xl rounded-bl-sm w-fit flex items-center gap-3 shadow-sm">
+            <div className="flex gap-1.5 items-center h-4">
+              <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+              <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+              <span className="w-1.5 h-1.5 bg-primary/70 rounded-full animate-bounce"></span>
             </div>
-            <span className="text-xs text-muted-foreground ml-1 font-medium">
-              {typingUserIds
-                .map((id) => orgUsers.find((u) => u._id === id)?.name.split(" ")[0] || "Someone")
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+              {typingUsers
+                .map((user) => orgUsers.find((u) => u._id === user.id)?.name.split(" ")[0] || "Someone")
                 .join(", ")}{" "}
-              {typingUserIds.length > 1 ? "are" : "is"} typing...
+              {typingUsers.length > 1 ? "are" : "is"}{" "}
+              {typingUsers[0].type === 'recording' ? 'recording audio' : 
+               typingUsers[0].type === 'uploading' ? 'uploading file' : 'typing'}
             </span>
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

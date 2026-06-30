@@ -255,7 +255,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               onChange={handleFileSelect}
             />
 
-            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end">
+            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end hover:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-200">
               <textarea
                 ref={textareaRef}
                 value={message}

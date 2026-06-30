@@ -86,7 +86,7 @@ export function useThreadChannel(
     onMessageDeleted?: (data: { messageId: string }) => void;
     onReactionUpdate?: (data: { messageId: string; reactions: any }) => void;
     onReadReceipt?: (data: { userId: string; lastReadAt: string }) => void;
-    onTyping?: (data: { userId: string; isTyping?: boolean }) => void;
+    onTyping?: (data: { userId: string; isTyping?: boolean; activityType?: 'typing' | 'recording' | 'uploading' | null }) => void;
     onNewPoll?: (data: { poll: any; messageId: string }) => void;
     onPollVote?: (data: { pollId: string; voteCounts: any; totalVoters: number }) => void;
   }
@@ -101,12 +101,12 @@ export function useThreadChannel(
     poll_vote: (payload: any) => handlers.onPollVote?.(payload),
   });
 
-  const sendTyping = useCallback((isTyping: boolean) => {
+  const sendTyping = useCallback((isTyping: boolean, activityType: 'typing' | 'recording' | 'uploading' | null = 'typing') => {
     if (channelRef.current && userId) {
       channelRef.current.send({
         type: "broadcast",
         event: "typing",
-        payload: { userId, isTyping },
+        payload: { userId, isTyping, activityType },
       });
     }
   }, [userId, channelRef]);
