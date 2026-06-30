@@ -96,9 +96,11 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
           {/* This is the actual flush right pane */}
           <div className={`flex-1 flex flex-col overflow-hidden relative ${isFullBleed ? 'bg-background border-l border-border' : 'bg-card border-l border-border'}`}>
             {!isFullBleed && showBreadcrumbs && (
-              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-                <SidebarTrigger />
-                <Separator orientation="vertical" className="mr-2 h-4" />
+              <header className="flex h-14 shrink-0 items-center justify-center border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50 relative">
+                <div className="absolute left-4 flex items-center gap-2">
+                  <SidebarTrigger />
+                  <Separator orientation="vertical" className="h-4" />
+                </div>
                 <Breadcrumb>
                   <BreadcrumbList>
                     {items.length > 0 ? (

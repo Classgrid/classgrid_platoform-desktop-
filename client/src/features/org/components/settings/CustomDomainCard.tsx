@@ -405,6 +405,7 @@ function DomainConfigCard({
         try {
             await removeMutation.mutateAsync({ domainType });
             setRemoveConfirmOpen(false);
+            toast.success("Domain removed successfully.");
         } catch (err) {
             // Error is handled by the hook's onError
         }
