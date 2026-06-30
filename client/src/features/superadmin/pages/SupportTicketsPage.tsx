@@ -1144,7 +1144,7 @@ export function SupportTicketsPage() {
                                       src: fileUrl,
                                     })
                                   }
-                                  className="p-1 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                                  className="w-7 h-7 p-0 rounded-md hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
                                   title="View file"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
