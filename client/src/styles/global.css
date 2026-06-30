@@ -188,7 +188,7 @@
     --shadow-lg: 0 20px 48px -8px rgba(0, 0, 0, 0.6);
     --shadow-glow: 0 0 24px rgba(52, 211, 153, 0.25);
 
-    --sidebar-background: #0f0f0f;
+    --sidebar-background: #000000;
     --sidebar-foreground: #ffffff;
     --sidebar-primary: #34d399;
     --sidebar-primary-foreground: #022c22;
