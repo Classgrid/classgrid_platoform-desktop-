@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus, Clock } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus, Clock, BarChart2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
@@ -157,8 +157,8 @@ export function ChatBubble({
               ${message.is_deleted 
                 ? "bg-muted text-muted-foreground italic border border-border" 
                 : isMine 
-                  ? "bg-primary text-primary-foreground rounded-tr-sm" 
-                  : "bg-accent text-foreground rounded-tl-sm"
+                  ? "bg-[#005c4b] text-[#e9edef] rounded-tr-sm shadow-sm" 
+                  : "bg-[#202c33] text-[#e9edef] rounded-tl-sm shadow-sm"
               }
             `}
           >
@@ -237,11 +237,14 @@ export function ChatBubble({
 
                 {/* Poll UI */}
                 {poll && (
-                  <div className="flex flex-col gap-3 min-w-[220px] max-w-[320px] pb-1">
-                    <span className="text-[15px] font-semibold leading-relaxed break-words">
-                      {poll.question}
-                    </span>
-                    <div className="flex flex-col gap-2">
+                  <div className="flex flex-col min-w-[260px] sm:min-w-[300px] max-w-[340px] pb-1 mt-1">
+                    <div className="flex items-start gap-2 mb-4">
+                      <BarChart2 className="w-5 h-5 shrink-0 opacity-80 mt-0.5" />
+                      <span className="text-[15px] font-bold leading-snug break-words">
+                        {poll.question}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-3.5">
                       {poll.options.map((opt) => {
                         const count = poll.voteCounts[opt.id] || 0;
                         const percent = poll.totalVoters > 0 ? Math.round((count / poll.totalVoters) * 100) : 0;
@@ -250,33 +253,45 @@ export function ChatBubble({
                           <div 
                             key={opt.id} 
                             onClick={() => onVotePoll && onVotePoll(poll.id, opt.id)}
-                            className={`relative flex items-center justify-between p-2 rounded-lg cursor-pointer overflow-hidden border transition-colors
-                              ${isMine 
-                                ? (iVoted ? "border-primary-foreground bg-primary-foreground/20" : "border-primary-foreground/20 hover:bg-primary-foreground/10") 
-                                : (iVoted ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50")
-                              }
-                            `}
+                            className="group flex flex-col gap-1.5 cursor-pointer"
                           >
-                            {/* Progress bar background */}
-                            {count > 0 && (
-                              <div 
-                                className={`absolute left-0 top-0 bottom-0 opacity-20 transition-all duration-500
-                                  ${isMine ? "bg-primary-foreground" : "bg-primary"}
-                                `}
-                                
-                              />
-                            )}
-                            <div className="relative z-10 flex items-center gap-2 flex-1 min-w-0 pr-2">
-                              <span className="text-sm font-medium truncate">{opt.text}</span>
-                              {iVoted && <Check className="w-4 h-4 shrink-0" />}
+                            <div className="flex items-center gap-3">
+                              {/* WhatsApp style Radio/Checkbox */}
+                              <div className={`w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                                ${iVoted ? "border-[#00a884] bg-[#00a884]" : "border-white/30 group-hover:border-white/50"}
+                              `}>
+                                {iVoted && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
+                              </div>
+                              
+                              <div className="flex-1 flex justify-between items-center min-w-0 gap-2">
+                                <span className={`text-[15px] truncate ${iVoted ? "font-medium text-white" : "text-[#e9edef]"}`}>
+                                  {opt.text}
+                                </span>
+                                {count > 0 && (
+                                  <div className="flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full">
+                                    <span className="text-xs font-medium opacity-80">{count}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <span className="relative z-10 text-xs font-bold shrink-0">{percent}%</span>
+                            
+                            {/* WhatsApp style thin progress bar */}
+                            <div className="ml-[34px] h-1.5 bg-black/20 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-[#00a884] rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
                           </div>
                         );
                       })}
                     </div>
-                    <div className="text-[10px] opacity-70 mt-1">
-                      {poll.totalVoters} {poll.totalVoters === 1 ? 'vote' : 'votes'}
+                    
+                    {/* View Votes Footer */}
+                    <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-center">
+                      <button className="text-[13px] font-bold text-[#00a884] hover:underline cursor-pointer">
+                        View votes
+                      </button>
                     </div>
                   </div>
                 )}
@@ -284,7 +299,7 @@ export function ChatBubble({
             )}
 
             {/* Meta (Time + Checks) */}
-            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"} text-[10px]`}>
+            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-[#8796a1]" : "text-muted-foreground"} text-[10px]`}>
               <span>{timeString}</span>
               {isMine && !message.is_deleted && (
                 message.isSending ? (

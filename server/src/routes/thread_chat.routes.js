@@ -159,7 +159,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           type: 'dm',
           name: otherUser?.name || 'User',
           avatar: otherUser?.profilePicture || (otherUser?.name || 'U')[0].toUpperCase(),
-          role: otherUser?.role === 'student' ? 'Student' : 'Faculty',
+          role: otherUser?.role ? (otherUser.role === 'super_admin' ? 'Super Admin' : otherUser.role.charAt(0).toUpperCase() + otherUser.role.slice(1).replace('_', ' ')) : '',
           otherUserId,
           email: otherUser?.email || '',
           phoneNumber: otherUser?.phoneNumber || '',
