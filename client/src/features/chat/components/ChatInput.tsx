@@ -11,7 +11,7 @@ interface ChatInputProps {
   isSending: boolean;
   replyTo: ChatMessage | null;
   onCancelReply: () => void;
-  onTyping?: () => void;
+  onTyping?: (isTyping: boolean) => void;
   disabledReason?: string;
   onOpenPollModal?: () => void;
 }
@@ -25,7 +25,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const lastTypingTime = useRef(0);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
 
@@ -83,6 +83,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const handleSend = async () => {
     const text = message.trim();
     if (!text && files.length === 0 && !audioBlob) return;
+
+    if (onTyping) onTyping(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     const finalFiles = [...files];
     if (audioBlob) {
@@ -195,7 +198,6 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             <button
               onClick={() => fileInputRef.current?.click()}
               className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5"
-              disabled={isSending}
               title="Attach File"
             >
               <Paperclip className="w-5 h-5" />
@@ -224,17 +226,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 value={message}
                 onChange={(e) => {
                   setMessage(e.target.value);
-                  const now = Date.now();
-                  if (onTyping && now - lastTypingTime.current > 2000) {
-                    onTyping();
-                    lastTypingTime.current = now;
+                  if (onTyping) {
+                    onTyping(true);
+                    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                    typingTimeoutRef.current = setTimeout(() => onTyping(false), 2000);
                   }
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
                 className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground min-h-[44px] max-h-[120px]"
                 rows={1}
-                disabled={isSending}
               />
             </div>
 
@@ -256,10 +257,10 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             )}
             <button
               onClick={handleSend}
-              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording || isSending}
+              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording}
               className="p-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11"
             >
-              {isSending ? <Spinner className="w-5 h-5 text-current" /> : <Send className="w-5 h-5 ml-0.5" />}
+              <Send className="w-5 h-5 ml-0.5" />
             </button>
           </>
         )}

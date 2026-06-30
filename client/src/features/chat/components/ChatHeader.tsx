@@ -7,6 +7,7 @@ interface ChatHeaderProps {
   onBack: () => void;
   onShowInfo?: () => void;
   onAvatarClick?: () => void;
+  onlineUsers?: Set<string>;
 }
 
 function getInitials(name: string) {
@@ -27,7 +28,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
   return (
@@ -41,13 +42,16 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick }: ChatHe
       </button>
 
       {/* Avatar */}
-      <button onClick={onAvatarClick || onShowInfo} className="shrink-0">
+      <button onClick={onAvatarClick || onShowInfo} className="shrink-0 relative">
         {hasAvatar ? (
           <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
         ) : (
           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs ${getAvatarColor(thread.name)}`}>
             {thread.type === "group" ? <Users className="w-4 h-4" /> : getInitials(thread.name)}
           </div>
+        )}
+        {thread.type === "dm" && thread.otherUserId && onlineUsers?.has(thread.otherUserId) && (
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background" />
         )}
       </button>
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
-import type { ChatMessage, ChatThread } from "../services/chatApi";
+import type { ChatMessage, ChatThread, OrgUser } from "../services/chatApi";
 
 interface ChatConversationProps {
   thread: ChatThread;
@@ -15,6 +15,9 @@ interface ChatConversationProps {
   onEdit: (msgId: string, newText: string) => void;
   onReact: (msgId: string, emoji: string) => void;
   onUserClick?: (userId: string) => void;
+  typingUserIds?: string[];
+  orgUsers?: OrgUser[];
+  onViewMedia?: (attachment: any) => void;
 }
 
 export function ChatConversation({
@@ -29,6 +32,9 @@ export function ChatConversation({
   onEdit,
   onReact,
   onUserClick,
+  typingUserIds = [],
+  orgUsers = [],
+  onViewMedia,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -146,17 +152,42 @@ export function ChatConversation({
                   message={msg}
                   isMine={isMine}
                   showAvatar={showAvatar}
+                  currentUserId={currentUserId}
                   onReply={onReply}
                   onDelete={onDelete}
                   onEdit={onEdit}
                   onReact={onReact}
                   onUserClick={onUserClick}
+                  onViewMedia={onViewMedia}
+                  poll={msg.poll}
                 />
               );
             })}
           </div>
         ))}
       </div>
+
+      {/* Typing Indicator */}
+      {typingUserIds.length > 0 && (
+        <div className="flex items-end gap-2 mt-4 ml-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <span className="text-xs">💬</span>
+          </div>
+          <div className="bg-card border border-border text-foreground px-4 py-2.5 rounded-2xl rounded-bl-sm w-fit flex items-center gap-2">
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"></span>
+            </div>
+            <span className="text-xs text-muted-foreground ml-1 font-medium">
+              {typingUserIds
+                .map((id) => orgUsers.find((u) => u._id === id)?.name.split(" ")[0] || "Someone")
+                .join(", ")}{" "}
+              {typingUserIds.length > 1 ? "are" : "is"} typing...
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

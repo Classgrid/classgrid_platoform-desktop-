@@ -4,6 +4,7 @@ import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileTex
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
+import { Spinner } from "@/components/marketing_ui/spinner";
 import type { ChatMessage, Poll } from "../services/chatApi";
 
 
@@ -19,6 +20,7 @@ interface ChatBubbleProps {
   poll?: Poll;
   onVotePoll?: (pollId: string, optionId: string) => void;
   onUserClick?: (userId: string) => void;
+  onViewMedia?: (attachment: any) => void;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -51,6 +53,7 @@ export function ChatBubble({
   poll,
   onVotePoll,
   onUserClick,
+  onViewMedia,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
@@ -156,20 +159,32 @@ export function ChatBubble({
                 {message.attachments && message.attachments.length > 0 && (
                   <div className="flex flex-col gap-2 mb-2 w-full max-w-[300px]">
                     {message.attachments.map((att) => (
-                      att.file_type.startsWith("image/") ? (
-                        <a key={att.id} href={att.file_url} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border border-black/10 dark:border-white/10 relative group">
-                          <img src={att.file_url} alt={att.file_name} className="max-w-full h-auto object-cover max-h-[300px]" loading="lazy" />
+                      att.file_type.startsWith("image/") || att.file_type.startsWith("video/") || att.file_type === "application/pdf" ? (
+                        <div 
+                          key={att.id} 
+                          onClick={() => onViewMedia?.(att)}
+                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-white/10 relative group cursor-pointer"
+                        >
+                          {att.file_type.startsWith("image/") ? (
+                            <img src={att.file_url} alt={att.file_name} className="max-w-full h-auto object-cover max-h-[300px]" loading="lazy" />
+                          ) : (
+                            <div className="w-full h-[150px] bg-zinc-900 flex items-center justify-center">
+                              <span className="text-white text-xs opacity-70">{att.file_name}</span>
+                            </div>
+                          )}
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Download className="text-white w-6 h-6" />
+                            <Plus className="text-white w-8 h-8" />
                           </div>
-                        </a>
+                        </div>
                       ) : att.file_type.startsWith("audio/") ? (
                         <div key={att.id} className="mb-1 w-[280px]">
                           <WaveformPlayer url={att.file_url} />
                         </div>
                       ) : (
-                        <a key={att.id} href={att.file_url} target="_blank" rel="noreferrer" 
-                           className={`flex items-center gap-3 p-2 rounded-lg border transition-colors
+                        <div 
+                           key={att.id} 
+                           onClick={() => onViewMedia?.(att)}
+                           className={`flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer
                             ${isMine ? "bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20" : "bg-background border-border hover:bg-muted"}
                            `}>
                           <div className={`p-2 rounded ${isMine ? "bg-primary-foreground/20" : "bg-muted"}`}>
@@ -179,7 +194,7 @@ export function ChatBubble({
                             <p className="text-sm font-medium truncate">{att.file_name}</p>
                             <p className="text-xs opacity-70">{formatBytes(att.file_size)}</p>
                           </div>
-                        </a>
+                        </div>
                       )
                     ))}
                   </div>
@@ -247,7 +262,15 @@ export function ChatBubble({
             <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"} text-[10px]`}>
               <span>{timeString}</span>
               {isMine && !message.is_deleted && (
-                message.isSeen ? <CheckCheck className="w-3.5 h-3.5 text-blue-300" /> : <Check className="w-3.5 h-3.5" />
+                message.isSending ? (
+                  <Spinner className="w-3 h-3 text-current ml-0.5" />
+                ) : message.isError ? (
+                  <span className="text-red-500 font-bold ml-0.5">!</span>
+                ) : message.isSeen ? (
+                  <CheckCheck className="w-3.5 h-3.5 text-blue-300" />
+                ) : (
+                  <Check className="w-3.5 h-3.5" />
+                )
               )}
             </div>
           </div>

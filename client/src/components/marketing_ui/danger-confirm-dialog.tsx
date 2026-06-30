@@ -66,6 +66,9 @@ export interface DangerConfirmDialogProps {
 
     /** Additional content to render between description and confirmation steps */
     children?: React.ReactNode;
+    
+    /** Optional override to disable the confirm button (useful when using children for custom inputs) */
+    isConfirmDisabled?: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
@@ -84,6 +87,7 @@ export function DangerConfirmDialog({
     variant = "danger",
     maxWidth = "sm:max-w-md",
     children,
+    isConfirmDisabled,
 }: DangerConfirmDialogProps) {
     const [stepValues, setStepValues] = useState<string[]>([]);
 
@@ -231,10 +235,10 @@ export function DangerConfirmDialog({
                         </button>
                         <button
                             onClick={onConfirm}
-                            disabled={!allStepsComplete || isLoading}
+                            disabled={(isConfirmDisabled !== undefined ? isConfirmDisabled : !allStepsComplete) || isLoading}
                             className={cn(
                                 "inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 transition-all duration-200",
-                                allStepsComplete
+                                (isConfirmDisabled !== undefined ? !isConfirmDisabled : allStepsComplete)
                                     ? styles.buttonClass
                                     : "bg-white/5 text-white/40 cursor-not-allowed"
                             )}

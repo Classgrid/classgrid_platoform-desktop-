@@ -8,11 +8,13 @@ import {
   Download,
   FileText,
   FileImage,
+  FileVideo,
   File,
   ZoomIn,
   ZoomOut,
   RotateCw,
 } from "lucide-react";
+import { CustomVideoPlayer } from "@/features/shared/components/CustomVideoPlayer";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,8 @@ function getMimeType(file: FilePreviewSource): string {
     png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
     gif: "image/gif", webp: "image/webp", svg: "image/svg+xml",
     avif: "image/avif",
+    mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime",
+    mkv: "video/x-matroska", avi: "video/x-msvideo",
     pdf: "application/pdf",
     doc: "application/msword",
     docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -60,6 +64,7 @@ function getMimeType(file: FilePreviewSource): string {
 }
 
 function isImage(mime: string) { return mime.startsWith("image/"); }
+function isVideo(mime: string) { return mime.startsWith("video/"); }
 function isPDF(mime: string) { return mime === "application/pdf"; }
 function isText(mime: string) { return mime.startsWith("text/") && mime !== "text/csv"; }
 function isOfficeDoc(mime: string) {
@@ -152,6 +157,8 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
           <div className="flex items-center gap-3 min-w-0">
             {isImage(mime) ? (
               <FileImage className="w-5 h-5 text-emerald-400 shrink-0" />
+            ) : isVideo(mime) ? (
+              <FileVideo className="w-5 h-5 text-blue-400 shrink-0" />
             ) : isPDF(mime) ? (
               <FileText className="w-5 h-5 text-red-400 shrink-0" />
             ) : (
@@ -257,12 +264,20 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
             </motion.div>
           )}
 
+
+          {/* Video viewer */}
+          {isVideo(mime) && srcUrl && (
+            <div className="w-full max-w-5xl h-[85vh] rounded-lg overflow-hidden border border-zinc-700 bg-black">
+              <CustomVideoPlayer url={srcUrl} title={file.name} />
+            </div>
+          )}
+
           {/* PDF viewer */}
           {isPDF(mime) && srcUrl && (
             <iframe
               src={srcUrl}
               title={file.name}
-              className="w-full max-w-4xl h-[80vh] rounded-lg border border-zinc-700"
+              className="w-full max-w-4xl h-[80vh] rounded-lg border border-zinc-700 bg-white"
             />
           )}
 
@@ -287,7 +302,7 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
           )}
 
           {/* Unsupported file type (or local office docs) */}
-          {!isImage(mime) && !isPDF(mime) && !isText(mime) && !(isOfficeDoc(mime) && srcUrl && !srcUrl.startsWith("blob:")) && (
+          {!isImage(mime) && !isVideo(mime) && !isPDF(mime) && !isText(mime) && !(isOfficeDoc(mime) && srcUrl && !srcUrl.startsWith("blob:")) && (
             <div className="flex flex-col items-center gap-5 text-center">
               <div className="w-20 h-20 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
                 <File className="w-10 h-10 text-zinc-400" />
@@ -311,7 +326,7 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
 
         {/* ── Keyboard hint ── */}
         <div className="shrink-0 text-center py-2 text-[10px] text-zinc-600 select-none">
-          {isImage(mime) ? "Scroll to zoom · + / − keys · Esc to close" : "Esc to close"}
+          {isImage(mime) ? "Scroll to zoom · + / − keys · Esc to close" : isVideo(mime) ? "Esc to close" : "Esc to close"}
         </div>
       </motion.div>
     </AnimatePresence>

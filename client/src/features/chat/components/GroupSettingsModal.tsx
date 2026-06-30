@@ -15,7 +15,7 @@ import {
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
 import { toast } from "sonner";
-import { PhotoViewerModal } from "./PhotoViewerModal";
+import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { Megaphone } from "lucide-react";
 
 import { Input } from "@/components/marketing_ui/input";
@@ -163,9 +163,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
   // ── Fullscreen Photo Viewer ──
   if (viewingPhoto) {
     return (
-      <PhotoViewerModal
-        src={viewingPhoto}
-        alt={data?.group?.name || "Group Photo"}
+      <FilePreviewModal
+        file={{ src: viewingPhoto, name: data?.group?.name || "Group Photo" }}
         onClose={() => setViewingPhoto(null)}
       />
     );

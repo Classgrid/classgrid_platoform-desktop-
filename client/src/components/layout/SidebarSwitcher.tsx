@@ -40,11 +40,12 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger render={
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
+            />
+          }>
               <div className={`flex aspect-square size-8 items-center justify-center rounded-lg shadow-sm overflow-hidden shrink-0 ${orgLogo ? 'bg-white p-0.5' : 'bg-emerald-500 text-white'}`}>
                 {orgLogo ? (
                   <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
@@ -61,7 +62,6 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
-            </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl shadow-xl border-border bg-popover text-popover-foreground p-1"
@@ -108,13 +108,13 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
             {currentRole === "super_admin" && (
               <>
                 <DropdownMenuSeparator className="mx-1 my-1" />
-                <DropdownMenuItem asChild className="p-0">
-                  <Link to="/superadmin/onboard" className="flex items-center gap-2 p-2 w-full cursor-pointer rounded-md text-sm text-blue-500 hover:text-blue-600 font-medium">
+                <DropdownMenuItem render={
+                  <Link to="/superadmin/onboard" className="flex items-center gap-2 p-2 w-full cursor-pointer rounded-md text-sm text-blue-500 hover:text-blue-600 font-medium" />
+                } className="p-0">
                     <div className="flex size-5 items-center justify-center rounded-md border border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800">
                       <Plus className="size-3" />
                     </div>
                     Onboard New Organization
-                  </Link>
                 </DropdownMenuItem>
               </>
             )}

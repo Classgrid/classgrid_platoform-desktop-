@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 
 // Use the same Supabase project as the backend chat system
@@ -80,12 +80,13 @@ export function useUserChannel(userId: string | null, onThreadUpdated: (data: an
  */
 export function useThreadChannel(
   threadId: string | null,
+  userId: string | null,
   handlers: {
     onNewMessage?: (msg: any) => void;
     onMessageDeleted?: (data: { messageId: string }) => void;
     onReactionUpdate?: (data: { messageId: string; reactions: any }) => void;
     onReadReceipt?: (data: { userId: string; lastReadAt: string }) => void;
-    onTyping?: (data: { userId: string }) => void;
+    onTyping?: (data: { userId: string; isTyping?: boolean }) => void;
     onNewPoll?: (data: { poll: any; messageId: string }) => void;
     onPollVote?: (data: { pollId: string; voteCounts: any; totalVoters: number }) => void;
   }
@@ -100,5 +101,51 @@ export function useThreadChannel(
     poll_vote: (payload: any) => handlers.onPollVote?.(payload),
   });
 
-  return channelRef;
+  const sendTyping = useCallback((isTyping: boolean) => {
+    if (channelRef.current && userId) {
+      channelRef.current.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId, isTyping },
+      });
+    }
+  }, [userId, channelRef]);
+
+  return { channelRef, sendTyping };
+}
+
+/**
+ * Presence hook to track which users are currently online globally.
+ */
+export function usePresence(userId: string | null) {
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!userId) return;
+    const sb = getChatSupabase();
+    if (!sb) return;
+
+    const channel = sb.channel('classgrid-presence', {
+      config: { presence: { key: userId } },
+    });
+
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const onlineIds = new Set<string>();
+      Object.keys(state).forEach((id) => onlineIds.add(id));
+      setOnlineUsers(onlineIds);
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ onlineAt: new Date().toISOString() });
+      }
+    });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [userId]);
+
+  return onlineUsers;
 }

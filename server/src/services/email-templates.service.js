@@ -2300,3 +2300,42 @@ If you did not attempt to log in, please reset your password immediately.
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
 
+// ----------------------------------------------------------------------
+// Account Deleted Notification (Hierarchical)
+// ----------------------------------------------------------------------
+
+export const getAccountDeletedNotificationHtml = (userName, userEmail, role) => {
+    return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+        <h2 style="color: #d9534f; margin-bottom: 20px;">User Account Deleted</h2>
+        <p>This is an automated notification regarding a user departure.</p>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; border-left: 4px solid #d9534f; margin: 20px 0;">
+            <p style="margin: 0 0 10px 0;"><strong>Name:</strong> ${userName}</p>
+            <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${userEmail}</p>
+            <p style="margin: 0;"><strong>Role:</strong> <span style="text-transform: capitalize;">${role.replace('_', ' ')}</span></p>
+        </div>
+        <p>This user has permanently deleted their account from the platform.</p>
+        <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;" />
+        <p style="color: #888; font-size: 12px; text-align: center;">
+            &copy; ${new Date().getFullYear()} Classgrid. This is an internal administrative notification.
+        </p>
+    </div>
+    `;
+};
+
+export const getAccountDeletedNotificationPlainText = (userName, userEmail, role) => {
+    return `
+User Account Deleted
+
+This is an automated notification regarding a user departure.
+
+Name: ${userName}
+Email: ${userEmail}
+Role: ${role.replace('_', ' ')}
+
+This user has permanently deleted their account from the platform.
+
+(c) ${new Date().getFullYear()} Classgrid. This is an internal administrative notification.
+    `.trim();
+};
+

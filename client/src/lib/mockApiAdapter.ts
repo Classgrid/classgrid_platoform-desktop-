@@ -80,6 +80,24 @@ function getMockData(config: InternalAxiosRequestConfig): unknown {
     return { user: mockUser };
   }
 
+  if (pathname === "/api/user/profile" && method === "get") {
+    return { user: mockUser };
+  }
+
+  if (pathname === "/api/user/email-preferences" && method === "get") {
+    return {
+      emailNotifications: {
+        digestMode: "instant",
+        global: true,
+        announcements: true,
+        notes: true,
+        quizzes: true,
+        joinApproval: true,
+        emailOnPost: true,
+      }
+    };
+  }
+
   if (pathname === "/api/auth/check-email" && method === "post") {
     return { exists: true, hasPassword: true, role: "super_admin" };
   }

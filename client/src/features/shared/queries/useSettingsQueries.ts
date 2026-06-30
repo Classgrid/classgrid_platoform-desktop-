@@ -12,7 +12,7 @@ export type EmailPrefs = {
   digestMode: "instant" | "daily" | "weekly";
 };
 
-export function useEmailPreferences() {
+export function useEmailPreferences(enabled: boolean = true) {
   return useQuery({
     queryKey: ["email-preferences"],
     queryFn: async () => {
@@ -20,6 +20,7 @@ export function useEmailPreferences() {
       return data.emailNotifications;
     },
     staleTime: 10 * 60 * 1000, // 10 mins
+    enabled,
   });
 }
 

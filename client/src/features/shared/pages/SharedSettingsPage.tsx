@@ -12,13 +12,17 @@ import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
 import { OrgNameCard } from "@/components/dashboard/OrgNameCard";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { DeleteOrgCard } from "../../org/components/settings/DeleteOrgCard";
+import { SettingsChangePasswordCard } from "../components/settings/SettingsChangePasswordCard";
+import { SettingsDeleteAccountCard } from "../components/settings/SettingsDeleteAccountCard";
 
 export function SharedSettingsPage() {
-  const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences();
-  const updatePrefs = useUpdateEmailPreferences();
-  
   const { data: profileData, isLoading: isProfileLoading } = useUserProfile();
   const updateProfile = useUpdateProfile();
+  
+  const requiresPrefs = profileData?.role !== "org_admin" && profileData?.role !== "super_admin";
+  
+  const { data: prefData, isLoading: isPrefLoading } = useEmailPreferences(requiresPrefs);
+  const updatePrefs = useUpdateEmailPreferences();
 
   const [prefs, setPrefs] = useState<EmailPrefs>({
     global: true,
@@ -57,7 +61,9 @@ export function SharedSettingsPage() {
 
   const isPending = updatePrefs.isPending || updateProfile.isPending;
 
-  if (isProfileLoading || isPrefLoading) {
+  // Only block the page render if we are waiting for the initial profile data.
+  // Email preferences loading state is handled by the SettingsNotificationsCard itself.
+  if (!profileData && isProfileLoading) {
     return (
       <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12 animate-in fade-in duration-500">
         {/* Header Skeleton */}
@@ -92,7 +98,7 @@ export function SharedSettingsPage() {
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
       <SettingsAppearanceCard />
       
-      {profileData?.role !== "org_admin" && (
+      {profileData?.role !== "org_admin" && profileData?.role !== "super_admin" && (
         <SettingsNotificationsCard 
           prefs={prefs} 
           onChange={handlePrefChange} 
@@ -100,11 +106,18 @@ export function SharedSettingsPage() {
         />
       )}
       
-      {!isProfileLoading && profileData?.role !== "org_admin" && (
+      {!isProfileLoading && profileData?.role !== "org_admin" && profileData?.role !== "super_admin" && (
         <SettingsPushCard 
           pushEnabled={pushEnabled} 
           onChange={handlePushChange} 
         />
+      )}
+
+      {profileData?.role !== "org_admin" && (
+        <>
+          <SettingsChangePasswordCard />
+          {profileData?.role !== "super_admin" && <SettingsDeleteAccountCard />}
+        </>
       )}
 
       {profileData?.role === "org_admin" && (

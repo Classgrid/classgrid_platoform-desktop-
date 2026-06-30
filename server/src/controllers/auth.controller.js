@@ -2025,3 +2025,132 @@ export const checkEmailForLogin = async (req, res) => {
     }
 };
 
+export const changePassword = async (req, res) => {
+    try {
+        await connectDB();
+        const { oldPassword, newPassword } = req.body;
+        
+        if (!oldPassword || !newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: "Old password and new password (min 8 chars) are required." });
+        }
+
+        const user = await User.findById(req.user._id).select("+password");
+        if (!user) return res.status(404).json({ message: "User not found." });
+
+        const dummyHash = '$2a$10$abcdefghijklmnopqrstuv';
+        const hashToCompare = user.password || dummyHash;
+        
+        let isMatch = false;
+        try {
+            isMatch = await bcrypt.compare(oldPassword, hashToCompare);
+        } catch (e) {
+            isMatch = false;
+        }
+
+        if (!isMatch) {
+            return res.status(401).json({ message: "Incorrect current password." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.json({ message: "Password updated successfully." });
+    } catch (err) {
+        console.error("Change Password Error:", err);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+export const deleteAccount = async (req, res) => {
+    try {
+        await connectDB();
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ message: "Password is required to confirm deletion." });
+        }
+
+        const user = await User.findById(req.user._id).select("+password");
+        if (!user) return res.status(404).json({ message: "User not found." });
+        
+        if (user.role === "org_admin" || user.role === "super_admin") {
+            return res.status(403).json({ message: "Administrators must use the organization deletion process." });
+        }
+
+        const dummyHash = '$2a$10$abcdefghijklmnopqrstuv';
+        const hashToCompare = user.password || dummyHash;
+        let isMatch = false;
+        try { isMatch = await bcrypt.compare(password, hashToCompare); } catch (e) { isMatch = false; }
+
+        if (!isMatch) {
+            return res.status(401).json({ message: "Incorrect password." });
+        }
+
+        // Logic for sending emails to superiors
+        let targetEmails = [];
+        if (user.organization_id) {
+            let targetRoles = [];
+            if (user.role === "student") {
+                targetRoles = ["faculty", "teacher"];
+            } else if (user.role === "faculty" || user.role === "teacher") {
+                targetRoles = ["admission_head", "admission_verifier", "admission_counselor", "admission_clerk"];
+            } else {
+                // Anyone else in a department goes to org admin
+                targetRoles = ["org_admin"];
+            }
+            
+            const superiors = await User.find({ 
+                organization_id: user.organization_id, 
+                role: { $in: targetRoles } 
+            }).select("email");
+            
+            targetEmails = superiors.map(s => s.email);
+            
+            // Fallback to org admin if no specific superiors found
+            if (targetEmails.length === 0 && targetRoles[0] !== "org_admin") {
+                const orgAdmins = await User.find({ organization_id: user.organization_id, role: "org_admin" }).select("email");
+                targetEmails = orgAdmins.map(s => s.email);
+            }
+        }
+        
+        const { getAccountDeletedNotificationHtml, getAccountDeletedNotificationPlainText } = await import("../services/email-templates.service.js");
+        
+        // Notify superiors
+        if (targetEmails.length > 0 && getAccountDeletedNotificationHtml) {
+            try {
+                // Send individually or BCC, here we send one email per superior
+                for (const email of targetEmails) {
+                    sendEmail({
+                        to: email,
+                        subject: `Account Deleted: ${user.name} (${user.email})`,
+                        html: getAccountDeletedNotificationHtml(user.name, user.email, user.role),
+                        text: getAccountDeletedNotificationPlainText(user.name, user.email, user.role),
+                    }).catch(console.error);
+                }
+            } catch (err) {
+                console.error("Failed to send deletion notifications:", err);
+            }
+        }
+
+        // Send a final goodbye email to the user
+        try {
+            sendEmail({
+                to: user.email,
+                subject: "Your Classgrid account has been deleted",
+                html: `<p>Hi ${user.name},</p><p>Your account has been permanently deleted as requested.</p>`,
+                text: `Hi ${user.name},\n\nYour account has been permanently deleted as requested.`,
+            }).catch(console.error);
+        } catch(e) {}
+
+        // Delete user
+        await User.findByIdAndDelete(user._id);
+
+        res.clearCookie("token");
+        res.json({ message: "Account deleted successfully." });
+    } catch (err) {
+        console.error("Delete Account Error:", err);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+

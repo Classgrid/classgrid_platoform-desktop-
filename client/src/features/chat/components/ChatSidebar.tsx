@@ -12,6 +12,7 @@ interface ChatSidebarProps {
   onNewChat: () => void;
   onNewGroup: () => void;
   isLoading: boolean;
+  onlineUsers?: Set<string>;
 }
 
 function getInitials(name: string) {
@@ -39,6 +40,7 @@ export function ChatSidebar({
   onNewChat,
   onNewGroup,
   isLoading,
+  onlineUsers,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
 
@@ -139,6 +141,9 @@ export function ChatSidebar({
                         getInitials(thread.name)
                       )}
                     </div>
+                  )}
+                  {thread.type === "dm" && thread.otherUserId && onlineUsers?.has(thread.otherUserId) && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
                   )}
                   {thread.unread > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1">

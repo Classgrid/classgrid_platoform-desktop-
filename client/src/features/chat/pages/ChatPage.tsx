@@ -16,7 +16,7 @@ import {
   type ChatMessage,
   type OrgUser,
 } from "../services/chatApi";
-import { useUserChannel, useThreadChannel } from "../hooks/useRealtimeChat";
+import { useUserChannel, useThreadChannel, usePresence } from "../hooks/useRealtimeChat";
 
 import { ChatSidebar } from "../components/ChatSidebar";
 import { ChatHeader } from "../components/ChatHeader";
@@ -26,7 +26,7 @@ import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
-import { PhotoViewerModal } from "../components/PhotoViewerModal";
+import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { ChatUserProfileSidebar } from "../components/ChatUserProfileSidebar";
 
 export function ChatPage() {
@@ -51,8 +51,12 @@ export function ChatPage() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
-  const [viewingPhotoUrl, setViewingPhotoUrl] = useState<string | null>(null);
+  const [viewingMedia, setViewingMedia] = useState<any | null>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [typingUsers, setTypingUsers] = useState<Record<string, NodeJS.Timeout>>({});
+
+  const activeTypingUserIds = Object.keys(typingUsers);
+  const onlineUsers = usePresence(currentUserId || null);
 
   // -- Load Initial Data --
   useEffect(() => {
@@ -87,6 +91,7 @@ export function ChatPage() {
   // -- Load Messages when Thread Selected --
   useEffect(() => {
     if (activeThread) {
+      setTypingUsers({});
       loadMessages(activeThread.id);
       markThreadRead(activeThread.id).catch(console.error);
       
@@ -125,24 +130,48 @@ export function ChatPage() {
 
   // -- Send Message --
   const handleSendMessage = async (text: string, files: File[]) => {
-    if (!activeThread) return;
+    if (!activeThread || !currentUserId) return;
     setIsSending(true);
+
+    const tempId = `temp-${Date.now()}`;
+    const tempMessage: ChatMessage = {
+      id: tempId,
+      thread_id: activeThread.id,
+      sender_id: currentUserId,
+      sender_name: currentUser?.name || "Me",
+      user_avatar: currentUser?.profilePicture || null,
+      message: text,
+      reply_to: replyTo ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message } : null,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+      attachments: files.map((f, i) => ({
+        id: `temp-att-${i}`,
+        message_id: tempId,
+        file_url: URL.createObjectURL(f),
+        file_name: f.name,
+        file_type: f.type,
+        file_size: f.size
+      })),
+      reactions: {},
+      isSending: true
+    };
+
+    setMessages((prev) => [...prev, tempMessage]);
+    setReplyTo(null);
+
     try {
       const replyData = replyTo
         ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message }
         : null;
       
       const sentMessage = await sendMessage(activeThread.id, text, files, replyData);
-      // Instantly add the message to the screen (so we don't have to wait for websocket/refresh)
-      setMessages(prev => {
-        // Prevent duplicate if websocket somehow beat us to it
-        if (prev.find(m => m.id === sentMessage.id)) return prev;
-        return [...prev, sentMessage];
-      });
-      setReplyTo(null);
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? sentMessage : m)));
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || "Failed to send message";
       toast.error(errorMessage);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, isSending: false, isError: true } : m))
+      );
     } finally {
       setIsSending(false);
     }
@@ -214,7 +243,7 @@ export function ChatPage() {
   });
 
   // 2. Active Thread Updates (via Thread channel)
-  useThreadChannel(activeThread?.id || null, {
+  const { sendTyping } = useThreadChannel(activeThread?.id || null, currentUserId || null, {
     onNewMessage: (msg: ChatMessage) => {
       setMessages((prev) => {
         if (prev.find((m) => m.id === msg.id)) return prev;
@@ -243,6 +272,26 @@ export function ChatPage() {
         );
       }
     },
+    onTyping: (data: { userId: string; isTyping?: boolean }) => {
+      if (data.userId === currentUserId) return; // Ignore own typing
+      setTypingUsers((prev) => {
+        const next = { ...prev };
+        if (data.isTyping === false) {
+          if (next[data.userId]) clearTimeout(next[data.userId]);
+          delete next[data.userId];
+        } else {
+          if (next[data.userId]) clearTimeout(next[data.userId]);
+          next[data.userId] = setTimeout(() => {
+            setTypingUsers((p) => {
+              const pNext = { ...p };
+              delete pNext[data.userId];
+              return pNext;
+            });
+          }, 3000);
+        }
+        return next;
+      });
+    },
   });
 
   // -- Layout --
@@ -257,6 +306,7 @@ export function ChatPage() {
           onNewChat={() => setIsUserModalOpen(true)}
           onNewGroup={() => setIsGroupModalOpen(true)}
           isLoading={threadsLoading}
+          onlineUsers={onlineUsers}
         />
       </div>
 
@@ -266,6 +316,7 @@ export function ChatPage() {
           <>
             <ChatHeader
               thread={activeThread}
+              onlineUsers={onlineUsers}
               onBack={() => setActiveThread(null)}
               onAvatarClick={() => {
                 if (activeThread.avatar) {
@@ -311,6 +362,10 @@ export function ChatPage() {
                 }
               }}
               onReact={(id, emoji) => toggleReaction(activeThread.id, id, emoji).catch(() => toast.error("Reaction failed"))}
+              onUserClick={setProfileUserId}
+              onViewMedia={setViewingMedia}
+              typingUserIds={activeTypingUserIds}
+              orgUsers={orgUsers}
             />
 
             <ChatInput
@@ -318,6 +373,7 @@ export function ChatPage() {
               isSending={isSending}
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
+              onTyping={sendTyping}
             />
           </>
         ) : (
@@ -363,11 +419,14 @@ export function ChatPage() {
         />
       )}
 
-      {!!viewingPhotoUrl && (
-        <PhotoViewerModal 
-          src={viewingPhotoUrl} 
-          alt="Profile Photo" 
-          onClose={() => setViewingPhotoUrl(null)} 
+      {!!viewingMedia && (
+        <FilePreviewModal 
+          file={
+            typeof viewingMedia === "string"
+              ? { src: viewingMedia, name: "Photo" }
+              : { src: viewingMedia.file_url, name: viewingMedia.file_name, mimeType: viewingMedia.file_type }
+          } 
+          onClose={() => setViewingMedia(null)} 
         />
       )}
       

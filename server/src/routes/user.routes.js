@@ -11,10 +11,13 @@ import redis from "../config/redis.js";
 
 const router = express.Router();
 
-const normalizePushNotifications = (pushNotifications = {}) => ({
-  global: pushNotifications.global ?? true,
-  sidebarPanelEnabled: pushNotifications.sidebarPanelEnabled ?? true,
-});
+const normalizePushNotifications = (pushNotifications) => {
+  const p = pushNotifications || {};
+  return {
+    global: p.global ?? true,
+    sidebarPanelEnabled: p.sidebarPanelEnabled ?? true,
+  };
+};
 
 // =======================
 // GET USER PROFILE
@@ -22,7 +25,13 @@ const normalizePushNotifications = (pushNotifications = {}) => ({
 router.get("/profile", isAuthenticated, async (req, res) => {
   try {
     const cacheKey = `user:profile:${req.user._id}`;
-    const cached = await redis.get(cacheKey);
+    let cached = null;
+    try {
+      cached = await redis.get(cacheKey);
+    } catch (e) {
+      console.warn("Redis get failed for user profile, falling back to DB:", e.message);
+    }
+    
     if (cached) {
       return res.json(JSON.parse(cached));
     }
@@ -82,7 +91,11 @@ router.get("/profile", isAuthenticated, async (req, res) => {
       },
     };
 
-    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 1800);
+    try {
+      await redis.set(cacheKey, JSON.stringify(responseData), "EX", 1800);
+    } catch (e) {
+      console.warn("Redis set failed for user profile:", e.message);
+    }
     res.json(responseData);
   } catch (error) {
     console.error("PROFILE ERROR:", error.message);

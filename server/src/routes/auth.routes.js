@@ -46,6 +46,8 @@ router.get("/verify-reset-token/:token", authController.verifyResetToken);
 router.post("/reset-password", resetPasswordLimiter, authController.resetPassword);
 router.post("/faculty-activate", resetPasswordLimiter, authController.facultyActivate);
 router.post("/force-reset-password", isAuthenticated, authController.forceResetPassword);
+router.post("/change-password", isAuthenticated, authController.changePassword);
+router.post("/delete-account", isAuthenticated, authController.deleteAccount);
 
 // Google OAuth
 router.get(

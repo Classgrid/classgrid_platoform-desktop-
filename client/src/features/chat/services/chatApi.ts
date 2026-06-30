@@ -44,6 +44,8 @@ export interface ChatMessage {
   reactions: Record<string, { id: string; name: string }[]>;
   isSeen?: boolean;
   is_edited?: boolean;
+  isSending?: boolean;
+  isError?: boolean;
 }
 
 export interface OrgUser {
