@@ -95,8 +95,18 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     const text = message.trim();
     if (!text && files.length === 0 && !audioBlob) return;
 
-    if (onTyping) onTyping(false);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    const hasMedia = files.length > 0 || !!audioBlob;
+    if (onTyping) {
+      if (hasMedia) {
+        onTyping(true, 'uploading');
+        // Keep it active for up to 3 mins in case it's a long upload
+        typingTimeoutRef.current = setTimeout(() => onTyping(false, 'uploading'), 180000);
+      } else {
+        onTyping(false, 'typing');
+      }
+    }
 
     const finalFiles = [...files];
     if (audioBlob) {
@@ -111,7 +121,14 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       textareaRef.current.style.height = "auto";
     }
 
-    await onSendMessage(text, finalFiles);
+    try {
+      await onSendMessage(text, finalFiles);
+    } finally {
+      if (onTyping && hasMedia) {
+        onTyping(false, 'uploading');
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -279,6 +296,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                       textareaRef.current?.focus();
                     }}
                     theme="auto"
+                    previewConfig={{ showPreview: false }}
                   />
                 </PopoverContent>
               </Popover>

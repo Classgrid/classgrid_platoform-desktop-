@@ -321,6 +321,18 @@ const userSchema = new mongoose.Schema(
       addedAt: { type: Date, default: Date.now },
     }],
 
+    // 🔇 Muted Chat Threads
+    muted_chat_threads: {
+      type: [String],
+      default: []
+    },
+
+    // ⭐ Starred Chat Messages
+    starred_chat_messages: {
+      type: [String],
+      default: []
+    },
+
     // 🔔 Push / In-App notification preferences
     pushNotifications: {
       global: { type: Boolean, default: true },

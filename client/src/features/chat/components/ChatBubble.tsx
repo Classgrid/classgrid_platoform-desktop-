@@ -356,6 +356,7 @@ export function ChatBubble({
                       setShowFullPicker(false);
                     }}
                     theme="auto"
+                    previewConfig={{ showPreview: false }}
                   />
                 ) : (
                   <>

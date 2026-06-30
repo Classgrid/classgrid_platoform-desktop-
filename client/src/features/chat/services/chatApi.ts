@@ -102,9 +102,9 @@ export interface Poll {
 
 // ── API Functions ──
 
-export async function fetchThreads(): Promise<ChatThread[]> {
-  const res = await apiClient.get<{ threads: ChatThread[] }>("/api/threads");
-  return res.data.threads;
+export async function fetchThreads(filter: string = "All"): Promise<ChatThread[]> {
+  const { data } = await apiClient.get<{ threads: ChatThread[] }>(`/api/threads?filter=${encodeURIComponent(filter)}`);
+  return data.threads;
 }
 
 export async function fetchOrgUsers(): Promise<OrgUser[]> {

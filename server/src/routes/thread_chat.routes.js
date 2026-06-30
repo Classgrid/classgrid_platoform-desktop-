@@ -70,6 +70,8 @@ router.get('/', isAuthenticated, async (req, res) => {
 
     if (!orgId && !isSuperAdmin) return res.json({ threads: [] });
 
+    const filter = req.query.filter || 'All';
+
     // Get thread IDs where user is a member
     const { data: memberships, error: memErr } = await sb
       .from('chat_thread_members')
@@ -85,6 +87,14 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (!isSuperAdmin) {
       threadQuery = threadQuery.eq('org_id', orgId);
     }
+    
+    // Apply category filters
+    if (filter === 'Groups') {
+      threadQuery = threadQuery.eq('type', 'group');
+    } else if (filter === 'Admins' || filter === 'Faculty') {
+      threadQuery = threadQuery.eq('type', 'dm');
+    }
+    
     threadQuery = threadQuery.order('last_message_at', { ascending: false, nullsFirst: false }).limit(50);
 
     const [threadsResult, readsResult] = await Promise.all([
@@ -188,7 +198,17 @@ router.get('/', isAuthenticated, async (req, res) => {
       }
     });
 
-    res.json({ threads: formatted });
+    // Apply role and unread filters AFTER formatting (since roles and unread counts are calculated here)
+    let finalFormatted = formatted;
+    if (filter === 'Unread') {
+      finalFormatted = formatted.filter(t => t.unread > 0);
+    } else if (filter === 'Admins') {
+      finalFormatted = formatted.filter(t => t.role && t.role.toLowerCase().includes('admin'));
+    } else if (filter === 'Faculty') {
+      finalFormatted = formatted.filter(t => t.role && t.role.toLowerCase() === 'faculty');
+    }
+
+    res.json({ threads: finalFormatted });
   } catch (err) {
     console.error('Thread list error:', err);
     res.status(500).json({ error: err.message });
@@ -983,6 +1003,93 @@ router.get('/:id/polls', isAuthenticated, async (req, res) => {
 
     res.json({ polls: result });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ==========================================
+// Mute / Unmute Notifications
+// ==========================================
+router.post('/:id/mute', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const userId = req.user._id.toString();
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let muted = user.muted_chat_threads || [];
+    const isMuted = muted.includes(threadId);
+
+    if (isMuted) {
+      muted = muted.filter(id => id !== threadId);
+    } else {
+      muted.push(threadId);
+    }
+
+    user.muted_chat_threads = muted;
+    await user.save();
+
+    res.json({ success: true, isMuted: !isMuted });
+  } catch (err) {
+    console.error('Mute error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Star / Unstar Message
+// ==========================================
+router.post('/messages/:id/star', isAuthenticated, async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const userId = req.user._id.toString();
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let starred = user.starred_chat_messages || [];
+    const isStarred = starred.includes(messageId);
+
+    if (isStarred) {
+      starred = starred.filter(id => id !== messageId);
+    } else {
+      starred.push(messageId);
+    }
+
+    user.starred_chat_messages = starred;
+    await user.save();
+
+    res.json({ success: true, isStarred: !isStarred });
+  } catch (err) {
+    console.error('Star error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Get Starred Messages
+// ==========================================
+router.get('/starred-messages', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const user = await User.findById(userId);
+    const starredIds = user?.starred_chat_messages || [];
+
+    if (starredIds.length === 0) return res.json({ messages: [] });
+
+    // Fetch the actual messages from Supabase
+    const { data: messages, error } = await sb
+      .from('chat_messages')
+      .select('*')
+      .in('id', starredIds)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ messages: messages || [] });
+  } catch (err) {
+    console.error('Fetch starred error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================================
