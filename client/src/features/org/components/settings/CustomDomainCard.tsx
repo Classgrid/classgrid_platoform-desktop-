@@ -681,7 +681,6 @@ function DomainConfigCard({
                                         variant="default" 
                                         size="sm"
                                     >
-                                        {!verifyMutation.isPending && !isPolling && <RefreshCw className="w-3.5 h-3.5" />}
                                         {isPolling ? "Verifying..." : "Verify"}
                                     </Button>
                                 </div>
