@@ -572,6 +572,15 @@ router.delete("/custom-domains/:orgId", async (req, res) => {
         org.has_custom_domain = false;
         org.custom_domain = undefined; // or { domain: null } depending on schema, but undefined works if schema allows
         
+        // Reset branding settings
+        org.site_title = "Classgrid ERP";
+        org.favicon_url = "";
+        org.campus_photo_url = "";
+        org.brand_colors = {
+            primary: "#6366f1",
+            secondary: "#4f46e5"
+        };
+
         await org.save();
 
         return res.json({ success: true, message: "Custom domain removed successfully" });

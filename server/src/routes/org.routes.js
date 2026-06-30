@@ -2217,6 +2217,13 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
                 ssl_provisioned: false,
                 allow_classgrid_url: true,
                 is_enabled: true
+            },
+            site_title: "Classgrid ERP",
+            favicon_url: "",
+            campus_photo_url: "",
+            brand_colors: {
+                primary: "#6366f1",
+                secondary: "#4f46e5"
             }
         };
 
