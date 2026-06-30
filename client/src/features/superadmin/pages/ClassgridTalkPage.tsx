@@ -921,8 +921,8 @@ export function ClassgridTalkPage() {
         </div>
 
         {/* Right: Metadata Sidebar */}
-        <div className="sticky top-6 lg:top-24 self-start">
-          <div className="bg-card border border-border rounded-lg p-5">
+        <div className="h-full">
+          <div className="bg-card border border-border rounded-lg p-5 sticky top-6 lg:top-24">
             <dl className="space-y-4">
               <MetaRow
                 label="Id"
