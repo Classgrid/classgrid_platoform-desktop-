@@ -466,7 +466,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   if (isReadOnly) {
     return (
       <div className="w-full h-full pb-12">
-        <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 md:px-6">
+        <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
           <div className="flex items-center text-sm text-muted-foreground">
             <span className="cursor-pointer hover:text-foreground hover:underline transition-colors" onClick={onClose}>Chat</span>
             <ChevronRight size={14} className="mx-2 opacity-50" />
