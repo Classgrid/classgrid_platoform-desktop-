@@ -13,8 +13,10 @@ import {
   Paperclip,
   Eye,
   FileText,
+  FileText,
   Building2,
   Copy,
+  ArrowLeft,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
@@ -688,29 +690,18 @@ export function ClassgridTalkPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Breadcrumb */}
+      {/* Back Button */}
       <div className="mb-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="#"
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  setSelectedTicket(null);
-                }}
-              >
-                Classgrid Talk
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                {selectedRequester?.name || "Unknown"}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setSelectedTicket(null);
+          }}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Classgrid Talk
+        </button>
       </div>
 
       {/* Title + Status Badge */}
