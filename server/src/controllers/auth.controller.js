@@ -1720,6 +1720,7 @@ export const getCurrentUser = async (req, res) => {
             department: req.user.department || "",
             subject: req.user.subject || null,
             profilePicture: req.user.profilePicture || "",
+            platformLogo: req.user.platformLogo || "",
             phoneNumber: req.user.phoneNumber || "",
             authProvider: req.user.authProvider,
             linkedProviders: req.user.linkedProviders,

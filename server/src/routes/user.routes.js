@@ -386,6 +386,7 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
         role: user.role,
         phoneNumber: user.phoneNumber || "",
         profilePicture: user.profilePicture || "",
+        platformLogo: user.platformLogo || "",
         qualification: user.qualification || "",
         department: user.department || "",
         bio: user.bio || "",
