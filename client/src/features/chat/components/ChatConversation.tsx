@@ -31,7 +31,7 @@ export function ChatConversation({
   onUserClick,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isNearBottom, setIsNearBottom] = useState(true);
+  const isNearBottomRef = useRef(true);
   const prevHeightRef = useRef<number>(0);
 
   // Handle scroll events to detect if we're near bottom or hit top (for pagination)
@@ -41,7 +41,7 @@ export function ChatConversation({
     
     // Check if near bottom
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    setIsNearBottom(distanceFromBottom < 100);
+    isNearBottomRef.current = distanceFromBottom < 100;
 
     // Hit top -> load more
     if (scrollTop === 0 && hasMore && !isLoading) {
@@ -63,10 +63,10 @@ export function ChatConversation({
 
   // Scroll to bottom on first load or when new messages arrive (if already at bottom)
   useEffect(() => {
-    if (scrollRef.current && (isNearBottom || messages.length <= 20)) {
+    if (scrollRef.current && isNearBottomRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isNearBottom]);
+  }, [messages]);
 
   // Group messages by date
   const groupedMessages: { date: string; messages: ChatMessage[] }[] = [];
