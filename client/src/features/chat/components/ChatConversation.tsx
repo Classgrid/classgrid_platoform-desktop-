@@ -85,7 +85,7 @@ export function ChatConversation({
     <div 
       ref={scrollRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto p-4 bg-muted/20 relative custom-scrollbar flex flex-col"
+      className="flex-1 min-h-0 overflow-y-auto p-4 bg-muted/20 relative custom-scrollbar flex flex-col"
     >
       {/* Loading indicator at top */}
       {isLoading && hasMore && (
