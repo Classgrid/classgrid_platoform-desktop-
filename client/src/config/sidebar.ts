@@ -114,8 +114,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "📢 PLATFORM",
         items: [
-          { label: "Notifications Engine", to: "/superadmin/notifications", icon: Bell },
-          { label: "Announcements", to: "/superadmin/announcements", icon: Megaphone },
           { label: "Subscribers", to: "/superadmin/subscribers", icon: Mail, restrictedToEmail: "support@classgrid.in" },
           { label: "Chat", to: "/superadmin/chat", icon: MessageSquare },
           { label: "Classgrid Talk", to: "/superadmin/talk", icon: MessageSquare },
