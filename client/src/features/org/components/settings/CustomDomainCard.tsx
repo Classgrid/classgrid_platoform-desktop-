@@ -624,7 +624,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <span className="text-muted-foreground/30">-</span>}
+                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
                                                         <tr className="hover:bg-muted/10 transition-colors">
@@ -649,7 +649,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <span className="text-muted-foreground/30">-</span>}
+                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
                                                         {targetType === 'A' && (
@@ -679,9 +679,7 @@ function DomainConfigCard({
                                         disabled={verifyMutation.isPending || isPolling} 
                                         isLoading={verifyMutation.isPending || isPolling} 
                                         variant="default" 
-                                        size="sm" 
-                                        showGlow={true} 
-                                        glowVariant="emerald"
+                                        size="sm"
                                     >
                                         {!verifyMutation.isPending && !isPolling && <RefreshCw className="w-3.5 h-3.5" />}
                                         {isPolling ? "Verifying..." : "Verify"}

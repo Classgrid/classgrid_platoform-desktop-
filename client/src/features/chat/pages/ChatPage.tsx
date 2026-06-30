@@ -469,13 +469,17 @@ export function ChatPage() {
 
   // -- Layout --
   return (
-    <div className="flex flex-1 min-h-0 h-full w-full overflow-hidden bg-background">
-      {/* Sidebar Panel (Hidden on mobile when a chat is open) */}
-      <div className={`${activeThread ? "hidden lg:block" : "block"} w-full lg:w-[350px] xl:w-[400px] shrink-0 border-r border-border h-full overflow-hidden`}>
+    <div className="flex h-full w-full bg-background relative overflow-hidden min-h-0">
+      {/* Sidebar - hidden on mobile if thread is active */}
+      <div 
+        className={`${
+          activeThread ? "hidden md:flex" : "flex"
+        } w-full md:w-[350px] lg:w-[400px] h-full flex-col min-h-0 border-r border-border bg-card shrink-0`}
+      >
         <ChatSidebar
           threads={threads}
           activeThreadId={activeThread?.id || null}
-          onSelectThread={setActiveThread}
+          onSelectThread={(t) => { setActiveThread(t); setIsSending(false); setReplyTo(null); }}
           onNewChat={() => setIsUserModalOpen(true)}
           onNewGroup={() => setIsGroupModalOpen(true)}
           onMarkAllRead={handleMarkAllRead}

@@ -101,7 +101,7 @@ export function ChatSidebar({
   const filters = ["All", "Unread", "Groups", "Admins", "Faculty"];
 
   return (
-    <div className="flex flex-col h-full w-full bg-background">
+    <div className="flex flex-col h-full w-full bg-background min-h-0">
       {/* Header */}
       <div className="px-4 py-4 border-b border-border">
         <div className="flex items-center justify-between mb-3 h-9">
