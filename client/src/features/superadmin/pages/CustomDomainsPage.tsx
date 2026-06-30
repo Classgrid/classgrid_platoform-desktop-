@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/marketing_ui/skeleton";
 
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
+import { CodeCopyDialog } from "@/components/marketing_ui/code-copy-dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +22,6 @@ export function CustomDomainsPage() {
   const navigate = useNavigate();
   const [showCloudflareModal, setShowCloudflareModal] = useState(false);
   const [showRecaptchaModal, setShowRecaptchaModal] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["super-admin-custom-domains"],
@@ -134,13 +134,6 @@ export function CustomDomainsPage() {
     return domains.join("\n");
   }, [orgs]);
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success("Copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const totalVerified = orgs.filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active").length;
   const totalPending = orgs.filter(o => o.custom_domain?.status === "pending_verification").length;
 
@@ -204,86 +197,27 @@ export function CustomDomainsPage() {
         </SectionPanel>
       </div>
 
-      <Dialog open={showCloudflareModal} onOpenChange={setShowCloudflareModal}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="shrink-0">
-            <DialogTitle>Cloudflare R2 CORS Configuration</DialogTitle>
-            <DialogDescription>
-              Copy this JSON and paste it into your Cloudflare R2 Bucket CORS settings to allow file uploads from all active custom domains.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-y-auto pr-2 pb-2 mt-2">
-            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-3 rounded-md flex items-start gap-2 my-2">
-              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div className="text-xs">
-                <span className="font-semibold text-primary block mb-0.5">Why do I need this?</span>
-                <span className="text-foreground/80 leading-relaxed">
-                  Browsers block direct R2 uploads from new custom domains due to CORS. 
-                  Copy this dynamically generated JSON into your Cloudflare R2 CORS settings to whitelist all active domains.
-                </span>
-              </div>
-            </div>
+      <CodeCopyDialog
+        open={showCloudflareModal}
+        onOpenChange={setShowCloudflareModal}
+        title="Cloudflare R2 CORS Configuration"
+        description="Copy this JSON and paste it into your Cloudflare R2 Bucket CORS settings to allow file uploads from all active custom domains."
+        infoBoxTitle="Why do I need this?"
+        infoBoxDescription="Browsers block direct R2 uploads from new custom domains due to CORS. Copy this dynamically generated JSON into your Cloudflare R2 CORS settings to whitelist all active domains."
+        code={cloudflareJSON}
+        copyButtonText="Copy JSON"
+      />
 
-            <div className="relative mt-4">
-              <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
-                {cloudflareJSON}
-              </pre>
-            </div>
-          </div>
-          
-          <DialogFooter className="shrink-0 mt-2">
-            <Button 
-              size="sm" 
-              variant="default" 
-              onClick={() => copyToClipboard(cloudflareJSON)}
-            >
-              {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
-              {copied ? "Copied!" : "Copy JSON"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showRecaptchaModal} onOpenChange={setShowRecaptchaModal}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="shrink-0">
-            <DialogTitle>Google reCAPTCHA Domains</DialogTitle>
-            <DialogDescription>
-              Copy this list and paste it into the "Domains" section of your Google reCAPTCHA v3 Admin Console.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-y-auto pr-2 pb-2 mt-2">
-            <div className="bg-primary/5 border border-primary/20 text-primary-foreground p-3 rounded-md flex items-start gap-2 my-2">
-              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div className="text-xs">
-                <span className="font-semibold text-primary block mb-0.5">How to use this?</span>
-                <span className="text-foreground/80 leading-relaxed">
-                  To prevent the "Invalid domain for site key" error without sacrificing security, paste this list directly into Google reCAPTCHA. It contains every verified custom domain on your platform.
-                </span>
-              </div>
-            </div>
-
-            <div className="relative mt-4">
-              <pre className="bg-secondary/50 p-4 rounded-md overflow-x-auto text-sm font-mono border border-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
-                {recaptchaDomainsList}
-              </pre>
-            </div>
-          </div>
-          
-          <DialogFooter className="shrink-0 mt-2">
-            <Button 
-              size="sm" 
-              variant="default" 
-              onClick={() => copyToClipboard(recaptchaDomainsList)}
-            >
-              {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
-              {copied ? "Copied!" : "Copy List"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CodeCopyDialog
+        open={showRecaptchaModal}
+        onOpenChange={setShowRecaptchaModal}
+        title="Google reCAPTCHA Domains"
+        description="Copy this list and paste it into the &quot;Domains&quot; section of your Google reCAPTCHA v3 Admin Console."
+        infoBoxTitle="How to use this?"
+        infoBoxDescription="To prevent the &quot;Invalid domain for site key&quot; error without sacrificing security, paste this list directly into Google reCAPTCHA. It contains every verified custom domain on your platform."
+        code={recaptchaDomainsList}
+        copyButtonText="Copy List"
+      />
     </div>
   );
 }
