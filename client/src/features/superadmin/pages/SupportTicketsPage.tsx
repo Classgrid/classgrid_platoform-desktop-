@@ -710,18 +710,11 @@ export function SupportTicketsPage() {
         >
           {statusLabel(selectedTicket.status)}
         </span>
-        <Button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full transition-colors disabled:opacity-50"
-        >
-          {isFetching ? (
-            <Spinner className="w-3.5 h-3.5" />
-          ) : (
-            <RefreshCw className="w-3.5 h-3.5" />
-          )}
-          {isFetching ? "Refreshing..." : "Refresh"}
-        </Button>
+        <RefreshButton
+            onClick={() => refetch()}
+            isFetching={isFetching}
+            className="ml-auto rounded-full border-none bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+          />
       </div>
 
       {/* 2-Column Grid */}
@@ -811,10 +804,11 @@ export function SupportTicketsPage() {
                             return (
                               <Button
                                 key={`msg-att-${aIdx}`}
-                                onClick={() =>
-                                  setPreviewFile({ name: fileName, src: fileUrl })
-                                }
-                                className="group flex items-center gap-2 px-3 py-1.5 bg-card border border-border hover:border-primary/50 hover:bg-primary/5 rounded-lg text-xs transition-all shadow-sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setPreviewFile({ name: fileName, src: fileUrl })
+                                  }
+                                  className="group flex items-center gap-2 px-3 py-1.5 bg-card border border-border hover:border-primary/50 hover:bg-primary/5 rounded-lg text-xs transition-all shadow-sm"
                                 title="View attachment"
                               >
                                 <div className="w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
