@@ -55,15 +55,19 @@ export function ChatSidebar({
           <h2 className="text-lg font-bold text-foreground">Chats</h2>
           <div className="flex items-center gap-1">
             <Button
+              variant="ghost"
+              size="icon"
               onClick={onNewChat}
-              className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />
             </Button>
             <Button
+              variant="ghost"
+              size="icon"
               onClick={onNewGroup}
-              className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground"
               title="New Group"
             >
               <Users className="w-4 h-4" />
@@ -116,9 +120,10 @@ export function ChatSidebar({
 
             return (
               <Button
+                variant="ghost"
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
+                className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
                   isActive ? "bg-accent" : ""
                 }`}
               >
