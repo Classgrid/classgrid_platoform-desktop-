@@ -32,7 +32,7 @@ export function DataTable({ columns, rows, isLoading, skeletonLines = 5, emptyMe
   }
 
   return (
-    <div className="rounded-md border bg-card dark:bg-black overflow-hidden">
+    <div className="rounded-md border bg-card overflow-hidden">
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow>
