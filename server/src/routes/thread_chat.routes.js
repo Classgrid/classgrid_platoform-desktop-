@@ -27,7 +27,7 @@ function checkRateLimit(userId) {
   if (!rateLimitStore[userId]) rateLimitStore[userId] = [];
   // Purge entries older than 60s
   rateLimitStore[userId] = rateLimitStore[userId].filter(ts => now - ts < 60000);
-  if (rateLimitStore[userId].length >= 30) return false;
+  if (rateLimitStore[userId].length >= 200) return false;
   rateLimitStore[userId].push(now);
   return true;
 }
@@ -396,7 +396,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     // Rate limit
     if (!checkRateLimit(userId)) {
-      return res.status(429).json({ error: 'Rate limit exceeded. Max 30 messages per minute.' });
+      return res.status(429).json({ error: 'Rate limit exceeded. Max 200 messages per minute.' });
     }
 
     // Empty guard
