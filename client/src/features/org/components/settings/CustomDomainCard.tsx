@@ -24,6 +24,7 @@ export function CustomDomainCard() {
     const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [showEnableClassgridConfirm, setShowEnableClassgridConfirm] = useState(false);
 
     const [showEditDomainModal, setShowEditDomainModal] = useState(false);
 
