@@ -27,7 +27,7 @@ import { GroupCreateModal } from "../components/GroupCreateModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
-import { ChatUserProfileSidebar } from "../components/ChatUserProfileSidebar";
+
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -320,7 +320,7 @@ export function ChatPage() {
               onBack={() => setActiveThread(null)}
               onAvatarClick={() => {
                 if (activeThread.avatar) {
-                  setViewingPhotoUrl(activeThread.avatar);
+                  setViewingMedia(activeThread.avatar);
                 } else {
                   toast.info("No profile picture available");
                 }
@@ -430,15 +430,25 @@ export function ChatPage() {
         />
       )}
       
-      {/* Right Sidebar Panel for User Info */}
-      {!!profileUserId && (
-        <div className="hidden lg:block w-[300px] xl:w-[350px] shrink-0 border-l border-border bg-background">
-          <ChatUserProfileSidebar 
-            user={orgUsers.find(u => u._id === profileUserId)} 
+      {/* Full Screen Shared Profile Modal */}
+      {!!profileUserId && (() => {
+        const selectedUserForProfile = orgUsers.find(u => u._id === profileUserId);
+        if (!selectedUserForProfile) return null;
+        return (
+          <SharedProfilePage 
+            publicUser={{
+              name: selectedUserForProfile.name,
+              phoneNumber: selectedUserForProfile.phoneNumber || "",
+              email: selectedUserForProfile.email,
+              role: selectedUserForProfile.role,
+              profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
+              prn: selectedUserForProfile.prn,
+              bio: selectedUserForProfile.bio,
+            }}
             onClose={() => setProfileUserId(null)} 
           />
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

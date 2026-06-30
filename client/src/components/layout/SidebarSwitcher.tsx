@@ -20,11 +20,12 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
   const { isMobile } = useSidebar();
 
   // 1. Resolve Organization Branding from Backend User Object
-  const orgName = user?.organization?.sidebar_name || user?.organization?.name || "Classgrid Platform";
-  const orgLogo = user?.organization?.logo_url;
+  const currentRole = user?.role || "super_admin";
+  const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.name || "Super Admin" : "Classgrid Platform");
+  const orgLogo = user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.profilePicture || (user as any)?.photoURL : undefined);
 
   // 2. Resolve Roles
-  const currentRole = user?.role || "super_admin";
+  // (currentRole already defined above)
   
   // Use additional_roles from the backend user object
   const additionalRoles = user?.additional_roles || [];
