@@ -65,8 +65,8 @@ export function CustomDomainCard() {
     return (
         <div className="flex flex-col gap-6">
             {/* Card 1: Default Classgrid Subdomain */}
-            <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="w-full bg-black border border-white/10 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-4">
                         <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20 shrink-0">
                             <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -138,9 +138,9 @@ export function CustomDomainCard() {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="border-white/10 bg-black text-white hover:bg-white/5"
                                     onClick={() => {
                                         setSubdomainInput("");
-                                        setConfirmOldDomainInput("");
                                         setShowEditDomainModal(true);
                                     }}
                                 >
@@ -204,7 +204,7 @@ export function CustomDomainCard() {
                 variant="danger"
             >
                 <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-foreground">
+                    <label className="text-sm font-medium text-zinc-300">
                         Enter the new domain:
                     </label>
                     <div className="flex items-center gap-2">
@@ -212,9 +212,9 @@ export function CustomDomainCard() {
                             value={subdomainInput}
                             onChange={(e) => setSubdomainInput(e.target.value)}
                             placeholder="e.g. aec"
-                            className="flex-1"
+                            className="flex-1 bg-black border-white/10 text-white focus-visible:ring-1 focus-visible:ring-white/30 h-10"
                         />
-                        <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
+                        <span className="text-zinc-400 font-medium bg-[#0a0a0a] px-3 py-2 rounded-md border border-white/10 shrink-0 h-10 flex items-center">.classgrid.in</span>
                     </div>
                 </div>
             </DangerConfirmDialog>
@@ -398,9 +398,9 @@ function DomainConfigCard({
         : "border-purple-500/10";
 
     return (
-        <div className="w-full bg-card text-card-foreground border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="w-full bg-black border border-white/10 rounded-xl overflow-hidden shadow-sm">
             {/* Header */}
-            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                     <div className={`p-2.5 rounded-xl border shrink-0 ${colorClasses}`}>
                         <Icon className="w-5 h-5" />
@@ -428,7 +428,7 @@ function DomainConfigCard({
                 </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-6 border-t border-white/10 bg-[#0f0f0f]">
                 {!hasDomain ? (
                     <div className="flex flex-col gap-6">
                         <div className="bg-background rounded-xl p-5 border border-border/50">

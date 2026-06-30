@@ -10,9 +10,9 @@ export function DeleteOrgCard() {
   const { data: profileData } = useUserProfile();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const orgName = profileData?.organization?.name || "";
-  const orgSubdomain = profileData?.organization?.subdomain || "";
-  const orgLogo = profileData?.organization?.logo_url;
+  const orgName = profileData?.organization_id?.name || "";
+  const orgSubdomain = profileData?.organization_id?.subdomain || "";
+  const orgLogo = profileData?.organization_id?.logo_url;
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -30,7 +30,7 @@ export function DeleteOrgCard() {
   });
 
   // Only render if we have org data
-  if (!profileData?.organization) {
+  if (!profileData?.organization_id) {
     return null;
   }
 
