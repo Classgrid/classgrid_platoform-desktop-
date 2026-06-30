@@ -1,4 +1,3 @@
-import { Input } from "@/components/marketing_ui/input";
 import { useEffect, useState, type FormEvent } from "react";
 import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, ArrowLeft, Globe, Facebook, Instagram, Linkedin } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -7,7 +6,6 @@ import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, 
 import { getRedirectPath, saveStoredAuthRole, readStoredAuthRole, getRoleLabel, getPortalLabel, isInstitutionAdminRole } from "../auth-helpers";
 import type { AuthUserRole, AuthLoginRole, AuthBranding } from "../types";
 import { toast } from "sonner";
-
 
 /* ── Constants ── */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
@@ -257,40 +255,70 @@ export function ClassgridSubdomainAdminLoginPage() {
           {/* TOP GREEN EFFECT - left to right direction */}
           <div
             className="pointer-events-none absolute -top-[90px] -left-[120px] h-[320px] w-[420px] rounded-full blur-[90px]"
-            
+            style={{
+              background:
+                "radial-gradient(circle, rgba(16,185,129,0.85) 0%, rgba(16,185,129,0.4) 38%, rgba(16,185,129,0) 72%)",
+            }}
           />
 
           {/* BOTTOM ORANGE EFFECT - right to left direction */}
           <div
             className="pointer-events-none absolute -bottom-[120px] -right-[110px] h-[340px] w-[460px] rounded-full blur-[125px]"
-            
+            style={{
+              background:
+                "radial-gradient(circle, rgba(249,115,22,0.52) 0%, rgba(249,115,22,0.24) 40%, rgba(249,115,22,0) 75%)",
+            }}
           />
 
           {/* WHITE DOTTED GRID — top-right, fades before logo */}
           <div
             className="pointer-events-none absolute right-0 top-0 h-[160px] w-[280px]"
-            
+            style={{
+              opacity: 0.5,
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.7) 1.2px, transparent 1.2px)",
+              backgroundSize: "16px 16px",
+              maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+              WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+            }}
             aria-hidden="true"
           />
 
           {/* WHITE DOTTED GRID — middle-right, fades left to fill gap */}
           <div
             className="pointer-events-none absolute right-0 top-[140px] h-[260px] w-[200px]"
-            
+            style={{
+              opacity: 0.45,
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.7) 1.2px, transparent 1.2px)",
+              backgroundSize: "16px 16px",
+              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+            }}
             aria-hidden="true"
           />
 
           {/* WHITE DOTTED GRID — middle-left, fades right to fill gap */}
           <div
             className="pointer-events-none absolute left-0 bottom-[140px] h-[240px] w-[180px]"
-            
+            style={{
+              opacity: 0.45,
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.65) 1.2px, transparent 1.2px)",
+              backgroundSize: "16px 16px",
+              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+            }}
             aria-hidden="true"
           />
 
           {/* WHITE DOTTED GRID — bottom-left, fades before content */}
           <div
             className="pointer-events-none absolute bottom-0 left-0 h-[180px] w-[320px]"
-            
+            style={{
+              opacity: 0.45,
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.65) 1.2px, transparent 1.2px)",
+              backgroundSize: "16px 16px",
+              maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+              WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 50%, transparent 85%)",
+            }}
             aria-hidden="true"
           />
 
@@ -418,13 +446,13 @@ export function ClassgridSubdomainAdminLoginPage() {
                 {/* 14. Email Input */}
                 <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                   <Mail className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email Address" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email Address" />
                 </div>
 
                 {/* Password Input */}
                 <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                  <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
+                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-white/70 transition-colors hover:text-white">
                     {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                   </button>
@@ -433,7 +461,7 @@ export function ClassgridSubdomainAdminLoginPage() {
                 {/* 15. Remember Me & Forgot Password */}
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
+                    <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
                     <span className="text-[13px] text-[#ededed]">Remember me</span>
                   </div>
                   {showForgotPassword && (
@@ -469,7 +497,7 @@ export function ClassgridSubdomainAdminLoginPage() {
 
                 <div className="mt-5 flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                  <Input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-[#ededed] outline-none placeholder:text-white/40 tracking-[0.25em]" placeholder="000000" />
+                  <input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-[#ededed] outline-none placeholder:text-white/40 tracking-[0.25em]" placeholder="000000" />
                 </div>
 
                 {feedback && (

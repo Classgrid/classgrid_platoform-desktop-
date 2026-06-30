@@ -45,7 +45,7 @@ export function LogoutPage() {
   return (
     <div 
       className="fixed inset-0 flex flex-col items-center justify-center"
-      
+      style={{ backgroundColor: "#0f0f0f", zIndex: 999999 }}
     >
       {/* Top-left Classgrid Logo */}
       <div className="absolute top-8 left-8">

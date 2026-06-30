@@ -1,4 +1,3 @@
-import { Input } from "@/components/marketing_ui/input";
 import { useEffect, useState, type FormEvent } from "react";
 import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Globe, Facebook, Instagram, Linkedin, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -7,7 +6,6 @@ import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, 
 import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
 import type { AuthUserRole, AuthBranding } from "../types";
 import { toast } from "sonner";
-
 
 /* ── Constants ── */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
@@ -275,7 +273,10 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
           {/* 2. Dark Gradient Overlay for Readability */}
           <div
             className="pointer-events-none absolute inset-0"
-            
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 60%)",
+            }}
             aria-hidden="true"
           />
 
@@ -379,13 +380,13 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                   {/* 14. Email Input */}
                   <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                     <Mail className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email Address" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Email Address" />
                   </div>
 
                   {/* Password Input */}
                   <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                     <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
+                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-[#ededed] outline-none placeholder:text-white/40" placeholder="Password" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-white/70 transition-colors hover:text-white">
                       {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                     </button>
@@ -394,7 +395,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                   {/* 15. Remember Me & Forgot Password */}
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
+                      <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
                       <span className="text-[13px] text-[#ededed]">Remember me</span>
                     </div>
                     {showForgotPassword && (
@@ -430,7 +431,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                   
                   <div className="mt-5 flex h-[46px] items-center gap-3 rounded-[12px] border border-white/[0.14] bg-[#141414] px-4">
                     <Lock className="h-[18px] w-[18px] shrink-0 text-white/70" />
-                    <Input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-[#ededed] outline-none placeholder:text-white/40 tracking-[0.25em]" placeholder="000000" />
+                    <input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-[#ededed] outline-none placeholder:text-white/40 tracking-[0.25em]" placeholder="000000" />
                   </div>
 
                   {feedback && (
