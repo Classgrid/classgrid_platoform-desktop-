@@ -47,7 +47,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
           {/* This is the actual flush right pane */}
           <div className={`flex-1 flex flex-col overflow-hidden relative ${isFullBleed ? 'bg-background border-l border-border' : 'bg-card border-l border-border'}`}>
             {!isFullBleed && showBreadcrumbs && (
-              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+              <header className="flex h-14 shrink-0 items-center justify-center border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <Breadcrumb>
                   <BreadcrumbList>
                     {items.length > 0 ? (
@@ -66,15 +66,28 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                         </React.Fragment>
                       ))
                     ) : (
-                      <BreadcrumbItem>
-                        <BreadcrumbPage>Overview</BreadcrumbPage>
-                      </BreadcrumbItem>
+                      location.pathname.split("/").filter(Boolean).map((part, index, arr) => {
+                        const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ');
+                        const isLast = index === arr.length - 1;
+                        const href = "/" + arr.slice(0, index + 1).join("/");
+                        return (
+                          <React.Fragment key={index}>
+                            <BreadcrumbItem>
+                              {isLast ? (
+                                <BreadcrumbPage>{label}</BreadcrumbPage>
+                              ) : (
+                                <BreadcrumbLink asChild>
+                                  <Link to={href}>{label}</Link>
+                                </BreadcrumbLink>
+                              )}
+                            </BreadcrumbItem>
+                            {!isLast && <BreadcrumbSeparator />}
+                          </React.Fragment>
+                        );
+                      })
                     )}
                   </BreadcrumbList>
                 </Breadcrumb>
-                <div className="w-full flex justify-between items-center">
-                  {/* Topbar placeholder for future breadcrumbs / search / right actions */}
-                </div>
               </header>
             )}
             <main className={`flex-1 overflow-x-hidden overflow-y-auto bg-background ${isFullBleed ? 'p-0 m-0 border-none flex flex-col h-full' : 'p-4 lg:p-6'}`}>

@@ -122,21 +122,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Support Tickets", to: "/superadmin/support", icon: Ticket }
         ]
       },
-      {
-        label: "🛡️ SECURITY & MODERATION",
-        items: [
-          { label: "Content Reports", to: "/superadmin/moderation", icon: Flag },
-          { label: "Flagged Users", to: "/superadmin/global-users?status=suspended", icon: AlertTriangle },
-          { label: "GDPR Erasure", to: "/superadmin/gdpr", icon: Trash2 },
-        ]
-      },
-      {
-        label: "🗄️ BACKUP & RECOVERY",
-        items: [
-          { label: "Backups", to: "/superadmin/backups", icon: Database },
-          { label: "Data Export", to: "/superadmin/backups?tab=export", icon: Download },
-        ]
-      }
+
     ],
     identity: {
       name: "Classgrid Support",
