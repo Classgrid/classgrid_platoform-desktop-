@@ -1,8 +1,9 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { SidebarProvider, SidebarInset } from "@/components/marketing_ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/marketing_ui/sidebar";
 import { TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbLink } from "@/components/marketing_ui/breadcrumb";
+import { Separator } from "@/components/marketing_ui/separator";
 import { Link } from "react-router-dom";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
@@ -95,7 +96,9 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
           {/* This is the actual flush right pane */}
           <div className={`flex-1 flex flex-col overflow-hidden relative ${isFullBleed ? 'bg-background border-l border-border' : 'bg-card border-l border-border'}`}>
             {!isFullBleed && showBreadcrumbs && (
-              <header className="flex h-14 shrink-0 items-center justify-center border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+                <SidebarTrigger />
+                <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
                   <BreadcrumbList>
                     {items.length > 0 ? (
