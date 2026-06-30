@@ -6,12 +6,22 @@ import type { DashboardRole } from "./DashboardLayout";
 
 type SidebarFooterUserProps = {
   role: DashboardRole;
-  user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string };
+  user: {
+    name: string;
+    email?: string;
+    avatar?: string;
+    profilePicture?: string;
+    photoURL?: string;
+    pushNotifications?: {
+      global?: boolean;
+      sidebarPanelEnabled?: boolean;
+    };
+  };
 };
 
 export function SidebarFooterUser({ role, user }: SidebarFooterUserProps) {
   const avatarSrc = user.avatar || user.profilePicture || user.photoURL;
-  const showNotifications = role !== "org_admin";
+  const showNotifications = role !== "org_admin" && user.pushNotifications?.sidebarPanelEnabled !== false;
   const settingsPath = role === "super_admin" ? "/superadmin/settings" : "/settings";
 
   return (

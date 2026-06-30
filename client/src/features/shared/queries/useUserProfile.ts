@@ -27,7 +27,7 @@ export type ProfileData = {
   lastLoginAt?: string;
   createdAt?: string;
   profile_completed?: boolean;
-  pushNotifications?: { global: boolean };
+  pushNotifications?: { global: boolean; sidebarPanelEnabled?: boolean };
   organization_id?: {
     id: string;
     name: string;

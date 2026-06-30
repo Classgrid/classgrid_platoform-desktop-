@@ -11,6 +11,11 @@ import redis from "../config/redis.js";
 
 const router = express.Router();
 
+const normalizePushNotifications = (pushNotifications = {}) => ({
+  global: pushNotifications.global ?? true,
+  sidebarPanelEnabled: pushNotifications.sidebarPanelEnabled ?? true,
+});
+
 // =======================
 // GET USER PROFILE
 // =======================
@@ -73,7 +78,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         branch: user.branch || null,
         batch: user.batch || null,
         profile_completed: user.profile_completed,
-        pushNotifications: user.pushNotifications || { global: true }
+        pushNotifications: normalizePushNotifications(user.pushNotifications)
       },
     };
 
@@ -381,7 +386,7 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
         authProvider: user.authProvider,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
-        pushNotifications: user.pushNotifications || { global: true }
+        pushNotifications: normalizePushNotifications(user.pushNotifications)
       }
     });
 

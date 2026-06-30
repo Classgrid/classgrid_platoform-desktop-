@@ -8,6 +8,7 @@ import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 import { AppSidebar } from "./AppSidebar";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 import type { DashboardRole } from "@/layouts/types";
 
@@ -83,11 +84,12 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
   const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website");
   const { items, showBreadcrumbs } = useBreadcrumbStore();
   const dashboardRole = normalizeDashboardRole(role, location.pathname);
+  const sidebarUser = user ?? currentUser ?? undefined;
 
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <AppSidebar role={dashboardRole} user={user} />
+        <AppSidebar role={dashboardRole} user={sidebarUser} />
         {/* Make the inset background match the sidebar so it's a seamless black canvas */}
         <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
           {/* This is the actual flush right pane */}

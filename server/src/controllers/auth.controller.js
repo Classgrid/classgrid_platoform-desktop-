@@ -1729,6 +1729,10 @@ export const getCurrentUser = async (req, res) => {
             organization: orgData,
             mustResetPassword: req.user.mustResetPassword || false,
             profile_completed: req.user.profile_completed || false,
+            pushNotifications: {
+                global: req.user.pushNotifications?.global ?? true,
+                sidebarPanelEnabled: req.user.pushNotifications?.sidebarPanelEnabled ?? true,
+            },
             isImpersonating: req.isImpersonating || false,
             realUser: req.realUser ? {
                 id: req.realUser._id,

@@ -640,10 +640,11 @@ export function ClassgridTalkPage() {
                       ) : (
                         currentUser && (
                           <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAssigningTicketId(ticket._id);
-                              updateTicket.mutate(
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAssigningTicketId(ticket._id);
+                                updateTicket.mutate(
                                 { id: ticket._id, assignedTo: currentUser._id },
                                 {
                                   onSuccess: () => {
@@ -882,7 +883,7 @@ export function ClassgridTalkPage() {
                       }
                     }}
                     placeholder="Type your reply here..."
-                    minHeight={300}
+                    minHeight={80}
                     onSubmit={submitReply}
                   />
                   <div className="flex flex-wrap items-center justify-between gap-3">
@@ -920,8 +921,8 @@ export function ClassgridTalkPage() {
         </div>
 
         {/* Right: Metadata Sidebar */}
-        <div>
-          <div className="bg-card border border-border rounded-lg p-5 lg:sticky lg:top-28">
+        <div className="sticky top-6 lg:top-24 self-start">
+          <div className="bg-card border border-border rounded-lg p-5">
             <dl className="space-y-4">
               <MetaRow
                 label="Id"
@@ -976,9 +977,10 @@ export function ClassgridTalkPage() {
                       <span>Unassigned</span>
                       {currentUser && (
                         <Button
-                          onClick={() => {
-                            updateTicket.mutate(
-                              { id: selectedTicket._id, assignedTo: currentUser._id },
+                            variant="ghost"
+                            onClick={() => {
+                              updateTicket.mutate(
+                                { id: selectedTicket._id, assignedTo: currentUser._id },
                               {
                                 onSuccess: (res) => {
                                   toast.success("Ticket assigned to you");
@@ -1139,8 +1141,10 @@ export function ClassgridTalkPage() {
                                     : fileName}
                                 </span>
                                 <Button
-                                  onClick={() =>
-                                    setPreviewFile({
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      setPreviewFile({
                                       name: fileName,
                                       src: fileUrl,
                                     })
@@ -1197,11 +1201,13 @@ function MetaRow({
         <span>{value}</span>
         {copyValue && (
           <Button
-            onClick={() => {
-              navigator.clipboard.writeText(copyValue);
-              toast.success("Merge URL copied to clipboard");
-            }}
-            className="p-1 rounded bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                navigator.clipboard.writeText(copyValue);
+                toast.success("Merge URL copied to clipboard");
+              }}
+              className="w-6 h-6 p-0 rounded bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
             title="Copy Merge URL"
           >
             <Copy className="w-3 h-3" />

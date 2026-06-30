@@ -317,7 +317,8 @@ const userSchema = new mongoose.Schema(
 
     // 🔔 Push / In-App notification preferences
     pushNotifications: {
-      global: { type: Boolean, default: true }
+      global: { type: Boolean, default: true },
+      sidebarPanelEnabled: { type: Boolean, default: true }
     },
 
     fcmTokens: {
