@@ -148,14 +148,14 @@ export function DangerConfirmDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent 
                 className={cn(
-                    "max-w-[calc(100%-2rem)] p-0 gap-0 border border-white/10 shadow-2xl rounded-xl overflow-hidden bg-[#0f0f0f]", 
+                    "max-w-[calc(100%-2rem)] p-0 gap-0 border border-white/10 shadow-2xl rounded-xl overflow-hidden bg-[#0f0f0f] flex flex-col max-h-[90dvh]", 
                     maxWidth
                 )}
                 showCloseButton={false}
                 onKeyDown={handleKeyDown}
             >
                 {/* ── Section 1: Header ───────────────────────────── */}
-                <div className="px-6 py-6 border-b border-white/10 bg-black">
+                <div className="px-6 py-6 border-b border-white/10 bg-black shrink-0">
                     <DialogTitle className="text-xl font-semibold text-white tracking-tight">
                         {title}
                     </DialogTitle>
@@ -166,8 +166,10 @@ export function DangerConfirmDialog({
                     )}
                 </div>
 
-                {/* ── Custom Children Content ──────────────────────── */}
-                {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
+                {/* ── Scrollable Body ──────────────────────────────── */}
+                <div className="flex-1 overflow-y-auto min-h-0">
+                    {/* ── Custom Children Content ──────────────────────── */}
+                    {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
 
                 {/* ── Section 2: Confirmation Steps ─────────────────── */}
                 {confirmationSteps.length > 0 && (
@@ -202,9 +204,10 @@ export function DangerConfirmDialog({
                         ))}
                     </div>
                 )}
+                </div>
 
                 {/* ── Section 3: Footer (Warning + Buttons) ─────────── */}
-                <div className="px-6 py-5 flex flex-col gap-5 bg-black">
+                <div className="px-6 py-5 flex flex-col gap-5 bg-black border-t border-white/10 shrink-0">
                     {/* Warning Banner */}
                     <div className={cn(
                         "flex items-center gap-3 rounded-md border px-4 py-3",
