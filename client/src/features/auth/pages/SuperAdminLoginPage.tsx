@@ -190,6 +190,7 @@ export function SuperAdminLoginPage() {
                     className="form-input"
                     placeholder="Enter your password" 
                     required 
+                    autoComplete="current-password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                   />
