@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 import { AppSidebar } from "./AppSidebar";
+import { resolveDashboardPageTitle } from "@/config/sidebar";
 
 export type DashboardRole =
   | "super_admin"
@@ -66,25 +67,9 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                         </React.Fragment>
                       ))
                     ) : (
-                      location.pathname.split("/").filter(Boolean).map((part, index, arr) => {
-                        const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ');
-                        const isLast = index === arr.length - 1;
-                        const href = "/" + arr.slice(0, index + 1).join("/");
-                        return (
-                          <React.Fragment key={index}>
-                            <BreadcrumbItem>
-                              {isLast ? (
-                                <BreadcrumbPage>{label}</BreadcrumbPage>
-                              ) : (
-                                <BreadcrumbLink asChild>
-                                  <Link to={href}>{label}</Link>
-                                </BreadcrumbLink>
-                              )}
-                            </BreadcrumbItem>
-                            {!isLast && <BreadcrumbSeparator />}
-                          </React.Fragment>
-                        );
-                      })
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>{resolveDashboardPageTitle(location.pathname)}</BreadcrumbPage>
+                      </BreadcrumbItem>
                     )}
                   </BreadcrumbList>
                 </Breadcrumb>
