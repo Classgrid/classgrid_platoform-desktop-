@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus, Clock, BarChart2 } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Clock, BarChart2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
@@ -157,7 +157,7 @@ export function ChatBubble({
               ${message.is_deleted 
                 ? "bg-muted text-muted-foreground italic border border-border" 
                 : isMine 
-                  ? "bg-[#005c4b] text-[#e9edef] rounded-tr-sm shadow-sm" 
+                  ? "bg-primary text-[#0f172a] font-medium rounded-tr-sm shadow-sm" 
                   : "bg-[#202c33] text-[#e9edef] rounded-tl-sm shadow-sm"
               }
             `}
@@ -299,17 +299,17 @@ export function ChatBubble({
             )}
 
             {/* Meta (Time + Checks) */}
-            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-[#8796a1]" : "text-muted-foreground"} text-[10px]`}>
+            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-[#0f172a]/70 font-semibold" : "text-muted-foreground"} text-[10px]`}>
               <span>{timeString}</span>
               {isMine && !message.is_deleted && (
                 message.isSending ? (
                   <Spinner className="w-3 h-3 text-current ml-0.5" />
                 ) : message.isError ? (
-                  <span className="text-red-500 font-bold ml-0.5">!</span>
+                  <span className="text-red-600 font-bold ml-0.5">!</span>
                 ) : message.isSeen ? (
-                  <CheckCheck className="w-3.5 h-3.5 text-blue-300" />
+                  <CheckCheck className="w-4 h-4 text-blue-700 font-extrabold" />
                 ) : (
-                  <Check className="w-3.5 h-3.5" />
+                  <Check className="w-4 h-4 text-[#0f172a]" />
                 )
               )}
             </div>
@@ -359,14 +359,14 @@ export function ChatBubble({
                   />
                 ) : (
                   <>
-                    <div className="flex px-2 py-2 gap-2 border-b border-border justify-between items-center">
+                    <div className="flex px-3 py-3 gap-2 border-b border-border justify-between items-center">
                       {COMMON_EMOJIS.map(emoji => (
-                        <button key={emoji} onClick={() => onReact(message.id, emoji)} className="hover:scale-125 transition-transform">
+                        <button key={emoji} onClick={() => onReact(message.id, emoji)} className="text-xl hover:scale-125 transition-transform origin-bottom">
                           {emoji}
                         </button>
                       ))}
-                      <button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted">
-                        <Plus className="w-4 h-4" />
+                      <button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted ml-2">
+                        <Smile className="w-5 h-5" />
                       </button>
                     </div>
                     <button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">

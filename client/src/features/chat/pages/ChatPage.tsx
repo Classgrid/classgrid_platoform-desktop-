@@ -265,7 +265,14 @@ export function ChatPage() {
         : null;
       
       const sentMessage = await sendMessage(activeThread.id, text, files, replyData);
-      setMessages((prev) => prev.map((m) => (m.id === tempId ? sentMessage : m)));
+      setMessages((prev) => {
+        // If realtime subscription already added the real message, just remove the temp one
+        if (prev.some(m => m.id === sentMessage.id)) {
+          return prev.filter(m => m.id !== tempId);
+        }
+        // Otherwise, safely replace temp message with the actual one from the backend
+        return prev.map((m) => (m.id === tempId ? sentMessage : m));
+      });
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || "Failed to send message";
       toast.error(errorMessage);
@@ -458,8 +465,30 @@ export function ChatPage() {
                 }
               }}
               onReact={async (id, emoji) => {
+                // Optimistic UI Update
+                setMessages(prev => prev.map(m => {
+                  if (m.id === id) {
+                    const currentReacts = { ...(m.reactions || {}) };
+                    let users = currentReacts[emoji] ? [...currentReacts[emoji]] : [];
+                    const myReactIdx = users.findIndex(u => u.id === currentUserId);
+                    if (myReactIdx > -1) {
+                      users.splice(myReactIdx, 1);
+                    } else {
+                      users.push({ id: currentUserId!, name: 'You' });
+                    }
+                    if (users.length === 0) {
+                      delete currentReacts[emoji];
+                    } else {
+                      currentReacts[emoji] = users;
+                    }
+                    return { ...m, reactions: currentReacts };
+                  }
+                  return m;
+                }));
+
                 try {
                   const newReacts = await toggleReaction(activeThread.id, id, emoji);
+                  // Sync exact state from server in background
                   setMessages(prev => prev.map(m => m.id === id ? { ...m, reactions: newReacts } : m));
                 } catch {
                   toast.error("Failed to react");

@@ -3,6 +3,8 @@ import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Im
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
+import EmojiPicker from 'emoji-picker-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 
 import { Input } from "@/components/marketing_ui/input";
 import {
@@ -255,7 +257,23 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               onChange={handleFileSelect}
             />
 
-            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end hover:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-200">
+            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end hover:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-200 pl-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="p-2 mb-1 text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none rounded-full hover:bg-muted">
+                    <Smile className="w-5 h-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2">
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) => {
+                      setMessage(prev => prev + emojiData.emoji);
+                      textareaRef.current?.focus();
+                    }}
+                    theme="auto"
+                  />
+                </PopoverContent>
+              </Popover>
               <textarea
                 ref={textareaRef}
                 value={message}
