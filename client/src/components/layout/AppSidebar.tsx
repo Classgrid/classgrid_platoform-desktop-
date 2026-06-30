@@ -53,11 +53,11 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
       <SidebarHeader>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center w-full group-data-[collapsible=icon]:justify-center">
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
             <SidebarSwitcher user={user ?? null} />
           </div>
-          <SidebarTrigger className="mx-auto" />
+          <SidebarTrigger />
         </div>
         <div className="group-data-[collapsible=icon]:hidden">
           <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
