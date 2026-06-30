@@ -22,7 +22,7 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
   // 1. Resolve Organization Branding from Backend User Object
   const currentRole = user?.role || "super_admin";
   const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.name || "Super Admin" : "Classgrid Platform");
-  const orgLogo = user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.profilePicture || (user as any)?.photoURL : undefined);
+  const orgLogo = user?.organization?.logo_url;
 
   // 2. Resolve Roles
   // (currentRole already defined above)
@@ -47,9 +47,9 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           }>
-              <div className={`flex aspect-square size-8 items-center justify-center rounded-lg shadow-sm overflow-hidden shrink-0 ${orgLogo ? 'bg-white p-0.5' : 'bg-emerald-500 text-white'}`}>
+              <div className={`flex aspect-square size-8 items-center justify-center rounded-lg shadow-sm overflow-hidden shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
                 ) : (
                   <Building2 className="size-4 text-white" />
                 )}
@@ -74,9 +74,9 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
               Active Context
             </DropdownMenuLabel>
             <DropdownMenuItem className="gap-3 p-2 rounded-md">
-              <div className={`flex aspect-square size-8 items-center justify-center rounded-md border border-border overflow-hidden shrink-0 ${orgLogo ? 'bg-white p-0.5' : 'bg-emerald-500 text-white'}`}>
+              <div className={`flex aspect-square size-8 items-center justify-center rounded-md border border-border overflow-hidden shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
                 ) : (
                   <Building2 className="size-4 text-white" />
                 )}

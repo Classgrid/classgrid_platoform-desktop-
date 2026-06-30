@@ -474,7 +474,7 @@ export function ChatPage() {
               isSending={isSending}
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
-              onTyping={(isTyping) => threadChannelRef.current?.track({ isTyping })}
+              onTyping={(isTyping) => sendTyping && sendTyping(isTyping)}
               onOpenPollModal={() => setIsPollModalOpen(true)}
             />
           </>

@@ -59,6 +59,7 @@ export function ChatBubble({
   const [editValue, setEditValue] = useState(message.message);
   const [isHovered, setIsHovered] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showFullPicker, setShowFullPicker] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   let isSystem = false;
