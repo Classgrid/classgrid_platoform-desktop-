@@ -4,8 +4,9 @@ import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
-import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings, CustomDomainConfig } from "../../queries/useCustomDomainQueries";
+import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings, CustomDomainConfig, CustomDomainsResponse } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -23,10 +24,8 @@ export function CustomDomainCard() {
     const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
-    const [hasCopiedBackdoorUrl, setHasCopiedBackdoorUrl] = useState(false);
 
     const [showEditDomainModal, setShowEditDomainModal] = useState(false);
-    const [confirmOldDomainInput, setConfirmOldDomainInput] = useState("");
 
     const updateSubdomainMutation = useMutation({
         mutationFn: (subdomain: string) => apiClient.patch("/api/org-admin/subdomain", { subdomain }),
@@ -87,15 +86,21 @@ export function CustomDomainCard() {
                                 <Switch 
                                     checked={domainsData.erp_domain?.allow_classgrid_url !== false} 
                                     onCheckedChange={(checked) => {
-                                        if (!checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled === false) {
-                                            toast.error("You must have at least one domain active! Please turn on your Custom Domain first.");
-                                            return;
+                                        // When disabling Classgrid URL, check if at least one custom domain is enabled
+                                        if (!checked) {
+                                            const erpDomainEnabled = domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false;
+                                            const websiteDomainEnabled = domainsData.custom_domain?.domain && domainsData.custom_domain?.is_enabled !== false;
+                                            if (!erpDomainEnabled && !websiteDomainEnabled) {
+                                                toast.error("You must have at least one domain active! Please turn on your Custom Domain first.");
+                                                return;
+                                            }
                                         }
 
                                         let settingsToUpdate: any = { allow_classgrid_url: checked };
                                         
+                                        // When enabling Classgrid URL, auto-disable the custom ERP domain
                                         if (checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false) {
-                                            toast("Turning on Classgrid URL turned off your custom domain", { icon: "🔄" });
+                                            toast("Turning on Classgrid URL will disable your custom ERP domain", { icon: "🔄" });
                                             settingsToUpdate.is_enabled = false;
                                         }
                                         
@@ -148,132 +153,78 @@ export function CustomDomainCard() {
             </div>
 
             {/* Backdoor Warning Dialog */}
-            <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
-                <DialogContent className="sm:max-w-md [&>button]:hidden">
-                    <DialogHeader>
-                        <DialogTitle className="text-destructive flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5" />
-                            CRITICAL: Save the Emergency URL
-                        </DialogTitle>
-                        <DialogDescription className="text-base text-foreground/90 space-y-4 pt-4 pb-2">
-                            <p>
-                                By disabling the default <span className="font-semibold text-primary">{user?.organization?.subdomain}.classgrid.in</span> URL, 
-                                your institution's ERP will now rely <strong>exclusively</strong> on your custom DNS settings.
-                            </p>
-                            <p>
-                                If your custom domain expires or experiences downtime, <strong className="text-destructive">your students and staff will temporarily lose access</strong>.
-                            </p>
-                            <div className="bg-destructive/10 border-l-4 border-destructive p-4 rounded-md">
-                                <p className="font-semibold text-destructive mb-1">Emergency Administrator Access</p>
-                                <p className="text-sm">
-                                    The Organization Admin portal remains accessible via the default URL. We strongly recommend saving this emergency access URL. It ensures you can always log in to manage your DNS and ERP settings during a domain outage.
-                                </p>
-                            </div>
-                        </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="flex items-center space-x-2 bg-muted/50 p-3 rounded-lg border font-mono text-sm">
-                        <span className="flex-1 overflow-x-auto whitespace-nowrap">
-                            https://{user?.organization?.subdomain}.classgrid.in/org/login
-                        </span>
-                    </div>
-
-                    <DialogFooter className="sm:justify-start gap-2 sm:gap-0 mt-4 flex-col sm:flex-row">
-                        <Button 
+            <DangerConfirmDialog
+                open={showBackdoorWarning}
+                onOpenChange={() => {}}
+                title="Save the Emergency URL"
+                description={<>By disabling the default <strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong> URL, your institution's ERP will now rely exclusively on your custom DNS settings. If your custom domain expires or experiences downtime, your students and staff will temporarily lose access.</>}
+                confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
+                warningMessage="The Organization Admin portal remains accessible via the default URL. Save the emergency URL below before closing."
+                actionLabel="I understand & Close"
+                onConfirm={() => {
+                    navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
+                    toast.success("Emergency URL copied!");
+                    setShowBackdoorWarning(false);
+                }}
+                variant="warning"
+            >
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-foreground">Emergency Access URL</label>
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all">
+                        <span className="flex-1">https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                        <button
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
-                                setHasCopiedBackdoorUrl(true);
-                            }} 
-                            variant={hasCopiedBackdoorUrl ? "outline" : "default"}
-                            className="w-full font-bold"
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
-                            <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
-                        </Button>
-                        <Button 
-                            onClick={() => setShowBackdoorWarning(false)} 
-                            disabled={!hasCopiedBackdoorUrl}
-                            variant="secondary"
-                            className="w-full"
-                        >
-                            I understand & Close
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={showEditDomainModal} onOpenChange={setShowEditDomainModal}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Edit Classgrid Organization URL</DialogTitle>
-                        <DialogDescription>
-                            This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing links pointing to it. You will be instantly redirected to your new domain.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="flex flex-col gap-5 py-2">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-foreground">
-                                To confirm, type the old domain: "{user?.organization?.subdomain}"
-                            </label>
-                            <Input
-                                value={confirmOldDomainInput}
-                                onChange={(e) => setConfirmOldDomainInput(e.target.value)}
-                                placeholder={`Type "${user?.organization?.subdomain}" here`}
-                            />
-                        </div>
-
-                        {confirmOldDomainInput === user?.organization?.subdomain && (
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Now, enter the new domain:
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        value={subdomainInput}
-                                        onChange={(e) => setSubdomainInput(e.target.value)}
-                                        placeholder="e.g. aec"
-                                        className="flex-1"
-                                    />
-                                    <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
-                                </div>
-                            </div>
-                        )}
-                        
-                        <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg flex gap-3 text-danger mt-2">
-                            <AlertTriangle className="w-5 h-5 shrink-0" />
-                            <div className="text-sm">
-                                <strong>Warning:</strong> You will be instantly redirected to the new URL. An email with the new links will be sent to the admin.
-                            </div>
-                        </div>
+                            <Copy className="w-4 h-4" />
+                        </button>
                     </div>
+                </div>
+            </DangerConfirmDialog>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowEditDomainModal(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => updateSubdomainMutation.mutate(subdomainInput, {
-                                onSuccess: () => {
-                                    const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
-                                    window.location.replace(newUrl);
-                                }
-                            })}
-                            disabled={updateSubdomainMutation.isPending || confirmOldDomainInput !== user?.organization?.subdomain || !subdomainInput.trim() || subdomainInput === user?.organization?.subdomain}
-                        >
-                            {updateSubdomainMutation.isPending && <Spinner className="mr-2" size="sm" />}
-                            Update Domain
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DangerConfirmDialog
+                open={showEditDomainModal}
+                onOpenChange={setShowEditDomainModal}
+                title="Edit Classgrid Organization URL"
+                description={<>This will instantly break your current Classgrid URL (<strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong>) and all existing links pointing to it. You will be instantly redirected to your new domain.</>}
+                confirmationSteps={[{ label: "To confirm, type the current domain", value: `${user?.organization?.subdomain}.classgrid.in` }]}
+                warningMessage="You will be instantly redirected to the new URL. An email with the new links will be sent to the admin."
+                actionLabel="Update Domain"
+                cancelLabel="Cancel"
+                isLoading={updateSubdomainMutation.isPending}
+                onConfirm={() => updateSubdomainMutation.mutate(subdomainInput, {
+                    onSuccess: () => {
+                        const newUrl = `https://${subdomainInput}.classgrid.in${window.location.pathname}`;
+                        window.location.replace(newUrl);
+                    }
+                })}
+                variant="danger"
+            >
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-foreground">
+                        Enter the new domain:
+                    </label>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            value={subdomainInput}
+                            onChange={(e) => setSubdomainInput(e.target.value)}
+                            placeholder="e.g. aec"
+                            className="flex-1"
+                        />
+                        <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
+                    </div>
+                </div>
+            </DangerConfirmDialog>
 
             <DomainConfigCard
                 title="ERP Login Portal Domain"
                 description="This domain will be used for students and faculty to login (e.g. erp.myschool.edu)"
                 domainType="erp_domain"
                 domainConfig={domainsData.erp_domain}
+                allDomainsData={domainsData}
                 user={user}
                 showPortalLinks={true}
                 icon={LayoutDashboard}
@@ -285,6 +236,7 @@ export function CustomDomainCard() {
                 description={`This domain will be used for your public-facing ${orgTypeString.toLowerCase()} website (e.g. www.my${orgTypeString.toLowerCase()}.edu)`}
                 domainType="custom_domain"
                 domainConfig={domainsData.custom_domain}
+                allDomainsData={domainsData}
                 user={user}
                 showPortalLinks={false}
                 icon={Monitor}
@@ -299,6 +251,7 @@ function DomainConfigCard({
     description,
     domainType,
     domainConfig,
+    allDomainsData,
     user,
     showPortalLinks,
     icon: Icon,
@@ -308,6 +261,7 @@ function DomainConfigCard({
     description: string;
     domainType: "custom_domain" | "erp_domain";
     domainConfig: CustomDomainConfig | null;
+    allDomainsData: CustomDomainsResponse;
     user: any;
     showPortalLinks: boolean;
     icon: any;
@@ -324,7 +278,6 @@ function DomainConfigCard({
     const [isPolling, setIsPolling] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
-    const [hasCopiedBackdoorUrl, setHasCopiedBackdoorUrl] = useState(false);
 
     const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
 
@@ -345,7 +298,6 @@ function DomainConfigCard({
                             setIsPolling(false);
                             if (domainType === "erp_domain") {
                                 setTimeout(() => {
-                                    setHasCopiedBackdoorUrl(false);
                                     setShowBackdoorWarning(true);
                                 }, 800);
                             }
@@ -393,7 +345,6 @@ function DomainConfigCard({
                     toast.success("Domain verified successfully! SSL provisioning has started.", { duration: 5000 });
                     if (domainType === "erp_domain") {
                         setTimeout(() => {
-                            setHasCopiedBackdoorUrl(false);
                             setShowBackdoorWarning(true);
                         }, 800);
                     }
@@ -740,19 +691,40 @@ function DomainConfigCard({
                                                 <Switch 
                                                     checked={domainConfig.is_enabled !== false} 
                                                     onCheckedChange={(checked) => {
-                                                        if (!checked && domainConfig.allow_classgrid_url === false) {
-                                                            toast.error("You must have at least one domain active! Please turn on the Default Classgrid URL first.");
-                                                            return;
+                                                        // When disabling custom domain, check if Classgrid URL is enabled
+                                                        if (!checked) {
+                                                            const classgridUrlEnabled = domainType === "erp_domain" 
+                                                                ? allDomainsData.erp_domain?.allow_classgrid_url !== false 
+                                                                : allDomainsData.custom_domain?.allow_classgrid_url !== false;
+                                                            if (!classgridUrlEnabled) {
+                                                                toast.error("You must have at least one domain active! Please turn on the Default Classgrid URL first.");
+                                                                return;
+                                                            }
                                                         }
 
                                                         let settingsToUpdate: any = { is_enabled: checked };
                                                         
-                                                        if (checked && domainConfig.allow_classgrid_url !== false) {
-                                                            toast("Turning on custom domain turned off Classgrid organization URL", { icon: "🔄" });
-                                                            settingsToUpdate.allow_classgrid_url = false;
+                                                        // When enabling custom domain, auto-disable Classgrid URL
+                                                        if (checked) {
+                                                            const classgridUrlEnabled = domainType === "erp_domain" 
+                                                                ? allDomainsData.erp_domain?.allow_classgrid_url !== false 
+                                                                : allDomainsData.custom_domain?.allow_classgrid_url !== false;
+                                                            if (classgridUrlEnabled) {
+                                                                toast("Turning on custom domain will disable Classgrid organization URL", { icon: "🔄" });
+                                                                settingsToUpdate.allow_classgrid_url = false;
+                                                            }
                                                         }
                                                         
-                                                        updateSettingsMutation.mutate({ domainType, settings: settingsToUpdate })
+                                                        updateSettingsMutation.mutate({ domainType, settings: settingsToUpdate }, {
+                                                            onSuccess: () => {
+                                                                toast.success(checked ? "Custom domain enabled" : "Custom domain disabled");
+                                                                if (checked && domainType === "erp_domain") {
+                                                                    setHasCopiedBackdoorUrl(false);
+                                                                    setShowBackdoorWarning(true);
+                                                                }
+                                                            },
+                                                            onError: () => toast.error("Failed to update settings")
+                                                        })
                                                     }}
                                                     disabled={updateSettingsMutation.isPending}
                                                 />
@@ -782,68 +754,52 @@ function DomainConfigCard({
             </div>
 
             {/* Remove Domain Confirmation Dialog */}
-            <Dialog open={removeConfirmOpen} onOpenChange={setRemoveConfirmOpen}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Remove {title}?</DialogTitle>
-                        <DialogDescription>
-                            Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-sm text-muted-foreground">
-                        <strong className="text-foreground">💡 Good to know:</strong> You can always re-add this domain later. Just enter it again and reconfigure the DNS records.
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
-                        <Button variant="destructive" isLoading={removeMutation.isPending} onClick={handleRemove}>
-                            <Trash2 className="w-3.5 h-3.5" /> Remove Domain
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DangerConfirmDialog
+                open={removeConfirmOpen}
+                onOpenChange={setRemoveConfirmOpen}
+                title={`Remove ${title}?`}
+                description={<>Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.</>}
+                confirmationSteps={domainConfig?.domain ? [{ label: "To confirm, type the domain", value: domainConfig.domain }] : []}
+                warningMessage="You can always re-add this domain later. Just enter it again and reconfigure the DNS records."
+                actionLabel="Remove Domain"
+                cancelLabel="Cancel"
+                isLoading={removeMutation.isPending}
+                onConfirm={handleRemove}
+                variant="danger"
+            />
 
             {/* Backdoor Warning Dialog for ERP Domain */}
-            <Dialog open={showBackdoorWarning} onOpenChange={() => {}}> 
-                <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                            <AlertTriangle className="w-5 h-5" />
-                            Important: Save Your Emergency URL
-                        </DialogTitle>
-                        <DialogDescription className="text-sm mt-2 text-foreground/80">
-                            Because you verified an ERP custom domain, if your custom DNS breaks (domain expires, CNAME deleted) — your ERP login is DEAD. 
-                            <br/><br/>
-                            <strong className="text-foreground">You must copy this as a "break glass in emergency" URL.</strong>
-                        </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all flex items-center justify-between">
-                        <span>https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
-                    </div>
-                    
-                    <DialogFooter className="mt-4 flex flex-col gap-2">
-                        <Button 
+            <DangerConfirmDialog
+                open={showBackdoorWarning}
+                onOpenChange={() => {}}
+                title="Save Your Emergency URL"
+                description={<>Because you verified an ERP custom domain, if your custom DNS breaks (domain expires, CNAME deleted) — your ERP login will be inaccessible. You must save the emergency URL below.</>}
+                confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
+                warningMessage="If your custom domain goes down and you haven't saved this URL, you will lose admin access."
+                actionLabel="I understand & Close"
+                onConfirm={() => {
+                    navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
+                    toast.success("Emergency URL copied!");
+                    setShowBackdoorWarning(false);
+                }}
+                variant="warning"
+            >
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-foreground">Emergency Access URL</label>
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all">
+                        <span className="flex-1">https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
+                        <button
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
-                                setHasCopiedBackdoorUrl(true);
-                            }} 
-                            variant={hasCopiedBackdoorUrl ? "outline" : "default"}
-                            className="w-full font-bold"
+                            }}
+                            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
-                            <Copy className="w-4 h-4 mr-2" /> {hasCopiedBackdoorUrl ? "Copied!" : "Copy URL"}
-                        </Button>
-                        <Button 
-                            onClick={() => setShowBackdoorWarning(false)} 
-                            disabled={!hasCopiedBackdoorUrl}
-                            variant="secondary"
-                            className="w-full"
-                        >
-                            I understand & Close
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                            <Copy className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </DangerConfirmDialog>
 
         </div>
     );
