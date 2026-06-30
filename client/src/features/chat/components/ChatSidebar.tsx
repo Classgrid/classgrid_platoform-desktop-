@@ -43,10 +43,24 @@ export function ChatSidebar({
   onlineUsers,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
 
-  const filtered = threads.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = threads.filter((t) => {
+    // Text search filter
+    if (search && !t.name.toLowerCase().includes(search.toLowerCase())) {
+      return false;
+    }
+    
+    // Category filter
+    if (activeFilter === "Unread") return t.unread > 0;
+    if (activeFilter === "Groups") return t.type === "group";
+    if (activeFilter === "Admins") return t.type === "dm" && t.role?.toLowerCase().includes("admin");
+    if (activeFilter === "Faculty") return t.type === "dm" && t.role?.toLowerCase() === "faculty";
+    
+    return true; // "All"
+  });
+
+  const filters = ["All", "Unread", "Groups", "Admins", "Faculty"];
 
   return (
     <div className="flex flex-col h-full w-full bg-background">
@@ -75,11 +89,28 @@ export function ChatSidebar({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search conversations..."
+            placeholder="Search or start a new chat"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-sm bg-muted/50 border border-border rounded-lg outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
           />
+        </div>
+
+        {/* Filter Chips */}
+        <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+          {filters.map(f => (
+            <button
+              key={f}
+              onClick={() => setActiveFilter(f)}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                activeFilter === f
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80 border border-transparent"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
