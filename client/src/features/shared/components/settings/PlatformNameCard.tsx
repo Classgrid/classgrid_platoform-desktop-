@@ -17,13 +17,13 @@ export function PlatformNameCard() {
   });
 
   useEffect(() => {
-    if (profileData?.user?.name) {
-      setLocalName(profileData.user.name);
+    if (profileData?.user) {
+      setLocalName(profileData.user.sidebar_name || profileData.user.name || "Classgrid Platform");
     }
   }, [profileData]);
 
   const updateProfile = useMutation({
-    mutationFn: (updates: { name: string }) => apiClient.put("/api/user/update", updates),
+    mutationFn: (updates: { sidebar_name: string }) => apiClient.put("/api/user/update", updates),
     onSuccess: (res, variables) => {
       queryClient.invalidateQueries({ queryKey: ["global-profile"] });
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
@@ -50,7 +50,7 @@ export function PlatformNameCard() {
         <div className="relative">
           <input
             type="text"
-            value={isEditing ? localName : (profileData?.user?.name || "Classgrid Platform")}
+            value={isEditing ? localName : (profileData?.user?.sidebar_name || profileData?.user?.name || "Classgrid Platform")}
             onChange={(e) => setLocalName(e.target.value)}
             disabled={!isEditing}
             className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -61,7 +61,7 @@ export function PlatformNameCard() {
           <div className="flex items-center gap-2">
             <Button 
               size="sm" 
-              onClick={() => updateProfile.mutate({ name: localName })}
+              onClick={() => updateProfile.mutate({ sidebar_name: localName })}
               disabled={updateProfile.isPending || !localName.trim()}
               className="flex-1"
             >
@@ -72,7 +72,7 @@ export function PlatformNameCard() {
               variant="outline" 
               onClick={() => {
                 setIsEditing(false);
-                setLocalName(profileData?.user?.name || "Classgrid Platform");
+                setLocalName(profileData?.user?.sidebar_name || profileData?.user?.name || "Classgrid Platform");
               }}
               className="px-3"
             >

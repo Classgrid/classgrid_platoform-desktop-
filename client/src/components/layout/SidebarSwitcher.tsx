@@ -16,12 +16,12 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/marketing_ui/sidebar";
 
-export function SidebarSwitcher({ user }: { user: { role?: string; additional_roles?: string[]; organization?: { sidebar_name?: string; name?: string; logo_url?: string; sidebar_logo_url?: string } } | null }) {
+export function SidebarSwitcher({ user }: { user: { role?: string; name?: string; sidebar_name?: string; additional_roles?: string[]; organization?: { sidebar_name?: string; name?: string; logo_url?: string; sidebar_logo_url?: string } } | null }) {
   const { isMobile } = useSidebar();
 
   // 1. Resolve Organization Branding from Backend User Object
   const currentRole = user?.role || "super_admin";
-  const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.name || "Super Admin" : "Classgrid Platform");
+  const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.sidebar_name || user?.name || "Super Admin" : "Classgrid Platform");
   const orgLogo = user?.organization?.sidebar_logo_url || user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.platformLogo : undefined);
 
   // 2. Resolve Roles

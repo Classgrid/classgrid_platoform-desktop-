@@ -48,6 +48,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        sidebar_name: user.sidebar_name,
         email: user.email,
         role: user.role,
         phoneNumber: user.phoneNumber || "",
@@ -109,7 +110,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 // =======================
 router.put("/update", isAuthenticated, attachInstitutionProfile({ required: false }), async (req, res) => {
   try {
-    const { name, phoneNumber, profilePicture, platformLogo, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, fatherName, motherName, eligibilityNo, pattern, alternateEmail, signature, admission_type, category } = req.body;
+    const { name, sidebar_name, phoneNumber, profilePicture, platformLogo, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, fatherName, motherName, eligibilityNo, pattern, alternateEmail, signature, admission_type, category } = req.body;
 
     // Safety check: Don't allow empty name
     if (name !== undefined && (name === null || name.trim() === "")) {
@@ -118,6 +119,7 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
 
     const updateData = {};
     if (name) updateData.name = name.trim();
+    if (sidebar_name !== undefined) updateData.sidebar_name = sidebar_name.trim();
     if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
     if (profilePicture !== undefined) {
       // Lightweight server-side photo validation (no native modules)

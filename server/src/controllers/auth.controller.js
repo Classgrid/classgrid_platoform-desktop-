@@ -1715,6 +1715,7 @@ export const getCurrentUser = async (req, res) => {
         res.json({
             id: req.user._id,
             name: req.user.name,
+            sidebar_name: req.user.sidebar_name || "",
             email: req.user.email,
             role: req.user.role,
             additional_roles: req.user.additional_roles || [],
