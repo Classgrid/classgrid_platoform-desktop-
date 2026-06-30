@@ -52,6 +52,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         role: user.role,
         phoneNumber: user.phoneNumber || "",
         profilePicture: user.profilePicture || "",
+        platformLogo: user.platformLogo || "",
         profileBanner: user.profileBanner || "",
         photoURL: user.profilePicture || "", // Alias for compatibility
         qualification: user.qualification || "",
@@ -108,7 +109,7 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 // =======================
 router.put("/update", isAuthenticated, attachInstitutionProfile({ required: false }), async (req, res) => {
   try {
-    const { name, phoneNumber, profilePicture, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, fatherName, motherName, eligibilityNo, pattern, alternateEmail, signature, admission_type, category } = req.body;
+    const { name, phoneNumber, profilePicture, platformLogo, profileBanner, qualification, department, bio, prn, abc_id, branch, batch, address, hobby, subjectsAssigned, dob, gender, fatherName, motherName, eligibilityNo, pattern, alternateEmail, signature, admission_type, category } = req.body;
 
     // Safety check: Don't allow empty name
     if (name !== undefined && (name === null || name.trim() === "")) {
@@ -133,6 +134,10 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
       }
       updateData.profilePicture = profilePicture;
     }
+    
+    // Add platformLogo (Super Admin only branding)
+    if (platformLogo !== undefined) updateData.platformLogo = platformLogo;
+
     if (profileBanner !== undefined) updateData.profileBanner = profileBanner;
     if (qualification !== undefined) updateData.qualification = qualification;
     if (bio !== undefined) updateData.bio = (bio || '').substring(0, 300);
