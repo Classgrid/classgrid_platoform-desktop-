@@ -883,7 +883,7 @@ export function ClassgridTalkPage() {
                       }
                     }}
                     placeholder="Type your reply here..."
-                    minHeight={80}
+                    minHeight={300}
                     onSubmit={submitReply}
                   />
                   <div className="flex flex-wrap items-center justify-between gap-3">
