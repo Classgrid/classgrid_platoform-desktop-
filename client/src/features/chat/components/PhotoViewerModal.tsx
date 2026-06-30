@@ -56,23 +56,20 @@ export function PhotoViewerModal({ src, alt = "Photo", onClose }: PhotoViewerMod
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col"
+      className="fixed inset-0 z-[9999] flex flex-col bg-black"
       
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Top bar — transparent, just the X button */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
-        <div /> {/* spacer */}
-        <button
-          onClick={onClose}
-          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-200 cursor-pointer"
-          aria-label="Close"
-        >
-          <X className="w-6 h-6" />
-        </button>
-      </div>
+      {/* Top right close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-200 cursor-pointer"
+        aria-label="Close"
+      >
+        <X className="w-6 h-6" />
+      </button>
 
       {/* Image container — completely centered */}
       <div
