@@ -144,6 +144,14 @@ export async function deleteMessage(threadId: string, messageId: string) {
   await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`);
 }
 
+export async function clearChat(threadId: string) {
+  await apiClient.post(`/api/threads/${threadId}/clear`);
+}
+
+export async function deleteChat(threadId: string) {
+  await apiClient.delete(`/api/threads/${threadId}`);
+}
+
 export async function editMessage(threadId: string, messageId: string, message: string) {
   await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}`, { message });
 }
@@ -191,6 +199,26 @@ export async function exitGroup(groupId: string) {
 
 export async function toggleAdminRole(groupId: string, userId: string, role: 'admin' | 'member') {
   const res = await apiClient.put(`/api/group-chat/${groupId}/admins/${userId}`, { role });
+  return res.data;
+}
+
+export async function createThreadPoll(threadId: string, question: string, options: string[], allowMultiple = false) {
+  const res = await apiClient.post(`/api/threads/${threadId}/polls`, { question, options, allowMultiple });
+  return res.data.poll;
+}
+
+export async function voteThreadPoll(threadId: string, pollId: string, optionId: string) {
+  const res = await apiClient.post(`/api/threads/${threadId}/polls/${pollId}/vote`, { optionId });
+  return res.data;
+}
+
+export async function fetchThreadPolls(threadId: string): Promise<Poll[]> {
+  const res = await apiClient.get<{ polls: Poll[] }>(`/api/threads/${threadId}/polls`);
+  return res.data.polls;
+}
+
+export async function setDisappearingMessages(threadId: string, ttl: number) {
+  const res = await apiClient.post(`/api/threads/${threadId}/disappearing`, { ttl });
   return res.data;
 }
 

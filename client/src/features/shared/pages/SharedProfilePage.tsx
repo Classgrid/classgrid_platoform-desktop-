@@ -435,59 +435,6 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               </div>
             </div>
 
-            {/* Security Guard */}
-            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
-              <div className="border-b border-border pb-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground"><Shield size={18} /> Security Guard</h3>
-                <p className="text-sm text-muted-foreground mt-1 opacity-80">Manage account access and 2FA.</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-transparent hover:bg-white/10 hover:border-border transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-primary/10 rounded-xl"><Lock size={18} className="text-primary" /></div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-foreground">Credential Vault</span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Update Password</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="h-8 rounded-lg px-4 gap-1">Manage <ChevronRight size={14} /></Button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-transparent hover:bg-white/10 hover:border-border transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-warning/10 rounded-xl"><Smartphone size={18} className="text-warning" /></div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-foreground">Device 2FA</span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">MFA Security</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" className="h-8 rounded-lg px-4 gap-1">Secure <ChevronRight size={14} /></Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Intelligence (Full Width) */}
-            <div className="md:col-span-2 bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
-              <div className="border-b border-border pb-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground"><Activity size={18} /> Account Intelligence</h3>
-                <p className="text-sm text-muted-foreground mt-1 opacity-80">Summary of your session and registration data.</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Last Successful Login</span>
-                  <span className="text-lg font-semibold">{form.lastLoginAt ? new Date(form.lastLoginAt).toLocaleString() : "N/A"}</span>
-                </div>
-                <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Member Since</span>
-                  <span className="text-lg font-semibold">{form.createdAt ? new Date(form.createdAt).toLocaleDateString() : "N/A"}</span>
-                </div>
-                <div className="flex flex-col gap-1 p-4 bg-white/5 rounded-lg border border-border/50">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Presence</span>
-                  <span className="text-lg font-semibold text-success flex items-center gap-2">
-                    <CheckCircle2 size={16} /> {isReadOnly ? "Active Account" : "1 Session"}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {!isReadOnly && (

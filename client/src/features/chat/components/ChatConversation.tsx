@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
-import type { ChatMessage, ChatThread, OrgUser } from "../services/chatApi";
+import type { ChatMessage, ChatThread, OrgUser, Poll } from "../services/chatApi";
 
 interface ChatConversationProps {
   thread: ChatThread;
@@ -18,6 +18,8 @@ interface ChatConversationProps {
   typingUserIds?: string[];
   orgUsers?: OrgUser[];
   onViewMedia?: (attachment: any) => void;
+  polls?: Poll[];
+  onVotePoll?: (pollId: string, optionId: string) => void;
 }
 
 export function ChatConversation({
@@ -35,6 +37,8 @@ export function ChatConversation({
   typingUserIds = [],
   orgUsers = [],
   onViewMedia,
+  polls = [],
+  onVotePoll,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -159,7 +163,8 @@ export function ChatConversation({
                   onReact={onReact}
                   onUserClick={onUserClick}
                   onViewMedia={onViewMedia}
-                  poll={msg.poll}
+                  poll={polls.find(p => p.message_id === msg.id)}
+                  onVotePoll={onVotePoll}
                 />
               );
             })}

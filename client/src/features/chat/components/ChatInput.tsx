@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2 } from "lucide-react";
+import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
 
 import { Input } from "@/components/marketing_ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/marketing_ui/dropdown-menu";
 
 interface ChatInputProps {
   onSendMessage: (message: string, files: File[]) => Promise<void>;
@@ -195,23 +201,52 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           </div>
         ) : (
           <>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5"
-              title="Attach File"
-            >
-              <Paperclip className="w-5 h-5" />
-            </button>
-            {onOpenPollModal && (
-              <button
-                onClick={onOpenPollModal}
-                className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5 ml-[-4px]"
-                disabled={isSending}
-                title="Create Poll"
-              >
-                <BarChart2 className="w-5 h-5" />
-              </button>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5 outline-none"
+                  title="Attach"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="top" className="w-48 mb-2">
+                <DropdownMenuItem 
+                  className="cursor-pointer py-2" 
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.accept = "*/*";
+                      fileInputRef.current.click();
+                    }
+                  }}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  <span>Document</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer py-2" 
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.accept = "image/*,video/*";
+                      fileInputRef.current.click();
+                    }
+                  }}
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  <span>Photos & Videos</span>
+                </DropdownMenuItem>
+                {onOpenPollModal && (
+                  <DropdownMenuItem 
+                    className="cursor-pointer py-2" 
+                    onClick={onOpenPollModal}
+                  >
+                    <BarChart2 className="w-4 h-4 mr-2" />
+                    <span>Poll</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Input
               type="file"
               multiple

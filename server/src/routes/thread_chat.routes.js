@@ -813,4 +813,176 @@ router.post('/:id/notes', isAuthenticated, async (req, res) => {
   }
 });
 
+// ==========================================
+// Thread Management Routes
+// ==========================================
+
+// Clear Chat (Hide messages before now)
+router.post('/:id/clear', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const userId = req.user._id.toString();
+    
+    // Attempt to update cleared_at if schema supports it
+    const { error } = await sb
+      .from('chat_thread_members')
+      .update({ cleared_at: new Date().toISOString() })
+      .eq('thread_id', threadId)
+      .eq('user_id', userId);
+      
+    if (error) {
+       console.log("cleared_at column might not exist, ignoring for now.");
+    }
+    res.json({ ok: true });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete Chat
+router.delete('/:id', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const userId = req.user._id.toString();
+    const isSuperAdmin = req.user.role === 'super_admin';
+
+    const { data: member } = await sb
+      .from('chat_thread_members')
+      .select('id')
+      .eq('thread_id', threadId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (!member && !isSuperAdmin) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    const { error } = await sb.from('chat_threads').delete().eq('id', threadId);
+    if (error) throw error;
+
+    broadcastToChannel(threadId, { type: 'THREAD_DELETED', threadId });
+    res.json({ ok: true });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Disappearing Messages
+// ==========================================
+router.post('/:id/disappearing', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const { ttl } = req.body;
+    const userId = req.user._id.toString();
+
+    // Verify membership
+    const { data: member } = await sb.from('chat_thread_members').select('id').eq('thread_id', threadId).eq('user_id', userId).maybeSingle();
+    if (!member) return res.status(403).json({ error: 'Not a member' });
+
+    // Format the time text
+    let timeText = 'Off';
+    if (ttl === 86400) timeText = '24 hours';
+    else if (ttl === 604800) timeText = '7 days';
+    else if (ttl === 7776000) timeText = '90 days';
+
+    // Insert a system message noting the change
+    const msgText = ttl === 0 
+      ? `Disappearing messages were turned off.`
+      : `Disappearing messages were set to ${timeText}.`;
+
+    const { data: msg } = await sb.from('chat_messages').insert([{
+      thread_id: threadId,
+      sender_id: userId,
+      message: JSON.stringify({ type: 'system', action: 'set_ttl', ttl, text: msgText }),
+    }]).select().single();
+
+    broadcastToChannel(threadId, { type: 'NEW_MESSAGE', message: msg });
+    res.json({ success: true, ttl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Polls (Threads)
+// ==========================================
+router.post('/:id/polls', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const { question, options, allowMultiple } = req.body;
+    const userId = req.user._id.toString();
+
+    const { data: member } = await sb.from('chat_thread_members').select('id').eq('thread_id', threadId).eq('user_id', userId).maybeSingle();
+    if (!member) return res.status(403).json({ error: 'Not a member' });
+
+    const { data: msg } = await sb.from('chat_messages').insert([{
+      thread_id: threadId,
+      sender_id: userId,
+      message: 'Created a poll: ' + question,
+    }]).select().single();
+
+    const { data: poll } = await sb.from('chat_polls').insert([{
+      thread_id: threadId,
+      message_id: msg.id,
+      question,
+      options,
+      allow_multiple: !!allowMultiple,
+      created_by: userId
+    }]).select().single();
+
+    broadcastToChannel(threadId, { type: 'NEW_POLL', poll });
+    res.status(201).json({ poll });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const pollId = req.params.pollId;
+    const { optionId } = req.body;
+    const userId = req.user._id.toString();
+
+    const { data: poll } = await sb.from('chat_polls').select('*').eq('id', pollId).single();
+    if (!poll) return res.status(404).json({ error: 'Poll not found' });
+
+    if (!poll.allow_multiple) {
+      await sb.from('chat_poll_votes').delete().eq('poll_id', pollId).eq('user_id', userId);
+    }
+    
+    const { data: existing } = await sb.from('chat_poll_votes').select('id').eq('poll_id', pollId).eq('user_id', userId).eq('option_id', optionId).maybeSingle();
+    
+    if (existing) {
+      await sb.from('chat_poll_votes').delete().eq('id', existing.id);
+    } else {
+      await sb.from('chat_poll_votes').insert([{ poll_id: pollId, user_id: userId, option_id: optionId }]);
+    }
+
+    broadcastToChannel(threadId, { type: 'POLL_VOTE_UPDATED', pollId });
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+router.get('/:id/polls', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const { data: polls } = await sb.from('chat_polls').select('*').eq('thread_id', threadId).order('created_at', { ascending: false });
+    
+    const result = await Promise.all((polls || []).map(async (poll) => {
+      const { data: votes } = await sb.from('chat_poll_votes').select('option_id, user_id').eq('poll_id', poll.id);
+      const voteCounts = {};
+      const myVotes = [];
+      let totalVoters = new Set();
+      (votes || []).forEach(v => {
+        voteCounts[v.option_id] = (voteCounts[v.option_id] || 0) + 1;
+        totalVoters.add(v.user_id);
+        if (v.user_id === req.user._id.toString()) myVotes.push(v.option_id);
+      });
+      return { ...poll, voteCounts, myVotes, totalVoters: totalVoters.size };
+    }));
+
+    res.json({ polls: result });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 export default router;

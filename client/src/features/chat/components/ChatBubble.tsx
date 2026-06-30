@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Plus, Clock } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
@@ -58,7 +58,31 @@ export function ChatBubble({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
   const [isHovered, setIsHovered] = useState(false);
-  const [showFullPicker, setShowFullPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  let isSystem = false;
+  let systemText = "";
+  try {
+    if (message.message?.startsWith("{")) {
+      const parsed = JSON.parse(message.message);
+      if (parsed.type === "system") {
+        isSystem = true;
+        systemText = parsed.text;
+      }
+    }
+  } catch (e) {}
+
+  if (isSystem) {
+    return (
+      <div className="flex justify-center w-full my-4 animate-in fade-in slide-in-from-bottom-2">
+        <div className="flex items-center gap-2 text-xs font-medium px-4 py-1.5 bg-accent/50 text-muted-foreground rounded-full border border-border/50 backdrop-blur-sm">
+          <Clock className="w-3.5 h-3.5" />
+          <span>{systemText}</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleEditSubmit = () => {
     if (editValue.trim() && editValue !== message.message) {

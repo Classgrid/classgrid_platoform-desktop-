@@ -2,23 +2,23 @@ import { useState } from "react";
 import { X, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { useMutation } from "@tanstack/react-query";
-import { createPoll } from "../services/chatApi";
+import { createThreadPoll } from "../services/chatApi";
 import { toast } from "sonner";
 
 import { Input } from "@/components/marketing_ui/input";
 
 interface CreatePollModalProps {
-  groupId: string;
+  threadId: string;
   onClose: () => void;
 }
 
-export function CreatePollModal({ groupId, onClose }: CreatePollModalProps) {
+export function CreatePollModal({ threadId, onClose }: CreatePollModalProps) {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [allowMultiple, setAllowMultiple] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () => createPoll(groupId, question, options.filter(o => o.trim().length > 0), allowMultiple),
+    mutationFn: () => createThreadPoll(threadId, question, options.filter(o => o.trim().length > 0), allowMultiple),
     onSuccess: () => {
       toast.success("Poll created successfully");
       onClose();

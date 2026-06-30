@@ -1,13 +1,23 @@
-import { MoreVertical, Users, ArrowLeft } from "lucide-react";
+import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, CheckSquare, Trash2, ShieldAlert, XCircle, Trash } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/marketing_ui/dropdown-menu";
 
 
 interface ChatHeaderProps {
   thread: ChatThread;
   onBack: () => void;
-  onShowInfo?: () => void;
+  onShowInfo: () => void;
   onAvatarClick?: () => void;
   onlineUsers?: Set<string>;
+  onClearChat: () => void;
+  onDeleteChat: () => void;
+  onOpenDisappearingModal?: () => void;
 }
 
 function getInitials(name: string) {
@@ -28,7 +38,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
   return (
@@ -67,13 +77,47 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <button
-          onClick={onShowInfo}
-          className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-          title="More"
-        >
-          <MoreVertical className="w-4 h-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
+              title="More"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={onShowInfo} className="cursor-pointer py-2">
+              <User className="w-4 h-4 mr-2" />
+              <span>View Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
+              <Search className="w-4 h-4 mr-2" />
+              <span>Search in chat</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
+              <BellOff className="w-4 h-4 mr-2" />
+              <span>Mute notifications</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
+              <CheckSquare className="w-4 h-4 mr-2" />
+              <span>Select messages</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenDisappearingModal}>
+              <ShieldAlert className="w-4 h-4 mr-2" />
+              <span>Disappearing messages</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onClearChat}>
+              <XCircle className="w-4 h-4 mr-2" />
+              <span>Clear chat</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onDeleteChat}>
+              <Trash className="w-4 h-4 mr-2" />
+              <span>Delete chat</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

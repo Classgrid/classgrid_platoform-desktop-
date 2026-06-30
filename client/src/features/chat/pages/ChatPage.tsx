@@ -12,9 +12,14 @@ import {
   editMessage,
   toggleReaction,
   createGroup,
+  deleteChat,
+  clearChat,
+  fetchThreadPolls,
+  voteThreadPoll,
   type ChatThread,
   type ChatMessage,
   type OrgUser,
+  type Poll,
 } from "../services/chatApi";
 import { useUserChannel, useThreadChannel, usePresence } from "../hooks/useRealtimeChat";
 
@@ -24,6 +29,8 @@ import { ChatConversation } from "../components/ChatConversation";
 import { ChatInput } from "../components/ChatInput";
 import { UserListModal } from "../components/UserListModal";
 import { GroupCreateModal } from "../components/GroupCreateModal";
+import { CreatePollModal } from "../components/CreatePollModal";
+import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
@@ -53,6 +60,9 @@ export function ChatPage() {
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
   const [viewingMedia, setViewingMedia] = useState<any | null>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
+  const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
+  const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, NodeJS.Timeout>>({});
 
   const activeTypingUserIds = Object.keys(typingUsers);
@@ -64,6 +74,93 @@ export function ChatPage() {
     loadThreads();
     loadOrgUsers();
   }, [currentUserId]);
+
+  const handleDeleteMessage = async (msgId: string) => {
+    if (!activeThread) return;
+    setMessages(prev => prev.filter(m => m.id !== msgId));
+    try {
+      await deleteMessage(activeThread.id, msgId);
+    } catch (err) {
+      toast.error("Failed to delete message");
+    }
+  };
+
+  const handleClearChat = async () => {
+    if (!activeThread) return;
+    try {
+      await clearChat(activeThread.id);
+      setMessages([]);
+      toast.success("Chat cleared");
+    } catch (err) {
+      toast.error("Failed to clear chat");
+    }
+  };
+
+  const handleDeleteChat = async () => {
+    if (!activeThread) return;
+    try {
+      await deleteChat(activeThread.id);
+      const threadId = activeThread.id;
+      setActiveThread(null);
+      setThreads(threads.filter(t => t.id !== threadId));
+      toast.success("Chat deleted");
+    } catch (err) {
+      toast.error("Failed to delete chat");
+    }
+  };
+
+  const handleVotePoll = async (pollId: string, optionId: string) => {
+    if (!activeThread) return;
+    try {
+      await voteThreadPoll(activeThread.id, pollId, optionId);
+      setPolls(prev => prev.map(p => {
+        if (p.id !== pollId) return p;
+        let newMyVotes = [...p.myVotes];
+        const newVoteCounts = { ...p.voteCounts };
+        
+        if (p.allow_multiple) {
+          if (newMyVotes.includes(optionId)) {
+            newMyVotes = newMyVotes.filter(id => id !== optionId);
+            newVoteCounts[optionId] = Math.max(0, (newVoteCounts[optionId] || 0) - 1);
+          } else {
+            newMyVotes.push(optionId);
+            newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+          }
+        } else {
+          if (newMyVotes.length > 0) {
+            const oldVote = newMyVotes[0];
+            if (oldVote !== optionId) {
+              newVoteCounts[oldVote] = Math.max(0, (newVoteCounts[oldVote] || 0) - 1);
+            }
+          }
+          newMyVotes = [optionId];
+          if (!p.myVotes.includes(optionId)) {
+             newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+          }
+        }
+        return { ...p, myVotes: newMyVotes, voteCounts: newVoteCounts };
+      }));
+    } catch (err) {
+      toast.error("Failed to vote");
+    }
+  };
+
+  const loadPolls = async (threadId: string) => {
+    try {
+      const threadPolls = await fetchThreadPolls(threadId);
+      setPolls(threadPolls);
+    } catch (err) {
+      console.error("Failed to load polls", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeThread) {
+      loadPolls(activeThread.id);
+    } else {
+      setPolls([]);
+    }
+  }, [activeThread]);
 
   const loadThreads = async () => {
     try {
@@ -334,6 +431,9 @@ export function ChatPage() {
                   }
                 }
               }}
+              onClearChat={handleClearChat}
+              onDeleteChat={handleDeleteChat}
+              onOpenDisappearingModal={() => setIsDisappearingModalOpen(true)}
             />
             
             <ChatConversation
@@ -345,14 +445,6 @@ export function ChatPage() {
               onLoadMore={handleLoadMore}
               onReply={setReplyTo}
               onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
-              onUserClick={(userId) => {
-                const user = orgUsers.find(u => u._id === userId);
-                if (user?.profilePicture) {
-                  setViewingPhotoUrl(user.profilePicture);
-                } else {
-                  toast.info("No profile picture available");
-                }
-              }}
               onEdit={async (id, text) => {
                 try {
                   await editMessage(activeThread.id, id, text);
@@ -361,11 +453,20 @@ export function ChatPage() {
                   toast.error("Failed to edit");
                 }
               }}
-              onReact={(id, emoji) => toggleReaction(activeThread.id, id, emoji).catch(() => toast.error("Reaction failed"))}
-              onUserClick={setProfileUserId}
-              onViewMedia={setViewingMedia}
-              typingUserIds={activeTypingUserIds}
+              onReact={async (id, emoji) => {
+                try {
+                  const newReacts = await toggleReaction(activeThread.id, id, emoji);
+                  setMessages(prev => prev.map(m => m.id === id ? { ...m, reactions: newReacts } : m));
+                } catch {
+                  toast.error("Failed to react");
+                }
+              }}
+              onUserClick={(userId) => setProfileUserId(userId)}
               orgUsers={orgUsers}
+              onViewMedia={(attachment) => setViewingMedia(attachment)}
+              typingUserIds={activeTypingUserIds}
+              polls={polls}
+              onVotePoll={handleVotePoll}
             />
 
             <ChatInput
@@ -373,7 +474,8 @@ export function ChatPage() {
               isSending={isSending}
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
-              onTyping={sendTyping}
+              onTyping={(isTyping) => threadChannelRef.current?.track({ isTyping })}
+              onOpenPollModal={() => setIsPollModalOpen(true)}
             />
           </>
         ) : (
@@ -416,6 +518,20 @@ export function ChatPage() {
             setIsGroupSettingsOpen(false);
             setActiveThread(null);
           }}
+        />
+      )}
+
+      {isPollModalOpen && activeThread && (
+        <CreatePollModal
+          threadId={activeThread.id}
+          onClose={() => setIsPollModalOpen(false)}
+        />
+      )}
+
+      {isDisappearingModalOpen && activeThread && (
+        <DisappearingMessagesModal
+          threadId={activeThread.id}
+          onClose={() => setIsDisappearingModalOpen(false)}
         />
       )}
 

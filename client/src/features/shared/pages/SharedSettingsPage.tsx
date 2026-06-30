@@ -10,8 +10,8 @@ import { CustomDomainCard } from "../../org/components/settings/CustomDomainCard
 import { OrgCodesCard } from "../../org/components/settings/OrgCodesCard";
 import { OrgBrandingCard } from "@/components/dashboard/OrgBrandingCard";
 import { OrgNameCard } from "@/components/dashboard/OrgNameCard";
-import { PlatformNameCard } from "./PlatformNameCard";
-import { PlatformBrandingCard } from "./PlatformBrandingCard";
+import { PlatformNameCard } from "../components/settings/PlatformNameCard";
+import { PlatformBrandingCard } from "../components/settings/PlatformBrandingCard";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { DeleteOrgCard } from "../../org/components/settings/DeleteOrgCard";
 import { SettingsChangePasswordCard } from "../components/settings/SettingsChangePasswordCard";
