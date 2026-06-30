@@ -28,6 +28,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
@@ -60,6 +62,10 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
       mediaRecorder.start();
       setIsRecording(true);
+      setRecordingTime(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
       if (onTyping) onTyping(true, 'recording');
     } catch (err) {
       console.error("Error accessing mic", err);
@@ -70,12 +76,17 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
       if (onTyping) onTyping(false, 'recording');
     }
   };
 
   const clearAudio = () => {
     setAudioBlob(null);
+    setRecordingTime(0);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
@@ -282,6 +293,19 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               onChange={handleFileSelect}
             />
 
+            {isRecording ? (
+              <div className="flex-1 h-[44px] bg-accent/50 border border-border rounded-2xl flex items-center px-4 animate-in slide-in-from-right-4 duration-300 mb-0.5">
+                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse mr-3 shrink-0" />
+                <span className="text-base text-foreground w-12 font-mono shrink-0">
+                  {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                </span>
+                <div className="flex-1 flex items-center justify-start gap-1 overflow-hidden opacity-40 px-2">
+                  {[...Array(40)].map((_, i) => (
+                    <div key={i} className="w-1 h-1 bg-foreground rounded-full" />
+                  ))}
+                </div>
+              </div>
+            ) : (
             <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end hover:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-200 pl-2">
               <Popover>
                 <PopoverTrigger asChild>
@@ -317,6 +341,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 rows={1}
               />
             </div>
+            )}
 
             {isRecording ? (
               <button
