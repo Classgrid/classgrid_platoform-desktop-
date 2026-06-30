@@ -86,23 +86,22 @@ export function CustomDomainCard() {
                                 <Switch 
                                     checked={domainsData.erp_domain?.allow_classgrid_url !== false} 
                                     onCheckedChange={(checked) => {
-                                        // When disabling Classgrid URL, check if at least one custom domain is enabled
+                                        // Prevent turning off Classgrid URL if no custom ERP domain is active
                                         if (!checked) {
                                             const erpDomainEnabled = domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false;
-                                            const websiteDomainEnabled = domainsData.custom_domain?.domain && domainsData.custom_domain?.is_enabled !== false;
-                                            if (!erpDomainEnabled && !websiteDomainEnabled) {
-                                                toast.error("You must have at least one domain active! Please turn on your Custom Domain first.");
+                                            if (!erpDomainEnabled) {
+                                                toast.error("Action blocked: You must have an active ERP Custom Domain before turning this off, or you will lock yourself out!");
                                                 return;
                                             }
                                         }
 
-                                        let settingsToUpdate: any = { allow_classgrid_url: checked };
-                                        
-                                        // When enabling Classgrid URL, auto-disable the custom ERP domain
+                                        // When enabling Classgrid URL, if they have an active custom ERP domain, we must force a strict confirmation
                                         if (checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false) {
-                                            toast("Turning on Classgrid URL will disable your custom ERP domain", { icon: "🔄" });
-                                            settingsToUpdate.is_enabled = false;
+                                            setShowEnableClassgridConfirm(true);
+                                            return; // Stop here, wait for dialog confirmation
                                         }
+                                        
+                                        let settingsToUpdate: any = { allow_classgrid_url: checked };
                                         
                                         updateSettingsMutation.mutate({ domainType: "erp_domain", settings: settingsToUpdate }, {
                                             onSuccess: () => {
@@ -690,24 +689,20 @@ function DomainConfigCard({
                                                 <Switch 
                                                     checked={domainConfig.is_enabled !== false} 
                                                     onCheckedChange={(checked) => {
-                                                        // When disabling custom domain, check if Classgrid URL is enabled
-                                                        if (!checked) {
-                                                            const classgridUrlEnabled = domainType === "erp_domain" 
-                                                                ? allDomainsData.erp_domain?.allow_classgrid_url !== false 
-                                                                : allDomainsData.custom_domain?.allow_classgrid_url !== false;
+                                                        // Prevent turning off ERP Custom Domain if Classgrid URL is also off
+                                                        if (!checked && domainType === "erp_domain") {
+                                                            const classgridUrlEnabled = allDomainsData.erp_domain?.allow_classgrid_url !== false;
                                                             if (!classgridUrlEnabled) {
-                                                                toast.error("You must have at least one domain active! Please turn on the Default Classgrid URL first.");
+                                                                toast.error("Action blocked: You must turn on the Default Classgrid URL first, otherwise you will be locked out!");
                                                                 return;
                                                             }
                                                         }
 
                                                         let settingsToUpdate: any = { is_enabled: checked };
                                                         
-                                                        // When enabling custom domain, auto-disable Classgrid URL
-                                                        if (checked) {
-                                                            const classgridUrlEnabled = domainType === "erp_domain" 
-                                                                ? allDomainsData.erp_domain?.allow_classgrid_url !== false 
-                                                                : allDomainsData.custom_domain?.allow_classgrid_url !== false;
+                                                        // When enabling ERP Custom Domain, auto-disable Classgrid URL to prevent double URLs
+                                                        if (checked && domainType === "erp_domain") {
+                                                            const classgridUrlEnabled = allDomainsData.erp_domain?.allow_classgrid_url !== false;
                                                             if (classgridUrlEnabled) {
                                                                 toast("Turning on custom domain will disable Classgrid organization URL", { icon: "🔄" });
                                                                 settingsToUpdate.allow_classgrid_url = false;
@@ -799,6 +794,50 @@ function DomainConfigCard({
                     </div>
                 </div>
             </DangerConfirmDialog>
+
+            {/* Re-enable Classgrid URL Warning Dialog */}
+            <DangerConfirmDialog
+                open={showEnableClassgridConfirm}
+                onOpenChange={setShowEnableClassgridConfirm}
+                title="Switch back to Classgrid URL?"
+                description={
+                    <div className="space-y-4">
+                        <p>
+                            You are about to re-enable your default Classgrid URL (<strong className="text-foreground">{orgBranding?.subdomain}.classgrid.in</strong>).
+                        </p>
+                        <p>
+                            To prevent double URLs, your current active custom ERP domain (<strong className="text-foreground">{allDomainsData?.erp_domain?.domain}</strong>) will be <strong>automatically disabled</strong>.
+                        </p>
+                    </div>
+                }
+                warningMessage="Your students and staff will no longer be able to log in via your custom domain until you manually turn it back on."
+                confirmationSteps={[
+                    {
+                        label: `To confirm, type your current custom domain`,
+                        value: allDomainsData?.erp_domain?.domain || ""
+                    },
+                    {
+                        label: `Now type your Classgrid URL to enable it`,
+                        value: `${orgBranding?.subdomain}.classgrid.in`
+                    }
+                ]}
+                onConfirm={() => {
+                    let settingsToUpdate: any = { 
+                        allow_classgrid_url: true,
+                        is_enabled: false 
+                    };
+                    
+                    updateSettingsMutation.mutate({ domainType: "erp_domain", settings: settingsToUpdate }, {
+                        onSuccess: () => {
+                            toast.success("Classgrid URL enabled, Custom Domain disabled.");
+                            setShowEnableClassgridConfirm(false);
+                        },
+                        onError: () => toast.error("Failed to update settings")
+                    });
+                }}
+                actionLabel="Switch to Classgrid URL"
+                isDestructive={false}
+            />
 
         </div>
     );
