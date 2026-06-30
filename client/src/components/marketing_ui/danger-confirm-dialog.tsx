@@ -168,9 +168,6 @@ export function DangerConfirmDialog({
 
                 {/* ── Scrollable Body ──────────────────────────────── */}
                 <div className="flex-1 overflow-y-auto min-h-0">
-                    {/* ── Custom Children Content ──────────────────────── */}
-                    {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
-
                 {/* ── Section 2: Confirmation Steps ─────────────────── */}
                 {confirmationSteps.length > 0 && (
                     <div className="flex flex-col gap-5 px-6 py-6 border-b border-white/10 bg-[#0f0f0f]">
@@ -204,6 +201,9 @@ export function DangerConfirmDialog({
                         ))}
                     </div>
                 )}
+
+                {/* ── Custom Children Content ──────────────────────── */}
+                {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
                 </div>
 
                 {/* ── Section 3: Footer (Warning + Buttons) ─────────── */}
