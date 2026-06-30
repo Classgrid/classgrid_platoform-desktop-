@@ -71,12 +71,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
         {filteredSections.map((section, index) => (
           <SidebarGroup key={section.label || index}>
             {index > 0 && (
-              <div className="mx-4 my-2 h-px bg-border/50 group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
-            )}
-            {section.label && (
-              <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mt-2 mb-1">
-                {section.label}
-              </SidebarGroupLabel>
+              <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
             )}
             <SidebarGroupContent>
               <SidebarMenu>
