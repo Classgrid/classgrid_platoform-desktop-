@@ -486,7 +486,7 @@ function DomainConfigCard({
                                         </div>
                                         <Input 
                                             placeholder="erp.yourdomain.com" 
-                                            className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full"
+                                            className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none shadow-none"
                                             value={domainInput}
                                             onChange={(e) => setDomainInput(e.target.value)}
                                             onKeyDown={(e) => {
