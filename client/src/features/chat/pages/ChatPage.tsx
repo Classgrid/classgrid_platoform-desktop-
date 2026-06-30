@@ -374,6 +374,15 @@ export function ChatPage() {
         if (prev.find((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
+      // Immediately clear their typing/uploading indicator once their message arrives
+      setTypingUsers((prev) => {
+        const next = { ...prev };
+        if (next[msg.sender_id]) {
+          clearTimeout(next[msg.sender_id].timeout);
+          delete next[msg.sender_id];
+        }
+        return next;
+      });
     },
     onMessageDeleted: ({ messageId }) => {
       setMessages((prev) =>
