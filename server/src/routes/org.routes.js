@@ -2131,9 +2131,13 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             // ==========================================
             // AUTOMATED VERCEL INTEGRATION
             // ==========================================
-            if (process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID) {
+            const targetProjectId = domainType === "erp_domain" 
+                ? process.env.VERCEL_PROJECT_ID 
+                : process.env.VERCEL_MARKETING_PROJECT_ID;
+
+            if (process.env.VERCEL_API_TOKEN && targetProjectId) {
                 try {
-                    const vercelRes = await fetch(`https://api.vercel.com/v10/projects/${process.env.VERCEL_PROJECT_ID}/domains`, {
+                    const vercelRes = await fetch(`https://api.vercel.com/v10/projects/${targetProjectId}/domains`, {
                         method: "POST",
                         headers: {
                             "Authorization": `Bearer ${process.env.VERCEL_API_TOKEN}`,
@@ -2146,13 +2150,13 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
                         const errData = await vercelRes.json();
                         console.error("[Vercel API Error]:", errData);
                     } else {
-                        console.log(`[Vercel API] Successfully attached ${domain} to project.`);
+                        console.log(`[Vercel API] Successfully attached ${domain} to project ${targetProjectId}.`);
                     }
                 } catch (vercelErr) {
                     console.error("[Vercel Fetch Error]:", vercelErr.message);
                 }
             } else {
-                console.warn("[Vercel API] VERCEL_API_TOKEN or VERCEL_PROJECT_ID not set in .env. Skipping automated domain attachment.");
+                console.warn(`[Vercel API] VERCEL_API_TOKEN or Project ID for ${domainType} not set in .env. Skipping automated domain attachment.`);
             }
         }
 
@@ -2220,10 +2224,14 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
             $set: updateObj
         });
 
+        const targetProjectId = resolvedDomainType === "erp_domain" 
+            ? process.env.VERCEL_PROJECT_ID 
+            : process.env.VERCEL_MARKETING_PROJECT_ID;
+
         // Remove from Vercel if configured
-        if (domainToDelete && process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID) {
+        if (domainToDelete && process.env.VERCEL_API_TOKEN && targetProjectId) {
             try {
-                const vercelRes = await fetch(`https://api.vercel.com/v9/projects/${process.env.VERCEL_PROJECT_ID}/domains/${domainToDelete}?teamId=${process.env.VERCEL_TEAM_ID || ''}`, {
+                const vercelRes = await fetch(`https://api.vercel.com/v9/projects/${targetProjectId}/domains/${domainToDelete}?teamId=${process.env.VERCEL_TEAM_ID || ''}`, {
                     method: "DELETE",
                     headers: {
                         "Authorization": `Bearer ${process.env.VERCEL_API_TOKEN}`
@@ -2233,7 +2241,7 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
                 if (!vercelRes.ok) {
                     console.error("[Vercel API Error on Delete]:", await vercelRes.json());
                 } else {
-                    console.log(`[Vercel API] Successfully detached ${domainToDelete} from project.`);
+                    console.log(`[Vercel API] Successfully detached ${domainToDelete} from project ${targetProjectId}.`);
                 }
             } catch (err) {
                 console.error("[Vercel Fetch Error on Delete]:", err.message);
