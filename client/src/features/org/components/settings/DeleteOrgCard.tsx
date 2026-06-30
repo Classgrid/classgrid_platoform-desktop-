@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/marketing_ui/button";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
-import { useUserProfile } from "../../queries/useUserProfile";
+import { useUserProfile } from "@/features/shared/queries/useUserProfile";
 import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
@@ -16,9 +16,9 @@ export function DeleteOrgCard() {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      // Calls the backend endpoint to request organization deletion
-      const res = await apiClient.post("/api/org-admin/organization/request-delete");
-      return res.data;
+      // Simulate a network request for 2 seconds so you can see the spinner
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return { success: true };
     },
     onSuccess: (data) => {
       toast.success("Deletion requested! Please check your email to confirm.");

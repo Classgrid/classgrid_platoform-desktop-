@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useCallback } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
@@ -122,14 +124,14 @@ export function DangerConfirmDialog({
             bannerBorder: "border-red-500/20 dark:border-red-500/20",
             bannerText: "text-red-600 dark:text-red-400",
             bannerIcon: "text-red-500 dark:text-red-400",
-            buttonVariant: "destructive" as const,
+            buttonClass: "bg-red-500 text-white hover:bg-red-600",
         },
         warning: {
             bannerBg: "bg-amber-500/10 dark:bg-amber-500/10",
             bannerBorder: "border-amber-500/20 dark:border-amber-500/20",
             bannerText: "text-amber-700 dark:text-amber-400",
             bannerIcon: "text-amber-600 dark:text-amber-500",
-            buttonVariant: "warning" as const,
+            buttonClass: "bg-amber-500 text-white hover:bg-amber-600",
         },
     };
 
@@ -145,40 +147,39 @@ export function DangerConfirmDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent 
-                className={cn("max-w-[calc(100%-2rem)]", maxWidth)}
+                className={cn(
+                    "max-w-[calc(100%-2rem)] p-0 gap-0 border border-white/10 shadow-2xl rounded-xl overflow-hidden bg-[#0f0f0f]", 
+                    maxWidth
+                )}
+                showCloseButton={false}
                 onKeyDown={handleKeyDown}
             >
-                {/* ── Header ───────────────────────────────────────── */}
-                <DialogHeader>
-                    <DialogTitle className="text-lg font-semibold text-foreground tracking-tight">
+                {/* ── Section 1: Header ───────────────────────────── */}
+                <div className="px-6 py-6 border-b border-white/10 bg-black">
+                    <DialogTitle className="text-xl font-semibold text-white tracking-tight">
                         {title}
                     </DialogTitle>
                     {description && (
-                        <DialogDescription className="text-sm text-muted-foreground leading-relaxed mt-1">
+                        <DialogDescription className="text-[15px] text-zinc-400 leading-relaxed mt-3">
                             {description}
                         </DialogDescription>
                     )}
-                </DialogHeader>
+                </div>
 
                 {/* ── Custom Children Content ──────────────────────── */}
-                {children}
+                {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
 
-                {/* ── Confirmation Steps ───────────────────────────── */}
+                {/* ── Section 2: Confirmation Steps ─────────────────── */}
                 {confirmationSteps.length > 0 && (
-                    <div className="flex flex-col gap-4 mt-1">
+                    <div className="flex flex-col gap-5 px-6 py-6 border-b border-white/10 bg-[#0f0f0f]">
                         {confirmationSteps.map((step, index) => (
                             <div
                                 key={index}
-                                className={cn(
-                                    "flex flex-col gap-2 transition-all duration-300",
-                                    isStepVisible(index) 
-                                        ? "opacity-100 translate-y-0" 
-                                        : "opacity-0 h-0 overflow-hidden pointer-events-none -translate-y-2"
-                                )}
+                                className="flex flex-col gap-2.5"
                             >
-                                <label className="text-sm text-muted-foreground">
+                                <label className="text-sm text-zinc-300">
                                     {step.label}{" "}
-                                    <span className="font-bold text-foreground">
+                                    <span className="font-bold text-white">
                                         &ldquo;{step.value}&rdquo;
                                     </span>
                                 </label>
@@ -190,12 +191,9 @@ export function DangerConfirmDialog({
                                     autoComplete="off"
                                     spellCheck={false}
                                     className={cn(
-                                        "h-10 w-full rounded-lg border bg-background px-3 text-sm text-foreground outline-none transition-all duration-200",
-                                        "placeholder:text-muted-foreground/40",
-                                        "focus:ring-2 focus:ring-ring/50 focus:border-ring",
-                                        isStepComplete(index)
-                                            ? "border-emerald-500/50 bg-emerald-500/5"
-                                            : "border-border"
+                                        "h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200",
+                                        "focus:ring-1 focus:ring-white/30 focus:border-white/30",
+                                        "border-white/10"
                                     )}
                                     disabled={isLoading}
                                     autoFocus={index === 0}
@@ -205,40 +203,44 @@ export function DangerConfirmDialog({
                     </div>
                 )}
 
-                {/* ── Warning Banner ───────────────────────────────── */}
-                <div className={cn(
-                    "flex items-center gap-3 rounded-lg border px-4 py-3 mt-1",
-                    styles.bannerBg,
-                    styles.bannerBorder
-                )}>
-                    <AlertTriangle className={cn("w-4 h-4 shrink-0", styles.bannerIcon)} />
-                    <span className={cn("text-sm font-medium", styles.bannerText)}>
-                        {warningMessage}
-                    </span>
-                </div>
+                {/* ── Section 3: Footer (Warning + Buttons) ─────────── */}
+                <div className="px-6 py-5 flex flex-col gap-5 bg-black">
+                    {/* Warning Banner */}
+                    <div className={cn(
+                        "flex items-center gap-3 rounded-md border px-4 py-3",
+                        styles.bannerBg,
+                        styles.bannerBorder
+                    )}>
+                        <AlertTriangle className={cn("w-[18px] h-[18px] shrink-0", styles.bannerIcon)} />
+                        <span className={cn("text-sm", styles.bannerText)}>
+                            {warningMessage}
+                        </span>
+                    </div>
 
-                {/* ── Footer ──────────────────────────────────────── */}
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => onOpenChange(false)}
-                        disabled={isLoading}
-                    >
-                        {cancelLabel}
-                    </Button>
-                    <Button
-                        variant={styles.buttonVariant}
-                        onClick={onConfirm}
-                        disabled={!allStepsComplete || isLoading}
-                        className={cn(
-                            "transition-all duration-200",
-                            !allStepsComplete && "opacity-50 cursor-not-allowed"
-                        )}
-                    >
-                        {isLoading && <Spinner className="mr-2" size="sm" />}
-                        {actionLabel}
-                    </Button>
-                </DialogFooter>
+                    {/* Buttons */}
+                    <div className="flex items-center justify-between w-full mt-1">
+                        <button
+                            onClick={() => onOpenChange(false)}
+                            disabled={isLoading}
+                            className="h-10 px-4 rounded-md border border-white/10 bg-transparent text-sm font-medium text-white hover:bg-white/5 transition-colors"
+                        >
+                            {cancelLabel}
+                        </button>
+                        <button
+                            onClick={onConfirm}
+                            disabled={!allStepsComplete || isLoading}
+                            className={cn(
+                                "inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 transition-all duration-200",
+                                allStepsComplete
+                                    ? styles.buttonClass
+                                    : "bg-white/5 text-white/40 cursor-not-allowed"
+                            )}
+                        >
+                            {isLoading && <Spinner className="mr-2" />}
+                            {actionLabel}
+                        </button>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     );
