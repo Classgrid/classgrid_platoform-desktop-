@@ -20,6 +20,8 @@ interface ChatSidebarProps {
   onMarkAllRead?: () => void;
   isLoading: boolean;
   onlineUsers?: Set<string>;
+  activeFilter: string;
+  onFilterChange: (filter: string) => void;
 }
 
 function getInitials(name: string) {
@@ -49,9 +51,10 @@ export function ChatSidebar({
   onMarkAllRead,
   isLoading,
   onlineUsers,
+  activeFilter,
+  onFilterChange,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
 
   const filtered = threads.filter((t) => {
     // Text search filter
@@ -59,13 +62,7 @@ export function ChatSidebar({
       return false;
     }
     
-    // Category filter
-    if (activeFilter === "Unread") return t.unread > 0;
-    if (activeFilter === "Groups") return t.type === "group";
-    if (activeFilter === "Admins") return t.type === "dm" && t.role?.toLowerCase().includes("admin");
-    if (activeFilter === "Faculty") return t.type === "dm" && t.role?.toLowerCase() === "faculty";
-    
-    return true; // "All"
+    return true;
   });
 
   const filters = ["All", "Unread", "Groups", "Admins", "Faculty"];
@@ -130,7 +127,7 @@ export function ChatSidebar({
           {filters.map(f => (
             <button
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => onFilterChange(f)}
               className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 activeFilter === f
                   ? "bg-primary/20 text-primary border border-primary/30"

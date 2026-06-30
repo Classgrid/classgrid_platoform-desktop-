@@ -63,6 +63,7 @@ export function ChatPage() {
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
 
@@ -168,7 +169,7 @@ export function ChatPage() {
 
   const loadThreads = async () => {
     try {
-      const data = await fetchThreads();
+      const data = await fetchThreads(activeFilter);
       setThreads(data);
     } catch (err) {
       toast.error("Failed to load chat threads");
@@ -176,6 +177,10 @@ export function ChatPage() {
       setThreadsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadThreads();
+  }, [activeFilter]);
 
   const loadOrgUsers = async () => {
     setUsersLoading(true);
@@ -429,6 +434,8 @@ export function ChatPage() {
           onMarkAllRead={handleMarkAllRead}
           isLoading={threadsLoading}
           onlineUsers={onlineUsers}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
         />
       </div>
 
