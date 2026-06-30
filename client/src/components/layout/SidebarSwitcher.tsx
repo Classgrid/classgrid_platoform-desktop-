@@ -16,13 +16,13 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/marketing_ui/sidebar";
 
-export function SidebarSwitcher({ user }: { user: { role?: string; additional_roles?: string[]; organization?: { sidebar_name?: string; name?: string; logo_url?: string } } | null }) {
+export function SidebarSwitcher({ user }: { user: { role?: string; additional_roles?: string[]; organization?: { sidebar_name?: string; name?: string; logo_url?: string; sidebar_logo_url?: string } } | null }) {
   const { isMobile } = useSidebar();
 
   // 1. Resolve Organization Branding from Backend User Object
   const currentRole = user?.role || "super_admin";
   const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.name || "Super Admin" : "Classgrid Platform");
-  const orgLogo = user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.platformLogo : undefined);
+  const orgLogo = user?.organization?.sidebar_logo_url || user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.platformLogo : undefined);
 
   // 2. Resolve Roles
   // (currentRole already defined above)
@@ -74,9 +74,9 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
               Active Context
             </DropdownMenuLabel>
             <DropdownMenuItem className="gap-3 p-2 rounded-md">
-              <div className={`flex aspect-square size-8 items-center justify-center rounded-md border border-border overflow-hidden shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white'}`}>
+              <div className={`flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white border border-border'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain" />
                 ) : (
                   <Building2 className="size-4 text-white" />
                 )}

@@ -1694,6 +1694,7 @@ export const getCurrentUser = async (req, res) => {
                         name: userWithOrg.organization_id.name,
                         sidebar_name: userWithOrg.organization_id.sidebar_name,
                         logo_url: userWithOrg.organization_id.logo_url,
+                        sidebar_logo_url: userWithOrg.organization_id.sidebar_logo_url || "",
                         subdomain: userWithOrg.organization_id.subdomain,
                         branding: userWithOrg.organization_id.branding || {
                             theme_colors: { primary: "#6366f1", secondary: "#4f46e5", accent: "#f43f5e" }

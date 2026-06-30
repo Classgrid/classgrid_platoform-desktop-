@@ -111,6 +111,10 @@ const organizationSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+        sidebar_logo_url: {
+            type: String,
+            default: "",
+        },
         favicon_url: {
             type: String,
             default: "",

@@ -119,7 +119,7 @@ export function ChatSidebar({
               <button
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
-                className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
+                className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 text-left transition-colors cursor-pointer hover:bg-accent/50 ${
                   isActive ? "bg-accent" : ""
                 }`}
               >

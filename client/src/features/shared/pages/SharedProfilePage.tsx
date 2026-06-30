@@ -282,14 +282,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               className="h-[250px] relative bg-muted" 
               style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
             >
-              {onClose && (
-                <Button
-                  onClick={onClose}
-                  className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-black/70 rounded-full text-white backdrop-blur-md transition-all z-10"
-                >
-                  <X size={20} />
-                </Button>
-              )}
+
               {!isReadOnly && (
                 <>
                   <div 
@@ -473,12 +466,18 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   if (isReadOnly) {
     return (
       <div className="w-full h-full pb-12">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center">
-          <Button variant="ghost" className="gap-2 -ml-4 hover:bg-accent" onClick={onClose}>
-            <ArrowLeft size={16} /> Back to Chat
+        <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 md:px-6">
+          <Button variant="ghost" size="sm" className="gap-2 -ml-2 text-muted-foreground hover:text-foreground" onClick={onClose}>
+            <ArrowLeft size={16} />
+            Back to Chat
           </Button>
+          <div className="flex-1 text-center text-sm font-semibold text-foreground mr-[100px]">
+            User Profile
+          </div>
         </div>
-        {containerContent}
+        <div className="pt-6">
+          {containerContent}
+        </div>
       </div>
     );
   }

@@ -2310,13 +2310,14 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
             return res.json(JSON.parse(cached));
         }
 
-        const org = await Organization.findById(orgId).select("logo_url favicon_url campus_photo_url social_links custom_domain erp_domain site_title subdomain name sidebar_name brand_colors branding.theme_colors");
+        const org = await Organization.findById(orgId).select("logo_url sidebar_logo_url favicon_url campus_photo_url social_links custom_domain erp_domain site_title subdomain name sidebar_name brand_colors branding.theme_colors");
         if (!org) return res.status(404).json({ message: "Organization not found." });
 
         const themeColors = getThemeColors(org);
         const brandColors = resolveBrandColors(org);
         const responseData = {
             logo_url: org.logo_url || "",
+            sidebar_logo_url: org.sidebar_logo_url || "",
             favicon_url: org.favicon_url || "",
             campus_photo_url: org.campus_photo_url || "",
             social_links: org.social_links || {},
@@ -2349,13 +2350,14 @@ router.get("/branding", isAuthenticated, requireRole("org_admin"), async (req, r
  */
 router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
-        const { logo_url, favicon_url, campus_photo_url, social_links, site_title, name, sidebar_name, brand_colors } = req.body;
+        const { logo_url, sidebar_logo_url, favicon_url, campus_photo_url, social_links, site_title, name, sidebar_name, brand_colors } = req.body;
         const orgId = req.user.organization_id?._id || req.user.organization_id;
         
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
         const updateData = {};
         if (logo_url !== undefined) updateData.logo_url = logo_url;
+        if (sidebar_logo_url !== undefined) updateData.sidebar_logo_url = sidebar_logo_url;
         if (favicon_url !== undefined) updateData.favicon_url = favicon_url;
         if (campus_photo_url !== undefined) updateData.campus_photo_url = campus_photo_url;
         if (social_links !== undefined) updateData.social_links = social_links;
@@ -2383,7 +2385,7 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             orgId,
             { $set: updateData },
             { new: true, runValidators: true }
-        ).select("logo_url favicon_url campus_photo_url social_links site_title name sidebar_name subdomain brand_colors branding.theme_colors");
+        ).select("logo_url sidebar_logo_url favicon_url campus_photo_url social_links site_title name sidebar_name subdomain brand_colors branding.theme_colors");
 
         if (!updatedOrg) return res.status(404).json({ message: "Organization not found." });
 
@@ -2401,6 +2403,7 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
             message: "Organization branding updated successfully",
             branding: {
                 logo_url: updatedOrg.logo_url,
+                sidebar_logo_url: updatedOrg.sidebar_logo_url,
                 favicon_url: updatedOrg.favicon_url,
                 campus_photo_url: updatedOrg.campus_photo_url,
                 social_links: updatedOrg.social_links,
