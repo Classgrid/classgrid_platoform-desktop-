@@ -4,7 +4,6 @@ import { Check, Eye, EyeOff, XCircle, AlertCircle } from "lucide-react";
 
 import { resetPasswordWithToken, verifyResetToken } from "../api";
 
-import { Button } from "@/components/marketing_ui/button";
 
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
@@ -270,13 +269,13 @@ export function ResetPasswordPage() {
                 placeholder="Enter new password"
                 className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
               />
-              <Button
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
               >
                 {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-              </Button>
+              </button>
 
               {/* Floating Rules Popover */}
               {isPasswordFocused && password.length >= 2 && (
@@ -329,13 +328,13 @@ export function ResetPasswordPage() {
                   placeholder="Re-enter password"
                   className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
                 />
-                <Button
+                <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
                 >
                   {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-                </Button>
+                </button>
               </div>
 
               {isConfirmTouched && (
@@ -363,7 +362,7 @@ export function ResetPasswordPage() {
 
 
 
-            <Button
+            <button
               type="submit"
               disabled={!canSubmit}
               className={`mt-7 h-14 w-full rounded-2xl font-bold transition-all duration-300 ${
@@ -373,7 +372,7 @@ export function ResetPasswordPage() {
               }`}
             >
               {isSubmitting ? "Updating..." : "Update Password"}
-            </Button>
+            </button>
           </form>
         ) : null}
       </div>

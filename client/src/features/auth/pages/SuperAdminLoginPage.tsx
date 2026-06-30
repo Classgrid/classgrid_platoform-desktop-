@@ -6,7 +6,6 @@ import { loginWithPassword, getGoogleAuthUrl, requestPasswordReset } from "../ap
 import { saveStoredAuthRole, getRedirectPath } from "../auth-helpers";
 import "./SuperAdminVanilla.css";
 
-import { Button } from "@/components/marketing_ui/button";
 
 export function SuperAdminLoginPage() {
   const navigate = useNavigate();
@@ -121,7 +120,7 @@ export function SuperAdminLoginPage() {
               <p className="form-subtitle">Secure system access</p>
 
               <div >
-                <Button 
+                <button 
                   type="button" 
                   onClick={() => {
                     const url = getGoogleAuthUrl({ audience: "super_admin", role: "super_admin" });
@@ -139,7 +138,7 @@ export function SuperAdminLoginPage() {
                 >
                   <img src="https://www.google.com/favicon.ico" alt="Google"  />
                   <span>Sign in with Google</span>
-                </Button>
+                </button>
               </div>
 
               <div >
@@ -177,26 +176,26 @@ export function SuperAdminLoginPage() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                   />
-                  <Button 
+                  <button 
                     type="button" 
                     className="password-toggle" 
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>
-                  </Button>
+                  </button>
                 </div>
               </div>
 
 
-              <Button type="submit" className="submit-btn" disabled={isLoading}>
+              <button type="submit" className="submit-btn" disabled={isLoading}>
                 <span>{isLoading ? "Signing in..." : "Sign In"}</span>
                 {!isLoading && <i className="fas fa-sign-in-alt"></i>}
-              </Button>
+              </button>
 
-              <Button type="button" className="reset-password-btn" onClick={handleResetPassword} disabled={isResetting}>
+              <button type="button" className="reset-password-btn" onClick={handleResetPassword} disabled={isResetting}>
                 <span>{isResetting ? "Sending..." : "Reset Password"}</span>
                 {!isResetting && <i className="fas fa-key"></i>}
-              </Button>
+              </button>
             </form>
 
             {/* Footer */}
