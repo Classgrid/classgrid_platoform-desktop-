@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Clock, BarChart2 } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
