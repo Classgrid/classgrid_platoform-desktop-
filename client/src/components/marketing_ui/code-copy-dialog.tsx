@@ -56,10 +56,7 @@ export function CodeCopyDialog({
           className
         )}
       >
-        {/* Glow effect at the top */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-2xl">
-          <div className="absolute -top-[100px] left-1/2 h-[200px] w-[80%] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[80px]" />
-        </div>
+        {/* Glow effect removed as per request */}
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 shrink-0 border-b border-white/5">
@@ -100,16 +97,16 @@ export function CodeCopyDialog({
           )}
 
           {/* Code Block Container */}
-          <div className="relative group">
+          <div className="relative group flex flex-col rounded-xl border border-white/10 overflow-hidden">
             {/* Window controls decoration */}
-            <div className="absolute top-0 left-0 w-full h-8 bg-zinc-900/80 border-b border-white/10 rounded-t-xl flex items-center px-4 gap-1.5 z-10">
+            <div className="w-full h-8 bg-zinc-900 shrink-0 border-b border-white/10 flex items-center px-4 gap-1.5 z-10">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
             </div>
             
             {/* The Code */}
-            <pre className="bg-[#0a0a0a] pt-12 pb-4 px-4 rounded-xl overflow-x-auto text-xs sm:text-sm font-mono text-zinc-300 border border-white/10 max-h-[400px] overflow-y-auto custom-scrollbar selection:bg-emerald-500/30 shadow-inner">
+            <pre className="bg-[#0a0a0a] py-4 px-4 overflow-x-auto text-xs sm:text-sm font-mono text-zinc-300 max-h-[360px] overflow-y-auto custom-scrollbar selection:bg-emerald-500/30 shadow-inner">
               <code>{code}</code>
             </pre>
             
