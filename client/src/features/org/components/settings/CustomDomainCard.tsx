@@ -624,7 +624,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <span className="text-muted-foreground/30">-</span>}
                                                             </td>
                                                         </tr>
                                                         <tr className="hover:bg-muted/10 transition-colors">
@@ -649,7 +649,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <span className="text-muted-foreground/30">-</span>}
                                                             </td>
                                                         </tr>
                                                         {targetType === 'A' && (
