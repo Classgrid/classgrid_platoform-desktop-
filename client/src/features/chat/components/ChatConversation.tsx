@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import type { ChatMessage, ChatThread, OrgUser, Poll } from "../services/chatApi";
@@ -44,8 +45,11 @@ export function ChatConversation({
   onStar,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevHeightRef = useRef<number>(0);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Handle scroll events to detect if we're near bottom or hit top (for pagination)
   const handleScroll = useCallback(() => {
@@ -54,7 +58,13 @@ export function ChatConversation({
     
     // Check if near bottom
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    isNearBottomRef.current = distanceFromBottom < 100;
+    const nearBottom = distanceFromBottom < 100;
+    isNearBottomRef.current = nearBottom;
+    setShowScrollBottom(!nearBottom);
+
+    if (nearBottom) {
+      setUnreadCount(0);
+    }
 
     // Hit top -> load more
     if (scrollTop === 0 && hasMore && !isLoading) {
@@ -76,13 +86,34 @@ export function ChatConversation({
 
   // Scroll to bottom on first load or when new messages arrive (if already at bottom)
   useEffect(() => {
-    if (scrollRef.current && isNearBottomRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth"
-      });
+    if (scrollRef.current) {
+      if (isNearBottomRef.current) {
+        scrollRef.current.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: "smooth"
+        });
+      } else {
+        // We received a new message but we are not at the bottom
+        // Increment unread count if it's a new message (we could be more precise but this is a good heuristic)
+        setUnreadCount(prev => prev + 1);
+      }
     }
-  }, [messages, typingUsers.length]);
+  }, [messages.length, typingUsers.length]);
+
+  // Use ResizeObserver to detect when images/media finish loading and expand the content height
+  useEffect(() => {
+    if (!contentRef.current || !scrollRef.current) return;
+    const observer = new ResizeObserver(() => {
+      if (isNearBottomRef.current && scrollRef.current) {
+        scrollRef.current.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: "auto"
+        });
+      }
+    });
+    observer.observe(contentRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Group messages by date
   const groupedMessages: { date: string; messages: ChatMessage[] }[] = [];
@@ -98,17 +129,19 @@ export function ChatConversation({
   });
 
   return (
-    <div 
-      ref={scrollRef}
-      onScroll={handleScroll}
-      className="flex-1 min-h-0 overflow-y-auto p-4 bg-muted/20 relative custom-scrollbar flex flex-col"
-    >
-      {/* Loading indicator at top */}
-      {isLoading && hasMore && (
-        <div className="flex justify-center py-4">
-          <Spinner className="w-5 h-5 text-muted-foreground" />
-        </div>
-      )}
+    <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto p-4 bg-muted/20 custom-scrollbar flex flex-col"
+      >
+        <div ref={contentRef} className="flex flex-col min-h-full justify-end">
+          {/* Loading indicator at top */}
+          {isLoading && hasMore && (
+            <div className="flex justify-center py-4">
+              <Spinner className="w-5 h-5 text-muted-foreground" />
+            </div>
+          )}
 
       {/* End of history */}
       {!hasMore && messages.length > 0 && (
@@ -226,6 +259,31 @@ export function ChatConversation({
             </span>
           </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Floating Scroll to Bottom Button */}
+      <AnimatePresence>
+        {showScrollBottom && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onClick={() => {
+              scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+              setUnreadCount(0);
+            }}
+            className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-card border border-border shadow-md flex items-center justify-center text-foreground hover:bg-accent transition-colors z-20"
+          >
+            <ChevronDown className="w-5 h-5 opacity-70" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -left-1.5 min-w-[20px] h-5 rounded-full bg-[#00a884] text-white text-[11px] font-bold flex items-center justify-center px-1 shadow-sm border-2 border-card">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
