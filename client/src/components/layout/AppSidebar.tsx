@@ -30,6 +30,7 @@ interface AppSidebarProps {
 import { SidebarSwitcher } from "./SidebarSwitcher";
 import { SidebarSearch } from "./SidebarSearch";
 import { useState } from "react";
+import { SidebarTrigger } from "@/components/marketing_ui/sidebar";
 
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const location = useLocation();
@@ -52,7 +53,12 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
       <SidebarHeader>
-        <SidebarSwitcher user={user ?? null} />
+        <div className="flex items-center gap-1">
+          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+            <SidebarSwitcher user={user ?? null} />
+          </div>
+          <SidebarTrigger className="mx-auto" />
+        </div>
         <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </SidebarHeader>
 
