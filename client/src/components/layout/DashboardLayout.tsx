@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 import { AppSidebar } from "./AppSidebar";
-import { resolveDashboardPageTitle } from "@/config/sidebar";
+import { resolveDashboardPageTitle, defaultTitlesByRole } from "@/config/sidebar";
 
 export type DashboardRole =
   | "super_admin"
@@ -57,9 +57,9 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                           <BreadcrumbItem>
                             {item.onClick ? (
                               <BreadcrumbLink asChild>
-                                <button onClick={item.onClick} className="hover:text-foreground cursor-pointer bg-transparent border-none p-0">
+                                <div role="button" tabIndex={0} onClick={item.onClick} className="hover:text-foreground cursor-pointer bg-transparent border-none p-0 inline-flex">
                                   {item.label}
-                                </button>
+                                </div>
                               </BreadcrumbLink>
                             ) : item.href ? (
                               <BreadcrumbLink asChild>
@@ -73,9 +73,21 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                         </React.Fragment>
                       ))
                     ) : (
-                      <BreadcrumbItem>
-                        <BreadcrumbPage>{resolveDashboardPageTitle(location.pathname)}</BreadcrumbPage>
-                      </BreadcrumbItem>
+                      <>
+                        <BreadcrumbItem>
+                          <BreadcrumbPage className="text-muted-foreground font-normal">
+                            {defaultTitlesByRole[role]}
+                          </BreadcrumbPage>
+                        </BreadcrumbItem>
+                        {resolveDashboardPageTitle(location.pathname) !== defaultTitlesByRole[role] && (
+                          <>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                              <BreadcrumbPage>{resolveDashboardPageTitle(location.pathname)}</BreadcrumbPage>
+                            </BreadcrumbItem>
+                          </>
+                        )}
+                      </>
                     )}
                   </BreadcrumbList>
                 </Breadcrumb>

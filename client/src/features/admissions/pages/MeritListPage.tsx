@@ -9,14 +9,14 @@ const columns: ColumnDef<MeritListEntry>[] = [
     accessorKey: "general_rank",
     header: "#",
     cell: ({ row }) => (
-      <span className="">{(row.original.general_rank ?? row.index + 1)}</span>
+      <span >{(row.original.general_rank ?? row.index + 1)}</span>
     ),
     size: 60,
   },
   {
     accessorKey: "full_name",
     header: "Name",
-    cell: ({ row }) => <span className="">{row.original.full_name}</span>,
+    cell: ({ row }) => <span >{row.original.full_name}</span>,
   },
   {
     accessorKey: "merit_score",
@@ -57,14 +57,14 @@ export function MeritListPage() {
         { label: "Merit Lists" },
       ]}
       actions={
-        <button
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
+        <Button
+          variant="default"
           disabled={generate.isPending}
           onClick={() => generate.mutate(undefined)}
         >
           {generate.isPending ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           Generate Merit
-        </button>
+        </Button>
       }
     >
       {isError && (
@@ -78,7 +78,7 @@ export function MeritListPage() {
       )}
 
       {isLoading ? (
-        <div className="">
+        <div >
           <Loader2 size={24} className="animate-spin " />
         </div>
       ) : (

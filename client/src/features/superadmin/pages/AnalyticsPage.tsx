@@ -34,7 +34,7 @@ export function AnalyticsPage() {
       </div>
 
       {isError ? (
-        <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ marginBottom: "1.5rem" }}>
+        <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
           Failed to load analytics data. Check your network or permissions.
         </div>
       ) : (
@@ -63,48 +63,26 @@ export function AnalyticsPage() {
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem" }}>
+          <div >
             {/* User Growth Chart */}
             <SectionPanel title="User Acquisition" description="New users onboarded over time.">
               <div
-                style={{
-                  height: "300px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "var(--surface-2)",
-                  borderRadius: "8px",
-                  color: "var(--text-muted)",
-                  border: "1px dashed var(--border)",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
+                
               >
-                <BarChart3 size={32} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                <BarChart3 size={32}  />
                 <span>[ Chart Integration: User Growth ]</span>
-                <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Data points: {userGrowth.length}</span>
+                <span >Data points: {userGrowth.length}</span>
               </div>
             </SectionPanel>
 
             {/* Org Growth Chart */}
             <SectionPanel title="Organization Growth" description="New organizations signing up over time.">
               <div
-                style={{
-                  height: "300px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "var(--surface-2)",
-                  borderRadius: "8px",
-                  color: "var(--text-muted)",
-                  border: "1px dashed var(--border)",
-                  flexDirection: "column",
-                  gap: "0.5rem"
-                }}
+                
               >
-                <TrendingUp size={32} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                <TrendingUp size={32}  />
                 <span>[ Chart Integration: Organization Growth ]</span>
-                <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Data points: {orgGrowth.length}</span>
+                <span >Data points: {orgGrowth.length}</span>
               </div>
             </SectionPanel>
           </div>

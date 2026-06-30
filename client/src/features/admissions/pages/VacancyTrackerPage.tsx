@@ -87,18 +87,18 @@ export function VacancyTrackerPage() {
                             </div>
                             <div>
                               <div className="text-muted-foreground text-xs">Vacant</div>
-                              <div className="font-bold text-lg" style={{ color: statusColor }}>{vacancy > 0 ? vacancy : 0}</div>
+                              <div className="font-bold text-lg" >{vacancy > 0 ? vacancy : 0}</div>
                             </div>
                             <div>
                               <div className="text-muted-foreground text-xs">Waitlist</div>
-                              <div className="font-medium" style={{ color: quota.waitlist_count > 0 ? "hsl(var(--amber-600))" : "inherit" }}>
+                              <div className="font-medium" >
                                 {quota.waitlist_count || 0}
                               </div>
                             </div>
                           </div>
                         </div>
                         <div className="h-1.5 w-full bg-muted mt-auto">
-                          <div className={`h-full ${bgStatusColor}`} style={{ width: `${Math.min(fillRate, 100)}%` }} />
+                          <div className={`h-full ${bgStatusColor}`}  />
                         </div>
                       </div>
                     );

@@ -79,7 +79,7 @@ export function ChatBubble({
         {!isMine && (
           <div className="shrink-0 w-8 flex justify-center">
             {showAvatar ? (
-              <button 
+              <Button 
                 className="w-8 h-8 rounded-full overflow-hidden mt-1 hover:opacity-80 transition-opacity focus:outline-none"
                 onClick={() => onUserClick?.(message.sender_id)}
               >
@@ -94,7 +94,7 @@ export function ChatBubble({
                     {getInitials(message.sender_name)}
                   </div>
                 )}
-              </button>
+              </Button>
             ) : null}
           </div>
         )}
@@ -145,8 +145,8 @@ export function ChatBubble({
                   autoFocus
                 />
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setIsEditing(false)} className="text-xs opacity-70 hover:opacity-100">Cancel</button>
-                  <button onClick={handleEditSubmit} className="text-xs font-bold bg-background/30 px-2 py-1 rounded">Save</button>
+                  <Button onClick={() => setIsEditing(false)} className="text-xs opacity-70 hover:opacity-100">Cancel</Button>
+                  <Button onClick={handleEditSubmit} className="text-xs font-bold bg-background/30 px-2 py-1 rounded">Save</Button>
                 </div>
               </div>
             ) : (
@@ -222,7 +222,7 @@ export function ChatBubble({
                                 className={`absolute left-0 top-0 bottom-0 opacity-20 transition-all duration-500
                                   ${isMine ? "bg-primary-foreground" : "bg-primary"}
                                 `}
-                                style={{ width: `${percent}%` }}
+                                
                               />
                             )}
                             <div className="relative z-10 flex items-center gap-2 flex-1 min-w-0 pr-2">
@@ -257,7 +257,7 @@ export function ChatBubble({
               {Object.entries(message.reactions).map(([emoji, users]) => {
                 const iReacted = users.some(u => u.id === currentUserId);
                 return (
-                  <button
+                  <Button
                     key={emoji}
                     onClick={() => onReact(message.id, emoji)}
                     className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs border bg-card transition-colors
@@ -267,7 +267,7 @@ export function ChatBubble({
                   >
                     <span>{emoji}</span>
                     <span className="font-medium">{users.length}</span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -280,9 +280,9 @@ export function ChatBubble({
           <div className={`flex items-center self-center shrink-0 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}>
             <Popover>
               <PopoverTrigger asChild>
-                <button className="p-1.5 text-muted-foreground hover:bg-accent rounded-full transition-colors">
+                <Button className="p-1.5 text-muted-foreground hover:bg-accent rounded-full transition-colors">
                   <MoreHorizontal className="w-4 h-4" />
-                </button>
+                </Button>
               </PopoverTrigger>
               <PopoverContent className={showFullPicker ? "w-auto p-0 border-none" : "w-40 p-1"} side={isMine ? "left" : "right"}>
                 {showFullPicker ? (
@@ -297,25 +297,25 @@ export function ChatBubble({
                   <>
                     <div className="flex px-2 py-2 gap-2 border-b border-border justify-between items-center">
                       {COMMON_EMOJIS.map(emoji => (
-                        <button key={emoji} onClick={() => onReact(message.id, emoji)} className="hover:scale-125 transition-transform">
+                        <Button key={emoji} onClick={() => onReact(message.id, emoji)} className="hover:scale-125 transition-transform">
                           {emoji}
-                        </button>
+                        </Button>
                       ))}
-                      <button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted">
+                      <Button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted">
                         <Plus className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
-                    <button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
+                    <Button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
                       <CornerUpLeft className="w-4 h-4" /> Reply
-                    </button>
+                    </Button>
                     {isMine && (
                       <>
-                        <button onClick={() => setIsEditing(true)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
+                        <Button onClick={() => setIsEditing(true)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
                           <Edit2 className="w-4 h-4" /> Edit
-                        </button>
-                        <button onClick={() => onDelete(message.id)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-red-500/10 text-red-500 rounded-sm text-left">
+                        </Button>
+                        <Button onClick={() => onDelete(message.id)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-red-500/10 text-red-500 rounded-sm text-left">
                           <Trash2 className="w-4 h-4" /> Delete
-                        </button>
+                        </Button>
                       </>
                     )}
                   </>

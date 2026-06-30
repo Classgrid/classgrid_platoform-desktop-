@@ -64,7 +64,7 @@ export function NotificationEnginePage() {
         title="Notifications Engine"
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div >
             <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</Button>
             <Button onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</Button>
@@ -79,25 +79,21 @@ export function NotificationEnginePage() {
       </div>
 
       {/* Quick Action Cards */}
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <div title="Quick Actions" description="Common notification workflows.">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             {[
               { icon: <Zap size={16} />, label: "Emergency Broadcast", desc: "Send to all users NOW", action: () => setBroadcastOpen(true) },
               { icon: <Megaphone size={16} />, label: "Org Admin Blast", desc: "Message all org admins", action: () => setScheduleOpen(true) },
               { icon: <Clock size={16} />, label: "Schedule Reminder", desc: "Plan future notifications", action: () => setScheduleOpen(true) },
               { icon: <Mail size={16} />, label: "System Alert", desc: "Trigger a system-level alert", action: () => setBroadcastOpen(true) },
             ].map(({ icon, label, desc, action }) => (
-              <div key={label} onClick={action} style={{
-                padding: "1rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--muted) / 0.3)", cursor: "pointer",
-                display: "flex", flexDirection: "column", gap: "0.4rem", transition: "background 0.15s",
-              }}
+              <div key={label} onClick={action} 
                 onMouseEnter={e => (e.currentTarget.style.background = "hsl(var(--muted) / 0.6)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "hsl(var(--muted) / 0.3)")}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 600, fontSize: "0.9rem" }}>{icon}{label}</div>
-                <div style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>{desc}</div>
+                <div >{icon}{label}</div>
+                <div >{desc}</div>
               </div>
             ))}
           </div>
@@ -105,29 +101,29 @@ export function NotificationEnginePage() {
       </div>
 
       {/* Scheduled List */}
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <div title="Scheduled Notifications" description="Upcoming and past notifications." noPadding>
           {isLoading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>Loading…</div>
+            <div >Loading…</div>
           ) : notifications.length === 0 ? (
-            <div style={{ padding: "3rem", textAlign: "center", color: "hsl(var(--muted-foreground))" }}>
-              <Bell size={32} style={{ opacity: 0.3, display: "block", margin: "0 auto 0.75rem" }} />
-              <div style={{ fontWeight: 500 }}>No scheduled notifications</div>
-              <div style={{ fontSize: "0.84rem", marginTop: "0.25rem" }}>Use "Schedule" to plan future notifications.</div>
+            <div >
+              <Bell size={32}  />
+              <div >No scheduled notifications</div>
+              <div >Use "Schedule" to plan future notifications.</div>
             </div>
           ) : (
             notifications.map((n: any) => (
-              <div key={n._id} style={{ padding: "0.9rem 1.25rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 500, fontSize: "0.9rem", marginBottom: "0.2rem" }}>{n.title}</div>
-                  <div style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>{n.message}</div>
+              <div key={n._id} >
+                <div >
+                  <div >{n.title}</div>
+                  <div >{n.message}</div>
                   {n.scheduledFor && (
-                    <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginTop: "0.3rem" }}>
-                      <Clock size={11} style={{ display: "inline", marginRight: "0.2rem" }} />{formatDate(n.scheduledFor)}
+                    <div >
+                      <Clock size={11}  />{formatDate(n.scheduledFor)}
                     </div>
                   )}
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
+                <div >
                   {["pending", "scheduled"].includes(n.status) ? (
                     <>
                       <Badge variant="warning" dot>Scheduled</Badge>
@@ -150,7 +146,7 @@ export function NotificationEnginePage() {
             <DialogTitle>⚡ Instant Broadcast</DialogTitle>
             <DialogDescription>Send a push notification to ALL users immediately.</DialogDescription>
           </DialogHeader>
-          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             <div><label className="text-sm font-medium mb-1 block">Title</label>
               <Input value={broadcast.title} onChange={e => setBroadcast(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Scheduled maintenance" /></div>
             <div><label className="text-sm font-medium mb-1 block">Message</label>
@@ -175,7 +171,7 @@ export function NotificationEnginePage() {
             <DialogTitle>Schedule Notification</DialogTitle>
             <DialogDescription>Plan a notification for a specific time and audience.</DialogDescription>
           </DialogHeader>
-          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             <div><label className="text-sm font-medium mb-1 block">Title</label>
               <Input value={scheduled.title} onChange={e => setScheduled(p => ({ ...p, title: e.target.value }))} placeholder="Title…" /></div>
             <div><label className="text-sm font-medium mb-1 block">Message</label>

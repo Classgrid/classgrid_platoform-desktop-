@@ -80,7 +80,7 @@ export function GroupCreateModal({
         <div className="flex-1 overflow-y-auto flex flex-col p-4 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Group Name</label>
-            <input
+            <Input
               type="text"
               placeholder="e.g. Faculty Announcement, Study Group..."
               value={groupName}
@@ -98,7 +98,7 @@ export function GroupCreateModal({
             </label>
             <div className="relative mb-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search to add..."
                 value={search}
@@ -118,7 +118,7 @@ export function GroupCreateModal({
                 </div>
               ) : (
                 filteredUsers.map((user) => (
-                  <button
+                  <Button
                     key={user._id}
                     onClick={() => toggleUser(user._id)}
                     className="w-full flex items-center gap-3 p-2 hover:bg-accent rounded-md transition-colors text-left group"
@@ -141,7 +141,7 @@ export function GroupCreateModal({
                       <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{user.role}</p>
                     </div>
-                  </button>
+                  </Button>
                 ))
               )}
             </div>

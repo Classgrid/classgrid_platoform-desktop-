@@ -258,6 +258,7 @@ export function WebsiteCMSPage() {
 
   useEffect(() => {
     void loadWebsiteContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectPage = (pageId: WebsiteCMSPageKey) => {
@@ -343,12 +344,13 @@ export function WebsiteCMSPage() {
               pages.map((page) => {
                 const isActive = page.id === activePage.id;
                 return (
-                  <button
+                  <div
                     key={page.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     aria-current={isActive ? "page" : undefined}
                     onClick={() => selectPage(page.id)}
-                    className={`flex w-full items-start gap-3 rounded-md px-3 py-3 text-left transition-colors ${
+                    className={`flex w-full items-start gap-3 rounded-md px-3 py-3 text-left transition-colors cursor-pointer ${
                       isActive
                         ? "bg-background text-foreground shadow-sm ring-1 ring-border"
                         : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
@@ -364,7 +366,7 @@ export function WebsiteCMSPage() {
                         page.status === "published" ? "bg-emerald-500" : "bg-amber-500"
                       }`}
                     />
-                  </button>
+                  </div>
                 );
               })
             )}

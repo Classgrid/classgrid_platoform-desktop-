@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { Label } from "@/components/marketing_ui/label";
 import { Link2, X } from "lucide-react";
 
@@ -92,13 +93,15 @@ export default function CMSLinkModal({ open, onClose, onInsert, initialText = ""
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Insert Link</h3>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 type="button"
                 onClick={onClose}
                 className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="px-5 py-5 space-y-4">
@@ -106,7 +109,7 @@ export default function CMSLinkModal({ open, onClose, onInsert, initialText = ""
                 <Label className="text-sm font-medium text-foreground">
                   URL <span className="text-destructive">*</span>
                 </Label>
-                <input
+                <Input
                   ref={urlInputRef}
                   type="text"
                   value={url}
@@ -128,7 +131,7 @@ export default function CMSLinkModal({ open, onClose, onInsert, initialText = ""
                 <Label className="text-sm font-medium text-foreground">
                   Display text <span className="text-muted-foreground font-normal">(optional)</span>
                 </Label>
-                <input
+                <Input
                   type="text"
                   value={text}
                   onChange={(e) => setText(e.target.value)}

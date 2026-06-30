@@ -157,18 +157,18 @@ export default function FacultyAttendancePortal() {
                                             "{leave.reason}"
                                         </p>
                                         <div className="flex gap-2">
-                                            <button 
+                                            <Button 
                                                 onClick={() => handleProcessLeave(leave._id, 'approved')}
                                                 className="flex-1 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-1"
                                             >
                                                 <Check className="w-3 h-3" /> Approve
-                                            </button>
-                                            <button 
+                                            </Button>
+                                            <Button 
                                                 onClick={() => handleProcessLeave(leave._id, 'rejected')}
                                                 className="flex-1 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-1"
                                             >
                                                 <X className="w-3 h-3" /> Reject
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
@@ -188,14 +188,14 @@ export default function FacultyAttendancePortal() {
                                 </h2>
                                 <p className="text-xs text-slate-400 mt-1">Click a status to toggle instantly. No lag.</p>
                             </div>
-                            <button 
+                            <Button 
                                 onClick={handleSaveRegister}
                                 disabled={isSubmitting}
                                 className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-2 disabled:opacity-50"
                             >
                                 <Save className="w-4 h-4" />
                                 {isSubmitting ? 'Saving...' : 'Save Register'}
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="flex-1 overflow-auto rounded-2xl border border-white/10 bg-black/20">
@@ -217,7 +217,7 @@ export default function FacultyAttendancePortal() {
                                                 </td>
                                                 <td className="py-4 px-6">
                                                     <div className="flex items-center justify-center gap-2">
-                                                        <button 
+                                                        <Button 
                                                             onClick={() => handleMark(student._id, 'present')}
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'present' 
@@ -226,8 +226,8 @@ export default function FacultyAttendancePortal() {
                                                             }`}
                                                         >
                                                             <CheckCircle2 className="w-3 h-3" /> P
-                                                        </button>
-                                                        <button 
+                                                        </Button>
+                                                        <Button 
                                                             onClick={() => handleMark(student._id, 'absent')}
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'absent' 
@@ -236,8 +236,8 @@ export default function FacultyAttendancePortal() {
                                                             }`}
                                                         >
                                                             <XCircle className="w-3 h-3" /> A
-                                                        </button>
-                                                        <button 
+                                                        </Button>
+                                                        <Button 
                                                             onClick={() => handleMark(student._id, 'late')}
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'late' 
@@ -246,7 +246,7 @@ export default function FacultyAttendancePortal() {
                                                             }`}
                                                         >
                                                             <Clock className="w-3 h-3" /> L
-                                                        </button>
+                                                        </Button>
                                                     </div>
                                                 </td>
                                             </tr>

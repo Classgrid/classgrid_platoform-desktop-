@@ -58,7 +58,7 @@ export function FailedPaymentsPage() {
         header: "Date",
         size: 120,
         cell: ({ getValue }) => (
-          <span style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</span>
+          <span >{formatDate(getValue<string>())}</span>
         ),
       },
       {
@@ -68,9 +68,9 @@ export function FailedPaymentsPage() {
         cell: ({ row, getValue }) => {
           const name = getValue<string>() || row.original.organizationId?.name || "—";
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+            <div >
               <Building2 size={13} />
-              <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>{name}</span>
+              <span >{name}</span>
             </div>
           );
         },
@@ -80,7 +80,7 @@ export function FailedPaymentsPage() {
         header: "Amount",
         size: 120,
         cell: ({ getValue }) => (
-          <span style={{ fontWeight: 600, color: "hsl(var(--danger))", fontSize: "0.9rem" }}>
+          <span >
             {INR(getValue<number>())}
           </span>
         ),
@@ -96,7 +96,7 @@ export function FailedPaymentsPage() {
         header: "Order ID",
         size: 200,
         cell: ({ getValue }) => (
-          <span style={{ fontFamily: "monospace", fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <span >
             {getValue<string>() || "—"}
           </span>
         ),
@@ -106,7 +106,7 @@ export function FailedPaymentsPage() {
         header: "Payment ID",
         size: 200,
         cell: ({ getValue }) => (
-          <span style={{ fontFamily: "monospace", fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <span >
             {getValue<string>() || "—"}
           </span>
         ),
@@ -116,7 +116,7 @@ export function FailedPaymentsPage() {
         header: "Note / Reason",
         size: 200,
         cell: ({ getValue }) => (
-          <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>
+          <span >
             {getValue<string>() || "—"}
           </span>
         ),
@@ -138,23 +138,14 @@ export function FailedPaymentsPage() {
       {/* Alert Banner */}
       {total > 0 && (
         <div
-          style={{
-            marginBottom: "1.25rem",
-            padding: "0.85rem 1.25rem",
-            borderRadius: "var(--radius)",
-            border: "1px solid hsl(var(--danger) / 0.4)",
-            background: "hsl(var(--danger) / 0.06)",
-            display: "flex",
-            gap: "0.75rem",
-            alignItems: "center",
-          }}
+          
         >
-          <XCircle size={18} style={{ color: "hsl(var(--danger))", flexShrink: 0 }} />
+          <XCircle size={18}  />
           <div>
-            <span style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+            <span >
               {total} failed payment{total !== 1 ? "s" : ""} detected
             </span>
-            <span style={{ fontSize: "0.84rem", color: "hsl(var(--muted-foreground))", marginLeft: "0.5rem" }}>
+            <span >
               — Total lost revenue: <strong>{INR(totalLost)}</strong>. Follow up with affected organizations.
             </span>
           </div>
@@ -179,7 +170,7 @@ export function FailedPaymentsPage() {
         />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel
           title="Failed Transaction Log"
           description="All failed or incomplete platform subscription payments."
@@ -196,7 +187,7 @@ export function FailedPaymentsPage() {
             />
           }
         >
-          <div style={{ padding: "0.75rem 1rem" }}>
+          <div >
             <div
               searchValue={search}
               onSearchChange={setSearch}

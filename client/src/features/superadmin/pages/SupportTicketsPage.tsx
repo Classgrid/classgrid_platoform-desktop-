@@ -23,14 +23,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/marketing_ui/breadcrumb";
+
 import { toast } from "sonner";
 import RichReplyEditor, {
   type RichReplyEditorRef,
@@ -645,7 +638,7 @@ export function SupportTicketsPage() {
                         </TooltipProvider>
                       ) : (
                         currentUser && (
-                          <button
+                          <Button
                             onClick={(e) => {
                               e.stopPropagation();
                               setAssigningTicketId(ticket._id);
@@ -672,7 +665,7 @@ export function SupportTicketsPage() {
                             ) : (
                               "Assign me"
                             )}
-                          </button>
+                          </Button>
                         )
                       )}
                     </div>
@@ -717,7 +710,7 @@ export function SupportTicketsPage() {
         >
           {statusLabel(selectedTicket.status)}
         </span>
-        <button
+        <Button
           onClick={() => refetch()}
           disabled={isFetching}
           className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-full transition-colors disabled:opacity-50"
@@ -728,7 +721,7 @@ export function SupportTicketsPage() {
             <RefreshCw className="w-3.5 h-3.5" />
           )}
           {isFetching ? "Refreshing..." : "Refresh"}
-        </button>
+        </Button>
       </div>
 
       {/* 2-Column Grid */}
@@ -816,7 +809,7 @@ export function SupportTicketsPage() {
                               : `${SUPABASE_URL}/storage/v1/object/public/support-attachments/${path}`;
 
                             return (
-                              <button
+                              <Button
                                 key={`msg-att-${aIdx}`}
                                 onClick={() =>
                                   setPreviewFile({ name: fileName, src: fileUrl })
@@ -830,7 +823,7 @@ export function SupportTicketsPage() {
                                 <span className="font-medium text-foreground truncate max-w-[200px]">
                                   {fileName}
                                 </span>
-                              </button>
+                              </Button>
                             );
                           }
                         )}
@@ -987,7 +980,7 @@ export function SupportTicketsPage() {
                     <>
                       <span>Unassigned</span>
                       {currentUser && (
-                        <button
+                        <Button
                           onClick={() => {
                             updateTicket.mutate(
                               { id: selectedTicket._id, assignedTo: currentUser._id },
@@ -1006,7 +999,7 @@ export function SupportTicketsPage() {
                         >
                           {updateTicket.isPending && <Spinner className="w-3 h-3" />}
                           {updateTicket.isPending ? "Assigning..." : "Assign to me"}
-                        </button>
+                        </Button>
                       )}
                     </>
                   )}
@@ -1146,7 +1139,7 @@ export function SupportTicketsPage() {
                                     fileName.slice(-8)
                                     : fileName}
                                 </span>
-                                <button
+                                <Button
                                   onClick={() =>
                                     setPreviewFile({
                                       name: fileName,
@@ -1157,7 +1150,7 @@ export function SupportTicketsPage() {
                                   title="View file"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
-                                </button>
+                                </Button>
                               </div>
                             );
                           }
@@ -1204,7 +1197,7 @@ function MetaRow({
       >
         <span>{value}</span>
         {copyValue && (
-          <button
+          <Button
             onClick={() => {
               navigator.clipboard.writeText(copyValue);
               toast.success("Merge URL copied to clipboard");
@@ -1213,7 +1206,7 @@ function MetaRow({
             title="Copy Merge URL"
           >
             <Copy className="w-3 h-3" />
-          </button>
+          </Button>
         )}
       </dd>
     </div>

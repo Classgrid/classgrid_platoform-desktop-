@@ -102,7 +102,7 @@ export function FeatureFlagsPage() {
         header: "Feature Key",
         size: 200,
         cell: ({ getValue }) => (
-          <span style={{ fontFamily: "monospace", fontSize: "0.84rem", fontWeight: 500 }}>
+          <span >
             {getValue<string>()}
           </span>
         ),
@@ -111,7 +111,7 @@ export function FeatureFlagsPage() {
         accessorKey: "name",
         header: "Name",
         size: 160,
-        cell: ({ getValue }) => <span style={{ fontWeight: 500 }}>{getValue<string>() || "—"}</span>,
+        cell: ({ getValue }) => <span >{getValue<string>() || "—"}</span>,
       },
       {
         accessorKey: "module",
@@ -124,7 +124,7 @@ export function FeatureFlagsPage() {
         header: "Description",
         size: 260,
         cell: ({ getValue }) => (
-          <span style={{ fontSize: "0.84rem", color: "hsl(var(--muted-foreground))" }}>
+          <span >
             {getValue<string>() || "—"}
           </span>
         ),
@@ -171,7 +171,7 @@ export function FeatureFlagsPage() {
         title="Feature Flags"
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div >
             <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button variant="outline" onClick={() => setNewFlagOpen(true)}>
               <Plus size={14} /> New Flag
@@ -190,13 +190,13 @@ export function FeatureFlagsPage() {
         <StatCard title="Disabled Features" value={isLoading ? "—" : flags.length - enabledCount} icon={<AlertTriangle size={15} />} />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel
           title="All Feature Flags"
           description="Toggle any feature globally. All changes take effect immediately platform-wide."
           noPadding
         >
-          <div style={{ padding: "0.75rem 1rem" }}>
+          <div >
             <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search flags, modules…" />
           </div>
           <DataTable
@@ -264,7 +264,7 @@ export function FeatureFlagsPage() {
             <DialogTitle>Create Feature Flag</DialogTitle>
             <DialogDescription>Add a new global feature flag / kill switch.</DialogDescription>
           </DialogHeader>
-          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             {(["key", "name", "module", "description"] as const).map((field) => (
               <div key={field}>
                 <label className="text-sm font-medium mb-1 block capitalize">

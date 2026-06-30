@@ -40,8 +40,8 @@ export function CustomDomainsPage() {
       width: "w-[30%]",
       render: (val: any, row: any) => (
         <div>
-          <div style={{ fontWeight: 500 }}>{row.name}</div>
-          <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>
+          <div >{row.name}</div>
+          <div >
             {row.subdomain}.classgrid.in
           </div>
         </div>
@@ -186,7 +186,7 @@ export function CustomDomainsPage() {
         <StatCard title="Pending DNS Setup" value={totalPending} icon={<ShieldAlert size={15} />} />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel title="Domain Registry" description={`Showing ${orgs.length} registered custom domains`} noPadding>
           <DataTable 
             columns={columns} 

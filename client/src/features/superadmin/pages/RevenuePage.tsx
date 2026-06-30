@@ -42,7 +42,7 @@ export function RevenuePage() {
         header: "Transaction ID",
         size: 150,
         cell: ({ getValue }) => (
-          <span style={{ fontFamily: "monospace", fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+          <span >
             {getValue<string>()}
           </span>
         ),
@@ -51,7 +51,7 @@ export function RevenuePage() {
         accessorKey: "orgName",
         header: "Organization",
         size: 250,
-        cell: ({ getValue }) => <strong style={{ fontWeight: 500 }}>{getValue<string>()}</strong>,
+        cell: ({ getValue }) => <strong >{getValue<string>()}</strong>,
       },
       {
         accessorKey: "plan",
@@ -70,7 +70,7 @@ export function RevenuePage() {
         accessorKey: "amount",
         header: "Amount",
         size: 140,
-        cell: ({ getValue }) => <span style={{ fontWeight: 600, color: "hsl(var(--success))" }}>{formatCurrency(getValue<number>())}</span>,
+        cell: ({ getValue }) => <span >{formatCurrency(getValue<number>())}</span>,
       },
       {
         accessorKey: "status",
@@ -86,7 +86,7 @@ export function RevenuePage() {
         accessorKey: "date",
         header: "Date",
         size: 140,
-        cell: ({ getValue }) => <span style={{ fontSize: "0.85rem" }}>{formatDate(getValue<string>())}</span>,
+        cell: ({ getValue }) => <span >{formatDate(getValue<string>())}</span>,
       },
     ],
     []
@@ -127,14 +127,14 @@ export function RevenuePage() {
         />
       </div>
 
-      <div style={{ marginTop: "1.5rem" }}>
+      <div >
         <SectionPanel
           title="Recent Transactions"
           description="Latest payments from organizations for platform subscriptions."
           noPadding
         >
           {isError ? (
-            <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+            <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
               <div className="p-4 rounded-md border__body">
                 <span className="p-4 rounded-md border__title">Failed to load revenue data.</span>
               </div>

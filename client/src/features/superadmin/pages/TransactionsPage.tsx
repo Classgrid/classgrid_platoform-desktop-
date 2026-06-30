@@ -92,13 +92,13 @@ export function TransactionsPage() {
   const columns: ColumnDef<any>[] = useMemo(() => [
     {
       accessorKey: "createdAt", header: "Date", size: 120,
-      cell: ({ getValue }) => <span style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</span>,
+      cell: ({ getValue }) => <span >{formatDate(getValue<string>())}</span>,
     },
     {
       accessorKey: "organizationName", header: "Organization", size: 180,
       cell: ({ row, getValue }) => {
         const name = getValue<string>() || row.original.organizationId?.name || "—";
-        return <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><Building2 size={13} /><span style={{ fontWeight: 500, fontSize: "0.85rem" }}>{name}</span></div>;
+        return <div ><Building2 size={13} /><span >{name}</span></div>;
       },
     },
     {
@@ -106,7 +106,7 @@ export function TransactionsPage() {
       cell: ({ row, getValue }) => {
         const amt = getValue<number>();
         const isRefund = row.original.type === "refund";
-        return <span style={{ fontWeight: 600, color: isRefund ? "hsl(var(--danger))" : "hsl(var(--success))", fontSize: "0.9rem" }}>{isRefund ? "−" : "+"}{INR(amt)}</span>;
+        return <span >{isRefund ? "−" : "+"}{INR(amt)}</span>;
       },
     },
     {
@@ -119,11 +119,11 @@ export function TransactionsPage() {
     },
     {
       accessorKey: "razorpayPaymentId", header: "Razorpay ID", size: 170,
-      cell: ({ getValue }) => <span style={{ fontFamily: "monospace", fontSize: "0.78rem" }}>{getValue<string>() || "—"}</span>,
+      cell: ({ getValue }) => <span >{getValue<string>() || "—"}</span>,
     },
     {
       accessorKey: "note", header: "Note", size: 180,
-      cell: ({ getValue }) => <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>{getValue<string>() || "—"}</span>,
+      cell: ({ getValue }) => <span >{getValue<string>() || "—"}</span>,
     },
     {
       id: "actions", header: "Actions", size: 100,
@@ -145,7 +145,7 @@ export function TransactionsPage() {
         title="Platform Transactions"
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div >
             <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</Button>
           </div>
@@ -159,10 +159,10 @@ export function TransactionsPage() {
         <StatCard title="Refund Count" value={isLoading ? "—" : refundCount} icon={<AlertTriangle size={15} />} />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel title="Transaction History" description={`${filtered.length} records`} noPadding
           actions={
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div >
               <div value={statusFilter} onValueChange={setStatusFilter} options={[
                 { label: "All Status", value: "" }, { label: "Paid", value: "success" },
                 { label: "Refunded", value: "refunded" }, { label: "Failed", value: "failed" },
@@ -174,7 +174,7 @@ export function TransactionsPage() {
             </div>
           }
         >
-          <div style={{ padding: "0.75rem 1rem" }}>
+          <div >
             <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search org, payment ID, note…" />
           </div>
           <DataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
@@ -189,8 +189,8 @@ export function TransactionsPage() {
             <DialogTitle>Issue Refund</DialogTitle>
             <DialogDescription>Refund {INR(refundTarget?.amount ?? 0)} to <strong>{refundTarget?.organizationName}</strong>. This will mark the original payment as refunded.</DialogDescription>
           </DialogHeader>
-          <div style={{ padding: "0.5rem 0" }}>
-            <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Reason</label>
+          <div >
+            <label >Reason</label>
             <Input value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder="Enter refund reason…" />
           </div>
           <DialogFooter>
@@ -209,18 +209,18 @@ export function TransactionsPage() {
             <DialogTitle>Record Manual Payment</DialogTitle>
             <DialogDescription>Log a payment that was collected outside of Razorpay (e.g., bank transfer, cash).</DialogDescription>
           </DialogHeader>
-          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             <div>
-              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Organization</label>
+              <label >Organization</label>
               <div value={manual.organizationId} onValueChange={v => setManual(p => ({ ...p, organizationId: v }))}
                 options={allOrgs.map(o => ({ label: o.name, value: o._id }))} />
             </div>
             <div>
-              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Amount (₹)</label>
+              <label >Amount (₹)</label>
               <Input type="number" min={0} value={manual.amount} onChange={e => setManual(p => ({ ...p, amount: e.target.value }))} placeholder="e.g. 5000" />
             </div>
             <div>
-              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Note</label>
+              <label >Note</label>
               <Input value={manual.note} onChange={e => setManual(p => ({ ...p, note: e.target.value }))} placeholder="e.g. Bank transfer for Q1 subscription" />
             </div>
           </div>

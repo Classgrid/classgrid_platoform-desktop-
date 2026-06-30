@@ -14,12 +14,12 @@ export function ChatUserProfileSidebar({ user, onClose }: ChatUserProfileSidebar
     <div className="flex flex-col h-full w-full bg-background border-l border-border animate-in slide-in-from-right-8 duration-200">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h2 className="text-sm font-bold text-foreground">Contact Info</h2>
-        <button
+        <Button
           onClick={onClose}
           className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors"
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center">

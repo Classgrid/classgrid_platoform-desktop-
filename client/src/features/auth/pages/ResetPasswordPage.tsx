@@ -163,13 +163,7 @@ export function ResetPasswordPage() {
     return (
       <main 
         className="relative flex min-h-screen flex-col items-center justify-center px-4" 
-        style={{ 
-          backgroundColor: "#111111",
-          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
-          backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
-          backgroundSize: "80px 80px",
-          backgroundRepeat: "repeat"
-        }}
+        
       >
         <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10 text-center">
           <div
@@ -193,34 +187,24 @@ export function ResetPasswordPage() {
     return (
       <main 
         className="relative flex min-h-screen flex-col items-center justify-center px-4" 
-        style={{ 
-          backgroundColor: "#111111",
-          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
-          backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
-          backgroundSize: "80px 80px",
-          backgroundRepeat: "repeat"
-        }}
+        
       >
         <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10">
           {/* Animated tick circle */}
           <div
             className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
-            style={{
-              background: "linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)",
-              border: "2px solid rgba(16,185,129,0.4)",
-              animation: "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-            }}
+            
           >
             <Check
               className="h-[48px] w-[48px] text-[#10b981]"
               strokeWidth={3}
-              style={{ animation: "fadeIn 0.4s ease 0.3s both" }}
+              
             />
           </div>
 
           <p
             className="mt-5 text-[18px] font-semibold text-[#ededed]"
-            style={{ animation: "fadeIn 0.4s ease 0.5s both" }}
+            
           >
             Password Set
           </p>
@@ -247,13 +231,7 @@ export function ResetPasswordPage() {
   return (
     <main 
       className="relative flex min-h-screen flex-col items-center justify-center px-4" 
-      style={{ 
-        backgroundColor: "#111111",
-        backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(315deg, rgba(255,255,255,0.03) 25%, #111111 25%)",
-        backgroundPosition: "40px 0, 40px 0, 0 0, 0 0",
-        backgroundSize: "80px 80px",
-        backgroundRepeat: "repeat"
-      }}
+      
     >
       <div className="relative z-10 w-full max-w-[430px] rounded-[28px] border border-white/10 bg-[#111111] p-8 shadow-2xl">
         {/* Logo */}
@@ -280,7 +258,7 @@ export function ResetPasswordPage() {
             </label>
 
             <div className="relative mt-3">
-              <input
+              <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 maxLength={64}
@@ -290,13 +268,13 @@ export function ResetPasswordPage() {
                 placeholder="Enter new password"
                 className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
               >
                 {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-              </button>
+              </Button>
 
               {/* Floating Rules Popover */}
               {isPasswordFocused && password.length >= 2 && (
@@ -341,7 +319,7 @@ export function ResetPasswordPage() {
               </label>
 
               <div className="relative mt-3">
-                <input
+                <Input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   maxLength={64}
@@ -349,13 +327,13 @@ export function ResetPasswordPage() {
                   placeholder="Re-enter password"
                   className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
                 >
                   {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-                </button>
+                </Button>
               </div>
 
               {isConfirmTouched && (
@@ -383,7 +361,7 @@ export function ResetPasswordPage() {
 
 
 
-            <button
+            <Button
               type="submit"
               disabled={!canSubmit}
               className={`mt-7 h-14 w-full rounded-2xl font-bold transition-all duration-300 ${
@@ -393,7 +371,7 @@ export function ResetPasswordPage() {
               }`}
             >
               {isSubmitting ? "Updating..." : "Update Password"}
-            </button>
+            </Button>
           </form>
         ) : null}
       </div>

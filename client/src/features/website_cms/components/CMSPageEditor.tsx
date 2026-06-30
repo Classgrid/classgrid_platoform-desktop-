@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-self-assign */
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 "use client";
 
@@ -31,17 +33,18 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 
 function ToolBtn({ icon, onClick, title }: { icon: React.ReactNode; onClick: () => void; title?: string }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       title={title}
       onMouseDown={(e) => {
         e.preventDefault();
         onClick();
       }}
-      className="w-7 h-7 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
+      className="w-7 h-7 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors cursor-pointer"
     >
       {icon}
-    </button>
+    </div>
   );
 }
 

@@ -283,12 +283,12 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
             >
               {onClose && (
-                <button
+                <Button
                   onClick={onClose}
                   className="absolute top-4 left-4 p-2 bg-black/40 hover:bg-black/70 rounded-full text-white backdrop-blur-md transition-all z-10"
                 >
                   <X size={20} />
-                </button>
+                </Button>
               )}
               {!isReadOnly && (
                 <>
@@ -301,7 +301,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                       Update Banner
                     </span>
                   </div>
-                  <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                  <Input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
                 </>
               )}
             </div>
@@ -322,7 +322,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Camera className="text-white w-8 h-8" />
                     </div>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+                    <Input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
                   </>
                 )}
               </div>

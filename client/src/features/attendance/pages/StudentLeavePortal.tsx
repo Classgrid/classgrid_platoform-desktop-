@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import React, { useState } from "react";
 import { 
     Calendar, 
@@ -72,13 +73,13 @@ export default function StudentLeavePortal() {
                     <h1 className="text-3xl font-bold text-white tracking-tight">Attendance & Leaves</h1>
                     <p className="text-sm text-slate-400 mt-1">Track your attendance and manage your leave requests.</p>
                 </div>
-                <button 
+                <Button 
                     onClick={() => setIsModalOpen(true)}
                     className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
                     Apply for Leave
-                </button>
+                </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -87,7 +88,7 @@ export default function StudentLeavePortal() {
                 <div className="lg:col-span-1">
                     <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl relative flex flex-col items-center justify-center text-center overflow-hidden h-full min-h-[400px]">
                         
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ backgroundColor: glowColor.replace('0.5', '1') }} />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"  />
 
                         <h2 className="text-lg font-semibold text-white mb-8 flex items-center gap-2 z-10">
                             <Activity className="w-5 h-5 text-emerald-400" />
@@ -116,7 +117,7 @@ export default function StudentLeavePortal() {
                                         strokeLinecap="round"
                                         strokeDasharray={`${2 * Math.PI * 45}`}
                                         strokeDashoffset={`${2 * Math.PI * 45 * (1 - percentage / 100)}`}
-                                        style={{ filter: `drop-shadow(0 0 10px ${glowColor})` }}
+                                        
                                     />
                                 </svg>
                                 
@@ -223,16 +224,16 @@ export default function StudentLeavePortal() {
                         
                         <div className="p-6 border-b border-white/10 flex items-center justify-between">
                             <h2 className="text-xl font-bold text-white">Apply for Leave</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition">
+                            <Button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition">
                                 <XCircle className="w-6 h-6" />
-                            </button>
+                            </Button>
                         </div>
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Start Date</label>
-                                    <input 
+                                    <Input 
                                         type="date" 
                                         required
                                         value={formData.startDate}
@@ -242,7 +243,7 @@ export default function StudentLeavePortal() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">End Date</label>
-                                    <input 
+                                    <Input 
                                         type="date" 
                                         required
                                         value={formData.endDate}
@@ -265,20 +266,20 @@ export default function StudentLeavePortal() {
                             </div>
 
                             <div className="pt-4 flex gap-3">
-                                <button 
+                                <Button 
                                     type="button" 
                                     onClick={() => setIsModalOpen(false)}
                                     className="flex-1 bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-xl transition"
                                 >
                                     Cancel
-                                </button>
-                                <button 
+                                </Button>
+                                <Button 
                                     type="submit" 
                                     disabled={isApplying}
                                     className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {isApplying ? 'Submitting...' : <><Send className="w-4 h-4" /> Submit Request</>}
-                                </button>
+                                </Button>
                             </div>
                         </form>
 

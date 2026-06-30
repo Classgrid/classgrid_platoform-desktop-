@@ -31,7 +31,7 @@ export function OrgEnrollmentChart({ profile }: OrgEnrollmentChartProps) {
           <div className="h-[300px] flex items-center justify-center bg-muted/5 rounded-md">
             <div className="flex space-x-2 items-end h-32 w-full max-w-sm justify-center">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <Skeleton key={i} className="w-8 rounded-t-sm" style={{ height: `${Math.random() * 80 + 20}%` }} />
+                <Skeleton key={i} className="w-8 rounded-t-sm"  />
               ))}
             </div>
           </div>

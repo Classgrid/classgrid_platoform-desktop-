@@ -6,10 +6,12 @@ import './attendance.worker.js';
 import { initCronJobs } from './cleanup.worker.js';
 import { initAdmissionCronJobs } from './admission-deadline-checker.cron.js';
 import { initPromotionSchedulerCron } from './promotion-scheduler.cron.js';
+import { initScheduledNotificationWorker } from './scheduled-notification.worker.js';
 
 initCronJobs();
 initAdmissionCronJobs();
 initPromotionSchedulerCron();
+initScheduledNotificationWorker();
 // import './analytics.worker.js';
 
 console.log('👷 Background Workers Initialized');

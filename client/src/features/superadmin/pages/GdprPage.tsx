@@ -52,11 +52,11 @@ export function GdprPage() {
       cell: ({ row }) => {
         const u = row.original;
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div >
             <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
-              <div style={{ fontWeight: 500 }}>{u.name}</div>
-              <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{u.email}</div>
+              <div >{u.name}</div>
+              <div >{u.email}</div>
             </div>
           </div>
         );
@@ -65,7 +65,7 @@ export function GdprPage() {
     { accessorKey: "role", header: "Role", size: 130, cell: ({ getValue }) => <Badge variant="neutral">{getValue<string>().replace(/_/g, " ")}</Badge> },
     {
       accessorKey: "organizationName", header: "Organization", size: 170,
-      cell: ({ getValue }) => getValue<string>() || <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>Platform</span>,
+      cell: ({ getValue }) => getValue<string>() || <span >Platform</span>,
     },
     {
       accessorKey: "status", header: "Status", size: 100,
@@ -76,14 +76,14 @@ export function GdprPage() {
         return <Badge variant="warning">{s}</Badge>;
       },
     },
-    { accessorKey: "createdAt", header: "Joined", size: 120, cell: ({ getValue }) => <span style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</span> },
+    { accessorKey: "createdAt", header: "Joined", size: 120, cell: ({ getValue }) => <span >{formatDate(getValue<string>())}</span> },
     {
       id: "actions", header: "GDPR Actions", size: 180,
       cell: ({ row }) => {
         const u = row.original;
         const isErased = u.status === "deleted" || u.name === "Deleted User";
         return (
-          <div style={{ display: "flex", gap: "0.35rem" }}>
+          <div >
             <Button size="sm" variant="outline" onClick={() => handleExport(u)}><Download size={12} /> Export</Button>
             {!isErased && u.role !== "super_admin" && (
               <Button size="sm" variant="destructive" onClick={() => setEraseTarget(u)}><Trash2 size={12} /> Erase</Button>
@@ -103,17 +103,17 @@ export function GdprPage() {
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
         actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
       />
-      <div style={{ marginBottom: "1.25rem", padding: "1rem 1.25rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--warning) / 0.4)", background: "hsl(var(--warning) / 0.06)", display: "flex", gap: "0.75rem" }}>
-        <AlertTriangle size={18} style={{ color: "hsl(var(--warning))", flexShrink: 0, marginTop: "0.1rem" }} />
+      <div >
+        <AlertTriangle size={18}  />
         <div>
-          <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: "0.25rem" }}>Erasure is irreversible</div>
-          <div style={{ fontSize: "0.84rem", color: "hsl(var(--muted-foreground))" }}>
+          <div >Erasure is irreversible</div>
+          <div >
             Erasing a user anonymizes their account — name, email, and PII replaced with placeholders. Foreign keys are preserved. Super Admin accounts are protected from erasure. All actions are logged.
           </div>
         </div>
       </div>
       <SectionPanel title="All Users" description="Perform GDPR actions on any user account." noPadding>
-        <div style={{ padding: "0.75rem 1rem" }}>
+        <div >
           <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search by name or email…" />
         </div>
         <DataTable columns={columns} data={users} isLoading={isLoading} pageSize={50}
@@ -128,7 +128,7 @@ export function GdprPage() {
               This will permanently anonymize <strong>{eraseTarget?.name}</strong> ({eraseTarget?.email}). This action <strong>cannot be undone</strong>.
             </DialogDescription>
           </DialogHeader>
-          <div style={{ padding: "0.5rem 0" }}>
+          <div >
             <label className="text-sm font-medium mb-1 block">Type <strong>ERASE</strong> to confirm</label>
             <Input value={eraseConfirmText} onChange={e => setEraseConfirmText(e.target.value)} placeholder="ERASE" />
           </div>

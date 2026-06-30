@@ -129,8 +129,8 @@ export function SubscribersPage() {
         size: 280,
         cell: ({ row }) => (
           <div>
-            <div style={{ fontWeight: 600 }}>{row.original.email}</div>
-            <div className="">
+            <div >{row.original.email}</div>
+            <div >
               Marketing blog and changelog updates
             </div>
           </div>
@@ -154,7 +154,7 @@ export function SubscribersPage() {
         header: "Subscribed",
         size: 170,
         cell: ({ row }) => (
-          <span style={{ fontSize: "0.82rem" }}>
+          <span >
             {formatSubscriberDate(row.original.created_at)}
           </span>
         ),
@@ -164,7 +164,7 @@ export function SubscribersPage() {
         header: "Last Updated",
         size: 170,
         cell: ({ row }) => (
-          <span style={{ fontSize: "0.82rem" }}>
+          <span >
             {formatSubscriberDate(row.original.updated_at)}
           </span>
         ),
@@ -177,7 +177,7 @@ export function SubscribersPage() {
           const subscriber = row.original;
 
           return (
-            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
+            <div >
               {subscriber.is_active ? (
                 <Button
                   size="sm"
@@ -221,8 +221,8 @@ export function SubscribersPage() {
         size: 280,
         cell: ({ row }) => (
           <div>
-            <div style={{ fontWeight: 600 }}>{row.original.email}</div>
-            <div className="">Currently not receiving updates</div>
+            <div >{row.original.email}</div>
+            <div >Currently not receiving updates</div>
           </div>
         ),
       },
@@ -231,7 +231,7 @@ export function SubscribersPage() {
         header: "Paused / Unsubscribed On",
         size: 190,
         cell: ({ row }) => (
-          <span style={{ fontSize: "0.82rem" }}>
+          <span >
             {formatSubscriberDate(row.original.updated_at)}
           </span>
         ),
@@ -241,7 +241,7 @@ export function SubscribersPage() {
         header: "Actions",
         size: 220,
         cell: ({ row }) => (
-          <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
+          <div >
             <Button
               size="sm"
               variant="success"
@@ -335,12 +335,7 @@ export function SubscribersPage() {
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 2fr) minmax(320px, 1fr)",
-          gap: "1.5rem",
-          marginTop: "1.5rem",
-        }}
+        
       >
         <div
           title="Subscriber Movement"
@@ -369,60 +364,36 @@ export function SubscribersPage() {
           title="Audience Health"
           description="A quick read on the email list quality and recent movement."
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.95rem" }}>
+          <div >
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "1rem",
-                paddingBottom: "0.75rem",
-                borderBottom: "1px solid hsl(var(--border))",
-              }}
+              
             >
-              <span className="">Delivery-ready audience</span>
+              <span >Delivery-ready audience</span>
               <strong>{isLoading ? "—" : stats.deliveryReady}</strong>
             </div>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "1rem",
-                paddingBottom: "0.75rem",
-                borderBottom: "1px solid hsl(var(--border))",
-              }}
+              
             >
-              <span className="">Active rate</span>
+              <span >Active rate</span>
               <strong>{isLoading ? "—" : `${stats.activeRate}%`}</strong>
             </div>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "1rem",
-                paddingBottom: "0.75rem",
-                borderBottom: "1px solid hsl(var(--border))",
-              }}
+              
             >
-              <span className="">Net growth in 14 days</span>
+              <span >Net growth in 14 days</span>
               <strong>{isLoading ? "—" : `${stats.netGrowth14d >= 0 ? "+" : ""}${stats.netGrowth14d}`}</strong>
             </div>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "1rem",
-                paddingBottom: "0.75rem",
-                borderBottom: "1px solid hsl(var(--border))",
-              }}
+              
             >
-              <span className="">Latest signup</span>
-              <strong style={{ textAlign: "right" }}>
+              <span >Latest signup</span>
+              <strong >
                 {formatSubscriberDate(activity.lastSubscribedAt)}
               </strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem" }}>
-              <span className="">Latest unsubscribe</span>
-              <strong style={{ textAlign: "right" }}>
+            <div >
+              <span >Latest unsubscribe</span>
+              <strong >
                 {formatSubscriberDate(activity.lastUnsubscribedAt)}
               </strong>
             </div>
@@ -431,38 +402,26 @@ export function SubscribersPage() {
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-          gap: "1.5rem",
-          marginTop: "1.5rem",
-        }}
+        
       >
         <div
           title="Recent Signups"
           description="Latest active subscribers added to the list."
         >
           {recentSubscribers.length === 0 ? (
-            <div style={{ color: "hsl(var(--muted-foreground))" }}>
+            <div >
               No recent signup activity yet.
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+            <div >
               {recentSubscribers.map((subscriber) => (
                 <div
                   key={subscriber.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "1rem",
-                    paddingBottom: "0.8rem",
-                    borderBottom: "1px solid hsl(var(--border))",
-                  }}
+                  
                 >
                   <div>
-                    <div style={{ fontWeight: 600 }}>{subscriber.email}</div>
-                    <div className="">
+                    <div >{subscriber.email}</div>
+                    <div >
                       Joined {formatSubscriberDate(subscriber.created_at)}
                     </div>
                   </div>
@@ -492,13 +451,13 @@ export function SubscribersPage() {
         </div>
       </div>
 
-      <div style={{ marginTop: "1.5rem" }}>
+      <div >
         <div
           title="All Subscribers"
           description={`Showing ${subscribers.length} matching rows from the marketing email list.`}
           noPadding
         >
-          <div style={{ padding: "0.85rem 1rem 0" }}>
+          <div >
             <div
               searchValue={search}
               onSearchChange={setSearch}
@@ -513,8 +472,8 @@ export function SubscribersPage() {
             />
           </div>
 
-          <div style={{ padding: "0 1rem 1rem" }}>
-            <div className="p-4 rounded-md border p-4 rounded-md border--info" style={{ marginBottom: "1rem" }}>
+          <div >
+            <div className="p-4 rounded-md border p-4 rounded-md border--info" >
               <Mail size={16} />
               <div className="p-4 rounded-md border__body">
                 <span className="p-4 rounded-md border__title">Management actions</span>

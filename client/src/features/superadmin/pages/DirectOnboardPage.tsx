@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
 import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle, Loader } from "lucide-react";
 
@@ -99,12 +100,12 @@ export function DirectOnboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
+          <Button
+            variant="default"
             onClick={() => { setShowForm(true); setResult(null); }}
           >
             <Plus size={14} /> Add Organization
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -117,23 +118,23 @@ export function DirectOnboardPage() {
 
       {/* Modal Form */}
       {showForm && (
-        <div className="">
+        <div >
           <div className=" ">
-            <div className="">
-              <h2 className="">Provision New Organization</h2>
-              <button className="" onClick={() => setShowForm(false)}>
+            <div >
+              <h2 >Provision New Organization</h2>
+              <Button  onClick={() => setShowForm(false)}>
                 <X size={18} />
-              </button>
+              </Button>
             </div>
 
-            <form onSubmit={handleSubmit} className="">
+            <form onSubmit={handleSubmit} >
               {result && (
-                <div className={`p-4 rounded-md border p-4 rounded-md border--${result.success ? "success" : "danger"}`} style={{ marginBottom: "1.25rem" }}>
+                <div className={`p-4 rounded-md border p-4 rounded-md border--${result.success ? "success" : "danger"}`} >
                   <div className="p-4 rounded-md border__body">
                     <span className="p-4 rounded-md border__title">{result.success ? "✅ Provisioned!" : "❌ Failed"}</span>
                     <p className="p-4 rounded-md border__message">{result.message}</p>
                     {result.success && result.activation && (
-                      <p className="p-4 rounded-md border__message" style={{ marginTop: "0.5rem" }}>
+                      <p className="p-4 rounded-md border__message" >
                         Activation link sent to admin email. Code expires in 5 minutes.
                       </p>
                     )}
@@ -141,11 +142,11 @@ export function DirectOnboardPage() {
                 </div>
               )}
 
-              <div className="">
+              <div >
                 <div className=" ">
-                  <label className="">Institution Name *</label>
-                  <input
-                    className=""
+                  <label >Institution Name *</label>
+                  <Input
+                    
                     required
                     placeholder="e.g. Sunrise Public School"
                     value={form.institutionName}
@@ -153,24 +154,24 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="">
-                  <label className="">Organization Type *</label>
-                  <ResponsiveSelect className="" value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
+                <div >
+                  <label >Organization Type *</label>
+                  <ResponsiveSelect  value={form.orgType} onChange={(e) => setForm((f) => ({ ...f, orgType: e.target.value }))}>
                     {ORG_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </ResponsiveSelect>
                 </div>
 
-                <div className="">
-                  <label className="">Plan</label>
-                  <ResponsiveSelect className="" value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
+                <div >
+                  <label >Plan</label>
+                  <ResponsiveSelect  value={form.plan} onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as any }))}>
                     {PLAN_OPTIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </ResponsiveSelect>
                 </div>
 
-                <div className="">
-                  <label className="">Admin Full Name *</label>
-                  <input
-                    className=""
+                <div >
+                  <label >Admin Full Name *</label>
+                  <Input
+                    
                     required
                     placeholder="Principal / Admin name"
                     value={form.adminName}
@@ -178,10 +179,10 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="">
-                  <label className="">Admin Email *</label>
-                  <input
-                    className=""
+                <div >
+                  <label >Admin Email *</label>
+                  <Input
+                    
                     type="email"
                     required
                     placeholder="admin@institution.edu"
@@ -190,41 +191,41 @@ export function DirectOnboardPage() {
                   />
                 </div>
 
-                <div className="">
-                  <label className="">Admin Phone</label>
-                  <input
-                    className=""
+                <div >
+                  <label >Admin Phone</label>
+                  <Input
+                    
                     placeholder="+91 9000000000"
                     value={form.adminPhone}
                     onChange={(e) => setForm((f) => ({ ...f, adminPhone: e.target.value }))}
                   />
                 </div>
 
-                <div className="">
-                  <label className="">City</label>
-                  <input
-                    className=""
+                <div >
+                  <label >City</label>
+                  <Input
+                    
                     placeholder="Pune"
                     value={form.city}
                     onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                   />
                 </div>
 
-                <div className="">
-                  <label className="">State</label>
-                  <ResponsiveSelect className="" value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
+                <div >
+                  <label >State</label>
+                  <ResponsiveSelect  value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}>
                     {INDIA_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </ResponsiveSelect>
                 </div>
               </div>
 
-              <div className="">
-                <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setShowForm(false)}>
+              <div >
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                   Cancel
-                </button>
-                <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={mutation.isPending}>
+                </Button>
+                <Button type="submit" variant="default" disabled={mutation.isPending}>
                   {mutation.isPending ? <><Loader size={14} className="animate-spin" /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -236,17 +237,17 @@ export function DirectOnboardPage() {
         title="All Organizations"
         description="Every institution currently provisioned on Classgrid."
         noPadding
-        style={{ marginTop: "1.5rem" }}
+        
       >
         {orgsLoading ? (
-          <div className=""><Loader size={20} className="animate-spin" /> Loading…</div>
+          <div ><Loader size={20} className="animate-spin" /> Loading…</div>
         ) : orgs.length === 0 ? (
-          <div className="">
-            <Building2 size={32} className="" />
+          <div >
+            <Building2 size={32}  />
             <p>No organizations yet. Provision your first one above.</p>
           </div>
         ) : (
-          <table className="">
+          <table >
             <thead>
               <tr>
                 <th>Organization</th>
@@ -261,10 +262,10 @@ export function DirectOnboardPage() {
               {orgs.map((org) => (
                 <tr key={org._id}>
                   <td>
-                    <div style={{ fontWeight: 500 }}>{org.name}</div>
-                    <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>{org.ownerEmail}</div>
+                    <div >{org.name}</div>
+                    <div >{org.ownerEmail}</div>
                   </td>
-                  <td style={{ textTransform: "capitalize" }}>{org.org_type?.replace(/_/g, " ") || "—"}</td>
+                  <td >{org.org_type?.replace(/_/g, " ") || "—"}</td>
                   <td>{org.plan || "—"}</td>
                   <td>{org.userCount ?? 0}</td>
                   <td>
@@ -272,7 +273,7 @@ export function DirectOnboardPage() {
                       {org.status ?? "unknown"}
                     </Badge>
                   </td>
-                  <td style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                  <td >
                     {org.createdAt ? new Date(org.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                   </td>
                 </tr>

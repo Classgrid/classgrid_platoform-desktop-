@@ -8,6 +8,7 @@ import { getChatSb } from "../config/supabaseClient.js";
 import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
 import { sendPushToDevice, sendPushToMultiple } from "../services/firebase.service.js";
 import Notification from "../models/Notification.js";
+import { getAppRolesForTarget, normalizeAppRole } from "../utils/notification-targeting.js";
 
 const router = express.Router();
 const sb = getChatSb();
@@ -28,7 +29,8 @@ const sb = getChatSb();
 
 router.post("/register-device", isAuthenticated, async (req, res) => {
   try {
-    const { fcmToken, platform = "android", appRole = "student" } = req.body;
+    const { fcmToken, platform = "android", appRole = req.user.role || "student" } = req.body;
+    const normalizedAppRole = normalizeAppRole(appRole);
     const userId = req.user._id.toString();
     const orgId = req.effectiveOrganizationId || req.user.organization_id?.toString() || null;
 
@@ -45,7 +47,7 @@ router.post("/register-device", isAuthenticated, async (req, res) => {
           user_id: userId,
           fcm_token: fcmToken,
           platform,
-          app_role: appRole,
+          app_role: normalizedAppRole,
           org_id: orgId,
           last_active: new Date().toISOString(),
         },
@@ -187,12 +189,23 @@ router.post("/send-by-role", isAuthenticated, requireRole("org_admin"), async (r
       return res.status(403).json({ success: false, message: "Organization context required" });
     }
 
+    const appRoles = getAppRolesForTarget(role);
+    if (appRoles.length === 0) {
+      return res.status(400).json({ success: false, message: "Unsupported notification role" });
+    }
+
     // Fetch all FCM tokens for this role within the admin's org
-    const { data: tokens, error } = await sb
+    let tokenQuery = sb
       .from("device_tokens")
       .select("fcm_token")
-      .eq("org_id", orgId)
-      .eq("app_role", role);
+      .eq("org_id", orgId);
+
+    tokenQuery = appRoles.length === 1
+      ? tokenQuery.eq("app_role", appRoles[0])
+      : tokenQuery.in("app_role", appRoles);
+
+    const { data: tokens, error } = await tokenQuery;
+
 
     if (error) throw error;
 

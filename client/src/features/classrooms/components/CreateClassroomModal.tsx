@@ -51,18 +51,18 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
             <h2 className="text-xl font-bold text-foreground">Create Classroom</h2>
             <p className="text-sm text-muted-foreground mt-1">Set up a new digital learning space.</p>
           </div>
-          <button
+          <Button
             onClick={onClose}
             className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Classroom Name *</label>
-            <input
+            <Input
               type="text"
               required
               placeholder="e.g. Data Structures & Algorithms A1"
@@ -76,7 +76,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
             <label className="text-sm font-medium text-foreground">Subject *</label>
             <div className="relative">
               <Book className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <input
+              <Input
                 type="text"
                 required
                 placeholder="e.g. Computer Science"
@@ -102,7 +102,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
               <label className="text-sm font-medium text-foreground">Max Students</label>
               <div className="relative">
                 <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <input
+                <Input
                   type="number"
                   min="1"
                   max="500"
@@ -115,7 +115,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
 
             <div className="flex flex-col justify-end pb-2">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input
+                <Input
                   type="checkbox"
                   checked={allowRequests}
                   onChange={(e) => setAllowRequests(e.target.checked)}
@@ -127,13 +127,13 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
           </div>
 
           <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-border">
-            <button
+            <Button
               type="button"
               onClick={onClose}
               className="rounded-md px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
               Cancel
-            </button>
+            </Button>
             <Button type="submit" disabled={isPending || !name || !subject}>
               {isPending ? (
                 <>

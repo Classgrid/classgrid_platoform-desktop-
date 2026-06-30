@@ -114,7 +114,7 @@ export function ExportDataPage() {
                             {module.description}
                         </p>
 
-                        <button
+                        <Button
                             onClick={() => handleDownload(module)}
                             disabled={downloadingId === module.id}
                             className={`inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 w-full flex items-center justify-center gap-2 ${
@@ -132,7 +132,7 @@ export function ExportDataPage() {
                                     Download CSV
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </motion.div>
                 ))}
             </div>

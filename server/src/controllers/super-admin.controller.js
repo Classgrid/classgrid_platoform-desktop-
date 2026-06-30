@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import { approveLeadAndProvision as approveLeadAndProvisionService } from "../services/lead-conversion.service.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { sendDemoMeetingScheduledNotification } from "../services/notification-email.service.js";
+import { getAppRolesForTarget, normalizeScheduledTarget } from "../utils/notification-targeting.js";
 
 const sb = getChatSb();
 const TEACHING_ROLES = ["teacher", "faculty", "hod", "principal", "vice_principal"];
@@ -73,23 +74,31 @@ async function getLegacyNotesStorageUsage(orgId) {
 // ══════════════════════════════════════════════════════════════
 export const broadcastGlobal = async (req, res) => {
     try {
-        const { title, body, deepLink = "", type = "announcement", target = "global" } = req.body;
+        const { title, body, message, deepLink = "", type = "announcement", target = "global" } = req.body;
+        const notificationBody = body || message;
+        const normalizedTarget = normalizeScheduledTarget(target);
 
-        if (!title || !body) {
+        if (!title || !notificationBody) {
             return res.status(400).json({ success: false, message: "title and body are required" });
         }
 
         let query = sb.from("device_tokens").select("fcm_token");
 
-        // Filter by target audience
-        if (target === "all_students") {
-            query = query.eq("app_role", "student");
-        } else if (target === "all_faculty") {
-            query = query.in("app_role", ["faculty", "teacher"]);
-        } else if (target === "all_org_admins") {
-            query = query.eq("app_role", "org_admin");
+        const appRoles = getAppRolesForTarget(normalizedTarget);
+        if (normalizedTarget === "active_orgs") {
+            const activeOrgs = await Organization.find({ status: "active" }).select("_id").lean();
+            const orgIds = activeOrgs.map((org) => org._id.toString());
+            if (orgIds.length === 0) {
+                return res.json({ success: true, message: "No active organizations found", sent: 0 });
+            }
+            query = query.in("org_id", orgIds);
+        } else if (appRoles.length > 0) {
+            query = appRoles.length === 1
+                ? query.eq("app_role", appRoles[0])
+                : query.in("app_role", appRoles);
         }
         // "global" = no filter, sends to everyone
+
 
         const { data: tokens, error } = await query;
         if (error) throw error;
@@ -107,7 +116,7 @@ export const broadcastGlobal = async (req, res) => {
 
         for (let i = 0; i < fcmTokens.length; i += batchSize) {
             const batch = fcmTokens.slice(i, i + batchSize);
-            const result = await sendPushToMultiple(batch, title, body, { deepLink, type });
+            const result = await sendPushToMultiple(batch, title, notificationBody, { deepLink, type });
             totalSent += result.success;
             totalFailed += result.failure;
 
@@ -119,7 +128,7 @@ export const broadcastGlobal = async (req, res) => {
 
         res.json({
             success: true,
-            message: `Global broadcast sent to ${target}`,
+            message: `Global broadcast sent to ${normalizedTarget}`,
             totalDevices: fcmTokens.length,
             sent: totalSent,
             failed: totalFailed
@@ -182,22 +191,42 @@ export const emailOrgAdmins = async (req, res) => {
 // CREATE a scheduled notification
 export const createScheduledNotification = async (req, res) => {
     try {
-        const { title, body, target, targetOrgId, scheduledAt, isRecurring, category, deepLink, sendEmail } = req.body;
+        const {
+            title,
+            body,
+            message,
+            target,
+            audience,
+            targetOrgId,
+            scheduledAt,
+            scheduledFor,
+            isRecurring,
+            category,
+            deepLink,
+            sendEmail
+        } = req.body;
+        const notificationBody = body || message;
+        const notificationTarget = normalizeScheduledTarget(target || audience || "global");
+        const scheduledDate = new Date(scheduledAt || scheduledFor);
 
-        if (!title || !body || !scheduledAt) {
-            return res.status(400).json({ success: false, message: "title, body, and scheduledAt are required" });
+        if (!title || !notificationBody || Number.isNaN(scheduledDate.getTime())) {
+            return res.status(400).json({ success: false, message: "title, body/message, and scheduledAt/scheduledFor are required" });
+        }
+
+        if (notificationTarget === "specific_org" && !targetOrgId) {
+            return res.status(400).json({ success: false, message: "targetOrgId is required for specific_org notifications" });
         }
 
         const notification = await ScheduledNotification.create({
             title,
-            body,
-            target: target || "global",
-            targetOrgId,
-            scheduledAt: new Date(scheduledAt),
-            isRecurring: isRecurring || false,
+            body: notificationBody,
+            target: notificationTarget,
+            targetOrgId: notificationTarget === "specific_org" ? targetOrgId : null,
+            scheduledAt: scheduledDate,
+            isRecurring: Boolean(isRecurring),
             category: category || "announcement",
             deepLink: deepLink || "",
-            sendEmail: sendEmail || false,
+            sendEmail: Boolean(sendEmail),
             createdBy: req.user._id
         });
 
@@ -221,7 +250,14 @@ export const listScheduledNotifications = async (req, res) => {
             .populate("createdBy", "name email")
             .lean();
 
-        res.json({ success: true, notifications });
+        const normalized = notifications.map((notification) => ({
+            ...notification,
+            message: notification.body,
+            audience: notification.target,
+            scheduledFor: notification.scheduledAt,
+        }));
+
+        res.json({ success: true, notifications: normalized });
     } catch (err) {
         console.error("[SuperAdmin] List scheduled error:", err.message);
         res.status(500).json({ success: false, message: "Server error" });

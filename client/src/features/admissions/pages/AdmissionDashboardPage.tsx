@@ -66,7 +66,7 @@ const columns: ColumnDef<any>[] = [
     accessorKey: "full_name",
     header: "Applicant",
     cell: ({ row }) => (
-      <div className="">
+      <div >
         <div name={row.original.full_name} size="sm" />
         <div>
           <div className=" font-semibold">{row.original.full_name}</div>
@@ -333,9 +333,9 @@ export function AdmissionDashboardPage() {
     >
       {/* ── Hierarchy Tabs ── */}
       <div value={activeDivision} onValueChange={(value) => setActiveDivision(value)}>
-        <div className="">
+        <div >
           {availableDivisions.map((division) => (
-            <div key={division.id} value={division.id} className="">
+            <div key={division.id} value={division.id} >
               {division.label}
             </div>
           ))}
@@ -351,7 +351,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 1 — METRIC CARDS (4 cols)                                */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="Total Applications" value={totalApps.toLocaleString()} icon={<FileText className="w-5 h-5" />} />
         </motion.div>
@@ -369,7 +369,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 2 — Secondary Metrics (Fee + Docs)                       */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="Fee Collected" value={`₹${(feeSummary.total_collected || 0).toLocaleString()}`} icon={<DollarSign className="w-5 h-5" />} />
         </motion.div>
@@ -387,7 +387,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 3 — FUNNEL + LINE CHART (2 cols)                         */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="Admission Pipeline" description="Application funnel tracking from Applied → Enrolled.">
             {charts?.funnelData?.length ? (
@@ -416,7 +416,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 4 — PIE CHART + DONUT CHART (2 cols)                     */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="🥧 Category Distribution" description="Applications by reservation category (Open, OBC, SC, ST, etc.).">
             {charts?.pieData?.length ? (
@@ -440,7 +440,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 5 — HISTOGRAM + BAR CHART (2 cols)                       */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="📊 Merit Rounds Histogram" description="Candidates allotted per admission round.">
             {charts?.histogramData?.length ? (
@@ -469,7 +469,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {/* ROW 6 — AREA CHART + FEE DONUT (2 cols)                      */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div title="📈 Cumulative Applications" description="Running total of applications over the last 30 days.">
             {charts?.areaData?.length ? (
@@ -517,7 +517,7 @@ export function AdmissionDashboardPage() {
       {/* ══════════════════════════════════════════════════════════════ */}
       {isCETOrg && cetCharts && (
         <>
-          <motion.div className="" variants={stagger} initial="hidden" animate="show">
+          <motion.div  variants={stagger} initial="hidden" animate="show">
             <motion.div variants={fadeUp}>
               <div title="🏗️ CAP Round Status" description="Claimed / Upgraded / Cancelled per CAP round.">
                 {cetCharts.capRoundBar.length > 0 ? (
@@ -572,7 +572,7 @@ export function AdmissionDashboardPage() {
       <motion.div variants={fadeUp} initial="hidden" animate="show">
         <div title="Recent Applications" description="Latest candidates across the selected hierarchy." noPadding>
           {recentApps.isLoading ? (
-            <div className="">
+            <div >
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
@@ -593,12 +593,12 @@ export function AdmissionDashboardPage() {
       {/*              strategy-selector.js                            */}
       {/*              admission-form-builder.service.js               */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         {/* SMS Budget — admission-notification.service.js */}
         <motion.div variants={fadeUp}>
           <div title="📱 SMS Budget" description="Real-time SMS usage from admission-notification.service.js">
             {smsBudget.isLoading ? (
-              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
+              <div ><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : smsBudget.data ? (
               <div className="flex flex-col gap-3">
                 <div title="SMS Sent" value={(smsBudget.data as any).messages_sent || (smsBudget.data as any).sent_today || 0} icon={<MessageSquare className="w-5 h-5" />} />
@@ -625,7 +625,7 @@ export function AdmissionDashboardPage() {
         <motion.div variants={fadeUp}>
           <div title="🪑 Live Seat Matrix" description="Real-time seat availability from seat-matrix.service.js">
             {seatMatrix.isLoading ? (
-              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
+              <div ><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : seatMatrix.data ? (
               <div className="flex flex-col gap-2">
                 {(Array.isArray(seatMatrix.data) ? seatMatrix.data : seatMatrix.data?.matrix || []).slice(0, 5).map((entry: any, i: number) => (
@@ -655,7 +655,7 @@ export function AdmissionDashboardPage() {
         <motion.div variants={fadeUp}>
           <div title="⚙️ Admission Config" description="Active strategy from strategy-selector.js + form-builder.service.js">
             {admissionConfig.isLoading ? (
-              <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
+              <div ><Loader2 className="w-6 h-6 animate-spin" /></div>
             ) : admissionConfig.data ? (
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between text-sm">
@@ -700,7 +700,7 @@ export function AdmissionDashboardPage() {
       {/*              scholarship.service.js (via enrolled data)       */}
       {/*              admission-printout.service.js (via print links)  */}
       {/* ══════════════════════════════════════════════════════════════ */}
-      <motion.div className="" variants={stagger} initial="hidden" animate="show">
+      <motion.div  variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp}>
           <div
             title="Waitlisted"
@@ -734,7 +734,7 @@ export function AdmissionDashboardPage() {
       {/* Quick Export Downloads — govt-export.service.js */}
       <motion.div variants={fadeUp} initial="hidden" animate="show">
         <div title="📤 Government Data Exports" description="Download admission data in government-mandated formats (powered by govt-export.service.js).">
-          <div className="">
+          <div >
             {exportFormats.map((format) => (
               <a
                 key={format.key}

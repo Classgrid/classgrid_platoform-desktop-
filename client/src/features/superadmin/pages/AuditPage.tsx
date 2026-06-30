@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
 import { Download, FileBarChart, Users, GraduationCap, Building2, RefreshCw } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -99,9 +100,9 @@ export function AuditPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginRight: "1rem" }}>
-            <div style={{ width: "160px" }}>
-              <input
+          <div >
+            <div >
+              <Input
                 className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
                 type="date"
                 value={startStr}
@@ -109,8 +110,8 @@ export function AuditPage() {
               />
             </div>
             <span className="text-muted-foreground">to</span>
-            <div style={{ width: "160px" }}>
-              <input
+            <div >
+              <Input
                 className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
                 type="date"
                 value={endStr}
@@ -119,14 +120,14 @@ export function AuditPage() {
             </div>
           </div>
           <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh" />
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2" onClick={handleExportCSV} disabled={isExporting || isLoading}>
+          <Button variant="outline" onClick={handleExportCSV} disabled={isExporting || isLoading}>
             <Download size={14} className="mr-2" />
             CSV Export
-          </button>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2" onClick={handleExportPDF} disabled={isExporting || isLoading}>
+          </Button>
+          <Button variant="default" onClick={handleExportPDF} disabled={isExporting || isLoading}>
             <FileBarChart size={14} className="mr-2" />
             PDF Report
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -157,7 +158,7 @@ export function AuditPage() {
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem", marginTop: "1.5rem" }}>
+          <div >
             {/* Criterion 2: Academic Performance Table */}
             <SectionPanel title="Criterion 2: Academic Performance" description="Aggregated pass rates and averages by classroom." noPadding>
               <DataTable

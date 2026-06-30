@@ -102,7 +102,7 @@ export function CustomDomainCard() {
                                             return; // Stop here, wait for dialog confirmation
                                         }
                                         
-                                        let settingsToUpdate: any = { allow_classgrid_url: checked };
+                                        const settingsToUpdate: any = { allow_classgrid_url: checked };
                                         
                                         updateSettingsMutation.mutate({ domainType: "erp_domain", settings: settingsToUpdate }, {
                                             onSuccess: () => {
@@ -171,7 +171,7 @@ export function CustomDomainCard() {
                     <label className="text-sm font-medium text-foreground">Emergency Access URL</label>
                     <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all">
                         <span className="flex-1">https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
-                        <button
+                        <Button
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
@@ -179,7 +179,7 @@ export function CustomDomainCard() {
                             className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
                             <Copy className="w-4 h-4" />
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </DangerConfirmDialog>
@@ -268,7 +268,7 @@ export function CustomDomainCard() {
                     }
                 ]}
                 onConfirm={() => {
-                    let settingsToUpdate: any = { 
+                    const settingsToUpdate: any = { 
                         allow_classgrid_url: true,
                         is_enabled: false 
                     };
@@ -484,7 +484,7 @@ function DomainConfigCard({
                                         <div className="flex items-center justify-center px-4 bg-muted/30 border-r border-input text-sm text-foreground font-medium h-full shrink-0">
                                             https://
                                         </div>
-                                        <input 
+                                        <Input 
                                             placeholder="erp.yourdomain.com" 
                                             className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full"
                                             value={domainInput}
@@ -606,17 +606,17 @@ function DomainConfigCard({
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{txtName}</code>
-                                                                    <button onClick={() => copyToClipboard(txtName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <Button onClick={() => copyToClipboard(txtName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group max-w-[300px]">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs break-all">classgrid-verify={domainConfig.verification_token}</code>
-                                                                    <button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
+                                                                    <Button onClick={() => copyToClipboard(`classgrid-verify=${domainConfig.verification_token}`)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
@@ -631,17 +631,17 @@ function DomainConfigCard({
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{cnameName}</code>
-                                                                    <button onClick={() => copyToClipboard(cnameName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <Button onClick={() => copyToClipboard(cnameName)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 <div className="flex items-center gap-2 group">
                                                                     <code className="bg-muted text-foreground px-1.5 py-0.5 rounded text-xs">{targetValue}</code>
-                                                                    <button onClick={() => copyToClipboard(targetValue)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
+                                                                    <Button onClick={() => copyToClipboard(targetValue)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground">
                                                                         <Copy className="w-3.5 h-3.5" />
-                                                                    </button>
+                                                                    </Button>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
@@ -742,7 +742,7 @@ function DomainConfigCard({
                                                             }
                                                         }
 
-                                                        let settingsToUpdate: any = { is_enabled: checked };
+                                                        const settingsToUpdate: any = { is_enabled: checked };
                                                         
                                                         // When enabling ERP Custom Domain, auto-disable Classgrid URL to prevent double URLs
                                                         if (checked && domainType === "erp_domain") {
@@ -826,7 +826,7 @@ function DomainConfigCard({
                     <label className="text-sm font-medium text-foreground">Emergency Access URL</label>
                     <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-3 border border-border/50 font-mono text-sm break-all select-all">
                         <span className="flex-1">https://{user?.organization?.subdomain}.classgrid.in/org/login</span>
-                        <button
+                        <Button
                             onClick={() => {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
@@ -834,7 +834,7 @@ function DomainConfigCard({
                             className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
                             <Copy className="w-4 h-4" />
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </DangerConfirmDialog>

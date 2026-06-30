@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -145,7 +146,7 @@ export function ApplicationsListPage() {
       )}
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <input 
+        <Input 
           type="search" 
           placeholder="Search by name, email, EN number..." 
           className="flex h-10 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 interface PageBreadcrumbsProps {

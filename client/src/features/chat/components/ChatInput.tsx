@@ -82,7 +82,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     const text = message.trim();
     if (!text && files.length === 0 && !audioBlob) return;
 
-    let finalFiles = [...files];
+    const finalFiles = [...files];
     if (audioBlob) {
       const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: "audio/webm" });
       finalFiles.push(audioFile);
@@ -130,12 +130,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               {replyTo.is_deleted ? "This message was deleted" : replyTo.message || "📎 Attachment"}
             </span>
           </div>
-          <button
+          <Button
             onClick={onCancelReply}
             className="p-1 rounded-full hover:bg-accent text-muted-foreground shrink-0"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -143,9 +143,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       {audioUrl && (
         <div className="px-4 py-3 flex items-center justify-between gap-3 border-b border-border bg-muted/30">
           <WaveformPlayer url={audioUrl} />
-          <button onClick={clearAudio} className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors shrink-0">
+          <Button onClick={clearAudio} className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors shrink-0">
             <Trash2 className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -171,12 +171,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   </span>
                 </div>
               )}
-              <button
+              <Button
                 onClick={() => removeFile(i)}
                 className="absolute top-1 right-1 p-0.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X className="w-3 h-3" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -190,25 +190,25 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           </div>
         ) : (
           <>
-            <button
+            <Button
               onClick={() => fileInputRef.current?.click()}
               className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5"
               disabled={isSending}
               title="Attach File"
             >
               <Paperclip className="w-5 h-5" />
-            </button>
+            </Button>
             {onOpenPollModal && (
-              <button
+              <Button
                 onClick={onOpenPollModal}
                 className="p-2.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0 mb-0.5 ml-[-4px]"
                 disabled={isSending}
                 title="Create Poll"
               >
                 <BarChart2 className="w-5 h-5" />
-              </button>
+              </Button>
             )}
-            <input
+            <Input
               type="file"
               multiple
               className="hidden"
@@ -237,28 +237,28 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             </div>
 
             {isRecording ? (
-              <button
+              <Button
                 onClick={stopRecording}
                 className="p-3 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 animate-pulse"
               >
                 <Square className="w-5 h-5 fill-current" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={startRecording}
                 disabled={isSending || !!audioBlob}
                 className="p-3 rounded-full bg-accent text-foreground hover:bg-accent/80 transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 disabled:opacity-50"
               >
                 <Mic className="w-5 h-5" />
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               onClick={handleSend}
               disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording || isSending}
               className="p-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11"
             >
               {isSending ? <Spinner className="w-5 h-5 text-current" /> : <Send className="w-5 h-5 ml-0.5" />}
-            </button>
+            </Button>
           </>
         )}
       </div>

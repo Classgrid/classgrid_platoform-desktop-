@@ -645,7 +645,7 @@ export const dashboardConfigs: DashboardConfig[] = [
   }
 ];
 
-const defaultTitlesByRole: Record<DashboardRole, string> = {
+export const defaultTitlesByRole: Record<DashboardRole, string> = {
   super_admin: "Super Admin Module",
   org_admin: "Organization Module",
   admission_dept: "Admissions Module",
@@ -715,6 +715,10 @@ export function resolveDashboardPageTitle(pathname: string): string {
   if (matchedItem) {
     return matchedItem.label;
   }
-
+  // Fallbacks for global non-sidebar pages
+  if (pathname.endsWith("/settings")) return "Settings";
+  if (pathname.endsWith("/profile")) return "Profile";
+  if (pathname.endsWith("/notifications")) return "Notifications";
+  
   return defaultTitlesByRole[resolveDashboardConfig(pathname).role];
 }

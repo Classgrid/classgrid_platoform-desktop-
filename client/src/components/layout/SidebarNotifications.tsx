@@ -14,7 +14,7 @@ import {
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
+    .replace(/-/g, '+')
     .replace(/_/g, '/');
   
   const rawData = window.atob(base64);
@@ -36,7 +36,11 @@ interface NotificationItem {
   createdAt: string;
 }
 
-export function SidebarNotifications() {
+type SidebarNotificationsProps = {
+  settingsPath?: string;
+};
+
+export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNotificationsProps) {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"inbox" | "archive">("inbox");
   const [showPushBanner, setShowPushBanner] = useState(() => {
@@ -115,20 +119,24 @@ export function SidebarNotifications() {
         {/* Header Tabs */}
         <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-background/50">
           <div className="flex items-center gap-4 text-sm">
-            <button 
+            <div 
+              role="button"
+              tabIndex={0}
               onClick={() => setTab("inbox")}
-              className={`font-semibold py-2 -mb-[9px] ${tab === 'inbox' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground border-b-2 border-transparent hover:text-foreground'}`}
+              className={`font-semibold py-2 -mb-[9px] cursor-pointer ${tab === 'inbox' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground border-b-2 border-transparent hover:text-foreground'}`}
             >
               Inbox {inboxNotifs.length > 0 && <span className="ml-1 bg-muted px-1.5 py-0.5 rounded-full text-[10px]">{inboxNotifs.length}</span>}
-            </button>
-            <button 
+            </div>
+            <div 
+              role="button"
+              tabIndex={0}
               onClick={() => setTab("archive")}
-              className={`font-semibold py-2 -mb-[9px] ${tab === 'archive' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground border-b-2 border-transparent hover:text-foreground'}`}
+              className={`font-semibold py-2 -mb-[9px] cursor-pointer ${tab === 'archive' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground border-b-2 border-transparent hover:text-foreground'}`}
             >
               Archive
-            </button>
+            </div>
           </div>
-          <Link to="/superadmin/settings" className="text-muted-foreground hover:text-foreground">
+          <Link to={settingsPath} className="text-muted-foreground hover:text-foreground">
             <Icons.Settings className="w-4 h-4" />
           </Link>
         </div>

@@ -85,13 +85,13 @@ export function WaveformPlayer({ url }: WaveformPlayerProps) {
 
   return (
     <div className="flex items-center gap-3 p-2 rounded-3xl bg-background/90 backdrop-blur-sm border border-border w-full max-w-[300px] min-w-[260px] shadow-sm">
-      <button 
+      <Button 
         onClick={togglePlay} 
         disabled={!isReady}
         className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-sm"
       >
         {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-      </button>
+      </Button>
       
       <div className="flex-1 flex flex-col justify-center min-w-[120px]">
         <div ref={containerRef} className="w-full opacity-90" />
@@ -100,13 +100,13 @@ export function WaveformPlayer({ url }: WaveformPlayerProps) {
         </div>
       </div>
 
-      <button 
+      <Button 
         onClick={toggleSpeed} 
         disabled={!isReady}
         className="w-9 h-9 flex items-center justify-center text-[10px] font-bold rounded-full bg-accent text-accent-foreground border border-border shrink-0 hover:bg-accent/80 transition-colors disabled:opacity-50"
       >
         {speed}x
-      </button>
+      </Button>
     </div>
   );
 }

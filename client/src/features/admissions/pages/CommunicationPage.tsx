@@ -46,14 +46,14 @@ export function CommunicationPage() {
             <option value="reminder_docs">Document Verification Pending</option>
             <option value="merit_generated">Merit List Generated</option>
           </ResponsiveSelect>
-          <button 
+          <Button 
             className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 self-start mt-2"
             disabled={notify.isPending}
             onClick={() => notify.mutate(trigger)}
           >
             {notify.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <Mail size={16} className="mr-2" />}
             Dispatch Notifications
-          </button>
+          </Button>
         </div>
       </div>
     </div>

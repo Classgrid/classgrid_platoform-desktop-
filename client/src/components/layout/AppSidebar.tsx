@@ -7,22 +7,11 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
 } from "@/components/marketing_ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/marketing_ui/dropdown-menu";
 import { dashboardConfigs } from "@/config/sidebar";
 import { DashboardRole } from "./DashboardLayout";
 import { SidebarFooterUser } from "./SidebarFooterUser";
@@ -63,7 +52,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
       <SidebarHeader>
-        <SidebarSwitcher user={user} />
+        <SidebarSwitcher user={user ?? null} />
         <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </SidebarHeader>
 
@@ -87,13 +76,15 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                         tooltip={item.label}
                         render={
                           item.label === "Log out" ? (
-                            <button
+                            <div
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => {
                                 e.preventDefault();
                                 const loginPath = getLoginPathForPath(location.pathname);
                                 navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
                               }}
-                              className="flex items-center gap-3 w-full justify-between"
+                              className="flex items-center gap-3 w-full justify-between cursor-pointer"
                             />
                           ) : (
                             <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between" />
@@ -124,7 +115,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
         )}
       </SidebarContent>
 
-      {user && <SidebarFooterUser user={user} />}
+      {user && <SidebarFooterUser role={role} user={user} />}
     </Sidebar>
   );
 }

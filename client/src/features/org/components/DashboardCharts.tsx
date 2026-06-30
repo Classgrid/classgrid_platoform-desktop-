@@ -38,7 +38,7 @@ function BarRow({ label, value }: { label: string; value: number }) {
         <span className="text-muted-foreground">{value}%</span>
       </div>
       <div className="h-2 rounded-full bg-muted">
-        <div className="h-2 rounded-full bg-primary" style={{ width: `${value}%` }} />
+        <div className="h-2 rounded-full bg-primary"  />
       </div>
     </div>
   );
@@ -95,7 +95,7 @@ export function DashboardCharts() {
             <div key={item.period} className="flex flex-1 flex-col items-center gap-2">
               <div
                 className="w-full rounded-t-md bg-primary/80"
-                style={{ height: `${item.value}%` }}
+                
                 aria-label={`${item.period}: ${item.value}%`}
               />
               <span className="text-xs text-muted-foreground">{item.period}</span>

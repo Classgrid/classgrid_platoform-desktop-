@@ -159,13 +159,13 @@ export function OrganizationsPage() {
         }
         noPadding
       >
-        <div style={{ padding: "1rem" }}>
+        <div >
           <div
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search name, owner, plan..."
             filters={
-              <div style={{ width: "180px" }}>
+              <div >
                 <div
                   value={statusFilter}
                   onValueChange={setStatusFilter}
@@ -183,7 +183,7 @@ export function OrganizationsPage() {
         </div>
 
         {isError ? (
-          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "0 1rem 1rem" }}>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
             <div className="p-4 rounded-md border__body">
               <span className="p-4 rounded-md border__title">Backend request failed</span>
               <p className="p-4 rounded-md border__message">

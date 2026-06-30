@@ -90,7 +90,7 @@ export function AllApplicationsPage() {
       accessorKey: "full_name",
       header: "Applicant",
       cell: ({ row }) => (
-        <div className="">
+        <div >
           <div name={row.original.full_name} size="sm" />
           <div>
             <div className=" font-semibold">{row.original.full_name}</div>
@@ -230,9 +230,9 @@ export function AllApplicationsPage() {
           setPage(1);
         }}
       >
-        <div className="">
+        <div >
           {divisions.map((division) => (
-            <div key={division.id} value={division.id} className="">
+            <div key={division.id} value={division.id} >
               {division.label}
             </div>
           ))}

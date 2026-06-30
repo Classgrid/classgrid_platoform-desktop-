@@ -106,10 +106,10 @@ const columns: ColumnDef<AuditLog>[] = [
       const d = getValue<string>();
       return (
         <div>
-          <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>
+          <div >
             {formatDate(d)}
           </div>
-          <div className="">{formatTime(d)}</div>
+          <div >{formatTime(d)}</div>
         </div>
       );
     },
@@ -122,8 +122,8 @@ const columns: ColumnDef<AuditLog>[] = [
       const log = row.original;
       return (
         <div>
-          <div style={{ fontWeight: 500 }}>{log.actorName}</div>
-          <div className="">{log.actorRole.replace("_", " ")}</div>
+          <div >{log.actorName}</div>
+          <div >{log.actorRole.replace("_", " ")}</div>
         </div>
       );
     },
@@ -149,8 +149,8 @@ const columns: ColumnDef<AuditLog>[] = [
       const log = row.original;
       return (
         <div>
-          <div style={{ fontWeight: 500 }}>{log.targetName || "—"}</div>
-          <div className="" style={{ textTransform: "capitalize" }}>
+          <div >{log.targetName || "—"}</div>
+          <div  >
             {log.targetType}
           </div>
         </div>
@@ -166,7 +166,7 @@ const columns: ColumnDef<AuditLog>[] = [
       return org ? (
         <span>{org}</span>
       ) : (
-        <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Platform</span>
+        <span >Platform</span>
       );
     },
   },
@@ -175,7 +175,7 @@ const columns: ColumnDef<AuditLog>[] = [
     header: "IP Address",
     size: 120,
     cell: ({ getValue }) => (
-      <span style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>{getValue<string>() || "—"}</span>
+      <span >{getValue<string>() || "—"}</span>
     ),
   },
 ];
@@ -247,8 +247,8 @@ export function ActivityLogPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search actor, target, org…"
         filters={
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <div style={{ width: "220px" }}>
+          <div >
+            <div >
               <div
                 value={actionFilter}
                 onValueChange={setActionFilter}
@@ -257,7 +257,7 @@ export function ActivityLogPage() {
                 allowClear
               />
             </div>
-            <div style={{ width: "180px" }}>
+            <div >
               <div
                 value={targetFilter}
                 onValueChange={setTargetFilter}
@@ -270,9 +270,9 @@ export function ActivityLogPage() {
         }
         actions={
           (actionFilter || targetFilter || search) && (
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => { setActionFilter(""); setTargetFilter(""); setSearch(""); }}>
+            <Button variant="outline" onClick={() => { setActionFilter(""); setTargetFilter(""); setSearch(""); }}>
               Clear
-            </button>
+            </Button>
           )
         }
         className="mb-4"
@@ -281,11 +281,11 @@ export function ActivityLogPage() {
       {/* Table */}
       <SectionPanel title="Event Timeline" description="Most recent actions first." noPadding>
         {isError ? (
-          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
             <div className="p-4 rounded-md border__body">
               <span className="p-4 rounded-md border__title">Failed to load audit logs</span>
             </div>
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()}>Retry</button>
+            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
           </div>
         ) : (
           <DataTable

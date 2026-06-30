@@ -16,7 +16,7 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/marketing_ui/sidebar";
 
-export function SidebarSwitcher({ user }: { user: any }) {
+export function SidebarSwitcher({ user }: { user: { role?: string; additional_roles?: string[]; organization?: { sidebar_name?: string; name?: string; logo_url?: string } } | null }) {
   const { isMobile } = useSidebar();
 
   // 1. Resolve Organization Branding from Backend User Object

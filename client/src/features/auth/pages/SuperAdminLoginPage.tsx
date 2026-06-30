@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useState, type FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -92,8 +93,8 @@ export function SuperAdminLoginPage() {
               <h1>Classgrid</h1>
             </div>
           </div>
-          <div className="intro-description" style={{color: "rgba(255, 255, 255, 0.9)", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "2rem", zIndex: 1}}>
-            <p style={{marginBottom: "1rem"}}>A comprehensive educational ERP that unifies academic tracking, student information, and administrative workflows into a single intelligent platform.</p>
+          <div className="intro-description" >
+            <p >A comprehensive educational ERP that unifies academic tracking, student information, and administrative workflows into a single intelligent platform.</p>
           </div>
           <div className="contact-info">
             <h3><i className="fas fa-address-card"></i> Contact Information</h3>
@@ -117,29 +118,14 @@ export function SuperAdminLoginPage() {
               <h2 className="form-title">Super Admin Portal</h2>
               <p className="form-subtitle">Secure system access</p>
 
-              <div style={{ display: "flex", gap: "10px", flexDirection: "column", marginBottom: "1rem" }}>
-                <button 
+              <div >
+                <Button 
                   type="button" 
                   onClick={() => {
                     const url = getGoogleAuthUrl({ audience: "super_admin", role: "super_admin" });
                     if (url) window.location.href = url;
                   }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                    width: "100%",
-                    padding: "1rem",
-                    background: "white",
-                    border: "2px solid #e0e0e0",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontSize: "1rem",
-                    fontWeight: "600",
-                    color: "#424242",
-                    transition: "all 0.3s ease"
-                  }}
+                  
                   onMouseOver={(e) => {
                     e.currentTarget.style.borderColor = "#10b981";
                     e.currentTarget.style.background = "#f9f9f9";
@@ -149,22 +135,22 @@ export function SuperAdminLoginPage() {
                     e.currentTarget.style.background = "white";
                   }}
                 >
-                  <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: "20px" }} />
+                  <img src="https://www.google.com/favicon.ico" alt="Google"  />
                   <span>Sign in with Google</span>
-                </button>
+                </Button>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem 0" }}>
-                <div style={{ flex: 1, height: "1px", backgroundColor: "#e0e0e0" }}></div>
-                <span style={{ fontSize: "0.85rem", color: "#888", fontWeight: 500, textTransform: "uppercase" }}>OR</span>
-                <div style={{ flex: 1, height: "1px", backgroundColor: "#e0e0e0" }}></div>
+              <div >
+                <div ></div>
+                <span >OR</span>
+                <div ></div>
               </div>
 
               <div className="form-group">
                 <label className="form-label" htmlFor="loginEmail">Email Address</label>
                 <div className="input-group">
                   <i className="fas fa-envelope input-icon"></i>
-                  <input 
+                  <Input 
                     type="email" 
                     id="loginEmail" 
                     className="form-input"
@@ -180,7 +166,7 @@ export function SuperAdminLoginPage() {
                 <label className="form-label" htmlFor="loginPassword">Password</label>
                 <div className="input-group">
                   <i className="fas fa-lock input-icon"></i>
-                  <input 
+                  <Input 
                     type={showPassword ? "text" : "password"} 
                     id="loginPassword" 
                     className="form-input"
@@ -189,26 +175,26 @@ export function SuperAdminLoginPage() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                   />
-                  <button 
+                  <Button 
                     type="button" 
                     className="password-toggle" 
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
 
-              <button type="submit" className="submit-btn" disabled={isLoading}>
+              <Button type="submit" className="submit-btn" disabled={isLoading}>
                 <span>{isLoading ? "Signing in..." : "Sign In"}</span>
                 {!isLoading && <i className="fas fa-sign-in-alt"></i>}
-              </button>
+              </Button>
 
-              <button type="button" className="reset-password-btn" onClick={handleResetPassword} disabled={isResetting}>
+              <Button type="button" className="reset-password-btn" onClick={handleResetPassword} disabled={isResetting}>
                 <span>{isResetting ? "Sending..." : "Reset Password"}</span>
                 {!isResetting && <i className="fas fa-key"></i>}
-              </button>
+              </Button>
             </form>
 
             {/* Footer */}

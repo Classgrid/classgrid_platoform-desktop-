@@ -1,5 +1,5 @@
 import React from "react";
-import { Palette } from "lucide-react";
+import { Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/marketing_ui/switch";
 
@@ -10,7 +10,7 @@ export function SettingsAppearanceCard() {
     <div className="bg-card border border-border rounded-xl shadow-sm mb-6">
       <div className="p-5 border-b border-border">
         <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-          <Palette size={18} className="text-foreground" /> Appearance
+          <Moon size={18} className="text-foreground" /> Appearance
         </h2>
         <p className="text-sm text-muted-foreground mt-1">Customize how Classgrid looks on your device.</p>
       </div>

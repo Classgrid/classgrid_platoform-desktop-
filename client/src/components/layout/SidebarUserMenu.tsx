@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
-import { useQueryClient } from "@tanstack/react-query";
 import * as Icons from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/marketing_ui/dropdown-menu";
 import { fetchLiveStatus, FooterStatusState, getFooterStatusDotClass, getFooterStatusTextClass } from "@/lib/footer-status";
-import { apiClient } from "@/lib/apiClient";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
-import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function SidebarUserMenu({ user }: { user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string } }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   
   const basePath = location.pathname.startsWith("/superadmin") 
@@ -123,10 +118,10 @@ export function SidebarUserMenu({ user }: { user: { name: string; email?: string
 
         <div className="p-1">
           <DropdownMenuItem className="p-0">
-            <button onClick={handleLogout} className="flex w-full items-center cursor-pointer justify-between rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+            <div role="button" tabIndex={0} onClick={handleLogout} className="flex w-full items-center cursor-pointer justify-between rounded-md py-2 px-3 text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
               <span>Log Out</span>
               <Icons.LogOut className="w-4 h-4 text-muted-foreground" />
-            </button>
+            </div>
           </DropdownMenuItem>
         </div>
 

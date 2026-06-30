@@ -49,7 +49,7 @@ export function ClassroomsPage() {
           <div className="flex items-center gap-3">
             <div className="relative w-64 hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search classrooms..."
                 value={search}
@@ -77,13 +77,13 @@ export function ClassroomsPage() {
               : "You haven't joined any classrooms yet. Click 'Join Class' to enter a class code."}
           </p>
           {isTeacher ? (
-            <button 
+            <Button 
               onClick={() => setIsCreateModalOpen(true)}
               className="mt-6 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <Plus size={16} />
               Create Class
-            </button>
+            </Button>
           ) : (
             <div className="mt-6">
               <Plus className="mr-2 h-4 w-4" />

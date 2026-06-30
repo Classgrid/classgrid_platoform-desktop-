@@ -36,7 +36,7 @@ export function ResultsProcessingPage() {
       {/* Tabs */}
       <div className="flex space-x-1 border-b border-border mt-6">
         {["schemes", "subjects", "upload", "generate"].map((tab) => (
-          <button
+          <Button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -46,7 +46,7 @@ export function ResultsProcessingPage() {
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
+          </Button>
         ))}
       </div>
 

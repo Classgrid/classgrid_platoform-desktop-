@@ -93,7 +93,7 @@ export function ContentModerationPage() {
       accessorKey: "severity", header: "Severity", size: 90,
       cell: ({ getValue }) => {
         const s = getValue<string>() ?? "low";
-        return <span style={{ fontWeight: 700, fontSize: "0.8rem", color: SEVERITY_COLOR[s], textTransform: "uppercase" }}>{s}</span>;
+        return <span >{s}</span>;
       },
     },
     {
@@ -106,15 +106,15 @@ export function ContentModerationPage() {
     },
     {
       accessorKey: "contentPreview", header: "Content Preview", size: 240,
-      cell: ({ getValue }) => <span style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>"{String(getValue<string>() ?? "").substring(0, 120)}{(getValue<string>() ?? "").length > 120 ? "…" : ""}"</span>,
+      cell: ({ getValue }) => <span >"{String(getValue<string>() ?? "").substring(0, 120)}{(getValue<string>() ?? "").length > 120 ? "…" : ""}"</span>,
     },
     {
       accessorKey: "reportedBy", header: "Reported By", size: 140,
-      cell: ({ getValue }) => { const u = getValue<any>(); return <span style={{ fontSize: "0.82rem" }}>{u?.name ?? "Anonymous"}</span>; },
+      cell: ({ getValue }) => { const u = getValue<any>(); return <span >{u?.name ?? "Anonymous"}</span>; },
     },
     {
       accessorKey: "reportedUser", header: "Accused User", size: 140,
-      cell: ({ getValue }) => { const u = getValue<any>(); return u ? <span style={{ fontSize: "0.82rem", fontWeight: 500 }}>{u.name}</span> : <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>Unknown</span>; },
+      cell: ({ getValue }) => { const u = getValue<any>(); return u ? <span >{u.name}</span> : <span >Unknown</span>; },
     },
     {
       accessorKey: "status", header: "Status", size: 110,
@@ -127,15 +127,15 @@ export function ContentModerationPage() {
     },
     {
       accessorKey: "createdAt", header: "Reported", size: 110,
-      cell: ({ getValue }) => <span style={{ fontSize: "0.8rem" }}>{formatDate(getValue<string>())}</span>,
+      cell: ({ getValue }) => <span >{formatDate(getValue<string>())}</span>,
     },
     {
       id: "actions", header: "Actions", size: 150,
       cell: ({ row }) => {
         const r = row.original;
-        if (r.status !== "pending") return <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>{r.resolution?.action ?? "—"}</span>;
+        if (r.status !== "pending") return <span >{r.resolution?.action ?? "—"}</span>;
         return (
-          <div style={{ display: "flex", gap: "0.3rem" }}>
+          <div >
             <Button size="sm" onClick={() => { setSelected(r); setResolveAction("no_action"); setResolveNote(""); }}>Review</Button>
             <Button size="sm" variant="outline" isLoading={dismissMut.isPending} onClick={() => dismissMut.mutate(r._id)}>Dismiss</Button>
           </div>
@@ -161,10 +161,10 @@ export function ContentModerationPage() {
         <StatCard title="Total Reports" value={isLoading ? "—" : total} icon={<Flag size={15} />} />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel title="Content Reports" description="All user-submitted reports across all organizations." noPadding
           actions={
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div >
               <div value={statusFilter} onValueChange={setStatusFilter} options={[
                 { label: "Pending", value: "pending" }, { label: "Resolved", value: "resolved" },
                 { label: "Dismissed", value: "dismissed" }, { label: "All", value: "" },
@@ -177,7 +177,7 @@ export function ContentModerationPage() {
             </div>
           }
         >
-          <div style={{ padding: "0.75rem 1rem" }}>
+          <div >
             <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search reporter, accused, content…" />
           </div>
           <DataTable columns={columns} data={filtered} isLoading={isLoading} pageSize={50}
@@ -197,13 +197,13 @@ export function ContentModerationPage() {
             </DialogDescription>
           </DialogHeader>
           {selected?.contentPreview && (
-            <div style={{ padding: "0.75rem", background: "hsl(var(--muted) / 0.5)", borderRadius: "var(--radius)", fontSize: "0.84rem", fontStyle: "italic", color: "hsl(var(--muted-foreground))" }}>
+            <div >
               "{selected.contentPreview}"
             </div>
           )}
-          <div style={{ display: "grid", gap: "0.75rem", padding: "0.5rem 0" }}>
+          <div >
             <div>
-              <label style={{ fontSize: "0.84rem", fontWeight: 500, display: "block", marginBottom: "0.35rem" }}>Action</label>
+              <label >Action</label>
               <div value={resolveAction} onValueChange={setResolveAction} options={ACTION_OPTIONS} />
             </div>
             <div>

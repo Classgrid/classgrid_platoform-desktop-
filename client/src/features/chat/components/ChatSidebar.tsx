@@ -51,25 +51,25 @@ export function ChatSidebar({
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-foreground">Chats</h2>
           <div className="flex items-center gap-1">
-            <button
+            <Button
               onClick={onNewChat}
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={onNewGroup}
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Group"
             >
               <Users className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             placeholder="Search conversations..."
             value={search}
@@ -99,12 +99,12 @@ export function ChatSidebar({
             <p className="text-sm text-muted-foreground">
               {search ? "No conversations match your search" : "No conversations yet"}
             </p>
-            <button
+            <Button
               onClick={onNewChat}
               className="mt-3 text-xs font-semibold text-primary hover:underline"
             >
               Start a new conversation
-            </button>
+            </Button>
           </div>
         ) : (
           filtered.map((thread) => {
@@ -112,7 +112,7 @@ export function ChatSidebar({
             const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
             return (
-              <button
+              <Button
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
@@ -163,7 +163,7 @@ export function ChatSidebar({
                     </p>
                   )}
                 </div>
-              </button>
+              </Button>
             );
           })
         )}

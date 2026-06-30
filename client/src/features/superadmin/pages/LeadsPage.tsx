@@ -8,6 +8,7 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { DataTable } from "@/components/marketing_ui/data-table";
 
 
@@ -91,150 +92,142 @@ function LeadDrawer({
   };
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 1000,
-      display: "flex", justifyContent: "flex-end",
-    }}>
+    <div >
       {/* Backdrop */}
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)" }} />
+      <div onClick={onClose}  />
 
       {/* Panel */}
-      <div style={{
-        position: "relative", width: "520px", maxWidth: "95vw", height: "100%",
-        background: "hsl(var(--background))", borderLeft: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))",
-        overflowY: "auto", display: "flex", flexDirection: "column",
-        boxShadow: "var(--)",
-      }}>
+      <div >
         {/* Header */}
-        <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div >
           <div>
-            <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>{lead.institutionName}</h2>
-            <p style={{ margin: "0.25rem 0 0", color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>{lead.orgType} · {lead.city}</p>
+            <h2 >{lead.institutionName}</h2>
+            <p >{lead.orgType} · {lead.city}</p>
           </div>
-          <button onClick={onClose} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost" style={{ padding: "0.3rem" }}><X size={18} /></button>
+          <Button onClick={onClose} variant="ghost" size="icon" ><X size={18} /></Button>
         </div>
 
-        <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <div >
 
           {/* Status badges */}
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div >
             <Badge variant={STATUS_MAP[lead.status]?.variant ?? "neutral"}>{STATUS_MAP[lead.status]?.label ?? lead.status}</Badge>
             <Badge variant={MEETING_MAP[lead.meetingStatus ?? "pending"]?.variant ?? "neutral"}>{MEETING_MAP[lead.meetingStatus ?? "pending"]?.label ?? "No Meeting"}</Badge>
           </div>
 
           {/* Contact info */}
-          <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)", padding: "1rem", gap: "0.5rem", display: "flex", flexDirection: "column" }}>
-            <div style={{ fontWeight: 600, marginBottom: "0.5rem", fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact Details</div>
-            <div><span style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>Name: </span><strong>{lead.adminName}</strong></div>
-            <div><span style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>Email: </span>
-              <a href={`mailto:${lead.adminEmail}`} style={{ color: "hsl(var(--primary))" }}>{lead.adminEmail}</a>
+          <div >
+            <div >Contact Details</div>
+            <div><span >Name: </span><strong>{lead.adminName}</strong></div>
+            <div><span >Email: </span>
+              <a href={`mailto:${lead.adminEmail}`} >{lead.adminEmail}</a>
             </div>
-            {lead.adminPhone && <div><span style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>Phone: </span>{lead.adminPhone}</div>}
-            <div><span style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.85rem" }}>Submitted: </span>{fmtDate(lead.createdAt)}</div>
+            {lead.adminPhone && <div><span >Phone: </span>{lead.adminPhone}</div>}
+            <div><span >Submitted: </span>{fmtDate(lead.createdAt)}</div>
           </div>
 
           {/* Meeting info if scheduled */}
           {lead.meetingStatus === "scheduled" && lead.meetingScheduledAt && (
-            <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)", padding: "1rem", borderLeft: "3px solid hsl(var(--primary))" }}>
-              <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>📅 Meeting Scheduled</div>
-              <div style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+            <div >
+              <div >📅 Meeting Scheduled</div>
+              <div >
                 {new Date(lead.meetingScheduledAt).toLocaleString("en-IN")}
               </div>
               {lead.meetingUrl && (
-                <a href={lead.meetingUrl} target="_blank" rel="noreferrer" style={{ fontSize: "0.85rem", color: "hsl(var(--primary))", display: "flex", alignItems: "center", gap: "0.3rem", marginTop: "0.5rem" }}>
+                <a href={lead.meetingUrl} target="_blank" rel="noreferrer" >
                   <Link2 size={13} /> Join Meeting
                 </a>
               )}
-              {lead.meetingNotes && <div style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>{lead.meetingNotes}</div>}
+              {lead.meetingNotes && <div >{lead.meetingNotes}</div>}
             </div>
           )}
 
           {/* ✅ Provisioned result */}
           {provisioned && (
-            <div className="p-4 rounded-md border p-4 rounded-md border--success" style={{ flexDirection: "column", gap: "0.75rem" }}>
-              <div style={{ fontWeight: 600 }}>✅ Organization Provisioned Successfully!</div>
-              <div style={{ fontSize: "0.85rem" }}>
+            <div className="p-4 rounded-md border p-4 rounded-md border--success" >
+              <div >✅ Organization Provisioned Successfully!</div>
+              <div >
                 <strong>{provisioned.orgName}</strong> has been created. An activation email was sent to <strong>{provisioned.adminEmail}</strong>.
               </div>
               <div>
-                <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>Activation Link</div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <code style={{ flex: 1, background: "hsl(var(--muted))", padding: "0.4rem 0.6rem", borderRadius: "4px", fontSize: "0.75rem", wordBreak: "break-all" }}>
+                <div >Activation Link</div>
+                <div >
+                  <code >
                     {provisioned.activationLink}
                   </code>
-                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.4rem 0.6rem", flexShrink: 0 }}
+                  <Button variant="outline" 
                     onClick={() => copyToClipboard(provisioned.activationLink, "link")}>
                     {copied === "link" ? <Check size={13} /> : <Copy size={13} />}
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))", marginBottom: "0.3rem" }}>Activation Code (6-digit)</div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <code style={{ background: "hsl(var(--muted))", padding: "0.4rem 0.8rem", borderRadius: "4px", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.2em" }}>
+                <div >Activation Code (6-digit)</div>
+                <div >
+                  <code >
                     {provisioned.activationCode}
                   </code>
-                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.4rem 0.6rem" }}
+                  <Button variant="outline" 
                     onClick={() => copyToClipboard(provisioned.activationCode, "code")}>
                     {copied === "code" ? <Check size={13} /> : <Copy size={13} />}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em" }}>Actions</div>
+          <div >
+            <div >Actions</div>
 
             {/* Approve & Provision */}
             {!isConverted && !provisioned && (
-              <button
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
-                style={{ width: "100%", justifyContent: "center", padding: "0.75rem" }}
+              <Button
+                variant="default"
+                
                 disabled={approving}
                 onClick={handleApprove}
               >
                 {approving ? "Provisioning..." : "✅ Approve & Provision Organization"}
-              </button>
+              </Button>
             )}
 
             {(isConverted || provisioned) && (
-              <div className=" " style={{ padding: "0.6rem 1rem", textAlign: "center", borderRadius: "6px" }}>
+              <div className=" " >
                 ✅ Already Provisioned
               </div>
             )}
 
             {/* Schedule Meeting */}
             {!showMeetingForm ? (
-              <button
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
-                style={{ width: "100%", justifyContent: "center" }}
+              <Button
+                variant="outline"
+                
                 onClick={() => setShowMeetingForm(true)}
               >
                 <Calendar size={14} /> Schedule Demo Meeting
-              </button>
+              </Button>
             ) : (
-              <form onSubmit={handleSchedule} style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "var(--radius)", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <div style={{ fontWeight: 600 }}>📅 Schedule Meeting</div>
+              <form onSubmit={handleSchedule} >
+                <div >📅 Schedule Meeting</div>
                 {meetingError && (
-                  <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}>
+                  <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
                     <AlertTriangle size={13} /> {meetingError}
                   </div>
                 )}
-                <div className="">
-                  <label className="">Date & Time *</label>
-                  <input className="" type="datetime-local" required value={meetingForm.scheduledAt}
+                <div >
+                  <label >Date & Time *</label>
+                  <Input  type="datetime-local" required value={meetingForm.scheduledAt}
                     onChange={e => setMeetingForm(f => ({ ...f, scheduledAt: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Meeting Link * (Google Meet / Zoom)</label>
-                  <input className="" type="url" required placeholder="https://meet.google.com/..."
+                <div >
+                  <label >Meeting Link * (Google Meet / Zoom)</label>
+                  <Input  type="url" required placeholder="https://meet.google.com/..."
                     value={meetingForm.meetingUrl}
                     onChange={e => setMeetingForm(f => ({ ...f, meetingUrl: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Platform</label>
+                <div >
+                  <label >Platform</label>
                   <div
                     value={meetingForm.provider}
                     onValueChange={val => setMeetingForm(f => ({ ...f, provider: val }))}
@@ -246,24 +239,24 @@ function LeadDrawer({
                     ]}
                   />
                 </div>
-                <div className="">
-                  <label className="">Notes (optional)</label>
-                  <textarea className="" rows={2} placeholder="Meeting agenda, topics to cover..."
+                <div >
+                  <label >Notes (optional)</label>
+                  <textarea  rows={2} placeholder="Meeting agenda, topics to cover..."
                     value={meetingForm.notes}
                     onChange={e => setMeetingForm(f => ({ ...f, notes: e.target.value }))} />
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ flex: 1 }} onClick={() => setShowMeetingForm(false)}>Cancel</button>
-                  <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" style={{ flex: 2 }} disabled={scheduling}>
+                <div >
+                  <Button type="button" variant="outline"  onClick={() => setShowMeetingForm(false)}>Cancel</Button>
+                  <Button type="submit" variant="default"  disabled={scheduling}>
                     {scheduling ? "Scheduling..." : "Send Meeting Invite"}
-                  </button>
+                  </Button>
                 </div>
               </form>
             )}
 
             {/* Email contact */}
             <a href={`mailto:${lead.adminEmail}?subject=Classgrid Demo for ${lead.institutionName}`}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ width: "100%", justifyContent: "center" }}>
+              variant="outline" >
               ✉️ Email Contact
             </a>
           </div>
@@ -282,11 +275,11 @@ function buildColumns(onOpen: (lead: Lead) => void): ColumnDef<Lead>[] {
       header: "Institution",
       size: 200,
       cell: ({ row }) => (
-        <button onClick={() => onOpen(row.original)}
-          style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, fontWeight: 500, color: "hsl(var(--foreground))" }}>
+        <Button onClick={() => onOpen(row.original)}
+          >
           {row.original.institutionName}
-          <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{row.original.city} · {row.original.orgType}</div>
-        </button>
+          <div >{row.original.city} · {row.original.orgType}</div>
+        </Button>
       ),
     },
     { accessorKey: "adminName", header: "Contact", size: 140 },
@@ -322,9 +315,9 @@ function buildColumns(onOpen: (lead: Lead) => void): ColumnDef<Lead>[] {
       header: "",
       size: 80,
       cell: ({ row }) => (
-        <button onClick={() => onOpen(row.original)} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }}>
+        <Button onClick={() => onOpen(row.original)} variant="outline" >
           Manage <ChevronRight size={12} />
-        </button>
+        </Button>
       ),
     },
   ];
@@ -425,7 +418,7 @@ export function LeadsPage() {
       </div>
 
       <SectionPanel title="Lead Pipeline" description='Click "Manage" on any lead to approve, schedule meeting, or contact.' noPadding>
-        <div style={{ padding: "1rem" }}>
+        <div >
           <div
             searchValue={search}
             onSearchChange={setSearch}
@@ -433,9 +426,9 @@ export function LeadsPage() {
           />
         </div>
         {isError ? (
-          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "1rem" }}>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
             <div className="p-4 rounded-md border__body"><span className="p-4 rounded-md border__title">Failed to load leads</span></div>
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()}>Retry</button>
+            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
           </div>
         ) : (
           <DataTable columns={columns} data={filtered} pageSize={10}
@@ -456,41 +449,41 @@ export function LeadsPage() {
 
       {/* Create Lead Modal */}
       {showCreateForm && (
-        <div className="">
+        <div >
           <div className=" ">
-            <div className="">
-              <h2 className="">Add Demo Request</h2>
-              <button className="" onClick={() => setShowCreateForm(false)}><X size={18} /></button>
+            <div >
+              <h2 >Add Demo Request</h2>
+              <Button  onClick={() => setShowCreateForm(false)}><X size={18} /></Button>
             </div>
-            <form onSubmit={handleCreate} className="">
-              <div className="">
+            <form onSubmit={handleCreate} >
+              <div >
                 <div className=" ">
-                  <label className="">Institution Name *</label>
-                  <input className="" required placeholder="Sunrise Public School"
+                  <label >Institution Name *</label>
+                  <Input  required placeholder="Sunrise Public School"
                     value={form.institutionName} onChange={e => setForm(f => ({ ...f, institutionName: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Admin Name *</label>
-                  <input className="" required placeholder="John Doe"
+                <div >
+                  <label >Admin Name *</label>
+                  <Input  required placeholder="John Doe"
                     value={form.adminName} onChange={e => setForm(f => ({ ...f, adminName: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Admin Email *</label>
-                  <input className="" type="email" required placeholder="admin@school.edu"
+                <div >
+                  <label >Admin Email *</label>
+                  <Input  type="email" required placeholder="admin@school.edu"
                     value={form.adminEmail} onChange={e => setForm(f => ({ ...f, adminEmail: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Phone</label>
-                  <input className="" placeholder="+91 9000000000"
+                <div >
+                  <label >Phone</label>
+                  <Input  placeholder="+91 9000000000"
                     value={form.adminPhone} onChange={e => setForm(f => ({ ...f, adminPhone: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">City</label>
-                  <input className="" placeholder="Pune"
+                <div >
+                  <label >City</label>
+                  <Input  placeholder="Pune"
                     value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
                 </div>
-                <div className="">
-                  <label className="">Type</label>
+                <div >
+                  <label >Type</label>
                   <div
                     value={form.orgType}
                     onValueChange={val => setForm(f => ({ ...f, orgType: val }))}
@@ -503,11 +496,11 @@ export function LeadsPage() {
                   />
                 </div>
               </div>
-              <div className="" style={{ marginTop: "1rem" }}>
-                <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => setShowCreateForm(false)}>Cancel</button>
-                <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={createMutation.isPending}>
+              <div  >
+                <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>Cancel</Button>
+                <Button type="submit" variant="default" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Lead"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

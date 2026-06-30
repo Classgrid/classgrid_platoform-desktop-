@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
 import { Server, Activity, Database, Shield, Power } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -20,7 +21,7 @@ function buildFlagColumns(
       accessorKey: "key",
       header: "Feature Key",
       size: 180,
-      cell: ({ getValue }) => <span style={{ fontFamily: "monospace", fontSize: "0.85rem" }}>{getValue<string>()}</span>,
+      cell: ({ getValue }) => <span >{getValue<string>()}</span>,
     },
     {
       accessorKey: "module",
@@ -147,9 +148,9 @@ export function ConfigPage() {
         description="Toggle features across the entire platform globally. Disabling a feature hides it instantly for all organizations."
         noPadding
         actions={
-          <div className="">
-            <input
-              className=""
+          <div >
+            <Input
+              
               placeholder="Search flags or modules…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

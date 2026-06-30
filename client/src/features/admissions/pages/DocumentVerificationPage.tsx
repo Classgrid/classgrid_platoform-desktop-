@@ -38,7 +38,7 @@ export function DocumentVerificationPage() {
       accessorKey: "full_name",
       header: "Applicant",
       cell: ({ row }) => (
-        <div className="">
+        <div >
           <div name={row.original.full_name} size="sm" />
           <div>
             <div className=" font-semibold">{row.original.full_name}</div>

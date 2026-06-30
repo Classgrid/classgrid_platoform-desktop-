@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/marketing_ui/button";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Switch } from "@/components/marketing_ui/switch";
-import "../styles/settings.css";
 
 type EmailPrefs = {
   global: boolean;
@@ -66,27 +65,27 @@ export function SettingsPage() {
   const isPending = updatePrefs.isPending;
 
   return (
-    <div className="">
+    <div >
       <SectionPanel
         title="Settings"
         description="Manage your platform preferences, notifications, and appearance."
       />
 
       {/* Appearance */}
-      <div className="">
-        <div className="">
+      <div >
+        <div >
           <h2 className=" flex items-center gap-2">
             <Palette size={18} /> Appearance
           </h2>
-          <p className="">Customize how Classgrid looks on your device.</p>
+          <p >Customize how Classgrid looks on your device.</p>
         </div>
         
-        <div className="">
-          <div className="">
-            <span className="">Dark Mode</span>
-            <span className="">Enable dark theme for the dashboard</span>
+        <div >
+          <div >
+            <span >Dark Mode</span>
+            <span >Enable dark theme for the dashboard</span>
           </div>
-          <label className="">
+          <label >
             <Switch
               checked={theme === "dark"}
               onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
@@ -96,24 +95,24 @@ export function SettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="">
-        <div className="">
+      <div >
+        <div >
           <h2 className=" flex items-center gap-2">
             <Bell size={18} /> Notifications
           </h2>
-          <p className="">Manage what events trigger email notifications.</p>
+          <p >Manage what events trigger email notifications.</p>
         </div>
 
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-4">Loading preferences...</div>
         ) : (
           <>
-            <div className="">
-              <div className="">
-                <span className="">Global Notifications</span>
-                <span className="">Master switch to enable or disable all emails</span>
+            <div >
+              <div >
+                <span >Global Notifications</span>
+                <span >Master switch to enable or disable all emails</span>
               </div>
-              <label className="">
+              <label >
                 <Switch
                   checked={prefs.global}
                   onCheckedChange={(checked) => handlePrefChange("global", checked)}
@@ -121,12 +120,12 @@ export function SettingsPage() {
               </label>
             </div>
 
-            <div className="" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
-              <div className="">
-                <span className="">Platform Announcements</span>
-                <span className="">Receive emails about major platform updates</span>
+            <div  >
+              <div >
+                <span >Platform Announcements</span>
+                <span >Receive emails about major platform updates</span>
               </div>
-              <label className="">
+              <label >
                 <Switch
                   checked={prefs.announcements}
                   onCheckedChange={(checked) => handlePrefChange("announcements", checked)}
@@ -134,12 +133,12 @@ export function SettingsPage() {
               </label>
             </div>
 
-            <div className="" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
-              <div className="">
-                <span className="">Join Approvals</span>
-                <span className="">Get notified when new organizations sign up</span>
+            <div  >
+              <div >
+                <span >Join Approvals</span>
+                <span >Get notified when new organizations sign up</span>
               </div>
-              <label className="">
+              <label >
                 <Switch
                   checked={prefs.joinApproval}
                   onCheckedChange={(checked) => handlePrefChange("joinApproval", checked)}

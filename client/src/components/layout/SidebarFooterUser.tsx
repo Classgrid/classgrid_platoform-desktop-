@@ -2,9 +2,17 @@ import React from "react";
 import { SidebarFooter } from "@/components/marketing_ui/sidebar";
 import { SidebarUserMenu } from "./SidebarUserMenu";
 import { SidebarNotifications } from "./SidebarNotifications";
+import type { DashboardRole } from "./DashboardLayout";
 
-export function SidebarFooterUser({ user }: { user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string } }) {
+type SidebarFooterUserProps = {
+  role: DashboardRole;
+  user: { name: string; email?: string; avatar?: string; profilePicture?: string; photoURL?: string };
+};
+
+export function SidebarFooterUser({ role, user }: SidebarFooterUserProps) {
   const avatarSrc = user.avatar || user.profilePicture || user.photoURL;
+  const showNotifications = role !== "org_admin";
+  const settingsPath = role === "super_admin" ? "/superadmin/settings" : "/settings";
 
   return (
     <SidebarFooter className="p-3 border-t border-sidebar-border mt-auto">
@@ -32,7 +40,7 @@ export function SidebarFooterUser({ user }: { user: { name: string; email?: stri
         {/* Right Side: Actions (Ellipsis Menu + Notifications) */}
         <div className="flex items-center gap-0.5 shrink-0 group-data-[collapsible=icon]:flex-col">
           <SidebarUserMenu user={user} />
-          <SidebarNotifications />
+          {showNotifications && <SidebarNotifications settingsPath={settingsPath} />}
         </div>
       </div>
     </SidebarFooter>

@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useMemo, useState } from "react";
@@ -29,15 +30,7 @@ const fetchHealth = () =>
 function StatusDot({ up }: { up: boolean }) {
   return (
     <span
-      style={{
-        display: "inline-block",
-        width: 8,
-        height: 8,
-        borderRadius: "50%",
-        background: up ? "hsl(var(--success))" : "hsl(var(--danger))",
-        marginRight: "0.5rem",
-        boxShadow: up ? "0 0 6px hsl(var(--success))" : "none",
-      }}
+      
     />
   );
 }
@@ -52,9 +45,9 @@ function formatUptime(secs: number) {
 }
 
 const levelIcon: Record<string, React.ReactNode> = {
-  error: <XCircle size={13} style={{ color: "hsl(var(--danger))" }} />,
-  warn: <AlertCircle size={13} style={{ color: "hsl(var(--warning))" }} />,
-  info: <Info size={13} style={{ color: "hsl(var(--info))" }} />,
+  error: <XCircle size={13}  />,
+  warn: <AlertCircle size={13}  />,
+  info: <Info size={13}  />,
 };
 
 export function SystemHealthPage() {
@@ -91,9 +84,9 @@ export function SystemHealthPage() {
       cell: ({ getValue }) => {
         const lv = (getValue<string>() ?? "info").toLowerCase();
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <div >
             {levelIcon[lv] ?? levelIcon.info}
-            <span style={{ fontSize: "0.8rem", fontWeight: 500, textTransform: "uppercase" }}>{lv}</span>
+            <span >{lv}</span>
           </div>
         );
       },
@@ -103,7 +96,7 @@ export function SystemHealthPage() {
       header: "Message",
       size: 320,
       cell: ({ getValue }) => (
-        <span style={{ fontSize: "0.84rem", fontFamily: "monospace", wordBreak: "break-all" }}>
+        <span >
           {getValue<string>()}
         </span>
       ),
@@ -124,8 +117,8 @@ export function SystemHealthPage() {
         const ts = getValue<string>();
         return ts ? (
           <div>
-            <div style={{ fontSize: "0.8rem" }}>{formatDate(ts)}</div>
-            <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>{formatTime(ts)}</div>
+            <div >{formatDate(ts)}</div>
+            <div >{formatTime(ts)}</div>
           </div>
         ) : "—";
       },
@@ -153,25 +146,20 @@ export function SystemHealthPage() {
 
       {/* Service Status */}
       <SectionPanel title="Service Status" description="Live connectivity of core platform services.">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", padding: "0.5rem 0" }}>
+        <div >
           {[
             { label: "API Server", up: serverUp, icon: <Server size={15} /> },
             { label: "MongoDB", up: dbUp, icon: <Database size={15} /> },
             { label: "Redis Cache", up: redisUp, icon: <Zap size={15} /> },
             { label: "Email Queue", up: true, icon: <Mail size={15} /> },
           ].map(({ label, up, icon }) => (
-            <div key={label} style={{
-              display: "flex", alignItems: "center", gap: "0.75rem",
-              padding: "0.85rem 1rem", borderRadius: "var(--radius)",
-              border: "1px solid hsl(var(--border))",
-              background: up ? "hsl(var(--success) / 0.06)" : "hsl(var(--danger) / 0.06)",
-            }}>
-              <span style={{ color: up ? "hsl(var(--success))" : "hsl(var(--danger))" }}>{icon}</span>
+            <div key={label} >
+              <span >{icon}</span>
               <div>
-                <div style={{ fontSize: "0.82rem", fontWeight: 500 }}>{label}</div>
-                <div style={{ display: "flex", alignItems: "center", marginTop: "0.2rem" }}>
+                <div >{label}</div>
+                <div >
                   <StatusDot up={up} />
-                  <span style={{ fontSize: "0.75rem", color: up ? "hsl(var(--success))" : "hsl(var(--danger))" }}>
+                  <span >
                     {up ? "Operational" : "Down"}
                   </span>
                 </div>
@@ -196,17 +184,17 @@ export function SystemHealthPage() {
       </div>
 
       {/* Email Stats */}
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel title="Email Queue Stats" description="Status of all emails in the outgoing queue.">
-          <div style={{ display: "flex", gap: "2rem", padding: "0.75rem 0", flexWrap: "wrap" }}>
+          <div >
             {[
               { label: "Sent", count: m?.emails?.sent ?? 0, color: "hsl(var(--success))" },
               { label: "Pending", count: m?.emails?.pending ?? 0, color: "hsl(var(--warning))" },
               { label: "Failed", count: m?.emails?.failed ?? 0, color: "hsl(var(--danger))" },
             ].map(({ label, count, color }) => (
-              <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-                <span style={{ fontSize: "1.6rem", fontWeight: 700, color }}>{metricsLoading ? "—" : count}</span>
-                <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>{label}</span>
+              <div key={label} >
+                <span >{metricsLoading ? "—" : count}</span>
+                <span >{label}</span>
               </div>
             ))}
           </div>
@@ -217,7 +205,7 @@ export function SystemHealthPage() {
       <div className="mt-5">
         <SectionPanel title="Error Logs" description="Recent system errors and warnings from the platform.">
           <div className="flex gap-2 items-center mb-4 pb-4 border-b border-border">
-            <input
+            <Input
               type="text"
               className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
               placeholder="Search messages..."

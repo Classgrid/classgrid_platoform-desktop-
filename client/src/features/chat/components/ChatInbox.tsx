@@ -43,24 +43,24 @@ export function ChatInbox() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-foreground">Inbox</h2>
           <div className="flex items-center gap-1">
-            <button
+            <Button
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setIsCreateGroupOpen(true)}
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Group"
             >
               <Users className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             placeholder="Search conversations..."
             value={search}
@@ -100,7 +100,7 @@ export function ChatInbox() {
             const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
             return (
-              <button
+              <Button
                 key={thread.id}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50"
               >
@@ -149,7 +149,7 @@ export function ChatInbox() {
                     )}
                   </div>
                 </div>
-              </button>
+              </Button>
             );
           })
         )}

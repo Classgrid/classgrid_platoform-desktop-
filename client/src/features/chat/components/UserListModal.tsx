@@ -53,7 +53,7 @@ export function UserListModal({
           </DialogTitle>
           <div className="relative mt-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
+            <Input
               type="text"
               placeholder="Search by name, email, or role..."
               value={search}
@@ -75,7 +75,7 @@ export function UserListModal({
           ) : (
             <div className="space-y-1">
               {filteredUsers.map((user) => (
-                <button
+                <Button
                   key={user._id}
                   onClick={() => {
                     onSelectUser(user._id);
@@ -100,7 +100,7 @@ export function UserListModal({
                       {user.role} {user.email ? `• ${user.email}` : ""}
                     </p>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}

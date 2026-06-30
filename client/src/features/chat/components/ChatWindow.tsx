@@ -521,9 +521,9 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
       {typingUsers.size > 0 && (
         <div className="absolute bottom-[90px] left-4 text-xs font-medium text-muted-foreground bg-background/80 px-3 py-1.5 rounded-full border border-border shadow-sm backdrop-blur-sm z-10 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
           <div className="flex gap-1">
-            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
+            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
+            <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
           </div>
           Someone is typing...
         </div>

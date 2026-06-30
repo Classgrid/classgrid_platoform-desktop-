@@ -213,7 +213,7 @@ export function BillingPage() {
             : <Badge variant="success">Live data</Badge>
         }
       >
-        <div style={{ padding: "1rem" }}>
+        <div >
           <div
             searchValue={search}
             onSearchChange={setSearch}

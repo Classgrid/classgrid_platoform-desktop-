@@ -247,11 +247,7 @@ export function OrgDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-        <div className="flex border-b border-border pb-4">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowLeft size={14} className="mr-2" /> Back
-          </Button>
-        </div>
+        
         <div className="flex items-center gap-3 p-12 text-muted-foreground justify-center">
           <RefreshCw size={18} className="animate-spin" />
           <span>Loading organization details…</span>
@@ -304,9 +300,7 @@ export function OrgDetailPage() {
             </Button>
           )}
           <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
-          <Button variant="ghost" asChild>
-            <Link to="/superadmin/orgs"><ArrowLeft size={14} className="mr-2" /> All Orgs</Link>
-          </Button>
+          
         </div>
       </div>
 
@@ -573,11 +567,7 @@ export function OrgDetailPage() {
                   <Mail size={14} className="mr-2" /> View Email &amp; Error Logs
                 </Link>
               </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <Link to="/superadmin/orgs">
-                  <ArrowLeft size={14} className="mr-2" /> Back to All Organizations
-                </Link>
-              </Button>
+              
             </div>
           </div>
         </div>

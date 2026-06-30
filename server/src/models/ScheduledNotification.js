@@ -26,8 +26,11 @@ const scheduledNotificationSchema = new mongoose.Schema({
         enum: [
             "global",         // ALL users across ALL organizations
             "all_org_admins",  // Only Org Admins
+            "all_super_admins", // Only Super Admins
             "all_students",    // Only Students globally
             "all_faculty",     // Only Faculty globally
+            "all_department_admins", // Existing HOD users acting as department admins
+            "active_orgs",     // Users attached to active organizations
             "specific_org"     // Only a specific organization
         ],
         default: "global"
@@ -68,7 +71,7 @@ const scheduledNotificationSchema = new mongoose.Schema({
     // Execution status
     status: {
         type: String,
-        enum: ["pending", "sent", "failed", "cancelled"],
+        enum: ["pending", "processing", "sent", "failed", "cancelled"],
         default: "pending"
     },
     sentAt: {

@@ -127,7 +127,7 @@ export function EnrollmentPage() {
       accessorKey: "full_name",
       header: "Candidate",
       cell: ({ row }) => (
-        <div className="">
+        <div >
           <div name={row.original.full_name} size="sm" />
           <div>
             <div className=" font-semibold">{row.original.full_name}</div>
@@ -199,35 +199,35 @@ export function EnrollmentPage() {
         if (isThisEnrolling) {
           return (
             <div className="flex gap-2 items-center">
-              <input
+              <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Set password..."
                 className="w-32 text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
-              <button
+              <Button
                 onClick={() => enrollMut.mutate(app._id)}
                 disabled={!password || enrollMut.isPending}
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm"
               >
                 {enrollMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm"}
-              </button>
-              <button onClick={() => { setEnrollingId(null); setPassword(""); }} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm">
+              </Button>
+              <Button onClick={() => { setEnrollingId(null); setPassword(""); }} className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--ghost inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm">
                 ✕
-              </button>
+              </Button>
             </div>
           );
         }
 
         return (
-          <button
+          <Button
             onClick={() => setEnrollingId(app._id)}
             disabled={!canEnroll}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2--sm"
           >
             Enroll <ChevronRight className="w-4 h-4 ml-1" />
-          </button>
+          </Button>
         );
       },
     },
@@ -242,23 +242,23 @@ export function EnrollmentPage() {
         { label: "Enrollment" },
       ]}
       actions={
-        <div className="">
-          <button
+        <div >
+          <Button
             onClick={() => divisionMut.mutate()}
             disabled={divisionMut.isPending}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+            variant="outline"
           >
             {divisionMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <LayoutGrid className="w-4 h-4" />}
             Allocate Divisions
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => prnMut.mutate()}
             disabled={prnMut.isPending}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+            variant="outline"
           >
             {prnMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4" />}
             Batch Generate PRNs
-          </button>
+          </Button>
           <ExportMenu
             data={apps}
             filename="enrollment-data"
@@ -268,18 +268,18 @@ export function EnrollmentPage() {
       }
     >
       {/* ── Hierarchy Tabs ── */}
-      <div className="">
+      <div >
         {HIERARCHIES.map(h => (
-          <button
+          <Button
             key={h.id}
             onClick={() => setActiveHierarchy(h.id)}
             className={`${activeHierarchy === h.id ? " " : ""}`}
           >
             {h.label}
             {activeHierarchy === h.id && (
-              <motion.span className="" layoutId="hierarchy-indicator-enroll" />
+              <motion.span  layoutId="hierarchy-indicator-enroll" />
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -314,7 +314,7 @@ export function EnrollmentPage() {
         <motion.div variants={fadeUp}>
           <div title="Fee Payment Status" description="Paid vs Pending for enrollment candidates.">
             {isLoading ? (
-              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
+              <div ><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : (feeDonut[0]?.value ?? 0) + (feeDonut[1]?.value ?? 0) > 0 ? (
               <div data={feeDonut} height={220} />
             ) : (
@@ -325,7 +325,7 @@ export function EnrollmentPage() {
         <motion.div variants={fadeUp}>
           <div title="Category Distribution" description="Reservation category split.">
             {isLoading ? (
-              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
+              <div ><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : categoryBar.length > 0 ? (
               <div data={categoryBar} indexKey="name" series={[{ key: "count", color: "hsl(var(--accent))", name: "Candidates" }]} height={220} />
             ) : (
@@ -340,9 +340,9 @@ export function EnrollmentPage() {
         <motion.div variants={fadeUp} initial="hidden" animate="show" className="mb-6">
           <div title="Live Seat Matrix" description="Real-time seat availability from the seat matrix service.">
             {seatMatrix.isLoading ? (
-              <div className=""><Loader2 className="animate-spin w-6 h-6" /></div>
+              <div ><Loader2 className="animate-spin w-6 h-6" /></div>
             ) : (
-              <div className="">
+              <div >
                 {(Array.isArray(seatMatrix.data) ? seatMatrix.data : seatMatrix.data?.matrix || []).map((entry: any, i: number) => (
                   <div key={i} className="p-4 bg-card border border-border rounded-lg">
                     <div className="text-sm font-medium text-foreground mb-1">{entry.hierarchy_name || entry.name || `Seat ${i + 1}`}</div>
@@ -386,7 +386,7 @@ export function EnrollmentPage() {
           </div>
 
           {isLoading ? (
-            <div className=""><Loader2 className="w-6 h-6 animate-spin" /></div>
+            <div ><Loader2 className="w-6 h-6 animate-spin" /></div>
           ) : (
             <div
               columns={columns}

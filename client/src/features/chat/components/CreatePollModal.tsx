@@ -57,15 +57,15 @@ export function CreatePollModal({ groupId, onClose }: CreatePollModalProps) {
       <div className="bg-background rounded-xl shadow-xl w-full max-w-md flex flex-col border border-border animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Create a Poll</h2>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors">
+          <Button onClick={onClose} className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[70vh] custom-scrollbar">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-foreground">Question</label>
-            <input
+            <Input
               type="text"
               placeholder="Ask a question..."
               value={question}
@@ -80,7 +80,7 @@ export function CreatePollModal({ groupId, onClose }: CreatePollModalProps) {
             <label className="text-sm font-semibold text-foreground">Options</label>
             {options.map((opt, i) => (
               <div key={i} className="flex items-center gap-2">
-                <input
+                <Input
                   type="text"
                   placeholder={`Option ${i + 1}`}
                   value={opt}
@@ -89,25 +89,25 @@ export function CreatePollModal({ groupId, onClose }: CreatePollModalProps) {
                   maxLength={50}
                 />
                 {options.length > 2 && (
-                  <button
+                  <Button
                     type="button"
                     onClick={() => handleRemoveOption(i)}
                     className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
             
             {options.length < 10 && (
-              <button
+              <Button
                 type="button"
                 onClick={handleAddOption}
                 className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors w-fit p-1"
               >
                 <Plus className="w-4 h-4" /> Add Option
-              </button>
+              </Button>
             )}
           </div>
 
@@ -123,16 +123,16 @@ export function CreatePollModal({ groupId, onClose }: CreatePollModalProps) {
         </form>
 
         <div className="p-4 border-t border-border shrink-0 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-lg transition-colors">
+          <Button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-lg transition-colors">
             Cancel
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={handleSubmit} 
             disabled={isPending || !question.trim() || options.filter(o => o.trim()).length < 2}
             className="px-6 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
           >
             {isPending ? <Spinner className="w-4 h-4" /> : "Create Poll"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

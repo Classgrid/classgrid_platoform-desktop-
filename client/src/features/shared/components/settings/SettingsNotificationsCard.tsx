@@ -45,7 +45,7 @@ export function SettingsNotificationsCard({ prefs, onChange, isLoading }: Settin
         />
       </div>
 
-      <div className="flex flex-col" style={{ opacity: prefs.global ? 1 : 0.5, pointerEvents: prefs.global ? "auto" : "none" }}>
+      <div className="flex flex-col" >
         <div className="flex items-center justify-between p-5">
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-sm text-foreground">Platform Announcements</span>

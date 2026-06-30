@@ -177,12 +177,12 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
           <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
             Group Info
           </h2>
-          <button
+          <Button
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Scrollable Content */}
@@ -214,7 +214,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                   {/* Admin Upload Overlay */}
                   {data.myRole === "admin" && (
                     <>
-                      <button
+                      <Button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
                         className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100 cursor-pointer"
@@ -229,8 +229,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                             </span>
                           </>
                         )}
-                      </button>
-                      <input
+                      </Button>
+                      <Input
                         type="file"
                         accept="image/*"
                         className="hidden"
@@ -256,13 +256,13 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                     <h4 className="text-sm font-semibold text-foreground">Members</h4>
                     {/* Add Member Button — Admin Only */}
                     {data.myRole === "admin" && (
-                      <button
+                      <Button
                         onClick={() => setShowAddMember(!showAddMember)}
                         className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
                       >
                         <UserPlus className="w-4 h-4" />
                         Add Member
-                      </button>
+                      </Button>
                     )}
                   </div>
 
@@ -271,7 +271,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                     <div className="mb-3 p-3 bg-muted/50 rounded-lg border border-border animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="relative mb-2">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input
+                        <Input
                           type="text"
                           placeholder="Search users..."
                           value={addSearch}
@@ -287,7 +287,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                           </p>
                         ) : (
                           availableUsers.map((user: OrgUser) => (
-                            <button
+                            <Button
                               key={user._id}
                               onClick={() => handleAddMember(user._id)}
                               disabled={isAdding}
@@ -317,7 +317,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                               <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
                                 Add
                               </span>
-                            </button>
+                            </Button>
                           ))
                         )}
                       </div>
@@ -376,20 +376,20 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                             {/* Actions — Admin only, not for creator */}
                             {canRemove && (
                               <div className="flex items-center opacity-0 group-hover/member:opacity-100 transition-opacity">
-                                <button
+                                <Button
                                   onClick={() => confirmToggleAdmin(member.userId, member.name, member.role)}
                                   className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer mr-1"
                                   title={member.role === "admin" ? `Demote ${member.name} to member` : `Promote ${member.name} to admin`}
                                 >
                                   {member.role === "admin" ? <Shield className="w-4 h-4 text-primary opacity-50" /> : <Shield className="w-4 h-4" />}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   onClick={() => confirmRemove(member.userId, member.name)}
                                   className="p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                                   title={`Remove ${member.name}`}
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                </button>
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -434,7 +434,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                 {/* Leave Group Button                             */}
                 {/* ═══════════════════════════════════════════════ */}
                 <div className="w-full mt-6 pt-4 border-t border-border">
-                  <button
+                  <Button
                     onClick={confirmLeave}
                     disabled={isLeaving}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors disabled:opacity-50 cursor-pointer"
@@ -445,7 +445,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                       <LogOut className="w-4 h-4" />
                     )}
                     Leave Group
-                  </button>
+                  </Button>
                 </div>
               </>
             )}

@@ -7,6 +7,7 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/avatar";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { formatDate } from "@/utils/dateUtils";
 import { useAllUsers, useSuspendUser, useReactivateUser, useImpersonateUser } from "../queries/useUsers";
 import { LogIn } from "lucide-react";
@@ -31,11 +32,11 @@ function buildColumns(
       cell: ({ row }) => {
         const u = row.original;
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div >
             <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
-              <div style={{ fontWeight: 500 }}>{u.name}</div>
-              <div className="">{u.email}</div>
+              <div >{u.name}</div>
+              <div >{u.email}</div>
             </div>
           </div>
         );
@@ -61,7 +62,7 @@ function buildColumns(
       size: 180,
       cell: ({ getValue }) => {
         const org = getValue<{ name: string } | undefined>();
-        return org ? org.name : <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>System</span>;
+        return org ? org.name : <span >System</span>;
       },
     },
     {
@@ -84,7 +85,7 @@ function buildColumns(
       header: "Joined",
       size: 120,
       cell: ({ getValue }) => (
-        <span style={{ fontSize: "0.85rem" }}>{formatDate(getValue<string>())}</span>
+        <span >{formatDate(getValue<string>())}</span>
       ),
     },
     {
@@ -96,7 +97,7 @@ function buildColumns(
         
         // Safeguard: Protect the primary super admin account from any modifications
         if (u.email === "support@classgrid.in") {
-          return <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontStyle: "italic" }}>Protected</span>;
+          return <span >Protected</span>;
         }
         
         if (u.role === "super_admin") return null; // Don't allow suspending other super admins from here easily
@@ -221,7 +222,7 @@ export function UsersPage() {
         description="Search by name, email, or organization."
       >
         <div className="p-4 flex gap-2 items-center border-b border-border">
-          <input
+          <Input
             type="text"
             className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
             placeholder="Search users..."

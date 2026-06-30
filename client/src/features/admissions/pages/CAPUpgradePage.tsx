@@ -53,19 +53,19 @@ export function CAPUpgradePage() {
           <h2 className="text-lg font-bold">Find Candidate</h2>
         </div>
         <div className="p-5">
-          <form onSubmit={handleSearch} style={{ display: "flex", gap: "1rem" }}>
+          <form onSubmit={handleSearch} >
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
+              <Input
                 className="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 placeholder="Enter EN Number (e.g. EN23123456)"
                 value={enSearch}
                 onChange={(e) => setEnSearch(e.target.value)}
               />
             </div>
-            <button type="submit" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2" disabled={!enSearch.trim() || isLoading}>
+            <Button type="submit" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2" disabled={!enSearch.trim() || isLoading}>
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Search"}
-            </button>
+            </Button>
           </form>
         </div>
       </div>
@@ -85,14 +85,14 @@ export function CAPUpgradePage() {
       )}
 
       {candidate && (
-        <div style={{ display: "grid", gap: "1.5rem" }}>
+        <div >
           <div className="bg-card border border-border rounded-xl shadow-sm">
             <div className="p-5 border-b border-border">
               <h2 className="text-lg font-bold">Candidate Status</h2>
             </div>
             <div className="p-5">
               {upgradeMutation.isSuccess && (
-                <div style={{ marginBottom: "1.5rem" }}>
+                <div >
                   <div className="bg-emerald-100 text-emerald-800 p-4 rounded-md border border-emerald-200">
                     <strong>Upgrade Confirmed</strong>
                     <br/>Candidate has been marked as upgraded and their seat has been vacated.
@@ -101,7 +101,7 @@ export function CAPUpgradePage() {
               )}
 
               {(upgradeMutation.isError || nocMutation.isError) && (
-                <div style={{ marginBottom: "1.5rem" }}>
+                <div >
                   <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-200">
                     <strong>Action Failed</strong>
                     <br/>{((upgradeMutation.error || nocMutation.error) as any)?.response?.data?.error || "An error occurred while processing the request."}
@@ -109,13 +109,13 @@ export function CAPUpgradePage() {
                 </div>
               )}
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div >
+                <div >
                   <div><strong>Name:</strong> {candidate.full_name}</div>
                   <div><strong>EN Number:</strong> {candidate.en_number}</div>
                   <div><strong>Category:</strong> {candidate.category || "OPEN"}</div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div >
                   <div>
                     <strong>Current Status:</strong>{" "}
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${candidate.status === "enrolled" ? "bg-emerald-100 text-emerald-800" : candidate.status === "upgraded" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>
@@ -137,23 +137,23 @@ export function CAPUpgradePage() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div >
             <div className="bg-card border border-border rounded-xl shadow-sm">
               <div className="p-5 border-b border-border">
                 <h2 className="text-lg font-bold">Step 1: NOC Request</h2>
               </div>
               <div className="p-5">
-                <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1rem" }}>
+                <p >
                   Issue a No Objection Certificate if the candidate requests to participate in the next CAP round. This does not cancel their current admission.
                 </p>
-                <button
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                <Button
+                  variant="outline"
                   disabled={nocMutation.isPending || candidate.status === "upgraded"}
                   onClick={() => nocMutation.mutate(candidate.en_number!)}
                 >
                   {nocMutation.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <FileText size={16} className="mr-2" />}
                   Generate NOC
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -162,10 +162,10 @@ export function CAPUpgradePage() {
                 <h2 className="text-lg font-bold">Step 2: Confirm Upgrade</h2>
               </div>
               <div className="p-5">
-                <p style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "1rem" }}>
+                <p >
                   If the candidate is allotted a seat elsewhere, confirm the upgrade. <strong>Warning:</strong> This will cancel their current admission and release their seat for the vacancy pool.
                 </p>
-                <button
+                <Button
                   className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-red-600 text-white shadow hover:bg-red-700 h-9 px-4 py-2 disabled:opacity-50"
                   disabled={upgradeMutation.isPending || candidate.status === "upgraded"}
                   onClick={() => {
@@ -176,7 +176,7 @@ export function CAPUpgradePage() {
                 >
                   {upgradeMutation.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <ArrowUpCircle size={16} className="mr-2" />}
                   Confirm Upgrade
-                </button>
+                </Button>
               </div>
             </div>
           </div>

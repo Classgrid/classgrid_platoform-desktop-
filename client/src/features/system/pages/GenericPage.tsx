@@ -16,7 +16,7 @@ export function GenericPage({ title }: GenericPageProps) {
         <h1>{resolvedTitle}</h1>
         <p>This module is wired into the dashboard shell and ready for detailed implementation.</p>
       </div>
-      <section className="">
+      <section >
         <p>
           The route <code>{location.pathname}</code> is active. API integration, forms, tables, and
           workflow actions can be added on top of this shell next.

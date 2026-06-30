@@ -166,7 +166,7 @@ export function NewApplicationPage() {
             <div className="p-5">
               <label className="text-sm block">
                 <div className="text-muted-foreground mb-1">Hierarchy ID (Division/Program)</div>
-                <input
+                <Input
                   value={hierarchyId}
                   onChange={(event) => setHierarchyId(event.target.value)}
                   className="w-full rounded-md border border-border bg-background px-3 py-2"
@@ -214,7 +214,7 @@ export function NewApplicationPage() {
                     if (normalizedType === "boolean") {
                       return (
                         <label key={field.id} className="text-sm flex items-center gap-2 mt-7">
-                          <input
+                          <Input
                             type="checkbox"
                             checked={value === "true"}
                             onChange={(event) => onFieldChange(field.id, String(event.target.checked))}
@@ -229,7 +229,7 @@ export function NewApplicationPage() {
                         <div className="mb-1 text-muted-foreground">
                           {field.label} {required ? "*" : ""}
                         </div>
-                        <input
+                        <Input
                           type={toInputType(normalizedType)}
                           value={value}
                           required={required}

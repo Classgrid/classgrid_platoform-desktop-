@@ -26,7 +26,7 @@ export function BulkSmsPage() {
       )}
       
       {isLoading ? (
-        <div style={{ display: "flex", justifyCenter: "center", padding: "4rem" }}><Loader2 size={24} className="animate-spin text-primary" /></div>
+        <div ><Loader2 size={24} className="animate-spin text-primary" /></div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -42,7 +42,7 @@ export function BulkSmsPage() {
               <p className="text-sm text-muted-foreground mt-1">Coming soon. For automated reminders, use the Communication tab.</p>
             </div>
             <div className="p-5">
-              <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 opacity-50 cursor-not-allowed" disabled>Compose Broadcast</button>
+              <Button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 opacity-50 cursor-not-allowed" disabled>Compose Broadcast</Button>
             </div>
           </div>
         </>

@@ -54,54 +54,44 @@ export function CETImportPage() {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem", maxWidth: "800px" }}>
+      <div >
         <div className="bg-card border border-border rounded-xl shadow-sm">
           <div className="p-5 border-b border-border">
             <h2 className="text-lg font-bold">Upload File</h2>
           </div>
-          <div className="p-5" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <p style={{ fontSize: "0.9rem", color: "hsl(var(--muted-foreground))" }}>
+          <div className="p-5" >
+            <p >
               Upload the official allotment list provided by DTE/CET Cell. The system will parse EN Numbers, Names, Merit Scores, and Categories.
             </p>
 
             <div
-              style={{
-                border: "2px dashed hsl(var(--border))",
-                borderRadius: "var(--radius)",
-                padding: "3rem",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "1rem",
-                backgroundColor: "hsl(var(--background))",
-                cursor: "pointer",
-              }}
+              
               onClick={() => document.getElementById("cet-file-upload")?.click()}
             >
-              <input
+              <Input
                 id="cet-file-upload"
                 type="file"
                 accept=".pdf,.csv,.xlsx,.xls"
                 onChange={handleFileChange}
-                style={{ display: "none" }}
+                
               />
               
               {file ? (
                 <>
-                  <FileType size={48} style={{ color: "hsl(var(--primary))" }} />
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontWeight: 600 }}>{file.name}</div>
-                    <div style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+                  <FileType size={48}  />
+                  <div >
+                    <div >{file.name}</div>
+                    <div >
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <UploadCloud size={48} style={{ color: "hsl(var(--muted-foreground))" }} />
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontWeight: 600 }}>Click to select or drag and drop</div>
-                    <div style={{ fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+                  <UploadCloud size={48}  />
+                  <div >
+                    <div >Click to select or drag and drop</div>
+                    <div >
                       PDF, CSV, or Excel (Max 10MB)
                     </div>
                   </div>
@@ -109,24 +99,24 @@ export function CETImportPage() {
               )}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
+            <div >
               {file && (
-                <button
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                <Button
+                  variant="outline"
                   onClick={() => setFile(null)}
                   disabled={importData.isPending}
                 >
                   Clear
-                </button>
+                </Button>
               )}
-              <button
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+              <Button
+                variant="default"
                 onClick={handleUpload}
                 disabled={!file || importData.isPending}
               >
                 {importData.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle size={16} className="mr-2" />}
                 Start Import
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -136,7 +126,7 @@ export function CETImportPage() {
             <h2 className="text-lg font-bold">Data Validation Rules</h2>
           </div>
           <div className="p-5">
-            <ul style={{ fontSize: "0.9rem", color: "hsl(var(--muted-foreground))", display: "flex", flexDirection: "column", gap: "0.5rem", paddingLeft: "1.5rem" }}>
+            <ul >
               <li><span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800">EN Number</span> acts as the unique identifier for all Engineering/Diploma candidates.</li>
               <li>Records with an existing EN Number in the database will be skipped (duplicates).</li>
               <li>Candidates will be able to log in to the portal using their EN Number and verify their email to proceed.</li>

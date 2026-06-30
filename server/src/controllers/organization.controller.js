@@ -13,6 +13,11 @@ import { markOnboardingStep, syncDerivedOnboardingProgress } from "../services/o
 import mongoose from "mongoose";
 import redis from "../config/redis.js";
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
+import {
+    deleteMongoAnnouncementBySupabaseId,
+    deliverPublishedOrganizationAnnouncement,
+    syncSupabaseAnnouncementToMongo,
+} from "../services/organization-announcement-sync.service.js";
 
 
 // POST /api/organization/apply
@@ -1455,7 +1460,15 @@ export const createOrganizationAnnouncement = async (req, res) => {
 
             logAdminAction(req, 'create_announcement', 'announcement', announcement.id, title);
 
-            res.status(201).json({ message: 'Announcement created successfully', announcement });
+            let notificationDelivery = { delivered: false, recipientCount: 0 };
+            try {
+                await syncSupabaseAnnouncementToMongo(announcement, req.user._id);
+                notificationDelivery = await deliverPublishedOrganizationAnnouncement(announcement);
+            } catch (deliveryErr) {
+                console.error('[OrgAnnouncement] sync/delivery failed:', deliveryErr.message);
+            }
+
+            res.status(201).json({ message: 'Announcement created successfully', announcement, notificationDelivery });
         } catch (limitErr) {
             if (limitErr.message && limitErr.message.startsWith('PLAN_LIMIT_REACHED')) {
                 return res.status(403).json({ message: limitErr.message.replace('PLAN_LIMIT_REACHED: ', ''), code: 'PLAN_LIMIT_REACHED' });
@@ -1597,7 +1610,17 @@ export const updateOrganizationAnnouncement = async (req, res) => {
 
             if (updateErr) throw updateErr;
 
-            res.json({ message: 'Announcement updated successfully', announcement: { ...announcement, _id: announcement.id } });
+            let notificationDelivery = { delivered: false, recipientCount: 0 };
+            try {
+                await syncSupabaseAnnouncementToMongo(announcement, req.user._id);
+                if (existing.status !== 'published' && announcement.status === 'published') {
+                    notificationDelivery = await deliverPublishedOrganizationAnnouncement(announcement);
+                }
+            } catch (deliveryErr) {
+                console.error('[OrgAnnouncement] update sync/delivery failed:', deliveryErr.message);
+            }
+
+            res.json({ message: 'Announcement updated successfully', announcement: { ...announcement, _id: announcement.id }, notificationDelivery });
         } catch (limitErr) {
             return res.status(403).json({ message: limitErr.message.replace('PLAN_LIMIT_REACHED: ', ''), code: 'PLAN_LIMIT_REACHED' });
         }
@@ -1620,6 +1643,12 @@ export const deleteOrganizationAnnouncement = async (req, res) => {
 
         if (error) throw error;
         if (count === 0) return res.status(404).json({ message: 'Announcement not found' });
+
+        try {
+            await deleteMongoAnnouncementBySupabaseId(id, organization_id);
+        } catch (syncErr) {
+            console.error('[OrgAnnouncement] mirror delete failed:', syncErr.message);
+        }
 
         logAdminAction(req, 'delete_announcement', 'announcement', id, id);
 

@@ -23,7 +23,7 @@ export function DashboardActivity() {
   const hasFees = isModuleEnabled(profile, "fees");
 
   // Format real backend activities
-  let entries = (activityData?.activities || []).map((act) => {
+  const entries = (activityData?.activities || []).map((act) => {
     let icon = <CheckCircle2 className="h-4 w-4" />;
     if (act.type === "admission" || act.type === "user") icon = <FileText className="h-4 w-4" />;
     if (act.type === "finance" || act.type === "fee") icon = <WalletCards className="h-4 w-4" />;
@@ -49,12 +49,12 @@ export function DashboardActivity() {
           <h3 className="text-base font-semibold text-foreground">Recent Activity</h3>
           <p className="mt-1 text-sm text-muted-foreground">Live operations from the active profile.</p>
         </div>
-        <button
+        <Button
           type="button"
           className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
         >
           View All
-        </button>
+        </Button>
       </div>
       <ul className="divide-y divide-border">
         {entries.map((entry) => (

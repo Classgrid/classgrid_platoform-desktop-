@@ -23,8 +23,8 @@ const errorColumns: ColumnDef<ErrorLog>[] = [
       const d = getValue<string>();
       return (
         <div>
-          <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
-          <div className="">{formatTime(d)}</div>
+          <div >{formatDate(d)}</div>
+          <div >{formatTime(d)}</div>
         </div>
       );
     },
@@ -44,7 +44,7 @@ const errorColumns: ColumnDef<ErrorLog>[] = [
     header: "Error Message",
     size: 350,
     cell: ({ getValue }) => (
-      <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "330px" }}>
+      <div >
         {getValue<string>()}
       </div>
     ),
@@ -54,7 +54,7 @@ const errorColumns: ColumnDef<ErrorLog>[] = [
     header: "Context",
     size: 120,
     cell: ({ getValue }) => (
-      <span style={{ fontFamily: "monospace", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+      <span >
         {getValue<string>() || "N/A"}
       </span>
     ),
@@ -73,7 +73,7 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
       header: "Subject",
       size: 250,
       cell: ({ getValue }) => (
-        <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "230px" }}>
+        <div >
           {getValue<string>()}
         </div>
       ),
@@ -96,8 +96,8 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
         const d = getValue<string>();
         return (
           <div>
-            <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{formatDate(d)}</div>
-            <div className="">{formatTime(d)}</div>
+            <div >{formatDate(d)}</div>
+            <div >{formatTime(d)}</div>
           </div>
         );
       },
@@ -111,13 +111,13 @@ function buildEmailColumns(onResend: (id: string) => void, isMutating: boolean):
         if (email.status !== "failed") return null;
 
         return (
-          <button
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+          <Button
+            variant="outline"
             disabled={isMutating}
             onClick={() => onResend(email._id)}
           >
             Retry
-          </button>
+          </Button>
         );
       },
     },
@@ -189,7 +189,7 @@ export function AlertsPage() {
       </div>
 
       {/* Tabs & Data Tables */}
-      <div style={{ marginTop: "1.5rem" }}>
+      <div >
         <div value={activeTab} onValueChange={setActiveTab}>
           <div>
             <div value="system-errors">System Errors</div>

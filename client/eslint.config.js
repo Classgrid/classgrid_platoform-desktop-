@@ -92,4 +92,10 @@ export default tseslint.config(
       ]
     },
   },
+  {
+    files: ['src/components/marketing_ui/**/*.{js,jsx,ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
 )

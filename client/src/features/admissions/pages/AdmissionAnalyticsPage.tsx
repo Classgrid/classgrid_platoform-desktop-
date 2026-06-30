@@ -86,7 +86,7 @@ export default function AdmissionAnalyticsPage() {
                 />
                 <div className="flex gap-4">
                     <ResponsiveSelect 
-                        className=""
+                        
                         value={selectedHierarchy}
                         onChange={(e) => setSelectedHierarchy(e.target.value)}
                     >

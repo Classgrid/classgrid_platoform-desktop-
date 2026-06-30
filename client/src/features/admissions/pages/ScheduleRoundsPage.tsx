@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -158,7 +159,7 @@ export function ScheduleRoundsPage() {
         </motion.button>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="">
+      <motion.div variants={stagger} initial="hidden" animate="show" >
 
         {/* ── KPIs ── */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -274,11 +275,11 @@ export function ScheduleRoundsPage() {
                       <label className="text-sm font-medium flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" /> Cutoff Date
                       </label>
-                      <input
+                      <Input
                         type="date"
                         value={cutoffDate}
                         onChange={(e) => setCutoffDate(e.target.value)}
-                        className=""
+                        
                       />
                       <p className="text-xs text-muted-foreground">
                         No new applications or admissions after this date.
@@ -286,25 +287,25 @@ export function ScheduleRoundsPage() {
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Maximum Rounds</label>
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         max={10}
                         value={maxRounds}
                         onChange={(e) => setMaxRounds(Number(e.target.value))}
-                        className=""
+                        
                       />
                       <p className="text-xs text-muted-foreground">Total number of merit list rounds.</p>
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Current Round</label>
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         max={maxRounds}
                         value={currentRound}
                         onChange={(e) => setCurrentRound(Number(e.target.value))}
-                        className=""
+                        
                       />
                       <p className="text-xs text-muted-foreground">Active round that candidates are allotted from.</p>
                     </div>
@@ -375,9 +376,9 @@ export function ScheduleRoundsPage() {
                             <p className="text-xs text-muted-foreground">{desc}</p>
                           </div>
                         </div>
-                        <label className="">
-                          <input type="checkbox" checked={val} onChange={(e) => set(e.target.checked)} />
-                          <span className="" />
+                        <label >
+                          <Input type="checkbox" checked={val} onChange={(e) => set(e.target.checked)} />
+                          <span  />
                         </label>
                       </motion.div>
                     ))}
@@ -388,7 +389,7 @@ export function ScheduleRoundsPage() {
                           <Clock className="w-4 h-4 text-muted-foreground" /> Fee Payment Deadline
                         </label>
                         <div className="relative">
-                          <input
+                          <Input
                             type="number"
                             value={feeDeadlineHours}
                             onChange={(e) => setFeeDeadlineHours(Number(e.target.value))}

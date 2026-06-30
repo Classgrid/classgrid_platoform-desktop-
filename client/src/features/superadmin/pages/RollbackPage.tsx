@@ -55,8 +55,8 @@ export function RollbackPage() {
       accessorKey: "createdAt", header: "When", size: 140,
       cell: ({ getValue }) => (
         <div>
-          <div style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</div>
-          <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>{formatTime(getValue<string>())}</div>
+          <div >{formatDate(getValue<string>())}</div>
+          <div >{formatTime(getValue<string>())}</div>
         </div>
       ),
     },
@@ -71,11 +71,11 @@ export function RollbackPage() {
       accessorKey: "userId", header: "Performed By", size: 180,
       cell: ({ getValue }) => {
         const u = getValue<any>();
-        if (!u) return <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>System</span>;
+        if (!u) return <span >System</span>;
         return (
           <div>
-            <div style={{ fontWeight: 500, fontSize: "0.85rem" }}>{u.name}</div>
-            <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>{u.email}</div>
+            <div >{u.name}</div>
+            <div >{u.email}</div>
           </div>
         );
       },
@@ -84,7 +84,7 @@ export function RollbackPage() {
       accessorKey: "targetId", header: "Target", size: 180,
       cell: ({ getValue, row }) => {
         const id = getValue<string>();
-        return <span style={{ fontFamily: "monospace", fontSize: "0.78rem" }}>{id ?? "—"}</span>;
+        return <span >{id ?? "—"}</span>;
       },
     },
     {
@@ -100,7 +100,7 @@ export function RollbackPage() {
       cell: ({ row }) => {
         const c = row.original;
         if (c.rollbackStatus === "rolled_back") {
-          return <span style={{ fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>✓ Done</span>;
+          return <span >✓ Done</span>;
         }
         return (
           <Button size="sm" variant="outline" onClick={() => setConfirmTarget(c)} disabled={rollbackMut.isPending}>
@@ -122,11 +122,11 @@ export function RollbackPage() {
       />
 
       {/* Info */}
-      <div style={{ marginBottom: "1.25rem", padding: "1rem 1.25rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--info) / 0.3)", background: "hsl(var(--info) / 0.05)", display: "flex", gap: "0.75rem" }}>
-        <Info size={18} style={{ color: "hsl(var(--info))", flexShrink: 0, marginTop: "0.1rem" }} />
+      <div >
+        <Info size={18}  />
         <div>
-          <div style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: "0.25rem" }}>How Rollback Works</div>
-          <div style={{ fontSize: "0.84rem", color: "hsl(var(--muted-foreground))" }}>
+          <div >How Rollback Works</div>
+          <div >
             Only actions from the last <strong>7 days</strong> can be rolled back. Each rollback performs the <em>inverse operation</em> — e.g., rolling back a "Suspend Org" will re-activate it. Actions that cannot be auto-reversed (e.g., delete) will show an error and require manual action.
           </div>
         </div>
@@ -138,7 +138,7 @@ export function RollbackPage() {
         <div title="Total Tracked" value={isLoading ? "—" : candidates.length} icon={<Clock size={15} />} />
       </div>
 
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <div title="Rollback Candidates" description="Destructive actions from the last 7 days. Click 'Rollback' to reverse." noPadding>
           <div columns={columns} data={candidates} isLoading={isLoading} pageSize={50}
             emptyIcon={<CheckCircle2 size={32} />}

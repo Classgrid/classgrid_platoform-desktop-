@@ -42,11 +42,11 @@ export function RLAReportingPage() {
       ]}
     >
       <div title="Find Candidate">
-        <form onSubmit={handleSearch} style={{ display: "flex", gap: "1rem" }}>
-          <div className="" style={{ flex: 1, marginBottom: 0 }}>
-            <div className="">
-              <Search className="" size={16} />
-              <input
+        <form onSubmit={handleSearch} >
+          <div  >
+            <div >
+              <Search  size={16} />
+              <Input
                 className=" "
                 placeholder="Enter EN Number (e.g. EN23123456)"
                 value={enSearch}
@@ -54,9 +54,9 @@ export function RLAReportingPage() {
               />
             </div>
           </div>
-          <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={!enSearch.trim() || isLoading}>
+          <Button type="submit" variant="default" disabled={!enSearch.trim() || isLoading}>
             {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Search"}
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -75,7 +75,7 @@ export function RLAReportingPage() {
       {candidate && (
         <div title="Candidate Details">
           {reportMutation.isSuccess && (
-            <div style={{ marginBottom: "1.5rem" }}>
+            <div >
               <div variant="success" title="Reported Successfully">
                 Candidate has been marked as reported. They can now proceed with fee payment.
               </div>
@@ -83,21 +83,21 @@ export function RLAReportingPage() {
           )}
 
           {reportMutation.isError && (
-            <div style={{ marginBottom: "1.5rem" }}>
+            <div >
               <div variant="danger" title="Failed to Report">
                 {(reportMutation.error as any)?.response?.data?.error || "An error occurred while marking the candidate as reported."}
               </div>
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div >
+            <div >
               <div><strong>Name:</strong> {candidate.full_name}</div>
               <div><strong>EN Number:</strong> {candidate.en_number}</div>
               <div><strong>Category:</strong> {candidate.category || "OPEN"}</div>
               <div><strong>Seat Type:</strong> {candidate.seat_type || "N/A"}</div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div >
               <div>
                 <strong>Current Status:</strong>{" "}
                 <div variant={candidate.status === "rla_pending" ? "warning" : candidate.status === "fee_pending" ? "success" : "neutral"}>
@@ -115,22 +115,22 @@ export function RLAReportingPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "1rem", paddingTop: "1.5rem", borderTop: "1px solid hsl(var(--border))" }}>
-            <button
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow"
+          <div >
+            <Button
+              variant="default"
               disabled={reportMutation.isPending || candidate.rla_status === "reported" || candidate.status !== "rla_pending"}
               onClick={() => reportMutation.mutate(candidate.en_number!)}
             >
               {reportMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
               Mark as Reported (RLA)
-            </button>
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" disabled>
+            </Button>
+            <Button variant="outline" disabled>
               <FileText size={16} /> Upload Reporting Reciept
-            </button>
+            </Button>
           </div>
           
           {candidate.status !== "rla_pending" && candidate.rla_status !== "reported" && (
-            <p style={{ marginTop: "1rem", fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+            <p >
               Candidate is currently in <strong>{candidate.status.replace(/_/g, " ")}</strong> stage. They must reach the RLA Pending stage before reporting can be confirmed.
             </p>
           )}

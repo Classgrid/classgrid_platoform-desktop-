@@ -61,11 +61,11 @@ export function GlobalUsersPage() {
       cell: ({ row }) => {
         const u = row.original;
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div >
             <Avatar className="w-8 h-8"><AvatarFallback>{u.name?.charAt(0)}</AvatarFallback></Avatar>
             <div>
-              <div style={{ fontWeight: 500 }}>{u.name}</div>
-              <div style={{ fontSize: "0.78rem", color: "hsl(var(--muted-foreground))" }}>{u.email}</div>
+              <div >{u.name}</div>
+              <div >{u.email}</div>
             </div>
           </div>
         );
@@ -80,7 +80,7 @@ export function GlobalUsersPage() {
     },
     {
       accessorKey: "organizationName", header: "Organization", size: 170,
-      cell: ({ getValue }) => getValue<string>() || <span style={{ color: "hsl(var(--muted-foreground))", fontStyle: "italic" }}>Platform</span>,
+      cell: ({ getValue }) => getValue<string>() || <span >Platform</span>,
     },
     {
       accessorKey: "status", header: "Status", size: 110,
@@ -92,7 +92,7 @@ export function GlobalUsersPage() {
     },
     {
       accessorKey: "createdAt", header: "Joined", size: 120,
-      cell: ({ getValue }) => <span style={{ fontSize: "0.82rem" }}>{formatDate(getValue<string>())}</span>,
+      cell: ({ getValue }) => <span >{formatDate(getValue<string>())}</span>,
     },
     {
       id: "actions", header: "Actions", size: 200,
@@ -100,7 +100,7 @@ export function GlobalUsersPage() {
         const u = row.original;
         const isBanned = u.status === "suspended";
         return (
-          <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+          <div >
             {isBanned
               ? <Button size="sm" variant="outline" onClick={() => setConfirm({ user: u, action: "unban" })}><UserCheck size={12} /> Unban</Button>
               : <Button size="sm" variant="destructive" onClick={() => setConfirm({ user: u, action: "ban" })}><Ban size={12} /> Ban</Button>
@@ -141,10 +141,10 @@ export function GlobalUsersPage() {
         <StatCard title="Active" value={isLoading ? "—" : users.filter(u => u.status === "active").length} icon={<CheckCircle size={15} />} />
         <StatCard title="Banned" value={isLoading ? "—" : users.filter(u => u.status === "suspended").length} icon={<ShieldAlert size={15} />} />
       </div>
-      <div style={{ marginTop: "1.25rem" }}>
+      <div >
         <SectionPanel title="All Users" description={`Showing ${users.length} of ${total}`} noPadding>
-          <div style={{ padding: "0.75rem 1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <div style={{ flex: 1, minWidth: 220 }}>
+          <div >
+            <div >
               <div searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search name or email…" />
             </div>
             <div value={roleFilter} onValueChange={setRoleFilter} options={ROLE_OPTIONS} />
@@ -166,7 +166,7 @@ export function GlobalUsersPage() {
             </DialogDescription>
           </DialogHeader>
           {confirm?.action === "change-role" && (
-            <div style={{ padding: "0.5rem 0" }}>
+            <div >
               <div value={newRole} onValueChange={setNewRole} options={ROLE_OPTIONS.filter(r => r.value !== "")} />
             </div>
           )}

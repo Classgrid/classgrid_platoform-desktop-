@@ -6,7 +6,7 @@ export function AdmissionConfigPage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
   const update = useUpdateAdmissionConfig();
 
-  if (isLoading) return <div className=""><Loader2 size={24} className="animate-spin" /></div>;
+  if (isLoading) return <div ><Loader2 size={24} className="animate-spin" /></div>;
   if (isError || !configResponse) return <div title="Admission Config" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Config" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};
@@ -15,10 +15,10 @@ export function AdmissionConfigPage() {
     <div title="Admission Configuration" description="Portal settings, workflow execution, and admission round management." breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Config" }]}>
       {update.isSuccess && <div variant="success" title="Saved">Configuration updated.</div>}
 
-      <div className="">
+      <div >
         {/* Portal & Strategy */}
         <div title="Portal Settings">
-          <div className="">
+          <div >
             <div>
               <strong>Structure Type:</strong>{" "}
               <div variant="info">{configResponse.structure_type?.replace(/_/g, " ")}</div>
@@ -42,7 +42,7 @@ export function AdmissionConfigPage() {
 
         {/* Round Management */}
         <div title="Rounds & Deadlines">
-          <div className="">
+          <div >
             <div><strong>Current Round:</strong> {cfg.admission_round?.current_round || 1} / {cfg.admission_round?.max_rounds || 3}</div>
             <div>
               <strong>Waitlist:</strong>{" "}
@@ -65,7 +65,7 @@ export function AdmissionConfigPage() {
 
         {/* Workflow Execution */}
         <div title="Workflow Execution">
-          <div className="">
+          <div >
             <div>
               <strong>Document Verification:</strong>{" "}
               {cfg.workflow_execution?.require_admin_document_verification
@@ -86,9 +86,9 @@ export function AdmissionConfigPage() {
         {/* Seat Matrix */}
         {cfg.seat_matrix_policy?.enabled && (
           <div title="Seat Matrix Policy">
-            <div className="">
+            <div >
               {(cfg.seat_matrix_policy.categories || []).map((cat) => (
-                <div key={cat.category_name} className="">
+                <div key={cat.category_name} >
                   <span>{cat.category_name}</span>
                   <div variant="info" size="sm">{cat.reservation_percentage}%</div>
                 </div>

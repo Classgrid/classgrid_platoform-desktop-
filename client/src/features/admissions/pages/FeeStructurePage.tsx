@@ -5,7 +5,7 @@ import { useAdmissionConfig } from "../queries/useAdmissionConfig";
 export function FeeStructurePage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
 
-  if (isLoading) return <div className=""><Loader2 size={24} className="animate-spin" /></div>;
+  if (isLoading) return <div ><Loader2 size={24} className="animate-spin" /></div>;
   if (isError || !configResponse) return <div title="Fee Structure" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Fee Structure" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};
@@ -15,9 +15,9 @@ export function FeeStructurePage() {
     <div title="Fee Structure" description="Application fee, category-based mappings, and refund policy."
       breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Fee Structure" }]}>
 
-      <div className="">
+      <div >
         <div title="Registration Fee">
-          <div className="">
+          <div >
             <div><strong>Registration Fee:</strong> ₹{cfg.registration_fee || 0}</div>
             <div>
               <strong>Portal Status:</strong>{" "}
@@ -30,9 +30,9 @@ export function FeeStructurePage() {
 
         {feeConfig && (
           <div title="Fee Configuration">
-            <div className="">
+            <div >
               {feeConfig.admission_fee_structure_id && (
-                <div><strong>Fee Structure ID:</strong> <code className="">{feeConfig.admission_fee_structure_id}</code></div>
+                <div><strong>Fee Structure ID:</strong> <code >{feeConfig.admission_fee_structure_id}</code></div>
               )}
               {(feeConfig.dynamic_fee_mapping || []).length > 0 && (
                 <div>
@@ -50,9 +50,9 @@ export function FeeStructurePage() {
               {feeConfig.refund_policy?.enabled && (
                 <div>
                   <strong>Refund Policy:</strong> Enabled
-                  <div className="">
+                  <div >
                     {(feeConfig.refund_policy.rules || []).map((rule, i) => (
-                      <div key={i} className="">
+                      <div key={i} >
                         {rule.days_before_start} days before session → {rule.refund_percentage}% refund
                       </div>
                     ))}

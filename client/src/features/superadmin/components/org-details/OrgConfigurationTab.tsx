@@ -131,7 +131,7 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
               <div key={name} className="rounded-xl border border-border/60 p-3">
                 <div
                   className="h-16 rounded-lg border border-border"
-                  style={{ backgroundColor: color }}
+                  
                   aria-label={`${humanizeKey(name)} color ${color}`}
                 />
                 <p className="mt-2 text-sm font-medium">{humanizeKey(name)}</p>

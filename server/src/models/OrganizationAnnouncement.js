@@ -15,6 +15,16 @@ const organizationAnnouncementSchema = new mongoose.Schema({
         enum: ["announcement", "notice", "event", "holiday", "emergency"],
         default: "announcement",
     },
+    source: {
+        type: String,
+        enum: ["mongo", "supabase"],
+        default: "mongo",
+    },
+    supabase_id: {
+        type: String,
+        index: true,
+        sparse: true,
+    },
     organization_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Organization",
@@ -51,6 +61,22 @@ const organizationAnnouncementSchema = new mongoose.Schema({
     views_count: {
         type: Number,
         default: 0,
+    },
+    creator_name: {
+        type: String,
+        default: "",
+    },
+    attachment_url: {
+        type: String,
+        default: "",
+    },
+    attachment_name: {
+        type: String,
+        default: "",
+    },
+    attachment_type: {
+        type: String,
+        default: "",
     }
 }, { timestamps: true });
 

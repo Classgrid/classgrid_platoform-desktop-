@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useMemo, useState } from "react";
 import { Star, MessageSquareQuote, RefreshCw, TrendingUp } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -23,7 +24,7 @@ function fmtDate(iso: string) {
 
 function renderStars(rating: number) {
   return (
-    <div style={{ display: "flex", gap: "0.15rem", color: "#f59e0b" }}>
+    <div >
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
@@ -48,8 +49,8 @@ const columns: ColumnDef<Review>[] = [
       const r = row.original;
       return (
         <div>
-          <div style={{ fontWeight: 500 }}>{r.name}</div>
-          <div className="">{r.college}</div>
+          <div >{r.name}</div>
+          <div >{r.college}</div>
         </div>
       );
     },
@@ -66,12 +67,7 @@ const columns: ColumnDef<Review>[] = [
     size: 250,
     cell: ({ getValue }) => (
       <div
-        style={{
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          maxWidth: "230px",
-        }}
+        
         title={getValue<string>()}
       >
         {getValue<string>()}
@@ -86,19 +82,13 @@ const columns: ColumnDef<Review>[] = [
       const s = getValue<string>();
       return s ? (
         <div
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "180px",
-            color: "var(--text-muted)",
-          }}
+          
           title={s}
         >
           {s}
         </div>
       ) : (
-        <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>None</span>
+        <span >None</span>
       );
     },
   },
@@ -192,10 +182,10 @@ export function ReviewsPage() {
         description="All reviews submitted across the platform."
         noPadding
         actions={
-          <div className="">
-            <TrendingUp size={14} className="" />
-            <input
-              className=""
+          <div >
+            <TrendingUp size={14}  />
+            <Input
+              
               placeholder="Search reviewer or college…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

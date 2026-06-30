@@ -1,3 +1,4 @@
+import { Input } from "@/components/marketing_ui/input";
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -138,14 +139,14 @@ function WelcomeStep({ orgName, config, onNext }: { orgName: string; config: any
             {config?.merit_list_mode && (
               <div className="cgp-info-item">
                 <div className="cgp-info-item__label">Selection Mode</div>
-                <div className="cgp-info-item__value" style={{ textTransform: "capitalize" }}>
+                <div className="cgp-info-item__value" >
                   {config.merit_list_mode.replace(/_/g, " ")}
                 </div>
               </div>
             )}
           </div>
 
-          <div style={{ fontWeight: 600, fontSize: "0.88rem", marginBottom: "0.75rem" }}>
+          <div >
             How the process works:
           </div>
           <div className="cgp-process-steps">
@@ -166,9 +167,9 @@ function WelcomeStep({ orgName, config, onNext }: { orgName: string; config: any
         </div>
       </div>
 
-      <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" onClick={onNext} id="portal-start-btn">
+      <Button variant="default" onClick={onNext} id="portal-start-btn">
         Start Application <ArrowRight size={16} />
-      </button>
+      </Button>
     </motion.div>
   );
 }
@@ -264,7 +265,7 @@ function AuthGate({
       </div>
 
       <div className="cgp-auth-gate">
-        {error && <div style={{ marginBottom: "1rem" }}><div variant="danger" title="Error">{error}</div></div>}
+        {error && <div ><div variant="danger" title="Error">{error}</div></div>}
 
         {/* CET: EN input */}
         {isCetMode && step === "input" && (
@@ -275,13 +276,13 @@ function AuthGate({
               <label className="cgp-form-label">EN Number</label>
               <div className="cgp-form-input-wrap">
                 <Hash size={15} className="cgp-form-icon" />
-                <input type="text" required className="cgp-form-input" placeholder="e.g. EN25234503"
+                <Input type="text" required className="cgp-form-input" placeholder="e.g. EN25234503"
                   value={enNumber} onChange={e => setEnNumber(e.target.value.toUpperCase())} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="cet-validate-btn">
+            <Button type="submit" variant="default" disabled={loading} id="cet-validate-btn">
               {loading ? <Loader2 size={15} className="animate-spin" /> : "Validate EN"} <ArrowRight size={15} />
-            </button>
+            </Button>
           </form>
         )}
 
@@ -294,7 +295,7 @@ function AuthGate({
                 <div className="cgp-cet-preview__grid">
                   <div><strong>EN:</strong> {enNumber}</div>
                   <div><strong>Score:</strong> {cetCandidate.mht_cet_score}</div>
-                  <div style={{ gridColumn: "1/-1" }}><strong>Branch:</strong> {cetCandidate.branch_name}</div>
+                  <div ><strong>Branch:</strong> {cetCandidate.branch_name}</div>
                 </div>
               </div>
             )}
@@ -302,13 +303,13 @@ function AuthGate({
               <label className="cgp-form-label">Personal Email</label>
               <div className="cgp-form-input-wrap">
                 <Mail size={15} className="cgp-form-icon" />
-                <input type="email" required className="cgp-form-input" placeholder="you@example.com"
+                <Input type="email" required className="cgp-form-input" placeholder="you@example.com"
                   value={identifier} onChange={e => setIdentifier(e.target.value)} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="cet-get-otp-btn">
+            <Button type="submit" variant="default" disabled={loading} id="cet-get-otp-btn">
               {loading ? <Loader2 size={15} className="animate-spin" /> : "Get OTP"} <ArrowRight size={15} />
-            </button>
+            </Button>
           </form>
         )}
 
@@ -318,29 +319,29 @@ function AuthGate({
             <h2 className="cgp-auth-gate__title">Start Application</h2>
             <p className="cgp-auth-gate__sub">New or returning? Enter your number to continue.</p>
             <div className="cgp-auth-gate__mode-switch">
-              <button type="button" id="mode-phone"
+              <Button type="button" id="mode-phone"
                 className={`cgp-auth-gate__mode-btn${authMode === "phone" ? " cgp-auth-gate__mode-btn--active" : ""}`}
                 onClick={() => setAuthMode("phone")}>
                 <Phone size={13} /> Phone OTP
-              </button>
-              <button type="button" id="mode-email"
+              </Button>
+              <Button type="button" id="mode-email"
                 className={`cgp-auth-gate__mode-btn${authMode === "email" ? " cgp-auth-gate__mode-btn--active" : ""}`}
                 onClick={() => setAuthMode("email")}>
                 <Mail size={13} /> Email OTP
-              </button>
+              </Button>
             </div>
             <div className="cgp-form-field">
               <label className="cgp-form-label">{authMode === "phone" ? "Mobile Number" : "Email Address"}</label>
               <div className="cgp-form-input-wrap">
                 {authMode === "phone" ? <Phone size={15} className="cgp-form-icon" /> : <Mail size={15} className="cgp-form-icon" />}
-                <input type={authMode === "phone" ? "tel" : "email"} required className="cgp-form-input"
+                <Input type={authMode === "phone" ? "tel" : "email"} required className="cgp-form-input"
                   placeholder={authMode === "phone" ? "+91 9876543210" : "you@example.com"}
                   value={identifier} onChange={e => setIdentifier(e.target.value)} disabled={loading} />
               </div>
             </div>
-            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="get-otp-btn">
+            <Button type="submit" variant="default" disabled={loading} id="get-otp-btn">
               {loading ? <Loader2 size={15} className="animate-spin" /> : "Get OTP"} <ArrowRight size={15} />
-            </button>
+            </Button>
           </form>
         )}
 
@@ -351,21 +352,21 @@ function AuthGate({
             <p className="cgp-auth-gate__sub">We sent a 6-digit code to <strong>{identifier}</strong></p>
             <div className="cgp-form-field">
               <label className="cgp-form-label">6-digit OTP</label>
-              <input type="text" required maxLength={6} className="cgp-form-input cgp-form-input--otp"
+              <Input type="text" required maxLength={6} className="cgp-form-input cgp-form-input--otp"
                 placeholder="000000" value={otp}
                 onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} disabled={loading} />
             </div>
-            <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 bg-primary text-primary-foreground shadow" disabled={loading} id="verify-otp-btn">
+            <Button type="submit" variant="default" disabled={loading} id="verify-otp-btn">
               {loading ? <Loader2 size={15} className="animate-spin" /> : "Verify & Continue"}
-            </button>
+            </Button>
             <div className="cgp-auth-actions">
-              <button type="button" className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => { setStep("input"); setOtp(""); }}>
+              <Button type="button" variant="outline" onClick={() => { setStep("input"); setOtp(""); }}>
                 ← Back
-              </button>
-              <button type="button" className="cgp-auth-link" style={{ background: "none", border: "none" }}
+              </Button>
+              <Button type="button" className="cgp-auth-link" 
                 onClick={() => handleNext()} disabled={loading || cooldown > 0}>
                 {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -419,7 +420,7 @@ export function CandidatePortalPage() {
   // ── Loading ──
   if (configLoading || sessionLoading) {
     return (
-      <div className="cgp-shell" style={{ alignItems: "center", justifyContent: "center" }}>
+      <div className="cgp-shell" >
         <Loader2 size={32} className="animate-spin" />
       </div>
     );
@@ -488,9 +489,9 @@ export function CandidatePortalPage() {
             </div>
           )}
           {isAuthenticated && (
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={handleSignOut} id="portal-signout-btn">
+            <Button variant="outline" onClick={handleSignOut} id="portal-signout-btn">
               <LogOut size={14} /> Sign Out
-            </button>
+            </Button>
           )}
         </div>
       </header>

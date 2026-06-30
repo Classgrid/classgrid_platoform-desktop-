@@ -175,7 +175,7 @@ export function OnboardPage() {
         </div>
 
         {isError ? (
-          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" style={{ margin: "0 1rem 1rem" }}>
+          <div className="p-4 rounded-md border bg-red-100 text-red-800 p-4 rounded-md border border-red-200" >
             <div className="p-4 rounded-md border__body">
               <span className="p-4 rounded-md border__title">Could not load pending organizations</span>
               <p className="p-4 rounded-md border__message">

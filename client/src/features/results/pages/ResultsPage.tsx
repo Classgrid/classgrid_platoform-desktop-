@@ -91,7 +91,7 @@ export function ResultsPage() {
 
       {/* Tabs */}
       <div className="flex space-x-1 border-b border-border mt-6">
-        <button
+        <Button
           onClick={() => setActiveTab("current")}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "current"
@@ -100,9 +100,9 @@ export function ResultsPage() {
           }`}
         >
           Semester Results
-        </button>
+        </Button>
         {isCollegeMode && (
-          <button
+          <Button
             onClick={() => setActiveTab("cumulative")}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "cumulative"
@@ -111,7 +111,7 @@ export function ResultsPage() {
             }`}
           >
             Cumulative CGPA
-          </button>
+          </Button>
         )}
       </div>
 
@@ -340,7 +340,7 @@ function CumulativeView({ cgpaData }: { cgpaData: any | null }) {
                   <div className="flex-1 h-8 bg-secondary/30 rounded-md overflow-hidden relative">
                     <div
                       className="h-full bg-primary/80 rounded-md transition-all duration-500"
-                      style={{ width: `${widthPct}%` }}
+                      
                     />
                     <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
                       {sgpa.toFixed(2)}
