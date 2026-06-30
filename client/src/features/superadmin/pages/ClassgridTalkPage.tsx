@@ -13,7 +13,6 @@ import {
   Paperclip,
   Eye,
   FileText,
-  FileText,
   Building2,
   Copy,
   ArrowLeft,
