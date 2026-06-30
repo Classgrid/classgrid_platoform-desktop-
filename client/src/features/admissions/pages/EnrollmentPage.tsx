@@ -19,6 +19,7 @@ import { useApplications } from "../../admissions/queries/useApplications";
 import type { AdmissionApplication } from "../../admissions/types";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 // ── Hierarchy config ──
 const HIERARCHIES = [

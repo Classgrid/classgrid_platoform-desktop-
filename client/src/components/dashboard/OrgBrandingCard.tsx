@@ -500,7 +500,7 @@ export function OrgBrandingCard() {
         )}
 
         {/* Website Theme Colors */}
-        {data?.has_custom_domain && (
+        {data?.has_erp_domain && (
           <div className="flex flex-col gap-4 md:col-span-2 lg:col-span-2">
             <div className="flex flex-col gap-1">
               <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -594,7 +594,7 @@ export function OrgBrandingCard() {
         )}
       </div>
 
-      {data?.has_website_domain && (
+      {data?.has_erp_domain && (
         <div className="border-t border-border pt-6 mt-2">
           <div className="flex flex-col gap-1 mb-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider">

@@ -3,6 +3,7 @@ import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/marketing_ui/button"
+import { Input } from "@/components/marketing_ui/input";
 import {
   InputGroup,
   InputGroupAddon,

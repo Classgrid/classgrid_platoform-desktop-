@@ -6,6 +6,7 @@ import { createPoll } from "../services/chatApi";
 import { toast } from "sonner";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 interface CreatePollModalProps {
   groupId: string;

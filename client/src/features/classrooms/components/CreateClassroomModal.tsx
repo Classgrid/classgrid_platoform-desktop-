@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Book, Users, Loader2 } from "lucide-react";
 import { useCreateClassroom } from "../queries/useCreateClassroom";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 type CreateClassroomModalProps = {
   isOpen: boolean;

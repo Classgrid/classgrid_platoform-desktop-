@@ -5,6 +5,7 @@ import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 interface ChatInputProps {
   onSendMessage: (message: string, files: File[]) => Promise<void>;

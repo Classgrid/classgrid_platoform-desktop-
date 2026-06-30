@@ -19,6 +19,7 @@ import { PhotoViewerModal } from "./PhotoViewerModal";
 import { Megaphone } from "lucide-react";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 interface GroupSettingsModalProps {
   groupId: string;

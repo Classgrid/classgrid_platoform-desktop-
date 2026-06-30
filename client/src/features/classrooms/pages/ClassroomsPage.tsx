@@ -7,6 +7,7 @@ import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { CreateClassroomModal } from "../components/CreateClassroomModal";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 export function ClassroomsPage() {
   const { data: user } = useCurrentUser();

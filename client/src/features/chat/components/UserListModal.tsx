@@ -5,6 +5,7 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import type { OrgUser } from "../services/chatApi";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 
 interface UserListModalProps {
   isOpen: boolean;

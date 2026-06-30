@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Search, Users, Check, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import type { OrgUser } from "../services/chatApi";
 

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { deskEnroll, getAdmissionConfigFull } from "../api";
 
 type SchemaField = {
