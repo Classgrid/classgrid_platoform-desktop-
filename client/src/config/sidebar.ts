@@ -66,8 +66,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "🏠 OVERVIEW",
         items: [
           { label: "Overview", to: "/superadmin/dashboard", icon: LayoutDashboard },
-          { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart },
-          { label: "Alerts", to: "/superadmin/alerts", icon: Bell }
+          { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart }
         ]
       },
       {
