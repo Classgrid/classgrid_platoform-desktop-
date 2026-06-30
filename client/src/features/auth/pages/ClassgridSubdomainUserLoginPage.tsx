@@ -93,6 +93,9 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
 
   const rememberLoggedInUser = (result: any) => {
     if (!result.user) return;
+    if (result.token) {
+      localStorage.setItem("token", result.token);
+    }
     queryClient.setQueryData(["current-user"], {
       _id: result.user.id,
       id: result.user.id,

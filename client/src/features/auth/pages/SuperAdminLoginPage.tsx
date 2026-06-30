@@ -51,7 +51,11 @@ export function SuperAdminLoginPage() {
          return;
       }
 
-      // Optionally update query cache here if needed, but cookie is set by backend.
+      // Save token to localStorage for apiClient fallback (solves Safari/cross-domain cookie drops)
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+      }
+
       toast.success("Login successful!");
       
       // Default to /superadmin/dashboard as per router configuration
