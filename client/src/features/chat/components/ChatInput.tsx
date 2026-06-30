@@ -19,7 +19,7 @@ interface ChatInputProps {
   isSending: boolean;
   replyTo: ChatMessage | null;
   onCancelReply: () => void;
-  onTyping?: (isTyping: boolean) => void;
+  onTyping?: (isTyping: boolean, activityType?: 'typing' | 'recording' | 'uploading') => void;
   disabledReason?: string;
   onOpenPollModal?: () => void;
 }
@@ -60,6 +60,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
       mediaRecorder.start();
       setIsRecording(true);
+      if (onTyping) onTyping(true, 'recording');
     } catch (err) {
       console.error("Error accessing mic", err);
     }
@@ -69,6 +70,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      if (onTyping) onTyping(false, 'recording');
     }
   };
 
@@ -78,6 +80,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    if (onTyping) onTyping(false, 'recording');
   };
 
   // Auto-resize textarea
@@ -125,6 +128,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles((prev) => [...prev, ...Array.from(e.target.files!)].slice(0, 50));
+      if (onTyping) {
+        onTyping(true, 'uploading');
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => onTyping(false, 'uploading'), 180000);
+      }
     }
     // Reset input so the same file can be selected again
     if (fileInputRef.current) {
@@ -280,9 +288,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 onChange={(e) => {
                   setMessage(e.target.value);
                   if (onTyping) {
-                    onTyping(true);
+                    onTyping(true, 'typing');
                     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                    typingTimeoutRef.current = setTimeout(() => onTyping(false), 2000);
+                    typingTimeoutRef.current = setTimeout(() => onTyping(false, 'typing'), 2000);
                   }
                 }}
                 onKeyDown={handleKeyDown}

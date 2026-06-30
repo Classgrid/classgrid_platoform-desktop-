@@ -407,7 +407,7 @@ export function ChatPage() {
               delete pNext[data.userId];
               return pNext;
             });
-          }, data.activityType === 'recording' || data.activityType === 'uploading' ? 10000 : 3000);
+          }, data.activityType === 'uploading' ? 180000 : data.activityType === 'recording' ? 60000 : 3000);
           next[data.userId] = { timeout, type: data.activityType || 'typing' };
         }
         return next;
