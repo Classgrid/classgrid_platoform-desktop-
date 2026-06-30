@@ -52,7 +52,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       </button>
 
       {/* Avatar */}
-      <button onClick={onAvatarClick || onShowInfo} className="shrink-0 relative">
+      <button onClick={onAvatarClick || onShowInfo} className="shrink-0 relative cursor-pointer hover:opacity-80 transition-opacity">
         {hasAvatar ? (
           <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
         ) : (
@@ -66,7 +66,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       </button>
 
       {/* Info */}
-      <button onClick={onShowInfo} className="flex-1 min-w-0 text-left">
+      <button onClick={onShowInfo} className="flex-1 min-w-0 text-left cursor-pointer hover:underline transition-all">
         <h3 className="text-sm font-bold text-foreground truncate">{thread.name}</h3>
         <p className="text-xs text-muted-foreground truncate">
           {thread.type === "group"
