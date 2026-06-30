@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Building2, ClipboardList, Megaphone, Plus, RefreshCw, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
+import { Building2, ClipboardList, Megaphone, Plus, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/marketing_ui/badge";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { StatCard } from "@/components/marketing_ui/StatCard";
@@ -109,10 +110,7 @@ export function DashboardHomePage() {
           title="Super Admin Overview" 
           description="Manage all organizations and platform metrics."
         >
-          <Button variant="outline" onClick={() => { refetch(); refetchOrgs(); }} disabled={isFetching || orgsFetching}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching || orgsFetching ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <RefreshButton onClick={() => { refetch(); refetchOrgs(); }} isFetching={isFetching || orgsFetching} />
         </PageHeader>
 
         {isError && (

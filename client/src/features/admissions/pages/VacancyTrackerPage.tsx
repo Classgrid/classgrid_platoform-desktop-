@@ -20,14 +20,7 @@ export function VacancyTrackerPage() {
           <p className="text-muted-foreground mt-1">Live dashboard monitoring available seats, waitlists, and quotas across branches.</p>
         </div>
         <div>
-          <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-            onClick={() => refetch()}
-            disabled={isRefetching}
-          >
-            <RefreshCw size={14} className={`mr-2 ${isRefetching ? "animate-spin" : ""}`} />
-            Refresh Now
-          </button>
+          <RefreshButton onClick={() => refetch()} isFetching={isRefetching} label="Refresh Now" />
         </div>
       </div>
 

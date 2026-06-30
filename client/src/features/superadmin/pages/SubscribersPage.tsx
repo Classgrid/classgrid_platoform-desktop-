@@ -287,14 +287,7 @@ export function SubscribersPage() {
         title="Subscribers"
         description="Track growth, unsubscribes, and audience health for blog and changelog emails."
         actions={
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isFetching || isMutating}
-          >
-            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching || isMutating} />
         }
       />
 

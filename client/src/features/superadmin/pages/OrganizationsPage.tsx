@@ -128,10 +128,7 @@ export function OrganizationsPage() {
         description="Live organization records from the Classgrid backend, including owner, status, and user counts."
         actions={
           <>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button asChild>
               <Link to="/superadmin/onboard">
                 <Plus className="size-4" />

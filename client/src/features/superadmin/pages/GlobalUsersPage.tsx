@@ -132,7 +132,7 @@ export function GlobalUsersPage() {
       <div
         title="Global User Control"
         description="Search and manage any user across all organizations. All actions are logged."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
+        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Users" value={isLoading ? "—" : total} icon={<Users size={15} />} />

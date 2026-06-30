@@ -63,7 +63,7 @@ export function NotificationEnginePage() {
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</Button>
             <Button onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</Button>
           </div>

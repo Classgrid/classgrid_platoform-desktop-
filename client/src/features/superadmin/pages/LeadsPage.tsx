@@ -411,9 +411,7 @@ export function LeadsPage() {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowCreateForm(true)}><Plus size={14} /> Add Lead</Button>
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
-            <RefreshCw size={14} /> Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         </div>
       </div>
 

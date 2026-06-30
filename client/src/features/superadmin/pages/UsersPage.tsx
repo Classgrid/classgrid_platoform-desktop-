@@ -186,14 +186,7 @@ export function UsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} />
-            Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         </div>
       </div>
 

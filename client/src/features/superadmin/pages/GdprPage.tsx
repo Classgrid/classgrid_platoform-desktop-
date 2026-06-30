@@ -99,7 +99,7 @@ export function GdprPage() {
       <PageHeader
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
+        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
       />
       <div style={{ marginBottom: "1.25rem", padding: "1rem 1.25rem", borderRadius: "var(--radius)", border: "1px solid hsl(var(--warning) / 0.4)", background: "hsl(var(--warning) / 0.06)", display: "flex", gap: "0.75rem" }}>
         <AlertTriangle size={18} style={{ color: "hsl(var(--warning))", flexShrink: 0, marginTop: "0.1rem" }} />

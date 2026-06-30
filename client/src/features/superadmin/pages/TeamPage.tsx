@@ -183,9 +183,7 @@ export function TeamPage() {
         description="Invite co-admins, support agents, sales staff, and analysts to help manage Classgrid. Each role has controlled access."
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
-            </Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button onClick={() => { setShowForm(true); setFormResult(null); }}>
               <UserPlus size={14} /> Invite Team Member
             </Button>

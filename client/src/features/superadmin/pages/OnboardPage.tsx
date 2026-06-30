@@ -146,10 +146,7 @@ export function OnboardPage() {
         description="Review pending requests and provision organizations through live backend APIs."
         actions={
           <>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button onClick={() => setIsCreating(true)}>
               <Plus className="size-4" />
               Onboard New Org

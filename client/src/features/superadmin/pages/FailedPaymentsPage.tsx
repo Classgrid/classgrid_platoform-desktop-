@@ -129,9 +129,7 @@ export function FailedPaymentsPage() {
         title="Failed Payments"
         description="All platform billing payments that failed or were not completed. Investigate and follow up with organizations."
         actions={
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         }
       />
 

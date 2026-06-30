@@ -96,10 +96,7 @@ export function RevenuePage() {
         title="Platform Revenue"
         description="Monitor Monthly Recurring Revenue (MRR), total platform income, and subscription status."
         actions={
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium border h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-            Refresh Data
-          </button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh Data" />
         }
       />
 

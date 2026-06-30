@@ -157,9 +157,7 @@ export function ReviewsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} isLoading={isFetching}>
-            <RefreshCw size={14} /> Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         </div>
       </div>
 

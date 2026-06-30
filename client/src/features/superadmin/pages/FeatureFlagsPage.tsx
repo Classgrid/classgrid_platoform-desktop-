@@ -170,9 +170,7 @@ export function FeatureFlagsPage() {
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh
-            </Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button variant="outline" onClick={() => setNewFlagOpen(true)}>
               <Plus size={14} /> New Flag
             </Button>

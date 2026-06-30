@@ -172,10 +172,7 @@ export function BillingPage() {
         title="Plans & Billing"
         description="Manage organization subscriptions, quotas, and platform access."
         actions={
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         }
       />
 

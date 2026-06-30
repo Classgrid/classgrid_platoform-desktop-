@@ -144,7 +144,7 @@ export function TransactionsPage() {
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>
+            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
             <Button onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</Button>
           </div>
         }

@@ -301,9 +301,7 @@ export function OrgDetailPage() {
               <LogIn size={14} className="mr-2" /> Impersonate Admin
             </Button>
           )}
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} /> Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
           <Button variant="ghost" asChild>
             <Link to="/superadmin/orgs"><ArrowLeft size={14} className="mr-2" /> All Orgs</Link>
           </Button>

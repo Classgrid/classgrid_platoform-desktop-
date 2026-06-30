@@ -174,9 +174,7 @@ export function CustomDomainsPage() {
           <Button variant="outline" onClick={() => setShowCloudflareModal(true)}>
             <Settings size={14} className="mr-2 text-primary" /> Cloudflare CORS
           </Button>
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} /> Refresh
-          </Button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         </div>
       </div>
 

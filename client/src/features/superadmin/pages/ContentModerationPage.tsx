@@ -149,7 +149,7 @@ export function ContentModerationPage() {
       <PageHeader
         title="Content Moderation"
         description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
+        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -116,10 +116,7 @@ export function AuditPage() {
               />
             </div>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw size={14} className={isFetching ? "animate-spin mr-2" : "mr-2"} />
-            Refresh
-          </button>
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh" />
           <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2" onClick={handleExportCSV} disabled={isExporting || isLoading}>
             <Download size={14} className="mr-2" />
             CSV Export

@@ -116,7 +116,7 @@ export function RollbackPage() {
       <div
         title="Rollback Actions"
         description="Undo critical admin actions from the last 7 days. Only destructive/reversible actions are listed here."
-        actions={<Button variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw size={14} className={isFetching ? "animate-spin" : ""} /> Refresh</Button>}
+        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
       />
 
       {/* Info */}
