@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
-import { Button } from "@/components/marketing_ui/button";
 
 interface PhotoViewerModalProps {
   src: string;
@@ -66,13 +65,13 @@ export function PhotoViewerModal({ src, alt = "Photo", onClose }: PhotoViewerMod
       {/* Top bar — transparent, just the X button */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
         <div /> {/* spacer */}
-        <Button
+        <button
           onClick={onClose}
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-200 cursor-pointer"
           aria-label="Close"
         >
           <X className="w-6 h-6" />
-        </Button>
+        </button>
       </div>
 
       {/* Image container — completely centered */}
@@ -93,31 +92,31 @@ export function PhotoViewerModal({ src, alt = "Photo", onClose }: PhotoViewerMod
 
       {/* Bottom zoom controls */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
-        <Button
+        <button
           onClick={() => setScale((s) => Math.max(0.5, s - 0.25))}
           className="p-1.5 rounded-full hover:bg-white/20 text-white transition-colors cursor-pointer"
           aria-label="Zoom out"
         >
           <ZoomOut className="w-4 h-4" />
-        </Button>
+        </button>
         <span className="text-white text-xs font-bold min-w-[3ch] text-center tabular-nums">
           {Math.round(scale * 100)}%
         </span>
-        <Button
+        <button
           onClick={() => setScale((s) => Math.min(5, s + 0.25))}
           className="p-1.5 rounded-full hover:bg-white/20 text-white transition-colors cursor-pointer"
           aria-label="Zoom in"
         >
           <ZoomIn className="w-4 h-4" />
-        </Button>
+        </button>
         <div className="w-px h-4 bg-white/20" />
-        <Button
+        <button
           onClick={resetView}
           className="p-1.5 rounded-full hover:bg-white/20 text-white transition-colors cursor-pointer"
           aria-label="Reset view"
         >
           <RotateCcw className="w-4 h-4" />
-        </Button>
+        </button>
       </div>
     </div>
   );

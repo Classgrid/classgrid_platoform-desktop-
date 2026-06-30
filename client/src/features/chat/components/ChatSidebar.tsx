@@ -3,7 +3,6 @@ import { Search, Plus, Users, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
-import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 
 interface ChatSidebarProps {
@@ -54,24 +53,20 @@ export function ChatSidebar({
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-foreground">Chats</h2>
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={onNewChat}
               className="text-muted-foreground hover:text-foreground"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
+            </button>
+            <button
               onClick={onNewGroup}
               className="text-muted-foreground hover:text-foreground"
               title="New Group"
             >
               <Users className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         </div>
         <div className="relative">
@@ -106,12 +101,12 @@ export function ChatSidebar({
             <p className="text-sm text-muted-foreground">
               {search ? "No conversations match your search" : "No conversations yet"}
             </p>
-            <Button
+            <button
               onClick={onNewChat}
               className="mt-3 text-xs font-semibold text-primary hover:underline"
             >
               Start a new conversation
-            </Button>
+            </button>
           </div>
         ) : (
           filtered.map((thread) => {
@@ -119,8 +114,7 @@ export function ChatSidebar({
             const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
             return (
-              <Button
-                variant="ghost"
+              <button
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
                 className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
@@ -171,7 +165,7 @@ export function ChatSidebar({
                     </p>
                   )}
                 </div>
-              </Button>
+              </button>
             );
           })
         )}

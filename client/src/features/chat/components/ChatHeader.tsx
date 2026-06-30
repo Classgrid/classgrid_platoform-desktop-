@@ -1,7 +1,6 @@
 import { MoreVertical, Users, ArrowLeft } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 
-import { Button } from "@/components/marketing_ui/button";
 
 interface ChatHeaderProps {
   thread: ChatThread;
@@ -34,15 +33,15 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick }: ChatHe
   return (
     <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background shrink-0">
       {/* Back button (mobile) */}
-      <Button
+      <button
         onClick={onBack}
         className="lg:hidden p-1.5 rounded-lg hover:bg-accent text-muted-foreground"
       >
         <ArrowLeft className="w-5 h-5" />
-      </Button>
+      </button>
 
       {/* Avatar */}
-      <Button onClick={onAvatarClick || onShowInfo} className="shrink-0">
+      <button onClick={onAvatarClick || onShowInfo} className="shrink-0">
         {hasAvatar ? (
           <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
         ) : (
@@ -50,27 +49,27 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick }: ChatHe
             {thread.type === "group" ? <Users className="w-4 h-4" /> : getInitials(thread.name)}
           </div>
         )}
-      </Button>
+      </button>
 
       {/* Info */}
-      <Button onClick={onShowInfo} className="flex-1 min-w-0 text-left">
+      <button onClick={onShowInfo} className="flex-1 min-w-0 text-left">
         <h3 className="text-sm font-bold text-foreground truncate">{thread.name}</h3>
         <p className="text-xs text-muted-foreground truncate">
           {thread.type === "group"
             ? "Group"
             : thread.role || ""}
         </p>
-      </Button>
+      </button>
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <Button
+        <button
           onClick={onShowInfo}
           className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
           title="More"
         >
           <MoreVertical className="w-4 h-4" />
-        </Button>
+        </button>
       </div>
     </div>
   );

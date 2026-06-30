@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, Users, Check, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
-import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import type { OrgUser } from "../services/chatApi";
@@ -119,7 +118,7 @@ export function GroupCreateModal({
                 </div>
               ) : (
                 filteredUsers.map((user) => (
-                  <Button
+                  <button
                     key={user._id}
                     onClick={() => toggleUser(user._id)}
                     className="w-full flex items-center gap-3 p-2 hover:bg-accent rounded-md transition-colors text-left group"
@@ -142,7 +141,7 @@ export function GroupCreateModal({
                       <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{user.role}</p>
                     </div>
-                  </Button>
+                  </button>
                 ))
               )}
             </div>
@@ -150,16 +149,16 @@ export function GroupCreateModal({
         </div>
 
         <DialogFooter className="p-4 border-t border-border bg-card">
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancel
-          </Button>
-          <Button 
+          </button>
+          <button 
             onClick={handleCreate} 
             disabled={isSubmitting || !groupName.trim() || selectedIds.size === 0}
           >
             {isSubmitting ? <Spinner className="w-4 h-4 mr-2" /> : null}
             Create Group
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

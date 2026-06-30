@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns";
 import { fetchThreads } from "../services/chatApi";
 import { CreateGroupModal } from "./CreateGroupModal";
 
-import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 
 function getInitials(name: string) {
@@ -46,19 +45,19 @@ export function ChatInbox() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-foreground">Inbox</h2>
           <div className="flex items-center gap-1">
-            <Button
+            <button
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => setIsCreateGroupOpen(true)}
               className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="New Group"
             >
               <Users className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         </div>
         <div className="relative">
@@ -103,7 +102,7 @@ export function ChatInbox() {
             const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
             return (
-              <Button
+              <button
                 key={thread.id}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50"
               >
@@ -152,7 +151,7 @@ export function ChatInbox() {
                     )}
                   </div>
                 </div>
-              </Button>
+              </button>
             );
           })
         )}

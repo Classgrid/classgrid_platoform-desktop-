@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/m
 import { Spinner } from "@/components/marketing_ui/spinner";
 import type { OrgUser } from "../services/chatApi";
 
-import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 
 interface UserListModalProps {
@@ -78,7 +77,7 @@ export function UserListModal({
           ) : (
             <div className="space-y-1">
               {filteredUsers.map((user) => (
-                <Button
+                <button
                   key={user._id}
                   onClick={() => {
                     onSelectUser(user._id);
@@ -103,7 +102,7 @@ export function UserListModal({
                       {user.role} {user.email ? `• ${user.email}` : ""}
                     </p>
                   </div>
-                </Button>
+                </button>
               ))}
             </div>
           )}
