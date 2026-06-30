@@ -47,11 +47,11 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           }>
-              <div className={`flex aspect-square size-8 items-center justify-center rounded-lg shadow-sm overflow-hidden shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white'}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-md shrink-0 ${orgLogo ? 'bg-transparent' : 'bg-emerald-500 text-white shadow-sm overflow-hidden'}`}>
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+                  <img src={orgLogo} alt={orgName} className="w-full h-full object-contain rounded-md" />
                 ) : (
-                  <Building2 className="size-4 text-white" />
+                  <Building2 className="size-5 text-white" />
                 )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">

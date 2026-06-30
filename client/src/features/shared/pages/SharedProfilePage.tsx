@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, CheckCircle2, ShieldAlert,
-  User as UserIcon, ChevronRight
+  User as UserIcon, ChevronRight, ArrowLeft
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
@@ -331,7 +331,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold tracking-tight">{form.name}</h1>
                   <Badge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest uppercase">
-                    {form.role.replace("platform_", "")}
+                    {(form.role || "User").replace("platform_", "")}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium">
