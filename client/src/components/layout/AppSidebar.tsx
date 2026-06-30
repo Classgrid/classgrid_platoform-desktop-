@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
 } from "@/components/marketing_ui/sidebar";
 import { dashboardConfigs } from "@/config/sidebar";
-import { DashboardRole } from "./DashboardLayout";
+import type { DashboardRole } from "./DashboardLayout";
 import { SidebarFooterUser } from "./SidebarFooterUser";
 
 interface AppSidebarProps {
