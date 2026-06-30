@@ -985,4 +985,40 @@ router.get('/:id/polls', isAuthenticated, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ==========================================
+// Mark All as Read
+// ==========================================
+router.post('/read-all', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+
+    // Find all thread IDs the user belongs to
+    const { data: memberships } = await sb
+      .from('chat_thread_members')
+      .select('thread_id')
+      .eq('user_id', userId);
+
+    if (!memberships || memberships.length === 0) {
+      return res.json({ success: true });
+    }
+
+    const threadIds = memberships.map(m => m.thread_id);
+    const now = new Date().toISOString();
+
+    // Upsert read records for all these threads
+    const upserts = threadIds.map(tid => ({
+      thread_id: tid,
+      user_id: userId,
+      last_read_at: now
+    }));
+
+    await sb.from('thread_reads').upsert(upserts, { onConflict: 'thread_id,user_id' });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Read all error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

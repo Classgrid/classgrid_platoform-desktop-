@@ -140,6 +140,10 @@ export async function markThreadRead(threadId: string) {
   await apiClient.post(`/api/threads/${threadId}/read`);
 }
 
+export async function markAllRead() {
+  await apiClient.post(`/api/threads/read-all`);
+}
+
 export async function deleteMessage(threadId: string, messageId: string) {
   await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`);
 }

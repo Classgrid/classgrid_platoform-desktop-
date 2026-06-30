@@ -17,6 +17,7 @@ interface ChatSidebarProps {
   onSelectThread: (thread: ChatThread) => void;
   onNewChat: () => void;
   onNewGroup: () => void;
+  onMarkAllRead?: () => void;
   isLoading: boolean;
   onlineUsers?: Set<string>;
 }
@@ -45,6 +46,7 @@ export function ChatSidebar({
   onSelectThread,
   onNewChat,
   onNewGroup,
+  onMarkAllRead,
   isLoading,
   onlineUsers,
 }: ChatSidebarProps) {
@@ -104,7 +106,7 @@ export function ChatSidebar({
                   <CheckSquare className="w-4 h-4 mr-3" />
                   <span>Select chats</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2">
+                <DropdownMenuItem onClick={onMarkAllRead} className="cursor-pointer py-2 text-primary">
                   <CheckCheck className="w-4 h-4 mr-3" />
                   <span>Mark all as read</span>
                 </DropdownMenuItem>

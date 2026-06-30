@@ -14,6 +14,7 @@ import {
   createGroup,
   deleteChat,
   clearChat,
+  markAllRead,
   fetchThreadPolls,
   voteThreadPoll,
   type ChatThread,
@@ -306,11 +307,23 @@ export function ChatPage() {
 
   const handleCreateGroup = async (name: string, memberIds: string[]) => {
     try {
-      await createGroup(name, memberIds);
+      const { threadId } = await createGroup(name, memberIds);
       await loadThreads();
-      toast.success("Group created successfully");
+      const newThread = threads.find((t) => t.id === threadId);
+      if (newThread) setActiveThread(newThread);
+      setIsGroupModalOpen(false);
     } catch (err) {
       toast.error("Failed to create group");
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllRead();
+      setThreads((prev) => prev.map((t) => ({ ...t, unread: 0 })));
+      toast.success("All chats marked as read");
+    } catch (err) {
+      toast.error("Failed to mark all as read");
     }
   };
 
@@ -413,6 +426,7 @@ export function ChatPage() {
           onSelectThread={setActiveThread}
           onNewChat={() => setIsUserModalOpen(true)}
           onNewGroup={() => setIsGroupModalOpen(true)}
+          onMarkAllRead={handleMarkAllRead}
           isLoading={threadsLoading}
           onlineUsers={onlineUsers}
         />
