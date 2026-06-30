@@ -50,6 +50,7 @@ export function CodeCopyDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
+        showCloseButton={false}
         className={cn(
           "max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-white/10 bg-[#0f0f0f] shadow-2xl rounded-2xl", 
           className
@@ -124,7 +125,14 @@ export function CodeCopyDialog({
         </div>
         
         {/* Footer */}
-        <div className="px-6 py-4 shrink-0 border-t border-white/5 bg-zinc-900/30 flex justify-end">
+        <div className="px-6 py-4 shrink-0 border-t border-white/5 bg-zinc-900/30 flex justify-end gap-3">
+          <Button 
+            variant="ghost" 
+            onClick={() => onOpenChange(false)}
+            className="text-zinc-400 hover:text-white hover:bg-white/5"
+          >
+            Cancel
+          </Button>
           <Button 
             size="default"
             variant="default" 
