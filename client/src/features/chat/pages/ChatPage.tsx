@@ -249,7 +249,7 @@ export function ChatPage() {
   return (
     <div className="flex flex-1 h-full w-full overflow-hidden bg-background">
       {/* Sidebar Panel (Hidden on mobile when a chat is open) */}
-      <div className={`${activeThread ? "hidden lg:block" : "block"} w-full lg:w-[350px] xl:w-[400px] shrink-0 border-r border-border`}>
+      <div className={`${activeThread ? "hidden lg:block" : "block"} w-full lg:w-[350px] xl:w-[400px] shrink-0 border-r border-border h-full overflow-hidden`}>
         <ChatSidebar
           threads={threads}
           activeThreadId={activeThread?.id || null}

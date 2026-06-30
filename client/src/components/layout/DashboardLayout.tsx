@@ -133,7 +133,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                 </Breadcrumb>
               </header>
             )}
-            <main className={`flex-1 overflow-x-hidden overflow-y-auto bg-background ${isFullBleed ? 'p-0 m-0 border-none flex flex-col h-full' : 'p-4 lg:p-6'}`}>
+            <main className={`flex-1 overflow-x-hidden bg-background ${isFullBleed ? 'overflow-y-hidden p-0 m-0 border-none flex flex-col h-full' : 'overflow-y-auto p-4 lg:p-6'}`}>
 
               {children}
             </main>

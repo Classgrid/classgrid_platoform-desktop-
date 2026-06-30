@@ -222,6 +222,8 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
 
   // Load Google reCAPTCHA v3 — shows official badge at bottom-right
   useEffect(() => {
+    if (brandingError || !branding) return;
+
     const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
     script.async = true;
@@ -231,11 +233,12 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
       try { document.head.removeChild(script); } catch {}
       document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
     };
-  }, []);
+  }, [branding, brandingError]);
 
   if (brandingError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-[#0f0f0f] text-white text-center">
+        <img src="/logo.png" alt="Classgrid" className="h-16 w-16 object-contain mb-6 opacity-80" />
         <h2 className="text-2xl font-semibold mb-2">Institution Not Found</h2>
         <p className="text-white/60">This login portal does not exist or has been moved.</p>
       </div>
