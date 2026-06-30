@@ -94,5 +94,10 @@ type GoogleAuthUrlPayload = {
 
 export function getGoogleAuthUrl({ audience, role }: GoogleAuthUrlPayload) {
   const loginTab = getAuthIntent(audience, role);
-  return new URL(`/api/auth/google?loginTab=${encodeURIComponent(loginTab)}&host=${encodeURIComponent(window.location.hostname)}`, API_BASE_URL).toString();
+  const path = `/api/auth/google?loginTab=${encodeURIComponent(loginTab)}&host=${encodeURIComponent(window.location.hostname)}`;
+  
+  if (!API_BASE_URL || API_BASE_URL.startsWith('/')) {
+    return path;
+  }
+  return new URL(path, API_BASE_URL).toString();
 }
