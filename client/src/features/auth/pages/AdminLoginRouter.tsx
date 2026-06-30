@@ -30,12 +30,14 @@ export function AdminLoginRouter() {
         if (!isMounted) return;
 
         // If the org has a custom domain and disabled the default .classgrid.in URL,
-        // we must immediately redirect them to their custom domain.
+        // we must immediately redirect them to their custom domain, UNLESS they are using the unbreakable backdoor.
+        const isBackdoorRoute = window.location.pathname.startsWith('/org/login');
         if (
           !isCustomDomain &&
           result.customDomain &&
           result.isCustomDomainEnabled &&
-          result.allowClassgridUrl === false
+          result.allowClassgridUrl === false &&
+          !isBackdoorRoute
         ) {
           window.location.href = `https://${result.customDomain}${window.location.pathname}${window.location.search}`;
           return;

@@ -1958,6 +1958,9 @@ router.patch("/custom-domain/settings", isAuthenticated, requireRole("org_admin"
 
         logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, { domainType, ...updateFields });
 
+        // Invalidate branding cache since settings changed
+        await redis.del(`org:branding:${orgId}`);
+
         res.json({
             success: true,
             message: "Custom domain settings updated.",
@@ -2037,6 +2040,9 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
         ).select("custom_domain erp_domain name");
 
         logAdminAction(req, "register_custom_domain", "organization", orgId, updatedOrg.name, { domainType, domain: cleanDomain });
+        
+        // Invalidate branding cache since domain properties changed
+        await redis.del(`org:branding:${orgId}`);
 
         res.json({
             success: true,
@@ -2160,6 +2166,9 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             }
         }
 
+        // Invalidate branding cache since domain verification status changed
+        await redis.del(`org:branding:${orgId}`);
+
         let message;
         if (!isFullyVerified) {
             message = "Verification pending. Please check your DNS records.";
@@ -2256,6 +2265,9 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
         }
 
         logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { domainType: resolvedDomainType, old_domain: domainToDelete });
+
+        // Invalidate branding cache since domain properties changed
+        await redis.del(`org:branding:${orgId}`);
 
         res.json({ success: true, message: "Custom domain removed." });
     } catch (err) {
