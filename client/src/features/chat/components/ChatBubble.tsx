@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2 } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
@@ -21,6 +21,7 @@ interface ChatBubbleProps {
   onVotePoll?: (pollId: string, optionId: string) => void;
   onUserClick?: (userId: string) => void;
   onViewMedia?: (attachment: any) => void;
+  onStar?: (msgId: string) => void;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -54,6 +55,7 @@ export function ChatBubble({
   onVotePoll,
   onUserClick,
   onViewMedia,
+  onStar,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
@@ -341,14 +343,16 @@ export function ChatBubble({
 
         {/* Action Menu (Hover) */}
         {!message.is_deleted && (
-          <div className={`flex items-center self-center shrink-0 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}>
+          <div className={`flex items-center self-center gap-1 shrink-0 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}>
+            
+            {/* Reaction Button & Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="p-1.5 text-muted-foreground hover:bg-accent rounded-full transition-colors">
-                  <MoreHorizontal className="w-4 h-4" />
+                <button className="p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground rounded-full transition-colors" title="React">
+                  <Smile className="w-4 h-4" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className={showFullPicker ? "w-auto p-0 border-none" : "w-40 p-1"} side={isMine ? "left" : "right"}>
+              <PopoverContent className={showFullPicker ? "w-auto p-0 border-none" : "w-auto p-1.5 px-2 rounded-full"} side="top" align={isMine ? "end" : "start"} sideOffset={10}>
                 {showFullPicker ? (
                   <EmojiPicker
                     onEmojiClick={(emojiData) => {
@@ -359,34 +363,58 @@ export function ChatBubble({
                     previewConfig={{ showPreview: false }}
                   />
                 ) : (
-                  <>
-                    <div className="flex px-3 py-3 gap-2 border-b border-border justify-between items-center">
-                      {COMMON_EMOJIS.map(emoji => (
-                        <button key={emoji} onClick={() => onReact(message.id, emoji)} className="text-xl hover:scale-125 transition-transform origin-bottom">
-                          {emoji}
-                        </button>
-                      ))}
-                      <button onClick={() => setShowFullPicker(true)} className="hover:scale-125 transition-transform text-muted-foreground p-0.5 rounded-full hover:bg-muted ml-2">
-                        <Smile className="w-5 h-5" />
+                  <div className="flex items-center gap-1.5">
+                    {COMMON_EMOJIS.map(emoji => (
+                      <button 
+                        key={emoji} 
+                        onClick={() => onReact(message.id, emoji)} 
+                        className="text-xl hover:scale-125 transition-transform origin-bottom hover:-translate-y-1 p-1"
+                      >
+                        {emoji}
                       </button>
-                    </div>
-                    <button onClick={() => onReply(message)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
-                      <CornerUpLeft className="w-4 h-4" /> Reply
+                    ))}
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <button 
+                      onClick={() => setShowFullPicker(true)} 
+                      className="hover:bg-accent text-muted-foreground hover:text-foreground p-1.5 rounded-full transition-colors"
+                      title="More emojis"
+                    >
+                      <Plus className="w-4 h-4" />
                     </button>
-                    {isMine && (
-                      <>
-                        <button onClick={() => setIsEditing(true)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-accent rounded-sm text-left">
-                          <Edit2 className="w-4 h-4" /> Edit
-                        </button>
-                        <button onClick={() => onDelete(message.id)} className="w-full flex items-center gap-2 px-2 py-2 text-sm hover:bg-red-500/10 text-red-500 rounded-sm text-left">
-                          <Trash2 className="w-4 h-4" /> Delete
-                        </button>
-                      </>
-                    )}
-                  </>
+                  </div>
                 )}
               </PopoverContent>
             </Popover>
+
+            {/* Menu Button & Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground rounded-full transition-colors" title="Menu">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40" align={isMine ? "end" : "start"}>
+                <DropdownMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
+                  <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
+                </DropdownMenuItem>
+                {onStar && (
+                  <DropdownMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
+                    <Star className="w-4 h-4 mr-2" /> Star
+                  </DropdownMenuItem>
+                )}
+                {isMine && (
+                  <>
+                    <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
+                      <Edit2 className="w-4 h-4 mr-2" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
+                      <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
           </div>
         )}
 

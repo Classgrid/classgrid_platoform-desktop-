@@ -21,6 +21,7 @@ interface ChatConversationProps {
   onViewMedia?: (attachment: any) => void;
   polls?: Poll[];
   onVotePoll?: (pollId: string, optionId: string) => void;
+  onStar?: (msgId: string) => void;
 }
 
 export function ChatConversation({
@@ -40,6 +41,7 @@ export function ChatConversation({
   onViewMedia,
   polls = [],
   onVotePoll,
+  onStar,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
@@ -175,6 +177,7 @@ export function ChatConversation({
                     onViewMedia={onViewMedia}
                     poll={polls.find(p => p.message_id === msg.id)}
                     onVotePoll={onVotePoll}
+                    onStar={onStar}
                   />
                 </motion.div>
               );
