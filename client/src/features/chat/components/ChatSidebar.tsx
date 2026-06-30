@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Plus, Users, MessageSquare } from "lucide-react";
+import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
 import { Input } from "@/components/marketing_ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/marketing_ui/dropdown-menu";
 
 interface ChatSidebarProps {
   threads: ChatThread[];
@@ -67,22 +73,43 @@ export function ChatSidebar({
       {/* Header */}
       <div className="px-4 py-4 border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-foreground">Chats</h2>
-          <div className="flex items-center gap-1">
+          <h2 className="text-xl font-bold text-foreground ml-1">Chats</h2>
+          <div className="flex items-center gap-2">
             <button
               onClick={onNewChat}
-              className="text-muted-foreground hover:text-foreground"
+              className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
               title="New Chat"
             >
-              <Plus className="w-4 h-4" />
+              <MessageSquarePlus className="w-5 h-5" />
             </button>
-            <button
-              onClick={onNewGroup}
-              className="text-muted-foreground hover:text-foreground"
-              title="New Group"
-            >
-              <Users className="w-4 h-4" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors outline-none"
+                  title="Menu"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={onNewGroup} className="cursor-pointer py-2">
+                  <Users className="w-4 h-4 mr-3" />
+                  <span>New group</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer py-2">
+                  <Star className="w-4 h-4 mr-3" />
+                  <span>Starred messages</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer py-2">
+                  <CheckSquare className="w-4 h-4 mr-3" />
+                  <span>Select chats</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer py-2">
+                  <CheckCheck className="w-4 h-4 mr-3" />
+                  <span>Mark all as read</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="relative">
