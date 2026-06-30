@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Building2, ClipboardList, Megaphone, Plus, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
+import { Building2, ClipboardList, Megaphone, Plus, RefreshCw, ShieldCheck, Ticket, Users, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/marketing_ui/badge";

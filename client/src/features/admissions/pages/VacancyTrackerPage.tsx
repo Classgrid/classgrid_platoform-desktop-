@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
 
 import { getSeatMatrix } from "../api";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+
 
 export function VacancyTrackerPage() {
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({

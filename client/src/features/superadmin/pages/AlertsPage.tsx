@@ -9,6 +9,8 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 import { formatDate, formatTime } from "@/utils/dateUtils";
 import { useErrorLogs, useEmailLogs, useResendEmail } from "../queries/useAlerts";
 import type { ErrorLog, EmailLog } from "../services/superAdminApi";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+
 
 // ── columns ───────────────────────────────────────────────────────────────────
 

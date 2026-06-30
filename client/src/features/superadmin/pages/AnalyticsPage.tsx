@@ -2,6 +2,8 @@ import { BarChart3, TrendingUp, Users, RefreshCw } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { useDashboardAnalytics } from "../queries/useAnalytics";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+
 
 export function AnalyticsPage() {
   const { data, isLoading, isError, refetch, isFetching } = useDashboardAnalytics();

@@ -15,6 +15,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/a
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+
 
 export function GdprPage() {
   const [search, setSearch] = useState("");

@@ -16,6 +16,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+
 
 const SEVERITY_COLOR: Record<string, string> = {
   low: "hsl(var(--success))", medium: "hsl(var(--warning))", high: "hsl(var(--danger))", critical: "hsl(340, 82%, 48%)",
