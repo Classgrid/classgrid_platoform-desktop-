@@ -7,24 +7,68 @@ import { Link } from "react-router-dom";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 import { AppSidebar } from "./AppSidebar";
-import { resolveDashboardPageTitle, defaultTitlesByRole } from "@/config/sidebar";
+import { resolveDashboardPageTitle } from "@/config/sidebar";
 
-export type DashboardRole =
-  | "super_admin"
-  | "org_admin"
-  | "admission"
-  | "fees"
-  | "exams"
-  | "library"
-  | "attendance"
-  | "hr"
-  | "hostel"
-  | "faculty"
-  | "student";
+import type { DashboardRole } from "@/layouts/types";
+
+export type { DashboardRole } from "@/layouts/types";
+
+type DashboardRoleInput = DashboardRole | string;
+
+const ROLE_ALIASES: Record<string, DashboardRole> = {
+  admission: "admission_dept",
+  admissions: "admission_dept",
+  ADMISSION_MENU: "admission_dept",
+  admission_head: "admission_dept",
+  admission_verifier: "admission_dept",
+  admission_counselor: "admission_dept",
+  admission_clerk: "admission_dept",
+  fees: "fees_dept",
+  FEES_MENU: "fees_dept",
+  fee_manager: "fees_dept",
+  exams: "exam_dept",
+  exam: "exam_dept",
+  EXAMS_MENU: "exam_dept",
+  exam_controller: "exam_dept",
+  library: "library_dept",
+  LIBRARY_MENU: "library_dept",
+  library_manager: "library_dept",
+  attendance: "attendance_dept",
+  ATTENDANCE_MENU: "attendance_dept",
+  hr: "hr_dept",
+  HR_MENU: "hr_dept",
+  hostel: "hostel_dept",
+  transport: "hostel_dept",
+  HOSTEL_MENU: "hostel_dept",
+  transport_manager: "hostel_dept",
+  teacher: "faculty",
+  hod: "faculty",
+  principal: "faculty",
+  vice_principal: "faculty",
+};
+
+function roleFromPath(pathname: string): DashboardRole | null {
+  if (pathname.startsWith("/superadmin")) return "super_admin";
+  if (pathname.startsWith("/org")) return "org_admin";
+  if (pathname.startsWith("/dept/admissions")) return "admission_dept";
+  if (pathname.startsWith("/dept/fees")) return "fees_dept";
+  if (pathname.startsWith("/dept/exams")) return "exam_dept";
+  if (pathname.startsWith("/dept/library")) return "library_dept";
+  if (pathname.startsWith("/dept/attendance")) return "attendance_dept";
+  if (pathname.startsWith("/dept/hr")) return "hr_dept";
+  if (pathname.startsWith("/dept/hostel") || pathname.startsWith("/dept/transport")) return "hostel_dept";
+  if (pathname.startsWith("/faculty")) return "faculty";
+  if (pathname.startsWith("/student")) return "student";
+  return null;
+}
+
+function normalizeDashboardRole(role: DashboardRoleInput, pathname: string): DashboardRole {
+  return ROLE_ALIASES[role] || roleFromPath(pathname) || (role as DashboardRole);
+}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role: DashboardRole;
+  role: DashboardRoleInput;
   user?: {
     name: string;
     email?: string;
@@ -37,12 +81,12 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
   const location = useLocation();
   const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website");
-  const { items, showBreadcrumbs } = useBreadcrumbStore();
+  const { items, showBreadcrumbs } = useBreadcrumbStore();`r`n  const dashboardRole = normalizeDashboardRole(role, location.pathname);
 
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <AppSidebar role={role} user={user} />
+        <AppSidebar role={dashboardRole} user={user} />
         {/* Make the inset background match the sidebar so it's a seamless black canvas */}
         <SidebarInset className="bg-background m-0 p-0 flex flex-col min-h-screen overflow-hidden">
           {/* This is the actual flush right pane */}
@@ -73,21 +117,9 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                         </React.Fragment>
                       ))
                     ) : (
-                      <>
-                        <BreadcrumbItem>
-                          <BreadcrumbPage className="text-muted-foreground font-normal">
-                            {defaultTitlesByRole[role]}
-                          </BreadcrumbPage>
-                        </BreadcrumbItem>
-                        {resolveDashboardPageTitle(location.pathname) !== defaultTitlesByRole[role] && (
-                          <>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                              <BreadcrumbPage>{resolveDashboardPageTitle(location.pathname)}</BreadcrumbPage>
-                            </BreadcrumbItem>
-                          </>
-                        )}
-                      </>
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>{resolveDashboardPageTitle(location.pathname)}</BreadcrumbPage>
+                      </BreadcrumbItem>
                     )}
                   </BreadcrumbList>
                 </Breadcrumb>
