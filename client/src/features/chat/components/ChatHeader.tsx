@@ -76,14 +76,21 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       </button>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
+          title="Search"
+          onClick={() => {}}
+        >
+          <Search className="w-5 h-5" />
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
+              className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
               title="More"
             >
-              <MoreVertical className="w-4 h-4" />
+              <MoreVertical className="w-5 h-5" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

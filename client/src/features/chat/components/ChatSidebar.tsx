@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck } from "lucide-react";
+import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
@@ -22,6 +22,9 @@ interface ChatSidebarProps {
   onlineUsers?: Set<string>;
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  onBulkDelete?: (threadIds: string[]) => void;
+  onBulkMute?: (threadIds: string[]) => void;
+  onOpenStarredMessages?: () => void;
 }
 
 function getInitials(name: string) {
@@ -53,8 +56,38 @@ export function ChatSidebar({
   onlineUsers,
   activeFilter,
   onFilterChange,
+  onBulkDelete,
+  onBulkMute,
+  onOpenStarredMessages,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedChats, setSelectedChats] = useState<Set<string>>(new Set());
+
+  const toggleSelection = (threadId: string) => {
+    setSelectedChats(prev => {
+      const next = new Set(prev);
+      if (next.has(threadId)) next.delete(threadId);
+      else next.add(threadId);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (onBulkDelete && selectedChats.size > 0) {
+      onBulkDelete(Array.from(selectedChats));
+      setIsSelectionMode(false);
+      setSelectedChats(new Set());
+    }
+  };
+
+  const handleBulkMute = () => {
+    if (onBulkMute && selectedChats.size > 0) {
+      onBulkMute(Array.from(selectedChats));
+      setIsSelectionMode(false);
+      setSelectedChats(new Set());
+    }
+  };
 
   const filtered = threads.filter((t) => {
     // Text search filter
@@ -71,16 +104,48 @@ export function ChatSidebar({
     <div className="flex flex-col h-full w-full bg-background">
       {/* Header */}
       <div className="px-4 py-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold text-foreground ml-1">Chats</h2>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onNewChat}
-              className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
-              title="New Chat"
-            >
-              <MessageSquarePlus className="w-5 h-5" />
-            </button>
+        <div className="flex items-center justify-between mb-3 h-9">
+          {isSelectionMode ? (
+            <div className="flex items-center justify-between w-full animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => { setIsSelectionMode(false); setSelectedChats(new Set()); }}
+                  className="p-1.5 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <span className="font-bold text-foreground">{selectedChats.size} selected</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={handleBulkMute}
+                  disabled={selectedChats.size === 0}
+                  className="p-2 text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-full transition-colors disabled:opacity-50"
+                  title="Mute selected"
+                >
+                  <BellOff className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={handleBulkDelete}
+                  disabled={selectedChats.size === 0}
+                  className="p-2 text-danger hover:bg-danger/10 focus:text-danger rounded-full transition-colors disabled:opacity-50"
+                  title="Delete selected"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold text-foreground ml-1">Chats</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onNewChat}
+                  className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
+                  title="New Chat"
+                >
+                  <MessageSquarePlus className="w-5 h-5" />
+                </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -95,11 +160,11 @@ export function ChatSidebar({
                   <Users className="w-4 h-4 mr-3" />
                   <span>New group</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2">
+                <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenStarredMessages}>
                   <Star className="w-4 h-4 mr-3" />
                   <span>Starred messages</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2">
+                <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSelectionMode(true)}>
                   <CheckSquare className="w-4 h-4 mr-3" />
                   <span>Select chats</span>
                 </DropdownMenuItem>
@@ -110,6 +175,8 @@ export function ChatSidebar({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          </>
+          )}
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -175,11 +242,22 @@ export function ChatSidebar({
             return (
               <button
                 key={thread.id}
-                onClick={() => onSelectThread(thread)}
+                onClick={() => {
+                  if (isSelectionMode) toggleSelection(thread.id);
+                  else onSelectThread(thread);
+                }}
                 className={`w-full h-auto flex items-center justify-start gap-3 px-4 py-3 text-left transition-colors cursor-pointer hover:bg-accent/50 ${
-                  isActive ? "bg-accent" : ""
-                }`}
+                  isActive && !isSelectionMode ? "bg-accent" : ""
+                } ${isSelectionMode ? "hover:bg-accent" : ""}`}
               >
+                {isSelectionMode && (
+                  <div className={`shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors mr-1 ${
+                    selectedChats.has(thread.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"
+                  }`}>
+                    {selectedChats.has(thread.id) && <Check className="w-3.5 h-3.5" />}
+                  </div>
+                )}
+                
                 {/* Avatar */}
                 <div className="relative shrink-0">
                   {hasAvatar ? (

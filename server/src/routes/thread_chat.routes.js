@@ -846,7 +846,6 @@ router.post('/:id/clear', isAuthenticated, async (req, res) => {
     // Attempt to update cleared_at if schema supports it
     const { error } = await sb
       .from('chat_thread_members')
-      .update({ cleared_at: new Date().toISOString() })
       .eq('thread_id', threadId)
       .eq('user_id', userId);
       
@@ -855,6 +854,79 @@ router.post('/:id/clear', isAuthenticated, async (req, res) => {
     }
     res.json({ ok: true });
   } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mark all as read
+router.post('/mark-all-read', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+
+    // Just upsert for all active threads... but since we don't know them, we can do it by querying all user's threads first.
+    const userThreads = await sb.from('chat_thread_members').select('thread_id').eq('user_id', userId);
+    if (!userThreads.data) return res.json({ ok: true });
+
+    const upserts = userThreads.data.map(t => ({
+      thread_id: t.thread_id,
+      user_id: userId,
+      last_read_at: new Date().toISOString(),
+    }));
+
+    await sb.from('thread_reads').upsert(upserts, { onConflict: 'thread_id,user_id' });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Mark all read error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Bulk Mute
+// ==========================================
+router.post('/bulk-mute', isAuthenticated, async (req, res) => {
+  try {
+    const { threadIds } = req.body;
+    if (!threadIds || !Array.isArray(threadIds)) return res.status(400).json({ error: 'Invalid threadIds' });
+
+    const userId = req.user._id.toString();
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const muted = new Set(user.muted_chat_threads || []);
+    threadIds.forEach(id => muted.add(id));
+
+    user.muted_chat_threads = Array.from(muted);
+    await user.save();
+
+    res.json({ success: true, muted: user.muted_chat_threads });
+  } catch (err) {
+    console.error('Bulk mute error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Bulk Delete
+// ==========================================
+router.post('/bulk-delete', isAuthenticated, async (req, res) => {
+  try {
+    const { threadIds } = req.body;
+    if (!threadIds || !Array.isArray(threadIds)) return res.status(400).json({ error: 'Invalid threadIds' });
+
+    const userId = req.user._id.toString();
+    
+    // For DMs, delete the thread_members record for this user (hide it)
+    // For Groups, leave the group.
+    
+    for (const threadId of threadIds) {
+      await sb.from('chat_thread_members').delete().match({ thread_id: threadId, user_id: userId });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Bulk delete error:', err);
     res.status(500).json({ error: err.message });
   }
 });

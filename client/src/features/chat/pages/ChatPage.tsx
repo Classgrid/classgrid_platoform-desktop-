@@ -14,6 +14,9 @@ import {
   createGroup,
   deleteChat,
   clearChat,
+  bulkDeleteChats,
+  bulkMuteChats,
+  toggleStarMessage,
   markAllRead,
   fetchThreadPolls,
   voteThreadPoll,
@@ -33,6 +36,7 @@ import { GroupCreateModal } from "../components/GroupCreateModal";
 import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
+import { StarredMessagesModal } from "../components/StarredMessagesModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 
@@ -63,6 +67,7 @@ export function ChatPage() {
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
+  const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
@@ -332,6 +337,39 @@ export function ChatPage() {
     }
   };
 
+  const handleBulkDelete = async (threadIds: string[]) => {
+    if (!confirm(`Are you sure you want to delete ${threadIds.length} chats?`)) return;
+    try {
+      await bulkDeleteChats(threadIds);
+      setThreads(prev => prev.filter(t => !threadIds.includes(t.id)));
+      if (activeThread && threadIds.includes(activeThread.id)) {
+        setActiveThread(null);
+      }
+      toast.success(`${threadIds.length} chats deleted`);
+    } catch (err) {
+      toast.error("Failed to delete chats");
+    }
+  };
+
+  const handleBulkMute = async (threadIds: string[]) => {
+    try {
+      await bulkMuteChats(threadIds);
+      toast.success(`${threadIds.length} chats muted`);
+      // Since muted state isn't locally tracked on threads yet, just toast
+    } catch (err) {
+      toast.error("Failed to mute chats");
+    }
+  };
+
+  const handleStarMessage = async (messageId: string) => {
+    try {
+      await toggleStarMessage(messageId);
+      toast.success("Message starred/unstarred");
+    } catch (err) {
+      toast.error("Failed to star message");
+    }
+  };
+
   // -- Realtime Handlers --
   
   // 1. Sidebar Updates (via User channel)
@@ -441,6 +479,9 @@ export function ChatPage() {
           onNewChat={() => setIsUserModalOpen(true)}
           onNewGroup={() => setIsGroupModalOpen(true)}
           onMarkAllRead={handleMarkAllRead}
+          onBulkDelete={handleBulkDelete}
+          onBulkMute={handleBulkMute}
+          onOpenStarredMessages={() => setIsStarredModalOpen(true)}
           isLoading={threadsLoading}
           onlineUsers={onlineUsers}
           activeFilter={activeFilter}
@@ -485,6 +526,7 @@ export function ChatPage() {
               hasMore={hasMoreMessages}
               onLoadMore={handleLoadMore}
               onReply={setReplyTo}
+              onStar={handleStarMessage}
               onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
               onEdit={async (id, text) => {
                 try {
@@ -597,6 +639,11 @@ export function ChatPage() {
           onClose={() => setIsDisappearingModalOpen(false)}
         />
       )}
+
+      <StarredMessagesModal
+        isOpen={isStarredModalOpen}
+        onClose={() => setIsStarredModalOpen(false)}
+      />
 
       {!!viewingMedia && (
         <FilePreviewModal 

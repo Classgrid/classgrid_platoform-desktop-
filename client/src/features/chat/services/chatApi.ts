@@ -156,6 +156,20 @@ export async function deleteChat(threadId: string) {
   await apiClient.delete(`/api/threads/${threadId}`);
 }
 
+export async function bulkDeleteChats(threadIds: string[]) {
+  await apiClient.post('/api/threads/bulk-delete', { threadIds });
+}
+
+export async function bulkMuteChats(threadIds: string[]) {
+  const res = await apiClient.post('/api/threads/bulk-mute', { threadIds });
+  return res.data;
+}
+
+export async function toggleStarMessage(messageId: string) {
+  const res = await apiClient.post(`/api/threads/messages/${messageId}/star`);
+  return res.data;
+}
+
 export async function editMessage(threadId: string, messageId: string, message: string) {
   await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}`, { message });
 }
