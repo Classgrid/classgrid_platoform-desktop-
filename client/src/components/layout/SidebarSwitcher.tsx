@@ -22,7 +22,7 @@ export function SidebarSwitcher({ user }: { user: { role?: string; additional_ro
   // 1. Resolve Organization Branding from Backend User Object
   const currentRole = user?.role || "super_admin";
   const orgName = user?.organization?.sidebar_name || user?.organization?.name || (currentRole === "super_admin" ? user?.name || "Super Admin" : "Classgrid Platform");
-  const orgLogo = user?.organization?.logo_url;
+  const orgLogo = user?.organization?.logo_url || (currentRole === "super_admin" ? (user as any)?.platformLogo : undefined);
 
   // 2. Resolve Roles
   // (currentRole already defined above)

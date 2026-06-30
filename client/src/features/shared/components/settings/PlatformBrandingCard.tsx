@@ -20,14 +20,14 @@ export function PlatformBrandingCard() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: (updates: { profilePicture: string }) => apiClient.put("/api/user/update", updates),
+    mutationFn: (updates: { platformLogo: string }) => apiClient.put("/api/user/update", updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["global-profile"] });
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
     }
   });
 
-  const logoUrl = profileData?.user?.profilePicture || profileData?.user?.photoURL;
+  const logoUrl = profileData?.user?.platformLogo;
 
   const openCropper = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -67,7 +67,7 @@ export function PlatformBrandingCard() {
 
       if (!response.ok) throw new Error(`Upload failed`);
 
-      await updateProfile.mutateAsync({ profilePicture: data.publicUrl });
+      await updateProfile.mutateAsync({ platformLogo: data.publicUrl });
       toast.success(`Platform Logo updated successfully!`, { id: loadingToast });
       setCropOpen(false);
     } catch (err) {
@@ -79,7 +79,7 @@ export function PlatformBrandingCard() {
   const handleDelete = async () => {
     const loadingToast = toast.loading(`Removing Platform Logo...`);
     try {
-      await updateProfile.mutateAsync({ profilePicture: "" });
+      await updateProfile.mutateAsync({ platformLogo: "" });
       toast.success(`Platform Logo removed successfully!`, { id: loadingToast });
     } catch (error) {
       toast.error(`Failed to remove logo`, { id: loadingToast });

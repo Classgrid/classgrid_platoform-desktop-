@@ -472,13 +472,13 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
 
   if (isReadOnly) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div 
-          className="w-full h-full md:w-[95vw] md:h-[95vh] md:max-w-6xl md:rounded-3xl bg-background border border-border shadow-2xl overflow-y-auto overflow-x-hidden animate-in zoom-in-95 duration-200"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {containerContent}
+      <div className="w-full h-full pb-12">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center">
+          <Button variant="ghost" className="gap-2 -ml-4 hover:bg-accent" onClick={onClose}>
+            <ArrowLeft size={16} /> Back to Chat
+          </Button>
         </div>
+        {containerContent}
       </div>
     );
   }

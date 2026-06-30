@@ -546,23 +546,25 @@ export function ChatPage() {
         />
       )}
       
-      {/* Full Screen Shared Profile Modal */}
+      {/* Full Screen Shared Profile View */}
       {!!profileUserId && (() => {
         const selectedUserForProfile = orgUsers.find(u => u._id === profileUserId);
         if (!selectedUserForProfile) return null;
         return (
-          <SharedProfilePage 
-            publicUser={{
-              name: selectedUserForProfile.name,
-              phoneNumber: selectedUserForProfile.phoneNumber || "",
-              email: selectedUserForProfile.email,
-              role: selectedUserForProfile.role,
-              profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
-              prn: selectedUserForProfile.prn,
-              bio: selectedUserForProfile.bio,
-            }}
-            onClose={() => setProfileUserId(null)} 
-          />
+          <div className="absolute inset-0 z-50 bg-background overflow-y-auto animate-in fade-in duration-200">
+            <SharedProfilePage 
+              publicUser={{
+                name: selectedUserForProfile.name,
+                phoneNumber: selectedUserForProfile.phoneNumber || "",
+                email: selectedUserForProfile.email,
+                role: selectedUserForProfile.role,
+                profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
+                prn: selectedUserForProfile.prn,
+                bio: selectedUserForProfile.bio,
+              }}
+              onClose={() => setProfileUserId(null)} 
+            />
+          </div>
         );
       })()}
     </div>
