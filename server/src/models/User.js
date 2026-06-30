@@ -170,6 +170,12 @@ const userSchema = new mongoose.Schema(
       alias: "photoUrl",
     },
 
+    // 🏢 Super Admin: Platform Logo (stored separately from personal profile picture)
+    platformLogo: {
+      type: String,
+      default: "",
+    },
+
     profileBanner: {
       type: String,
       default: "",
