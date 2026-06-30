@@ -25,7 +25,7 @@ export function SidebarFooterUser({ role, user }: SidebarFooterUserProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const avatarSrc = user.avatar || user.profilePicture || user.photoURL;
-  const showNotifications = role !== "org_admin" && user.pushNotifications?.sidebarPanelEnabled !== false;
+  const showNotifications = user.pushNotifications?.sidebarPanelEnabled !== false;
   const settingsPath = role === "super_admin" ? "/superadmin/settings" : "/settings";
 
   const avatarNode = (
