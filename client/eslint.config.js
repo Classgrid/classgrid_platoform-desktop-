@@ -3,24 +3,25 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import reactPlugin from 'eslint-plugin-react'
-import tailwindPlugin from 'eslint-plugin-tailwindcss'
+import tseslint from 'typescript-eslint'
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+export default tseslint.config(
   {
     ignores: ['dist', 'node_modules', 'public', '**/*.css'],
   },
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
       'react': reactPlugin,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      'tailwindcss': tailwindPlugin,
     },
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
+      parser: tseslint.parser,
       globals: {
         ...globals.browser,
       },
@@ -34,9 +35,6 @@ export default [
       react: {
         version: 'detect',
       },
-      tailwindcss: {
-        cssFiles: [],
-      },
     },
     rules: {
       // Base JS
@@ -49,27 +47,6 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-
-      // Tailwind
-      'tailwindcss/no-custom-classname': ['error', {
-        whitelist: [
-          'animate-in',
-          'fade-in',
-          'zoom-in',
-          'spin-in',
-          'slide-in-from-[\\w-]+',
-          'duration-\\d+',
-          'w-onboarding-progress-.*',
-          'text-(color|muted|primary|success|warning|danger|info|hover|error)(/\\d+)?',
-          'bg-(surface\\d*|bg|hover|primary|success|warning|danger|info|border)(/\\d+)?',
-          'border-(border|primary|success|warning|danger|info|l-success|l-warning|l-primary|l-border)(/\\d+)?',
-          'ring-(primary|success|warning|danger|info|border)(/\\d+)?',
-          'divide-(border)(/\\d+)?',
-          '(hover|focus):(bg|text|border|ring)-.*',
-          'shadow-soft'
-        ]
-      }],
-      'tailwindcss/classnames-order': 'warn',
 
       // BAN GENERIC LIBRARIES (Enforce Platform Standards)
       'no-restricted-imports': [
@@ -115,4 +92,4 @@ export default [
       ]
     },
   },
-]
+)

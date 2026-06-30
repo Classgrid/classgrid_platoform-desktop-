@@ -55,7 +55,13 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                       items.map((item, index) => (
                         <React.Fragment key={index}>
                           <BreadcrumbItem>
-                            {item.href ? (
+                            {item.onClick ? (
+                              <BreadcrumbLink asChild>
+                                <button onClick={item.onClick} className="hover:text-foreground cursor-pointer bg-transparent border-none p-0">
+                                  {item.label}
+                                </button>
+                              </BreadcrumbLink>
+                            ) : item.href ? (
                               <BreadcrumbLink asChild>
                                 <Link to={item.href}>{item.label}</Link>
                               </BreadcrumbLink>

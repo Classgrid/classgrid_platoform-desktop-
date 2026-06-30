@@ -50,7 +50,7 @@ import type {
   TicketPriority,
 } from "../services/superAdminApi";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
-
+import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -370,6 +370,21 @@ export function SupportTicketsPage() {
       }, 50);
     }
   }, [selectedTicket?._id, selectedMessages.length]);
+
+  const { setBreadcrumbs } = useBreadcrumbStore();
+
+  useEffect(() => {
+    if (selectedTicket) {
+      const requesterName = getRequester(selectedTicket).name || "Unknown";
+      setBreadcrumbs([
+        { label: "Tickets", onClick: () => setSelectedTicket(null) },
+        { label: requesterName }
+      ]);
+    } else {
+      setBreadcrumbs([]);
+    }
+    return () => setBreadcrumbs([]);
+  }, [selectedTicket, setBreadcrumbs]);
 
   const submitStatusChange = async () => {
     if (!selectedTicket || !pendingStatus) return;
@@ -691,19 +706,6 @@ export function SupportTicketsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Back Button */}
-      <div className="mb-6">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setSelectedTicket(null);
-          }}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Tickets
-        </button>
-      </div>
 
       {/* Title + Status Badge */}
       <div className="flex flex-wrap items-center gap-3 mb-8">

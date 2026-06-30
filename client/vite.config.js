@@ -25,5 +25,17 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['lucide-react', 'framer-motion'],
+          'vendor-charts': ['recharts'],
+          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge', 'axios', '@tanstack/react-query', '@tanstack/react-table']
+        }
+      }
+    }
   }
 });
