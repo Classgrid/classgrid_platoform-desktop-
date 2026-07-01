@@ -34,7 +34,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
@@ -94,12 +94,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     if (onTyping) onTyping(false, 'recording');
   };
 
-  // Auto-resize textarea
+  // Auto-resize textarea is not needed for contentEditable with min-height and max-height
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
+    // Left empty for compatibility if needed elsewhere
   }, [message]);
 
   const handleSend = async () => {
@@ -128,8 +125,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     setMessage("");
     setFiles([]);
     clearAudio();
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
     }
 
     try {
@@ -142,12 +139,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  // handleKeyDown moved directly to the element to handle text logic
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
@@ -311,29 +303,75 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2">
                   <EmojiPicker
                     onEmojiClick={(emojiData) => {
-                      setMessage(prev => prev + emojiData.emoji);
-                      textareaRef.current?.focus();
+                      if (editorRef.current) {
+                        editorRef.current.focus();
+                        document.execCommand("insertText", false, emojiData.emoji);
+                        setMessage(editorRef.current.innerHTML);
+                      }
                     }}
                     theme="auto"
                     previewConfig={{ showPreview: false }}
                   />
                 </PopoverContent>
               </Popover>
-              <textarea
-                ref={textareaRef}
-                value={message}
-                onChange={(e) => {
-                  setMessage(e.target.value);
+              <div
+                ref={editorRef}
+                contentEditable
+                data-placeholder="Type a message..."
+                onInput={(e) => {
+                  setMessage(e.currentTarget.innerHTML);
                   if (onTyping) {
                     onTyping(true, 'typing');
                     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                     typingTimeoutRef.current = setTimeout(() => onTyping(false, 'typing'), 2000);
                   }
                 }}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground min-h-[44px] max-h-[120px]"
-                rows={1}
+                onPaste={(e) => {
+                  const html = e.clipboardData.getData("text/html");
+                  if (html) {
+                    e.preventDefault();
+                    document.execCommand("insertHTML", false, html);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                    return;
+                  }
+                  if (e.key === " " || e.key === "Enter") {
+                    const sel = window.getSelection();
+                    if (sel && sel.focusNode && sel.focusNode.nodeType === Node.TEXT_NODE) {
+                      const text = sel.focusNode.textContent || "";
+                      const offset = sel.focusOffset;
+                      const textBeforeCursor = text.slice(0, offset);
+                      const match = textBeforeCursor.match(/(?:^|\s)([^\s]+)$/);
+                      if (match) {
+                        const word = match[1];
+                        const isUrl = /^(https?:\/\/[^\s]+|www\.[^\s]+)$/i.test(word);
+                        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(word);
+                        if (isUrl || isEmail) {
+                          e.preventDefault();
+                          const url = isEmail ? `mailto:${word}` : (word.startsWith('http') ? word : `https://${word}`);
+                          const wordStartOffset = offset - word.length;
+                          const range = document.createRange();
+                          range.setStart(sel.focusNode, wordStartOffset);
+                          range.setEnd(sel.focusNode, offset);
+                          sel.removeAllRanges();
+                          sel.addRange(range);
+                          document.execCommand('createLink', false, url);
+                          sel.collapseToEnd();
+                          if (e.key === " ") {
+                            document.execCommand('insertText', false, ' ');
+                          } else {
+                            document.execCommand('insertParagraph');
+                          }
+                        }
+                      }
+                    }
+                  }
+                }}
+                className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none min-h-[44px] max-h-[120px] overflow-y-auto cursor-text [&_a]:text-blue-500 [&_a]:underline"
               />
             </div>
             )}

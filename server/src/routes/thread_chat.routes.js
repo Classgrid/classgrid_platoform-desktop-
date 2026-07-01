@@ -573,10 +573,26 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
     }
     const msgId = insertedMsg.id;
 
+    // Calculate last message text for sidebar snippet
+    let lastMsgText = msgText || '';
+    if (!lastMsgText && files && files.length > 0) {
+      if (files.length === 1) {
+        const mime = files[0].mimetype || '';
+        if (mime.startsWith('image/')) lastMsgText = '[IMAGE] Photo';
+        else if (mime.startsWith('video/')) lastMsgText = '[VIDEO] Video';
+        else if (mime.startsWith('audio/')) lastMsgText = '[AUDIO] Audio';
+        else if (mime === 'application/pdf') lastMsgText = '[PDF] Document';
+        else if (mime.includes('word') || mime.includes('document')) lastMsgText = '[DOC] Document';
+        else lastMsgText = '[FILE] Document';
+      } else {
+        lastMsgText = `[FILE] ${files.length} files`;
+      }
+    }
+
     // Update thread metadata manually
     sb.from('chat_threads')
       .update({ 
-        last_message: msgText || (files.length > 0 ? '📎 File' : ''), 
+        last_message: lastMsgText, 
         last_message_at: now 
       })
       .eq('id', threadId)
@@ -623,7 +639,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     // ── Files: update last_message + upload (slower path) ──
     sb.from('chat_threads')
-      .update({ last_message: `📎 ${files.length} file${files.length > 1 ? 's' : ''}` })
+      .update({ last_message: lastMsgText })
       .eq('id', threadId)
       .then(() => {})
       .catch(() => {});
@@ -1120,6 +1136,11 @@ router.post('/:id/polls', isAuthenticated, async (req, res) => {
       sender_id: userId,
       message: 'Created a poll: ' + question,
     }]).select().single();
+
+    await sb.from('chat_threads').update({
+      last_message: '[POLL] ' + question,
+      last_message_at: new Date().toISOString()
+    }).eq('id', threadId);
 
     const { data: poll } = await sb.from('chat_polls').insert([{
       thread_id: threadId,

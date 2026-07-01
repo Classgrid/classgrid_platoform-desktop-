@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
+import { formatBytes } from "@/lib/utils";
+import DOMPurify from "dompurify";
 import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
@@ -287,12 +289,17 @@ export function ChatBubble({
 
                 {/* Text Message */}
                 {message.message && !poll && (
-                  <span className="text-[15px] whitespace-pre-wrap leading-relaxed break-words">
-                    {message.message}
+                  <div className="relative text-[15px] whitespace-pre-wrap leading-relaxed break-words prose prose-sm dark:prose-invert max-w-none [&_a]:text-blue-500 [&_a]:hover:underline [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_em]:italic [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-[15px] [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1">
+                    <span dangerouslySetInnerHTML={{ 
+                      __html: DOMPurify.sanitize(message.message, { 
+                        ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote'], 
+                        ALLOWED_ATTR: ['href', 'target', 'rel'] 
+                      }) 
+                    }} />
                     {message.is_edited && (
-                      <span className="text-[10px] opacity-60 italic ml-2">(edited)</span>
+                      <span className="text-[10px] opacity-60 italic ml-2 align-bottom">(edited)</span>
                     )}
-                  </span>
+                  </div>
                 )}
 
                 {/* Poll UI */}

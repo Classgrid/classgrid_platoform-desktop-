@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check } from "lucide-react";
+import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check, Image as ImageIcon, Video, FileText, Mic, BarChart2, Paperclip } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
@@ -44,6 +44,30 @@ function getAvatarColor(name: string) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
+function renderSnippet(text: string) {
+  if (!text) return null;
+  const match = text.match(/^\[(IMAGE|VIDEO|AUDIO|PDF|DOC|FILE|POLL)\]\s*(.*)$/);
+  if (match) {
+    const type = match[1];
+    const content = match[2];
+    const iconClass = "w-3.5 h-3.5 mr-1.5 inline-block opacity-70 -mt-0.5";
+    switch (type) {
+      case 'IMAGE': return <><ImageIcon className={iconClass} /> {content}</>;
+      case 'VIDEO': return <><Video className={iconClass} /> {content}</>;
+      case 'AUDIO': return <><Mic className={iconClass} /> {content}</>;
+      case 'PDF':
+      case 'DOC':
+      case 'FILE': return <><FileText className={iconClass} /> {content}</>;
+      case 'POLL': return <><BarChart2 className={iconClass} /> {content}</>;
+      default: return <><Paperclip className={iconClass} /> {content}</>;
+    }
+  }
+  if (text.startsWith('📎')) {
+    return <><Paperclip className="w-3.5 h-3.5 mr-1.5 inline-block opacity-70 -mt-0.5" /> {text.replace('📎', '').trim()}</>;
+  }
+  return text;
 }
 
 export function ChatSidebar({
@@ -305,7 +329,7 @@ export function ChatSidebar({
                   </div>
                   {thread.lastMessage && (
                     <p className={`text-xs truncate mt-0.5 ${thread.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                      {thread.lastMessage}
+                      {renderSnippet(thread.lastMessage)}
                     </p>
                   )}
                 </div>

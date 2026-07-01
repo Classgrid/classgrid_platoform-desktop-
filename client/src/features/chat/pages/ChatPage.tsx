@@ -32,8 +32,9 @@ import { useOnlineUsers } from "../context/PresenceContext";
 import { ChatSidebar } from "../components/ChatSidebar";
 import { ChatHeader } from "../components/ChatHeader";
 import { ChatConversation } from "../components/ChatConversation";
+import { AnimatePresence } from "framer-motion";
 import { ChatInput } from "../components/ChatInput";
-import { UserListModal } from "../components/UserListModal";
+import { NewChatSidebar } from "../components/NewChatSidebar";
 import { GroupCreateModal } from "../components/GroupCreateModal";
 import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
@@ -496,7 +497,7 @@ export function ChatPage() {
       <div 
         className={`${
           activeThread ? "hidden md:flex" : "flex"
-        } w-full md:w-[350px] lg:w-[400px] h-full flex-col min-h-0 border-r border-border bg-card shrink-0`}
+        } w-full md:w-[350px] lg:w-[400px] h-full flex-col min-h-0 border-r border-border bg-card shrink-0 relative overflow-hidden`}
       >
         <ChatSidebar
           threads={threads}
@@ -513,6 +514,22 @@ export function ChatPage() {
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
         />
+
+        <AnimatePresence>
+          {isUserModalOpen && (
+            <NewChatSidebar
+              onClose={() => setIsUserModalOpen(false)}
+              users={orgUsers}
+              currentUserId={currentUserId!}
+              onSelectUser={handleSelectUserDM}
+              isLoading={usersLoading}
+              onNewGroup={() => {
+                setIsUserModalOpen(false);
+                setIsGroupModalOpen(true);
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Main Conversation Panel */}
@@ -673,14 +690,6 @@ export function ChatPage() {
       </div>
 
       {/* Modals */}
-      <UserListModal
-        isOpen={isUserModalOpen}
-        onClose={() => setIsUserModalOpen(false)}
-        users={orgUsers}
-        currentUserId={currentUserId!}
-        onSelectUser={handleSelectUserDM}
-        isLoading={usersLoading}
-      />
       
       <GroupCreateModal
         isOpen={isGroupModalOpen}
