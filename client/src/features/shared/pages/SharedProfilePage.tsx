@@ -322,7 +322,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               
               <div className="flex flex-col w-full gap-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold tracking-tight">{form.name}</h1>
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">{form.name}</h1>
                   <Badge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest uppercase">
                     {(form.role || "User").replace("platform_", "")}
                   </Badge>

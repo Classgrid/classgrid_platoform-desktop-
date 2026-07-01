@@ -81,35 +81,35 @@ export function SettingsChangePasswordCard() {
       >
         <div className="flex flex-col gap-5 pt-2">
           <div className="flex flex-col gap-2.5">
-            <label className="text-sm text-zinc-300">Current Password</label>
+            <label className="text-sm text-foreground/80">Current Password</label>
             <input
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              className="h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200 focus:ring-1 focus:ring-white/30 focus:border-white/30 border-white/10"
+              className="h-10 w-full rounded-md border bg-background dark:bg-black px-3 text-sm text-foreground outline-none transition-all duration-200 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 border-input"
               disabled={changePasswordMutation.isPending}
               autoFocus
             />
           </div>
 
           <div className="flex flex-col gap-2.5">
-            <label className="text-sm text-zinc-300">New Password</label>
+            <label className="text-sm text-foreground/80">New Password</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200 focus:ring-1 focus:ring-white/30 focus:border-white/30 border-white/10"
+              className="h-10 w-full rounded-md border bg-background dark:bg-black px-3 text-sm text-foreground outline-none transition-all duration-200 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 border-input"
               disabled={changePasswordMutation.isPending}
             />
           </div>
 
           <div className="flex flex-col gap-2.5">
-            <label className="text-sm text-zinc-300">Confirm New Password</label>
+            <label className="text-sm text-foreground/80">Confirm New Password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200 focus:ring-1 focus:ring-white/30 focus:border-white/30 border-white/10"
+              className="h-10 w-full rounded-md border bg-background dark:bg-black px-3 text-sm text-foreground outline-none transition-all duration-200 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 border-input"
               disabled={changePasswordMutation.isPending}
             />
           </div>

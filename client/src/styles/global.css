@@ -108,8 +108,8 @@
     --destructive-foreground: #ffffff;
     --danger: hsl(0 84% 60%);
     --danger-foreground: hsl(0 0% 100%);
-    --border: #e5e7eb;
-    --input: #e5e7eb;
+    --border: #d4d4d8;
+    --input: #d4d4d8;
     --ring: #34d399;
     --chart-1: oklch(0.68 0.18 255);
     --chart-2: oklch(0.74 0.13 220);

@@ -78,12 +78,12 @@ export function SettingsDeleteAccountCard() {
         isConfirmDisabled={password.length < 8}
       >
         <div className="flex flex-col gap-2.5 pt-2">
-          <label className="text-sm text-zinc-300">Type your password to finalize</label>
+          <label className="text-sm text-foreground/80">Type your password to finalize</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200 focus:ring-1 focus:ring-white/30 focus:border-white/30 border-white/10"
+            className="h-10 w-full rounded-md border bg-background dark:bg-black px-3 text-sm text-foreground outline-none transition-all duration-200 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 border-input"
             disabled={deleteAccountMutation.isPending}
           />
         </div>

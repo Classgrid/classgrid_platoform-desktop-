@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, CheckSquare, Trash2, ShieldAlert, XCircle, Trash } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 import {
@@ -40,9 +42,19 @@ function getAvatarColor(name: string) {
 
 export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
+  
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isSearchOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isSearchOpen]);
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background shrink-0">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background shrink-0 min-h-[60px]">
       {/* Back button (mobile) */}
       <button
         onClick={onBack}
@@ -65,22 +77,75 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
         )}
       </button>
 
-      {/* Info */}
-      <button onClick={onShowInfo} className="flex-1 min-w-0 text-left cursor-pointer hover:underline transition-all">
-        <h3 className="text-sm font-bold text-foreground truncate">{thread.name}</h3>
-        <p className="text-xs text-muted-foreground truncate">
-          {thread.type === "group"
-            ? "Group"
-            : thread.role || ""}
-        </p>
-      </button>
+      {/* Info & Search Overlay */}
+      <div className="flex-1 min-w-0 text-left relative overflow-hidden flex items-center h-[40px]">
+        <AnimatePresence>
+          {!isSearchOpen && (
+            <motion.div
+              key="info"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+              onClick={onShowInfo} 
+              className="cursor-pointer hover:underline transition-all absolute inset-0 flex flex-col justify-center"
+            >
+              <h3 className="text-sm font-bold text-foreground truncate leading-tight">{thread.name}</h3>
+              <p className="text-xs text-muted-foreground truncate leading-tight">
+                {thread.type === "group"
+                  ? "Group"
+                  : thread.role || ""}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute inset-0 flex items-center z-10 bg-background"
+            >
+              <div className="relative w-full">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Search in conversation..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-accent/50 border border-border outline-none focus:ring-1 focus:ring-primary rounded-full pl-4 pr-10 py-1.5 text-sm h-9"
+                />
+                <button 
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted-foreground/20 text-muted-foreground transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0 z-20 bg-background">
         <button
           className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
           title="Search"
-          onClick={() => {}}
+          onClick={() => {
+            if (isSearchOpen) {
+              // If already open, clicking search icon could trigger a search if you had local search logic
+            } else {
+              setIsSearchOpen(true);
+            }
+          }}
         >
           <Search className="w-5 h-5" />
         </button>
@@ -98,7 +163,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <User className="w-4 h-4 mr-2" />
               <span>View Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSearchOpen(true)}>
               <Search className="w-4 h-4 mr-2" />
               <span>Search in chat</span>
             </DropdownMenuItem>

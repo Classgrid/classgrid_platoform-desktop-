@@ -158,19 +158,19 @@ export function DangerConfirmDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent 
                 className={cn(
-                    "max-w-[calc(100%-2rem)] p-0 gap-0 border border-white/10 shadow-2xl rounded-xl overflow-hidden bg-[#0f0f0f] flex flex-col max-h-[90dvh]", 
+                    "max-w-[calc(100%-2rem)] p-0 gap-0 border border-border shadow-2xl rounded-xl overflow-hidden bg-background flex flex-col max-h-[90dvh]", 
                     maxWidth
                 )}
                 showCloseButton={false}
                 onKeyDown={handleKeyDown}
             >
                 {/* ── Section 1: Header ───────────────────────────── */}
-                <div className="px-6 py-6 border-b border-white/10 bg-black shrink-0">
-                    <DialogTitle className="text-xl font-semibold text-white tracking-tight">
+                <div className="px-6 py-6 border-b border-border bg-muted dark:bg-black shrink-0">
+                    <DialogTitle className="text-xl font-semibold text-foreground tracking-tight">
                         {title}
                     </DialogTitle>
                     {description && (
-                        <DialogDescription className="text-[15px] text-zinc-400 leading-relaxed mt-3">
+                        <DialogDescription className="text-[15px] text-muted-foreground leading-relaxed mt-3">
                             {description}
                         </DialogDescription>
                     )}
@@ -180,16 +180,16 @@ export function DangerConfirmDialog({
                 <div className="flex-1 overflow-y-auto min-h-0">
                 {/* ── Section 2: Confirmation Steps ─────────────────── */}
                 {confirmationSteps.length > 0 && (
-                    <div className="flex flex-col gap-5 px-6 py-6 border-b border-white/10 bg-[#0f0f0f]">
+                    <div className="flex flex-col gap-5 px-6 py-6 border-b border-border bg-background">
                         {confirmationSteps.map((step, index) => (
                             <div
                                 key={index}
                                 className="flex flex-col gap-2.5"
                             >
-                                <label className="text-sm text-zinc-300">
+                                <label className="text-sm text-foreground/80">
                                     {step.label}{" "}
                                     {!step.hideValueFromUI && (
-                                        <span className="font-bold text-white">
+                                        <span className="font-bold text-foreground">
                                             &ldquo;{step.value}&rdquo;
                                         </span>
                                     )}
@@ -202,9 +202,9 @@ export function DangerConfirmDialog({
                                     autoComplete="off"
                                     spellCheck={false}
                                     className={cn(
-                                        "h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200",
+                                        "h-10 w-full rounded-md border bg-background dark:bg-black px-3 text-sm text-foreground outline-none transition-all duration-200",
                                         "focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50",
-                                        "border-white/10"
+                                        "border-input"
                                     )}
                                     disabled={isLoading}
                                     autoFocus={index === 0}
@@ -215,11 +215,11 @@ export function DangerConfirmDialog({
                 )}
 
                 {/* ── Custom Children Content ──────────────────────── */}
-                {children && <div className="px-6 py-4 bg-[#0f0f0f]">{children}</div>}
+                {children && <div className="px-6 py-4 bg-background">{children}</div>}
                 </div>
 
                 {/* ── Section 3: Footer (Warning + Buttons) ─────────── */}
-                <div className="px-6 py-5 flex flex-col gap-5 bg-black border-t border-white/10 shrink-0">
+                <div className="px-6 py-5 flex flex-col gap-5 bg-muted dark:bg-black border-t border-border shrink-0">
                     {/* Warning Banner */}
                     <div className={cn(
                         "flex items-center gap-3 rounded-md border px-4 py-3",
@@ -238,7 +238,7 @@ export function DangerConfirmDialog({
                             <button
                                 onClick={() => onOpenChange(false)}
                                 disabled={isLoading}
-                                className="h-10 px-4 rounded-md border border-white/10 bg-transparent text-sm font-medium text-white hover:bg-white/5 transition-colors"
+                                className="h-10 px-4 rounded-md border border-border bg-transparent text-sm font-medium text-foreground hover:bg-muted transition-colors"
                             >
                                 {cancelLabel}
                             </button>
@@ -250,7 +250,7 @@ export function DangerConfirmDialog({
                                 "inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 transition-all duration-200",
                                 (isConfirmDisabled !== undefined ? !isConfirmDisabled : allStepsComplete)
                                     ? styles.buttonClass
-                                    : "bg-white/5 text-white/40 cursor-not-allowed"
+                                    : "bg-muted text-muted-foreground cursor-not-allowed"
                             )}
                         >
                             {isLoading && <Spinner className="mr-2" />}

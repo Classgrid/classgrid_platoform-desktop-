@@ -47,7 +47,7 @@ export function CopySnippetCard({
 
         {/* Code Snippet Box */}
         <div className="relative flex items-center mt-2">
-          <div className="w-full bg-black border border-white/10 rounded-lg py-2.5 pl-3 pr-12 font-mono text-sm text-foreground overflow-x-auto whitespace-nowrap">
+          <div className="w-full bg-zinc-100 dark:bg-black border border-zinc-200 dark:border-white/10 rounded-lg py-2.5 pl-3 pr-12 font-mono text-sm text-foreground overflow-x-auto whitespace-nowrap">
             {value}
           </div>
           <button

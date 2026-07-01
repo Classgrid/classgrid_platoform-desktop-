@@ -6,7 +6,7 @@ const PremiumCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
     <div
       ref={ref}
       className={cn(
-        "w-full bg-black border border-white/10 rounded-xl overflow-hidden shadow-sm",
+        "w-full bg-background dark:bg-black border border-border shadow-sm rounded-xl overflow-hidden",
         className
       )}
       {...props}
@@ -34,7 +34,7 @@ const PremiumCardBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
     <div
       ref={ref}
       className={cn(
-        "p-6 border-t border-white/10 bg-[#0f0f0f]",
+        "p-6 border-t border-border bg-background dark:bg-[#0f0f0f]",
         className
       )}
       {...props}
