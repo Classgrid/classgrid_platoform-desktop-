@@ -54,6 +54,7 @@ import { OrgDetailPage } from "@/features/superadmin/pages/OrgDetailPage";
 import { OrgDetailsPage } from "@/features/superadmin/pages/OrgDetailsPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
+import SandboxProfilePage from "@/features/shared/pages/SandboxProfilePage";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
@@ -129,6 +130,7 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
+      <Route path="/sandbox-profile" element={<SandboxProfilePage />} />
 
       <Route path="/logout" element={<LogoutPage />} />
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
@@ -313,8 +315,9 @@ export function AppRouter() {
           <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
           <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
           <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
-          <Route path="/profile" element={<SharedProfilePage />} />
-          <Route path="/settings" element={<SharedSettingsPage />} />
+          <Route path="profile" element={<SharedProfilePage />} />
+          <Route path="settings" element={<SharedSettingsPage />} />
+          <Route path="classrooms" element={<ClassroomsPage />} />
           <Route path="/support" element={<SupportPage />} />
 
           {/* ── Wildcard sub-routes ── */}

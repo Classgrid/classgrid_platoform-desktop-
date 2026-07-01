@@ -1,0 +1,387 @@
+import React, { useState } from "react";
+import { 
+  User as UserIcon, Phone, Users, GraduationCap, Landmark, 
+  FileUp, Briefcase, Trophy, Activity, Globe, CreditCard, 
+  HeartPulse, Sparkles, ShieldCheck, School, Clock, Wallet, UploadCloud, CalendarIcon
+} from "lucide-react";
+import { getResolvedProfileStrategy } from "../lib/profile-strategy-selector";
+import { ScrollArea } from "@/components/marketing_ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
+import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
+import { Button } from "@/components/marketing_ui/button";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import indiaLocations from "@/data/india-locations.json";
+
+// ── SUB-COMPONENT FOR DATE FIELD TO HANDLE LOCAL STATE ──
+function DateField({ field, value, onChange }: { field: any, value: string, onChange: (val: string) => void }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [tempDate, setTempDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={`h-11 w-full rounded-lg border border-input bg-background px-3 text-left font-normal outline-none transition-all focus:border-primary flex items-center gap-2 ${!value ? "text-muted-foreground" : "text-foreground"}`}
+          onClick={() => { 
+            setTempDate(value ? new Date(value) : undefined); 
+            setIsOpen(true); 
+          }}
+        >
+          <CalendarIcon className="h-4 w-4" />
+          {value ? format(new Date(value), "PPP") : "Select date"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-3 shadow-2xl rounded-xl border border-border animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95" align="start">
+        <Calendar
+          mode="single"
+          selected={tempDate}
+          onSelect={setTempDate}
+          initialFocus
+          fixedWeeks
+          className="p-0 border-none"
+        />
+        <div className="p-2 border-t border-border mt-1">
+          <button
+            type="button"
+            onClick={() => { 
+              if (tempDate) onChange(tempDate.toISOString()); 
+              setIsOpen(false); 
+            }}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium bg-transparent text-foreground hover:bg-muted rounded-md transition-all border border-transparent hover:border-border hover:scale-[0.98]"
+          >
+            Apply <span className="opacity-50 text-[10px]">↵</span>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// Map string icon names from strategy to actual Lucide components
+const ICON_MAP: Record<string, React.ElementType> = {
+  User: UserIcon,
+  Phone: Phone,
+  Users: Users,
+  GraduationCap: GraduationCap,
+  Landmark: Landmark,
+  FileUp: FileUp,
+  Briefcase: Briefcase,
+  Trophy: Trophy,
+  Activity: Activity,
+  Globe: Globe,
+  CreditCard: CreditCard,
+  HeartPulse: HeartPulse,
+  Sparkles: Sparkles,
+  ShieldCheck: ShieldCheck,
+  School: School,
+  Clock: Clock,
+  Wallet: Wallet,
+};
+
+interface ContextualProfileProps {
+  targetRole: string;
+  viewerRole: string;
+  orgType: string;
+  structureType: string;
+  isSelfView: boolean;
+  profileData?: any;
+}
+
+export function ContextualProfile({
+  targetRole,
+  viewerRole,
+  orgType,
+  structureType,
+  isSelfView,
+  profileData,
+}: ContextualProfileProps) {
+  // 1. Get the resolved strategy from our data engine
+  const strategy = getResolvedProfileStrategy({
+    targetRole,
+    viewerRole,
+    orgType,
+    structureType,
+    isSelfView,
+  });
+
+  const [activeSection, setActiveSection] = useState(strategy.sections[0]?.key || "");
+  
+  // Initialize from actual profile data
+  const [formData, setFormData] = useState<Record<string, any>>(profileData?.metadata || {});
+  
+  // Loading & Edit States
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  const handleInputChange = (key: string, value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // In a real implementation, you might want to use react-query useMutation
+      // but for direct API calls we can use apiClient here
+      const { apiClient } = await import("@/lib/apiClient");
+      await apiClient.put("/api/user/update", { metadata: formData });
+      
+      // Update global context/cache if needed here or rely on the parent page
+      toast.success("Profile details updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save profile details");
+    } finally {
+      setIsSaving(true);
+      // Let it spin a tiny bit more for UX, then disable
+      setTimeout(() => setIsSaving(false), 500);
+    }
+  };
+
+  // 2. Render Vertical Stepper (Sidebar)
+  const renderSidebar = () => {
+    return (
+      <div className="w-64 border-r bg-background/50 flex flex-col h-full relative">
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-4">
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">
+              Profile Sections
+            </h3>
+            
+            <div className="relative border-l-2 border-muted ml-4 space-y-8">
+              {strategy.sections.map((section, index) => {
+                const Icon = ICON_MAP[section.icon] || UserIcon;
+                const isActive = activeSection === section.key;
+
+                return (
+                  <div key={section.key} className="relative">
+                    {/* Stepper Circle */}
+                    <div 
+                      className={`absolute -left-[17px] top-1 h-8 w-8 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
+                        isActive 
+                          ? "border-primary bg-primary text-primary-foreground" 
+                          : "border-muted bg-background text-muted-foreground hover:border-primary/50"
+                      }`}
+                      onClick={() => { setActiveSection(section.key); setIsEditing(false); }}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    
+                    {/* Stepper Label */}
+                    <div 
+                      className={`ml-8 cursor-pointer py-1.5 transition-colors ${
+                        isActive ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      onClick={() => { setActiveSection(section.key); setIsEditing(false); }}
+                    >
+                      {section.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  };
+
+  // 3. Render Form / Content Area
+  const renderContent = () => {
+    const section = strategy.sections.find(s => s.key === activeSection);
+    if (!section) return null;
+
+    return (
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-3xl">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              {React.createElement(ICON_MAP[section.icon] || UserIcon, { className: "w-6 h-6 text-primary" })}
+              {section.label}
+            </h2>
+            
+            {/* Edit / Save Toggle */}
+            {strategy.permissions.can_edit && (
+              isEditing ? (
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? (
+                      <span className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Saving...
+                      </span>
+                    ) : "Save Changes"}
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  Edit Details
+                </Button>
+              )
+            )}
+          </div>
+
+          {/* Anti-Ragging Special Banner */}
+          {section.key === "anti_ragging" && (
+            <div className="mb-6 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h4 className="font-semibold text-[15px] text-blue-600 dark:text-blue-400">Anti-Ragging Undertaking Form</h4>
+                <p className="text-sm text-muted-foreground mt-1">Click the link to fill the Anti Ragging Undertaking form on the official website, then paste your Undertaking Number below.</p>
+              </div>
+              <a href="https://www.antiragging.in/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <Button variant="outline" className="border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-700">
+                  Open antiragging.in <span className="ml-2">↗</span>
+                </Button>
+              </a>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {section.fields.map(field => (
+              <div key={field.key} className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  {field.label} {field.required && <span className="text-destructive">*</span>}
+                </label>
+                
+                {/* Form Input Renderer */}
+                {(() => {
+                  // India Locations Cascading Logic
+                  if (field.key === "permanent_state" || field.key === "current_state") {
+                    const states = Object.keys(indiaLocations.states);
+                    return (
+                      <Select 
+                        value={formData[field.key] || ""} 
+                        onValueChange={(val) => handleInputChange(field.key, val)}
+                      >
+                        <SelectTrigger className="w-full bg-background border-input">
+                          <SelectValue placeholder="Select State..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {states.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }
+                  if (field.key === "permanent_district" || field.key === "current_district") {
+                    const stateKey = field.key === "permanent_district" ? "permanent_state" : "current_state";
+                    const selectedState = formData[stateKey];
+                    // @ts-ignore
+                    const districts = selectedState ? Object.keys(indiaLocations.states[selectedState] || {}) : [];
+                    return (
+                      <Select 
+                        value={formData[field.key] || ""} 
+                        onValueChange={(val) => handleInputChange(field.key, val)}
+                        disabled={!selectedState}
+                      >
+                        <SelectTrigger className="w-full bg-background border-input">
+                          <SelectValue placeholder="Select District..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {districts.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }
+                  if (field.key === "permanent_city" || field.key === "current_city") {
+                    const stateKey = field.key === "permanent_city" ? "permanent_state" : "current_state";
+                    const districtKey = field.key === "permanent_city" ? "permanent_district" : "current_district";
+                    const selectedState = formData[stateKey];
+                    const selectedDistrict = formData[districtKey];
+                    // @ts-ignore
+                    const cities = (selectedState && selectedDistrict) ? (indiaLocations.states[selectedState][selectedDistrict] || []) : [];
+                    return (
+                      <Select 
+                        value={formData[field.key] || ""} 
+                        onValueChange={(val) => handleInputChange(field.key, val)}
+                        disabled={!selectedDistrict}
+                      >
+                        <SelectTrigger className="w-full bg-background border-input">
+                          <SelectValue placeholder="Select City / Taluka..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {cities.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }
+
+                  if (field.type === "dropdown") {
+                    return (
+                      <Select 
+                        value={formData[field.key] || ""} 
+                        onValueChange={(val) => handleInputChange(field.key, val)}
+                      >
+                        <SelectTrigger className="w-full bg-background border-input">
+                          <SelectValue placeholder={`Select ${field.label}...`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {field.options?.map((opt: string) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }
+                  
+                  if (field.type === "date") {
+                    return (
+                      <DateField 
+                        field={field} 
+                        value={formData[field.key] || ""} 
+                        onChange={(val) => handleInputChange(field.key, val)} 
+                      />
+                    );
+                  }
+                  
+                  if (field.type === "boolean") {
+                    return (
+                      <div className="flex items-center gap-4 mt-2">
+                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input type="radio" name={field.key} value="yes" className="accent-primary w-4 h-4" /> Yes
+                        </label>
+                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input type="radio" name={field.key} value="no" className="accent-primary w-4 h-4" defaultChecked /> No
+                        </label>
+                      </div>
+                    );
+                  }
+                  
+                  if (field.type === "file_list" || field.type === "image") {
+                    return (
+                      <div className="w-full p-4 border-2 border-dashed rounded-md bg-muted/20 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 hover:border-primary/50 transition-colors">
+                        <UploadCloud className="w-6 h-6 text-primary/70" />
+                        <span className="font-medium text-foreground">Upload {field.label}</span>
+                        <span className="text-xs">PDF, JPG, PNG up to 5MB</span>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <input 
+                      type={field.type === "number" ? "number" : "text"}
+                      placeholder={`Enter ${field.label}...`}
+                      className="w-full p-2.5 border rounded-md bg-background text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                    />
+                  );
+                })()}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex h-[600px] border rounded-xl overflow-hidden shadow-sm bg-card">
+      {renderSidebar()}
+      {renderContent()}
+    </div>
+  );
+}

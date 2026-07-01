@@ -4,7 +4,8 @@ import { useTheme } from "next-themes";
 import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, CheckCircle2, ShieldAlert,
-  User as UserIcon, ChevronRight, ArrowLeft
+  User as UserIcon, ChevronRight, ArrowLeft,
+  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
@@ -15,6 +16,8 @@ import { Input } from "@/components/marketing_ui/input";
 import { Switch } from "@/components/marketing_ui/switch";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "sonner";
+import { ContextualProfile } from "../components/ContextualProfile";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 type ProfileData = {
   name: string;
@@ -57,6 +60,9 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
 
   const isReadOnly = !!publicUser;
+  
+  // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
+  const { data: currentUser } = useCurrentUser();
 
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -327,52 +333,102 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     {(form.role || "User").replace("platform_", "")}
                   </Badge>
                 </div>
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium">
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium mt-1">
                   <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
                   <span className="flex items-center gap-1.5"><Globe size={16} /> Classgrid Cloud</span>
                   <span className="flex items-center gap-1.5 text-success"><Activity size={16} /> Current Status: Active</span>
+                  <span className="flex items-center gap-1.5 text-muted-foreground italic">@{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}</span>
+                </div>
+
+                {/* Social Links with Premium Hover Effects */}
+                <div className="flex items-center gap-3 mt-4">
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-pink-600 hover:border-pink-500 hover:bg-pink-500/10 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                    <Instagram size={18} />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-blue-600 hover:border-blue-600 hover:bg-blue-600/10 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                    <Facebook size={18} />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-sky-500 hover:border-sky-500 hover:bg-sky-500/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                    <Linkedin size={18} />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-foreground/5 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5">
+                    <Github size={18} />
+                  </Button>
+                </div>
+                
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-6 opacity-60" />
+
+                {/* Media & Docs Prominent Button */}
+                <div className="w-full sm:w-auto relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full sm:w-auto relative flex items-center justify-between gap-4 py-6 px-6 border-border/50 bg-background/50 dark:bg-muted/10 backdrop-blur-xl hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10 text-primary">
+                        <FileBox size={18} />
+                      </div>
+                      <span className="font-semibold text-foreground/90 tracking-wide">Media, Links & Docs</span>
+                    </div>
+                    <ChevronRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </Button>
+                </div>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-6 opacity-60" />
+
+                {/* Groups & Academic Status in Glass Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
+                      <Users size={16} className="text-blue-500" />
+                      Groups in Common
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">FY CS Batch A</Badge>
+                      <Badge variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">Web Dev Club</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
+                      <GraduationCap size={16} className="text-purple-500" />
+                      Academic Status
+                    </div>
+                    <div className="text-sm text-foreground/90 font-medium">
+                      {form.role.includes("student") ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold">B.Tech Computer Science</span>
+                          <span className="text-xs text-muted-foreground">Class of 2027 • Student</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold">Computer Science Dept</span>
+                          <span className="text-xs text-muted-foreground">Faculty Member</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bento Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Basic Information */}
-            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
-              <div className="border-b border-border pb-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground"><UserIcon size={18} /> Basic Information</h3>
-                <p className="text-sm text-muted-foreground mt-1 opacity-80">Standard identification details across the platform.</p>
-              </div>
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Display Name</label>
-                  <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" className="bg-muted/40 dark:bg-background" readOnly={isReadOnly} />
-                </div>
-                {form.prn && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">PRN</label>
-                    <Input value={form.prn} readOnly className="bg-muted/40 dark:bg-background" />
-                  </div>
-                )}
-                {form.bio && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bio</label>
-                    <div className="p-3 bg-muted/60 dark:bg-muted/40 rounded-lg border border-border text-sm opacity-90 italic">
-                      {form.bio}
-                    </div>
-                  </div>
-                )}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Access Role</label>
-                  <div className="p-3 bg-muted/60 dark:bg-muted/40 rounded-lg border border-dashed border-border text-sm font-semibold opacity-70 uppercase tracking-wide">
-                    {form.role}
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Dynamic Contextual Profile Data */}
+          <div className="mt-8 mb-6">
+            <ContextualProfile 
+              targetRole={form.role || "student"} 
+              viewerRole={currentUser?.role || "student"} 
+              orgType={currentUser?.organization?.type || "university"} 
+              structureType={currentUser?.organization?.structure || "standalone"} 
+              isSelfView={!publicUser} 
+              profileData={publicUser || profileData?.user}
+            />
+          </div>
 
+          {/* User Experience & Settings */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            
             {/* User Experience */}
             <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
               <div className="border-b border-border pb-4">
