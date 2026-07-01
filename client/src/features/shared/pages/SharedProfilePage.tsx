@@ -18,6 +18,8 @@ import { VerifiedBadge } from "@/components/marketing_ui/verified-badge";
 import { toast } from "sonner";
 import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+import { usePresence } from "@/features/chat/hooks/useRealtimeChat";
+import { formatDistanceToNow } from "date-fns";
 
 type ProfileData = {
   name: string;
@@ -66,6 +68,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   
   // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
   const { data: currentUser } = useCurrentUser();
+  const onlineUsers = usePresence(currentUser?.user?._id || currentUser?._id || null);
 
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -370,9 +373,16 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                      <Activity size={14} /> Active
-                    </span>
+                    {!isReadOnly || (targetUserId && onlineUsers.has(targetUserId)) ? (
+                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                        <Activity size={14} /> {!isReadOnly ? "Active" : "Online"}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-muted-foreground bg-muted/20 border border-border/40 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
+                        <Clock size={14} className="opacity-70" /> 
+                        {form.lastLoginAt ? `Last seen ${formatDistanceToNow(new Date(form.lastLoginAt), { addSuffix: true })}` : "Offline"}
+                      </span>
+                    )}
                     <span className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
                       @{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}
                     </span>
@@ -416,72 +426,76 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                 
                 <div className="w-full h-px bg-border my-6" />
 
-                {/* Media & Docs Prominent Button */}
-                <div className="w-full sm:w-auto relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full sm:w-auto relative flex items-center justify-between gap-4 py-6 px-6 border-border/50 bg-background/50 dark:bg-muted/10 backdrop-blur-xl hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-md bg-primary/10 text-primary">
-                        <FileBox size={18} />
+                {isReadOnly && (
+                  <>
+                    {/* Media & Docs Prominent Button */}
+                    <div className="w-full sm:w-auto relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full sm:w-auto relative flex items-center justify-between gap-4 py-6 px-6 border-border/50 bg-background/50 dark:bg-muted/10 backdrop-blur-xl hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-md bg-primary/10 text-primary">
+                            <FileBox size={18} />
+                          </div>
+                          <span className="font-semibold text-foreground/90 tracking-wide">Media, Links & Docs</span>
+                        </div>
+                        <ChevronRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </Button>
+                    </div>
+
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-6 opacity-60" />
+
+                    {/* Groups & Academic Status in Glass Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                      <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
+                          <Users size={16} className="text-blue-500" />
+                          Groups in Common
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {groupsLoading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-20 bg-muted rounded animate-pulse" />
+                              <div className="h-6 w-24 bg-muted rounded animate-pulse" />
+                            </div>
+                          ) : groupsData?.groups && groupsData.groups.length > 0 ? (
+                            groupsData.groups.map((group: any) => (
+                              <Badge key={group._id || group.id || group.name} variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">
+                                {group.name}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">No groups in common</span>
+                          )}
+                        </div>
                       </div>
-                      <span className="font-semibold text-foreground/90 tracking-wide">Media, Links & Docs</span>
-                    </div>
-                    <ChevronRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                  </Button>
-                </div>
-
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-6 opacity-60" />
-
-                {/* Groups & Academic Status in Glass Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
-                      <Users size={16} className="text-blue-500" />
-                      Groups in Common
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {groupsLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-6 w-20 bg-muted rounded animate-pulse" />
-                          <div className="h-6 w-24 bg-muted rounded animate-pulse" />
+                      
+                      <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
+                          <GraduationCap size={16} className="text-purple-500" />
+                          Academic Status
                         </div>
-                      ) : groupsData?.groups && groupsData.groups.length > 0 ? (
-                        groupsData.groups.map((group: any) => (
-                          <Badge key={group._id || group.id || group.name} variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">
-                            {group.name}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">No groups in common</span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-muted/20 dark:bg-white/[0.02] hover:bg-muted/40 dark:hover:bg-white/[0.04] transition-colors">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
-                      <GraduationCap size={16} className="text-purple-500" />
-                      Academic Status
-                    </div>
-                    <div className="text-sm text-foreground/90 font-medium">
-                      {academicLoading ? (
-                        <div className="flex flex-col gap-2">
-                          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-                          <div className="h-3 w-40 bg-muted rounded animate-pulse" />
+                        <div className="text-sm text-foreground/90 font-medium">
+                          {academicLoading ? (
+                            <div className="flex flex-col gap-2">
+                              <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                              <div className="h-3 w-40 bg-muted rounded animate-pulse" />
+                            </div>
+                          ) : academicData?.status ? (
+                            <div className="flex flex-col gap-1">
+                              <span className="font-semibold">{academicData.status.primaryText}</span>
+                              <span className="text-xs text-muted-foreground">{academicData.status.secondaryText}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">Academic status not available</span>
+                          )}
                         </div>
-                      ) : academicData?.status ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold">{academicData.status.primaryText}</span>
-                          <span className="text-xs text-muted-foreground">{academicData.status.secondaryText}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">Academic status not available</span>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
