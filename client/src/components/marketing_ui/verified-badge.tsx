@@ -27,19 +27,14 @@ export function VerifiedBadge({
     .join(" ");
   
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delay={0}>
       <Tooltip>
         <TooltipTrigger asChild>
           <span className={className}>
             <BadgeCheck className={`${iconClassName} text-white fill-[#1DA1F2] dark:text-[#0f0f0f]`} />
           </span>
         </TooltipTrigger>
-        <TooltipContent 
-          side="bottom" 
-          align="center"
-          className="bg-[#1f1f1f] text-white border-[#333] text-xs font-normal px-2 py-1 shadow-sm rounded-sm z-[100] mt-1"
-          sideOffset={2}
-        >
+        <TooltipContent side="top">
           Verified {displayRole}
         </TooltipContent>
       </Tooltip>
