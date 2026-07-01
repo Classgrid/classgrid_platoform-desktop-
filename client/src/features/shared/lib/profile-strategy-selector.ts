@@ -374,6 +374,9 @@ export const MASTER_PROFILE_SECTION_POOL = {
       { key: "hobby", label: "Hobbies", type: "text" },
       { key: "linkedin_url", label: "LinkedIn", type: "url" },
       { key: "github_url", label: "GitHub", type: "url" },
+        { key: "twitter_url", label: "Twitter / X", type: "url" },
+        { key: "coding_profile", label: "Coding Profile (LeetCode/HackerRank)", type: "url" },
+        { key: "tech_stack", label: "Your Tech Stack", type: "text" },
       { key: "instagram_url", label: "Instagram", type: "url" },
       { key: "portfolio_url", label: "Portfolio", type: "url" },
       { key: "facebook_url", label: "Facebook", type: "url" },
@@ -514,39 +517,39 @@ export const ROLE_PROFILE_CONFIGS = {
     },
   },
   faculty: {
-    sections: ["staff_common_details", "professional_details", "faculty_specific_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "faculty_specific_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   org_admin: {
-    sections: ["staff_common_details", "professional_details", "org_admin_details", "upload_documents", "platform_metadata"],
-    academic_placement_fields: null,
-  },
-  admission_head: {
-    sections: ["staff_common_details", "professional_details", "dept_admin_common_details", "admission_admin_details", "upload_documents", "platform_metadata"],
-    academic_placement_fields: null,
-  },
-  super_admin: {
-    sections: ["personal_details", "contact_details", "social_details", "id_card_photos", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "org_admin_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   department_admin: {
-    sections: ["staff_common_details", "professional_details", "dept_admin_common_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "dept_admin_common_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   fee_manager: {
-    sections: ["staff_common_details", "professional_details", "dept_admin_common_details", "fees_admin_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "dept_admin_common_details", "fees_admin_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   hr_dept: {
-    sections: ["staff_common_details", "professional_details", "dept_admin_common_details", "payroll_admin_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "dept_admin_common_details", "payroll_admin_details", "platform_metadata"],
+    academic_placement_fields: null,
+  },
+  admission_head: {
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "dept_admin_common_details", "admission_admin_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   hod: {
-    sections: ["staff_common_details", "professional_details", "org_admin_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "org_admin_details", "platform_metadata"],
     academic_placement_fields: null,
   },
   principal: {
-    sections: ["staff_common_details", "professional_details", "org_admin_details", "upload_documents", "platform_metadata"],
+    sections: ["personal_details", "contact_details", "education_details", "social_details", "staff_common_details", "professional_details", "org_admin_details", "platform_metadata"],
+    academic_placement_fields: null,
+  },
+  super_admin: {
+    sections: ["personal_details", "contact_details", "social_details", "platform_metadata"],
     academic_placement_fields: null,
   },
 };

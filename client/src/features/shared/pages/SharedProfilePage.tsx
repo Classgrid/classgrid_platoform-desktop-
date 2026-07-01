@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
-  Palette, Activity, CheckCircle2, ShieldAlert,
+  Palette, Activity, BadgeCheck, ShieldAlert,
   User as UserIcon, ChevronRight, ArrowLeft,
   Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap
 } from "lucide-react";
@@ -352,7 +352,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger className="cursor-help flex items-center justify-center">
-                            <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/20" />
+                            <BadgeCheck className="w-7 h-7 text-blue-500 fill-blue-500/10" strokeWidth={2.5} />
                           </TooltipTrigger>
                           <TooltipContent className="bg-popover text-popover-foreground border border-border shadow-md rounded-md px-3 py-1.5 text-xs font-semibold capitalize tracking-wide">
                             Verified {(form.role || "User").replace("platform_", "").replace("_", " ")}
