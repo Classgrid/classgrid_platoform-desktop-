@@ -157,6 +157,12 @@ app.use(
         return callback(null, true);
       }
 
+      // For white-labeled custom domains (e.g. erp.mycollege.edu), we must allow the origin dynamically.
+      // Since we use Bearer tokens for auth, reflecting any https:// origin is safe.
+      if (origin.startsWith("https://")) {
+        return callback(null, true);
+      }
+
       callback(new Error(`CORS blocked: ${origin}`));
     },
     credentials: true
