@@ -67,12 +67,12 @@ export default function StudentLeavePortal() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0B] text-slate-200 p-8 font-sans selection:bg-emerald-500/30">
+        <div className="min-h-screen bg-background dark:bg-[#0A0A0B] text-foreground dark:text-slate-200 p-8 font-sans selection:bg-emerald-500/30">
             
             {/* Header */}
             <div className="flex items-center justify-between mb-12">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Attendance & Leaves</h1>
+                    <h1 className="text-3xl font-bold text-foreground dark:text-white tracking-tight">Attendance & Leaves</h1>
                     <p className="text-sm text-slate-400 mt-1">Track your attendance and manage your leave requests.</p>
                 </div>
                 <Button 
@@ -88,11 +88,11 @@ export default function StudentLeavePortal() {
                 
                 {/* LEFT COLUMN: Glowing Attendance Ring */}
                 <div className="lg:col-span-1">
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl relative flex flex-col items-center justify-center text-center overflow-hidden h-full min-h-[400px]">
+                    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-8 backdrop-blur-xl relative flex flex-col items-center justify-center text-center overflow-hidden h-full min-h-[400px]">
                         
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"  />
 
-                        <h2 className="text-lg font-semibold text-white mb-8 flex items-center gap-2 z-10">
+                        <h2 className="text-lg font-semibold text-foreground dark:text-white mb-8 flex items-center gap-2 z-10">
                             <Activity className="w-5 h-5 text-emerald-400" />
                             Overall Attendance
                         </h2>
@@ -125,19 +125,19 @@ export default function StudentLeavePortal() {
                                 
                                 {/* Inner Text */}
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-5xl font-black text-white tracking-tighter">{percentage}%</span>
+                                    <span className="text-5xl font-black text-foreground dark:text-white tracking-tighter">{percentage}%</span>
                                 </div>
                             </div>
                         )}
 
                         <div className="grid grid-cols-2 gap-4 w-full z-10">
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/5 dark:border-white/5">
                                 <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Attended</p>
-                                <p className="text-2xl font-bold text-white">{attendanceData?.present || 0}</p>
+                                <p className="text-2xl font-bold text-foreground dark:text-white">{attendanceData?.present || 0}</p>
                             </div>
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/5 dark:border-white/5">
                                 <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Missed</p>
-                                <p className="text-2xl font-bold text-white">{attendanceData?.absent || 0}</p>
+                                <p className="text-2xl font-bold text-foreground dark:text-white">{attendanceData?.absent || 0}</p>
                             </div>
                         </div>
                     </div>
@@ -145,9 +145,9 @@ export default function StudentLeavePortal() {
 
                 {/* RIGHT COLUMN: Leave History */}
                 <div className="lg:col-span-2">
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl h-full flex flex-col">
+                    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 backdrop-blur-xl h-full flex flex-col">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <h2 className="text-lg font-semibold text-foreground dark:text-white flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-emerald-400" />
                                 Leave Application History
                             </h2>
@@ -156,14 +156,14 @@ export default function StudentLeavePortal() {
                         {loadingHistory ? (
                             <div className="flex-1 flex items-center justify-center text-slate-500">Loading history...</div>
                         ) : leaveHistory?.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 bg-white/5 rounded-2xl border border-white/5 border-dashed">
+                            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 border-dashed">
                                 <FileText className="w-12 h-12 mb-4 opacity-50" />
                                 <p>You haven't applied for any leaves yet.</p>
                             </div>
                         ) : (
-                            <div className="flex-1 overflow-auto rounded-2xl border border-white/10 bg-black/20">
+                            <div className="flex-1 overflow-auto rounded-2xl border border-black/10 dark:border-white/10 bg-muted dark:bg-black/20">
                                 <table className="w-full text-left border-collapse">
-                                    <thead className="sticky top-0 bg-[#1A1C20] border-b border-white/10 z-10">
+                                    <thead className="sticky top-0 bg-muted dark:bg-[#1A1C20] border-b border-black/10 dark:border-white/10 z-10">
                                         <tr>
                                             <th className="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Duration</th>
                                             <th className="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Reason</th>
@@ -173,9 +173,9 @@ export default function StudentLeavePortal() {
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
                                         {leaveHistory?.map((leave: any) => (
-                                            <tr key={leave._id} className="hover:bg-white/5 transition-colors">
+                                            <tr key={leave._id} className="hover:bg-black/5 dark:bg-white/5 transition-colors">
                                                 <td className="py-4 px-6 whitespace-nowrap">
-                                                    <p className="text-sm font-semibold text-slate-200">
+                                                    <p className="text-sm font-semibold text-foreground dark:text-slate-200">
                                                         {new Date(leave.start_date).toLocaleDateString()}
                                                     </p>
                                                     <p className="text-xs text-slate-500 mt-1">to {new Date(leave.end_date).toLocaleDateString()}</p>
@@ -222,11 +222,11 @@ export default function StudentLeavePortal() {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-                    <div className="relative bg-[#1A1C20] border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+                    <div className="relative bg-muted dark:bg-[#1A1C20] border border-black/10 dark:border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
                         
-                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-white">Apply for Leave</h2>
-                            <Button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white transition">
+                        <div className="p-6 border-b border-black/10 dark:border-white/10 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-foreground dark:text-white">Apply for Leave</h2>
+                            <Button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-foreground dark:text-white transition">
                                 <XCircle className="w-6 h-6" />
                             </Button>
                         </div>
@@ -240,7 +240,7 @@ export default function StudentLeavePortal() {
                                         required
                                         value={formData.startDate}
                                         onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition"
+                                        className="w-full bg-muted dark:bg-black/50 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-foreground dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -250,7 +250,7 @@ export default function StudentLeavePortal() {
                                         required
                                         value={formData.endDate}
                                         onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition"
+                                        className="w-full bg-muted dark:bg-black/50 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-foreground dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition"
                                     />
                                 </div>
                             </div>
@@ -263,7 +263,7 @@ export default function StudentLeavePortal() {
                                     placeholder="Please provide a detailed reason..."
                                     value={formData.reason}
                                     onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition resize-none"
+                                    className="w-full bg-muted dark:bg-black/50 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-foreground dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition resize-none"
                                 />
                             </div>
 
@@ -271,7 +271,7 @@ export default function StudentLeavePortal() {
                                 <Button 
                                     type="button" 
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-xl transition"
+                                    className="flex-1 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-foreground dark:text-white font-semibold py-3 rounded-xl transition"
                                 >
                                     Cancel
                                 </Button>

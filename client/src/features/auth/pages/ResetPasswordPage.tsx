@@ -85,7 +85,7 @@ export function ResetPasswordPage() {
 
   const strengthStyles = {
     empty: {
-      border: "border-white/10",
+      border: "border-border dark:border-white/10",
       glow: "",
       text: "text-gray-400",
       bar: "bg-white/10 w-0",
@@ -117,7 +117,7 @@ export function ResetPasswordPage() {
   const current = strengthStyles[strength];
 
   const confirmBorder = !isConfirmTouched
-    ? "border-white/10"
+    ? "border-border dark:border-white/10"
     : isPasswordMatch
     ? "border-emerald-500/80 shadow-[0_0_18px_rgba(16,185,129,0.22)]"
     : "border-red-500/70 shadow-[0_0_18px_rgba(239,68,68,0.20)]";
@@ -153,7 +153,7 @@ export function ResetPasswordPage() {
 
   if (isVerifying) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#111111]">
+      <main className="flex min-h-screen items-center justify-center bg-muted dark:bg-[#111111]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
       </main>
     );
@@ -171,13 +171,13 @@ export function ResetPasswordPage() {
           backgroundRepeat: "repeat"
         }}
       >
-        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10 text-center">
+        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-border dark:border-white/10 bg-muted dark:bg-[#111111] px-7 py-12 shadow-2xl relative z-10 text-center">
           <div
             className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-red-500/10 border border-red-500/30"
           >
             <AlertCircle className="h-[40px] w-[40px] text-red-500" />
           </div>
-          <h2 className="mt-5 text-[20px] font-bold text-white">Link Expired</h2>
+          <h2 className="mt-5 text-[20px] font-bold text-foreground dark:text-white">Link Expired</h2>
           <p className="mt-3 text-[14px] text-gray-400">
             This password reset link is invalid or has expired. Please request a new link to reset your password.
           </p>
@@ -201,7 +201,7 @@ export function ResetPasswordPage() {
           backgroundRepeat: "repeat"
         }}
       >
-        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-[#111111] px-7 py-12 shadow-2xl relative z-10">
+        <div className="flex w-full max-w-[430px] flex-col items-center justify-center rounded-[28px] border border-border dark:border-white/10 bg-muted dark:bg-[#111111] px-7 py-12 shadow-2xl relative z-10">
           {/* Animated tick circle */}
           <div
             className="flex h-[100px] w-[100px] items-center justify-center rounded-full"
@@ -219,7 +219,7 @@ export function ResetPasswordPage() {
           </div>
 
           <p
-            className="mt-5 text-[18px] font-semibold text-[#ededed]"
+            className="mt-5 text-[18px] font-semibold text-foreground dark:text-[#ededed]"
             style={{ animation: "fadeIn 0.4s ease 0.5s both" }}
           >
             Password Set
@@ -255,7 +255,7 @@ export function ResetPasswordPage() {
         backgroundRepeat: "repeat"
       }}
     >
-      <div className="relative z-10 w-full max-w-[430px] rounded-[28px] border border-white/10 bg-[#111111] p-8 shadow-2xl">
+      <div className="relative z-10 w-full max-w-[430px] rounded-[28px] border border-border dark:border-white/10 bg-muted dark:bg-[#111111] p-8 shadow-2xl">
         {/* Logo */}
         <img
           src={CLASSGRID_LOGO}
@@ -263,7 +263,7 @@ export function ResetPasswordPage() {
           className="mx-auto h-[56px] w-[56px] object-contain"
         />
 
-        <h1 className="mt-6 text-center text-3xl font-bold text-white">
+        <h1 className="mt-6 text-center text-3xl font-bold text-foreground dark:text-white">
           Reset Your Password
         </h1>
 
@@ -288,21 +288,21 @@ export function ResetPasswordPage() {
                 onFocus={() => setIsPasswordFocused(true)}
                 onBlur={() => setIsPasswordFocused(false)}
                 placeholder="Enter new password"
-                className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
+                className={`h-14 w-full rounded-2xl border bg-muted dark:bg-[#111111] px-5 pr-12 text-foreground dark:text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${current.border} ${current.glow}`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none"
               >
                 {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </button>
 
               {/* Floating Rules Popover */}
               {isPasswordFocused && password.length >= 2 && (
-                <div className="absolute left-[calc(100%+16px)] top-1/2 z-50 w-[260px] -translate-y-1/2 rounded-xl border border-white/10 bg-[#1e1e1e] p-4 shadow-xl hidden md:block">
-                  <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-b border-l border-white/10 bg-[#1e1e1e]" />
-                  <p className="text-[13px] font-semibold text-white">Password must contain:</p>
+                <div className="absolute left-[calc(100%+16px)] top-1/2 z-50 w-[260px] -translate-y-1/2 rounded-xl border border-border dark:border-white/10 bg-[#1e1e1e] p-4 shadow-xl hidden md:block">
+                  <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-b border-l border-border dark:border-white/10 bg-[#1e1e1e]" />
+                  <p className="text-[13px] font-semibold text-foreground dark:text-white">Password must contain:</p>
                   <ul className="mt-2 flex flex-col gap-1 text-[12px] text-gray-300">
                     <li className="flex items-center gap-2">
                       <div className={`h-1.5 w-1.5 rounded-full ${passwordRules.minLength ? "bg-emerald-500" : "bg-gray-500"}`} />
@@ -347,12 +347,12 @@ export function ResetPasswordPage() {
                   maxLength={64}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  className={`h-14 w-full rounded-2xl border bg-[#111111] px-5 pr-12 text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
+                  className={`h-14 w-full rounded-2xl border bg-muted dark:bg-[#111111] px-5 pr-12 text-foreground dark:text-white outline-none transition-all duration-300 placeholder:text-gray-500 ${confirmBorder}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none"
                 >
                   {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </button>
@@ -388,7 +388,7 @@ export function ResetPasswordPage() {
               disabled={!canSubmit}
               className={`mt-7 h-14 w-full rounded-2xl font-bold transition-all duration-300 ${
                 canSubmit
-                  ? "bg-emerald-500 text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] hover:bg-emerald-400"
+                  ? "bg-emerald-500 text-foreground dark:text-white shadow-[0_0_24px_rgba(16,185,129,0.28)] hover:bg-emerald-400"
                   : "cursor-not-allowed bg-emerald-700/60 text-gray-400"
               }`}
             >

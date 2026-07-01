@@ -5,8 +5,10 @@ import { GlobalErrorBoundary } from "@/components/layout/GlobalErrorBoundary";
 export function App() {
   return (
     <GlobalErrorBoundary>
-      <AppRouter />
-      <Toaster />
+      <div className="bg-background text-foreground min-h-screen w-full">
+        <AppRouter />
+        <Toaster />
+      </div>
     </GlobalErrorBoundary>
   );
 }

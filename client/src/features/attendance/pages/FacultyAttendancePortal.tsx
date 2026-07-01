@@ -8,11 +8,11 @@ import {
     Check,
     X,
     Save,
-    CalendarClock
+    CalendarClock,
+    ClipboardCheck
 } from "lucide-react";
-import { 
 import { Button } from "@/components/marketing_ui/button";
-
+import { 
     useGetBatchAttendanceReport, 
     useGetPendingLeaveRequests,
     useSubmitDailyAttendance,
@@ -73,15 +73,15 @@ export default function FacultyAttendancePortal() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0B] text-slate-200 p-8 font-sans selection:bg-emerald-500/30">
+        <div className="min-h-screen bg-background dark:bg-[#0A0A0B] text-foreground dark:text-slate-200 p-8 font-sans selection:bg-emerald-500/30">
             
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Attendance & Leave Control</h1>
+                    <h1 className="text-3xl font-bold text-foreground dark:text-white tracking-tight">Attendance & Leave Control</h1>
                     <p className="text-sm text-slate-400 mt-1">Manage daily registers and approve student leaves instantly.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+                <div className="flex items-center gap-3 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-4 py-2 rounded-full">
                     <CalendarClock className="w-5 h-5 text-emerald-400" />
                     <span className="text-sm font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                 </div>
@@ -93,10 +93,10 @@ export default function FacultyAttendancePortal() {
                 <div className="xl:col-span-1 space-y-8">
                     
                     {/* BENTO GRID: Today's Snapshot */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden">
+                    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                         
-                        <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-foreground dark:text-white mb-6 flex items-center gap-2">
                             <Users className="w-5 h-5 text-emerald-400" />
                             Today's Snapshot
                         </h2>
@@ -105,9 +105,9 @@ export default function FacultyAttendancePortal() {
                             <div className="h-32 flex items-center justify-center text-slate-500">Loading stats...</div>
                         ) : (
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                                <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/5 dark:border-white/5">
                                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Total</p>
-                                    <p className="text-3xl font-bold text-white">{report?.stats?.total || 0}</p>
+                                    <p className="text-3xl font-bold text-foreground dark:text-white">{report?.stats?.total || 0}</p>
                                 </div>
                                 <div className="bg-emerald-500/10 rounded-2xl p-4 border border-emerald-500/20">
                                     <p className="text-xs text-emerald-400 font-medium uppercase tracking-wider mb-1">Present</p>
@@ -126,9 +126,9 @@ export default function FacultyAttendancePortal() {
                     </div>
 
                     {/* LEAVE WORKFLOW QUEUE */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 backdrop-blur-xl">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <h2 className="text-lg font-semibold text-foreground dark:text-white flex items-center gap-2">
                                 <AlertTriangle className="w-5 h-5 text-amber-400" />
                                 Leave Requests
                             </h2>
@@ -142,20 +142,20 @@ export default function FacultyAttendancePortal() {
                         {loadingLeaves ? (
                             <div className="text-sm text-slate-500 text-center py-4">Loading queue...</div>
                         ) : pendingLeaves?.length === 0 ? (
-                            <div className="text-sm text-slate-500 text-center py-8 bg-white/5 rounded-2xl border border-white/5 border-dashed">
+                            <div className="text-sm text-slate-500 text-center py-8 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5 border-dashed">
                                 No pending leave requests! 🎉
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 {pendingLeaves?.map((leave: any) => (
-                                    <div key={leave._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 transition hover:bg-white/10">
+                                    <div key={leave._id} className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-4 transition hover:bg-black/10 dark:hover:bg-white/10">
                                         <div className="flex justify-between items-start mb-3">
                                             <div>
-                                                <p className="text-sm font-semibold text-white">{leave.student_id?.name || 'Unknown Student'}</p>
+                                                <p className="text-sm font-semibold text-foreground dark:text-white">{leave.student_id?.name || 'Unknown Student'}</p>
                                                 <p className="text-xs text-slate-400">{new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}</p>
                                             </div>
                                         </div>
-                                        <p className="text-xs text-slate-300 bg-black/30 p-2 rounded-lg border border-white/5 mb-4 line-clamp-2">
+                                        <p className="text-xs text-slate-300 bg-muted/50 dark:bg-black/30 p-2 rounded-lg border border-black/5 dark:border-white/5 mb-4 line-clamp-2">
                                             "{leave.reason}"
                                         </p>
                                         <div className="flex gap-2">
@@ -181,10 +181,10 @@ export default function FacultyAttendancePortal() {
 
                 {/* RIGHT COLUMN: Fast-Entry Register */}
                 <div className="xl:col-span-2">
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl h-full flex flex-col">
+                    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-3xl p-6 backdrop-blur-xl h-full flex flex-col">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <h2 className="text-lg font-semibold text-foreground dark:text-white flex items-center gap-2">
                                     <ClipboardCheck className="w-5 h-5 text-emerald-400" />
                                     Daily Fast-Entry Register
                                 </h2>
@@ -200,9 +200,9 @@ export default function FacultyAttendancePortal() {
                             </Button>
                         </div>
 
-                        <div className="flex-1 overflow-auto rounded-2xl border border-white/10 bg-black/20">
+                        <div className="flex-1 overflow-auto rounded-2xl border border-black/10 dark:border-white/10 bg-muted dark:bg-black/20">
                             <table className="w-full text-left border-collapse">
-                                <thead className="sticky top-0 bg-[#1A1C20] border-b border-white/10 z-10">
+                                <thead className="sticky top-0 bg-muted dark:bg-[#1A1C20] border-b border-black/10 dark:border-white/10 z-10">
                                     <tr>
                                         <th className="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Student Name</th>
                                         <th className="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider w-1/2 text-center">Status Toggle</th>
@@ -212,9 +212,9 @@ export default function FacultyAttendancePortal() {
                                     {MOCK_ROSTER.map((student) => {
                                         const status = attendanceState[student._id];
                                         return (
-                                            <tr key={student._id} className="hover:bg-white/5 transition-colors group">
+                                            <tr key={student._id} className="hover:bg-black/5 dark:bg-white/5 transition-colors group">
                                                 <td className="py-4 px-6">
-                                                    <p className="text-sm font-semibold text-slate-200">{student.name}</p>
+                                                    <p className="text-sm font-semibold text-foreground dark:text-slate-200">{student.name}</p>
                                                     <p className="text-xs text-slate-500 font-mono">{student.prn}</p>
                                                 </td>
                                                 <td className="py-4 px-6">
@@ -224,7 +224,7 @@ export default function FacultyAttendancePortal() {
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'present' 
                                                                     ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
-                                                                    : 'bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
+                                                                    : 'bg-black/5 dark:bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
                                                             }`}
                                                         >
                                                             <CheckCircle2 className="w-3 h-3" /> P
@@ -234,7 +234,7 @@ export default function FacultyAttendancePortal() {
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'absent' 
                                                                     ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]' 
-                                                                    : 'bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
+                                                                    : 'bg-black/5 dark:bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
                                                             }`}
                                                         >
                                                             <XCircle className="w-3 h-3" /> A
@@ -244,7 +244,7 @@ export default function FacultyAttendancePortal() {
                                                             className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border ${
                                                                 status === 'late' 
                                                                     ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' 
-                                                                    : 'bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
+                                                                    : 'bg-black/5 dark:bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
                                                             }`}
                                                         >
                                                             <Clock className="w-3 h-3" /> L

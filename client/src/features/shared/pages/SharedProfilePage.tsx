@@ -348,25 +348,25 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Display Name</label>
-                  <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" className="bg-background" readOnly={isReadOnly} />
+                  <Input value={form.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="Enter name" className="bg-muted/40 dark:bg-background" readOnly={isReadOnly} />
                 </div>
                 {form.prn && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">PRN</label>
-                    <Input value={form.prn} readOnly className="bg-background" />
+                    <Input value={form.prn} readOnly className="bg-muted/40 dark:bg-background" />
                   </div>
                 )}
                 {form.bio && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bio</label>
-                    <div className="p-3 bg-muted/40 rounded-lg border border-border text-sm opacity-90 italic">
+                    <div className="p-3 bg-muted/60 dark:bg-muted/40 rounded-lg border border-border text-sm opacity-90 italic">
                       {form.bio}
                     </div>
                   </div>
                 )}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Access Role</label>
-                  <div className="p-3 bg-muted/40 rounded-lg border border-dashed border-border text-sm font-semibold opacity-70 uppercase tracking-wide">
+                  <div className="p-3 bg-muted/60 dark:bg-muted/40 rounded-lg border border-dashed border-border text-sm font-semibold opacity-70 uppercase tracking-wide">
                     {form.role}
                   </div>
                 </div>
@@ -380,7 +380,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                 <p className="text-sm text-muted-foreground mt-1 opacity-80">Manage how you interact with the interface.</p>
               </div>
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-transparent hover:bg-white/10 hover:border-border transition-colors">
+                <div className="flex items-center justify-between p-3 bg-muted/50 dark:bg-white/5 rounded-lg border border-transparent hover:bg-muted dark:hover:bg-white/10 hover:border-border transition-colors">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground/90">Dark Theme</span>
                     <span className="text-xs text-muted-foreground opacity-80">Optimize UI for low-light.</span>
@@ -392,7 +392,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     className={isReadOnly ? 'opacity-50 pointer-events-none' : ''}
                   />
                 </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-transparent hover:bg-white/10 hover:border-border transition-colors">
+                <div className="flex items-center justify-between p-3 bg-muted/50 dark:bg-white/5 rounded-lg border border-transparent hover:bg-muted dark:hover:bg-white/10 hover:border-border transition-colors">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground/90">Push Alerts</span>
                     <span className="text-xs text-muted-foreground opacity-80">Real-time system notifications.</span>
