@@ -407,25 +407,48 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                     <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
                       <h4 className="text-sm font-semibold text-foreground">Group Settings</h4>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-full text-primary">
-                          <Megaphone className="w-4 h-4" />
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-full text-primary">
+                            <Megaphone className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-foreground">Announcement Mode</span>
+                            <span className="text-xs text-muted-foreground">Only admins can send messages</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-foreground">Announcement Mode</span>
-                          <span className="text-xs text-muted-foreground">Only admins can send messages</span>
-                        </div>
+                        
+                        {/* Toggle Switch */}
+                        <Switch
+                          checked={data.group.send_messages_policy === 'admin_only'}
+                          disabled={isUpdatingPermissions}
+                          onCheckedChange={(checked) => {
+                            handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
+                          }}
+                        />
                       </div>
                       
-                      {/* Toggle Switch */}
-                      <Switch
-                        checked={data.group.permissions?.send_messages === 'admin_only'}
-                        disabled={isUpdatingPermissions}
-                        onCheckedChange={(checked) => {
-                          handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
-                        }}
-                      />
+                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-full text-primary">
+                            <Shield className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-foreground">Restrict Info Edits</span>
+                            <span className="text-xs text-muted-foreground">Only admins can edit group info & photo</span>
+                          </div>
+                        </div>
+                        
+                        {/* Toggle Switch */}
+                        <Switch
+                          checked={data.group.edit_info_policy === 'admin_only'}
+                          disabled={isUpdatingPermissions}
+                          onCheckedChange={(checked) => {
+                            handleUpdatePermissions({ edit_info: checked ? 'admin_only' : 'all' });
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}

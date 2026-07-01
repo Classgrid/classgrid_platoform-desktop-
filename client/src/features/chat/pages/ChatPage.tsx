@@ -45,6 +45,7 @@ import { ForwardMessageModal } from "../components/ForwardMessageModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { SelectionActionBar } from "../components/SelectionActionBar";
+import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
 
 
 export function ChatPage() {
@@ -71,6 +72,7 @@ export function ChatPage() {
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
   const [viewingMedia, setViewingMedia] = useState<any | null>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [viewVotesPollId, setViewVotesPollId] = useState<string | null>(null);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
@@ -501,6 +503,17 @@ export function ChatPage() {
         return next;
       });
     },
+    onNewPoll: (data) => {
+      setPolls((prev) => [data.poll, ...prev]);
+    },
+    onPollVote: (data) => {
+      setPolls((prev) => prev.map(p => {
+        if (p.id === data.pollId) {
+           return { ...p, voteCounts: data.voteCounts, totalVoters: data.totalVoters };
+        }
+        return p;
+      }));
+    },
   });
 
   // -- Layout --
@@ -645,6 +658,7 @@ export function ChatPage() {
               typingUsers={activeTypingUsers}
               polls={polls}
               onVotePoll={handleVotePoll}
+              onViewVotes={(pollId) => setViewVotesPollId(pollId)}
               isSelectionMode={isSelectionMode}
               selectedMessageIds={selectedMessageIds}
               onToggleMessageSelection={(id) => {
@@ -691,6 +705,10 @@ export function ChatPage() {
                   }
                 }}
               />
+            ) : (activeThread.type === "group" && activeThread.sendMessagesPolicy === "admin_only" && activeThread.myRole !== "admin") ? (
+              <div className="p-4 bg-background border-t border-border flex items-center justify-center text-sm text-muted-foreground">
+                Only admins can send messages
+              </div>
             ) : (
               <ChatInput
                 onSendMessage={handleSendMessage}
@@ -746,6 +764,25 @@ export function ChatPage() {
         isOpen={isStarredModalOpen}
         onClose={() => setIsStarredModalOpen(false)}
       />
+
+      <ForwardMessageModal
+        isOpen={isForwardModalOpen}
+        onClose={() => setIsForwardModalOpen(false)}
+        threads={threads}
+        selectedMessageIds={Array.from(selectedMessageIds)}
+        onForward={handleForwardMessages}
+      />
+
+      {viewVotesPollId && activeThread && (
+        <ViewPollVotesModal
+          isOpen={true}
+          onClose={() => setViewVotesPollId(null)}
+          poll={polls.find(p => p.id === viewVotesPollId) || null}
+          threadOrGroupId={activeThread.id}
+          isGroup={activeThread.type === 'group'}
+          orgUsers={orgUsers}
+        />
+      )}
 
       {!!viewingMedia && (
         <FilePreviewModal 

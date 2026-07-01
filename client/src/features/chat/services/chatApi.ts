@@ -15,6 +15,8 @@ export interface ChatThread {
   bio?: string;
   prn?: string;
   avatarColor?: string;
+  sendMessagesPolicy?: 'all' | 'admin_only';
+  myRole?: 'admin' | 'member';
   lastMessage: string | null;
   lastMessageAt: string | null;
   unread: number;
@@ -258,4 +260,10 @@ export async function votePoll(groupId: string, pollId: string, optionId: string
 export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
   const res = await apiClient.get<{ polls: Poll[] }>(`/api/group-chat/${groupId}/polls`);
   return res.data.polls;
+}
+
+export async function fetchPollVoters(pollId: string, threadOrGroupId: string, isGroup: boolean): Promise<{ option_id: string, user_id: string }[]> {
+  const prefix = isGroup ? 'group-chat' : 'threads';
+  const res = await apiClient.get<{ votes: { option_id: string, user_id: string }[] }>(`/api/${prefix}/${threadOrGroupId}/polls/${pollId}/voters`);
+  return res.data.votes;
 }

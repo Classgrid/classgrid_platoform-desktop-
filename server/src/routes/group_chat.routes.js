@@ -167,8 +167,8 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     if (!group) return res.status(404).json({ error: 'Group not found' });
     if (!membership) return res.status(403).json({ error: 'Not a member' });
 
-    // Permissions column not in schema, allow all admins to edit for now.
-    if (membership.role !== 'admin') {
+    // Check permissions
+    if (membership.role !== 'admin' && group.edit_info_policy === 'admin_only') {
       return res.status(403).json({ error: 'Only admins can edit group info' });
     }
 
@@ -206,7 +206,9 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
     const userId = req.user._id.toString();
     const { group, thread, membership } = await getGroupMembership(userId, req.params.id);
     if (!group || !membership) return res.status(403).json({ error: 'Not authorized' });
-    if (membership.role !== 'admin') {
+    
+    // Check permissions
+    if (membership.role !== 'admin' && group.edit_info_policy === 'admin_only') {
       return res.status(403).json({ error: 'Only admins can change group photo' });
     }
 
@@ -236,11 +238,40 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
 });
 
 // ──────────────────────────────────────────────
-// PUT /groups/:id/permissions — Update permissions (Mocked)
+// PUT /groups/:id/permissions — Update permissions
 // ──────────────────────────────────────────────
 router.put('/:id/permissions', isAuthenticated, async (req, res) => {
-  // Column doesn't exist yet in Supabase, mock success
-  res.json({ group: { permissions: { send_messages: 'all', edit_info: 'admin_only' } } });
+  try {
+    const userId = req.user._id.toString();
+    const { group, membership } = await getGroupMembership(userId, req.params.id);
+    if (!group || !membership) return res.status(403).json({ error: 'Not authorized' });
+
+    if (membership.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can change group permissions' });
+    }
+
+    const { send_messages, edit_info } = req.body;
+    const updates = {};
+    if (['all', 'admin_only'].includes(send_messages)) updates.send_messages_policy = send_messages;
+    if (['all', 'admin_only'].includes(edit_info)) updates.edit_info_policy = edit_info;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'Invalid permission values' });
+    }
+
+    const { data, error } = await sb
+      .from('chat_groups')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    res.json({ group: data });
+  } catch (err) {
+    console.error('Permission update error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ──────────────────────────────────────────────
@@ -509,6 +540,19 @@ router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
     res.json({ ok: true, voteCounts });
   } catch (err) {
     console.error('Poll vote error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// GET /groups/:id/polls/:pollId/voters — Get voters for a poll
+// ──────────────────────────────────────────────
+router.get('/:id/polls/:pollId/voters', isAuthenticated, async (req, res) => {
+  try {
+    const pollId = req.params.pollId;
+    const { data: votes } = await sb.from('chat_poll_votes').select('option_id, user_id').eq('poll_id', pollId);
+    res.json({ votes: votes || [] });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

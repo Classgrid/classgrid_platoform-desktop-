@@ -75,9 +75,12 @@ router.get('/', isAuthenticated, async (req, res) => {
     // Get thread IDs where user is a member
     const { data: memberships, error: memErr } = await sb
       .from('chat_thread_members')
-      .select('thread_id')
+      .select('thread_id, role')
       .eq('user_id', userId);
     if (memErr) throw memErr;
+    
+    const myRoles = {};
+    (memberships || []).forEach(m => { myRoles[m.thread_id] = m.role; });
 
     const threadIds = (memberships || []).map(m => m.thread_id);
     if (threadIds.length === 0) return res.json({ threads: [] });
@@ -194,6 +197,8 @@ router.get('/', isAuthenticated, async (req, res) => {
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
           createdAt: thread.created_at,
+          sendMessagesPolicy: group.send_messages_policy || 'all',
+          myRole: myRoles[thread.id] || 'member',
         };
       }
     });
@@ -534,8 +539,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     // Check group send_messages permission (only if group)
     if (thread.type === 'group' && thread.group_id) {
-      const { data: group } = await sb.from('chat_groups').select('permissions').eq('id', thread.group_id).single();
-      if (group?.permissions?.send_messages === 'admin_only' && membership.role !== 'admin') {
+      const { data: group } = await sb.from('chat_groups').select('send_messages_policy').eq('id', thread.group_id).single();
+      if (group?.send_messages_policy === 'admin_only' && membership.role !== 'admin') {
         return res.status(403).json({ error: 'Only admins can send messages in this group' });
       }
     }
@@ -1142,16 +1147,22 @@ router.post('/:id/polls', isAuthenticated, async (req, res) => {
       last_message_at: new Date().toISOString()
     }).eq('id', threadId);
 
+    // Format options with IDs
+    const formattedOptions = options.map((text, i) => ({
+      id: String.fromCharCode(97 + i), // a, b, c, ...
+      text: typeof text === 'string' ? text.trim() : text.text?.trim() || '',
+    }));
+
     const { data: poll } = await sb.from('chat_polls').insert([{
       thread_id: threadId,
       message_id: msg.id,
       question,
-      options,
+      options: formattedOptions,
       allow_multiple: !!allowMultiple,
       created_by: userId
     }]).select().single();
 
-    broadcastToChannel(threadId, { type: 'NEW_POLL', poll });
+    broadcastToChannel(`thread:${threadId}`, 'new_poll', { poll, messageId: msg.id });
     res.status(201).json({ poll });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1178,9 +1189,27 @@ router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
       await sb.from('chat_poll_votes').insert([{ poll_id: pollId, user_id: userId, option_id: optionId }]);
     }
 
-    broadcastToChannel(threadId, { type: 'POLL_VOTE_UPDATED', pollId });
+    const { data: allVotes } = await sb.from('chat_poll_votes').select('option_id, user_id').eq('poll_id', pollId);
+    const voteCounts = {};
+    (allVotes || []).forEach(v => {
+      voteCounts[v.option_id] = (voteCounts[v.option_id] || 0) + 1;
+    });
+
+    broadcastToChannel(`thread:${threadId}`, 'poll_vote', { 
+      pollId, 
+      voteCounts,
+      totalVoters: new Set((allVotes || []).map(v => v.user_id)).size 
+    });
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+router.get('/:id/polls/:pollId/voters', isAuthenticated, async (req, res) => {
+  try {
+    const pollId = req.params.pollId;
+    const { data: votes } = await sb.from('chat_poll_votes').select('option_id, user_id').eq('poll_id', pollId);
+    res.json({ votes: votes || [] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 router.get('/:id/polls', isAuthenticated, async (req, res) => {

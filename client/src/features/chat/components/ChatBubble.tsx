@@ -35,6 +35,7 @@ interface ChatBubbleProps {
   currentUserId: string;
   poll?: Poll;
   onVotePoll?: (pollId: string, optionId: string) => void;
+  onViewVotes?: (pollId: string) => void;
   onUserClick?: (userId: string) => void;
   onViewMedia?: (attachment: any) => void;
   onStar?: (msgId: string) => void;
@@ -72,6 +73,7 @@ export function ChatBubble({
   currentUserId,
   poll,
   onVotePoll,
+  onViewVotes,
   onUserClick,
   onViewMedia,
   onStar,
@@ -312,7 +314,10 @@ export function ChatBubble({
                       </span>
                     </div>
                     <div className="flex flex-col gap-3.5">
-                      {poll.options.map((opt) => {
+                      {poll.options.map((rawOpt, i) => {
+                        const opt = typeof rawOpt === 'string' 
+                          ? { id: String.fromCharCode(97 + i), text: rawOpt } 
+                          : rawOpt;
                         const count = poll.voteCounts[opt.id] || 0;
                         const percent = poll.totalVoters > 0 ? Math.round((count / poll.totalVoters) * 100) : 0;
                         const iVoted = poll.myVotes.includes(opt.id);
@@ -356,7 +361,10 @@ export function ChatBubble({
                     
                     {/* View Votes Footer */}
                     <div className="mt-5 pt-3 border-t border-border dark:border-white/10 flex items-center justify-center">
-                      <button className="text-[13px] font-bold text-[#00a884] hover:underline cursor-pointer">
+                      <button 
+                        onClick={() => onViewVotes?.(poll.id)}
+                        className="text-[13px] font-bold text-[#00a884] hover:underline cursor-pointer"
+                      >
                         View votes
                       </button>
                     </div>
