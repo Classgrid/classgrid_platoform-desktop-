@@ -673,6 +673,7 @@ export function ChatPage() {
                 email: selectedUserForProfile.email,
                 role: selectedUserForProfile.role,
                 profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
+                profileBanner: selectedUserForProfile.profileBanner || "",
                 prn: selectedUserForProfile.prn,
                 bio: selectedUserForProfile.bio,
               }}

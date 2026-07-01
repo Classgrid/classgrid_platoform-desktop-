@@ -159,14 +159,13 @@ export function ChatBubble({
             </div>
           )}
 
-          {/* Bubble body */}
           <div
             className={`relative rounded-2xl px-4 py-2 flex flex-col gap-1 min-w-[120px]
               ${message.is_deleted 
                 ? "bg-muted text-muted-foreground italic border border-border" 
                 : isMine 
                   ? "bg-primary text-[#0f172a] font-medium rounded-tr-sm shadow-sm" 
-                  : "bg-[#202c33] text-foreground dark:text-[#e9edef] rounded-tl-sm shadow-sm"
+                  : "bg-white dark:bg-[#202c33] text-foreground dark:text-[#e9edef] border border-black/5 dark:border-transparent rounded-tl-sm shadow-sm"
               }
             `}
           >
@@ -201,8 +200,8 @@ export function ChatBubble({
                           {att.file_type.startsWith("image/") ? (
                             <img src={att.file_url} alt={att.file_name} className="max-w-full h-auto object-cover max-h-[300px]" loading="lazy" />
                           ) : (
-                            <div className="w-full h-[150px] bg-zinc-900 flex items-center justify-center">
-                              <span className="text-white text-xs opacity-70">{att.file_name}</span>
+                            <div className="w-full h-[150px] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                              <span className="text-zinc-600 dark:text-white text-xs font-medium dark:opacity-70">{att.file_name}</span>
                             </div>
                           )}
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
