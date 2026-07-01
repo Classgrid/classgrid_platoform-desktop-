@@ -24,6 +24,9 @@ interface ChatConversationProps {
   onVotePoll?: (pollId: string, optionId: string) => void;
   onStar?: (msgId: string) => void;
   searchQuery?: string;
+  isSelectionMode?: boolean;
+  selectedMessageIds?: Set<string>;
+  onToggleMessageSelection?: (msgId: string) => void;
 }
 
 export function ChatConversation({
@@ -45,6 +48,9 @@ export function ChatConversation({
   onVotePoll,
   onStar,
   searchQuery = "",
+  isSelectionMode = false,
+  selectedMessageIds = new Set(),
+  onToggleMessageSelection,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -225,6 +231,9 @@ export function ChatConversation({
                     poll={polls.find(p => p.message_id === msg.id)}
                     onVotePoll={onVotePoll}
                     onStar={onStar}
+                    isSelectionMode={isSelectionMode}
+                    isSelected={selectedMessageIds.has(msg.id)}
+                    onToggleSelect={() => onToggleMessageSelection?.(msg.id)}
                   />
                 </motion.div>
               );

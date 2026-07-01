@@ -39,6 +39,7 @@ import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { StarredMessagesModal } from "../components/StarredMessagesModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
+import { SelectionActionBar } from "../components/SelectionActionBar";
 
 
 export function ChatPage() {
@@ -68,6 +69,8 @@ export function ChatPage() {
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
@@ -524,6 +527,7 @@ export function ChatPage() {
               onClearChat={handleClearChat}
               onDeleteChat={handleDeleteChat}
               onOpenDisappearingModal={() => setIsDisappearingModalOpen(true)}
+              onEnterSelectionMode={() => setIsSelectionMode(true)}
             />
             
             <ChatConversation
@@ -581,16 +585,61 @@ export function ChatPage() {
               typingUsers={activeTypingUsers}
               polls={polls}
               onVotePoll={handleVotePoll}
+              isSelectionMode={isSelectionMode}
+              selectedMessageIds={selectedMessageIds}
+              onToggleMessageSelection={(id) => {
+                setSelectedMessageIds(prev => {
+                  const next = new Set(prev);
+                  if (next.has(id)) next.delete(id);
+                  else next.add(id);
+                  return next;
+                });
+              }}
             />
 
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              isSending={isSending}
-              replyTo={replyTo}
-              onCancelReply={() => setReplyTo(null)}
-              onTyping={(isTyping, type) => sendTyping && sendTyping(isTyping, type)}
-              onOpenPollModal={() => setIsPollModalOpen(true)}
-            />
+            {isSelectionMode ? (
+              <SelectionActionBar
+                selectedCount={selectedMessageIds.size}
+                onCancel={() => {
+                  setIsSelectionMode(false);
+                  setSelectedMessageIds(new Set());
+                }}
+                onAction={async (action) => {
+                  if (selectedMessageIds.size === 0) return;
+                  if (action === "delete") {
+                    for (const msgId of Array.from(selectedMessageIds)) {
+                      try {
+                        await deleteMessage(activeThread.id, msgId);
+                        setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_deleted: true, message: "This message was deleted" } : m));
+                      } catch (err) {
+                        toast.error("Failed to delete some messages");
+                      }
+                    }
+                  } else if (action === "star") {
+                    for (const msgId of Array.from(selectedMessageIds)) {
+                      handleStarMessage(msgId);
+                    }
+                  } else if (action === "copy") {
+                    const texts = messages.filter(m => selectedMessageIds.has(m.id)).map(m => m.message).filter(Boolean);
+                    navigator.clipboard.writeText(texts.join("\n"));
+                    toast.success("Messages copied to clipboard");
+                  } else {
+                    toast.info(`${action} is not fully implemented yet`);
+                  }
+                  setIsSelectionMode(false);
+                  setSelectedMessageIds(new Set());
+                }}
+              />
+            ) : (
+              <ChatInput
+                onSendMessage={handleSendMessage}
+                isSending={isSending}
+                replyTo={replyTo}
+                onCancelReply={() => setReplyTo(null)}
+                onTyping={(isTyping, type) => sendTyping && sendTyping(isTyping, type)}
+                onOpenPollModal={() => setIsPollModalOpen(true)}
+              />
+            )}
           </>
         ) : (
           <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-center p-8">

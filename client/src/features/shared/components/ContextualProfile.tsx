@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import indiaLocations from "@/data/india-locations.json";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { toast } from "sonner";
+import { OnlineStatusDot } from "./OnlineStatusDot";
 
 // ── SUB-COMPONENT FOR DATE FIELD TO HANDLE LOCAL STATE ──
 function DateField({ field, value, onChange, disabled }: { field: any, value: string, onChange: (val: string) => void, disabled?: boolean }) {
@@ -224,8 +225,12 @@ export function ContextualProfile({
               {section.label}
             </h2>
             
-            {/* Edit / Save Toggle */}
-            {strategy.permissions.can_edit && (
+            <div className="flex items-center gap-4">
+              {targetRole && formData._id && (
+                <OnlineStatusDot userId={formData._id} showText />
+              )}
+              {/* Edit / Save Toggle */}
+              {strategy.permissions.can_edit && (
               isEditing ? (
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>
@@ -246,6 +251,7 @@ export function ContextualProfile({
                 </Button>
               )
             )}
+            </div>
           </div>
 
           {/* Anti-Ragging Special Banner */}

@@ -36,6 +36,9 @@ interface ChatBubbleProps {
   onUserClick?: (userId: string) => void;
   onViewMedia?: (attachment: any) => void;
   onStar?: (msgId: string) => void;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -70,6 +73,9 @@ export function ChatBubble({
   onUserClick,
   onViewMedia,
   onStar,
+  isSelectionMode = false,
+  isSelected = false,
+  onToggleSelect,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
@@ -111,8 +117,26 @@ export function ChatBubble({
   const timeString = format(new Date(message.created_at), "h:mm a");
 
   return (
-    <div
-      className={`flex w-full ${isMine ? "justify-end" : "justify-start"} mb-4`}
+    <div 
+      className={`flex w-full items-start group ${isSelectionMode ? "cursor-pointer relative hover:bg-black/5 dark:hover:bg-white/5 py-1 -my-1 transition-colors" : ""} ${isSelected ? "bg-primary/10 hover:bg-primary/10 dark:bg-primary/20 dark:hover:bg-primary/20" : ""}`}
+      onClick={(e) => {
+        if (isSelectionMode) {
+          e.preventDefault();
+          onToggleSelect?.();
+        }
+      }}
+    >
+      {isSelectionMode && (
+        <div className="shrink-0 w-12 flex justify-center pt-2 self-stretch">
+          <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-border bg-background"}`}>
+            {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+          </div>
+        </div>
+      )}
+      
+      <div
+        className={`flex w-full ${isMine ? "justify-end" : "justify-start"} mb-4 ${isSelectionMode ? "pointer-events-none" : ""}`}
+
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
