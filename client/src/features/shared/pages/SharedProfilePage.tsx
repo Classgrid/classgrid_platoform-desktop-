@@ -486,17 +486,19 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
             </div>
           </div>
 
-          {/* Dynamic Contextual Profile Data */}
-          <div className="mt-8 mb-6">
-            <ContextualProfile 
-              targetRole={form.role || "student"} 
-              viewerRole={currentUser?.role || "student"} 
-              orgType={currentUser?.organization?.type || "university"} 
-              structureType={currentUser?.organization?.structure || "standalone"} 
-              isSelfView={!publicUser} 
-              profileData={publicUser ? { ...publicUser, organization: form.organization_name } : { ...(profileData?.user || {}), organization: form.organization_name }}
-            />
-          </div>
+            {/* Dynamic Contextual Profile Data - Only shown to the user themselves */}
+            {!isReadOnly && (
+              <div className="mt-8 mb-6">
+                <ContextualProfile 
+                  targetRole={form.role || "student"} 
+                  viewerRole={currentUser?.role || "student"} 
+                  orgType={currentUser?.organization?.type || "university"} 
+                  structureType={currentUser?.organization?.structure || "standalone"} 
+                  isSelfView={true} 
+                  profileData={profileData?.user || {}}
+                />
+              </div>
+            )}
 
 
 
