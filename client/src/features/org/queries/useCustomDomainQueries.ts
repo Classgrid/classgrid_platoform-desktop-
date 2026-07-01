@@ -77,12 +77,8 @@ export function useVerifyCustomDomain() {
             const { data } = await apiClient.post<{ success: boolean; isFullyVerified: boolean; hasConflicts?: boolean; conflictingRecords?: string[]; message: string; custom_domain: CustomDomainConfig, erp_domain: CustomDomainConfig }>("/api/org-admin/custom-domain/verify", { domainType });
             return data;
         },
-        onSuccess: (data) => {
-            queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
-                ...old,
-                custom_domain: data.custom_domain,
-                erp_domain: data.erp_domain
-            }));
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["org-custom-domain"] });
         },
     });
 }
