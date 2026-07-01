@@ -458,6 +458,11 @@ const userSchema = new mongoose.Schema(
     webex_token_expiry: {
       type: Date,
       default: null,
+    },
+    metadata: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
     }
   },
   {

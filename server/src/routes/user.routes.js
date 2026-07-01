@@ -89,7 +89,8 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         branch: user.branch || null,
         batch: user.batch || null,
         profile_completed: user.profile_completed,
-        pushNotifications: normalizePushNotifications(user.pushNotifications)
+        pushNotifications: normalizePushNotifications(user.pushNotifications),
+        metadata: user.metadata || {}
       },
     };
 
@@ -162,6 +163,10 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
     // Push Notifications Toggle
     if (req.body.pushNotifications !== undefined && typeof req.body.pushNotifications.global === 'boolean') {
       updateData["pushNotifications.global"] = req.body.pushNotifications.global;
+    }
+
+    if (req.body.metadata !== undefined) {
+      updateData.metadata = req.body.metadata;
     }
 
     // Fetch the current user to enforce field locking
@@ -407,7 +412,8 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
         authProvider: user.authProvider,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
-        pushNotifications: normalizePushNotifications(user.pushNotifications)
+        pushNotifications: normalizePushNotifications(user.pushNotifications),
+        metadata: user.metadata || {}
       }
     });
 

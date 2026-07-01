@@ -32,6 +32,7 @@ type ProfileData = {
   bio?: string;
   organization_name?: string;
   organization_logo?: string;
+  metadata?: Record<string, any>;
 };
 
 type EmailPrefs = {
@@ -107,6 +108,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         prn: publicUser.prn,
         bio: publicUser.bio,
         organization_name: publicUser.organization_name,
+        metadata: publicUser.metadata || {},
       });
     } else if (profileData?.user) {
       setForm({
@@ -120,6 +122,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         createdAt: profileData.user.createdAt,
         organization_name: profileData.user.organization_name || (profileData.user.organization_id && profileData.user.organization_id.name) || (profileData.user.organization && profileData.user.organization.name) || currentUser?.organization?.name || currentUser?.organization_name || "",
         organization_logo: (profileData.user.organization_id && profileData.user.organization_id.logo_url) || (profileData.user.organization && profileData.user.organization.logo_url) || currentUser?.organization?.logo_url || "",
+        metadata: profileData.user.metadata || {},
       });
     }
   }, [profileData, publicUser, currentUser]);
@@ -378,21 +381,40 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
 
                 {/* Social Links with Premium Hover Effects */}
                 <div className="flex items-center gap-3 mt-4">
-                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-pink-600 hover:border-pink-500 hover:bg-pink-500/10 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                    <Instagram size={18} />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-blue-600 hover:border-blue-600 hover:bg-blue-600/10 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                    <Facebook size={18} />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-sky-500 hover:border-sky-500 hover:bg-sky-500/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                    <Linkedin size={18} />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-foreground/5 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5">
-                    <Github size={18} />
-                  </Button>
+                  {form.metadata?.instagram_url && (
+                    <a href={form.metadata.instagram_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-pink-600 hover:border-pink-500 hover:bg-pink-500/10 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                        <Instagram size={18} />
+                      </Button>
+                    </a>
+                  )}
+                  {form.metadata?.facebook_url && (
+                    <a href={form.metadata.facebook_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-blue-600 hover:border-blue-600 hover:bg-blue-600/10 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                        <Facebook size={18} />
+                      </Button>
+                    </a>
+                  )}
+                  {form.metadata?.linkedin_url && (
+                    <a href={form.metadata.linkedin_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-sky-500 hover:border-sky-500 hover:bg-sky-500/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                        <Linkedin size={18} />
+                      </Button>
+                    </a>
+                  )}
+                  {form.metadata?.github_url && (
+                    <a href={form.metadata.github_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-foreground/5 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5">
+                        <Github size={18} />
+                      </Button>
+                    </a>
+                  )}
+                  {(!form.metadata?.instagram_url && !form.metadata?.facebook_url && !form.metadata?.linkedin_url && !form.metadata?.github_url) && (
+                     <div className="text-xs text-muted-foreground italic mt-2">No social links added yet.</div>
+                  )}
                 </div>
                 
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-6 opacity-60" />
+                <div className="w-full h-px bg-border my-6" />
 
                 {/* Media & Docs Prominent Button */}
                 <div className="w-full sm:w-auto relative group">

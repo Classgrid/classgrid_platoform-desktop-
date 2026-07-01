@@ -147,7 +147,7 @@ export function ContextualProfile({
       // In a real implementation, you might want to use react-query useMutation
       // but for direct API calls we can use apiClient here
       const { apiClient } = await import("@/lib/apiClient");
-      await apiClient.put("/api/user/update", { metadata: formData });
+      await apiClient.put("/api/user/update", { ...formData, metadata: formData });
       
       // Update global context/cache if needed here or rely on the parent page
       toast.success("Profile details updated successfully");
