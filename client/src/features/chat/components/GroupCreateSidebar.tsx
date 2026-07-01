@@ -6,6 +6,7 @@ import type { OrgUser } from "../services/chatApi";
 
 interface GroupCreateSidebarProps {
   onClose: () => void;
+  onBack: () => void;
   users: OrgUser[];
   currentUserId: string;
   onCreateGroup: (name: string, memberIds: string[]) => Promise<void>;
@@ -21,6 +22,7 @@ function getInitials(name: string) {
 
 export function GroupCreateSidebar({
   onClose,
+  onBack,
   users,
   currentUserId,
   onCreateGroup,
@@ -94,7 +96,7 @@ export function GroupCreateSidebar({
             {/* Header */}
             <div className="h-16 shrink-0 bg-primary/5 flex items-center px-4 gap-4 border-b border-border">
               <button
-                onClick={onClose}
+                onClick={onBack}
                 className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-foreground"
               >
                 <ArrowLeft className="w-5 h-5" />

@@ -532,6 +532,10 @@ export function ChatPage() {
           {isGroupModalOpen && (
             <GroupCreateSidebar
               onClose={() => setIsGroupModalOpen(false)}
+              onBack={() => {
+                setIsGroupModalOpen(false);
+                setIsUserModalOpen(true);
+              }}
               users={orgUsers}
               currentUserId={currentUserId!}
               onCreateGroup={handleCreateGroup}
