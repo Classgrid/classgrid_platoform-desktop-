@@ -48,7 +48,12 @@ export function UserLoginRouter({ preferredRole }: UserLoginRouterProps) {
         setBranding(result);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error: any) => {
+        // If the domain is disabled, the backend returns 410 with a fallback URL
+        if (error?.response?.status === 410 && error?.response?.data?.fallbackUrl) {
+          window.location.replace(error.response.data.fallbackUrl);
+          return;
+        }
         if (isMounted) setIsLoading(false);
       });
 
