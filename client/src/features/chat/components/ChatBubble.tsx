@@ -166,7 +166,7 @@ export function ChatBubble({
                 ? "bg-muted text-muted-foreground italic border border-border" 
                 : isMine 
                   ? "bg-primary text-[#0f172a] font-medium rounded-tr-sm shadow-sm" 
-                  : "bg-[#202c33] text-[#e9edef] rounded-tl-sm shadow-sm"
+                  : "bg-[#202c33] text-foreground dark:text-[#e9edef] rounded-tl-sm shadow-sm"
               }
             `}
           >
@@ -196,7 +196,7 @@ export function ChatBubble({
                         <div 
                           key={att.id} 
                           onClick={() => onViewMedia?.(att)}
-                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-white/10 relative group cursor-pointer"
+                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-border dark:border-white/10 relative group cursor-pointer"
                         >
                           {att.file_type.startsWith("image/") ? (
                             <img src={att.file_url} alt={att.file_name} className="max-w-full h-auto object-cover max-h-[300px]" loading="lazy" />
@@ -266,13 +266,13 @@ export function ChatBubble({
                             <div className="flex items-center gap-3">
                               {/* WhatsApp style Radio/Checkbox */}
                               <div className={`w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                ${iVoted ? "border-[#00a884] bg-[#00a884]" : "border-white/30 group-hover:border-white/50"}
+                                ${iVoted ? "border-[#00a884] bg-[#00a884]" : "border-border dark:border-white/30 group-hover:border-white/50"}
                               `}>
                                 {iVoted && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
                               
                               <div className="flex-1 flex justify-between items-center min-w-0 gap-2">
-                                <span className={`text-[15px] truncate ${iVoted ? "font-medium text-white" : "text-[#e9edef]"}`}>
+                                <span className={`text-[15px] truncate ${iVoted ? "font-medium text-white" : "text-foreground dark:text-[#e9edef]"}`}>
                                   {opt.text}
                                 </span>
                                 {count > 0 && (
@@ -296,7 +296,7 @@ export function ChatBubble({
                     </div>
                     
                     {/* View Votes Footer */}
-                    <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-center">
+                    <div className="mt-5 pt-3 border-t border-border dark:border-white/10 flex items-center justify-center">
                       <button className="text-[13px] font-bold text-[#00a884] hover:underline cursor-pointer">
                         View votes
                       </button>
