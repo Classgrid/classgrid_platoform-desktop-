@@ -216,6 +216,113 @@ router.get('/', isAuthenticated, async (req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// GET /threads/dm/:userId/shared-media — Get media, docs, links shared in a DM
+// ──────────────────────────────────────────────
+router.get('/dm/:userId/shared-media', isAuthenticated, async (req, res) => {
+  try {
+    const myId = req.user._id.toString();
+    const otherId = req.params.userId;
+    
+    // Find DM thread ID
+    const { data: myThreads } = await sb.from('chat_thread_members').select('thread_id').eq('user_id', myId);
+    const { data: theirThreads } = await sb.from('chat_thread_members').select('thread_id').eq('user_id', otherId);
+
+    const myThreadIds = new Set((myThreads || []).map(t => t.thread_id));
+    const commonThreadIds = (theirThreads || []).filter(t => myThreadIds.has(t.thread_id)).map(t => t.thread_id);
+
+    let threadId = null;
+    if (commonThreadIds.length > 0) {
+      const { data: dmThreads } = await sb.from('chat_threads').select('id').in('id', commonThreadIds).eq('type', 'dm').maybeSingle();
+      if (dmThreads) threadId = dmThreads.id;
+    }
+
+    if (!threadId) {
+      return res.json({ media: [], docs: [], links: [] });
+    }
+
+    // Fetch messages to extract links and get message IDs for attachments
+    const { data: messages, error: msgErr } = await sb
+      .from('chat_messages')
+      .select('id, sender_id, sender_name, message, created_at, is_deleted')
+      .eq('thread_id', threadId)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false });
+
+    if (msgErr) throw msgErr;
+
+    const messageIds = (messages || []).map(m => m.id);
+    let attachments = [];
+    if (messageIds.length > 0) {
+      const { data: atts, error: attErr } = await sb
+        .from('chat_attachments')
+        .select('*')
+        .in('message_id', messageIds);
+      if (attErr) throw attErr;
+      attachments = atts || [];
+    }
+
+    // Attach sender and timestamp info to attachments
+    const messageMap = {};
+    (messages || []).forEach(m => { messageMap[m.id] = m; });
+
+    const media = [];
+    const docs = [];
+    const links = [];
+
+    // Process Attachments
+    attachments.forEach(att => {
+      const msg = messageMap[att.message_id];
+      if (!msg) return;
+
+      const enrichedAtt = {
+        ...att,
+        sender_id: msg.sender_id,
+        sender_name: msg.sender_name,
+        created_at: msg.created_at
+      };
+
+      if (isAllowedMime(att.file_type)) {
+        if (['image/', 'video/', 'audio/'].some(p => att.file_type.startsWith(p))) {
+          media.push(enrichedAtt);
+        } else {
+          docs.push(enrichedAtt);
+        }
+      }
+    });
+
+    // Process Links (Regex to find URLs in message text)
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    (messages || []).forEach(msg => {
+      if (!msg.message) return;
+      const urls = msg.message.match(urlRegex);
+      if (urls) {
+        urls.forEach(url => {
+          links.push({
+            id: msg.id + '_' + url,
+            url,
+            sender_id: msg.sender_id,
+            sender_name: msg.sender_name,
+            created_at: msg.created_at
+          });
+        });
+      }
+    });
+
+    // Sort all arrays by created_at descending
+    const sortDesc = (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    media.sort(sortDesc);
+    docs.sort(sortDesc);
+    links.sort(sortDesc);
+
+    res.json({ media, docs, links });
+  } catch (err) {
+    console.error('Shared media error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ──────────────────────────────────────────────
 // POST /threads/dm/:userId — Find-or-create DM
 // ──────────────────────────────────────────────
 router.post('/dm/:userId', isAuthenticated, async (req, res) => {

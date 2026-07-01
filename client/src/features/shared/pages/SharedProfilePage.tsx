@@ -20,6 +20,7 @@ import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { usePresence } from "@/features/chat/hooks/useRealtimeChat";
 import { formatDistanceToNow } from "date-fns";
+import { SharedMediaView } from "../components/SharedMediaView";
 
 type ProfileData = {
   name: string;
@@ -53,6 +54,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  const [activeView, setActiveView] = useState<"profile" | "shared-media">("profile");
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState<ProfileData>({
     name: "", phoneNumber: "", email: "", role: "", profilePicture: "", profileBanner: ""
@@ -433,6 +435,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                       <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       <Button 
                         variant="outline" 
+                        onClick={() => setActiveView("shared-media")}
                         className="w-full sm:w-auto relative flex items-center justify-between gap-4 py-6 px-6 border-border/50 bg-background/50 dark:bg-muted/10 backdrop-blur-xl hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30"
                       >
                         <div className="flex items-center gap-3">
@@ -551,18 +554,26 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
 
   if (isReadOnly) {
     return (
-      <div className="w-full h-full pb-12">
+      <div className="w-full h-full pb-12 flex flex-col">
         <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
           <div className="flex items-center text-sm text-muted-foreground">
             <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>Chat</button>
             <ChevronRight size={14} className="mx-2 opacity-50" />
-            <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>{form.name || "User"}</button>
+            <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={() => setActiveView("profile")}>{form.name || "User"}</button>
             <ChevronRight size={14} className="mx-2 opacity-50" />
-            <span className="font-semibold text-foreground">Profile</span>
+            {activeView === "shared-media" ? (
+              <span className="font-semibold text-foreground">Media, Links & Docs</span>
+            ) : (
+              <span className="font-semibold text-foreground">Profile</span>
+            )}
           </div>
         </div>
-        <div className="pt-6">
-          {containerContent}
+        <div className="pt-6 flex-1">
+          {activeView === "shared-media" ? (
+            <SharedMediaView targetUserId={publicUser?.userId || targetUserId} />
+          ) : (
+            containerContent
+          )}
         </div>
       </div>
     );
