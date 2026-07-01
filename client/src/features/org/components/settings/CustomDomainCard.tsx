@@ -886,18 +886,38 @@ const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseU
                 <AccordionContent className="px-6 pb-6 pt-4">
                     {subdomainEditUI}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {portals.map(portal => (
-                            <a 
-                                key={portal.name}
-                                href={`https://${baseUrl}${portal.path}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex flex-col p-3 rounded-lg hover:bg-muted border border-transparent hover:border-border/50 transition-colors group cursor-pointer"
-                            >
-                                <span className="font-medium text-foreground/90 group-hover:text-foreground text-sm">{portal.name}</span>
-                                <span className="text-xs text-muted-foreground truncate mt-1 group-hover:text-primary transition-colors">{`https://${baseUrl}${portal.path}`}</span>
-                            </a>
-                        ))}
+                        {portals.map(portal => {
+                            const fullUrl = `https://${baseUrl}${portal.path}`;
+                            return (
+                                <div 
+                                    key={portal.name}
+                                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted border border-transparent hover:border-border/50 transition-colors group"
+                                >
+                                    <a 
+                                        href={fullUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex flex-col flex-1 min-w-0 mr-4 cursor-pointer"
+                                    >
+                                        <span className="font-medium text-foreground/90 group-hover:text-foreground text-sm">{portal.name}</span>
+                                        <span className="text-xs text-muted-foreground truncate mt-1 group-hover:text-primary transition-colors">{fullUrl}</span>
+                                    </a>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            navigator.clipboard.writeText(fullUrl);
+                                            toast.success("Link copied!");
+                                        }}
+                                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-background rounded-md transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0"
+                                        title="Copy link"
+                                    >
+                                        <Copy className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            );
+                        })}
                     </div>
                 </AccordionContent>
             </AccordionItem>
