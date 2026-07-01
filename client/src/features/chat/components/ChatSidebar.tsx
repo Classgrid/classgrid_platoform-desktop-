@@ -277,7 +277,7 @@ export function ChatSidebar({
                       )}
                     </div>
                   )}
-                  {thread.type === "dm" && thread.otherUserId && onlineUsers?.has(thread.otherUserId) && (
+                  {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
                     <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
                   )}
                   {thread.unread > 0 && (

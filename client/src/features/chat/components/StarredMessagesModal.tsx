@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Star, X, Loader2 } from "lucide-react";
+import { Star, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/marketing_ui/dialog";
+import { Spinner } from "@/components/marketing_ui/spinner";
 import { apiClient } from "@/lib/apiClient";
 import type { ChatMessage } from "../services/chatApi";
 
@@ -61,7 +62,7 @@ export function StarredMessagesModal({ isOpen, onClose, onUnstar }: StarredMessa
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <Spinner className="w-6 h-6 text-muted-foreground" />
             </div>
           ) : error ? (
             <div className="text-center text-danger h-40 flex items-center justify-center">

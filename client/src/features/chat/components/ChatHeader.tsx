@@ -22,6 +22,7 @@ interface ChatHeaderProps {
   onOpenDisappearingModal?: () => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  onEnterSelectionMode?: () => void;
 }
 
 function getInitials(name: string) {
@@ -42,7 +43,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal, searchQuery = "", onSearchChange }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -77,7 +78,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
             {thread.type === "group" ? <Users className="w-4 h-4" /> : getInitials(thread.name)}
           </div>
         )}
-        {thread.type === "dm" && thread.otherUserId && onlineUsers?.has(thread.otherUserId) && (
+        {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
           <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background" />
         )}
       </button>
@@ -176,7 +177,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <BellOff className="w-4 h-4 mr-2" />
               <span>Mute notifications</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={onEnterSelectionMode}>
               <CheckSquare className="w-4 h-4 mr-2" />
               <span>Select messages</span>
             </DropdownMenuItem>
