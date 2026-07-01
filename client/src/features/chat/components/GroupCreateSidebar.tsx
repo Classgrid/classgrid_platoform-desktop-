@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Search, Check, Camera, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import { toast } from "sonner";
 import type { OrgUser } from "../services/chatApi";
 
 interface GroupCreateSidebarProps {
@@ -57,8 +58,15 @@ export function GroupCreateSidebar({
 
   const toggleUser = (userId: string) => {
     const next = new Set(selectedIds);
-    if (next.has(userId)) next.delete(userId);
-    else next.add(userId);
+    if (next.has(userId)) {
+      next.delete(userId);
+    } else {
+      if (next.size >= 50) {
+        toast.error("You can only add up to 50 members to a group.");
+        return;
+      }
+      next.add(userId);
+    }
     setSelectedIds(next);
   };
 
@@ -109,7 +117,10 @@ export function GroupCreateSidebar({
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <h2 className="text-lg font-bold text-foreground">Add group members</h2>
+              <div className="flex flex-col">
+                <h2 className="text-lg font-bold text-foreground leading-tight">Add group members</h2>
+                <span className="text-xs text-muted-foreground">{selectedIds.size} of 50 selected</span>
+              </div>
             </div>
 
             {/* Selected Chips & Search Area */}

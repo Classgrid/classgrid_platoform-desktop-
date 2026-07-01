@@ -357,6 +357,7 @@ export function ChatPage() {
         setActiveThread(thread as unknown as ChatThread);
       }
       setIsGroupModalOpen(false);
+      toast.success("Group created successfully!");
     } catch (err) {
       toast.error("Failed to create group");
     }
