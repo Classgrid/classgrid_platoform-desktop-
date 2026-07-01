@@ -48,6 +48,9 @@ export function RequireAuth() {
     const orgCustomDomainObj = user.organization.custom_domain as any;
     const orgCustomDomain = orgCustomDomainObj?.domain;
     
+    const orgErpDomainObj = user.organization.erp_domain as any;
+    const orgErpDomain = orgErpDomainObj?.domain;
+    
     const isClassgridSubdomain = currentHostname.endsWith(".classgrid.in") && currentHostname !== "classgrid.in";
     const systemDomains = ["www.classgrid.in", "app.classgrid.in", "admin.classgrid.in", "api.classgrid.in"];
 
@@ -59,9 +62,10 @@ export function RequireAuth() {
       }
     }
 
-    // If on a custom domain (not localhost, not vercel, not classgrid), it MUST be their organization's custom domain
+    // If on a custom domain (not localhost, not vercel, not classgrid), it MUST be one of their organization's custom domains
     if (!isClassgridSubdomain && !currentHostname.includes("localhost") && !currentHostname.includes("vercel.app") && currentHostname !== "classgrid.in") {
-      if (!orgCustomDomain || currentHostname !== orgCustomDomain) {
+      const isValidCustomDomain = currentHostname === orgCustomDomain || currentHostname === orgErpDomain;
+      if (!isValidCustomDomain) {
         window.location.replace(`https://${orgSubdomainHost}${location.pathname}${location.search}`);
         return null;
       }
