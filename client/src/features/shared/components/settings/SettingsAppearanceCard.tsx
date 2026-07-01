@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { Switch } from "@/components/marketing_ui/switch";
 
 export function SettingsAppearanceCard() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
     <div className="bg-card border border-border rounded-xl shadow-sm mb-6">
@@ -21,7 +21,7 @@ export function SettingsAppearanceCard() {
           <span className="text-xs text-muted-foreground">Enable dark theme for the dashboard</span>
         </div>
         <Switch 
-          checked={theme === "dark"} 
+          checked={resolvedTheme === "dark"} 
           onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} 
         />
       </div>
