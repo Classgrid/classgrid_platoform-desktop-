@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 
 interface ChatSidebarProps {
   threads: ChatThread[];
@@ -278,7 +279,18 @@ export function ChatSidebar({
                     </div>
                   )}
                   {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
+                    <TooltipProvider delay={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="absolute bottom-0 right-0 z-10 cursor-help">
+                            <span className="block w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          Online
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   {thread.unread > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-1">

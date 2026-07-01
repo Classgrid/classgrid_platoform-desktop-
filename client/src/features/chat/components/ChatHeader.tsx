@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 
 
 interface ChatHeaderProps {
@@ -79,7 +80,18 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
           </div>
         )}
         {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background" />
+          <TooltipProvider delay={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="absolute bottom-0 right-0 z-10 cursor-help">
+                  <span className="block w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                Online
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </button>
 
