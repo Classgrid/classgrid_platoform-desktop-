@@ -35,7 +35,7 @@ import { ChatConversation } from "../components/ChatConversation";
 import { AnimatePresence } from "framer-motion";
 import { ChatInput } from "../components/ChatInput";
 import { NewChatSidebar } from "../components/NewChatSidebar";
-import { GroupCreateModal } from "../components/GroupCreateModal";
+import { GroupCreateSidebar } from "../components/GroupCreateSidebar";
 import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
@@ -529,6 +529,15 @@ export function ChatPage() {
               }}
             />
           )}
+          {isGroupModalOpen && (
+            <GroupCreateSidebar
+              onClose={() => setIsGroupModalOpen(false)}
+              users={orgUsers}
+              currentUserId={currentUserId!}
+              onCreateGroup={handleCreateGroup}
+              isLoading={usersLoading}
+            />
+          )}
         </AnimatePresence>
       </div>
 
@@ -691,15 +700,6 @@ export function ChatPage() {
 
       {/* Modals */}
       
-      <GroupCreateModal
-        isOpen={isGroupModalOpen}
-        onClose={() => setIsGroupModalOpen(false)}
-        users={orgUsers}
-        currentUserId={currentUserId!}
-        onCreateGroup={handleCreateGroup}
-        isLoading={usersLoading}
-      />
-
       {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
         <GroupSettingsModal 
           groupId={activeThread.groupId} 
