@@ -234,7 +234,7 @@ export function CustomDomainCard() {
                             placeholder="e.g. aec"
                             className="flex-1"
                         />
-                        <span className="text-muted-foreground font-medium bg-muted/30 px-3 py-2 rounded-md border border-border shrink-0">.classgrid.in</span>
+                        <span className="text-muted-foreground font-medium bg-muted/30 px-3 h-10 flex items-center rounded-md border border-border shrink-0">.classgrid.in</span>
                     </div>
                 </div>
             </DangerConfirmDialog>

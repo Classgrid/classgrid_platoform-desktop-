@@ -203,7 +203,7 @@ export function DangerConfirmDialog({
                                     spellCheck={false}
                                     className={cn(
                                         "h-10 w-full rounded-md border bg-black px-3 text-sm text-white outline-none transition-all duration-200",
-                                        "focus:ring-1 focus:ring-white/30 focus:border-white/30",
+                                        "focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50",
                                         "border-white/10"
                                     )}
                                     disabled={isLoading}
