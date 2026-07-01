@@ -156,11 +156,6 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles((prev) => [...prev, ...Array.from(e.target.files!)].slice(0, 50));
-      if (onTyping) {
-        onTyping(true, 'uploading');
-        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = setTimeout(() => onTyping(false, 'uploading'), 180000);
-      }
     }
     // Reset input so the same file can be selected again
     if (fileInputRef.current) {

@@ -72,6 +72,7 @@ export function ChatPage() {
   const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
@@ -616,6 +617,7 @@ export function ChatPage() {
                         toast.error("Failed to delete some messages");
                       }
                     }
+                    setSelectedMessageIds(new Set());
                   } else if (action === "star") {
                     for (const msgId of Array.from(selectedMessageIds)) {
                       handleStarMessage(msgId);
@@ -624,11 +626,11 @@ export function ChatPage() {
                     const texts = messages.filter(m => selectedMessageIds.has(m.id)).map(m => m.message).filter(Boolean);
                     navigator.clipboard.writeText(texts.join("\n"));
                     toast.success("Messages copied to clipboard");
+                  } else if (action === "forward") {
+                    setIsForwardModalOpen(true);
                   } else {
                     toast.info(`${action} is not fully implemented yet`);
                   }
-                  setIsSelectionMode(false);
-                  setSelectedMessageIds(new Set());
                 }}
               />
             ) : (

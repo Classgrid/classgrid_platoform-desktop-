@@ -140,6 +140,11 @@ export async function markThreadRead(threadId: string) {
   await apiClient.post(`/api/threads/${threadId}/read`);
 }
 
+export async function forwardMessages(messageIds: string[], targetThreadIds: string[]) {
+  const res = await apiClient.post(`/api/threads/forward`, { messageIds, targetThreadIds });
+  return res.data;
+}
+
 export async function markAllRead() {
   await apiClient.post(`/api/threads/read-all`);
 }

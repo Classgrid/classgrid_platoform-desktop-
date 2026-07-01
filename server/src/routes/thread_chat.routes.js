@@ -1307,4 +1307,126 @@ router.post('/read-all', isAuthenticated, async (req, res) => {
   }
 });
 
+// ==========================================
+// Forward Messages
+// ==========================================
+router.post('/forward', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const { messageIds, targetThreadIds } = req.body;
+
+    if (!messageIds || !targetThreadIds || messageIds.length === 0 || targetThreadIds.length === 0) {
+      return res.status(400).json({ error: 'Missing messageIds or targetThreadIds' });
+    }
+
+    // 1. Fetch original messages
+    const { data: originalMessages, error: fetchErr } = await sb
+      .from('chat_messages')
+      .select('*')
+      .in('id', messageIds)
+      .eq('is_deleted', false);
+
+    if (fetchErr || !originalMessages || originalMessages.length === 0) {
+      return res.status(404).json({ error: 'Messages not found' });
+    }
+
+    // 2. Validate membership for all target threads
+    const { data: memberships } = await sb
+      .from('chat_thread_members')
+      .select('thread_id')
+      .eq('user_id', userId)
+      .in('thread_id', targetThreadIds);
+
+    const validThreadIds = memberships?.map(m => m.thread_id) || [];
+    if (validThreadIds.length === 0) {
+      return res.status(403).json({ error: 'Not a member of any of the target threads' });
+    }
+
+    // 3. Prepare new messages and attachments
+    const newMessagesToInsert = [];
+    
+    // Sort original messages by creation time so they are forwarded in order
+    const sortedMessages = originalMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    const now = new Date().toISOString();
+
+    for (const targetThreadId of validThreadIds) {
+      for (const msg of sortedMessages) {
+        newMessagesToInsert.push({
+          thread_id: targetThreadId,
+          sender_id: userId,
+          sender_name: req.user.name || 'User',
+          user_avatar: req.user.profilePicture || null,
+          message: msg.message,
+          reply_to: { isForwarded: true },
+          created_at: now
+        });
+      }
+    }
+
+    // Insert new messages
+    const { data: insertedMessages, error: insertErr } = await sb
+      .from('chat_messages')
+      .insert(newMessagesToInsert)
+      .select('id, thread_id');
+
+    if (insertErr) {
+      console.error("[Forward Insert Error]", insertErr);
+      return res.status(500).json({ error: 'Failed to forward messages' });
+    }
+
+    // Note: If original messages had attachments, we would need to copy them in `chat_attachments`.
+    // Since we don't have attachments grouped in original query, we can fetch them and copy them.
+    const { data: originalAttachments } = await sb
+      .from('chat_attachments')
+      .select('*')
+      .in('message_id', messageIds);
+
+    if (originalAttachments && originalAttachments.length > 0) {
+      const newAttachments = [];
+      // Map new inserted messages back to original messages
+      // This is slightly complex since we lose original mapping in the insert response if we don't track it.
+      // But we inserted in order of validThreadIds x sortedMessages
+      let index = 0;
+      for (const targetThreadId of validThreadIds) {
+        for (const msg of sortedMessages) {
+          const newMsgId = insertedMessages[index]?.id;
+          if (newMsgId) {
+            const msgAttachments = originalAttachments.filter(a => a.message_id === msg.id);
+            for (const att of msgAttachments) {
+              newAttachments.push({
+                message_id: newMsgId,
+                file_url: att.file_url,
+                file_name: att.file_name,
+                file_type: att.file_type,
+                file_size: att.file_size
+              });
+            }
+          }
+          index++;
+        }
+      }
+
+      if (newAttachments.length > 0) {
+        await sb.from('chat_attachments').insert(newAttachments);
+      }
+    }
+
+    // 4. Update last_message metadata for all target threads
+    const updatePromises = validThreadIds.map(tid => 
+      sb.from('chat_threads')
+        .update({ 
+          last_message: 'Forwarded message', 
+          last_message_at: now 
+        })
+        .eq('id', tid)
+    );
+    await Promise.all(updatePromises);
+
+    res.json({ success: true, forwardedCount: insertedMessages?.length });
+  } catch (err) {
+    console.error('Forward error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
