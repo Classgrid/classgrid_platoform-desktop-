@@ -320,6 +320,7 @@ function DomainConfigCard({
     const [isPolling, setIsPolling] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [showVerifiedCelebration, setShowVerifiedCelebration] = useState(false);
 
     const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
 
@@ -331,18 +332,29 @@ function DomainConfigCard({
                 try {
                     const { data } = await apiClient.post<{ custom_domain: any, erp_domain: any }>("/api/org-admin/custom-domain/verify", { domainType });
                     if (data && data[domainType]) {
-                        queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
-                            ...old,
-                            [domainType]: data[domainType]
-                        }));
-                        
                         if (data[domainType].status === "verified") {
+                            // Show green ticks first, then transition
+                            setShowVerifiedCelebration(true);
+                            queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
+                                ...old,
+                                [domainType]: { ...data[domainType], status: "pending_verification", txt_verified: true, cname_verified: true }
+                            }));
                             setIsPolling(false);
-                            if (domainType === "erp_domain") {
-                                setTimeout(() => {
-                                    setShowBackdoorWarning(true);
-                                }, 800);
-                            }
+                            setTimeout(() => {
+                                setShowVerifiedCelebration(false);
+                                queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
+                                    ...old,
+                                    [domainType]: data[domainType]
+                                }));
+                                if (domainType === "erp_domain") {
+                                    setTimeout(() => setShowBackdoorWarning(true), 800);
+                                }
+                            }, 2500);
+                        } else {
+                            queryClient.setQueryData(["org-custom-domain"], (old: any) => ({
+                                ...old,
+                                [domainType]: data[domainType]
+                            }));
                         }
                     }
                 } catch (err) {
@@ -385,11 +397,15 @@ function DomainConfigCard({
             onSuccess: (data) => {
                 if (data.isFullyVerified) {
                     toast.success("Domain verified successfully! SSL provisioning has started.", { duration: 5000 });
-                    if (domainType === "erp_domain") {
-                        setTimeout(() => {
-                            setShowBackdoorWarning(true);
-                        }, 800);
-                    }
+                    // Show both green ticks for 2.5s before transitioning to the verified card
+                    setShowVerifiedCelebration(true);
+                    setIsPolling(false);
+                    setTimeout(() => {
+                        setShowVerifiedCelebration(false);
+                        if (domainType === "erp_domain") {
+                            setTimeout(() => setShowBackdoorWarning(true), 800);
+                        }
+                    }, 2500);
                 } else {
                     toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
@@ -523,7 +539,7 @@ function DomainConfigCard({
                             </Button>
                         </div>
 
-                        {!isVerified && (
+                        {(!isVerified || showVerifiedCelebration) && (
                             <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
                                 <div className="p-4 border-b border-border/50 bg-muted/30">
                                     <h4 className="font-medium text-sm text-foreground">Action Required: Configure DNS Records</h4>
@@ -624,7 +640,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.txt_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                                {(domainConfig.txt_verified || showVerifiedCelebration) ? <CheckCircle2 className={`w-4 h-4 text-emerald-500 mx-auto ${showVerifiedCelebration ? 'animate-bounce' : ''}`} /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
                                                         <tr className="hover:bg-muted/10 transition-colors">
@@ -649,7 +665,7 @@ function DomainConfigCard({
                                                                 <span className="text-sm text-foreground">1 Hour</span>
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
-                                                                {domainConfig.cname_verified ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
+                                                                {(domainConfig.cname_verified || showVerifiedCelebration) ? <CheckCircle2 className={`w-4 h-4 text-emerald-500 mx-auto ${showVerifiedCelebration ? 'animate-bounce' : ''}`} /> : <XCircle className="w-4 h-4 text-muted-foreground/30 mx-auto" />}
                                                             </td>
                                                         </tr>
                                                         {targetType === 'A' && (
@@ -670,19 +686,23 @@ function DomainConfigCard({
                                 </div>
                                 <div className="p-4 bg-muted/10 border-t border-border/50 flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground max-w-[400px]">
-                                        {isPolling 
-                                            ? "Checking DNS automatically. This usually takes 3-5 minutes..." 
-                                            : "DNS propagation takes 3-5 minutes. Wait a moment before verifying."}
+                                        {showVerifiedCelebration
+                                            ? "✅ All DNS records verified! Transitioning to your verified domain..."
+                                            : isPolling 
+                                                ? "Checking DNS automatically. This usually takes 3-5 minutes..." 
+                                                : "DNS propagation takes 3-5 minutes. Wait a moment before verifying."}
                                     </span>
-                                    <Button 
-                                        onClick={handleVerify} 
-                                        disabled={verifyMutation.isPending || isPolling} 
-                                        isLoading={verifyMutation.isPending || isPolling} 
-                                        variant="default" 
-                                        size="sm"
-                                    >
-                                        {isPolling ? "Verifying..." : "Verify"}
-                                    </Button>
+                                    {!showVerifiedCelebration && (
+                                        <Button 
+                                            onClick={handleVerify} 
+                                            disabled={verifyMutation.isPending || isPolling} 
+                                            isLoading={verifyMutation.isPending || isPolling} 
+                                            variant="default" 
+                                            size="sm"
+                                        >
+                                            {isPolling ? "Verifying..." : "Verify"}
+                                        </Button>
+                                    )}
                                 </div>
                                 <Accordion type="single" collapsible className="w-full border-t border-border/50 px-2 bg-muted/5">
                                     <AccordionItem value="help" className="border-none">
@@ -772,7 +792,12 @@ function DomainConfigCard({
                                                 <CheckCircle2 className="w-4 h-4" /> TXT Record Verified
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <CheckCircle2 className="w-4 h-4" /> CNAME Record Verified
+                                                <CheckCircle2 className="w-4 h-4" /> {(() => {
+                                                    if (!domainConfig.domain) return "CNAME Record Verified";
+                                                    const parts = domainConfig.domain.split('.');
+                                                    const isLikelyRoot = parts.length === 2 || (parts.length === 3 && parts[1].length <= 3 && parts[2].length <= 3);
+                                                    return isLikelyRoot ? "A Record Verified" : "CNAME Record Verified";
+                                                })()}
                                             </div>
                                         </div>
                                         {domainConfig.verified_at && (
