@@ -867,16 +867,16 @@ function DomainConfigCard({
 
 const PortalLinksAccordion = ({ baseUrl, isSubdomain, subdomainEditUI }: { baseUrl: string, isSubdomain?: boolean, subdomainEditUI?: React.ReactNode }) => {
     const portals = [
-        { name: "Org Admin", path: "/org/admin/dashboard" },
+        { name: "Org Admin", path: "/org/login" },
         { name: "Student", path: "/student/login" },
         { name: "Faculty", path: "/faculty/login" },
-        { name: "Admissions", path: "/dept/admissions/dashboard" },
-        { name: "Fees", path: "/dept/fees/dashboard" },
-        { name: "Exams", path: "/dept/exams/dashboard" },
-        { name: "Attendance", path: "/dept/attendance/dashboard" },
-        { name: "HR & Payroll", path: "/dept/hr/dashboard" },
-        { name: "Hostel & Transport", path: "/dept/hostel/dashboard" },
-        { name: "Library", path: "/dept/library/dashboard" },
+        { name: "Admissions", path: "/dept/admissions/login" },
+        { name: "Fees", path: "/dept/fees/login" },
+        { name: "Exams", path: "/dept/exams/login" },
+        { name: "Attendance", path: "/dept/attendance/login" },
+        { name: "HR & Payroll", path: "/dept/hr/login" },
+        { name: "Hostel & Transport", path: "/dept/hostel/login" },
+        { name: "Library", path: "/dept/library/login" },
     ];
 
     return (

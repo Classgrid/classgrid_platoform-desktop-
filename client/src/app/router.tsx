@@ -147,6 +147,14 @@ export function AppRouter() {
       <Route path="/admin/login" element={<AdminLoginRouter />} />
       <Route path="/org/login" element={<AdminLoginRouter />} />
       <Route path="/auth/admin" element={<AdminLoginRouter />} />
+      {/* ── Department-specific login portals ── */}
+      <Route path="/dept/admissions/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/fees/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/exams/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/attendance/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/hr/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/hostel/login" element={<AdminLoginRouter />} />
+      <Route path="/dept/library/login" element={<AdminLoginRouter />} />
       <Route path="/superadmin" element={<SuperAdminLoginPage />} />
       <Route path="/superadmin/login" element={<SuperAdminLoginPage />} />
       <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
