@@ -518,5 +518,6 @@ export function ChatBubble({
 
       </div>
     </div>
+    </div>
   );
 }
