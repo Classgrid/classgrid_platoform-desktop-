@@ -16,13 +16,15 @@ import {
   GENDERLIST, 
   RELATIONTYPELIST, 
   BIRTHDISTRICTLIST, 
-  MOTHERTOUNGELIST 
+  MOTHERTOUNGELIST,
   ERPUNIVERSITYLIST,
   INDIA_STATES,
   INDIA_DISTRICTS,
   INDIA_TALUKAS,
   EXSERVICEMANLIST
-} from "./erp-large-options";\n\nexport const MASTER_PROFILE_SECTION_POOL = {
+} from "./erp-large-options";
+
+export const MASTER_PROFILE_SECTION_POOL = {
   personal_details: {
     key: "personal_details",
     label: "Personal Details",
