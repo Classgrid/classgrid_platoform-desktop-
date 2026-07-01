@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MessageSquare } from "lucide-react";
+import {  MessageSquare } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { getSmsBudget } from "../api";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function BulkSmsPage() {
   const { data, isLoading, isError } = useQuery({
@@ -28,7 +29,7 @@ export function BulkSmsPage() {
       )}
       
       {isLoading ? (
-        <div ><Loader2 size={24} className="animate-spin text-primary" /></div>
+        <div ><size={24} className=" text-primary" /></div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

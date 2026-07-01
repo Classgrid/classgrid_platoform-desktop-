@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { X, Book, Users, Loader2 } from "lucide-react";
+import { X, Book, Users } from "lucide-react";
 import { useCreateClassroom } from "../queries/useCreateClassroom";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 type CreateClassroomModalProps = {
   isOpen: boolean;
@@ -29,9 +30,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
         description,
         settings: {
           maxStudents: parseInt(maxStudents) || 200,
-          allowJoinRequests: allowRequests,
-        },
-      },
+          allowJoinRequests: allowRequests } },
       {
         onSuccess: () => {
           onClose();
@@ -39,8 +38,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
           setName("");
           setSubject("");
           setDescription("");
-        },
-      }
+        } }
     );
   };
 
@@ -138,7 +136,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
             <Button type="submit" disabled={isPending || !name || !subject}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                  <className="mr-2 h-4 w-4 " /> Creating...
                 </>
               ) : (
                 "Create Classroom"

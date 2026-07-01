@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import {  CheckCircle2, XCircle } from "lucide-react";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export type UploadStatus = "uploading" | "complete" | "error";
 
@@ -83,7 +84,7 @@ export function ProgressOverlay({
         ) : isError ? (
           <XCircle className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
         ) : (
-          <Loader2 className={`h-12 w-12 animate-spin relative z-10 ${getStatusColor()}`} />
+          <className={`h-12 w-12  relative z-10 ${getStatusColor()}`} />
         )}
       </div>
       

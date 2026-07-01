@@ -1,10 +1,11 @@
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useMemo, useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import {  Send } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { deskEnroll, getAdmissionConfigFull } from "../api";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 type SchemaField = {
   id: string;
@@ -56,16 +57,14 @@ export function NewApplicationPage() {
 
   const configQuery = useQuery({
     queryKey: ["admission-config-full"],
-    queryFn: getAdmissionConfigFull,
-  });
+    queryFn: getAdmissionConfigFull });
 
   const mutation = useMutation({
     mutationFn: async (payload: any) => deskEnroll(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admission-applications"] });
       qc.invalidateQueries({ queryKey: ["admission-analytics"] });
-    },
-  });
+    } });
 
   const structureType = (configQuery.data as any)?.structure_type as string | undefined;
   const isCETOrg = CET_STRUCTURE_TYPES.has(structureType || "");
@@ -111,8 +110,7 @@ export function NewApplicationPage() {
       hierarchy_id: hierarchyId || undefined,
       form_data: Object.fromEntries(
         Object.entries(values).map(([key, value]) => [key, value.trim()])
-      ),
-    };
+      ) };
 
     await mutation.mutateAsync(payload);
   };
@@ -142,7 +140,7 @@ export function NewApplicationPage() {
 
       {configQuery.isLoading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <className="w-8 h-8  text-primary" />
         </div>
       ) : configQuery.isError ? (
         <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
@@ -266,7 +264,7 @@ export function NewApplicationPage() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+              {mutation.isPending ? <className="w-4 h-4 mr-2 " /> : <Send className="w-4 h-4 mr-2" />}
               Submit Application
             </Button>
           </div>

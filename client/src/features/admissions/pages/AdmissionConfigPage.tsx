@@ -1,12 +1,13 @@
-import { Loader2, Save } from "lucide-react";
+import {  Save } from "lucide-react";
 
 import { useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function AdmissionConfigPage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
   const update = useUpdateAdmissionConfig();
 
-  if (isLoading) return <div ><Loader2 size={24} className="animate-spin" /></div>;
+  if (isLoading) return <div ><size={24}  /></div>;
   if (isError || !configResponse) return <div title="Admission Config" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Config" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};
@@ -101,7 +102,7 @@ export function AdmissionConfigPage() {
       {/* Instructions */}
       {cfg.instructions && (
         <div title="Portal Instructions">
-          <p className="  ">{cfg.instructions}</p>
+          <p >{cfg.instructions}</p>
         </div>
       )}
     </div>

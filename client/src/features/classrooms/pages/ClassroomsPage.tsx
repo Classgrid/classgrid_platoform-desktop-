@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Loader2, Plus, Search, BookOpen, Clock, Users } from "lucide-react";
+import {  Plus, Search, BookOpen, Clock, Users } from "lucide-react";
 
 
 import { useMyClassrooms, MyClassroomRecord } from "../queries/useMyClassrooms";
@@ -8,6 +8,7 @@ import { CreateClassroomModal } from "../components/CreateClassroomModal";
 
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function ClassroomsPage() {
   const { data: user } = useCurrentUser();
@@ -33,7 +34,7 @@ export function ClassroomsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <className="h-8 w-8  text-primary" />
         <p className="text-muted-foreground">Loading your classrooms...</p>
       </div>
     );

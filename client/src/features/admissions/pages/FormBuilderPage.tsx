@@ -1,12 +1,13 @@
 import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState, useEffect } from "react";
-import { Loader2, Save, FileText, LayoutList } from "lucide-react";
+import {  Save, FileText, LayoutList } from "lucide-react";
 
 import { useMasterFieldPool, useMasterDocumentPool, useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
 import indiaLocationsData from "@/data/india-locations.json";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 const COUNTRIES = [
   "India", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", 
@@ -107,7 +108,7 @@ export function FormBuilderPage() {
   if (poolLoading || configLoading || docLoading) {
     return (
       <div >
-        <Loader2 size={24} className="animate-spin" />
+        <size={24}  />
       </div>
     );
   }
@@ -149,7 +150,7 @@ export function FormBuilderPage() {
           disabled={updateConfig.isPending}
           
         >
-          {updateConfig.isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+          {updateConfig.isPending ? <size={18}  /> : <Save size={18} />}
           Save Form Configuration
         </Button>
       </div>

@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, RefreshCw } from "lucide-react";
+import {  RefreshCw } from "lucide-react";
 
 import { getSeatMatrix } from "../api";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 
 export function VacancyTrackerPage() {
@@ -35,7 +36,7 @@ export function VacancyTrackerPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
+          <size={24} className=" text-primary" />
         </div>
       ) : seatMatrixData.length === 0 ? (
         <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">

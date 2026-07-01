@@ -2,10 +2,11 @@ import { useState, useMemo, type ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import { useApplications } from "../../admissions/queries/useApplications";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Search, Loader2, FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Search,  FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
 import { getAdmissionConfig } from "../../admissions/api";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 type DivisionTab = {
   id: string;
@@ -34,8 +35,7 @@ export function AllApplicationsPage() {
 
   const configQuery = useQuery({
     queryKey: ["admission-config-all-applications"],
-    queryFn: getAdmissionConfig,
-  });
+    queryFn: getAdmissionConfig });
 
   const divisions = useMemo<DivisionTab[]>(() => {
     const structureType = (configQuery.data as any)?.structure_type as string | undefined;
@@ -51,16 +51,14 @@ export function AllApplicationsPage() {
           id: division.id || division.key || `division-${index}`,
           label: division.label || division.name || `Division ${index + 1}`,
           division: division.code || division.name || division.label,
-          hierarchyId: division.hierarchy_id || division.hierarchyId,
-        };
+          hierarchyId: division.hierarchy_id || division.hierarchyId };
       });
     }
 
     return [
       {
         id: "root",
-        label: (structureType || "admissions").replace(/_/g, " "),
-      },
+        label: (structureType || "admissions").replace(/_/g, " ") },
     ];
   }, [configQuery.data]);
 
@@ -79,8 +77,7 @@ export function AllApplicationsPage() {
     status: statusParam,
     search: search.trim() || undefined,
     page,
-    limit,
-  });
+    limit });
 
   const applications = data?.applications || [];
   const total = data?.total || 0;
@@ -99,8 +96,7 @@ export function AllApplicationsPage() {
             </small>
           </div>
         </div>
-      ),
-    },
+      ) },
     {
       accessorKey: "createdAt",
       header: "Date",
@@ -117,15 +113,13 @@ export function AllApplicationsPage() {
             })}
           </span>
         </div>
-      ),
-    },
+      ) },
     {
       accessorKey: "hierarchy_id",
       header: "Program",
       cell: ({ row }) => (
         <span className="text-sm">{row.original.hierarchy_id?.name || "N/A"}</span>
-      ),
-    },
+      ) },
     {
       accessorKey: "status",
       header: "Status",
@@ -140,8 +134,7 @@ export function AllApplicationsPage() {
           "neutral";
         
         return <div variant={variant}>{s.replace("_", " ")}</div>;
-      },
-    },
+      } },
     {
       accessorKey: "documents",
       header: "Documents",
@@ -197,8 +190,7 @@ export function AllApplicationsPage() {
             <span>{verified}/{total} verified</span>
           </div>
         );
-      },
-    },
+      } },
     {
       id: "actions",
       header: "Action",
@@ -209,8 +201,7 @@ export function AllApplicationsPage() {
         >
           View &rarr;
         </a>
-      ),
-    },
+      ) },
   ], []);
 
   const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -280,7 +271,7 @@ export function AllApplicationsPage() {
               </div>
             ) : isLoading ? (
               <div className="p-12 flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+                <className="w-8 h-8  mb-4 text-primary" />
                 <p>Fetching applications...</p>
               </div>
             ) : applications.length === 0 ? (

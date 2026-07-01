@@ -2,10 +2,11 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Loader2, Search, FileText, CheckCircle, XCircle, AlertCircle, Eye, Shield, Clock, Printer } from "lucide-react";
+import {  Search, FileText, CheckCircle, XCircle, AlertCircle, Eye, Shield, Clock, Printer } from "lucide-react";
 
 import { useApplications } from "../../admissions/queries/useApplications";
 import { getApplicationById, verifyDocument, updateApplicationStage } from "../../admissions/api";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
@@ -47,23 +48,19 @@ export function DocumentVerificationPage() {
             </small>
           </div>
         </div>
-      ),
-    },
+      ) },
     {
       accessorKey: "createdAt",
       header: "Applied On",
-      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
-    },
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) },
     {
       accessorKey: "category",
       header: "Category",
-      cell: ({ row }) => <span>{row.original.category || "General"}</span>,
-    },
+      cell: ({ row }) => <span>{row.original.category || "General"}</span> },
     {
       accessorKey: "status",
       header: "Status",
-      cell: () => <div variant="warning">Pending Verification</div>,
-    },
+      cell: () => <div variant="warning">Pending Verification</div> },
     {
       id: "actions",
       header: "Action",
@@ -77,8 +74,7 @@ export function DocumentVerificationPage() {
           <Shield className="w-4 h-4 text-primary" />
           Verify Docs
         </div>
-      ),
-    },
+      ) },
   ], []);
 
   return (
@@ -113,7 +109,7 @@ export function DocumentVerificationPage() {
           <div className="min-h-[400px]">
             {isAppsLoading ? (
               <div className="p-12 flex flex-col items-center justify-center text-muted-foreground h-full">
-                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+                <className="w-8 h-8  mb-4 text-primary" />
                 <p>Loading queue...</p>
               </div>
             ) : applications.length === 0 ? (
@@ -156,8 +152,7 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
 
   const { data: appData, isLoading } = useQuery({
     queryKey: ["admission-application-print", applicationId],
-    queryFn: () => getApplicationById(applicationId),
-  });
+    queryFn: () => getApplicationById(applicationId) });
 
   const printData = (appData as any)?.print_data;
   const applicant = printData?.applicant;
@@ -187,7 +182,7 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
     <div open={true} onOpenChange={(open) => !open && onClose()}>
       <div title="Verify Documents" className="max-w-3xl p-0 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <div className="p-12 flex justify-center"><className="w-8 h-8  text-primary" /></div>
         ) : !printData ? (
           <div className="p-12 text-center text-destructive">Failed to load applicant data.</div>
         ) : (
@@ -337,7 +332,7 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
                 onClick={() => finalizeMutation.mutate()}
                 className="gap-2"
               >
-                {finalizeMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                {finalizeMutation.isPending && <className="w-4 h-4 " />}
                 Mark Application as Verified
               </div>
             </div>

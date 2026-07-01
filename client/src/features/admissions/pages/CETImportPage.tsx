@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Loader2, UploadCloud, FileType, CheckCircle, AlertTriangle } from "lucide-react";
+import {  UploadCloud, FileType, CheckCircle, AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { importCETAllotments } from "../api";
 
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function CETImportPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -16,8 +17,7 @@ export function CETImportPage() {
     onSuccess: () => {
       setFile(null);
       qc.invalidateQueries({ queryKey: ["admission-analytics"] });
-    },
-  });
+    } });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -117,7 +117,7 @@ export function CETImportPage() {
                 onClick={handleUpload}
                 disabled={!file || importData.isPending}
               >
-                {importData.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle size={16} className="mr-2" />}
+                {importData.isPending ? <size={16} className=" mr-2" /> : <CheckCircle size={16} className="mr-2" />}
                 Start Import
               </Button>
             </div>

@@ -1,10 +1,11 @@
 import { type ColumnDef } from "@tanstack/react-table";
-import { Loader2, RefreshCw } from "lucide-react";
+import {  RefreshCw } from "lucide-react";
 
 import { useMeritList, useGenerateMerit } from "../queries/useMeritList";
 import type { MeritListEntry } from "../types";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 const columns: ColumnDef<MeritListEntry>[] = [
   {
@@ -13,28 +14,23 @@ const columns: ColumnDef<MeritListEntry>[] = [
     cell: ({ row }) => (
       <span >{(row.original.general_rank ?? row.index + 1)}</span>
     ),
-    size: 60,
-  },
+    size: 60 },
   {
     accessorKey: "full_name",
     header: "Name",
-    cell: ({ row }) => <span >{row.original.full_name}</span>,
-  },
+    cell: ({ row }) => <span >{row.original.full_name}</span> },
   {
     accessorKey: "merit_score",
     header: "Merit %",
-    cell: ({ row }) => `${row.original.merit_score.toFixed(2)}%`,
-  },
+    cell: ({ row }) => `${row.original.merit_score.toFixed(2)}%` },
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => row.original.category || "OPEN",
-  },
+    cell: ({ row }) => row.original.category || "OPEN" },
   {
     accessorKey: "category_rank",
     header: "Cat. Rank",
-    cell: ({ row }) => row.original.category_rank ?? "—",
-  },
+    cell: ({ row }) => row.original.category_rank ?? "—" },
   {
     accessorKey: "status",
     header: "Status",
@@ -42,8 +38,7 @@ const columns: ColumnDef<MeritListEntry>[] = [
       const s = row.original.status;
       const v = s === "enrolled" ? "success" : s === "fee_pending" ? "warning" : "neutral";
       return <div variant={v as "success" | "warning" | "neutral"}>{s.replace(/_/g, " ")}</div>;
-    },
-  },
+    } },
 ];
 
 export function MeritListPage() {
@@ -64,7 +59,7 @@ export function MeritListPage() {
           disabled={generate.isPending}
           onClick={() => generate.mutate(undefined)}
         >
-          {generate.isPending ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+          {generate.isPending ? <size={14}  /> : <RefreshCw size={14} />}
           Generate Merit
         </Button>
       }
@@ -81,7 +76,7 @@ export function MeritListPage() {
 
       {isLoading ? (
         <div >
-          <Loader2 size={24} className="animate-spin " />
+          <size={24}  />
         </div>
       ) : (
         <div

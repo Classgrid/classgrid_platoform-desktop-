@@ -1,7 +1,7 @@
 
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState, useMemo } from "react";
-import { Users, UserPlus, X, Loader, Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
+import { Users, UserPlus, X,  Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
@@ -11,6 +11,7 @@ import { Input } from "@/components/marketing_ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -40,32 +41,27 @@ const PLATFORM_ROLES: { value: PlatformRole; label: string; description: string;
     value: "super_admin",
     label: "Co-Super Admin",
     description: "Full platform access. Can manage everything except God-Owner controls.",
-    icon: Shield,
-  },
+    icon: Shield },
   {
     value: "platform_support",
     label: "Support Agent",
     description: "Can view and reply to support tickets, manage helpdesk.",
-    icon: Headphones,
-  },
+    icon: Headphones },
   {
     value: "platform_sales",
     label: "Sales / Growth",
     description: "Can view leads, schedule demos, onboard new orgs.",
-    icon: TrendingUp,
-  },
+    icon: TrendingUp },
   {
     value: "platform_moderator",
     label: "Content Moderator",
     description: "Can manage announcements, changelog, and reviews.",
-    icon: Settings,
-  },
+    icon: Settings },
   {
     value: "platform_analyst",
     label: "Analyst",
     description: "Read-only access to analytics, audit logs, and usage data.",
-    icon: TrendingUp,
-  },
+    icon: TrendingUp },
 ];
 
 const ROLE_MAP: Record<PlatformRole, { label: string; variant: "success" | "warning" | "info" | "danger" | "neutral" }> = {
@@ -73,8 +69,7 @@ const ROLE_MAP: Record<PlatformRole, { label: string; variant: "success" | "warn
   platform_support:     { label: "Support Agent",     variant: "info" },
   platform_sales:       { label: "Sales / Growth",    variant: "success" },
   platform_moderator:   { label: "Moderator",         variant: "warning" },
-  platform_analyst:     { label: "Analyst",           variant: "neutral" },
-};
+  platform_analyst:     { label: "Analyst",           variant: "neutral" } };
 
 function fmtDate(iso?: string) {
   if (!iso) return "Never";
@@ -102,8 +97,7 @@ const teamApi = {
   removeMember: (id: string) =>
     apiClient
       .delete<{ success: boolean }>(`/api/super-admin/team/${id}`)
-      .then((r) => r.data),
-};
+      .then((r) => r.data) };
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -120,8 +114,7 @@ export function TeamPage() {
     queryKey: ["superadmin-platform-team"],
     queryFn: () => teamApi.getTeam(),
     staleTime: 60_000,
-    retry: 1,
-  });
+    retry: 1 });
 
   const team: TeamMember[] = data?.team ?? [];
 
@@ -134,18 +127,15 @@ export function TeamPage() {
     },
     onError: (err: any) => {
       setFormResult({ success: false, message: err?.message ?? "Failed to invite member." });
-    },
-  });
+    } });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => teamApi.removeMember(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }),
-  });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }) });
 
   const roleUpdateMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: PlatformRole }) => teamApi.updateRole(id, role),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }),
-  });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }) });
 
   const stats = useMemo(() => {
     const byRole = PLATFORM_ROLES.reduce((acc, r) => {
@@ -283,7 +273,7 @@ export function TeamPage() {
         description="All platform staff with their assigned roles and access levels."
       >
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground"><Loader size={20} className="animate-spin mb-2" /> Loading team…</div>
+          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground"><size={20} className=" mb-2" /> Loading team…</div>
         ) : isError ? (
           <div className="bg-danger/10 border border-danger text-danger p-4 rounded-md my-4">
             <h4 className="font-bold">Failed to load Team</h4>

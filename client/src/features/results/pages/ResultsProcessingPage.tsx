@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Loader, Plus, AlertCircle, CheckCircle, Lock, UploadCloud, Play, Download } from "lucide-react";
+import {  Plus, AlertCircle, CheckCircle, Lock, UploadCloud, Play, Download } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { useSchemes, useSaveScheme, useDeleteScheme, useGenerateResults, usePublishResults, useLockScheme, ResultScheme } from "../queries/useResultSchemes";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function ResultsProcessingPage() {
   const { data: schemes, isLoading } = useSchemes();
@@ -12,7 +13,7 @@ export function ResultsProcessingPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <Loader size={36} className="animate-spin text-primary" />
+        <size={36} className=" text-primary" />
         <p className="text-muted-foreground font-medium">Loading Result Schemes...</p>
       </div>
     );

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Loader2, Search, CheckCircle, FileText } from "lucide-react";
+import {  Search, CheckCircle, FileText } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getApplications, reportRLA } from "../api";
 
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function RLAReportingPage() {
   const [enSearch, setEnSearch] = useState("");
@@ -15,16 +16,14 @@ export function RLAReportingPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admission-applications", queryEn],
     queryFn: () => getApplications({ search: queryEn }),
-    enabled: !!queryEn,
-  });
+    enabled: !!queryEn });
 
   const reportMutation = useMutation({
     mutationFn: (en: string) => reportRLA(en),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admission-applications", queryEn] });
       qc.invalidateQueries({ queryKey: ["admission-analytics"] });
-    },
-  });
+    } });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +49,7 @@ export function RLAReportingPage() {
             <div >
               <Search  size={16} />
               <Input
-                className=" "
+                
                 placeholder="Enter EN Number (e.g. EN23123456)"
                 value={enSearch}
                 onChange={(e) => setEnSearch(e.target.value)}
@@ -58,7 +57,7 @@ export function RLAReportingPage() {
             </div>
           </div>
           <Button type="submit" variant="default" disabled={!enSearch.trim() || isLoading}>
-            {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Search"}
+            {isLoading ? <size={16}  /> : "Search"}
           </Button>
         </form>
       </div>
@@ -124,7 +123,7 @@ export function RLAReportingPage() {
               disabled={reportMutation.isPending || candidate.rla_status === "reported" || candidate.status !== "rla_pending"}
               onClick={() => reportMutation.mutate(candidate.en_number!)}
             >
-              {reportMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+              {reportMutation.isPending ? <size={16}  /> : <CheckCircle size={16} />}
               Mark as Reported (RLA)
             </Button>
             <Button variant="outline" disabled>

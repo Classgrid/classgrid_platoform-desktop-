@@ -1,11 +1,12 @@
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState } from "react";
-import { Loader2, Mail } from "lucide-react";
+import {  Mail } from "lucide-react";
 
 import { useMutation } from "@tanstack/react-query";
 import { sendNotification } from "../api";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function CommunicationPage() {
   const [trigger, setTrigger] = useState("reminder_fee");
@@ -53,7 +54,7 @@ export function CommunicationPage() {
             disabled={notify.isPending}
             onClick={() => notify.mutate(trigger)}
           >
-            {notify.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : <Mail size={16} className="mr-2" />}
+            {notify.isPending ? <size={16} className=" mr-2" /> : <Mail size={16} className="mr-2" />}
             Dispatch Notifications
           </Button>
         </div>

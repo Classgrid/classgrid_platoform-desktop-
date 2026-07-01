@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Loader, UploadCloud, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import {  UploadCloud, FileText, CheckCircle, AlertCircle } from "lucide-react";
 
 import { useSchemes, useUploadMarks, ResultScheme } from "@/features/results/queries/useResultSchemes";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function ExamGradingPage() {
   const { data: schemes, isLoading } = useSchemes();
@@ -10,7 +11,7 @@ export function ExamGradingPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <Loader size={36} className="animate-spin text-primary" />
+        <size={36} className=" text-primary" />
         <p className="text-muted-foreground font-medium">Loading Active Examinations...</p>
       </div>
     );
@@ -138,7 +139,7 @@ function MarksUploadWorkspace({ scheme, onBack }: { scheme: ResultScheme; onBack
         
         {uploadMutation.isPending && (
           <div className="mt-6 flex items-center justify-center text-primary">
-            <Loader className="animate-spin mr-2" /> Uploading and validating to database...
+            <className=" mr-2" /> Uploading and validating to database...
           </div>
         )}
       </div>

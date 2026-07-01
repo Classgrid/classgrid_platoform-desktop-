@@ -1,11 +1,12 @@
-import { Loader2 } from "lucide-react";
+
 
 import { useAdmissionConfig } from "../queries/useAdmissionConfig";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function FeeStructurePage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
 
-  if (isLoading) return <div ><Loader2 size={24} className="animate-spin" /></div>;
+  if (isLoading) return <div ><size={24}  /></div>;
   if (isError || !configResponse) return <div title="Fee Structure" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Fee Structure" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};
@@ -37,9 +38,9 @@ export function FeeStructurePage() {
               {(feeConfig.dynamic_fee_mapping || []).length > 0 && (
                 <div>
                   <strong>Category-Based Fee Mapping:</strong>
-                  <div className=" ">
+                  <div >
                     {feeConfig.dynamic_fee_mapping!.map((m, i) => (
-                      <div key={i} className=" ">
+                      <div key={i} >
                         <div variant="info" size="sm">{m.attribute_type}</div>
                         <span>{m.attribute}</span>
                       </div>

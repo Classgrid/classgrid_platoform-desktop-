@@ -1,13 +1,14 @@
 import { Input } from "@/components/marketing_ui/input";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2, Phone, ArrowRight, CheckCircle2, Clock, FileText, CreditCard, Download } from "lucide-react";
+import {  Phone, ArrowRight, CheckCircle2, Clock, FileText, CreditCard, Download } from "lucide-react";
 import { parentLogin, getParentStatus, getParentDocuments } from "../api";
 import { useEngineConfig } from "../queries/useAdmissionEngine";
 
 import type { ApplicationState } from "../types";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 // ═══════════════════════════════════════════════════════════════
 // ParentTrackerPage — Public parent portal for tracking child's
@@ -70,7 +71,7 @@ export function ParentTrackerPage() {
   if (configLoading) {
     return (
       <div >
-        <Loader2 size={32} className="animate-spin" />
+        <size={32}  />
       </div>
     );
   }
@@ -104,7 +105,7 @@ export function ParentTrackerPage() {
                 </div>
               </div>
               <Button type="submit" variant="default" disabled={loading}>
-                {loading ? <Loader2 size={16} className="animate-spin" /> : "View Status"} <ArrowRight size={16} />
+                {loading ? <size={16}  /> : "View Status"} <ArrowRight size={16} />
               </Button>
             </form>
           </div>

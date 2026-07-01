@@ -1,10 +1,11 @@
-import { Loader2 } from "lucide-react";
+
 
 import { useAdmissionConfig, useUpdateAdmissionConfig } from "../queries/useAdmissionConfig";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { advanceRound } from "../api";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 export function AdmissionSchedulePage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
@@ -12,7 +13,7 @@ export function AdmissionSchedulePage() {
   const qc = useQueryClient();
   const advance = useMutation({ mutationFn: advanceRound, onSuccess: () => qc.invalidateQueries({ queryKey: ["admission-config"] }) });
 
-  if (isLoading) return <div ><Loader2 size={24} className="animate-spin" /></div>;
+  if (isLoading) return <div ><size={24}  /></div>;
   if (isError || !configResponse) return <div title="Schedule & Rounds" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Schedule" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};
@@ -59,7 +60,7 @@ export function AdmissionSchedulePage() {
               {cfg.is_merit_list_published ? "Unpublish" : "Publish"} Merit List
             </Button>
             <Button variant="default" disabled={advance.isPending || !cfg.is_portal_open} onClick={() => advance.mutate()}>
-              {advance.isPending ? <Loader2 size={14} className="animate-spin" /> : null} Advance to Next Round
+              {advance.isPending ? <size={14}  /> : null} Advance to Next Round
             </Button>
           </div>
         </div>

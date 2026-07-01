@@ -2,10 +2,11 @@ import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Loader2, Eye, MoreHorizontal } from "lucide-react";
+import {  Eye, MoreHorizontal } from "lucide-react";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { useApplications } from "../queries/useApplications";
 import type { AdmissionApplication } from "../types";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 const statusOptions = [
   { label: "All Stages", value: "all" },
@@ -33,8 +34,7 @@ const statusVariant: Record<string, "success" | "info" | "warning" | "neutral" |
   cancelled: "danger",
   withdrawn: "danger",
   draft: "neutral",
-  applied: "neutral",
-};
+  applied: "neutral" };
 
 const columns: ColumnDef<AdmissionApplication>[] = [
   {
@@ -52,13 +52,11 @@ const columns: ColumnDef<AdmissionApplication>[] = [
           </small>
         </div>
       </div>
-    ),
-  },
+    ) },
   {
     accessorKey: "en_number",
     header: "EN Number",
-    cell: ({ row }) => row.original.en_number || "—",
-  },
+    cell: ({ row }) => row.original.en_number || "—" },
   {
     accessorKey: "status",
     header: "Stage",
@@ -75,19 +73,16 @@ const columns: ColumnDef<AdmissionApplication>[] = [
           {row.original.status.replace(/_/g, " ")}
         </span>
       );
-    },
-  },
+    } },
   {
     accessorKey: "merit_score",
     header: "Merit %",
     cell: ({ row }) =>
-      row.original.merit_score > 0 ? `${row.original.merit_score.toFixed(2)}%` : "—",
-  },
+      row.original.merit_score > 0 ? `${row.original.merit_score.toFixed(2)}%` : "—" },
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => row.original.category || "—",
-  },
+    cell: ({ row }) => row.original.category || "—" },
   {
     accessorKey: "entry_mode",
     header: "Entry",
@@ -95,8 +90,7 @@ const columns: ColumnDef<AdmissionApplication>[] = [
       <span className="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
         {row.original.entry_mode}
       </span>
-    ),
-  },
+    ) },
   {
     accessorKey: "fee_paid",
     header: "Fee",
@@ -105,16 +99,13 @@ const columns: ColumnDef<AdmissionApplication>[] = [
         <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800">Paid</span>
       ) : (
         <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">Unpaid</span>
-      ),
-  },
+      ) },
   {
     accessorKey: "createdAt",
     header: "Applied",
     cell: ({ row }) =>
       new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-        day: "2-digit", month: "short", year: "numeric",
-      }),
-  },
+        day: "2-digit", month: "short", year: "numeric" }) },
 ];
 
 export function ApplicationsListPage() {
@@ -126,8 +117,7 @@ export function ApplicationsListPage() {
     status: statusFilter !== "all" ? statusFilter : undefined,
     search: search || undefined,
     page,
-    limit: 20,
-  });
+    limit: 20 });
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
@@ -166,7 +156,7 @@ export function ApplicationsListPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
+          <size={24} className=" text-primary" />
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">

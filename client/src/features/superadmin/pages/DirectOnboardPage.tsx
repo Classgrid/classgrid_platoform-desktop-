@@ -1,6 +1,6 @@
 import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
-import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { Building2, Mail, Phone, MapPin, Users, Plus, X, CheckCircle, AlertCircle } from "lucide-react";
 
 
 import { Badge } from "@/components/marketing_ui/badge";
@@ -10,6 +10,7 @@ import type { DirectProvisionPayload } from "../services/superAdminApi";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
 import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 // ── Org type options ────────────────────────────────────────────────────────
 
@@ -46,8 +47,7 @@ const EMPTY_FORM: DirectProvisionPayload = {
   adminPhone: "",
   city: "",
   state: "Maharashtra",
-  plan: "demo",
-};
+  plan: "demo" };
 
 // ── Component ───────────────────────────────────────────────────────────────
 
@@ -61,8 +61,7 @@ export function DirectOnboardPage() {
   const { data: orgsData, isLoading: orgsLoading } = useQuery({
     queryKey: ["superadmin-all-orgs-direct"],
     queryFn: () => dashboardApi.getOrganizations(),
-    staleTime: 30_000,
-  });
+    staleTime: 30_000 });
 
   const orgs: any[] = orgsData?.data ?? [];
 
@@ -75,8 +74,7 @@ export function DirectOnboardPage() {
     },
     onError: (err: any) => {
       setResult({ success: false, message: err?.message ?? "Provisioning failed. Please try again." });
-    },
-  });
+    } });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +119,7 @@ export function DirectOnboardPage() {
       {/* Modal Form */}
       {showForm && (
         <div >
-          <div className=" ">
+          <div >
             <div >
               <h2 >Provision New Organization</h2>
               <Button  onClick={() => setShowForm(false)}>
@@ -145,7 +143,7 @@ export function DirectOnboardPage() {
               )}
 
               <div >
-                <div className=" ">
+                <div >
                   <label >Institution Name *</label>
                   <Input
                     
@@ -226,7 +224,7 @@ export function DirectOnboardPage() {
                   Cancel
                 </Button>
                 <Button type="submit" variant="default" disabled={mutation.isPending}>
-                  {mutation.isPending ? <><Loader size={14} className="animate-spin" /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
+                  {mutation.isPending ? <><size={14}  /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
                 </Button>
               </div>
             </form>
@@ -242,7 +240,7 @@ export function DirectOnboardPage() {
         
       >
         {orgsLoading ? (
-          <div ><Loader size={20} className="animate-spin" /> Loading…</div>
+          <div ><size={20}  /> Loading…</div>
         ) : orgs.length === 0 ? (
           <div >
             <Building2 size={32}  />

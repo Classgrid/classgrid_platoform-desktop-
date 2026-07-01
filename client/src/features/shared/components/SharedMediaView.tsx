@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/marketing_ui/tabs";
-import { Loader, ImageIcon, FileText, Link2, ExternalLink, Download } from "lucide-react";
+import {  ImageIcon, FileText, Link2, ExternalLink, Download } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
+import { Spinner } from "@/components/marketing_ui/spinner";
 
 interface SharedMediaViewProps {
   targetUserId: string;
@@ -14,13 +15,12 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["shared-media", targetUserId],
     queryFn: () => apiClient.get(`/api/threads/dm/${targetUserId}/shared-media`).then((r) => r.data),
-    enabled: !!targetUserId,
-  });
+    enabled: !!targetUserId });
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full py-20 text-muted-foreground">
-        <Loader className="animate-spin mb-4" size={32} />
+        <className=" mb-4" size={32} />
         <p>Loading shared files...</p>
       </div>
     );
