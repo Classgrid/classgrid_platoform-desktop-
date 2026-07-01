@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/a
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Input } from "@/components/marketing_ui/input";
 import { Switch } from "@/components/marketing_ui/switch";
+import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { VerifiedBadge } from "@/components/marketing_ui/verified-badge";
 import { toast } from "sonner";
