@@ -24,6 +24,7 @@ export function CustomDomainCard() {
     const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [pendingBackdoorAction, setPendingBackdoorAction] = useState<(() => void) | null>(null);
     const [showEnableClassgridConfirm, setShowEnableClassgridConfirm] = useState(false);
 
     const [showEditDomainModal, setShowEditDomainModal] = useState(false);
@@ -96,6 +97,18 @@ export function CustomDomainCard() {
                                             }
                                         }
 
+                                        if (!checked) {
+                                            setPendingBackdoorAction(() => () => {
+                                                const settingsToUpdate: any = { allow_classgrid_url: false };
+                                                updateSettingsMutation.mutate({ domainType: "erp_domain", settings: settingsToUpdate }, {
+                                                    onSuccess: () => toast.success("Classgrid URL disabled"),
+                                                    onError: () => toast.error("Failed to update settings")
+                                                });
+                                            });
+                                            setShowBackdoorWarning(true);
+                                            return; // Stop here, wait for dialog confirmation
+                                        }
+
                                         // When enabling Classgrid URL, if they have an active custom ERP domain, we must force a strict confirmation
                                         if (checked && domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false) {
                                             setShowEnableClassgridConfirm(true);
@@ -106,10 +119,7 @@ export function CustomDomainCard() {
                                         
                                         updateSettingsMutation.mutate({ domainType: "erp_domain", settings: settingsToUpdate }, {
                                             onSuccess: () => {
-                                                toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled");
-                                                if (!checked) {
-                                                    setShowBackdoorWarning(true);
-                                                }
+                                                toast.success("Classgrid URL enabled");
                                             },
                                             onError: () => toast.error("Failed to update settings")
                                         });
@@ -153,16 +163,25 @@ export function CustomDomainCard() {
             {/* Backdoor Warning Dialog */}
             <DangerConfirmDialog
                 open={showBackdoorWarning}
-                onOpenChange={() => {}}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setShowBackdoorWarning(false);
+                        setPendingBackdoorAction(null);
+                    }
+                }}
                 title="Save the Emergency URL"
                 description={<>By disabling the default <strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong> URL, your institution's ERP will now rely exclusively on your custom DNS settings. If your custom domain expires or experiences downtime, your students and staff will temporarily lose access.</>}
                 confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
                 warningMessage="The Organization Admin portal remains accessible via the default URL. Save the emergency URL below before closing."
-                actionLabel="I understand & Close"
-                hideCancelButton={true}
+                actionLabel="I understand & Confirm"
+                hideCancelButton={!pendingBackdoorAction}
                 onConfirm={() => {
                     navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                     toast.success("Emergency URL copied!");
+                    if (pendingBackdoorAction) {
+                        pendingBackdoorAction();
+                        setPendingBackdoorAction(null);
+                    }
                     setShowBackdoorWarning(false);
                 }}
                 variant="warning"
@@ -322,6 +341,7 @@ function DomainConfigCard({
     const [isPolling, setIsPolling] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
+    const [pendingBackdoorAction, setPendingBackdoorAction] = useState<(() => void) | null>(null);
     const [showVerifiedCelebration, setShowVerifiedCelebration] = useState(false);
 
     const selectedProvider = DNS_PROVIDERS.find(p => p.id === selectedProviderId) || DNS_PROVIDERS[DNS_PROVIDERS.length - 1];
@@ -768,17 +788,21 @@ function DomainConfigCard({
                                                         if (checked && domainType === "erp_domain") {
                                                             const classgridUrlEnabled = allDomainsData.erp_domain?.allow_classgrid_url !== false;
                                                             if (classgridUrlEnabled) {
-                                                                toast("Turning on custom domain will disable Classgrid organization URL", { icon: "🔄" });
-                                                                settingsToUpdate.allow_classgrid_url = false;
+                                                                setPendingBackdoorAction(() => () => {
+                                                                    const settingsToUpdate: any = { is_enabled: true, allow_classgrid_url: false };
+                                                                    updateSettingsMutation.mutate({ domainType, settings: settingsToUpdate }, {
+                                                                        onSuccess: () => toast.success("Custom domain enabled & Classgrid URL disabled"),
+                                                                        onError: () => toast.error("Failed to update settings")
+                                                                    });
+                                                                });
+                                                                setShowBackdoorWarning(true);
+                                                                return; // Wait for dialog confirmation
                                                             }
                                                         }
                                                         
                                                         updateSettingsMutation.mutate({ domainType, settings: settingsToUpdate }, {
                                                             onSuccess: () => {
                                                                 toast.success(checked ? "Custom domain enabled" : "Custom domain disabled");
-                                                                if (checked && domainType === "erp_domain") {
-                                                                    setShowBackdoorWarning(true);
-                                                                }
                                                             },
                                                             onError: () => toast.error("Failed to update settings")
                                                         })
@@ -833,16 +857,25 @@ function DomainConfigCard({
             {/* Backdoor Warning Dialog for ERP Domain */}
             <DangerConfirmDialog
                 open={showBackdoorWarning}
-                onOpenChange={() => {}}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setShowBackdoorWarning(false);
+                        setPendingBackdoorAction(null);
+                    }
+                }}
                 title="Save Your Emergency URL"
                 description={<>Because you verified an ERP custom domain, if your custom DNS breaks (domain expires, CNAME deleted) — your ERP login will be inaccessible. You must save the emergency URL below.</>}
                 confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
                 warningMessage="If your custom domain goes down and you haven't saved this URL, you will lose admin access."
-                actionLabel="I understand & Close"
-                hideCancelButton={true}
+                actionLabel="I understand & Confirm"
+                hideCancelButton={!pendingBackdoorAction}
                 onConfirm={() => {
                     navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                     toast.success("Emergency URL copied!");
+                    if (pendingBackdoorAction) {
+                        pendingBackdoorAction();
+                        setPendingBackdoorAction(null);
+                    }
                     setShowBackdoorWarning(false);
                 }}
                 variant="warning"
