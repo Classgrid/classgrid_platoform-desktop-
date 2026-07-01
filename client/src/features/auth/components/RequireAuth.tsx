@@ -2,14 +2,11 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { getLoginPathForPath, getRedirectPath, isInstitutionAdminRole } from "../auth-helpers";
 import { useCurrentUser } from "../queries/useCurrentUser";
-import { useTrackGlobalPresence } from "@/features/chat/hooks/useRealtimeChat";
+import { PresenceProvider } from "@/features/chat/context/PresenceContext";
 
 export function RequireAuth() {
   const location = useLocation();
   const { data: user, isLoading } = useCurrentUser();
-  
-  // Track presence globally for any authenticated user
-  useTrackGlobalPresence(user?._id || null);
 
   if (isLoading) {
     return null;
@@ -103,5 +100,11 @@ export function RequireAuth() {
     }
   }
 
-  return <Outlet />;
+  return (
+    <PresenceProvider userId={user._id || null}>
+      <Outlet />
+    </PresenceProvider>
+  );
 }
+
+

@@ -1,5 +1,4 @@
-import { usePresence } from "@/features/chat/hooks/useRealtimeChat";
-import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+import { useOnlineUsers } from "@/features/chat/context/PresenceContext";
 import { cn } from "@/lib/utils";
 
 interface OnlineStatusDotProps {
@@ -9,9 +8,7 @@ interface OnlineStatusDotProps {
 }
 
 export function OnlineStatusDot({ userId, className, showText = false }: OnlineStatusDotProps) {
-  const { data: user } = useCurrentUser();
-  // We subscribe to the presence channel for this user
-  const onlineUsers = usePresence(user?._id || null);
+  const onlineUsers = useOnlineUsers();
   
   const isOnline = onlineUsers.has(userId);
 

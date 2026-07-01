@@ -18,7 +18,7 @@ import { VerifiedBadge } from "@/components/marketing_ui/verified-badge";
 import { toast } from "sonner";
 import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
-import { usePresence } from "@/features/chat/hooks/useRealtimeChat";
+import { useOnlineUsers } from "@/features/chat/context/PresenceContext";
 import { formatDistanceToNow } from "date-fns";
 import { SharedMediaView } from "../components/SharedMediaView";
 
@@ -70,7 +70,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   
   // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
   const { data: currentUser } = useCurrentUser();
-  const onlineUsers = usePresence(currentUser?.user?._id || currentUser?._id || null);
+  const onlineUsers = useOnlineUsers();
 
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
   const { data: profileData, isLoading: profileLoading } = useQuery({

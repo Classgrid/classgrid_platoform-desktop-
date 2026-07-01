@@ -25,7 +25,8 @@ import {
   type OrgUser,
   type Poll,
 } from "../services/chatApi";
-import { useUserChannel, useThreadChannel, usePresence } from "../hooks/useRealtimeChat";
+import { useUserChannel, useThreadChannel } from "../hooks/useRealtimeChat";
+import { useOnlineUsers } from "../context/PresenceContext";
 
 import { ChatSidebar } from "../components/ChatSidebar";
 import { ChatHeader } from "../components/ChatHeader";
@@ -80,7 +81,7 @@ export function ChatPage() {
     id,
     type: data.type
   }));
-  const onlineUsers = usePresence(currentUserId || null);
+  const onlineUsers = useOnlineUsers();
 
   // -- Load Initial Data --
   useEffect(() => {
