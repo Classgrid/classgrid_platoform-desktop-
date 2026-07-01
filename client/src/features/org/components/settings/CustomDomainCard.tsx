@@ -92,7 +92,7 @@ export function CustomDomainCard() {
                                         if (!checked) {
                                             const erpDomainEnabled = domainsData.erp_domain?.domain && domainsData.erp_domain?.is_enabled !== false;
                                             if (!erpDomainEnabled) {
-                                                toast.error("Action blocked: You must have an active ERP Custom Domain before turning this off, or you will lock yourself out!");
+                                                toast.error("Action blocked: Enabling your Custom Domain disables the default Classgrid organization domain.");
                                                 return;
                                             }
                                         }
