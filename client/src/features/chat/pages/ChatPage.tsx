@@ -743,6 +743,7 @@ export function ChatPage() {
             setIsGroupSettingsOpen(false);
             setActiveThread(null);
           }}
+          onUserClick={(userId) => setProfileUserId(userId)}
         />
       )}
 
