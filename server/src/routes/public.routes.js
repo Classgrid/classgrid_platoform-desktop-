@@ -146,6 +146,7 @@ router.get("/auth-branding", async (req, res) => {
       const matchedMkt = org.custom_domain?.domain === incomingDomain;
 
       if (matchedErp && org.erp_domain?.is_enabled === false) {
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(410).json({
           success: false,
           message: "This ERP domain has been disabled by the administrator.",
@@ -155,6 +156,7 @@ router.get("/auth-branding", async (req, res) => {
       }
 
       if (matchedMkt && org.custom_domain?.is_enabled === false) {
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(410).json({
           success: false,
           message: "This domain has been disabled by the administrator.",
