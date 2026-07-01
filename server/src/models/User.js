@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    sidebar_name: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     email: {
       type: String,
       required: true,
@@ -135,6 +141,12 @@ const userSchema = new mongoose.Schema(
     },
 
     profilePicture: {
+      type: String,
+      default: "",
+    },
+
+    // 🏢 Super Admin: Platform Logo (stored separately from personal profile picture)
+    platformLogo: {
       type: String,
       default: "",
     },
