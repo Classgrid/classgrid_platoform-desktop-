@@ -282,11 +282,9 @@ export function ChatSidebar({
                     <TooltipProvider delay={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="absolute bottom-0 right-0 z-10 cursor-help">
-                            <span className="block w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                          </div>
+                          <span className="absolute bottom-0 right-0 z-10 block w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] cursor-help" />
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent side="bottom">
                           Online
                         </TooltipContent>
                       </Tooltip>
