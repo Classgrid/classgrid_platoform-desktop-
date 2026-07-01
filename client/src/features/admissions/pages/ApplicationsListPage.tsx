@@ -156,7 +156,7 @@ export function ApplicationsListPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <size={24} className=" text-primary" />
+          <Spinner size={24} className=" text-primary" />
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">

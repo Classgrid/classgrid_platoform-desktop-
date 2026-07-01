@@ -71,7 +71,7 @@ export function ParentTrackerPage() {
   if (configLoading) {
     return (
       <div >
-        <size={32}  />
+        <Spinner size={32}  />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export function ParentTrackerPage() {
                 </div>
               </div>
               <Button type="submit" variant="default" disabled={loading}>
-                {loading ? <size={16}  /> : "View Status"} <ArrowRight size={16} />
+                {loading ? <Spinner size={16}  /> : "View Status"} <ArrowRight size={16} />
               </Button>
             </form>
           </div>

@@ -271,7 +271,7 @@ export function AllApplicationsPage() {
               </div>
             ) : isLoading ? (
               <div className="p-12 flex flex-col items-center justify-center h-full text-muted-foreground">
-                <className="w-8 h-8  mb-4 text-primary" />
+                <Spinner className="w-8 h-8  mb-4 text-primary" />
                 <p>Fetching applications...</p>
               </div>
             ) : applications.length === 0 ? (

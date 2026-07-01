@@ -20,7 +20,7 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full py-20 text-muted-foreground">
-        <className=" mb-4" size={32} />
+        <Spinner className=" mb-4" size={32} />
         <p>Loading shared files...</p>
       </div>
     );

@@ -54,7 +54,7 @@ export function CommunicationPage() {
             disabled={notify.isPending}
             onClick={() => notify.mutate(trigger)}
           >
-            {notify.isPending ? <size={16} className=" mr-2" /> : <Mail size={16} className="mr-2" />}
+            {notify.isPending ? <Spinner size={16} className=" mr-2" /> : <Mail size={16} className="mr-2" />}
             Dispatch Notifications
           </Button>
         </div>

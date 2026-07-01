@@ -21,7 +21,7 @@ export function InstitutionDashboardGate({
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <className="h-6 w-6  text-muted-foreground" />
+        <Spinner className="h-6 w-6  text-muted-foreground" />
       </div>
     );
   }

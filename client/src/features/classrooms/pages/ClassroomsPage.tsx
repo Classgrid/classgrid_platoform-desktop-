@@ -34,7 +34,7 @@ export function ClassroomsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <className="h-8 w-8  text-primary" />
+        <Spinner className="h-8 w-8  text-primary" />
         <p className="text-muted-foreground">Loading your classrooms...</p>
       </div>
     );

@@ -136,7 +136,7 @@ export function CreateClassroomModal({ isOpen, onClose }: CreateClassroomModalPr
             <Button type="submit" disabled={isPending || !name || !subject}>
               {isPending ? (
                 <>
-                  <className="mr-2 h-4 w-4 " /> Creating...
+                  <Spinner className="mr-2 h-4 w-4 " /> Creating...
                 </>
               ) : (
                 "Create Classroom"

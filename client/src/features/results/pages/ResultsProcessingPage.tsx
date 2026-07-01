@@ -13,7 +13,7 @@ export function ResultsProcessingPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <size={36} className=" text-primary" />
+        <Spinner size={36} className=" text-primary" />
         <p className="text-muted-foreground font-medium">Loading Result Schemes...</p>
       </div>
     );

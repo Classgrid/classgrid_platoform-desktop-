@@ -108,7 +108,7 @@ export function FormBuilderPage() {
   if (poolLoading || configLoading || docLoading) {
     return (
       <div >
-        <size={24}  />
+        <Spinner size={24}  />
       </div>
     );
   }
@@ -150,7 +150,7 @@ export function FormBuilderPage() {
           disabled={updateConfig.isPending}
           
         >
-          {updateConfig.isPending ? <size={18}  /> : <Save size={18} />}
+          {updateConfig.isPending ? <Spinner size={18}  /> : <Save size={18} />}
           Save Form Configuration
         </Button>
       </div>

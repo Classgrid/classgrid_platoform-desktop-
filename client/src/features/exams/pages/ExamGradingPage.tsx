@@ -11,7 +11,7 @@ export function ExamGradingPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <size={36} className=" text-primary" />
+        <Spinner size={36} className=" text-primary" />
         <p className="text-muted-foreground font-medium">Loading Active Examinations...</p>
       </div>
     );
@@ -139,7 +139,7 @@ function MarksUploadWorkspace({ scheme, onBack }: { scheme: ResultScheme; onBack
         
         {uploadMutation.isPending && (
           <div className="mt-6 flex items-center justify-center text-primary">
-            <className=" mr-2" /> Uploading and validating to database...
+            <Spinner className=" mr-2" /> Uploading and validating to database...
           </div>
         )}
       </div>

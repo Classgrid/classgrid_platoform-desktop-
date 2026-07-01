@@ -57,7 +57,7 @@ export function RLAReportingPage() {
             </div>
           </div>
           <Button type="submit" variant="default" disabled={!enSearch.trim() || isLoading}>
-            {isLoading ? <size={16}  /> : "Search"}
+            {isLoading ? <Spinner size={16}  /> : "Search"}
           </Button>
         </form>
       </div>
@@ -123,7 +123,7 @@ export function RLAReportingPage() {
               disabled={reportMutation.isPending || candidate.rla_status === "reported" || candidate.status !== "rla_pending"}
               onClick={() => reportMutation.mutate(candidate.en_number!)}
             >
-              {reportMutation.isPending ? <size={16}  /> : <CheckCircle size={16} />}
+              {reportMutation.isPending ? <Spinner size={16}  /> : <CheckCircle size={16} />}
               Mark as Reported (RLA)
             </Button>
             <Button variant="outline" disabled>

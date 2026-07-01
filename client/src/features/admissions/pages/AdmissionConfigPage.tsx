@@ -7,7 +7,7 @@ export function AdmissionConfigPage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
   const update = useUpdateAdmissionConfig();
 
-  if (isLoading) return <div ><size={24}  /></div>;
+  if (isLoading) return <div ><Spinner size={24}  /></div>;
   if (isError || !configResponse) return <div title="Admission Config" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Config" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};

@@ -6,7 +6,7 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 export function FeeStructurePage() {
   const { data: configResponse, isLoading, isError } = useAdmissionConfig();
 
-  if (isLoading) return <div ><size={24}  /></div>;
+  if (isLoading) return <div ><Spinner size={24}  /></div>;
   if (isError || !configResponse) return <div title="Fee Structure" breadcrumbs={[{ label: "Admissions", to: "/dept/admissions/dashboard" }, { label: "Fee Structure" }]}><div variant="danger" title="Error">Could not load config.</div></div>;
 
   const cfg = configResponse.config || {};

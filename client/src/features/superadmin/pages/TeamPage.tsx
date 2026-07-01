@@ -273,7 +273,7 @@ export function TeamPage() {
         description="All platform staff with their assigned roles and access levels."
       >
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground"><size={20} className=" mb-2" /> Loading team…</div>
+          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground"><Spinner size={20} className=" mb-2" /> Loading team…</div>
         ) : isError ? (
           <div className="bg-danger/10 border border-danger text-danger p-4 rounded-md my-4">
             <h4 className="font-bold">Failed to load Team</h4>

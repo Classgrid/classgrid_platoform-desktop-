@@ -109,7 +109,7 @@ export function DocumentVerificationPage() {
           <div className="min-h-[400px]">
             {isAppsLoading ? (
               <div className="p-12 flex flex-col items-center justify-center text-muted-foreground h-full">
-                <className="w-8 h-8  mb-4 text-primary" />
+                <Spinner className="w-8 h-8  mb-4 text-primary" />
                 <p>Loading queue...</p>
               </div>
             ) : applications.length === 0 ? (
@@ -182,7 +182,7 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
     <div open={true} onOpenChange={(open) => !open && onClose()}>
       <div title="Verify Documents" className="max-w-3xl p-0 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 flex justify-center"><className="w-8 h-8  text-primary" /></div>
+          <div className="p-12 flex justify-center"><Spinner className="w-8 h-8  text-primary" /></div>
         ) : !printData ? (
           <div className="p-12 text-center text-destructive">Failed to load applicant data.</div>
         ) : (
@@ -332,7 +332,7 @@ function VerificationModal({ applicationId, onClose }: { applicationId: string; 
                 onClick={() => finalizeMutation.mutate()}
                 className="gap-2"
               >
-                {finalizeMutation.isPending && <className="w-4 h-4 " />}
+                {finalizeMutation.isPending && <Spinner className="w-4 h-4 " />}
                 Mark Application as Verified
               </div>
             </div>

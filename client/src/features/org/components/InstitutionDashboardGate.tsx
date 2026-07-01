@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import {
 import { Spinner } from "@/components/marketing_ui/spinner";
+import {
   type InstitutionDashboardVariant,
   type InstitutionProfile,
   useInstitutionProfile } from "../queries/useInstitutionProfile";
@@ -20,7 +20,7 @@ export function InstitutionDashboardGate({
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <className="h-6 w-6  text-muted-foreground" />
+        <Spinner className="h-6 w-6  text-muted-foreground" />
       </div>
     );
   }

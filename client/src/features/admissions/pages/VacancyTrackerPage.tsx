@@ -36,7 +36,7 @@ export function VacancyTrackerPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <size={24} className=" text-primary" />
+          <Spinner size={24} className=" text-primary" />
         </div>
       ) : seatMatrixData.length === 0 ? (
         <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">

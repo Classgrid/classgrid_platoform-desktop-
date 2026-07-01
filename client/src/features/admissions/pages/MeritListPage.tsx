@@ -59,7 +59,7 @@ export function MeritListPage() {
           disabled={generate.isPending}
           onClick={() => generate.mutate(undefined)}
         >
-          {generate.isPending ? <size={14}  /> : <RefreshCw size={14} />}
+          {generate.isPending ? <Spinner size={14}  /> : <RefreshCw size={14} />}
           Generate Merit
         </Button>
       }
@@ -76,7 +76,7 @@ export function MeritListPage() {
 
       {isLoading ? (
         <div >
-          <size={24}  />
+          <Spinner size={24}  />
         </div>
       ) : (
         <div

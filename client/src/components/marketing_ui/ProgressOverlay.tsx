@@ -84,7 +84,7 @@ export function ProgressOverlay({
         ) : isError ? (
           <XCircle className={`h-12 w-12 relative z-10 ${getStatusColor()}`} />
         ) : (
-          <className={`h-12 w-12  relative z-10 ${getStatusColor()}`} />
+          <Spinner className={`h-12 w-12  relative z-10 ${getStatusColor()}`} />
         )}
       </div>
       

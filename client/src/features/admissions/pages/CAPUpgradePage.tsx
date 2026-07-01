@@ -65,7 +65,7 @@ export function CAPUpgradePage() {
               />
             </div>
             <Button type="submit" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2" disabled={!enSearch.trim() || isLoading}>
-              {isLoading ? <size={16}  /> : "Search"}
+              {isLoading ? <Spinner size={16}  /> : "Search"}
             </Button>
           </form>
         </div>
@@ -152,7 +152,7 @@ export function CAPUpgradePage() {
                   disabled={nocMutation.isPending || candidate.status === "upgraded"}
                   onClick={() => nocMutation.mutate(candidate.en_number!)}
                 >
-                  {nocMutation.isPending ? <size={16} className=" mr-2" /> : <FileText size={16} className="mr-2" />}
+                  {nocMutation.isPending ? <Spinner size={16} className=" mr-2" /> : <FileText size={16} className="mr-2" />}
                   Generate NOC
                 </Button>
               </div>
@@ -175,7 +175,7 @@ export function CAPUpgradePage() {
                     }
                   }}
                 >
-                  {upgradeMutation.isPending ? <size={16} className=" mr-2" /> : <ArrowUpCircle size={16} className="mr-2" />}
+                  {upgradeMutation.isPending ? <Spinner size={16} className=" mr-2" /> : <ArrowUpCircle size={16} className="mr-2" />}
                   Confirm Upgrade
                 </Button>
               </div>

@@ -117,7 +117,7 @@ export function CETImportPage() {
                 onClick={handleUpload}
                 disabled={!file || importData.isPending}
               >
-                {importData.isPending ? <size={16} className=" mr-2" /> : <CheckCircle size={16} className="mr-2" />}
+                {importData.isPending ? <Spinner size={16} className=" mr-2" /> : <CheckCircle size={16} className="mr-2" />}
                 Start Import
               </Button>
             </div>

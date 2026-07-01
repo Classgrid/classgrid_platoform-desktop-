@@ -140,7 +140,7 @@ export function NewApplicationPage() {
 
       {configQuery.isLoading ? (
         <div className="flex justify-center py-16">
-          <className="w-8 h-8  text-primary" />
+          <Spinner className="w-8 h-8  text-primary" />
         </div>
       ) : configQuery.isError ? (
         <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-6">
@@ -264,7 +264,7 @@ export function NewApplicationPage() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? <className="w-4 h-4 mr-2 " /> : <Send className="w-4 h-4 mr-2" />}
+              {mutation.isPending ? <Spinner className="w-4 h-4 mr-2 " /> : <Send className="w-4 h-4 mr-2" />}
               Submit Application
             </Button>
           </div>

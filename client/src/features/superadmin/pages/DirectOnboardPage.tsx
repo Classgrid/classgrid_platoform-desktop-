@@ -224,7 +224,7 @@ export function DirectOnboardPage() {
                   Cancel
                 </Button>
                 <Button type="submit" variant="default" disabled={mutation.isPending}>
-                  {mutation.isPending ? <><size={14}  /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
+                  {mutation.isPending ? <><Spinner size={14}  /> Provisioning…</> : <><Plus size={14} /> Provision Organization</>}
                 </Button>
               </div>
             </form>
@@ -240,7 +240,7 @@ export function DirectOnboardPage() {
         
       >
         {orgsLoading ? (
-          <div ><size={20}  /> Loading…</div>
+          <div ><Spinner size={20}  /> Loading…</div>
         ) : orgs.length === 0 ? (
           <div >
             <Building2 size={32}  />
