@@ -11,11 +11,10 @@ import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
 import { Switch } from "@/components/marketing_ui/switch";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
+import { VerifiedBadge } from "@/components/marketing_ui/verified-badge";
 import { toast } from "sonner";
 import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -118,10 +117,10 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         profileBanner: profileData.user.profileBanner || "",
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
-        organization_name: profileData.user.organization_name || (profileData.user.organization && profileData.user.organization.name) || "",
+        organization_name: profileData.user.organization_name || (profileData.user.organization && profileData.user.organization.name) || currentUser?.organization?.name || currentUser?.organization_name || "",
       });
     }
-  }, [profileData, publicUser]);
+  }, [profileData, publicUser, currentUser]);
 
   useEffect(() => {
     if (!isReadOnly && prefsData?.emailNotifications) {
@@ -348,23 +347,12 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
                     {form.name}
-                    {form.role && (form.role === "org_admin" || form.role === "platform_admin" || form.role === "super_admin") && (
-                      <TooltipProvider delayDuration={0}>
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-help flex items-center justify-center">
-                            <BadgeCheck className="w-7 h-7 text-blue-500 fill-blue-500/10" strokeWidth={2.5} />
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-popover text-popover-foreground border border-border shadow-md rounded-md px-3 py-1.5 text-xs font-semibold capitalize tracking-wide">
-                            Verified {(form.role || "User").replace("platform_", "").replace("_", " ")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
+                    <VerifiedBadge role={form.role} iconClassName="w-7 h-7" />
                   </h1>
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium mt-1">
                   <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
-                  <span className="flex items-center gap-1.5"><Globe size={16} /> {form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || "Organization Pending"}</span>
+                  <span className="flex items-center gap-1.5"><Globe size={16} /> {form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
                   <span className="flex items-center gap-1.5 text-success"><Activity size={16} /> Current Status: Active</span>
                   <span className="flex items-center gap-1.5 text-muted-foreground italic">@{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}</span>
                 </div>

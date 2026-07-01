@@ -29,7 +29,7 @@ function DateField({ field, value, onChange, disabled }: { field: any, value: st
           disabled={disabled}
           className={cn(
             "h-11 w-full rounded-lg px-3 text-left font-normal outline-none transition-all flex items-center gap-2",
-            disabled ? "bg-muted/10 border border-transparent text-foreground cursor-default opacity-90" : "border border-input bg-background focus:border-primary",
+            disabled ? "bg-muted/30 border border-input text-foreground cursor-not-allowed opacity-70" : "border border-input bg-background focus:border-primary",
             !value && !disabled ? "text-muted-foreground" : ""
           )}
           onClick={(e) => { 
@@ -117,9 +117,22 @@ export function ContextualProfile({
 
   const [activeSection, setActiveSection] = useState(strategy.sections[0]?.key || "");
   
-  // Initialize from actual profile data
-  const [formData, setFormData] = useState<Record<string, any>>(profileData?.metadata || {});
-  
+  // Initialize from actual profile data, flattening root props and metadata
+  const [formData, setFormData] = useState<Record<string, any>>({
+    ...(profileData || {}),
+    ...(profileData?.metadata || {})
+  });
+
+  // Sync form data if profileData arrives asynchronously
+  React.useEffect(() => {
+    if (profileData) {
+      setFormData(prev => ({
+        ...prev,
+        ...profileData,
+        ...(profileData.metadata || {})
+      }));
+    }
+  }, [profileData]);
   // Loading & Edit States
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -269,7 +282,7 @@ export function ContextualProfile({
                         onValueChange={(val) => handleInputChange(field.key, val)}
                         disabled={!isEditing}
                       >
-                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/10 border-transparent text-foreground cursor-default opacity-90")}>
+                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/30 border-input text-foreground cursor-not-allowed opacity-70")}>
                           <SelectValue placeholder="Select State..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -282,7 +295,7 @@ export function ContextualProfile({
                           <input 
                             type="text" 
                             placeholder={isEditing ? `ENTER YOUR ${field.label.toUpperCase()}` : ""}
-                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-transparent bg-muted/10 text-foreground cursor-default opacity-90")}
+                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-input bg-muted/30 text-foreground cursor-not-allowed opacity-70")}
                             value={formData[field.key + "_other"] || ""}
                             onChange={(e) => isEditing && handleInputChange(field.key + "_other", e.target.value)}
                             readOnly={!isEditing}
@@ -304,7 +317,7 @@ export function ContextualProfile({
                         onValueChange={(val) => handleInputChange(field.key, val)}
                         disabled={!selectedState || !isEditing}
                       >
-                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/10 border-transparent text-foreground cursor-default opacity-90")}>
+                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/30 border-input text-foreground cursor-not-allowed opacity-70")}>
                           <SelectValue placeholder="Select District..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -317,7 +330,7 @@ export function ContextualProfile({
                           <input 
                             type="text" 
                             placeholder={isEditing ? `ENTER YOUR ${field.label.toUpperCase()}` : ""}
-                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-transparent bg-muted/10 text-foreground cursor-default opacity-90")}
+                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-input bg-muted/30 text-foreground cursor-not-allowed opacity-70")}
                             value={formData[field.key + "_other"] || ""}
                             onChange={(e) => isEditing && handleInputChange(field.key + "_other", e.target.value)}
                             readOnly={!isEditing}
@@ -336,7 +349,7 @@ export function ContextualProfile({
                         onValueChange={(val) => handleInputChange(field.key, val)}
                         disabled={!isEditing}
                       >
-                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/10 border-transparent text-foreground cursor-default opacity-90")}>
+                        <SelectTrigger className={cn("w-full transition-all", isEditing ? "bg-background border-input" : "bg-muted/30 border-input text-foreground cursor-not-allowed opacity-70")}>
                           <SelectValue placeholder={`Select ${field.label}...`} />
                         </SelectTrigger>
                         <SelectContent>
@@ -351,7 +364,7 @@ export function ContextualProfile({
                           <input 
                             type="text" 
                             placeholder={isEditing ? `ENTER YOUR ${field.label.toUpperCase()}` : ""}
-                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-transparent bg-muted/10 text-foreground cursor-default opacity-90")}
+                            className={cn("w-full p-2.5 rounded-md text-sm outline-none transition-all", isEditing ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" : "border border-input bg-muted/30 text-foreground cursor-not-allowed opacity-70")}
                             value={formData[field.key + "_other"] || ""}
                             onChange={(e) => isEditing && handleInputChange(field.key + "_other", e.target.value)}
                             readOnly={!isEditing}
@@ -375,7 +388,7 @@ export function ContextualProfile({
                   
                   if (field.type === "boolean") {
                     return (
-                      <div className={cn("flex items-center gap-4 mt-2 transition-all", !isEditing && "opacity-80 pointer-events-none")}>
+                      <div className={cn("flex items-center gap-4 mt-2 transition-all", !isEditing && "opacity-70 cursor-not-allowed pointer-events-none")}>
                         <label className="flex items-center gap-2 text-sm cursor-pointer">
                           <input type="radio" name={field.key} value="yes" className="accent-primary w-4 h-4" disabled={!isEditing} /> Yes
                         </label>
@@ -388,7 +401,7 @@ export function ContextualProfile({
                   
                   if (field.type === "file_list" || field.type === "image") {
                     return (
-                      <div className={cn("w-full p-4 border-2 border-dashed rounded-md bg-muted/20 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2 transition-colors", isEditing ? "cursor-pointer hover:bg-muted/50 hover:border-primary/50" : "opacity-80 pointer-events-none cursor-default border-transparent bg-muted/10")}>
+                      <div className={cn("w-full p-4 border-2 border-dashed rounded-md bg-muted/20 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2 transition-colors", isEditing ? "cursor-pointer hover:bg-muted/50 hover:border-primary/50" : "opacity-70 cursor-not-allowed pointer-events-none bg-muted/30 border-input")}>
                         <UploadCloud className="w-6 h-6 text-primary/70" />
                         <span className="font-medium text-foreground">{isEditing ? `Upload ${field.label}` : 'No file uploaded'}</span>
                         {isEditing && <span className="text-xs">PDF, JPG, PNG up to 5MB</span>}
@@ -404,7 +417,7 @@ export function ContextualProfile({
                         "w-full p-2.5 rounded-md text-sm outline-none transition-all",
                         isEditing 
                           ? "border border-input bg-background focus:ring-2 focus:ring-primary/50" 
-                          : "border border-transparent bg-muted/10 text-foreground font-medium cursor-default opacity-90"
+                          : "border border-input bg-muted/30 text-foreground cursor-not-allowed opacity-70"
                       )}
                       value={formData[field.key] || ""}
                       onChange={(e) => isEditing && handleInputChange(field.key, e.target.value)}
