@@ -57,6 +57,11 @@ export default tseslint.config(
             {
               name: 'react-hot-toast',
               message: 'react-hot-toast is forbidden. Use our native dark toast: import { toast } from "sonner" to match platform design.'
+            },
+            {
+              name: 'lucide-react',
+              importNames: ['Loader', 'Loader2', 'Loader3', 'Spinner'],
+              message: 'Generic spinners are forbidden. Use our custom spinner: import { Spinner } from "@/components/marketing_ui/spinner"'
             }
           ]
         }

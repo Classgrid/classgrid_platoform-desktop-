@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
-import { Check, Search, Users, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Check, Search, Users } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 import { getInitials } from "@/lib/utils";
 
@@ -149,7 +150,7 @@ export function ForwardMessageModal({
             >
               {isForwarding ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Spinner className="mr-2 w-4 h-4 text-white" />
                   Forwarding...
                 </>
               ) : (
