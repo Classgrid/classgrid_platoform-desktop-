@@ -171,7 +171,7 @@ export function CustomDomainCard() {
                 }}
                 title="Save the Emergency URL"
                 description={<>By disabling the default <strong className="text-foreground">{user?.organization?.subdomain}.classgrid.in</strong> URL, your institution's ERP will now rely exclusively on your custom DNS settings. If your custom domain expires or experiences downtime, your students and staff will temporarily lose access.</>}
-                confirmationSteps={[{ label: "Please enter your Classgrid organization domain:", value: `${user?.organization?.subdomain}.classgrid.in`, hideValueFromUI: true }]}
+                confirmationSteps={[{ label: "Please enter your Classgrid organization domain (e.g. orgname.classgrid.in):", value: `${user?.organization?.subdomain}.classgrid.in`, hideValueFromUI: true }]}
                 warningMessage="The Organization Admin portal remains accessible via the default URL. Save the emergency URL below before closing."
                 actionLabel="I understand & Confirm"
                 hideCancelButton={!pendingBackdoorAction}
@@ -865,7 +865,7 @@ function DomainConfigCard({
                 }}
                 title="Save Your Emergency URL"
                 description={<>Because you verified an ERP custom domain, if your custom DNS breaks (domain expires, CNAME deleted) — your ERP login will be inaccessible. You must save the emergency URL below.</>}
-                confirmationSteps={[{ label: "Please enter your Classgrid organization domain:", value: `${user?.organization?.subdomain}.classgrid.in`, hideValueFromUI: true }]}
+                confirmationSteps={[{ label: "Please enter your Classgrid organization domain (e.g. orgname.classgrid.in):", value: `${user?.organization?.subdomain}.classgrid.in`, hideValueFromUI: true }]}
                 warningMessage="If your custom domain goes down and you haven't saved this URL, you will lose admin access."
                 actionLabel="I understand & Confirm"
                 hideCancelButton={!pendingBackdoorAction}
