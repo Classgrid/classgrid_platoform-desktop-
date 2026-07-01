@@ -14,6 +14,8 @@ export interface ConfirmationStep {
     label: string;
     /** The exact value the user must type to pass this step */
     value: string;
+    /** If true, the expected value will NOT be displayed in the UI next to the label */
+    hideValueFromUI?: boolean;
 }
 
 export interface DangerConfirmDialogProps {
@@ -186,9 +188,11 @@ export function DangerConfirmDialog({
                             >
                                 <label className="text-sm text-zinc-300">
                                     {step.label}{" "}
-                                    <span className="font-bold text-white">
-                                        &ldquo;{step.value}&rdquo;
-                                    </span>
+                                    {!step.hideValueFromUI && (
+                                        <span className="font-bold text-white">
+                                            &ldquo;{step.value}&rdquo;
+                                        </span>
+                                    )}
                                 </label>
                                 <input
                                     type="text"
