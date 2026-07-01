@@ -136,6 +136,34 @@ router.get("/auth-branding", async (req, res) => {
       });
     }
 
+    // 🔒 Custom Domain Disabled Guard
+    // If the request came in via a custom domain (ERP or marketing),
+    // and that domain has is_enabled = false, refuse to serve branding.
+    // This enforces the "Enable Custom Domain" toggle in the admin settings.
+    const incomingDomain = domainParam || req.tenantHost;
+    if (incomingDomain) {
+      const matchedErp = org.erp_domain?.domain === incomingDomain;
+      const matchedMkt = org.custom_domain?.domain === incomingDomain;
+
+      if (matchedErp && org.erp_domain?.is_enabled === false) {
+        return res.status(410).json({
+          success: false,
+          message: "This ERP domain has been disabled by the administrator.",
+          disabled: true,
+          fallbackUrl: `https://${org.subdomain}.classgrid.in/login`,
+        });
+      }
+
+      if (matchedMkt && org.custom_domain?.is_enabled === false) {
+        return res.status(410).json({
+          success: false,
+          message: "This domain has been disabled by the administrator.",
+          disabled: true,
+          fallbackUrl: `https://${org.subdomain}.classgrid.in`,
+        });
+      }
+    }
+
     const site = await OrgWebsiteContent.findOne({
       $or: [{ org_slug: slug }, { organization_id: org._id }],
     })
