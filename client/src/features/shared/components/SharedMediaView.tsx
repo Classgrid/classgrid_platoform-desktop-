@@ -36,19 +36,19 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
         <TabsList className="w-full flex justify-start bg-transparent border-b border-border/50 rounded-none h-auto p-0 space-x-6">
           <TabsTrigger 
             value="media" 
-            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary pb-3 pt-2 px-1 text-[15px]"
+            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 pb-3 pt-2 px-1 text-[15px]"
           >
             Media
           </TabsTrigger>
           <TabsTrigger 
             value="docs" 
-            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary pb-3 pt-2 px-1 text-[15px]"
+            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 pb-3 pt-2 px-1 text-[15px]"
           >
             Docs
           </TabsTrigger>
           <TabsTrigger 
             value="links" 
-            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary pb-3 pt-2 px-1 text-[15px]"
+            className="rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 pb-3 pt-2 px-1 text-[15px]"
           >
             Links
           </TabsTrigger>
@@ -64,7 +64,7 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {media.map((item: any) => (
-                  <div key={item.id} className="aspect-square relative group overflow-hidden rounded-xl border border-border/50 bg-muted/20">
+                  <div key={item.id} className="aspect-square relative group overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm">
                     {item.file_type.startsWith('video/') ? (
                       <video src={item.file_url} className="w-full h-full object-cover" />
                     ) : (
@@ -89,7 +89,7 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
             ) : (
               <div className="flex flex-col gap-4">
                 {docs.map((item: any) => (
-                  <div key={item.id} className="flex flex-col bg-muted/20 rounded-xl overflow-hidden border border-border/50 p-4 hover:bg-muted/30 transition-colors">
+                  <div key={item.id} className="flex flex-col bg-card shadow-sm rounded-xl overflow-hidden border border-border/40 p-4 hover:bg-accent/30 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-2 text-emerald-500 font-semibold text-sm">
                         <span>~ {item.sender_name}</span>
@@ -97,7 +97,7 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
                       <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
                     </div>
                     
-                    <div className="flex items-center gap-4 bg-background rounded-lg p-3 border border-border/40">
+                    <div className="flex items-center gap-4 bg-muted/30 rounded-lg p-3 border border-border/40">
                       <div className="w-10 h-10 shrink-0 bg-red-500/10 text-red-500 flex items-center justify-center rounded-lg">
                         <FileText size={20} />
                       </div>
@@ -132,7 +132,7 @@ export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
             ) : (
               <div className="flex flex-col gap-3">
                 {links.map((item: any) => (
-                  <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors group">
+                  <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 rounded-xl border border-border/40 bg-card shadow-sm hover:bg-accent/30 transition-colors group">
                     <div className="w-10 h-10 shrink-0 bg-blue-500/10 text-blue-500 flex items-center justify-center rounded-full mt-1">
                       <Link2 size={20} className="group-hover:-rotate-45 transition-transform" />
                     </div>
