@@ -13,6 +13,8 @@ import { Button } from "@/components/marketing_ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import indiaLocations from "@/data/india-locations.json";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { toast } from "sonner";
 
 // ── SUB-COMPONENT FOR DATE FIELD TO HANDLE LOCAL STATE ──
 function DateField({ field, value, onChange }: { field: any, value: string, onChange: (val: string) => void }) {
@@ -213,7 +215,7 @@ export function ContextualProfile({
                   <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving ? (
                       <span className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        <Spinner className="w-4 h-4" />
                         Saving...
                       </span>
                     ) : "Save Changes"}
