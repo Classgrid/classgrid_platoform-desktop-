@@ -159,6 +159,7 @@ export function CustomDomainCard() {
                 confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
                 warningMessage="The Organization Admin portal remains accessible via the default URL. Save the emergency URL below before closing."
                 actionLabel="I understand & Close"
+                hideCancelButton={true}
                 onConfirm={() => {
                     navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                     toast.success("Emergency URL copied!");
@@ -175,7 +176,9 @@ export function CustomDomainCard() {
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
                             }}
-                            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground hover:bg-background transition-colors shrink-0 w-8 h-8"
                         >
                             <Copy className="w-4 h-4" />
                         </Button>
@@ -836,6 +839,7 @@ function DomainConfigCard({
                 confirmationSteps={[{ label: "To confirm, type", value: "I understand" }]}
                 warningMessage="If your custom domain goes down and you haven't saved this URL, you will lose admin access."
                 actionLabel="I understand & Close"
+                hideCancelButton={true}
                 onConfirm={() => {
                     navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                     toast.success("Emergency URL copied!");
@@ -852,7 +856,9 @@ function DomainConfigCard({
                                 navigator.clipboard.writeText(`https://${user?.organization?.subdomain}.classgrid.in/org/login`);
                                 toast.success("Emergency URL copied!");
                             }}
-                            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground hover:bg-background transition-colors shrink-0 w-8 h-8"
                         >
                             <Copy className="w-4 h-4" />
                         </Button>

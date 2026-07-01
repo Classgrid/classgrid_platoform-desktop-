@@ -69,6 +69,9 @@ export interface DangerConfirmDialogProps {
     
     /** Optional override to disable the confirm button (useful when using children for custom inputs) */
     isConfirmDisabled?: boolean;
+
+    /** If true, the cancel button is completely hidden */
+    hideCancelButton?: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
@@ -88,6 +91,7 @@ export function DangerConfirmDialog({
     maxWidth = "sm:max-w-md",
     children,
     isConfirmDisabled,
+    hideCancelButton = false,
 }: DangerConfirmDialogProps) {
     const [stepValues, setStepValues] = useState<string[]>([]);
 
@@ -225,14 +229,16 @@ export function DangerConfirmDialog({
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex items-center justify-between w-full mt-1">
-                        <button
-                            onClick={() => onOpenChange(false)}
-                            disabled={isLoading}
-                            className="h-10 px-4 rounded-md border border-white/10 bg-transparent text-sm font-medium text-white hover:bg-white/5 transition-colors"
-                        >
-                            {cancelLabel}
-                        </button>
+                    <div className={cn("flex items-center w-full mt-1", hideCancelButton ? "justify-end" : "justify-between")}>
+                        {!hideCancelButton && (
+                            <button
+                                onClick={() => onOpenChange(false)}
+                                disabled={isLoading}
+                                className="h-10 px-4 rounded-md border border-white/10 bg-transparent text-sm font-medium text-white hover:bg-white/5 transition-colors"
+                            >
+                                {cancelLabel}
+                            </button>
+                        )}
                         <button
                             onClick={onConfirm}
                             disabled={(isConfirmDisabled !== undefined ? isConfirmDisabled : !allStepsComplete) || isLoading}
