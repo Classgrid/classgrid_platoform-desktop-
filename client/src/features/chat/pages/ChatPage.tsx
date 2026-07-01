@@ -20,6 +20,7 @@ import {
   markAllRead,
   fetchThreadPolls,
   voteThreadPoll,
+  forwardMessages,
   type ChatThread,
   type ChatMessage,
   type OrgUser,
@@ -38,6 +39,7 @@ import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { GroupSettingsModal } from "../components/GroupSettingsModal";
 import { StarredMessagesModal } from "../components/StarredMessagesModal";
+import { ForwardMessageModal } from "../components/ForwardMessageModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { SelectionActionBar } from "../components/SelectionActionBar";
@@ -123,6 +125,19 @@ export function ChatPage() {
       toast.success("Chat deleted");
     } catch (err) {
       toast.error("Failed to delete chat");
+    }
+  };
+
+  const handleForwardMessages = async (targetThreadIds: string[]) => {
+    try {
+      if (selectedMessageIds.size === 0) return;
+      const res = await forwardMessages(Array.from(selectedMessageIds), targetThreadIds);
+      if (res.success) {
+        toast.success(`Messages forwarded to ${targetThreadIds.length} ${targetThreadIds.length === 1 ? 'chat' : 'chats'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to forward messages");
     }
   };
 

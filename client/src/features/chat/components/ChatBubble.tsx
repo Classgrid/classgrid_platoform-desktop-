@@ -181,7 +181,7 @@ export function ChatBubble({
           )}
 
           {/* Reply Context */}
-          {message.reply_to && !message.is_deleted && (
+          {message.reply_to && !(message.reply_to as any).isForwarded && !message.is_deleted && (
             <div
               className={`mb-1 p-2 rounded-lg text-xs opacity-80 cursor-pointer w-full
                 ${isMine ? "bg-primary/20 text-primary-foreground/90 border-l-2 border-primary-foreground/50" 
@@ -203,6 +203,13 @@ export function ChatBubble({
               }
             `}
           >
+            {(message.reply_to as any)?.isForwarded && !message.is_deleted && (
+              <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground/80 italic mb-1 -ml-1">
+                <Forward className="w-3.5 h-3.5" />
+                <span>Forwarded</span>
+              </div>
+            )}
+
             {message.is_deleted ? (
               <span className="text-[15px]">This message was deleted</span>
             ) : isEditing ? (
