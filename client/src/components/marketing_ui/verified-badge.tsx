@@ -1,5 +1,6 @@
 import React from "react";
 import { BadgeCheck } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 
 interface VerifiedBadgeProps {
   role?: string;
@@ -26,11 +27,22 @@ export function VerifiedBadge({
     .join(" ");
   
   return (
-    <span
-      className={className}
-      title={`Verified ${displayRole}`}
-    >
-      <BadgeCheck className={`${iconClassName} text-white fill-[#1DA1F2] dark:text-[#0f0f0f]`} />
-    </span>
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className={className}>
+            <BadgeCheck className={`${iconClassName} text-white fill-[#1DA1F2] dark:text-[#0f0f0f]`} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent 
+          side="bottom" 
+          align="center"
+          className="bg-[#1f1f1f] text-white border-[#333] text-xs font-normal px-2 py-1 shadow-sm rounded-sm z-[100] mt-1"
+          sideOffset={2}
+        >
+          Verified {displayRole}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

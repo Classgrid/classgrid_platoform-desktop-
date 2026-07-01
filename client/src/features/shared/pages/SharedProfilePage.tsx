@@ -31,6 +31,7 @@ type ProfileData = {
   prn?: string;
   bio?: string;
   organization_name?: string;
+  organization_logo?: string;
 };
 
 type EmailPrefs = {
@@ -117,7 +118,8 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         profileBanner: profileData.user.profileBanner || "",
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
-        organization_name: profileData.user.organization_name || (profileData.user.organization && profileData.user.organization.name) || currentUser?.organization?.name || currentUser?.organization_name || "",
+        organization_name: profileData.user.organization_name || (profileData.user.organization_id && profileData.user.organization_id.name) || (profileData.user.organization && profileData.user.organization.name) || currentUser?.organization?.name || currentUser?.organization_name || "",
+        organization_logo: (profileData.user.organization_id && profileData.user.organization_id.logo_url) || (profileData.user.organization && profileData.user.organization.logo_url) || currentUser?.organization?.logo_url || "",
       });
     }
   }, [profileData, publicUser, currentUser]);
@@ -352,7 +354,14 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium mt-1">
                   <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
-                  <span className="flex items-center gap-1.5"><Globe size={16} /> {form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
+                  <span className="flex items-center gap-1.5">
+                    {form.organization_logo ? (
+                      <img src={form.organization_logo} alt="Org Logo" className="w-4 h-4 object-contain rounded-sm" />
+                    ) : (
+                      <Globe size={16} />
+                    )}
+                    {form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}
+                  </span>
                   <span className="flex items-center gap-1.5 text-success"><Activity size={16} /> Current Status: Active</span>
                   <span className="flex items-center gap-1.5 text-muted-foreground italic">@{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}</span>
                 </div>
@@ -453,7 +462,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               orgType={currentUser?.organization?.type || "university"} 
               structureType={currentUser?.organization?.structure || "standalone"} 
               isSelfView={!publicUser} 
-              profileData={publicUser || profileData?.user}
+              profileData={publicUser ? { ...publicUser, organization: form.organization_name } : { ...(profileData?.user || {}), organization: form.organization_name }}
             />
           </div>
 
