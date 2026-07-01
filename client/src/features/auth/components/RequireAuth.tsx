@@ -25,9 +25,22 @@ export function RequireAuth() {
 
   // 🚨 STRICT ROLE GUARDS 🚨
   
-  // 1. Super Admin Guard
+  // 1. Super Admin Guard — role check
   if (path.startsWith("/superadmin") && user.role !== "super_admin") {
     return <Navigate to={getRedirectPath(user.role)} replace />;
+  }
+
+  // 🔐 Super Admin Domain Lock
+  // /superadmin/* routes are EXCLUSIVELY accessible from superadmin.classgrid.in.
+  // If a super_admin tries to reach these routes from any other subdomain
+  // (e.g. sunita.classgrid.in/superadmin/dashboard), redirect them to the correct domain.
+  if (path.startsWith("/superadmin") && user.role === "super_admin") {
+    const currentHostname = window.location.hostname;
+    const isSuperAdminDomain = currentHostname === "superadmin.classgrid.in" || currentHostname === "localhost" || currentHostname.startsWith("127.0.0.1");
+    if (!isSuperAdminDomain) {
+      window.location.replace(`https://superadmin.classgrid.in${location.pathname}${location.search}`);
+      return null;
+    }
   }
 
   // 2. Organization / Department Admin Guard
