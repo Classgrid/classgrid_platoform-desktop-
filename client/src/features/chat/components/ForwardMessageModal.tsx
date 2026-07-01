@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
-import { Check, Search, Users } from "lucide-react";
+import { Check, Search, Users, Loader2 } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 import { getInitials } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ interface ForwardMessageModalProps {
   isOpen: boolean;
   onClose: () => void;
   threads: ChatThread[];
-  onForward: (targetThreadIds: string[]) => void;
+  onForward: (targetThreadIds: string[]) => Promise<void> | void;
   onNewGroup: () => void;
   selectedMessageCount: number;
 }
@@ -25,6 +25,7 @@ export function ForwardMessageModal({
 }: ForwardMessageModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTargetIds, setSelectedTargetIds] = useState<Set<string>>(new Set());
+  const [isForwarding, setIsForwarding] = useState(false);
 
   const filteredThreads = threads.filter((t) =>
     t.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -40,12 +41,17 @@ export function ForwardMessageModal({
     setSelectedTargetIds(next);
   };
 
-  const handleForward = () => {
+  const handleForward = async () => {
     if (selectedTargetIds.size > 0) {
-      onForward(Array.from(selectedTargetIds));
-      setSelectedTargetIds(new Set());
-      setSearchQuery("");
-      onClose();
+      setIsForwarding(true);
+      try {
+        await onForward(Array.from(selectedTargetIds));
+      } finally {
+        setIsForwarding(false);
+        setSelectedTargetIds(new Set());
+        setSearchQuery("");
+        onClose();
+      }
     }
   };
 
@@ -138,10 +144,17 @@ export function ForwardMessageModal({
             </Button>
             <Button
               onClick={handleForward}
-              disabled={selectedTargetIds.size === 0}
+              disabled={selectedTargetIds.size === 0 || isForwarding}
               className="bg-emerald-500 hover:bg-emerald-600 text-white border-transparent"
             >
-              Forward {selectedMessageCount > 0 ? selectedMessageCount : ""} {selectedMessageCount === 1 ? "message" : selectedMessageCount > 1 ? "messages" : ""}
+              {isForwarding ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Forwarding...
+                </>
+              ) : (
+                <>Forward {selectedMessageCount > 0 ? selectedMessageCount : ""} {selectedMessageCount === 1 ? "message" : selectedMessageCount > 1 ? "messages" : ""}</>
+              )}
             </Button>
           </div>
         </div>
