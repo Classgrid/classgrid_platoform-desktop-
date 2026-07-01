@@ -36,6 +36,20 @@ export function RequireAuth() {
     return <Navigate to={getRedirectPath(user.role)} replace />;
   }
 
+  // 🔒 ERP Domain Guard
+  // The ERP custom domain is EXCLUSIVELY for students and faculty.
+  // If an admin is logged in on the ERP domain and tries to open ANY admin/dept route,
+  // kick them back to the login page.
+  if (isAdminRoute && isInstitutionAdminRole(user.role)) {
+    const currentHostname = window.location.hostname;
+    const isClassgridUrl = currentHostname.endsWith(".classgrid.in") || currentHostname === "classgrid.in" || currentHostname === "localhost" || currentHostname.startsWith("127.0.0.1");
+    const orgErpDomain = (user.organization as any)?.erp_domain?.domain;
+    const isOnErpDomain = !isClassgridUrl && orgErpDomain && currentHostname === orgErpDomain;
+    if (isOnErpDomain) {
+      return <Navigate to="/login" replace />;
+    }
+  }
+
   // 3. Student Guard
   if (path.startsWith("/student") && user.role !== "student") {
     return <Navigate to={getRedirectPath(user.role)} replace />;
