@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
   DropdownMenu,
@@ -11,6 +11,14 @@ import {
 import EmojiPicker from 'emoji-picker-react';
 import { WaveformPlayer } from "./WaveformPlayer";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/marketing_ui/context-menu";
+import { toast } from "sonner";
 import type { ChatMessage, Poll } from "../services/chatApi";
 
 
@@ -137,7 +145,9 @@ export function ChatBubble({
         )}
 
         {/* Message Container */}
-        <div className={`relative flex flex-col ${isMine ? "items-end" : "items-start"}`}>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div className={`relative flex flex-col ${isMine ? "items-end" : "items-start"}`}>
           
           {/* Sender Name (for group chats) */}
           {!isMine && showAvatar && (
@@ -344,7 +354,49 @@ export function ChatBubble({
             </div>
           )}
 
-        </div>
+            </div>
+          </ContextMenuTrigger>
+          {!message.is_deleted && (
+            <ContextMenuContent className="w-56" align={isMine ? "end" : "start"}>
+              <ContextMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
+                <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
+              </ContextMenuItem>
+              {message.message && (
+                <ContextMenuItem onClick={() => {
+                  navigator.clipboard.writeText(message.message);
+                  toast.success("Copied to clipboard");
+                }} className="cursor-pointer py-2">
+                  <Copy className="w-4 h-4 mr-2" /> Copy
+                </ContextMenuItem>
+              )}
+              <ContextMenuItem className="cursor-pointer py-2" disabled>
+                <Forward className="w-4 h-4 mr-2" /> Forward
+              </ContextMenuItem>
+              <ContextMenuItem className="cursor-pointer py-2" disabled>
+                <Pin className="w-4 h-4 mr-2" /> Pin
+              </ContextMenuItem>
+              {onStar && (
+                <ContextMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
+                  <Star className="w-4 h-4 mr-2" /> Star
+                </ContextMenuItem>
+              )}
+              {isMine && (
+                <ContextMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
+                  <Edit2 className="w-4 h-4 mr-2" /> Edit
+                </ContextMenuItem>
+              )}
+              <ContextMenuSeparator />
+              <ContextMenuItem className="cursor-pointer py-2" disabled>
+                <CheckSquare className="w-4 h-4 mr-2" /> Select
+              </ContextMenuItem>
+              {isMine && (
+                <ContextMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
+                  <Trash2 className="w-4 h-4 mr-2" /> Delete
+                </ContextMenuItem>
+              )}
+            </ContextMenuContent>
+          )}
+        </ContextMenu>
 
         {/* Action Menu (Hover) */}
         {!message.is_deleted && (
