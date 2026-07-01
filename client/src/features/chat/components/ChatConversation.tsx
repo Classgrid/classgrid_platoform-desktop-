@@ -23,6 +23,7 @@ interface ChatConversationProps {
   polls?: Poll[];
   onVotePoll?: (pollId: string, optionId: string) => void;
   onStar?: (msgId: string) => void;
+  searchQuery?: string;
 }
 
 export function ChatConversation({
@@ -43,6 +44,7 @@ export function ChatConversation({
   polls = [],
   onVotePoll,
   onStar,
+  searchQuery = "",
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -115,11 +117,16 @@ export function ChatConversation({
     return () => observer.disconnect();
   }, []);
 
+  // Filter messages by search query
+  const filteredMessages = searchQuery.trim() 
+    ? messages.filter(msg => msg.message?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
+
   // Group messages by date
   const groupedMessages: { date: string; messages: ChatMessage[] }[] = [];
   let currentDate = "";
 
-  messages.forEach((msg) => {
+  filteredMessages.forEach((msg) => {
     const msgDate = new Date(msg.created_at).toLocaleDateString();
     if (msgDate !== currentDate) {
       currentDate = msgDate;
@@ -144,15 +151,22 @@ export function ChatConversation({
           )}
 
       {/* End of history */}
-      {!hasMore && messages.length > 0 && (
+      {!hasMore && filteredMessages.length > 0 && !searchQuery && (
         <div className="text-center py-6 text-xs text-muted-foreground">
           This is the start of your conversation
         </div>
       )}
 
-      {/* Empty State */}
-      {messages.length === 0 && !isLoading && (
-        <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-auto">
+      {/* No Messages Found (Search) */}
+      {filteredMessages.length === 0 && searchQuery && !isLoading && (
+        <div className="flex-1 flex items-center justify-center text-center opacity-70 my-auto h-full min-h-[300px]">
+          <h3 className="text-[15px] font-medium text-foreground">No messages found</h3>
+        </div>
+      )}
+
+      {/* Empty State (No messages ever) */}
+      {filteredMessages.length === 0 && !searchQuery && !isLoading && (
+        <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-auto h-full min-h-[300px]">
           <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">👋</span>
           </div>

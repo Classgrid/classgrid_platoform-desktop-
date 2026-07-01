@@ -20,6 +20,8 @@ interface ChatHeaderProps {
   onClearChat: () => void;
   onDeleteChat: () => void;
   onOpenDisappearingModal?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 function getInitials(name: string) {
@@ -40,12 +42,15 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal, searchQuery = "", onSearchChange }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const query = onSearchChange ? searchQuery : localSearchQuery;
+  const setQuery = onSearchChange ? onSearchChange : setLocalSearchQuery;
 
   useEffect(() => {
     if (isSearchOpen && inputRef.current) {
@@ -115,14 +120,14 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
                   ref={inputRef}
                   type="text"
                   placeholder="Search in conversation..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                   className="w-full bg-accent/50 border border-border outline-none focus:ring-1 focus:ring-primary rounded-full pl-4 pr-10 py-1.5 text-sm h-9"
                 />
                 <button 
                   onClick={() => {
                     setIsSearchOpen(false);
-                    setSearchQuery("");
+                    setQuery("");
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted-foreground/20 text-muted-foreground transition-colors"
                 >

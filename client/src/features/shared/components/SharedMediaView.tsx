@@ -13,7 +13,7 @@ interface SharedMediaViewProps {
 export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
   const { data, isLoading } = useQuery({
     queryKey: ["shared-media", targetUserId],
-    queryFn: () => apiClient.get(`/api/chat/threads/dm/${targetUserId}/shared-media`).then((r) => r.data),
+    queryFn: () => apiClient.get(`/api/threads/dm/${targetUserId}/shared-media`).then((r) => r.data),
     enabled: !!targetUserId,
   });
 

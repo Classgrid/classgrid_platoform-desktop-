@@ -71,6 +71,7 @@ export function ChatPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
+  const [chatSearchQuery, setChatSearchQuery] = useState("");
 
   const activeTypingUsers = Object.entries(typingUsers).map(([id, data]) => ({
     id,
@@ -501,6 +502,8 @@ export function ChatPage() {
             <ChatHeader
               thread={activeThread}
               onlineUsers={onlineUsers}
+              searchQuery={chatSearchQuery}
+              onSearchChange={setChatSearchQuery}
               onBack={() => setActiveThread(null)}
               onAvatarClick={() => {
                 if (activeThread.avatar) {
@@ -526,6 +529,7 @@ export function ChatPage() {
             <ChatConversation
               thread={activeThread}
               messages={messages}
+              searchQuery={chatSearchQuery}
               currentUserId={currentUserId!}
               isLoading={messagesLoading}
               hasMore={hasMoreMessages}

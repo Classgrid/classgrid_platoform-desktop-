@@ -364,20 +364,24 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                   <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground font-medium">
                     <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
                     <span className="flex items-center gap-2.5">
-                      {form.organization_logo ? (
+                      {form.role === "super_admin" || form.role === "Super Admin" ? (
+                        <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
+                          <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
+                        </div>
+                      ) : form.organization_logo ? (
                         <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
                           <img src={form.organization_logo} alt="Org Logo" className="w-6 h-6 object-contain" />
                         </div>
                       ) : (
                         <Globe size={18} className="text-muted-foreground" />
                       )}
-                      <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
+                      <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     {!isReadOnly || (targetUserId && onlineUsers.has(targetUserId)) ? (
                       <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        <Activity size={14} /> {!isReadOnly ? "Active" : "Online"}
+                        <Activity size={14} /> {isReadOnly ? "Online" : "Active"}
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5 text-muted-foreground bg-muted/20 border border-border/40 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
