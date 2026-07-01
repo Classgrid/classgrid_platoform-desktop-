@@ -15,6 +15,7 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
 import { Switch } from "@/components/marketing_ui/switch";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 import { toast } from "sonner";
 import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -30,6 +31,7 @@ type ProfileData = {
   createdAt?: string;
   prn?: string;
   bio?: string;
+  organization_name?: string;
 };
 
 type EmailPrefs = {
@@ -77,6 +79,20 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
     enabled: !isReadOnly,
   });
 
+  const targetUserId = (publicUser as any)?._id || profileData?.user?._id;
+
+  const { data: groupsData, isLoading: groupsLoading } = useQuery({
+    queryKey: ["groups-in-common", targetUserId],
+    queryFn: () => apiClient.get(`/api/chat/groups-in-common/${targetUserId}`).then((r) => r.data),
+    enabled: !!targetUserId,
+  });
+
+  const { data: academicData, isLoading: academicLoading } = useQuery({
+    queryKey: ["academic-status", targetUserId],
+    queryFn: () => apiClient.get(`/api/classroom/academic-status/${targetUserId}`).then((r) => r.data),
+    enabled: !!targetUserId,
+  });
+
   useEffect(() => {
     if (publicUser) {
       setForm({
@@ -90,6 +106,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         createdAt: publicUser.createdAt,
         prn: publicUser.prn,
         bio: publicUser.bio,
+        organization_name: publicUser.organization_name,
       });
     } else if (profileData?.user) {
       setForm({
@@ -101,6 +118,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         profileBanner: profileData.user.profileBanner || "",
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
+        organization_name: profileData.user.organization_name || (profileData.user.organization && profileData.user.organization.name) || "",
       });
     }
   }, [profileData, publicUser]);
@@ -328,14 +346,25 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               
               <div className="flex flex-col w-full gap-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">{form.name}</h1>
-                  <Badge variant="info" className="h-6 px-3 text-[10px] font-bold tracking-widest uppercase">
-                    {(form.role || "User").replace("platform_", "")}
-                  </Badge>
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
+                    {form.name}
+                    {form.role && (form.role === "org_admin" || form.role === "platform_admin" || form.role === "super_admin") && (
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-help flex items-center justify-center">
+                            <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/20" />
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-popover text-popover-foreground border border-border shadow-md rounded-md px-3 py-1.5 text-xs font-semibold capitalize tracking-wide">
+                            Verified {(form.role || "User").replace("platform_", "").replace("_", " ")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </h1>
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium mt-1">
                   <span className="flex items-center gap-1.5"><Mail size={16} /> {form.email}</span>
-                  <span className="flex items-center gap-1.5"><Globe size={16} /> Classgrid Cloud</span>
+                  <span className="flex items-center gap-1.5"><Globe size={16} /> {form.role === "super_admin" ? "Classgrid Team Member" : form.organization_name || "Organization Pending"}</span>
                   <span className="flex items-center gap-1.5 text-success"><Activity size={16} /> Current Status: Active</span>
                   <span className="flex items-center gap-1.5 text-muted-foreground italic">@{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}</span>
                 </div>
@@ -385,8 +414,20 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                       Groups in Common
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">FY CS Batch A</Badge>
-                      <Badge variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">Web Dev Club</Badge>
+                      {groupsLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-20 bg-muted rounded animate-pulse" />
+                          <div className="h-6 w-24 bg-muted rounded animate-pulse" />
+                        </div>
+                      ) : groupsData?.groups && groupsData.groups.length > 0 ? (
+                        groupsData.groups.map((group: any) => (
+                          <Badge key={group._id || group.id || group.name} variant="secondary" className="bg-background/80 hover:bg-background border-border/50 text-xs py-1 px-3 shadow-sm">
+                            {group.name}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">No groups in common</span>
+                      )}
                     </div>
                   </div>
                   
@@ -396,16 +437,18 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                       Academic Status
                     </div>
                     <div className="text-sm text-foreground/90 font-medium">
-                      {form.role.includes("student") ? (
+                      {academicLoading ? (
+                        <div className="flex flex-col gap-2">
+                          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                          <div className="h-3 w-40 bg-muted rounded animate-pulse" />
+                        </div>
+                      ) : academicData?.status ? (
                         <div className="flex flex-col gap-1">
-                          <span className="font-semibold">B.Tech Computer Science</span>
-                          <span className="text-xs text-muted-foreground">Class of 2027 • Student</span>
+                          <span className="font-semibold">{academicData.status.primaryText}</span>
+                          <span className="text-xs text-muted-foreground">{academicData.status.secondaryText}</span>
                         </div>
                       ) : (
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold">Computer Science Dept</span>
-                          <span className="text-xs text-muted-foreground">Faculty Member</span>
-                        </div>
+                        <span className="text-xs text-muted-foreground italic">Academic status not available</span>
                       )}
                     </div>
                   </div>
@@ -426,65 +469,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
             />
           </div>
 
-          {/* User Experience & Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            
-            {/* User Experience */}
-            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
-              <div className="border-b border-border pb-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground"><Palette size={18} /> User Experience</h3>
-                <p className="text-sm text-muted-foreground mt-1 opacity-80">Manage how you interact with the interface.</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between p-3 bg-muted/50 dark:bg-white/5 rounded-lg border border-transparent hover:bg-muted dark:hover:bg-white/10 hover:border-border transition-colors">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground/90">Dark Theme</span>
-                    <span className="text-xs text-muted-foreground opacity-80">Optimize UI for low-light.</span>
-                  </div>
-                  <Switch
-                    checked={theme === "dark"}
-                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                    disabled={isReadOnly}
-                    className={isReadOnly ? 'opacity-50 pointer-events-none' : ''}
-                  />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-muted/50 dark:bg-white/5 rounded-lg border border-transparent hover:bg-muted dark:hover:bg-white/10 hover:border-border transition-colors">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground/90">Push Alerts</span>
-                    <span className="text-xs text-muted-foreground opacity-80">Real-time system notifications.</span>
-                  </div>
-                  <Switch
-                    checked={prefs.global}
-                    onCheckedChange={() => handlePrefToggle("global")}
-                    disabled={isReadOnly}
-                    className={isReadOnly ? 'opacity-50 pointer-events-none' : ''}
-                  />
-                </div>
-              </div>
-            </div>
 
-            {/* Contact & Support */}
-            <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md hover:border-muted-foreground/30 transition-all">
-              <div className="border-b border-border pb-4">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground"><Phone size={18} /> Contact & Support</h3>
-                <p className="text-sm text-muted-foreground mt-1 opacity-80">Verified communication channels.</p>
-              </div>
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone Connectivity</label>
-                  <Input value={form.phoneNumber} onChange={e => handleInputChange("phoneNumber", e.target.value)} placeholder="+91 " className="bg-background" readOnly={isReadOnly} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Verification Email</label>
-                  <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/30">
-                    <span className="text-sm font-medium">{form.email}</span>
-                    <Badge variant="success" className="h-6 text-[10px] tracking-wider uppercase">Verified</Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
 
           {!isReadOnly && (
             <ImageCropperModal

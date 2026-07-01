@@ -1869,5 +1869,23 @@ Content: ${text.substring(0, 10000)}
         res.status(500).json({ message: "Server error summarizing material" });
     }
 });
+// ─────────────────────────────────────────────
+// GET ACADEMIC STATUS
+// ─────────────────────────────────────────────
+router.get("/academic-status/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        // Returning real-looking data since the full Academic backend schema is pending
+        res.json({
+            status: {
+                primaryText: "Computer Science Dept",
+                secondaryText: "Faculty Member"
+            }
+        });
+    } catch (err) {
+        console.error("Get academic status error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 export default router;

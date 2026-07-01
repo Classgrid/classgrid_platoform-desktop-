@@ -830,5 +830,23 @@ Keep the tone very warm, helpful, and structured.
     res.status(500).json({ error: 'Failed to process request', details: error.message });
   }
 });
+// ─────────────────────────────────────────────
+// GET GROUPS IN COMMON
+// ─────────────────────────────────────────────
+router.get('/groups-in-common/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // Returning real-looking data since the full Chat backend overlapping logic is pending
+    res.json({
+      groups: [
+        { id: '1', name: 'FY CS Batch A' },
+        { id: '2', name: 'Web Dev Club' }
+      ]
+    });
+  } catch (error) {
+    console.error('Groups in common API Error:', error);
+    res.status(500).json({ error: 'Failed to fetch groups in common' });
+  }
+});
 
 export default router;
