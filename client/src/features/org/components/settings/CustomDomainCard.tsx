@@ -108,7 +108,6 @@ export function CustomDomainCard() {
                                             onSuccess: () => {
                                                 toast.success(checked ? "Classgrid URL enabled" : "Classgrid URL disabled");
                                                 if (!checked) {
-                                                    setHasCopiedBackdoorUrl(false);
                                                     setShowBackdoorWarning(true);
                                                 }
                                             },
@@ -775,7 +774,6 @@ function DomainConfigCard({
                                                             onSuccess: () => {
                                                                 toast.success(checked ? "Custom domain enabled" : "Custom domain disabled");
                                                                 if (checked && domainType === "erp_domain") {
-                                                                    setHasCopiedBackdoorUrl(false);
                                                                     setShowBackdoorWarning(true);
                                                                 }
                                                             },
