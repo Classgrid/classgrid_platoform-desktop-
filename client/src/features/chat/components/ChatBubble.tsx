@@ -450,9 +450,23 @@ export function ChatBubble({
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40" align={isMine ? "end" : "start"}>
+              <DropdownMenuContent className="w-56" align={isMine ? "end" : "start"}>
                 <DropdownMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
                   <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
+                </DropdownMenuItem>
+                {message.message && (
+                  <DropdownMenuItem onClick={() => {
+                    navigator.clipboard.writeText(message.message);
+                    toast.success("Copied to clipboard");
+                  }} className="cursor-pointer py-2">
+                    <Copy className="w-4 h-4 mr-2" /> Copy
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem className="cursor-pointer py-2" disabled>
+                  <Forward className="w-4 h-4 mr-2" /> Forward
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer py-2" disabled>
+                  <Pin className="w-4 h-4 mr-2" /> Pin
                 </DropdownMenuItem>
                 {onStar && (
                   <DropdownMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
@@ -460,14 +474,17 @@ export function ChatBubble({
                   </DropdownMenuItem>
                 )}
                 {isMine && (
-                  <>
-                    <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
-                      <Edit2 className="w-4 h-4 mr-2" /> Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
-                      <Trash2 className="w-4 h-4 mr-2" /> Delete
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
+                    <Edit2 className="w-4 h-4 mr-2" /> Edit
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem className="cursor-pointer py-2" disabled>
+                  <CheckSquare className="w-4 h-4 mr-2" /> Select
+                </DropdownMenuItem>
+                {isMine && (
+                  <DropdownMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

@@ -87,11 +87,12 @@ export function ChatPage() {
 
   const handleDeleteMessage = async (msgId: string) => {
     if (!activeThread) return;
-    setMessages(prev => prev.filter(m => m.id !== msgId));
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_deleted: true, message: "This message was deleted" } : m));
     try {
       await deleteMessage(activeThread.id, msgId);
     } catch (err) {
       toast.error("Failed to delete message");
+      // Revert optimistic update on failure could be handled here
     }
   };
 
