@@ -245,9 +245,15 @@ export function ChatBubble({
                               <span className="text-zinc-600 dark:text-white text-xs font-medium dark:opacity-70">{att.file_name}</span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${message.isSending ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}>
                             <Plus className="text-white w-8 h-8" />
                           </div>
+                          {message.isSending && (
+                            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
+                              <Spinner className="w-8 h-8 text-white mb-2" />
+                              <span className="text-white text-xs font-semibold tracking-wide">Uploading...</span>
+                            </div>
+                          )}
                         </div>
                       ) : att.file_type.startsWith("audio/") ? (
                         <div key={att.id} className="mb-1 w-[280px]">
@@ -257,7 +263,7 @@ export function ChatBubble({
                         <div 
                            key={att.id} 
                            onClick={() => onViewMedia?.(att)}
-                           className={`flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer
+                           className={`relative flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer overflow-hidden
                             ${isMine ? "bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20" : "bg-background border-border hover:bg-muted"}
                            `}>
                           <div className={`p-2 rounded ${isMine ? "bg-primary-foreground/20" : "bg-muted"}`}>
@@ -267,6 +273,12 @@ export function ChatBubble({
                             <p className="text-sm font-medium truncate">{att.file_name}</p>
                             <p className="text-xs opacity-70">{formatBytes(att.file_size)}</p>
                           </div>
+                          {message.isSending && (
+                            <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] flex items-center justify-center z-10">
+                              <Spinner className="w-5 h-5 text-primary mr-2" />
+                              <span className="text-primary text-xs font-semibold">Uploading...</span>
+                            </div>
+                          )}
                         </div>
                       )
                     ))}
