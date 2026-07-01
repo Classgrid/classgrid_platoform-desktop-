@@ -154,7 +154,13 @@ export function ChatBubble({
             {showAvatar ? (
               <button 
                 className="w-8 h-8 rounded-full overflow-hidden mt-1 hover:opacity-80 transition-opacity focus:outline-none"
-                onClick={() => onUserClick?.(message.sender_id)}
+                onClick={() => {
+                  if (message.user_avatar) {
+                    onViewMedia?.({ file_url: message.user_avatar, file_name: message.sender_name + " Profile Photo", file_type: "image/jpeg" });
+                  } else {
+                    onUserClick?.(message.sender_id);
+                  }
+                }}
               >
                 {message.user_avatar ? (
                   <img
@@ -179,9 +185,12 @@ export function ChatBubble({
           
           {/* Sender Name (for group chats) */}
           {!isMine && showAvatar && (
-            <span className="text-xs text-muted-foreground ml-1 mb-1 font-medium">
+            <button 
+              onClick={() => onUserClick?.(message.sender_id)}
+              className="text-xs text-muted-foreground ml-1 mb-1 font-medium hover:underline hover:text-primary transition-colors cursor-pointer text-left"
+            >
               {message.sender_name}
-            </span>
+            </button>
           )}
 
           {/* Reply Context */}
