@@ -519,7 +519,7 @@ function DomainConfigCard({
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-medium text-foreground">Host at</label>
                                 <div className="flex gap-3">
-                                    <div className="relative flex-1 flex items-center bg-background border border-input rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 overflow-hidden transition-all">
+                                    <div className="relative flex-1 flex items-center bg-background border border-input rounded-lg focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/50 overflow-hidden transition-all">
                                         <div className="flex items-center justify-center px-4 bg-muted/30 border-r border-input text-sm text-foreground font-medium h-full shrink-0">
                                             https://
                                         </div>
