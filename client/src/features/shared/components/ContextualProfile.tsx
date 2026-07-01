@@ -255,6 +255,7 @@ export function ContextualProfile({
                   if (field.key === "permanent_state" || field.key === "current_state") {
                     const states = Object.keys(indiaLocations.states);
                     return (
+                      <>
                       <Select 
                         value={formData[field.key] || ""} 
                         onValueChange={(val) => handleInputChange(field.key, val)}
@@ -264,17 +265,31 @@ export function ContextualProfile({
                         </SelectTrigger>
                         <SelectContent>
                           {states.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
+                          <SelectItem value="Other (Please specify)">Other (Please specify)</SelectItem>
                         </SelectContent>
                       </Select>
-                    );
-                  }
+                      {formData[field.key] === "Other (Please specify)" && (
+                        <div className="mt-2 animate-in fade-in slide-in-from-top-1">
+                          <input 
+                            type="text" 
+                            placeholder={`ENTER YOUR ${field.label.toUpperCase()}`}
+                            className="w-full p-2.5 border rounded-md bg-background text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                            value={formData[field.key + "_other"] || ""}
+                            onChange={(e) => handleInputChange(field.key + "_other", e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                }
                   if (field.key === "permanent_district" || field.key === "current_district") {
                     const stateKey = field.key === "permanent_district" ? "permanent_state" : "current_state";
                     const selectedState = formData[stateKey];
                     // @ts-ignore
                     const districts = selectedState ? Object.keys(indiaLocations.states[selectedState] || {}) : [];
                     return (
-                      <Select 
+                      <>
+                        <Select 
                         value={formData[field.key] || ""} 
                         onValueChange={(val) => handleInputChange(field.key, val)}
                         disabled={!selectedState}
@@ -284,35 +299,27 @@ export function ContextualProfile({
                         </SelectTrigger>
                         <SelectContent>
                           {districts.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                          <SelectItem value="Other (Please specify)">Other (Please specify)</SelectItem>
                         </SelectContent>
                       </Select>
-                    );
-                  }
-                  if (field.key === "permanent_city" || field.key === "current_city") {
-                    const stateKey = field.key === "permanent_city" ? "permanent_state" : "current_state";
-                    const districtKey = field.key === "permanent_city" ? "permanent_district" : "current_district";
-                    const selectedState = formData[stateKey];
-                    const selectedDistrict = formData[districtKey];
-                    // @ts-ignore
-                    const cities = (selectedState && selectedDistrict) ? (indiaLocations.states[selectedState][selectedDistrict] || []) : [];
-                    return (
-                      <Select 
-                        value={formData[field.key] || ""} 
-                        onValueChange={(val) => handleInputChange(field.key, val)}
-                        disabled={!selectedDistrict}
-                      >
-                        <SelectTrigger className="w-full bg-background border-input">
-                          <SelectValue placeholder="Select City / Taluka..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cities.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    );
-                  }
+                      {formData[field.key] === "Other (Please specify)" && (
+                        <div className="mt-2 animate-in fade-in slide-in-from-top-1">
+                          <input 
+                            type="text" 
+                            placeholder={`ENTER YOUR ${field.label.toUpperCase()}`}
+                            className="w-full p-2.5 border rounded-md bg-background text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                            value={formData[field.key + "_other"] || ""}
+                            onChange={(e) => handleInputChange(field.key + "_other", e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                }
 
-                  if (field.type === "dropdown") {
-                    return (
+                if (field.type === "dropdown") {
+                  return (
+                    <>
                       <Select 
                         value={formData[field.key] || ""} 
                         onValueChange={(val) => handleInputChange(field.key, val)}
@@ -324,10 +331,23 @@ export function ContextualProfile({
                           {field.options?.map((opt: string) => (
                             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                           ))}
+                          <SelectItem value="Other (Please specify)">Other (Please specify)</SelectItem>
                         </SelectContent>
                       </Select>
-                    );
-                  }
+                      {formData[field.key] === "Other (Please specify)" && (
+                        <div className="mt-2 animate-in fade-in slide-in-from-top-1">
+                          <input 
+                            type="text" 
+                            placeholder={`ENTER YOUR ${field.label.toUpperCase()}`}
+                            className="w-full p-2.5 border rounded-md bg-background text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                            value={formData[field.key + "_other"] || ""}
+                            onChange={(e) => handleInputChange(field.key + "_other", e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                }
                   
                   if (field.type === "date") {
                     return (
@@ -367,6 +387,8 @@ export function ContextualProfile({
                       type={field.type === "number" ? "number" : "text"}
                       placeholder={`Enter ${field.label}...`}
                       className="w-full p-2.5 border rounded-md bg-background text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                      value={formData[field.key] || ""}
+                      onChange={(e) => handleInputChange(field.key, e.target.value)}
                     />
                   );
                 })()}
