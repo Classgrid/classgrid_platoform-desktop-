@@ -143,7 +143,7 @@ export async function markThreadRead(threadId: string) {
 }
 
 export async function forwardMessages(messageIds: string[], targetThreadIds: string[]) {
-  const res = await apiClient.post(`/api/threads/forward`, { messageIds, targetThreadIds });
+  const res = await apiClient.post(`/api/threads/forward`, { messageIds, targetThreadIds }, { timeout: 300000 });
   return res.data;
 }
 
@@ -152,23 +152,23 @@ export async function markAllRead() {
 }
 
 export async function deleteMessage(threadId: string, messageId: string) {
-  await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`);
+  await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`, { timeout: 300000 });
 }
 
 export async function clearChat(threadId: string) {
-  await apiClient.post(`/api/threads/${threadId}/clear`);
+  await apiClient.post(`/api/threads/${threadId}/clear`, {}, { timeout: 300000 });
 }
 
 export async function deleteChat(threadId: string) {
-  await apiClient.delete(`/api/threads/${threadId}`);
+  await apiClient.delete(`/api/threads/${threadId}`, { timeout: 300000 });
 }
 
 export async function bulkDeleteChats(threadIds: string[]) {
-  await apiClient.post('/api/threads/bulk-delete', { threadIds });
+  await apiClient.post('/api/threads/bulk-delete', { threadIds }, { timeout: 300000 });
 }
 
 export async function bulkMuteChats(threadIds: string[]) {
-  const res = await apiClient.post('/api/threads/bulk-mute', { threadIds });
+  const res = await apiClient.post('/api/threads/bulk-mute', { threadIds }, { timeout: 300000 });
   return res.data;
 }
 

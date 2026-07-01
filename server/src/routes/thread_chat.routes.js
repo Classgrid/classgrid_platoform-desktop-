@@ -1417,7 +1417,7 @@ router.post('/forward', isAuthenticated, async (req, res) => {
     const { data: insertedMessages, error: insertErr } = await sb
       .from('chat_messages')
       .insert(newMessagesToInsert)
-      .select('id, thread_id');
+      .select('*');
 
     if (insertErr) {
       console.error("[Forward Insert Error]", insertErr);
@@ -1431,8 +1431,8 @@ router.post('/forward', isAuthenticated, async (req, res) => {
       .select('*')
       .in('message_id', messageIds);
 
+    let newAttachments = [];
     if (originalAttachments && originalAttachments.length > 0) {
-      const newAttachments = [];
       // Map new inserted messages back to original messages
       // This is slightly complex since we lose original mapping in the insert response if we don't track it.
       // But we inserted in order of validThreadIds x sortedMessages
@@ -1471,6 +1471,17 @@ router.post('/forward', isAuthenticated, async (req, res) => {
         .eq('id', tid)
     );
     await Promise.all(updatePromises);
+
+    // 5. Broadcast to all target threads
+    for (const msg of insertedMessages || []) {
+      const fullMsg = {
+        ...msg,
+        attachments: newAttachments?.filter(a => a.message_id === msg.id) || [],
+        reactions: {},
+        is_deleted: false
+      };
+      broadcastToChannel(`thread:${msg.thread_id}`, 'new_message', fullMsg);
+    }
 
     res.json({ success: true, forwardedCount: insertedMessages?.length });
   } catch (err) {

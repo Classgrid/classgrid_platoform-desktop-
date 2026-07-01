@@ -12,11 +12,10 @@ import {
   updateGroupPermissions,
   type OrgUser,
 } from "../services/chatApi";
-import { Spinner } from "@/components/marketing_ui/spinner";
-import { Switch } from "@/components/marketing_ui/switch";
 import { toast } from "sonner";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
-import { Megaphone } from "lucide-react";
+import { Megaphone, AnimatePresence } from "lucide-react";
+import { AddGroupMemberSidebar } from "./AddGroupMemberSidebar";
 
 import { Input } from "@/components/marketing_ui/input";
 
@@ -61,17 +60,19 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
     },
   });
 
-  // ── Mutation: Add Member ──
-  const { mutate: handleAddMember, isPending: isAdding } = useMutation({
-    mutationFn: (userId: string) => addGroupMember(groupId, userId),
+  // ── Mutation: Add Members ──
+  const { mutateAsync: handleAddMembers, isPending: isAdding } = useMutation({
+    mutationFn: async (userIds: string[]) => {
+      const promises = userIds.map(id => addGroupMember(groupId, id));
+      await Promise.all(promises);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
       queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
-      toast.success("Member added!");
-      setAddSearch("");
+      toast.success("Members added successfully!");
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.error || "Failed to add member");
+      toast.error(err?.response?.data?.error || "Failed to add members");
     },
   });
 
@@ -257,7 +258,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                     {/* Add Member Button — Admin Only */}
                     {data.myRole === "admin" && (
                       <button
-                        onClick={() => setShowAddMember(!showAddMember)}
+                        onClick={() => setShowAddMember(true)}
                         className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
                       >
                         <UserPlus className="w-4 h-4" />
@@ -265,64 +266,6 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
                       </button>
                     )}
                   </div>
-
-                  {/* ── Add Member Panel (Admin Only) ── */}
-                  {showAddMember && data.myRole === "admin" && (
-                    <div className="mb-3 p-3 bg-muted/50 rounded-lg border border-border animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="relative mb-2">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          type="text"
-                          placeholder="Search users..."
-                          value={addSearch}
-                          onChange={(e) => setAddSearch(e.target.value)}
-                          className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground"
-                          autoFocus
-                        />
-                      </div>
-                      <div className="max-h-[160px] overflow-y-auto custom-scrollbar space-y-0.5">
-                        {availableUsers.length === 0 ? (
-                          <p className="text-xs text-muted-foreground text-center py-3">
-                            {addSearch ? "No matching users found" : "No users available to add"}
-                          </p>
-                        ) : (
-                          availableUsers.map((user: OrgUser) => (
-                            <button
-                              key={user._id}
-                              onClick={() => handleAddMember(user._id)}
-                              disabled={isAdding}
-                              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors text-left disabled:opacity-50 cursor-pointer"
-                            >
-                              {user.profilePicture ? (
-                                <img
-                                  src={user.profilePicture}
-                                  className="w-8 h-8 rounded-full object-cover border border-border"
-                                  alt=""
-                                />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-border">
-                                  {user.name[0]?.toUpperCase()}
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <span className="text-sm font-medium text-foreground block truncate">
-                                  {user.name}
-                                </span>
-                                {user.email && (
-                                  <span className="text-[10px] text-muted-foreground block truncate">
-                                    {user.email}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                                Add
-                              </span>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                   {/* ── Member List ── */}
                   <div className="space-y-0.5 max-h-[240px] overflow-y-auto custom-scrollbar">
@@ -475,6 +418,20 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup }: GroupSett
           </div>
         </div>
       </div>
+      
+      <AnimatePresence>
+        {showAddMember && data?.myRole === "admin" && (
+          <AddGroupMemberSidebar
+            onClose={() => setShowAddMember(false)}
+            onBack={() => setShowAddMember(false)}
+            users={orgUsersData || []}
+            currentUserId={data.myRole === 'admin' ? '' : ''} // Pass a valid user ID if needed, but we rely on existingMemberIds
+            onAddMembers={handleAddMembers}
+            isLoading={isAdding}
+            existingMemberIds={Array.from(memberIds)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
