@@ -21,6 +21,7 @@ import {
   fetchThreadPolls,
   voteThreadPoll,
   forwardMessages,
+  uploadGroupPhoto,
   type ChatThread,
   type ChatMessage,
   type OrgUser,
@@ -338,12 +339,23 @@ export function ChatPage() {
     }
   };
 
-  const handleCreateGroup = async (name: string, memberIds: string[]) => {
+  const handleCreateGroup = async (name: string, memberIds: string[], photo?: File | null) => {
     try {
-      const { threadId } = await createGroup(name, memberIds);
+      const response = await createGroup(name, memberIds);
+      const group = response.group;
+      const thread = response.thread;
+      
+      if (group?.id && photo) {
+        await uploadGroupPhoto(group.id, photo);
+      }
+
       await loadThreads();
-      const newThread = threads.find((t) => t.id === threadId);
-      if (newThread) setActiveThread(newThread);
+      
+      // Because state update from loadThreads() won't be available here immediately,
+      // we can set activeThread to the thread object returned by the backend
+      if (thread) {
+        setActiveThread(thread as unknown as ChatThread);
+      }
       setIsGroupModalOpen(false);
     } catch (err) {
       toast.error("Failed to create group");

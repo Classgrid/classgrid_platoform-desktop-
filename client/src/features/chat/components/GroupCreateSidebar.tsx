@@ -9,7 +9,7 @@ interface GroupCreateSidebarProps {
   onBack: () => void;
   users: OrgUser[];
   currentUserId: string;
-  onCreateGroup: (name: string, memberIds: string[]) => Promise<void>;
+  onCreateGroup: (name: string, memberIds: string[], photo: File | null) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -32,6 +32,7 @@ export function GroupCreateSidebar({
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupName, setGroupName] = useState("");
+  const [groupPhoto, setGroupPhoto] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredAndSortedUsers = useMemo(() => {
@@ -65,13 +66,20 @@ export function GroupCreateSidebar({
     if (!groupName.trim() || selectedIds.size === 0) return;
     setIsSubmitting(true);
     try {
-      await onCreateGroup(groupName.trim(), Array.from(selectedIds));
+      await onCreateGroup(groupName.trim(), Array.from(selectedIds), groupPhoto);
       setGroupName("");
+      setGroupPhoto(null);
       setSelectedIds(new Set());
       setStage("select");
       onClose();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setGroupPhoto(e.target.files[0]);
     }
   };
 
@@ -229,10 +237,17 @@ export function GroupCreateSidebar({
 
             {/* Group Icon & Name */}
             <div className="flex flex-col items-center pt-8 px-6 pb-4">
-              <div className="w-48 h-48 rounded-full bg-accent flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted transition-colors group relative overflow-hidden mb-8">
-                <Camera className="w-10 h-10 mb-2 opacity-70 group-hover:opacity-100 transition-opacity" />
-                <span className="text-xs uppercase tracking-wider font-semibold opacity-70 group-hover:opacity-100 text-center px-4 leading-tight">Add group<br/>icon</span>
-              </div>
+              <label className="w-48 h-48 rounded-full bg-accent flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted transition-colors group relative overflow-hidden mb-8">
+                {groupPhoto ? (
+                  <img src={URL.createObjectURL(groupPhoto)} alt="Group" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera className="w-10 h-10 mb-2 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <span className="text-xs uppercase tracking-wider font-semibold opacity-70 group-hover:opacity-100 text-center px-4 leading-tight">Add group<br/>icon</span>
+                  </>
+                )}
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              </label>
               
               <div className="w-full relative">
                 <input
