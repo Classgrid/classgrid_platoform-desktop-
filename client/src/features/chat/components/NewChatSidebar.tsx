@@ -53,10 +53,10 @@ export function NewChatSidebar({
       animate={{ x: 0 }}
       exit={{ x: "-100%" }}
       transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
-      className="absolute inset-0 z-50 flex flex-col bg-background"
+      className="absolute inset-0 z-50 flex flex-col bg-white dark:bg-black"
     >
       {/* Header */}
-      <div className="h-16 shrink-0 bg-primary/5 flex items-center px-4 gap-4 border-b border-border">
+      <div className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-border">
         <button
           onClick={onClose}
           className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-foreground"
@@ -67,7 +67,7 @@ export function NewChatSidebar({
       </div>
 
       {/* Search */}
-      <div className="p-2 border-b border-border bg-card">
+      <div className="p-2 border-b border-border bg-white dark:bg-black">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -75,13 +75,13 @@ export function NewChatSidebar({
             placeholder="Search by name, email, or role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 h-9 text-sm bg-muted border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70"
+            className="w-full pl-9 pr-3 py-1.5 h-9 text-sm bg-[#fafafa] dark:bg-[#0f0f0f] border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
       </div>
 
       {/* User List */}
-      <div className="flex-1 overflow-y-auto min-h-0 bg-background">
+      <div className="flex-1 overflow-y-auto min-h-0 bg-[#fafafa] dark:bg-[#0f0f0f]">
         {isLoading ? (
           <div className="flex justify-center p-8">
             <Spinner className="w-6 h-6 text-primary" />
@@ -91,7 +91,7 @@ export function NewChatSidebar({
             {/* New Group Button */}
             <button
               onClick={onNewGroup}
-              className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-4 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left"
             >
               <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm">
                 <Users className="w-6 h-6" />
@@ -119,7 +119,7 @@ export function NewChatSidebar({
                     onSelectUser(user._id);
                     onClose();
                   }}
-                  className="w-full flex items-center gap-4 px-4 py-2 hover:bg-muted transition-colors text-left group"
+                  className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group"
                 >
                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                     {user.profilePicture ? (

@@ -81,7 +81,7 @@ export function GroupCreateSidebar({
       animate={{ x: 0 }}
       exit={{ x: "-100%" }}
       transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
-      className="absolute inset-0 z-50 flex flex-col bg-background overflow-hidden"
+      className="absolute inset-0 z-50 flex flex-col bg-white dark:bg-black overflow-hidden"
     >
       <AnimatePresence mode="wait">
         {stage === "select" ? (
@@ -94,7 +94,7 @@ export function GroupCreateSidebar({
             className="flex flex-col w-full h-full"
           >
             {/* Header */}
-            <div className="h-16 shrink-0 bg-primary/5 flex items-center px-4 gap-4 border-b border-border">
+            <div className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-border bg-white dark:bg-black">
               <button
                 onClick={onBack}
                 className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-foreground"
@@ -105,7 +105,7 @@ export function GroupCreateSidebar({
             </div>
 
             {/* Selected Chips & Search Area */}
-            <div className="p-3 border-b border-border bg-card flex flex-col gap-3">
+            <div className="p-3 border-b border-border bg-white dark:bg-black flex flex-col gap-3">
               {selectedUsersList.length > 0 && (
                 <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
                   {selectedUsersList.map(user => (
@@ -138,7 +138,7 @@ export function GroupCreateSidebar({
             </div>
 
             {/* User List */}
-            <div className="flex-1 overflow-y-auto min-h-0 bg-background relative">
+            <div className="flex-1 overflow-y-auto min-h-0 bg-[#fafafa] dark:bg-[#0f0f0f] relative">
               {isLoading ? (
                 <div className="flex justify-center p-8">
                   <Spinner className="w-6 h-6 text-primary" />
@@ -156,7 +156,7 @@ export function GroupCreateSidebar({
                         <button
                           key={user._id}
                           onClick={() => toggleUser(user._id)}
-                          className="w-full flex items-center gap-4 px-4 py-2 hover:bg-muted transition-colors text-left group relative"
+                          className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group relative"
                         >
                           <div className={`relative shrink-0 transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'opacity-100'}`}>
                             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center overflow-hidden">
@@ -214,10 +214,10 @@ export function GroupCreateSidebar({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "20%", opacity: 0 }}
             transition={{ type: "tween", duration: 0.2 }}
-            className="flex flex-col w-full h-full bg-card"
+            className="flex flex-col w-full h-full bg-[#fafafa] dark:bg-[#0f0f0f]"
           >
             {/* Header */}
-            <div className="h-16 shrink-0 bg-primary/5 flex items-center px-4 gap-4 border-b border-border">
+            <div className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-border bg-white dark:bg-black">
               <button
                 onClick={() => setStage("select")}
                 className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-foreground"
