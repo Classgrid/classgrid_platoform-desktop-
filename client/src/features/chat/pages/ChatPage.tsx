@@ -673,6 +673,7 @@ export function ChatPage() {
           <div className="absolute inset-0 z-50 bg-background overflow-y-auto animate-in fade-in duration-200">
             <SharedProfilePage 
               publicUser={{
+                _id: selectedUserForProfile._id,
                 name: selectedUserForProfile.name,
                 phoneNumber: selectedUserForProfile.phoneNumber || "",
                 email: selectedUserForProfile.email,

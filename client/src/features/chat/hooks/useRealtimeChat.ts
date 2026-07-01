@@ -149,3 +149,29 @@ export function usePresence(userId: string | null) {
 
   return onlineUsers;
 }
+
+/**
+ * Tracks the current user's presence globally without subscribing to state changes,
+ * preventing unnecessary re-renders in global providers.
+ */
+export function useTrackGlobalPresence(userId: string | null) {
+  useEffect(() => {
+    if (!userId) return;
+    const sb = getChatSupabase();
+    if (!sb) return;
+
+    const channel = sb.channel('classgrid-presence', {
+      config: { presence: { key: userId } },
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ onlineAt: new Date().toISOString() });
+      }
+    });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [userId]);
+}
