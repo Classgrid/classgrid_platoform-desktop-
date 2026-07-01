@@ -14,6 +14,16 @@ export function SuperAdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
+  // 🔐 Domain Lock: Super Admin login is EXCLUSIVELY on superadmin.classgrid.in
+  // If someone navigates to /superadmin/login on any other subdomain, hard-redirect them.
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    const isSuperAdminDomain = hostname === "superadmin.classgrid.in" || hostname === "localhost" || hostname.startsWith("127.0.0.1");
+    if (!isSuperAdminDomain) {
+      window.location.replace(`https://superadmin.classgrid.in/superadmin/login`);
+    }
+  }, []);
+
   useEffect(() => {
     // Load Recaptcha script dynamically to show the badge
     const script = document.createElement("script");
