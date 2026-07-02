@@ -355,8 +355,13 @@ export function ChatPage() {
       
       // Because state update from loadThreads() won't be available here immediately,
       // we can set activeThread to the thread object returned by the backend
-      if (thread) {
-        setActiveThread(thread as unknown as ChatThread);
+      if (thread && group) {
+        setActiveThread({
+          ...thread,
+          name: group.name,
+          groupId: group.id,
+          avatar: photo ? URL.createObjectURL(photo) : undefined
+        } as unknown as ChatThread);
       }
       setIsGroupModalOpen(false);
       toast.success("Group created successfully!");

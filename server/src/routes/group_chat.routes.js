@@ -73,6 +73,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       .from('chat_groups')
       .insert([{
         name: name.trim(),
+        description: description ? description.trim() : null,
         created_by: userId,
         org_id: threadOrgId,
       }])
