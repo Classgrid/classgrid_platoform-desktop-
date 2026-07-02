@@ -1,5 +1,6 @@
 import { useState, type FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { loginWithPassword, getGoogleAuthUrl, requestPasswordReset } from "../api";
 import { saveStoredAuthRole, getRedirectPath } from "../auth-helpers";
@@ -7,6 +8,7 @@ import "./SuperAdminVanilla.css";
 
 export function SuperAdminLoginPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
