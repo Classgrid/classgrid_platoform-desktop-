@@ -5,7 +5,7 @@ import { X, Save, Shield, Camera, Loader, Mail, Phone,
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, BadgeCheck, ShieldAlert,
   User as UserIcon, ChevronRight, ArrowLeft,
-  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap
+  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit, Loader2
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
@@ -73,6 +73,10 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isSavingGroupInfo, setIsSavingGroupInfo] = useState(false);
 
   // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
   const { data: currentUser } = useCurrentUser();
@@ -192,6 +196,21 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
       setIsDirty(false);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSaveGroupInfo = async () => {
+    if (!onUpdateGroup) return;
+    setIsSavingGroupInfo(true);
+    try {
+      await onUpdateGroup({ name: form.name, description: form.bio || "" });
+      setIsEditingName(false);
+      setIsEditingBio(false);
+      setIsDirty(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingGroupInfo(false);
     }
   };
 
@@ -420,13 +439,29 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
                     {isGroup ? (
-                      <Input 
-                        value={form.name} 
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        readOnly={isReadOnly}
-                        className="text-3xl font-bold h-auto py-1 px-2 -ml-2 bg-transparent border-transparent hover:border-border focus:border-primary focus:bg-background transition-all"
-                        placeholder="Group Name"
-                      />
+                      isEditingName ? (
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            value={form.name} 
+                            onChange={(e) => handleInputChange("name", e.target.value)}
+                            className="text-3xl font-bold h-auto py-1 px-2 -ml-2 bg-background border-primary focus:ring-1 focus:ring-primary transition-all max-w-[300px]"
+                            placeholder="Group Name"
+                          />
+                          <Button size="sm" onClick={handleSaveGroupInfo} disabled={isSavingGroupInfo} className="h-8">
+                            {isSavingGroupInfo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setIsEditingName(false)} disabled={isSavingGroupInfo} className="h-8">Cancel</Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 group/editname">
+                          <span>{form.name}</span>
+                          {!isReadOnly && (
+                            <button onClick={() => setIsEditingName(true)} className="opacity-0 group-hover/editname:opacity-100 p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-all">
+                              <Edit size={16} />
+                            </button>
+                          )}
+                        </div>
+                      )
                     ) : (
                       form.name
                     )}
@@ -594,13 +629,31 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                 {isGroup && (
                   <div className="w-full mt-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Group Description</label>
-                    <Input 
-                      value={form.bio}
-                      onChange={(e) => handleInputChange("bio", e.target.value)}
-                      readOnly={isReadOnly}
-                      className="w-full bg-background/50 border-border/50"
-                      placeholder="Add a group description..."
-                    />
+                    {isEditingBio ? (
+                      <div className="flex flex-col gap-2">
+                        <Input 
+                          value={form.bio || ""}
+                          onChange={(e) => handleInputChange("bio", e.target.value)}
+                          className="w-full bg-background border-primary focus:ring-1 focus:ring-primary"
+                          placeholder="Add a group description..."
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={handleSaveGroupInfo} disabled={isSavingGroupInfo} className="h-8">
+                            {isSavingGroupInfo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setIsEditingBio(false)} disabled={isSavingGroupInfo} className="h-8">Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 group/editbio min-h-[40px] px-3 py-2 bg-muted/20 rounded-md border border-border/50">
+                        <span className="text-sm text-foreground/80 flex-1">{form.bio || <span className="text-muted-foreground italic text-xs">No description</span>}</span>
+                        {!isReadOnly && (
+                          <button onClick={() => setIsEditingBio(true)} className="opacity-0 group-hover/editbio:opacity-100 p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-all">
+                            <Edit size={16} />
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

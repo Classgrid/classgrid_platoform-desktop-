@@ -216,17 +216,19 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
 
     if (!req.file) return res.status(400).json({ error: 'No photo provided' });
 
+    const type = req.body.type || 'avatar';
+    if (type !== 'avatar' && type !== 'banner') return res.status(400).json({ error: 'Invalid photo type' });
+
     const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `chat/groups/${req.params.id}/${Date.now()}_${safeName}`;
+    const storagePath = `chat/groups/${req.params.id}/${type}_${Date.now()}_${safeName}`;
 
     const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.originalname || 'upload.file', req.file.mimetype || 'application/octet-stream', storagePath);
-    /* Error handled inside R2 */
 
-    /* getPublicUrl replaced by R2 */
+    const updateField = type === 'banner' ? 'banner_url' : 'avatar_url';
 
     const { data, error } = await sb
       .from('chat_groups')
-      .update({ avatar_url: publicUrl })
+      .update({ [updateField]: publicUrl })
       .eq('id', req.params.id)
       .select()
       .single();

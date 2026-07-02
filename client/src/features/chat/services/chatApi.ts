@@ -210,9 +210,10 @@ export async function updateGroupInfo(groupId: string, name: string, description
   return res.data.group;
 }
 
-export async function uploadGroupPhoto(groupId: string, file: File) {
+export async function uploadGroupPhoto(groupId: string, file: File, type: "avatar" | "banner" = "avatar") {
   const formData = new FormData();
   formData.append("photo", file);
+  formData.append("type", type);
   const res = await apiClient.post(`/api/group-chat/${groupId}/photo`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });

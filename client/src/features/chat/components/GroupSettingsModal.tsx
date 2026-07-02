@@ -55,7 +55,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
 
   // ── Mutation: Upload Group Photo ──
   const { mutate: handleUpload, isPending: isUploading } = useMutation({
-    mutationFn: (file: File) => uploadGroupPhoto(groupId, file),
+    mutationFn: ({ file, type }: { file: File, type: "avatar" | "banner" }) => uploadGroupPhoto(groupId, file, type),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
       queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
@@ -150,7 +150,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   // ── Handlers ──
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      handleUpload(e.target.files[0]);
+      handleUpload({ file: e.target.files[0], type: "avatar" });
     }
   };
 
@@ -195,9 +195,9 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
       <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
         <div className="flex items-center text-sm text-muted-foreground">
           <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>Chat</button>
-          <Crown size={14} className="mx-2 opacity-50" />
+          <span className="mx-2 opacity-50">/</span>
           <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>{data?.group?.name || "Group"}</button>
-          <Crown size={14} className="mx-2 opacity-50" />
+          <span className="mx-2 opacity-50">/</span>
           <span className="font-semibold text-foreground">Settings</span>
         </div>
       </div>
@@ -218,10 +218,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
               await handleUpdateGroupInfo(updates);
             }}
             onUpdateGroupPhoto={async (blob, type) => {
-              if (type === "avatar") {
-                const file = new File([blob], "avatar.jpg", { type: blob.type });
-                await handleUpload(file);
-              }
+              const file = new File([blob], `${type}.jpg`, { type: blob.type });
+              await handleUpload({ file, type });
             }}
           >
             {/* ═══════════════════════════════════════════════ */}
