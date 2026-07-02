@@ -202,6 +202,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
           <span className="mx-2 opacity-50">/</span>
           <span className="font-semibold text-foreground">Settings</span>
         </div>
+      </div>
       <div className="flex-1 overflow-y-auto w-full relative">
         <div className="min-h-full flex flex-col pb-12">
           {isLoading ? (
