@@ -74,6 +74,9 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
 
+  // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
+  const { data: currentUser } = useCurrentUser();
+
   // Read-only logic:
   // For users, it's read-only if publicUser is passed.
   // For groups, it's editable only if the current user is the owner (creator).
@@ -82,8 +85,6 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
     : !!publicUser;
   
   const isGroup = mode === "group";
-  // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
-  const { data: currentUser } = useCurrentUser();
   const onlineUsers = useOnlineUsers();
 
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
