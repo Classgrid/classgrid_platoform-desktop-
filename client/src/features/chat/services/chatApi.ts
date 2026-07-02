@@ -387,5 +387,5 @@ export async function processJoinRequest(groupId: string, requestId: string, sta
 }
 
 export async function deleteGroup(groupId: string) {
-  await apiClient.delete(/api/group-chat/);
+  await apiClient.delete(`/api/group-chat/${groupId}`);
 }
