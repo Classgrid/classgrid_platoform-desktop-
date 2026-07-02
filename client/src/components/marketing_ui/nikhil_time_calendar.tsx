@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
-import { Clock, Calendar as CalendarIcon, ChevronDownIcon } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, ChevronDownIcon, CheckIcon } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { cn } from "@/lib/utils";
 
@@ -14,33 +14,91 @@ interface NikhilTimeCalendarProps {
   popDirection?: "up" | "down" | "left" | "right";
 }
 
-// Custom Native Select that looks EXACTLY like Radix Select but without Portal conflicts
-function NativeSelect({
+// Completely custom Select component that perfectly matches the styling
+// but uses absolutely zero portals, guaranteeing no Base UI / Radix conflicts
+function CustomSelect({
   value,
-  onChange,
+  onValueChange,
+  options,
+  placeholder,
   className,
-  children,
+  dropdownClassName
 }: {
   value: string;
-  onChange: (val: string) => void;
+  onValueChange: (val: string) => void;
+  options: { label: string; value: string }[];
+  placeholder?: string;
   className?: string;
-  children: React.ReactNode;
+  dropdownClassName?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    // Use capture phase to ensure we close before other listeners fire
+    document.addEventListener("mousedown", onClick, true);
+    return () => document.removeEventListener("mousedown", onClick, true);
+  }, [open]);
+
+  const selectedOption = options.find((o) => o.value === value);
+
   return (
-    <div className={cn("relative w-full overflow-hidden rounded-md border-none", className)}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-full w-full appearance-none bg-transparent pl-3 pr-8 text-sm font-semibold text-foreground outline-none cursor-pointer focus:ring-1 focus:ring-ring"
-        // Prevent click from bubbling up and triggering outside-click on Popover
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
+    <div ref={containerRef} className="relative w-full text-sm">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+          e.stopPropagation(); // Don't bubble to Popover
+          setOpen(!open);
+        }}
+        className={cn(
+          "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm shadow-sm outline-none transition-colors focus:ring-1 focus:ring-ring",
+          className
+        )}
       >
-        {children}
-      </select>
-      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 opacity-50">
-        <ChevronDownIcon className="h-4 w-4" />
-      </div>
+        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDownIcon className="h-4 w-4 opacity-50" />
+      </button>
+
+      {open && (
+        <div 
+          className={cn(
+            "absolute z-[1000] mt-1 max-h-56 w-full overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+            dropdownClassName
+          )}
+          // Prevent click inside dropdown from bubbling
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="p-1">
+            {options.map((opt) => (
+              <div
+                key={opt.value}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  onValueChange(opt.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                  value === opt.value ? "bg-accent/50 text-accent-foreground font-medium" : ""
+                )}
+              >
+                {value === opt.value && (
+                  <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                    <CheckIcon className="h-4 w-4" />
+                  </span>
+                )}
+                {opt.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -78,14 +136,32 @@ export function NikhilTimeCalendar({
   const [selectedMonth, setSelectedMonth] = useState((internalDate || new Date()).getMonth().toString());
   const [selectedYear, setSelectedYear] = useState((internalDate || new Date()).getFullYear().toString());
 
-  // Create arrays for dropdowns
-  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
-  const months = [
+  // Create options for dropdowns
+  const hourOptions = Array.from({ length: 12 }, (_, i) => {
+    const v = (i + 1).toString().padStart(2, "0");
+    return { label: v, value: v };
+  });
+  
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => {
+    const v = i.toString().padStart(2, "0");
+    return { label: v, value: v };
+  });
+  
+  const monthNames = [
     "January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December",
   ];
-  const years = Array.from({ length: 100 }, (_, i) => (currentYear - 50 + i).toString());
+  const monthOptions = monthNames.map((m, i) => ({ label: m, value: i.toString() }));
+  
+  const yearOptions = Array.from({ length: 100 }, (_, i) => {
+    const v = (currentYear - 50 + i).toString();
+    return { label: v, value: v };
+  });
+
+  const ampmOptions = [
+    { label: "AM", value: "AM" },
+    { label: "PM", value: "PM" }
+  ];
 
   const handleMonthChange = (val: string) => {
     setSelectedMonth(val);
@@ -99,7 +175,6 @@ export function NikhilTimeCalendar({
     setInternalDate(newDate);
   };
 
-  // Combine date and time when apply is clicked
   const handleApply = () => {
     const baseDate = internalDate || new Date();
     const finalDate = new Date(baseDate);
@@ -143,26 +218,30 @@ export function NikhilTimeCalendar({
         className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent z-[100] nikhil-time-calendar-portal"
       >
         <div
-          className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden"
-          // Prevent any click inside from bubbling out and closing popover
+          // Removed overflow-hidden so our custom dropdowns can pop out seamlessly!
+          className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col"
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Custom Month/Year Header using native selects */}
+          {/* Custom Month/Year Header */}
           <div className="flex items-center gap-2 p-3 pb-0">
             <div className="flex-1">
-              <NativeSelect value={selectedMonth} onChange={handleMonthChange} className="h-8 bg-accent/50 hover:bg-accent">
-                {months.map((m, i) => (
-                  <option key={i} value={i.toString()}>{m}</option>
-                ))}
-              </NativeSelect>
+              <CustomSelect 
+                value={selectedMonth} 
+                onValueChange={handleMonthChange} 
+                options={monthOptions}
+                className="h-8 border-none bg-accent/50 hover:bg-accent font-semibold"
+                dropdownClassName="w-40 -ml-2"
+              />
             </div>
             <div className="flex-1">
-              <NativeSelect value={selectedYear} onChange={handleYearChange} className="h-8 bg-accent/50 hover:bg-accent">
-                {years.map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </NativeSelect>
+              <CustomSelect 
+                value={selectedYear} 
+                onValueChange={handleYearChange} 
+                options={yearOptions}
+                className="h-8 border-none bg-accent/50 hover:bg-accent font-semibold"
+                dropdownClassName="w-32"
+              />
             </div>
           </div>
 
@@ -196,7 +275,7 @@ export function NikhilTimeCalendar({
 
           <div className="w-full h-px bg-border/50" />
 
-          {/* Time Picker Section using native selects */}
+          {/* Time Picker Section */}
           <div className="p-4 flex flex-col gap-3 bg-muted/20">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80">
               <Clock size={16} />
@@ -205,28 +284,36 @@ export function NikhilTimeCalendar({
 
             <div className="flex items-center gap-2">
               <div className="flex-[2]">
-                <NativeSelect value={hour} onChange={setHour} className="h-9 bg-background border border-border">
-                  {hours.map((h) => <option key={h} value={h}>{h}</option>)}
-                </NativeSelect>
+                <CustomSelect 
+                  value={hour} 
+                  onValueChange={setHour} 
+                  options={hourOptions}
+                  className="h-9 border-border bg-background font-medium"
+                />
               </div>
               <span className="text-lg font-bold text-muted-foreground pb-1">:</span>
               <div className="flex-[2]">
-                <NativeSelect value={minute} onChange={setMinute} className="h-9 bg-background border border-border">
-                  {minutes.map((m) => <option key={m} value={m}>{m}</option>)}
-                </NativeSelect>
+                <CustomSelect 
+                  value={minute} 
+                  onValueChange={setMinute} 
+                  options={minuteOptions}
+                  className="h-9 border-border bg-background font-medium"
+                />
               </div>
               <div className="w-2" />
               <div className="flex-[2]">
-                <NativeSelect value={ampm} onChange={setAmpm} className="h-9 bg-emerald-500/10 text-emerald-500 font-bold [&>select]:text-emerald-500">
-                  <option value="AM">AM</option>
-                  <option value="PM">PM</option>
-                </NativeSelect>
+                <CustomSelect 
+                  value={ampm} 
+                  onValueChange={setAmpm} 
+                  options={ampmOptions}
+                  className="h-9 border-none bg-emerald-500/10 text-emerald-500 font-bold hover:bg-emerald-500/20"
+                />
               </div>
             </div>
           </div>
 
           {/* Action Button */}
-          <div className="p-3 bg-muted/20 border-t border-border">
+          <div className="p-3 bg-muted/20 border-t border-border rounded-b-xl">
             <Button
               type="button"
               className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium"
