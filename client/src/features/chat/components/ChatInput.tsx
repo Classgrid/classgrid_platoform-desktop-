@@ -4,6 +4,7 @@ import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
 import EmojiPicker from 'emoji-picker-react';
+import DOMPurify from "dompurify";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 
 import { Input } from "@/components/marketing_ui/input";
@@ -327,10 +328,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   }
                 }}
                 onPaste={(e) => {
-                  const html = e.clipboardData.getData("text/html");
+                  let html = e.clipboardData.getData("text/html");
                   if (html) {
                     e.preventDefault();
-                    document.execCommand("insertHTML", false, html);
+                    html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
+                    const cleanHtml = DOMPurify.sanitize(html, {
+                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'],
+                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
+                    });
+                    document.execCommand("insertHTML", false, cleanHtml);
                   }
                 }}
                 onKeyDown={(e) => {
