@@ -105,27 +105,29 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
   const handleOptionsOpenChange = (
     open: boolean,
-    event?: Event,
-    reason?: string
+    eventDetails?: any
   ) => {
+    console.log('[ChatInput] handleOptionsOpenChange', { open, eventDetails });
     if (open) {
       setIsOptionsOpen(true);
       return;
     }
 
+    const event = eventDetails?.event;
+    const reason = eventDetails?.reason;
     const targetNode = event?.target instanceof Node ? event.target : null;
     const targetElement = targetNode?.nodeType === 3 ? targetNode.parentElement : (targetNode instanceof Element ? targetNode : null);
 
     // Prevent closing if we clicked an element that was instantly unmounted
-    if (reason === "click-outside" && event && targetNode && !targetNode.isConnected) {
-      event.preventDefault?.();
+    if (reason === "outside-press" && event && targetNode && !targetNode.isConnected) {
+      eventDetails?.cancel?.();
       setIsOptionsOpen(true);
       return;
     }
 
     // Prevent closing if we clicked inside our nested portals
     if (targetElement?.closest('.nikhil-time-calendar-content, [data-calendar-container="true"], [data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]')) {
-      event?.preventDefault?.();
+      eventDetails?.cancel?.();
       setIsOptionsOpen(true);
       return;
     }

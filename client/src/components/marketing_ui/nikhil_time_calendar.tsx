@@ -87,20 +87,22 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
   const handlePopoverOpenChange = (
     open: boolean,
-    event?: Event,
-    reason?: string
+    eventDetails?: any
   ) => {
+    console.log('[NikhilTimeCalendar] handlePopoverOpenChange', { open, eventDetails });
     if (open) {
       setIsOpen(true);
       return;
     }
 
+    const event = eventDetails?.event;
+    const reason = eventDetails?.reason;
     const targetNode = event?.target instanceof Node ? event.target : null;
     const targetElement = targetNode?.nodeType === 3 ? targetNode.parentElement : (targetNode instanceof Element ? targetNode : null);
     
     // Prevent closing if we clicked an element that was instantly unmounted
-    if (reason === "click-outside" && event && targetNode && !targetNode.isConnected) {
-      event.preventDefault?.();
+    if (reason === "outside-press" && event && targetNode && !targetNode.isConnected) {
+      eventDetails?.cancel?.();
       setIsOpen(true);
       return;
     }
@@ -114,7 +116,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
       );
 
     if (isCalendarSelectEvent) {
-      event?.preventDefault?.();
+      eventDetails?.cancel?.();
       setIsOpen(true);
       return;
     }
