@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { useQueryClient } from "@tanstack/react-query";
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
+import DOMPurify from 'dompurify';
 
 interface ScheduledMessagesDrawerProps {
   isOpen: boolean;
@@ -167,9 +168,10 @@ export function ScheduledMessagesDrawer({ isOpen, onClose, threadId }: Scheduled
                       </div>
                     </div>
                     
-                    <p className="text-sm text-foreground whitespace-pre-wrap">
-                      {msg.message?.replace(/&nbsp;/g, ' ')}
-                    </p>
+                    <div 
+                      className="text-sm text-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:m-0"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.message || '') }}
+                    />
                     
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="mt-3 text-xs text-muted-foreground font-medium flex items-center gap-1">
