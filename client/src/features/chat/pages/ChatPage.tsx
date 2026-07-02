@@ -22,6 +22,10 @@ import {
   voteThreadPoll,
   forwardMessages,
   uploadGroupPhoto,
+  toggleMuteThread,
+  approveMessage,
+  rejectMessage,
+  acknowledgeMessage,
   type ChatThread,
   type ChatMessage,
   type OrgUser,
@@ -48,6 +52,8 @@ import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { SelectionActionBar } from "../components/SelectionActionBar";
 import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
 
+
+import { ScheduledMessagesDrawer } from "../components/ScheduledMessagesDrawer";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -76,6 +82,7 @@ export function ChatPage() {
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [viewVotesPollId, setViewVotesPollId] = useState<string | null>(null);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
+  const [isScheduledDrawerOpen, setIsScheduledDrawerOpen] = useState(false);
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -268,10 +275,29 @@ export function ChatPage() {
   }, [activeThread, hasMoreMessages, messages]);
 
   // -- Send Message --
-  const handleSendMessage = async (text: string, files: File[]) => {
+  const handleSendMessage = async (text: string, files: File[], options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) => {
     if (!activeThread || !currentUserId) return;
-    setIsSending(true);
+    if (!text.trim() && files.length === 0) return;
+    
+    // If scheduled message
+    if (options?.scheduledFor) {
+      setIsSending(true);
+      try {
+        const replyData = replyTo
+          ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message }
+          : null;
+        await sendMessage(activeThread.id, text, files, replyData, options);
+        setReplyTo(null);
+        toast.success("Message scheduled successfully!");
+      } catch (err: any) {
+        toast.error(err.response?.data?.error || "Failed to schedule message");
+      } finally {
+        setIsSending(false);
+      }
+      return;
+    }
 
+    setIsSending(true);
     const tempId = `temp-${Date.now()}`;
     const tempMessage: ChatMessage = {
       id: tempId,
@@ -303,13 +329,11 @@ export function ChatPage() {
         ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message }
         : null;
       
-      const sentMessage = await sendMessage(activeThread.id, text, files, replyData);
+      const sentMessage = await sendMessage(activeThread.id, text, files, replyData, options);
       setMessages((prev) => {
-        // If realtime subscription already added the real message, just remove the temp one
         if (prev.some(m => m.id === sentMessage.id)) {
           return prev.filter(m => m.id !== tempId);
         }
-        // Otherwise, safely replace temp message with the actual one from the backend
         return prev.map((m) => (m.id === tempId ? sentMessage : m));
       });
     } catch (err: any) {
@@ -523,6 +547,44 @@ export function ChatPage() {
     },
   });
 
+  const handleApprove = async (msgId: string) => {
+    if (!activeThread) return;
+    try {
+      await approveMessage(activeThread.id, msgId);
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, status: 'approved' } : m));
+      toast.success("Message approved");
+    } catch (err) {
+      toast.error("Failed to approve message");
+    }
+  };
+
+  const handleReject = async (msgId: string) => {
+    if (!activeThread) return;
+    try {
+      await rejectMessage(activeThread.id, msgId);
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, status: 'rejected' } : m));
+      toast.success("Message rejected");
+    } catch (err) {
+      toast.error("Failed to reject message");
+    }
+  };
+
+  const handleAcknowledge = async (msgId: string) => {
+    if (!activeThread) return;
+    try {
+      await acknowledgeMessage(activeThread.id, msgId);
+      setMessages(prev => prev.map(m => {
+        if (m.id === msgId) {
+           return { ...m, has_acknowledged: true };
+        }
+        return m;
+      }));
+      toast.success("Message acknowledged");
+    } catch (err) {
+      toast.error("Failed to acknowledge message");
+    }
+  };
+
   // -- Layout --
   return (
     <div className="flex h-full w-full bg-background relative overflow-hidden min-h-0">
@@ -585,6 +647,8 @@ export function ChatPage() {
             <ChatHeader
               thread={activeThread}
               onlineUsers={onlineUsers}
+              typingUsers={activeTypingUsers}
+              orgUsers={orgUsers}
               searchQuery={chatSearchQuery}
               onSearchChange={setChatSearchQuery}
               onBack={() => setActiveThread(null)}
@@ -593,6 +657,17 @@ export function ChatPage() {
                   setViewingMedia(activeThread.avatar);
                 } else {
                   toast.info("No profile picture available");
+                }
+              }}
+              isMuted={activeThread.isMuted}
+              onMuteThread={async () => {
+                try {
+                  const res = await toggleMuteThread(activeThread.id);
+                  setActiveThread((prev) => prev ? { ...prev, isMuted: res.isMuted } : null);
+                  setThreads((prev) => prev.map((t) => (t.id === activeThread.id ? { ...t, isMuted: res.isMuted } : t)));
+                  toast.success(res.isMuted ? "Notifications muted" : "Notifications unmuted");
+                } catch (err) {
+                  toast.error("Failed to toggle mute");
                 }
               }}
               onShowInfo={() => {
@@ -622,6 +697,7 @@ export function ChatPage() {
               }}
               onOpenDisappearingModal={() => setIsDisappearingModalOpen(true)}
               onEnterSelectionMode={() => setIsSelectionMode(true)}
+              onOpenScheduledMessages={() => setIsScheduledDrawerOpen(true)}
             />
             
             <ChatConversation
@@ -695,6 +771,10 @@ export function ChatPage() {
                   return next;
                 });
               }}
+              amIAdmin={activeThread.myRole === 'admin'}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onAcknowledge={handleAcknowledge}
             />
 
             {isSelectionMode ? (
@@ -743,6 +823,7 @@ export function ChatPage() {
                 onCancelReply={() => setReplyTo(null)}
                 onTyping={(isTyping, type) => sendTyping && sendTyping(isTyping, type)}
                 onOpenPollModal={() => setIsPollModalOpen(true)}
+                canSchedule={true}
               />
             )}
           </>
@@ -761,6 +842,14 @@ export function ChatPage() {
 
       {/* Modals */}
       
+      {isScheduledDrawerOpen && activeThread && (
+        <ScheduledMessagesDrawer 
+          isOpen={isScheduledDrawerOpen} 
+          onClose={() => setIsScheduledDrawerOpen(false)} 
+          threadId={activeThread.id} 
+        />
+      )}
+
       {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
         <Suspense fallback={null}>
           <GroupSettingsModal 

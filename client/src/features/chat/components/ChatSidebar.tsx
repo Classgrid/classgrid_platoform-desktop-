@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check, Image as ImageIcon, Video, FileText, Mic, BarChart2, Paperclip } from "lucide-react";
+import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check, Image as ImageIcon, Video, FileText, Mic, BarChart2, Paperclip, BadgeCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
@@ -291,13 +291,13 @@ export function ChatSidebar({
                     <img
                       src={thread.avatar!}
                       alt=""
-                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border/50"
+                      className="w-10 h-10 rounded-full object-cover bg-background border border-border/50"
                     />
                   ) : (
                     <img
                       src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR}
                       alt=""
-                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border/50"
+                      className="w-10 h-10 rounded-full object-cover bg-background border border-border/50"
                     />
                   )}
                   {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
@@ -316,8 +316,11 @@ export function ChatSidebar({
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-sm truncate ${thread.unread > 0 ? "font-bold text-foreground" : "font-medium text-foreground"}`}>
+                    <span className={`text-sm truncate flex items-center gap-1.5 ${thread.unread > 0 ? "font-bold text-foreground" : "font-medium text-foreground"}`}>
                       {thread.name}
+                      {thread.isOfficial && (
+                        <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/20 shrink-0" title="Official Group" />
+                      )}
                     </span>
                     {thread.lastMessageAt && (
                       <span className="text-[10px] text-muted-foreground shrink-0 ml-2">

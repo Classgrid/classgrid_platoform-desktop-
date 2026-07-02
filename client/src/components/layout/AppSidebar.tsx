@@ -31,6 +31,8 @@ import { SidebarSwitcher } from "./SidebarSwitcher";
 import { SidebarSearch } from "./SidebarSearch";
 import { useState } from "react";
 import { SidebarTrigger } from "@/components/marketing_ui/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/apiClient";
 
 export function AppSidebar({ role, user }: AppSidebarProps) {
   const location = useLocation();
@@ -50,6 +52,26 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
     return { ...section, items: filteredItems };
   }).filter(section => section.items.length > 0);
 
+  const { data: chatUnreadData } = useQuery({
+    queryKey: ["chat-unread-count"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ threads: any[] }>("/api/threads?filter=Unread");
+      return data.threads.reduce((acc, t) => acc + (t.unread || 0), 0);
+    },
+    refetchInterval: 30000,
+  });
+
+  // Inject dynamic badges
+  const sectionsWithBadges = filteredSections.map(section => ({
+    ...section,
+    items: section.items.map(item => {
+      if (item.label === "Chat" && chatUnreadData && chatUnreadData > 0) {
+        return { ...item, badge: chatUnreadData > 99 ? '99+' : chatUnreadData.toString() };
+      }
+      return item;
+    })
+  }));
+
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
       <SidebarHeader>
@@ -62,7 +84,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
-        {filteredSections.map((section, index) => (
+        {sectionsWithBadges.map((section, index) => (
           <SidebarGroup key={section.label || index}>
             {index > 0 && (
               <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
@@ -113,7 +135,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        {filteredSections.length === 0 && (
+        {sectionsWithBadges.length === 0 && (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
             No matching items found.
           </div>

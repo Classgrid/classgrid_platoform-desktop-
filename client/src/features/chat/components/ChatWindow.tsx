@@ -3,7 +3,7 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
-import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
+import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
 import { useThreadChannel } from "../hooks/useRealtimeChat";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
@@ -202,9 +202,26 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     }
   };
 
-  const handleSendMessage = async (text: string, files: File[]) => {
+  const handleSendMessage = async (text: string, files: File[], options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) => {
     if (!text.trim() && files.length === 0) return;
     
+    // If it's a scheduled message, skip optimistic update and just send
+    if (options?.scheduledFor) {
+      if (files.length > 0) setIsSending(true);
+      try {
+        const sentMessage = await sendMessage(threadId, text, files, replyTo, options);
+        setReplyTo(null);
+        // Dispatch a custom event or show a toast in real app, using alert for now
+        alert("Message scheduled successfully!");
+      } catch (error) {
+        console.error("Failed to schedule message", error);
+        alert("Failed to schedule message.");
+      } finally {
+        setIsSending(false);
+      }
+      return;
+    }
+
     // Optimistic UI Update instantly!
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
@@ -246,7 +263,7 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     
     try {
       // Send to server in background
-      const sentMsg = await sendMessage(threadId, text, files, replyTo);
+      const sentMsg = await sendMessage(threadId, text, files, replyTo, options);
       setReplyTo(null);
       
       // Replace temporary message with actual server message
@@ -382,6 +399,69 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     }
   };
 
+  const handlePinMessage = async (msgId: string, isPinned: boolean) => {
+    try {
+      await pinMessage(threadId, msgId, isPinned);
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.map(m => m.id === msgId ? { ...m, is_pinned: isPinned } : m)
+        );
+        return { ...oldData, pages: newPages };
+      });
+    } catch (error) {
+      console.error("Failed to pin message", error);
+    }
+  };
+
+  const handleApproveMessage = async (msgId: string) => {
+    try {
+      await approveMessage(threadId, msgId);
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.map(m => m.id === msgId ? { ...m, status: 'approved' } : m)
+        );
+        return { ...oldData, pages: newPages };
+      });
+    } catch (error) {
+      console.error("Failed to approve message", error);
+    }
+  };
+
+  const handleRejectMessage = async (msgId: string) => {
+    try {
+      await rejectMessage(threadId, msgId);
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.map(m => m.id === msgId ? { ...m, status: 'rejected' } : m)
+        );
+        return { ...oldData, pages: newPages };
+      });
+    } catch (error) {
+      console.error("Failed to reject message", error);
+    }
+  };
+
+  const handleAcknowledgeMessage = async (msgId: string) => {
+    try {
+      await acknowledgeMessage(threadId, msgId);
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          page.map(m => m.id === msgId ? { 
+             ...m, 
+             acknowledgements: [...(m.acknowledgements || []), { user_id: currentUserId, user_name: 'You' }] 
+          } : m)
+        );
+        return { ...oldData, pages: newPages };
+      });
+    } catch (error) {
+      console.error("Failed to acknowledge message", error);
+    }
+  };
+
   // Handle read receipts
   useEffect(() => {
     const handleFocus = () => {
@@ -443,6 +523,36 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
           </p>
         </div>
       </div>
+      
+      {/* Pinned Messages Banner */}
+      {(() => {
+        const pinnedMessages = allMessages.filter(m => m.is_pinned && !m.is_deleted);
+        if (pinnedMessages.length === 0) return null;
+        const topPinned = pinnedMessages[pinnedMessages.length - 1]; // most recently pinned or latest message
+        return (
+          <div 
+            className="flex items-center gap-3 px-4 py-2 bg-background border-b border-border shadow-sm shrink-0 cursor-pointer hover:bg-muted/30 transition-colors"
+            onClick={() => {
+              // Note: Ideally scroll to message, but here we just show the text
+              const el = document.getElementById(`msg-${topPinned.id}`);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          >
+            <div className="text-amber-500">
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pin"><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+               <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
+               <span className="text-[13px] text-foreground truncate">{topPinned.message || "Attachment"}</span>
+            </div>
+            {pinnedMessages.length > 1 && (
+               <div className="text-[10px] font-bold text-muted-foreground bg-accent px-1.5 py-0.5 rounded">
+                  1/{pinnedMessages.length}
+               </div>
+            )}
+          </div>
+        );
+      })()}
 
       <div 
         ref={scrollRef}
@@ -512,6 +622,11 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
               onReact={handleReact}
               poll={polls?.find(p => p.message_id === msg.id)}
               onVotePoll={handleVotePoll}
+              onPin={handlePinMessage}
+              onApprove={handleApproveMessage}
+              onReject={handleRejectMessage}
+              onAcknowledge={handleAcknowledgeMessage}
+              isAdmin={groupInfo?.myRole === 'admin'}
             />
           );
         })}
@@ -539,6 +654,7 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
           onCancelReply={() => setReplyTo(null)}
           disabledReason={disabledReason}
           onOpenPollModal={thread.type === 'group' ? () => setIsCreatePollOpen(true) : undefined}
+          canSchedule={true}
           onTyping={() => {
             channelRef.current?.send({
               type: "broadcast",

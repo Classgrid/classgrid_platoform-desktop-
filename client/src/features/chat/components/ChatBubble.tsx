@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 
 import DOMPurify from "dompurify";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
   DropdownMenu,
@@ -44,6 +44,11 @@ interface ChatBubbleProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  onPin?: (msgId: string, isPinned: boolean) => void;
+  onApprove?: (msgId: string) => void;
+  onReject?: (msgId: string) => void;
+  onAcknowledge?: (msgId: string) => void;
+  isAdmin?: boolean;
 }
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -83,6 +88,11 @@ export function ChatBubble({
   isSelectionMode = false,
   isSelected = false,
   onToggleSelect,
+  onPin,
+  onApprove,
+  onReject,
+  onAcknowledge,
+  isAdmin = false,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.message);
@@ -159,7 +169,7 @@ export function ChatBubble({
                 className="w-8 h-8 rounded-full overflow-hidden mt-1 hover:opacity-80 transition-opacity focus:outline-none"
                 onClick={() => {
                   if (message.user_avatar) {
-                    onViewMedia?.({ file_url: message.user_avatar, file_name: message.sender_name + " Profile Photo", file_type: "image/jpeg" });
+                    onViewMedia?.({ file_url: message.user_avatar, file_name: (message.sender_name || 'User') + " Profile Photo", file_type: "image/jpeg" });
                   } else {
                     onUserClick?.(message.sender_id);
                   }
@@ -194,7 +204,7 @@ export function ChatBubble({
               onClick={() => onUserClick?.(message.sender_id)}
               className="text-xs text-muted-foreground ml-1 mb-1 font-medium hover:underline hover:text-primary transition-colors cursor-pointer text-left"
             >
-              {message.sender_name}
+              {message.sender_name || 'User'}
             </button>
           )}
 
@@ -215,12 +225,44 @@ export function ChatBubble({
             className={`relative rounded-2xl px-4 py-2 flex flex-col gap-1 min-w-[120px]
               ${message.is_deleted 
                 ? "bg-muted text-muted-foreground italic border border-border" 
-                : isMine 
-                  ? "bg-emerald-50 dark:bg-[#005c4b] text-[#111b21] dark:text-white/90 font-medium rounded-tr-sm shadow-sm border border-emerald-100 dark:border-[#00705a]" 
-                  : "bg-white dark:bg-[#202c33] text-foreground dark:text-[#e9edef] border border-black/5 dark:border-transparent rounded-tl-sm shadow-sm"
+                : message.status === 'pending'
+                  ? "bg-orange-50 dark:bg-orange-950/50 text-foreground border border-orange-200 dark:border-orange-800"
+                  : message.status === 'rejected'
+                    ? "bg-red-50 dark:bg-red-950/50 text-foreground border border-red-200 dark:border-red-800 opacity-70"
+                    : isMine 
+                      ? "bg-emerald-50 dark:bg-[#005c4b] text-[#111b21] dark:text-white/90 font-medium rounded-tr-sm shadow-sm border border-emerald-100 dark:border-[#00705a]" 
+                      : "bg-white dark:bg-[#202c33] text-foreground dark:text-[#e9edef] border border-black/5 dark:border-transparent rounded-tl-sm shadow-sm"
               }
             `}
           >
+            {/* Pinned Indicator */}
+            {message.is_pinned && (
+               <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-500 mb-1 -ml-1">
+                 <Pin className="w-3.5 h-3.5" />
+                 <span>Pinned</span>
+               </div>
+            )}
+
+            {/* Pending / Rejected Banner */}
+            {message.status === 'pending' && (
+              <div className="mb-2 p-2 bg-orange-100 dark:bg-orange-900/40 rounded border border-orange-200 dark:border-orange-800 text-xs">
+                <div className="font-bold text-orange-800 dark:text-orange-300 flex items-center gap-1.5 mb-1">
+                  <Shield className="w-3.5 h-3.5" /> Pending Admin Approval
+                </div>
+                {isAdmin && onApprove && onReject && (
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={() => onApprove(message.id)} className="flex-1 bg-emerald-500 text-white py-1 rounded font-medium hover:bg-emerald-600">Approve</button>
+                    <button onClick={() => onReject(message.id)} className="flex-1 bg-red-500 text-white py-1 rounded font-medium hover:bg-red-600">Reject</button>
+                  </div>
+                )}
+              </div>
+            )}
+            {message.status === 'rejected' && (
+               <div className="mb-2 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <Shield className="w-3.5 h-3.5" /> Message Rejected
+               </div>
+            )}
+
             {(message.reply_to as any)?.isForwarded && !message.is_deleted && (
               <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground/80 italic mb-1 -ml-1">
                 <Forward className="w-3.5 h-3.5" />
@@ -300,6 +342,32 @@ export function ChatBubble({
                         </div>
                       )
                     ))}
+                  </div>
+                )}
+                
+                {/* Priority / Silent / Expiry Badges */}
+                {(!message.is_deleted && (message.priority === 'urgent' || message.priority === 'high' || message.is_silent || message.expires_at)) && (
+                  <div className="flex flex-wrap items-center gap-1 mb-1">
+                    {message.priority === 'urgent' && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded">
+                        <AlertCircle className="w-3 h-3" /> Urgent
+                      </span>
+                    )}
+                    {message.priority === 'high' && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded">
+                        <AlertCircle className="w-3 h-3" /> High Priority
+                      </span>
+                    )}
+                    {message.is_silent && (
+                      <span className="flex items-center gap-1 text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                        <BellOff className="w-3 h-3" /> Silent
+                      </span>
+                    )}
+                    {message.expires_at && (
+                      <span className="flex items-center gap-1 text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded" title={`Expires at ${new Date(message.expires_at).toLocaleString()}`}>
+                        <Timer className="w-3 h-3" /> Auto-delete
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -404,6 +472,40 @@ export function ChatBubble({
             </div>
           </div>
 
+          {/* Acknowledgements Row */}
+          {!message.is_deleted && message.requires_acknowledgement && (
+            <div className={`flex flex-col gap-1 mt-1 ${isMine ? "items-end" : "items-start"} max-w-[250px]`}>
+              {(() => {
+                const acks = message.acknowledgements || [];
+                const iAcked = acks.some(a => a.user_id === currentUserId);
+                return (
+                  <>
+                    <button
+                      onClick={() => !iAcked && onAcknowledge && onAcknowledge(message.id)}
+                      disabled={iAcked || !onAcknowledge}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold border transition-colors
+                        ${iAcked 
+                          ? "bg-primary text-primary-foreground border-primary opacity-80 cursor-default" 
+                          : "bg-background text-foreground border-border hover:bg-muted"
+                        }
+                      `}
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                      {iAcked ? "Acknowledged" : "Acknowledge"}
+                      <span className="ml-1 bg-black/10 dark:bg-white/10 px-1.5 rounded-full">{acks.length}</span>
+                    </button>
+                    {acks.length > 0 && (
+                      <div className="text-[10px] text-muted-foreground line-clamp-1 cursor-default" title={acks.map(a => a.user_name).join(", ")}>
+                        By: {acks.map(a => a.user_name).slice(0, 3).join(", ")}
+                        {acks.length > 3 && ` +${acks.length - 3} more`}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
+
           {/* Reactions Row */}
           {!message.is_deleted && Object.keys(message.reactions || {}).length > 0 && (
             <div className={`flex flex-wrap gap-1 mt-1 ${isMine ? "justify-end" : "justify-start"} max-w-[200px]`}>
@@ -444,9 +546,11 @@ export function ChatBubble({
               <ContextMenuItem onClick={() => onForward?.(message.id)} className="cursor-pointer py-2">
                 <Forward className="w-4 h-4 mr-2" /> Forward
               </ContextMenuItem>
-              <ContextMenuItem className="cursor-pointer py-2" disabled>
-                <Pin className="w-4 h-4 mr-2" /> Pin
-              </ContextMenuItem>
+              {isAdmin && onPin && (
+                <ContextMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
+                  <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
+                </ContextMenuItem>
+              )}
               {onStar && (
                 <ContextMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                   <Star className="w-4 h-4 mr-2" /> Star
@@ -537,9 +641,11 @@ export function ChatBubble({
                 <DropdownMenuItem className="cursor-pointer py-2" disabled>
                   <Forward className="w-4 h-4 mr-2" /> Forward
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2" disabled>
-                  <Pin className="w-4 h-4 mr-2" /> Pin
-                </DropdownMenuItem>
+                {isAdmin && onPin && (
+                  <DropdownMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
+                    <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
+                  </DropdownMenuItem>
+                )}
                 {onStar && (
                   <DropdownMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                     <Star className="w-4 h-4 mr-2" /> Star

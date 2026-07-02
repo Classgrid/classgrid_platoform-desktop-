@@ -9,7 +9,9 @@ import { useAuditData } from "../queries/useAudit";
 import { apiClient } from "@/lib/apiClient";
 import { format } from "date-fns";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
-
+import { useQuery } from "@tanstack/react-query";
+import { fetchChatAuditLogs } from "@/features/chat/services/chatApi";
+import { Button } from "@/components/marketing_ui/button";
 
 export function AuditPage() {
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
@@ -25,6 +27,12 @@ export function AuditPage() {
 
   const { data, isLoading, isError, refetch, isFetching } = useAuditData(startStr, endStr);
   const audit = data?.data;
+
+  const { data: chatLogsData, isLoading: isChatLogsLoading, refetch: refetchChatLogs } = useQuery({
+    queryKey: ["chat-audit-logs"],
+    queryFn: fetchChatAuditLogs,
+  });
+  const chatLogs = chatLogsData || [];
 
   // CSV Export logic
   const handleExportCSV = async () => {
@@ -87,6 +95,25 @@ export function AuditPage() {
     []
   );
 
+  const chatLogColumns: ColumnDef<any>[] = useMemo(
+    () => [
+      { accessorKey: "created_at", header: "Date & Time", size: 150, cell: ({ getValue }) => format(new Date(getValue<string>()), "MMM d, yyyy HH:mm") },
+      { accessorKey: "group.name", header: "Group", size: 150, cell: ({ row }) => row.original.group?.name || "Unknown Group" },
+      { accessorKey: "actor_name", header: "Actor", size: 150 },
+      { accessorKey: "action", header: "Action", size: 150, cell: ({ getValue }) => (
+        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+          {(getValue<string>() || "").replace(/_/g, ' ').toUpperCase()}
+        </span>
+      ) },
+      { accessorKey: "new_value", header: "Details", size: 250, cell: ({ getValue }) => (
+        <div className="max-w-[250px] truncate text-muted-foreground" title={JSON.stringify(getValue())}>
+          {JSON.stringify(getValue())}
+        </div>
+      ) },
+    ],
+    []
+  );
+
   const academicData = audit?.criterion2?.academicPerformance ?? [];
 
   return (
@@ -119,7 +146,7 @@ export function AuditPage() {
               />
             </div>
           </div>
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh" />
+          <RefreshButton onClick={() => { refetch(); refetchChatLogs(); }} isFetching={isFetching || isChatLogsLoading} label="Refresh" />
           <Button variant="outline" onClick={handleExportCSV} disabled={isExporting || isLoading}>
             <Download size={14} className="mr-2" />
             CSV Export
@@ -166,6 +193,15 @@ export function AuditPage() {
                 data={academicData}
                 pageSize={5}
                 emptyMessage={isLoading ? "Aggregating data..." : "No academic records for this period."}
+              />
+            </SectionPanel>
+
+            <SectionPanel title="Chat & Communication Audit Logs" description="Administrative actions within organization chat groups." noPadding className="mt-6">
+              <DataTable
+                columns={chatLogColumns}
+                data={chatLogs}
+                pageSize={10}
+                emptyMessage={isChatLogsLoading ? "Loading chat audit logs..." : "No chat audit logs found for this organization."}
               />
             </SectionPanel>
           </div>

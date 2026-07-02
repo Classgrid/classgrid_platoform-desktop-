@@ -139,5 +139,51 @@ router.put("/read-all", isAuthenticated, async (req, res) => {
     }
 });
 
+// GET /notifications/preferences — Get user's in-app notification preferences
+router.get("/preferences", isAuthenticated, async (req, res) => {
+    try {
+        await connectDB();
+        const User = (await import("../models/User.js")).default;
+        const user = await User.findById(req.user._id).select('inAppNotifications').lean();
+        const prefs = user?.inAppNotifications || {
+            global: true, chat: true, classroom: true, meetings: true,
+            settings: true, attendance: true, assignments: true, fees: true,
+        };
+        res.json({ preferences: prefs });
+    } catch (err) {
+        console.error("Get preferences error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// PUT /notifications/preferences — Update user's in-app notification preferences
+router.put("/preferences", isAuthenticated, async (req, res) => {
+    try {
+        await connectDB();
+        const User = (await import("../models/User.js")).default;
+        const { preferences } = req.body;
+        if (!preferences || typeof preferences !== 'object') {
+            return res.status(400).json({ message: "Invalid preferences" });
+        }
+        
+        const allowedKeys = ['global', 'chat', 'classroom', 'meetings', 'settings', 'attendance', 'assignments', 'fees'];
+        const updateObj = {};
+        for (const key of allowedKeys) {
+            if (key in preferences) {
+                updateObj[`inAppNotifications.${key}`] = !!preferences[key];
+            }
+        }
+        
+        await User.findByIdAndUpdate(req.user._id, { $set: updateObj });
+        
+        // Return updated preferences
+        const updated = await User.findById(req.user._id).select('inAppNotifications').lean();
+        res.json({ preferences: updated?.inAppNotifications });
+    } catch (err) {
+        console.error("Update preferences error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 export default router;
 

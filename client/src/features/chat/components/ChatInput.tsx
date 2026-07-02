@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon } from "lucide-react";
+import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
@@ -15,17 +15,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
 
+interface MessageOptions {
+  scheduledFor?: string;
+  isSilent?: boolean;
+  priority?: string;
+  expiresAt?: string;
+}
+
 interface ChatInputProps {
-  onSendMessage: (message: string, files: File[]) => Promise<void>;
+  onSendMessage: (message: string, files: File[], options?: MessageOptions) => Promise<void>;
   isSending: boolean;
   replyTo: ChatMessage | null;
   onCancelReply: () => void;
   onTyping?: (isTyping: boolean, activityType?: 'typing' | 'recording' | 'uploading') => void;
   disabledReason?: string;
   onOpenPollModal?: () => void;
+  canSchedule?: boolean;
 }
 
-export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal }: ChatInputProps) {
+export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -33,6 +41,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  // New options state
+  const [scheduledDate, setScheduledDate] = useState<string>("");
+  const [isSilent, setIsSilent] = useState(false);
+  const [priority, setPriority] = useState("normal"); // normal, high, urgent
+  const [expiresAt, setExpiresAt] = useState<string>("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -123,15 +137,26 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       finalFiles.push(audioFile);
     }
 
+    const options = {
+      scheduledFor: scheduledDate || undefined,
+      isSilent,
+      priority,
+      expiresAt: expiresAt || undefined
+    };
+    
     setMessage("");
     setFiles([]);
+    setScheduledDate("");
+    setIsSilent(false);
+    setPriority("normal");
+    setExpiresAt("");
     clearAudio();
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
 
     try {
-      await onSendMessage(text, finalFiles);
+      await onSendMessage(text, finalFiles, options);
     } finally {
       if (onTyping && hasMedia) {
         onTyping(false, 'uploading');
@@ -398,12 +423,98 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 <Mic className="w-5 h-5" />
               </button>
             )}
+
+            {!isRecording && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className={`p-3 rounded-full transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 ${(scheduledDate || isSilent || priority !== 'normal' || expiresAt) ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'bg-accent text-foreground hover:bg-accent/80'}`}
+                    title="Message Options"
+                  >
+                    <SlidersHorizontal className="w-5 h-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" align="end" className="w-72 p-4 bg-card border border-border shadow-lg rounded-xl">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-sm border-b pb-2">Message Options</h4>
+                    
+                    {/* Priority */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Priority</label>
+                      <select 
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+
+                    {/* Silent Notice */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        {isSilent ? <BellOff className="w-4 h-4 text-muted-foreground" /> : <Bell className="w-4 h-4 text-primary" />}
+                        Silent Delivery
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" checked={isSilent} onChange={(e) => setIsSilent(e.target.checked)} />
+                        <div className="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                      </label>
+                    </div>
+
+                    {/* Expiry */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-muted-foreground block">Auto-Delete At (Optional)</label>
+                      <input 
+                        type="datetime-local" 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        value={expiresAt}
+                        onChange={(e) => setExpiresAt(e.target.value)}
+                        min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                      />
+                    </div>
+
+                    {/* Scheduling */}
+                    {canSchedule && (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-muted-foreground block">Schedule For (Optional)</label>
+                        <input 
+                          type="datetime-local" 
+                          className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                          min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                        />
+                      </div>
+                    )}
+                    
+                    {(scheduledDate || expiresAt || isSilent || priority !== 'normal') && (
+                      <button 
+                        onClick={() => {
+                          setScheduledDate("");
+                          setExpiresAt("");
+                          setIsSilent(false);
+                          setPriority("normal");
+                        }}
+                        className="w-full text-xs text-red-500 hover:text-red-600 font-medium py-1 mt-2 border-t pt-2"
+                      >
+                        Reset Options
+                      </button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+            
             <button
               onClick={handleSend}
               disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording}
-              className="p-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11"
+              className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
+              title={scheduledDate ? 'Schedule Message' : 'Send Message'}
             >
-              <Send className="w-5 h-5 ml-0.5" />
+              {scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>
           </>
         )}

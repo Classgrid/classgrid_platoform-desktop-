@@ -22,6 +22,8 @@ import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
+import { useOnlineUsers } from "../context/PresenceContext";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 import { Input } from "@/components/marketing_ui/input";
 
@@ -36,11 +38,13 @@ interface GroupSettingsModalProps {
 export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick, initialShowAddMember }: GroupSettingsModalProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   // ── Local UI State ──
   const [showAddMember, setShowAddMember] = useState(initialShowAddMember || false);
   const [addSearch, setAddSearch] = useState("");
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
+  const onlineUsers = useOnlineUsers();
 
   // ── Data: Group Info ──
   const { data, isLoading, isError, error } = useQuery({
@@ -191,6 +195,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
     );
   }
 
+  const onlineMembersCount = data?.members?.filter(m => onlineUsers?.has(m.userId)).length || 0;
+
   return (
     <div className="absolute inset-0 z-50 bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
       {/* Breadcrumb Header */}
@@ -229,16 +235,36 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
             {/* ═══════════════════════════════════════════════ */}
             <div className="w-full max-w-[1000px] mx-auto bg-muted/20 rounded-xl p-4 border border-border mt-4">
               <div className="flex items-center justify-between pb-3 mb-2 border-b border-border">
-                <h4 className="text-sm font-semibold text-foreground">Group Members</h4>
-                {/* Add Member Button — Admin Only */}
-                {data.myRole === "admin" && (
-                  <button
-                    onClick={() => setShowAddMember(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors"
-                  >
-                    <UserPlus className="w-3.5 h-3.5" /> Add Member
-                  </button>
-                )}
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  Group Members
+                  {onlineMembersCount > 0 && (
+                    <span className="text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {onlineMembersCount} online
+                    </span>
+                  )}
+                </h4>
+                {/* Add Member Button — Controlled by Policy */}
+                {(() => {
+                  const policy = data.group.add_member_policy || 'admin_only';
+                  const isOrgAdmin = user?.role === 'super_admin' || user?.role === 'org_admin';
+                  const isFaculty = user?.role === 'faculty';
+                  const isAdmin = data.myRole === 'admin' || isOrgAdmin;
+                  
+                  let canAddMember = false;
+                  if (policy === 'org_admin_only') canAddMember = isOrgAdmin;
+                  else if (policy === 'admin_only') canAddMember = isAdmin;
+                  else if (policy === 'admin_faculty') canAddMember = isAdmin || isFaculty;
+
+                  return canAddMember && (
+                    <button
+                      onClick={() => setShowAddMember(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" /> Add Member
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* ── Member List ── */}
@@ -268,19 +294,27 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                                 onClick={() => onUserClick?.(member.userId)}
                               >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  {member.profilePicture ? (
-                                    <img
-                                      src={member.profilePicture}
-                                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
-                                      alt=""
-                                    />
-                                  ) : (
-                                    <img
-                                      src={DEFAULT_USER_AVATAR}
-                                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
-                                      alt=""
-                                    />
-                                  )}
+                                  <div className="relative">
+                                    {member.profilePicture ? (
+                                      <img
+                                        src={member.profilePicture}
+                                        className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
+                                        alt=""
+                                      />
+                                    ) : (
+                                      <img
+                                        src={DEFAULT_USER_AVATAR}
+                                        className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
+                                        alt=""
+                                      />
+                                    )}
+                                    {onlineUsers?.has(member.userId) && (
+                                      <span 
+                                        title="Online"
+                                        className="absolute bottom-0 right-0 z-10 block w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
+                                      />
+                                    )}
+                                  </div>
                                   <div className="min-w-0 flex-1">
                                     <span className="text-sm font-medium text-foreground block truncate group-hover/member:underline">
                                       {member.name}
@@ -352,48 +386,178 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                 <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
                   <h4 className="text-sm font-semibold text-foreground">Group Settings</h4>
                 </div>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-full text-primary">
-                        <Megaphone className="w-4 h-4" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">Announcement Mode</span>
-                        <span className="text-xs text-muted-foreground">Only admins can send messages</span>
-                      </div>
-                    </div>
-                    
-                    {/* Toggle Switch */}
-                    <Switch
-                      checked={data.group.send_messages_policy === 'admin_only'}
-                      disabled={isUpdatingPermissions}
-                      onCheckedChange={(checked) => {
-                        handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Message Approval */}
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-full text-primary">
                         <Shield className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">Restrict Info Edits</span>
-                        <span className="text-xs text-muted-foreground">Only admins can edit group info & photo</span>
+                        <span className="text-sm font-medium text-foreground">Require Message Approval</span>
+                        <span className="text-xs text-muted-foreground">Student messages must be approved by an admin before others can see them</span>
                       </div>
                     </div>
-                    
-                    {/* Toggle Switch */}
                     <Switch
-                      checked={data.group.edit_info_policy === 'admin_only'}
+                      checked={data.group.require_message_approval}
                       disabled={isUpdatingPermissions}
                       onCheckedChange={(checked) => {
-                        handleUpdatePermissions({ edit_info: checked ? 'admin_only' : 'all' });
+                        handleUpdatePermissions({ require_message_approval: checked });
                       }}
                     />
                   </div>
+
+                  {/* Send Messages Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can send messages?</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.send_message_policy || data.group.send_messages_policy || 'all'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ send_message_policy: e.target.value })}
+                     >
+                        <option value="all">Everyone</option>
+                        <option value="admin_faculty">Admins & Faculty</option>
+                        <option value="admin_only">Only Admins</option>
+                     </select>
+                  </div>
+
+                  {/* Reply Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can reply to messages?</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.reply_policy || 'all'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ reply_policy: e.target.value })}
+                     >
+                        <option value="all">Everyone</option>
+                        <option value="admin_faculty">Admins & Faculty</option>
+                        <option value="admin_only">Only Admins</option>
+                     </select>
+                  </div>
+
+                  {/* Send Attachments Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can send attachments?</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.send_attachments_policy || 'all'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ send_attachments_policy: e.target.value })}
+                     >
+                        <option value="all">Everyone</option>
+                        <option value="admin_faculty">Admins & Faculty</option>
+                        <option value="admin_only">Only Admins</option>
+                     </select>
+                  </div>
+
+                  {/* Add Member Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can add members?</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.add_member_policy || 'admin_only'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ add_member_policy: e.target.value })}
+                     >
+                        <option value="admin_only">Only Admins</option>
+                        <option value="admin_faculty">Admins & Faculty</option>
+                        <option value="org_admin_only">Only Org Admins</option>
+                     </select>
+                  </div>
+
+                  {/* Edit Info Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can edit group info?</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.edit_info_policy || 'admin_only'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ edit_info_policy: e.target.value })}
+                     >
+                        <option value="admin_only">Group Admins</option>
+                        <option value="org_admin_only">Only Org Admins</option>
+                     </select>
+                  </div>
+
+                  {/* Group Type */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Group Type</span>
+                     <select 
+                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                        value={data.group.group_type || 'general'}
+                        disabled={isUpdatingPermissions}
+                        onChange={(e) => handleUpdatePermissions({ group_type: e.target.value })}
+                     >
+                        <option value="general">General</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="class">Class</option>
+                        <option value="department">Department</option>
+                        <option value="subject">Subject</option>
+                        <option value="exam">Exam</option>
+                        <option value="fees">Fees</option>
+                        <option value="admission">Admission</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="parent">Parent</option>
+                        <option value="transport">Transport</option>
+                        <option value="hostel">Hostel</option>
+                        <option value="library">Library</option>
+                        <option value="event">Event</option>
+                     </select>
+                  </div>
+
+                  {/* Is Official Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">Official Group</span>
+                        <span className="text-xs text-muted-foreground">Mark this group as official</span>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={data.group.is_official}
+                      disabled={isUpdatingPermissions}
+                      onCheckedChange={(checked) => {
+                        handleUpdatePermissions({ is_official: checked });
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Require Join Approval Toggle */}
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">Require Join Approval</span>
+                        <span className="text-xs text-muted-foreground">New members must request to join and be approved by an admin</span>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={data.group.require_join_approval}
+                      disabled={isUpdatingPermissions}
+                      onCheckedChange={(checked) => {
+                        handleUpdatePermissions({ require_join_approval: checked });
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Actions Row */}
+                  <div className="flex items-center gap-3 mt-2 md:col-span-2">
+                     <button
+                        className="flex-1 py-2 rounded bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                        onClick={() => window.open('/org/audit', '_blank')}
+                     >
+                        Audit Logs
+                     </button>
+                     <button
+                        className="flex-1 py-2 rounded bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                        onClick={() => window.open(`/join-requests/${groupId}`, '_blank')}
+                     >
+                        Join Requests
+                     </button>
+                  </div>
+
                 </div>
               </div>
             )}

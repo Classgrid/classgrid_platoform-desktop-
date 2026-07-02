@@ -1,0 +1,158 @@
+import cron from 'node-cron';
+import { supabaseService as sb } from '../config/supabaseClient.js';
+import { broadcastToChannel } from '../services/socket.service.js';
+import Notification from '../models/notification.model.js';
+import User from '../models/user.model.js';
+
+export function initChatSchedulerCron() {
+  console.log('⏳ Initializing Chat Scheduler Cron Job');
+  
+  // Run every minute
+  cron.schedule('* * * * *', async () => {
+    try {
+      const now = new Date().toISOString();
+      
+      // Find all pending messages that should be sent now
+      const { data: pendingMessages, error: fetchErr } = await sb
+        .from('chat_scheduled_messages')
+        .select('*')
+        .eq('status', 'pending')
+        .lte('scheduled_for', now);
+
+      if (fetchErr) {
+        console.error('[ChatScheduler] Error fetching pending messages:', fetchErr);
+        return;
+      }
+
+      if (!pendingMessages || pendingMessages.length === 0) {
+        return;
+      }
+
+      console.log(`[ChatScheduler] Found ${pendingMessages.length} scheduled messages to send.`);
+
+      for (const schedMsg of pendingMessages) {
+        try {
+          // Check if thread still exists
+          const { data: thread } = await sb.from('chat_threads').select('type, group_id, name').eq('id', schedMsg.thread_id).single();
+          if (!thread) {
+            await sb.from('chat_scheduled_messages').update({ status: 'failed' }).eq('id', schedMsg.id);
+            continue;
+          }
+
+          // Check if group requires approval
+          let msgStatus = 'approved';
+          if (thread.type === 'group' && thread.group_id) {
+            const { data: group } = await sb.from('chat_groups').select('require_message_approval').eq('id', thread.group_id).single();
+            if (group && group.require_message_approval) {
+              // Note: If the sender was not admin, they couldn't have scheduled it if require_message_approval is strictly admin-only.
+              // But we can just set it to approved, because scheduling is restricted to people who can send.
+              // Actually, in the endpoint we allowed normal members to schedule. So we should re-check here, or just set status to pending.
+              // For simplicity, scheduled messages that are approved bypass this, but let's do a quick check.
+              const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', thread.group_id).eq('user_id', schedMsg.sender_id).single();
+              if (membership?.role !== 'admin') {
+                msgStatus = 'pending';
+              }
+            }
+          }
+
+          // Insert into chat_messages
+          const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
+            thread_id: schedMsg.thread_id,
+            sender_id: schedMsg.sender_id,
+            sender_name: schedMsg.sender_name,
+            message: schedMsg.message,
+            reply_to: schedMsg.reply_to,
+            created_at: new Date().toISOString(),
+            status: msgStatus,
+            requires_acknowledgement: false // Could be added to scheduled messages if needed
+          }).select('id').single();
+
+          if (insertErr) throw insertErr;
+
+          // Insert attachments if any
+          const uploadedAttachments = schedMsg.attachments || [];
+          const actualAttachments = [];
+          if (uploadedAttachments.length > 0) {
+            for (const att of uploadedAttachments) {
+              const { data: savedAtt, error: attErr } = await sb.from('chat_attachments').insert({
+                message_id: insertedMsg.id,
+                file_url: att.file_url,
+                file_name: att.file_name,
+                file_type: att.file_type,
+                file_size: att.file_size
+              }).select().single();
+              if (!attErr && savedAtt) actualAttachments.push(savedAtt);
+            }
+          }
+
+          // Broadcast payload
+          const broadcastPayload = {
+            id: insertedMsg.id,
+            thread_id: schedMsg.thread_id,
+            sender_id: schedMsg.sender_id,
+            sender_name: schedMsg.sender_name,
+            message: schedMsg.message,
+            reply_to: schedMsg.reply_to,
+            is_deleted: false,
+            created_at: new Date().toISOString(),
+            attachments: actualAttachments,
+          };
+
+          // Mark as sent
+          await sb.from('chat_scheduled_messages').update({ status: 'sent' }).eq('id', schedMsg.id);
+
+          // Update thread metadata
+          let lastMsgText = schedMsg.message || '';
+          if (!lastMsgText && actualAttachments.length > 0) {
+            lastMsgText = `[FILE] ${actualAttachments.length} files`;
+          }
+          await sb.from('chat_threads').update({ last_message: lastMsgText, last_message_at: new Date().toISOString() }).eq('id', schedMsg.thread_id);
+
+          // Broadcast to connected clients
+          broadcastToChannel(`thread:${schedMsg.thread_id}`, 'new_message', broadcastPayload);
+
+          // Global notifications for sidebar updates
+          sb.from('chat_thread_members').select('user_id').eq('thread_id', schedMsg.thread_id).then(async ({ data: members }) => {
+            if (members) {
+              const memberIds = members.map(m => m.user_id).filter(id => id !== schedMsg.sender_id && /^[0-9a-fA-F]{24}$/.test(id));
+              let userMutes = {};
+              if (memberIds.length > 0) {
+                const users = await User.find({ _id: { $in: memberIds } }).select('_id muted_chat_threads').lean();
+                users.forEach(u => { userMutes[u._id.toString()] = u.muted_chat_threads || []; });
+              }
+              const notificationsToInsert = [];
+              members.forEach((m) => {
+                if (m.user_id !== schedMsg.sender_id) {
+                  broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
+                    threadId: schedMsg.thread_id, messageId: insertedMsg.id, message: broadcastPayload
+                  });
+                  const mutes = userMutes[m.user_id] || [];
+                  if (!mutes.includes(schedMsg.thread_id)) {
+                    notificationsToInsert.push({
+                      recipient: m.user_id,
+                      type: 'chat',
+                      title: thread.type === 'group' ? `New scheduled message in ${thread.name || 'Group'}` : `New message from ${schedMsg.sender_name}`,
+                      message: lastMsgText,
+                      link: `/platform/chat?threadId=${schedMsg.thread_id}`,
+                      relatedId: schedMsg.thread_id,
+                      isRead: false, emailSent: false, createdAt: new Date()
+                    });
+                  }
+                }
+              });
+              if (notificationsToInsert.length > 0) {
+                try { await Notification.insertMany(notificationsToInsert); } catch (e) { }
+              }
+            }
+          }).catch(() => {});
+
+        } catch (msgErr) {
+          console.error(`[ChatScheduler] Failed to send scheduled message ${schedMsg.id}:`, msgErr);
+          await sb.from('chat_scheduled_messages').update({ status: 'failed' }).eq('id', schedMsg.id);
+        }
+      }
+    } catch (err) {
+      console.error('[ChatScheduler] Cron Error:', err);
+    }
+  });
+}

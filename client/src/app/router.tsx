@@ -59,6 +59,7 @@ import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
 import { WebsiteCMSPage } from "@/features/website_cms/pages/WebsiteCMSPage";
+import { JoinRequestPage } from "@/features/chat/pages/JoinRequestPage";
 
 import { StudentHomePage } from "@/features/student/pages/StudentHomePage";
 import { StudentWorkPage } from "@/features/student/pages/StudentWorkPage";
@@ -220,6 +221,7 @@ export function AppRouter() {
           <Route path="/org/admin/profile" element={<SharedProfilePage />} />
           <Route path="/org/admin/chat" element={<ChatPage />} />
           <Route path="/org/website" element={<WebsiteCMSPage />} />
+          <Route path="/org/audit" element={<AuditPage />} />
           <Route path="/org/admin/dashboard" element={<GenericPage title="Org Overview" />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
           <Route path="/org/*" element={<ComingSoonPage />} />
@@ -309,7 +311,7 @@ export function AppRouter() {
           <Route path="/classgrid-ai" element={<GenericPage title="Classgrid AI" />} />
           <Route path="/drive" element={<GenericPage title="Google Drive" />} />
           <Route path="/virtual-id" element={<GenericPage title="Virtual ID" />} />
-          <Route path="/join-requests" element={<GenericPage title="Requests" />} />
+          <Route path="/join-requests/:groupId" element={<JoinRequestPage />} />
           <Route path="/whats-new" element={<GenericPage title="What's New" />} />
           <Route path="/organization" element={<GenericPage title="Organization" />} />
           <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />

@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { fetchPollVoters } from "../services/chatApi";
-import { OrgUser } from "../../org/services/orgApi";
-import { Poll } from "../services/chatApi";
+import { fetchPollVoters, type Poll, type OrgUser } from "../services/chatApi";
 import { toast } from "sonner";
 
 interface ViewPollVotesModalProps {

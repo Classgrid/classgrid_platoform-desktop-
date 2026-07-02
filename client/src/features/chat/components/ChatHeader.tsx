@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut } from "lucide-react";
-import type { ChatThread } from "../services/chatApi";
+import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, Bell, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut, Clock, BadgeCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchGroupInfo } from "../services/chatApi";
+import type { ChatThread, OrgUser } from "../services/chatApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +21,8 @@ interface ChatHeaderProps {
   onShowInfo: () => void;
   onAvatarClick?: () => void;
   onlineUsers?: Set<string>;
+  typingUsers?: Record<string, { type: string; timeout: any }>;
+  orgUsers?: OrgUser[];
   onClearChat: () => void;
   onDeleteChat: () => void;
   onOpenDisappearingModal?: () => void;
@@ -27,6 +31,9 @@ interface ChatHeaderProps {
   onEnterSelectionMode?: () => void;
   onLeaveGroup?: () => void;
   onAddMember?: () => void;
+  isMuted?: boolean;
+  onMuteThread?: () => void;
+  onOpenScheduledMessages?: () => void;
 }
 
 function getInitials(name: string) {
@@ -48,7 +55,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenScheduledMessages }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -57,6 +64,12 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
 
   const query = onSearchChange ? searchQuery : localSearchQuery;
   const setQuery = onSearchChange ? onSearchChange : setLocalSearchQuery;
+
+  const { data: groupInfo } = useQuery({
+    queryKey: ["group-info", thread.groupId],
+    queryFn: () => fetchGroupInfo(thread.groupId!),
+    enabled: thread.type === "group" && !!thread.groupId,
+  });
 
   useEffect(() => {
     if (isSearchOpen && inputRef.current) {
@@ -77,9 +90,9 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       {/* Avatar */}
       <button onClick={onAvatarClick || onShowInfo} className="shrink-0 relative cursor-pointer hover:opacity-80 transition-opacity">
         {hasAvatar ? (
-          <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover bg-primary/10 border border-border/50" />
+          <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover bg-background border border-border/50" />
         ) : (
-          <img src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR} alt="" className="w-9 h-9 rounded-full object-cover bg-primary/10 border border-border/50" />
+          <img src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR} alt="" className="w-9 h-9 rounded-full object-cover bg-background border border-border/50" />
         )}
         {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
           <span 
@@ -102,11 +115,61 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               onClick={onShowInfo} 
               className="cursor-pointer hover:underline transition-all absolute inset-0 flex flex-col justify-center"
             >
-              <h3 className="text-sm font-bold text-foreground truncate leading-tight">{thread.name}</h3>
-              <p className="text-xs text-muted-foreground truncate leading-tight">
-                {thread.type === "group"
-                  ? "Group"
-                  : thread.role || ""}
+              <h3 className="text-sm font-bold text-foreground truncate leading-tight flex items-center gap-1.5">
+                {thread.name}
+                {thread.isOfficial && (
+                  <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/20" title="Official Group" />
+                )}
+              </h3>
+              <p className="text-xs text-muted-foreground truncate leading-tight flex items-center gap-1">
+                {(() => {
+                  let isTypingSubtitle = false;
+                  let typingText = "";
+                  if (typingUsers && orgUsers && Object.keys(typingUsers).length > 0) {
+                    const typingNames: string[] = [];
+                    Object.entries(typingUsers).forEach(([uid, data]) => {
+                      const u = orgUsers.find(o => o._id === uid);
+                      if (u) {
+                        typingNames.push(u.name.split(" ")[0]);
+                      }
+                    });
+                    if (typingNames.length > 0) {
+                      isTypingSubtitle = true;
+                      if (typingNames.length === 1) {
+                        const typeStr = Object.values(typingUsers)[0].type;
+                        typingText = `${typingNames[0]} is ${typeStr}...`;
+                      } else if (typingNames.length === 2) {
+                        typingText = `${typingNames[0]} and ${typingNames[1]} are typing...`;
+                      } else {
+                        typingText = `${typingNames[0]}, ${typingNames[1]} and ${typingNames.length - 2} others are typing...`;
+                      }
+                    }
+                  }
+
+                  if (isTypingSubtitle) {
+                    return <span className="text-emerald-500 font-medium">{typingText}</span>;
+                  }
+
+                  if (thread.type === "group" && groupInfo?.members) {
+                    const onlineCount = groupInfo.members.filter(m => onlineUsers?.has(m.userId)).length;
+                    return (
+                      <>
+                        {groupInfo.members.length} members
+                        {onlineCount > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 text-emerald-500 font-medium">
+                              {onlineCount} online
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></span>
+                            </span>
+                          </>
+                        )}
+                      </>
+                    );
+                  }
+
+                  return thread.type === "group" ? "Group" : (thread.role || "");
+                })()}
               </p>
             </motion.div>
           )}
@@ -187,9 +250,16 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <Search className="w-4 h-4 mr-2" />
               <span>Search in chat</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => {}}>
-              <BellOff className="w-4 h-4 mr-2" />
-              <span>Mute notifications</span>
+            
+            {onOpenScheduledMessages && (
+              <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenScheduledMessages}>
+                <Clock className="w-4 h-4 mr-2" />
+                <span>Scheduled messages</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={onMuteThread}>
+              {isMuted ? <BellOff className="w-4 h-4 mr-2" /> : <Bell className="w-4 h-4 mr-2" />}
+              <span>{isMuted ? "Unmute notifications" : "Mute notifications"}</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer py-2" onClick={onEnterSelectionMode}>
               <CheckSquare className="w-4 h-4 mr-2" />

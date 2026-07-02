@@ -345,19 +345,26 @@ const userSchema = new mongoose.Schema(
       default: []
     },
 
-    // 🔇 Muted Chat Threads
-    muted_chat_threads: {
-      type: [String],
-      default: []
+    // 🗑️ Cleared Chat Threads (Thread ID -> Cleared At Timestamp)
+    cleared_chat_threads: {
+        type: Map,
+        of: Date,
+        default: {}
     },
 
-    // ⭐ Starred Chat Messages
-    starred_chat_messages: {
-      type: [String],
-      default: []
+    // 🔔 In-App notification preferences (Bell icon inbox)
+    inAppNotifications: {
+      global: { type: Boolean, default: true },
+      chat: { type: Boolean, default: true },
+      classroom: { type: Boolean, default: true },
+      meetings: { type: Boolean, default: true },
+      settings: { type: Boolean, default: true },
+      attendance: { type: Boolean, default: true },
+      assignments: { type: Boolean, default: true },
+      fees: { type: Boolean, default: true },
     },
 
-    // 🔔 Push / In-App notification preferences
+    // Legacy push notification preferences
     pushNotifications: {
       global: { type: Boolean, default: true },
       sidebarPanelEnabled: { type: Boolean, default: true }

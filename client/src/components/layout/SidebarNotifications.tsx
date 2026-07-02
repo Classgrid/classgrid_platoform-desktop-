@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/marketing_ui/popover";
+import { Switch } from "@/components/marketing_ui/switch";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -42,18 +43,28 @@ type SidebarNotificationsProps = {
 
 export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNotificationsProps) {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"inbox" | "archive">("inbox");
-  const [showPushBanner, setShowPushBanner] = useState(() => {
-    return localStorage.getItem("push_banner_dismissed") !== "true";
-  });
-
+  const [tab, setTab] = useState<"inbox" | "archive" | "settings">("inbox");
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const res = await apiClient.get<{ notifications: NotificationItem[], unreadCount: number }>("/api/notifications");
       return res.data;
     },
-    refetchInterval: 30000, // Poll every 30s
+    refetchInterval: 30000,
+  });
+
+  const { data: preferences } = useQuery({
+    queryKey: ["notification-preferences"],
+    queryFn: async () => {
+      const res = await apiClient.get<{ preferences: Record<string, boolean> }>("/api/notifications/preferences");
+      return res.data.preferences;
+    },
+  });
+
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (newPrefs: Record<string, boolean>) => 
+      apiClient.put("/api/notifications/preferences", { preferences: newPrefs }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notification-preferences"] })
   });
 
   const markReadMutation = useMutation({
@@ -65,35 +76,6 @@ export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNoti
     mutationFn: async () => apiClient.put("/api/notifications/read-all"),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
-
-  const handleEnablePush = async () => {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        const vapidRes = await apiClient.get<{ publicKey: string }>("/api/web-push/vapid-public-key");
-        const vapidKey = vapidRes.data.publicKey;
-
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey)
-        });
-
-        await apiClient.post("/api/web-push/subscribe", {
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: subscription.toJSON().keys?.p256dh,
-            auth: subscription.toJSON().keys?.auth,
-          },
-          userAgent: navigator.userAgent
-        });
-      }
-    } catch (e) {
-      console.error("Push subscription failed", e);
-    }
-    localStorage.setItem("push_banner_dismissed", "true");
-    setShowPushBanner(false);
-  };
 
   const unreadCount = data?.unreadCount || 0;
   const notifications = data?.notifications || [];
@@ -136,80 +118,91 @@ export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNoti
               Archive
             </div>
           </div>
-          <Link to={settingsPath} className="text-muted-foreground hover:text-foreground">
-            <Icons.Settings className="w-4 h-4" />
-          </Link>
+            <div 
+              role="button"
+              tabIndex={0}
+              onClick={() => setTab("settings")}
+              className={`cursor-pointer ${tab === 'settings' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Icons.Settings className="w-4 h-4" />
+            </div>
         </div>
 
-        {/* Notifications List */}
-        <div className="max-h-[300px] overflow-y-auto flex flex-col">
-          {isLoading ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
-          ) : displayNotifs.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {tab === "inbox" ? "You're all caught up!" : "No archived notifications."}
-            </div>
-          ) : (
-            displayNotifs.map((n) => {
-              const Icon = n.type === "system" ? Icons.AlertCircle : n.type === "update" ? Icons.Info : Icons.Bell;
-              const colorClass = n.type === "system" ? "text-amber-500 bg-amber-500/10" : n.type === "update" ? "text-blue-500 bg-blue-500/10" : "text-emerald-500 bg-emerald-500/10";
-              
-              return (
-                <div 
-                  key={n._id}
-                  onClick={() => {
-                    if (!n.isRead) markReadMutation.mutate(n._id);
-                    if (n.link) window.open(n.link, "_blank");
-                  }}
-                  className={`flex items-start gap-3 p-4 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${!n.isRead ? 'bg-muted/20' : ''}`}
-                >
-                  <div className={`mt-0.5 rounded-full p-1 shrink-0 ${colorClass}`}>
-                    <Icon className="w-4 h-4" />
+        {/* Settings Panel */}
+        {tab === "settings" && (
+          <div className="p-4 flex flex-col gap-4 max-h-[300px] overflow-y-auto">
+            <h4 className="font-semibold text-sm border-b border-border pb-2">Notification Preferences</h4>
+            {[
+              { id: "global", label: "All Notifications", desc: "Master switch for all in-app alerts" },
+              { id: "chat", label: "Chat Messages", desc: "New messages and DMs" },
+              { id: "classroom", label: "Classroom Activity", desc: "Posts, comments, and materials" },
+              { id: "meetings", label: "Live Meetings", desc: "Zoom and Google Meet alerts" },
+              { id: "assignments", label: "Assignments & Quizzes", desc: "New tasks and grades" },
+              { id: "attendance", label: "Attendance Updates", desc: "Daily attendance logs" },
+              { id: "fees", label: "Fee Reminders", desc: "Payment dues and receipts" },
+            ].map((setting) => (
+              <div key={setting.id} className="flex items-center justify-between gap-4">
+                <div className="flex-1 space-y-0.5">
+                  <div className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {setting.label}
                   </div>
-                  <div className="flex-1 text-sm leading-tight">
-                    <span className="font-semibold mr-1">{n.title}:</span>
-                    {n.message}
+                  <div className="text-[11px] text-muted-foreground">
+                    {setting.desc}
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }).replace('about ', '')}
-                  </span>
                 </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Push Notification Banner */}
-        {showPushBanner && (
-          <div className="m-3 p-3 bg-background border border-border rounded-lg relative overflow-hidden">
-            <div className="flex items-start gap-2 mb-3">
-              <Icons.BellRing className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-              <p className="text-sm leading-tight pr-4">
-                Enable push notifications to receive updates on desktop or mobile
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  localStorage.setItem("push_banner_dismissed", "true");
-                  setShowPushBanner(false);
-                }}
-              >
-                Dismiss
-              </Button>
-              <Button 
-                size="sm"
-                className="flex-1"
-                onClick={handleEnablePush}
-              >
-                Enable
-              </Button>
-            </div>
+                <Switch 
+                  checked={preferences ? preferences[setting.id] : true}
+                  onCheckedChange={(checked) => {
+                    const newPrefs = { ...(preferences || {}), [setting.id]: checked };
+                    updatePreferencesMutation.mutate(newPrefs);
+                  }}
+                  disabled={updatePreferencesMutation.isPending || (!preferences?.global && setting.id !== "global")}
+                />
+              </div>
+            ))}
           </div>
         )}
+
+        {/* Notifications List */}
+        {tab !== "settings" && (
+          <div className="max-h-[300px] overflow-y-auto flex flex-col">
+            {isLoading ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+            ) : displayNotifs.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                {tab === "inbox" ? "You're all caught up!" : "No archived notifications."}
+              </div>
+            ) : (
+              displayNotifs.map((n) => {
+                const Icon = n.type === "system" ? Icons.AlertCircle : n.type === "update" ? Icons.Info : Icons.Bell;
+                const colorClass = n.type === "system" ? "text-amber-500 bg-amber-500/10" : n.type === "update" ? "text-blue-500 bg-blue-500/10" : "text-emerald-500 bg-emerald-500/10";
+                
+                return (
+                  <div 
+                    key={n._id}
+                    onClick={() => {
+                      if (!n.isRead) markReadMutation.mutate(n._id);
+                      if (n.link) window.open(n.link, "_blank");
+                    }}
+                    className={`flex items-start gap-3 p-4 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${!n.isRead ? 'bg-muted/20' : ''}`}
+                  >
+                    <div className={`mt-0.5 rounded-full p-1 shrink-0 ${colorClass}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 text-sm leading-tight">
+                      <span className="font-semibold mr-1">{n.title}:</span>
+                      {n.message}
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }).replace('about ', '')}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
 
         {/* Footer Action */}
         {tab === "inbox" && inboxNotifs.length > 0 && (

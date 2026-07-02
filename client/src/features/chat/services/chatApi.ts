@@ -21,6 +21,8 @@ export interface ChatThread {
   lastMessageAt: string | null;
   unread: number;
   createdAt: string;
+  isMuted?: boolean;
+  isOfficial?: boolean;
 }
 
 export interface ChatAttachment {
@@ -48,6 +50,14 @@ export interface ChatMessage {
   is_edited?: boolean;
   isSending?: boolean;
   isError?: boolean;
+  status?: 'approved' | 'pending' | 'rejected';
+  is_pinned?: boolean;
+  requires_acknowledgement?: boolean;
+  acknowledgements?: { user_id: string; user_name: string }[];
+  has_acknowledged?: boolean;
+  priority?: string;
+  is_silent?: boolean;
+  expires_at?: string;
 }
 
 export interface OrgUser {
@@ -129,16 +139,50 @@ export async function fetchMessages(threadId: string, before?: string): Promise<
   return res.data.messages;
 }
 
-export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any) {
+export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) {
   const formData = new FormData();
   if (message) formData.append("message", message);
   if (replyTo) formData.append("replyTo", JSON.stringify(replyTo));
+  if (options?.scheduledFor) formData.append("scheduledFor", options.scheduledFor);
+  if (options?.isSilent) formData.append("isSilent", "true");
+  if (options?.priority) formData.append("priority", options.priority);
+  if (options?.expiresAt) formData.append("expiresAt", options.expiresAt);
   if (files) {
-    files.forEach((file) => formData.append("files", file));
+    files.forEach((f) => formData.append("files", f));
   }
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
-    timeout: 300000, // 5 minutes to allow for large media uploads
+    headers: { "Content-Type": "multipart/form-data" },
   });
+  return res.data;
+}
+
+export interface ScheduledMessage {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  sender_name: string;
+  message: string;
+  attachments: ChatAttachment[];
+  scheduled_for: string;
+  status: 'pending' | 'sent' | 'failed' | 'cancelled';
+  created_at: string;
+}
+
+export async function fetchScheduledMessages(threadId: string): Promise<ScheduledMessage[]> {
+  const res = await apiClient.get<{ messages: ScheduledMessage[] }>(`/api/threads/${threadId}/messages/scheduled`);
+  return res.data.messages;
+}
+
+export async function cancelScheduledMessage(threadId: string, msgId: string) {
+  const res = await apiClient.delete(`/api/threads/${threadId}/messages/scheduled/${msgId}`);
+  return res.data;
+}
+
+export async function editScheduledMessage(threadId: string, msgId: string, message?: string, scheduledFor?: string) {
+  const payload: any = {};
+  if (message !== undefined) payload.message = message;
+  if (scheduledFor !== undefined) payload.scheduledFor = scheduledFor;
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/scheduled/${msgId}`, payload);
   return res.data.message;
 }
 
@@ -148,6 +192,11 @@ export async function markThreadRead(threadId: string) {
 
 export async function forwardMessages(messageIds: string[], targetThreadIds: string[]) {
   const res = await apiClient.post(`/api/threads/forward`, { messageIds, targetThreadIds }, { timeout: 300000 });
+  return res.data;
+}
+
+export async function toggleMuteThread(threadId: string) {
+  const res = await apiClient.post<{ success: boolean; isMuted: boolean }>(`/api/threads/${threadId}/mute`);
   return res.data;
 }
 
@@ -247,13 +296,28 @@ export async function voteThreadPoll(threadId: string, pollId: string, optionId:
   return res.data;
 }
 
-export async function fetchThreadPolls(threadId: string): Promise<Poll[]> {
-  const res = await apiClient.get<{ polls: Poll[] }>(`/api/threads/${threadId}/polls`);
+export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
+  const res = await apiClient.get<{ polls: Poll[] }>(`/api/group-chat/${groupId}/polls`);
   return res.data.polls;
 }
 
-export async function setDisappearingMessages(threadId: string, ttl: number) {
-  const res = await apiClient.post(`/api/threads/${threadId}/disappearing`, { ttl });
+export async function pinMessage(threadId: string, messageId: string, is_pinned: boolean) {
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/pin`, { is_pinned });
+  return res.data;
+}
+
+export async function approveMessage(threadId: string, messageId: string) {
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/approve`);
+  return res.data;
+}
+
+export async function rejectMessage(threadId: string, messageId: string, reason?: string) {
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/reject`, { reason });
+  return res.data;
+}
+
+export async function acknowledgeMessage(threadId: string, messageId: string) {
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/acknowledge`);
   return res.data;
 }
 
@@ -267,13 +331,40 @@ export async function votePoll(groupId: string, pollId: string, optionId: string
   return res.data;
 }
 
-export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
-  const res = await apiClient.get<{ polls: Poll[] }>(`/api/group-chat/${groupId}/polls`);
-  return res.data.polls;
-}
 
 export async function fetchPollVoters(pollId: string, threadOrGroupId: string, isGroup: boolean): Promise<{ option_id: string, user_id: string }[]> {
   const prefix = isGroup ? 'group-chat' : 'threads';
   const res = await apiClient.get<{ votes: { option_id: string, user_id: string }[] }>(`/api/${prefix}/${threadOrGroupId}/polls/${pollId}/voters`);
   return res.data.votes;
+}
+
+export async function fetchChatAuditLogs() {
+  const res = await apiClient.get('/api/group-chat/audit');
+  return res.data.logs;
+}
+
+// ── Join Requests ──
+export interface JoinRequest {
+  id: string;
+  group_id: string;
+  user_id: string;
+  user_name: string;
+  user_avatar: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+export async function requestToJoinGroup(groupId: string) {
+  const res = await apiClient.post(`/api/group-chat/${groupId}/join-request`);
+  return res.data.request;
+}
+
+export async function fetchJoinRequests(groupId: string) {
+  const res = await apiClient.get<{ requests: JoinRequest[] }>(`/api/group-chat/${groupId}/join-requests`);
+  return res.data.requests;
+}
+
+export async function processJoinRequest(groupId: string, requestId: string, status: 'approved' | 'rejected') {
+  const res = await apiClient.patch(`/api/group-chat/${groupId}/join-requests/${requestId}`, { status });
+  return res.data;
 }

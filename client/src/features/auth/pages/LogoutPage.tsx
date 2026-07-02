@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { apiClient } from "@/lib/apiClient";
@@ -21,7 +21,10 @@ export function LogoutPage() {
       if (!isMounted) return;
       
       // 3. Clear all stored user data
+      const pushDismissed = localStorage.getItem("push_banner_dismissed");
       localStorage.clear();
+      if (pushDismissed) localStorage.setItem("push_banner_dismissed", pushDismissed);
+      
       sessionStorage.clear();
       // Clear cookies safely
       document.cookie.split(";").forEach(c => {
@@ -44,8 +47,7 @@ export function LogoutPage() {
 
   return (
     <div 
-      className="fixed inset-0 flex flex-col items-center justify-center"
-      style={{ backgroundColor: "#0f0f0f", zIndex: 999999 }}
+      className="fixed inset-0 flex flex-col items-center justify-center bg-background z-[999999]"
     >
       {/* Top-left Classgrid Logo */}
       <div className="absolute top-8 left-8">
@@ -57,8 +59,8 @@ export function LogoutPage() {
       </div>
       
       {/* Center Spinner & Text */}
-      <Spinner className="w-8 h-8 text-white mb-6" />
-      <p className="text-lg font-semibold text-white tracking-tight">Logging out</p>
+      <Spinner className="w-8 h-8 text-foreground mb-6" />
+      <p className="text-lg font-semibold text-foreground tracking-tight">Logging out</p>
     </div>
   );
 }

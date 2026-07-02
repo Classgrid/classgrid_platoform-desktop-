@@ -29,6 +29,10 @@ interface ChatConversationProps {
   isSelectionMode?: boolean;
   selectedMessageIds?: Set<string>;
   onToggleMessageSelection?: (msgId: string) => void;
+  amIAdmin?: boolean;
+  onApprove?: (msgId: string) => void;
+  onReject?: (msgId: string) => void;
+  onAcknowledge?: (msgId: string) => void;
 }
 
 export function ChatConversation({
@@ -55,6 +59,10 @@ export function ChatConversation({
   isSelectionMode = false,
   selectedMessageIds = new Set(),
   onToggleMessageSelection,
+  amIAdmin = false,
+  onApprove,
+  onReject,
+  onAcknowledge,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -240,6 +248,10 @@ export function ChatConversation({
                     isSelectionMode={isSelectionMode}
                     isSelected={selectedMessageIds.has(msg.id)}
                     onToggleSelect={() => onToggleMessageSelection?.(msg.id)}
+                    isAdmin={amIAdmin}
+                    onApprove={onApprove}
+                    onReject={onReject}
+                    onAcknowledge={onAcknowledge}
                   />
                 </motion.div>
               );

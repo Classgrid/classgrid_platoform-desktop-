@@ -254,13 +254,42 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       return res.status(403).json({ error: 'Only admins can change group permissions' });
     }
 
-    const { send_messages, edit_info } = req.body;
+    const { 
+      send_message_policy, 
+      edit_info_policy,
+      add_member_policy,
+      create_poll_policy,
+      send_attachments_policy,
+      require_message_approval,
+      group_type,
+      is_official
+    } = req.body;
+    
     const updates = {};
-    if (['all', 'admin_only'].includes(send_messages)) updates.send_messages_policy = send_messages;
-    if (['all', 'admin_only'].includes(edit_info)) updates.edit_info_policy = edit_info;
+    
+    if (['all', 'admin_only', 'admin_faculty'].includes(send_message_policy)) updates.send_message_policy = send_message_policy;
+    if (['admin_only', 'org_admin_only'].includes(edit_info_policy)) updates.edit_info_policy = edit_info_policy;
+    if (['admin_only', 'admin_faculty', 'org_admin_only'].includes(add_member_policy)) updates.add_member_policy = add_member_policy;
+    if (['all', 'admin_only', 'admin_faculty'].includes(create_poll_policy)) updates.create_poll_policy = create_poll_policy;
+    if (['all', 'admin_only', 'admin_faculty'].includes(send_attachments_policy)) updates.send_attachments_policy = send_attachments_policy;
+    
+    if (typeof require_message_approval === 'boolean') updates.require_message_approval = require_message_approval;
+    if (typeof is_official === 'boolean') updates.is_official = is_official;
+    
+    const validGroupTypes = ['general', 'announcement', 'class', 'department', 'subject', 'exam', 'fees', 'admission', 'faculty', 'parent', 'transport', 'hostel', 'library', 'event'];
+    if (validGroupTypes.includes(group_type)) updates.group_type = group_type;
+
+    // Fallback for legacy send_messages
+    if (req.body.send_messages && ['all', 'admin_only', 'admin_faculty'].includes(req.body.send_messages)) {
+      updates.send_message_policy = req.body.send_messages;
+    }
+    // Fallback for legacy edit_info
+    if (req.body.edit_info && ['admin_only', 'org_admin_only'].includes(req.body.edit_info)) {
+       updates.edit_info_policy = req.body.edit_info;
+    }
 
     if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: 'Invalid permission values' });
+      return res.status(400).json({ error: 'Invalid or no permission values provided' });
     }
 
     const { data, error } = await sb
@@ -270,6 +299,19 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       .select()
       .single();
     if (error) throw error;
+
+    // TODO: Write to chat_group_audit_logs once model is ready
+    try {
+      await sb.from('chat_group_audit_logs').insert({
+        group_id: req.params.id,
+        actor_id: userId,
+        actor_name: req.user.name || 'Admin',
+        action: 'permissions_updated',
+        new_value: updates
+      });
+    } catch (auditErr) {
+      console.error('Failed to write audit log:', auditErr);
+    }
 
     res.json({ group: data });
   } catch (err) {
@@ -315,7 +357,22 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
     const orgId = req.user.organization_id?.toString();
     const { group, thread, membership } = await getGroupMembership(myId, req.params.id);
     if (!group || !membership) return res.status(403).json({ error: 'Not authorized' });
-    if (membership.role !== 'admin') return res.status(403).json({ error: 'Only admins can add members' });
+    
+    // Check add_member_policy
+    const policy = group.add_member_policy || 'admin_only';
+    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isFaculty = req.user.role === 'faculty';
+    const isAdmin = membership.role === 'admin' || isOrgAdmin;
+
+    if (policy === 'org_admin_only' && !isOrgAdmin) {
+      return res.status(403).json({ error: 'Only organization admins can add members' });
+    }
+    if (policy === 'admin_only' && !isAdmin) {
+      return res.status(403).json({ error: 'Only group admins can add members' });
+    }
+    if (policy === 'admin_faculty' && !isAdmin && !isFaculty) {
+       return res.status(403).json({ error: 'Only admins and faculty can add members' });
+    }
 
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'userId is required' });
@@ -339,6 +396,18 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
 
     // Update thread
     await sb.from('chat_threads').update({ updated_at: new Date().toISOString() }).eq('id', thread.id);
+
+    try {
+      await sb.from('chat_group_audit_logs').insert({
+        group_id: req.params.id,
+        actor_id: myId,
+        actor_name: req.user.name || 'Admin',
+        action: 'member_added',
+        new_value: { user_id: userId, name: targetUser.name }
+      });
+    } catch (auditErr) {
+      console.error('Audit log error:', auditErr);
+    }
 
     res.status(201).json({ ok: true, userId });
   } catch (err) {
@@ -448,15 +517,24 @@ router.post('/:id/polls', isAuthenticated, async (req, res) => {
     }));
 
     // Create a system message for the poll
-    const { data: msgId, error: rpcErr } = await sb.rpc('send_message_atomic', {
-      p_thread_id: thread.id,
-      p_sender_id: myId,
-      p_sender_name: req.user.name || 'User',
-      p_user_avatar: req.user.profilePicture || null,
-      p_msg: `📊 Poll: ${question.trim()}`,
-      p_reply: null,
-    });
-    if (rpcErr) throw rpcErr;
+    const now = new Date().toISOString();
+    const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
+      thread_id: thread.id,
+      sender_id: myId,
+      sender_name: req.user.name || 'User',
+      user_avatar: req.user.profilePicture || null,
+      message: `📊 Poll: ${question.trim()}`,
+      created_at: now
+    }).select('id').single();
+    if (insertErr) throw insertErr;
+    const msgId = insertedMsg.id;
+
+    // Update thread metadata
+    sb.from('chat_threads')
+      .update({ last_message: `📊 Poll: ${question.trim()}`, last_message_at: now })
+      .eq('id', thread.id)
+      .then(() => {})
+      .catch(() => {});
 
     // Create poll record
     const { data: poll, error: pollErr } = await sb
@@ -604,6 +682,192 @@ router.get('/:id/polls', isAuthenticated, async (req, res) => {
     res.json({ polls: result });
   } catch (err) {
     console.error('List polls error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// GET /groups/audit — Get organization chat audit logs
+// ──────────────────────────────────────────────
+router.get('/audit', isAuthenticated, async (req, res) => {
+  try {
+    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    if (!isOrgAdmin) return res.status(403).json({ error: 'Only org admins can view audit logs' });
+
+    // Join with chat_groups to verify org access, or just fetch all since it's admin
+    const { data: logs, error } = await sb
+      .from('chat_group_audit_logs')
+      .select('*, group:chat_groups(name, org_id)')
+      .order('created_at', { ascending: false })
+      .limit(100);
+      
+    if (error) throw error;
+    
+    // Filter by org
+    const filteredLogs = req.user.role === 'super_admin' 
+      ? logs 
+      : logs?.filter(log => log.group?.org_id === req.user.organization_id?.toString()) || [];
+
+    res.json({ logs: filteredLogs });
+  } catch (err) {
+    console.error('Audit logs error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /groups/:id/join-request — Student requests to join
+// ──────────────────────────────────────────────
+router.post('/:id/join-request', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const groupId = req.params.id;
+    
+    // Validate group exists and requires approval
+    const { data: group, error: groupErr } = await sb.from('chat_groups').select('*').eq('id', groupId).single();
+    if (groupErr || !group) return res.status(404).json({ error: 'Group not found' });
+    
+    if (!group.require_join_approval) {
+       return res.status(400).json({ error: 'Group does not require join approval' });
+    }
+    
+    // Check if already a member
+    const { data: thread } = await sb.from('chat_threads').select('id').eq('group_id', groupId).single();
+    if (thread) {
+       const { data: mem } = await sb.from('chat_thread_members').select('user_id').eq('thread_id', thread.id).eq('user_id', userId).maybeSingle();
+       if (mem) return res.status(400).json({ error: 'You are already a member of this group' });
+    }
+
+    // Check if request already exists
+    const { data: existing } = await sb.from('chat_group_join_requests')
+       .select('status')
+       .eq('group_id', groupId)
+       .eq('user_id', userId)
+       .maybeSingle();
+       
+    if (existing && existing.status === 'pending') {
+       return res.status(400).json({ error: 'You already have a pending join request for this group' });
+    }
+
+    // Create request
+    const { data: request, error: reqErr } = await sb.from('chat_group_join_requests').insert({
+       group_id: groupId,
+       user_id: userId,
+       user_name: req.user.name || '',
+       user_avatar: req.user.profilePicture || '',
+       status: 'pending'
+    }).select().single();
+
+    if (reqErr) throw reqErr;
+    
+    res.status(201).json({ request });
+  } catch (err) {
+    console.error('Join request error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// GET /groups/:id/join-requests — Get pending join requests
+// ──────────────────────────────────────────────
+router.get('/:id/join-requests', isAuthenticated, async (req, res) => {
+  try {
+    const myId = req.user._id.toString();
+    const groupId = req.params.id;
+    
+    const { group, membership } = await getGroupMembership(myId, groupId);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    
+    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isAdmin = membership?.role === 'admin' || isOrgAdmin;
+    
+    // Normal users can only see their own requests
+    let query = sb.from('chat_group_join_requests').select('*').eq('group_id', groupId).order('created_at', { ascending: false });
+    
+    if (!isAdmin) {
+       query = query.eq('user_id', myId);
+    }
+    
+    const { data: requests, error } = await query;
+    if (error) throw error;
+    
+    res.json({ requests: requests || [] });
+  } catch (err) {
+    console.error('Get join requests error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// PATCH /groups/:id/join-requests/:requestId — Approve or Reject
+// ──────────────────────────────────────────────
+router.patch('/:id/join-requests/:requestId', isAuthenticated, async (req, res) => {
+  try {
+    const myId = req.user._id.toString();
+    const groupId = req.params.id;
+    const { requestId } = req.params;
+    const { status } = req.body; // 'approved' or 'rejected'
+    
+    if (!['approved', 'rejected'].includes(status)) {
+       return res.status(400).json({ error: 'Invalid status' });
+    }
+    
+    const { group, thread, membership } = await getGroupMembership(myId, groupId);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    
+    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isAdmin = membership?.role === 'admin' || isOrgAdmin;
+    
+    if (!isAdmin) return res.status(403).json({ error: 'Only admins can process join requests' });
+    
+    // Fetch request
+    const { data: request } = await sb.from('chat_group_join_requests').select('*').eq('id', requestId).eq('group_id', groupId).single();
+    if (!request) return res.status(404).json({ error: 'Request not found' });
+    if (request.status !== 'pending') return res.status(400).json({ error: 'Request is already processed' });
+    
+    // Update request
+    const { error: updateErr } = await sb.from('chat_group_join_requests').update({
+       status,
+       processed_at: new Date().toISOString(),
+       processed_by: myId
+    }).eq('id', requestId);
+    if (updateErr) throw updateErr;
+    
+    // If approved, add to group
+    if (status === 'approved' && thread) {
+       await sb.from('chat_thread_members').insert({
+          thread_id: thread.id,
+          user_id: request.user_id,
+          role: 'member'
+       });
+       // Optional: Add audit log
+       await sb.from('chat_group_audit_logs').insert({
+          group_id: groupId,
+          action: 'member_joined',
+          actor_id: myId,
+          target_user_id: request.user_id,
+          details: 'Join request approved'
+       });
+    }
+
+    // Send Notification to user
+    const { dispatchNotification } = await import('../services/notification.service.js');
+    const title = `Group Join Request ${status === 'approved' ? 'Approved' : 'Rejected'}`;
+    const message = `Your request to join "${group.name}" has been ${status}.`;
+    
+    await dispatchNotification({
+       recipientId: request.user_id,
+       type: 'group_join',
+       title,
+       message,
+       link: '/chat',
+       relatedId: groupId,
+       sendPush: true
+    });
+    
+    res.json({ ok: true, status });
+  } catch (err) {
+    console.error('Process join request error:', err);
     res.status(500).json({ error: err.message });
   }
 });
