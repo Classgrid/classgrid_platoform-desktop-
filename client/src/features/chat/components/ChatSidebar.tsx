@@ -68,7 +68,8 @@ function renderSnippet(text: string) {
   if (text.startsWith('📎')) {
     return <><Paperclip className="w-3.5 h-3.5 mr-1.5 inline-block opacity-70 -mt-0.5" /> {text.replace('📎', '').trim()}</>;
   }
-  return text;
+  const strippedText = text.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+  return strippedText;
 }
 
 export function ChatSidebar({
