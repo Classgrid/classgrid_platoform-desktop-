@@ -128,13 +128,13 @@ export function NewChatSidebar({
                       <img
                         src={user.profilePicture}
                         alt=""
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
                       />
                     ) : (
                       <img
                         src={DEFAULT_USER_AVATAR}
                         alt=""
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
                       />
                     )}
                     {isSelected && (

@@ -168,13 +168,13 @@ export function ChatBubble({
                   <img
                     src={message.user_avatar}
                     alt={message.sender_name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover bg-primary/10 border border-border/50"
                   />
                 ) : (
                   <img
                     src={DEFAULT_USER_AVATAR}
                     alt={message.sender_name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover bg-primary/10 border border-border/50"
                   />
                 )}
               </button>

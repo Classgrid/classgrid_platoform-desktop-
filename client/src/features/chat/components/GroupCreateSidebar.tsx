@@ -150,9 +150,9 @@ export function GroupCreateSidebar({
                     <div key={user._id} className="flex items-center gap-1.5 bg-muted rounded-full pl-1 pr-2 py-1 border border-border">
                       <div className="w-5 h-5 rounded-full bg-primary/20 text-primary font-bold text-[9px] flex items-center justify-center shrink-0 overflow-hidden">
                         {user.profilePicture ? (
-                          <img src={user.profilePicture} alt="" className="w-full h-full object-cover" />
+                          <img src={user.profilePicture} alt="" className="w-full h-full object-cover bg-primary/10 border border-border/50" />
                         ) : (
-                          <img src={DEFAULT_USER_AVATAR} alt="" className="w-full h-full object-cover" />
+                          <img src={DEFAULT_USER_AVATAR} alt="" className="w-full h-full object-cover bg-primary/10 border border-border/50" />
                         )}
                       </div>
                       <span className="text-xs font-medium truncate max-w-[100px]">{user.name}</span>
@@ -202,13 +202,13 @@ export function GroupCreateSidebar({
                                 <img
                                   src={user.profilePicture}
                                   alt=""
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover bg-primary/10 border border-border/50"
                                 />
                               ) : (
                                 <img
                                   src={DEFAULT_USER_AVATAR}
                                   alt=""
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover bg-primary/10 border border-border/50"
                                 />
                               )}
                             </div>

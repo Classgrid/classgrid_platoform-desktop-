@@ -77,9 +77,9 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       {/* Avatar */}
       <button onClick={onAvatarClick || onShowInfo} className="shrink-0 relative cursor-pointer hover:opacity-80 transition-opacity">
         {hasAvatar ? (
-          <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
+          <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover bg-primary/10 border border-border/50" />
         ) : (
-          <img src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR} alt="" className="w-9 h-9 rounded-full object-cover" />
+          <img src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR} alt="" className="w-9 h-9 rounded-full object-cover bg-primary/10 border border-border/50" />
         )}
         {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
           <span 

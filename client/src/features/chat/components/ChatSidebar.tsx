@@ -290,13 +290,13 @@ export function ChatSidebar({
                     <img
                       src={thread.avatar!}
                       alt=""
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border/50"
                     />
                   ) : (
                     <img
                       src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR}
                       alt=""
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border/50"
                     />
                   )}
                   {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (

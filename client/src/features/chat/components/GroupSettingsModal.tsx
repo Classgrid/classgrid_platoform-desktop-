@@ -271,13 +271,13 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                                   {member.profilePicture ? (
                                     <img
                                       src={member.profilePicture}
-                                      className="w-10 h-10 rounded-full object-cover border border-border shrink-0 cursor-pointer"
+                                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
                                       alt=""
                                     />
                                   ) : (
                                     <img
                                       src={DEFAULT_USER_AVATAR}
-                                      className="w-10 h-10 rounded-full object-cover border border-border shrink-0 cursor-pointer"
+                                      className="w-10 h-10 rounded-full object-cover bg-primary/10 border border-border shrink-0 cursor-pointer"
                                       alt=""
                                     />
                                   )}
