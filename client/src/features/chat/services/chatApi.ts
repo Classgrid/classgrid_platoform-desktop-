@@ -15,7 +15,8 @@ export interface ChatThread {
   bio?: string;
   prn?: string;
   avatarColor?: string;
-  sendMessagesPolicy?: 'all' | 'admin_only';
+  sendMessagesPolicy?: 'all' | 'admin_only' | 'admin_faculty';
+  allowReplies?: boolean;
   myRole?: 'admin' | 'member';
   lastMessage: string | null;
   lastMessageAt: string | null;
@@ -254,6 +255,11 @@ export async function updateGroupPermissions(groupId: string, permissions: any) 
   return res.data.group;
 }
 
+export async function toggleThreadReplies(threadId: string, allowReplies: boolean) {
+  const res = await apiClient.put(`/api/thread-chat/${threadId}/replies`, { allowReplies });
+  return res.data;
+}
+
 export async function updateGroupInfo(groupId: string, name: string, description: string) {
   const res = await apiClient.put(`/api/group-chat/${groupId}`, { name, description });
   return res.data.group;
@@ -299,6 +305,11 @@ export async function voteThreadPoll(threadId: string, pollId: string, optionId:
 export async function fetchThreadPolls(threadId: string): Promise<Poll[]> {
   const res = await apiClient.get<{ polls: Poll[] }>(`/api/threads/${threadId}/polls`);
   return res.data.polls || [];
+}
+
+export async function setDisappearingMessages(threadId: string, ttl: number) {
+  const res = await apiClient.post(`/api/threads/${threadId}/disappearing-messages`, { ttl });
+  return res.data;
 }
 
 export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {

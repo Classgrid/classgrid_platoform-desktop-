@@ -3,7 +3,7 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
-import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
+import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, toggleThreadReplies, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
 import { useThreadChannel } from "../hooks/useRealtimeChat";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
@@ -33,10 +33,14 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     enabled: !!thread.groupId && thread.type === "group",
   });
 
-  const isAnnouncementMode = groupInfo?.group?.permissions?.send_messages === "admin_only";
+  const isAnnouncementMode = groupInfo?.group?.permissions?.send_messages === "admin_only" || thread.sendMessagesPolicy === "admin_only";
   const amIMember = groupInfo?.myRole === "member";
-  const isInputDisabled = isAnnouncementMode && amIMember;
-  const disabledReason = isInputDisabled ? "Only admins can send messages." : undefined;
+  const isInputDisabled = (isAnnouncementMode || thread.allowReplies === false) && amIMember;
+  let disabledReason = isInputDisabled ? "Only admins can send messages." : undefined;
+  
+  if (thread.allowReplies === false && amIMember) {
+    disabledReason = "Replies are disabled for this thread. Only admins can send messages.";
+  }
 
   // Fetch group polls if group
   const { data: polls } = useQuery({
@@ -459,6 +463,29 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
       });
     } catch (error) {
       console.error("Failed to acknowledge message", error);
+    }
+  };
+
+  const handleToggleReplies = async () => {
+    try {
+      const newAllowReplies = thread.allowReplies === false ? true : false;
+      await toggleThreadReplies(threadId, newAllowReplies);
+      queryClient.setQueryData(["chat-threads", "list"], (oldData: any) => {
+        if (!oldData || !oldData.threads) return oldData;
+        const newThreads = oldData.threads.map((t: ChatThread) => 
+          t.id === threadId ? { ...t, allowReplies: newAllowReplies } : t
+        );
+        return { ...oldData, threads: newThreads };
+      });
+      // Also update active thread if stored
+      queryClient.setQueryData(["active-thread"], (old: any) => {
+        if (old && old.id === threadId) {
+          return { ...old, allowReplies: newAllowReplies };
+        }
+        return old;
+      });
+    } catch (error) {
+      console.error("Failed to toggle replies", error);
     }
   };
 

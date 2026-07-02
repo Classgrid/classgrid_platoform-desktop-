@@ -100,7 +100,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "System Health", to: "/superadmin/system-health", icon: Activity },
           { label: "Feature Flags", to: "/superadmin/feature-flags", icon: Zap },
           { label: "Rollback Actions", to: "/superadmin/rollback", icon: RotateCcw },
-          { label: "Audit Logs", to: "/superadmin/activity-logs", icon: Shield },
+          { label: "Audit", to: "/superadmin/activity-logs", icon: Shield },
           { label: "System Config", to: "/superadmin/config", icon: Settings }
         ]
       },
@@ -184,7 +184,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         items: [
           { label: "NBA / NAAC", to: "/org/compliance/nba-naac", icon: Shield },
           { label: "SARAL / DTE Reports", to: "/org/compliance/reports", icon: FileText },
-          { label: "Audit Trail", to: "/org/audit", icon: Shield }
+          { label: "Audit", to: "/org/audit", icon: Shield }
         ]
       },
       {
@@ -261,7 +261,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Bulk SMS / WhatsApp", to: "/dept/admissions/bulk", icon: Megaphone },
           { label: "Website CMS", to: "/dept/admissions/website", icon: Globe },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Requests", to: "/join-requests", icon: Users }
+          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -309,7 +310,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Bank Reconciliation", to: "/dept/fees/reconciliation", icon: CreditCard },
           { label: "Website CMS", to: "/dept/fees/website", icon: Globe },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Requests", to: "/join-requests", icon: Users }
+          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -364,7 +366,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Toppers & Awards", to: "/dept/exams/toppers", icon: Award },
           { label: "Website CMS", to: "/dept/exams/website", icon: Globe },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Requests", to: "/join-requests", icon: Users }
+          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -417,7 +420,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Stock Report", to: "/dept/library/stock", icon: ClipboardList },
           { label: "Website CMS", to: "/dept/library/website", icon: Globe },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Requests", to: "/join-requests", icon: Users }
+          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -462,7 +466,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "SARAL Compliance", to: "/dept/attendance/saral", icon: Shield },
           { label: "Website CMS", to: "/dept/attendance/website", icon: Globe },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Requests", to: "/join-requests", icon: Users }
+          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -508,7 +513,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Salary Processing", to: "/dept/hr/payroll", icon: CreditCard },
           { label: "Pay Slips", to: "/dept/hr/payslips", icon: FileText },
           { label: "Payroll Reports", to: "/dept/hr/payroll-reports", icon: FileBarChart },
-          { label: "Website CMS", to: "/dept/hr/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/hr/website", icon: Globe },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -546,7 +552,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Routes & Buses", to: "/dept/transport/routes", icon: Bus },
           { label: "Passengers", to: "/dept/transport/passengers", icon: Users },
           { label: "Fee Collection", to: "/dept/transport/fees", icon: CreditCard },
-          { label: "Website CMS", to: "/dept/transport/website", icon: Globe }
+          { label: "Website CMS", to: "/dept/transport/website", icon: Globe },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -595,7 +602,8 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "What's New", to: "/whats-new", icon: Sparkles },
           { label: "Organization", to: "/organization", icon: Building2 },
           { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare },
-          { label: "Marketplace", to: "/marketplace", icon: CreditCard }
+          { label: "Marketplace", to: "/marketplace", icon: CreditCard },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],
@@ -639,11 +647,11 @@ export const dashboardConfigs: DashboardConfig[] = [
       },
       {
         items: [
-          { label: "My Requests", to: "/my-requests", icon: ClipboardList },
-          { label: "Requests", to: "/join-requests", icon: Users },
+          { label: "My Requests", to: "/join-requests", icon: ClipboardList },
           { label: "What's New", to: "/whats-new", icon: Sparkles },
           { label: "Organization", to: "/organization", icon: Building2 },
-          { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare }
+          { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare },
+          { label: "Audit", to: "/audit", icon: Shield }
         ]
       }
     ],

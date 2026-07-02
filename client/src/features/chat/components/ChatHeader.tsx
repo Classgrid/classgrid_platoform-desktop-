@@ -34,6 +34,7 @@ interface ChatHeaderProps {
   isMuted?: boolean;
   onMuteThread?: () => void;
   onOpenScheduledMessages?: () => void;
+  onToggleReplies?: () => void;
 }
 
 function getInitials(name: string) {
@@ -55,7 +56,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenScheduledMessages }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenScheduledMessages, onToggleReplies }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -250,6 +251,13 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <Search className="w-4 h-4 mr-2" />
               <span>Search in chat</span>
             </DropdownMenuItem>
+            
+            {onToggleReplies && thread.myRole === 'admin' && (
+              <DropdownMenuItem className="cursor-pointer py-2" onClick={onToggleReplies}>
+                {thread.allowReplies === false ? <CheckSquare className="w-4 h-4 mr-2" /> : <XCircle className="w-4 h-4 mr-2 text-danger" />}
+                <span className={thread.allowReplies === false ? "" : "text-danger"}>{thread.allowReplies === false ? "Enable replies" : "Disable replies"}</span>
+              </DropdownMenuItem>
+            )}
             
             {onOpenScheduledMessages && (
               <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenScheduledMessages}>

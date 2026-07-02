@@ -89,6 +89,7 @@ export function useThreadChannel(
     onTyping?: (data: { userId: string; isTyping?: boolean; activityType?: 'typing' | 'recording' | 'uploading' | null }) => void;
     onNewPoll?: (data: { poll: any; messageId: string }) => void;
     onPollVote?: (data: { pollId: string; voteCounts: any; totalVoters: number }) => void;
+    onThreadUpdated?: (data: { allow_replies?: boolean; [key: string]: any }) => void;
   }
 ) {
   const channelRef = useRealtimeChannel(threadId ? `thread:${threadId}` : null, {
@@ -99,6 +100,7 @@ export function useThreadChannel(
     typing: (payload: any) => handlers.onTyping?.(payload),
     new_poll: (payload: any) => handlers.onNewPoll?.(payload),
     poll_vote: (payload: any) => handlers.onPollVote?.(payload),
+    thread_updated: (payload: any) => handlers.onThreadUpdated?.(payload),
   });
 
   const sendTyping = useCallback((isTyping: boolean, activityType: 'typing' | 'recording' | 'uploading' | null = 'typing') => {
