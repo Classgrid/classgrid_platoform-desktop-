@@ -114,14 +114,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
 
     const targetElement = event?.target instanceof Element ? event.target : null;
-    const isNestedPickerEvent =
-      !targetElement ||
-      !targetElement.isConnected ||
-      !!targetElement.closest(
-        '.nikhil-time-calendar-content, [data-calendar-container="true"], [data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]'
-      );
 
-    if (isNestedPickerEvent) {
+    // Prevent closing if we clicked an element that was instantly unmounted
+    if (reason === "click-outside" && event && targetElement && !targetElement.isConnected) {
+      event.preventDefault?.();
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    // Prevent closing if we clicked inside our nested portals
+    if (targetElement?.closest('.nikhil-time-calendar-content, [data-calendar-container="true"], [data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]')) {
       event?.preventDefault?.();
       setIsOptionsOpen(true);
       return;

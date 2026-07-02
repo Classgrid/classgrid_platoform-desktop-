@@ -96,9 +96,16 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     }
 
     const targetElement = event?.target instanceof Element ? event.target : null;
+    
+    // Prevent closing if we clicked an element that was instantly unmounted
+    if (reason === "click-outside" && event && targetElement && !targetElement.isConnected) {
+      event.preventDefault?.();
+      setIsOpen(true);
+      return;
+    }
+
+    // Prevent closing if we clicked inside our nested portals
     const isCalendarSelectEvent =
-      !targetElement ||
-      !targetElement.isConnected ||
       selectCloseGuardRef.current ||
       isSelectOpenRef.current ||
       !!targetElement?.closest(
