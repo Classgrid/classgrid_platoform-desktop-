@@ -11,7 +11,7 @@ interface GroupCreateSidebarProps {
   onBack: () => void;
   users: OrgUser[];
   currentUserId: string;
-  onCreateGroup: (name: string, memberIds: string[], photo: File | null) => Promise<void>;
+  onCreateGroup: (name: string, description: string, memberIds: string[], photo: File | null) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -34,6 +34,7 @@ export function GroupCreateSidebar({
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupName, setGroupName] = useState("");
+  const [groupSubject, setGroupSubject] = useState("");
   const [groupPhoto, setGroupPhoto] = useState<File | null>(null);
   const [groupPhotoPreview, setGroupPhotoPreview] = useState<string | null>(null);
   const [cropperSrc, setCropperSrc] = useState<string | null>(null);
@@ -77,8 +78,9 @@ export function GroupCreateSidebar({
     if (!groupName.trim() || selectedIds.size === 0) return;
     setIsSubmitting(true);
     try {
-      await onCreateGroup(groupName.trim(), Array.from(selectedIds), groupPhoto);
+      await onCreateGroup(groupName.trim(), groupSubject.trim(), Array.from(selectedIds), groupPhoto);
       setGroupName("");
+      setGroupSubject("");
       setGroupPhoto(null);
       setSelectedIds(new Set());
       setStage("select");
@@ -276,15 +278,30 @@ export function GroupCreateSidebar({
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
               </label>
               
-              <div className="w-full relative">
-                <input
-                  type="text"
-                  placeholder="Group subject (optional)"
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  className="w-full bg-transparent border-b-2 border-emerald-500 py-2 text-foreground outline-none placeholder:text-muted-foreground/70"
-                  autoFocus
-                />
+              <div className="w-full relative flex flex-col gap-4">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Group name *"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    className="w-full bg-transparent border-b-2 border-emerald-500 py-2 pr-8 text-foreground outline-none placeholder:text-muted-foreground/70 font-semibold"
+                    autoFocus
+                  />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xl pointer-events-none">
+                    *
+                  </div>
+                </div>
+
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Group subject (optional)"
+                    value={groupSubject}
+                    onChange={(e) => setGroupSubject(e.target.value)}
+                    className="w-full bg-transparent border-b border-border py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/70"
+                  />
+                </div>
               </div>
             </div>
 

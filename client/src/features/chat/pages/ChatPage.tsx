@@ -341,9 +341,9 @@ export function ChatPage() {
     }
   };
 
-  const handleCreateGroup = async (name: string, memberIds: string[], photo?: File | null) => {
+  const handleCreateGroup = async (name: string, description: string, memberIds: string[], photo?: File | null) => {
     try {
-      const response = await createGroup(name, memberIds);
+      const response = await createGroup(name, description, memberIds);
       const group = response.group;
       const thread = response.thread;
       
