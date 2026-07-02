@@ -62,6 +62,7 @@ export interface OrgUser {
   prn: string | null;
   organization_name?: string | null;
   organization_logo?: string | null;
+  metadata?: Record<string, any>;
 }
 
 export interface ChatGroup {

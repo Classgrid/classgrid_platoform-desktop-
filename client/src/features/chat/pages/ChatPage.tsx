@@ -825,6 +825,7 @@ export function ChatPage() {
                 bio: selectedUserForProfile.bio,
                 organization_name: selectedUserForProfile.organization_name,
                 organization_logo: selectedUserForProfile.organization_logo,
+                metadata: selectedUserForProfile.metadata,
               }}
               onClose={() => setProfileUserId(null)} 
             />
