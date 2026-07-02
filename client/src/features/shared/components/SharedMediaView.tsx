@@ -8,14 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/a
 import { Spinner } from "@/components/marketing_ui/spinner";
 
 interface SharedMediaViewProps {
-  targetUserId: string;
+  targetUserId?: string;
+  threadId?: string;
 }
 
-export function SharedMediaView({ targetUserId }: SharedMediaViewProps) {
+export function SharedMediaView({ targetUserId, threadId }: SharedMediaViewProps) {
   const { data, isLoading } = useQuery({
-    queryKey: ["shared-media", targetUserId],
-    queryFn: () => apiClient.get(`/api/threads/dm/${targetUserId}/shared-media`).then((r) => r.data),
-    enabled: !!targetUserId });
+    queryKey: ["shared-media", targetUserId, threadId],
+    queryFn: () => {
+      if (threadId) {
+        return apiClient.get(`/api/threads/${threadId}/shared-media`).then((r) => r.data);
+      }
+      return apiClient.get(`/api/threads/dm/${targetUserId}/shared-media`).then((r) => r.data);
+    },
+    enabled: !!targetUserId || !!threadId 
+  });
 
   if (isLoading) {
     return (

@@ -45,6 +45,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const [showAddMember, setShowAddMember] = useState(initialShowAddMember || false);
   const [addSearch, setAddSearch] = useState("");
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<"settings" | "shared-media">("settings");
 
   // ── Data: Group Info ──
   const { data, isLoading, isError, error } = useQuery({
@@ -204,9 +205,13 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
         <div className="flex items-center text-sm text-muted-foreground">
           <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>Chat</button>
           <span className="mx-2 opacity-50">/</span>
-          <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>{data?.group?.name || "Group"}</button>
+          <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={() => setActiveView("settings")}>{data?.group?.name || "Group"}</button>
           <span className="mx-2 opacity-50">/</span>
-          <span className="font-semibold text-foreground">Settings</span>
+          {activeView === "shared-media" ? (
+            <span className="font-semibold text-foreground">Media, Links & Docs</span>
+          ) : (
+            <span className="font-semibold text-foreground">Settings</span>
+          )}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto w-full relative">
@@ -230,20 +235,46 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
               await handleUpload({ file, type });
             }}
           >
-            {/* ═══════════════════════════════════════════════ */}
-            {/* Members Section                                */}
-            {/* ═══════════════════════════════════════════════ */}
-            <div className="w-full max-w-[1000px] mx-auto bg-muted/20 rounded-xl p-4 border border-border mt-4">
-              <div className="flex items-center justify-between pb-3 mb-2 border-b border-border">
-                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  Group Members
-                  {onlineMembersCount > 0 && (
-                    <span className="text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      {onlineMembersCount} online
-                    </span>
-                  )}
-                </h4>
+            {activeView === "shared-media" ? (
+              <div className="pt-6">
+                <SharedMediaView threadId={data.thread?.id} />
+              </div>
+            ) : (
+              <>
+                {/* ═══════════════════════════════════════════════ */}
+                {/* Media & Docs Button                            */}
+                {/* ═══════════════════════════════════════════════ */}
+                <div className="w-full max-w-[1000px] mx-auto mt-6 relative group px-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveView("shared-media")}
+                    className="w-full sm:w-auto relative flex items-center justify-between gap-4 py-6 px-6 border-border/50 bg-background/50 dark:bg-muted/10 backdrop-blur-xl hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10 text-primary">
+                        <FileBox size={18} />
+                      </div>
+                      <span className="font-semibold text-foreground/90 tracking-wide">Media, Links & Docs</span>
+                    </div>
+                    <ChevronRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </Button>
+                </div>
+
+                {/* ═══════════════════════════════════════════════ */}
+                {/* Members Section                                */}
+                {/* ═══════════════════════════════════════════════ */}
+                <div className="w-full max-w-[1000px] mx-auto bg-muted/20 rounded-xl p-4 border border-border mt-4">
+                  <div className="flex items-center justify-between pb-3 mb-2 border-b border-border">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      Group Members
+                      {onlineMembersCount > 0 && (
+                        <span className="text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          {onlineMembersCount} online
+                        </span>
+                      )}
+                    </h4>
                 {/* Add Member Button — Controlled by Policy */}
                 {(() => {
                   const policy = data.group.add_member_policy || 'admin_only';
@@ -641,6 +672,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                 Leave Group
               </button>
             </div>
+            </>
+            )}
           </SharedProfilePage>
         )}
         </div>
