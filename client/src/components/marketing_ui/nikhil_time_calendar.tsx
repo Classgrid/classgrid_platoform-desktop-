@@ -107,6 +107,17 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
         side={popDirection === "up" ? "top" : popDirection === "down" ? "bottom" : popDirection}
         sideOffset={8}
         className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content z-[100]"
+        onInteractOutside={(e) => {
+          const target = e.target as Element | null;
+          if (
+            !target ||
+            !target.isConnected ||
+            target.closest('[data-radix-popper-content-wrapper]') ||
+            target.closest('[role="listbox"]')
+          ) {
+            e.preventDefault();
+          }
+        }}
       >
         {/* The Unified Picker Widget */}
         <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden">
