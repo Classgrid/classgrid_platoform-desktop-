@@ -25,7 +25,7 @@ export function ChatUserProfileSidebar({ user, onClose }: ChatUserProfileSidebar
       </div>
       
       <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center">
-        <Avatar className="w-32 h-32 mb-4 border-4 border-background shadow-md">
+        <Avatar className="w-32 h-32 mb-4 border-4 border-background shadow-md bg-primary/10">
           <AvatarImage src={user.profilePicture || user.photoURL || DEFAULT_USER_AVATAR} alt={user.name} className="object-cover" />
           <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
             {user.name?.charAt(0)?.toUpperCase() || "U"}

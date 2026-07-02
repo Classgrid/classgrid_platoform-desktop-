@@ -420,7 +420,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                 className={`relative -mt-[100px] mb-2 ${!isReadOnly ? 'cursor-pointer group' : ''} rounded-full overflow-hidden`} 
                 onClick={() => !isReadOnly && fileInputRef.current?.click()}
               >
-                <Avatar className="w-[160px] h-[160px] border-4 border-background shadow-xl bg-card">
+                <Avatar className="w-[160px] h-[160px] border-4 border-background shadow-xl bg-primary/10">
                   <AvatarImage src={form.profilePicture} alt={form.name} className="object-cover" />
                   <AvatarFallback className="text-5xl font-bold bg-primary/10 text-primary">
                     {form.name?.charAt(0)?.toUpperCase() || "U"}
