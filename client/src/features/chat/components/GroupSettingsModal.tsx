@@ -204,7 +204,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const onlineMembersCount = data?.members?.filter(m => onlineUsers?.has(m.userId)).length || 0;
 
   return (
-    <div className="absolute inset-0 z-50 bg-muted/20 dark:bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
+    <div className="absolute inset-0 z-50 bg-slate-50 dark:bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
       {/* Breadcrumb Header */}
       <div className="shrink-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
         <div className="flex items-center text-sm text-muted-foreground">
