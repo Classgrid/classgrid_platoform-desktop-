@@ -64,11 +64,8 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
   // Combine date and time when apply is clicked
   const handleApply = () => {
-    if (!internalDate) {
-      onChange(undefined);
-      return;
-    }
-    const finalDate = new Date(internalDate);
+    const baseDate = internalDate || new Date();
+    const finalDate = new Date(baseDate);
     let h = parseInt(hour);
     if (ampm === "PM" && h < 12) h += 12;
     if (ampm === "AM" && h === 12) h = 0;
