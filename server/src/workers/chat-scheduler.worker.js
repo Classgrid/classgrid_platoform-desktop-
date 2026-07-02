@@ -33,24 +33,25 @@ export function initChatSchedulerCron() {
       for (const schedMsg of pendingMessages) {
         try {
           // Check if thread still exists
-          const { data: thread } = await sb.from('chat_threads').select('type, group_id, name').eq('id', schedMsg.thread_id).single();
-          if (!thread) {
+          const { data: thread, error: threadErr } = await sb.from('chat_threads').select('type, group_id').eq('id', schedMsg.thread_id).single();
+          if (threadErr || !thread) {
+            console.error('[ChatScheduler] Thread fetch failed', threadErr);
             await sb.from('chat_scheduled_messages').update({ status: 'failed' }).eq('id', schedMsg.id);
             continue;
           }
 
           // Check if group requires approval
           let msgStatus = 'approved';
+          let groupName = 'Group';
           if (thread.type === 'group' && thread.group_id) {
-            const { data: group } = await sb.from('chat_groups').select('require_message_approval').eq('id', thread.group_id).single();
-            if (group && group.require_message_approval) {
-              // Note: If the sender was not admin, they couldn't have scheduled it if require_message_approval is strictly admin-only.
-              // But we can just set it to approved, because scheduling is restricted to people who can send.
-              // Actually, in the endpoint we allowed normal members to schedule. So we should re-check here, or just set status to pending.
-              // For simplicity, scheduled messages that are approved bypass this, but let's do a quick check.
-              const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', thread.group_id).eq('user_id', schedMsg.sender_id).single();
-              if (membership?.role !== 'admin') {
-                msgStatus = 'pending';
+            const { data: group } = await sb.from('chat_groups').select('require_message_approval, name').eq('id', thread.group_id).single();
+            if (group) {
+              groupName = group.name || 'Group';
+              if (group.require_message_approval) {
+                const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', schedMsg.thread_id).eq('user_id', schedMsg.sender_id).single();
+                if (membership?.role !== 'admin') {
+                  msgStatus = 'pending';
+                }
               }
             }
           }
@@ -134,7 +135,7 @@ export function initChatSchedulerCron() {
                     notificationsToInsert.push({
                       recipient: m.user_id,
                       type: 'chat',
-                      title: thread.type === 'group' ? `New scheduled message in ${thread.name || 'Group'}` : `New message from ${schedMsg.sender_name}`,
+                      title: thread.type === 'group' ? `New scheduled message in ${groupName}` : `New message from ${schedMsg.sender_name}`,
                       message: lastMsgText,
                       link: `/platform/chat?threadId=${schedMsg.thread_id}`,
                       relatedId: schedMsg.thread_id,
