@@ -323,7 +323,8 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
     // Verify user is in same org
     const targetUser = await User.findById(userId).select('organization_id name').lean();
     if (!targetUser) return res.status(404).json({ error: 'User not found' });
-    if (targetUser.organization_id?.toString() !== orgId) {
+    const isSuperAdmin = req.user.role === 'super_admin';
+    if (targetUser.organization_id?.toString() !== orgId && !isSuperAdmin) {
       return res.status(403).json({ error: 'User is not in your organization' });
     }
 

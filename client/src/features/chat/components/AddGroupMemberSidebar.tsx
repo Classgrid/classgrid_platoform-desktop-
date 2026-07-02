@@ -189,24 +189,31 @@ export function AddGroupMemberSidebar({
             </div>
           )}
           
-          {/* Floating Action Button */}
+          {/* Sticky Action Button */}
           <AnimatePresence>
             {selectedIds.size > 0 && (
-              <motion.button
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                onClick={handleAdd}
-                disabled={isSubmitting}
-                className="absolute bottom-6 right-6 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors z-10 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "tween", duration: 0.2 }}
+                className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-20"
               >
-                {isSubmitting ? (
-                  <Spinner className="w-6 h-6 text-white" />
-                ) : (
-                  <Check className="w-6 h-6" />
-                )}
-              </motion.button>
+                <button
+                  onClick={handleAdd}
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold shadow-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <Spinner className="w-5 h-5 text-white" />
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" />
+                      <span>Add {selectedIds.size} Member{selectedIds.size !== 1 ? 's' : ''}</span>
+                    </>
+                  )}
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
