@@ -103,36 +103,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   };
 
 
-  const handleOptionsOpenChange = (
-    open: boolean,
-    eventDetails?: any
-  ) => {
-    console.log('[ChatInput] handleOptionsOpenChange', { open, eventDetails });
-    if (open) {
-      setIsOptionsOpen(true);
-      return;
-    }
-
-    const event = eventDetails?.event;
-    const reason = eventDetails?.reason;
-    const targetNode = event?.target instanceof Node ? event.target : null;
-    const targetElement = targetNode?.nodeType === 3 ? targetNode.parentElement : (targetNode instanceof Element ? targetNode : null);
-
-    // Prevent closing if we clicked an element that was instantly unmounted
-    if (reason === "outside-press" && event && targetNode && !targetNode.isConnected) {
-      eventDetails?.cancel?.();
-      setIsOptionsOpen(true);
-      return;
-    }
-
-    // Prevent closing if we clicked inside our nested portals
-    if (targetElement?.closest('.nikhil-time-calendar-content, [data-calendar-container="true"], [data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]')) {
-      eventDetails?.cancel?.();
-      setIsOptionsOpen(true);
-      return;
-    }
-
-    setIsOptionsOpen(false);
+  const handleOptionsOpenChange = (open: boolean) => {
+    setIsOptionsOpen(open);
   };
   const clearAudio = () => {
     setAudioBlob(null);
