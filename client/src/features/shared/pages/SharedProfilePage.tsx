@@ -114,6 +114,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         prn: publicUser.prn,
         bio: publicUser.bio,
         organization_name: publicUser.organization_name,
+        organization_logo: publicUser.organization_logo,
         metadata: publicUser.metadata || {},
       });
     } else if (profileData?.user) {

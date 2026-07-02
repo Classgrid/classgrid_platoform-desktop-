@@ -1875,11 +1875,24 @@ Content: ${text.substring(0, 10000)}
 router.get("/academic-status/:userId", async (req, res) => {
     try {
         const { userId } = req.params;
-        // Returning real-looking data since the full Academic backend schema is pending
+        const User = (await import("../models/User.js")).default;
+        const user = await User.findById(userId).select("role department branch batch").lean();
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        let primaryText = user.department || user.branch || "Academic Status";
+        let secondaryText = user.role === "student" ? (user.batch || "Student") : (user.role || "Member");
+
+        // Format role to title case
+        if (secondaryText) {
+            secondaryText = secondaryText.charAt(0).toUpperCase() + secondaryText.slice(1).replace('_', ' ');
+        }
+
         res.json({
             status: {
-                primaryText: "Computer Science Dept",
-                secondaryText: "Faculty Member"
+                primaryText: primaryText,
+                secondaryText: secondaryText
             }
         });
     } catch (err) {

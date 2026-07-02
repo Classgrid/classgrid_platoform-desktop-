@@ -60,6 +60,8 @@ export interface OrgUser {
   phoneNumber: string | null;
   bio: string | null;
   prn: string | null;
+  organization_name?: string | null;
+  organization_logo?: string | null;
 }
 
 export interface ChatGroup {

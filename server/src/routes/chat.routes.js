@@ -1,5 +1,6 @@
 
 import express from 'express';
+import { isAuthenticated } from '../middleware/auth.middleware.js';
 import multer from 'multer';
 import { getChatReply, getVisionReply, getChatReplyStream } from '../services/chat.js';
 import { parsePDF } from '../services/file-parser.js';
@@ -833,16 +834,25 @@ Keep the tone very warm, helpful, and structured.
 // ─────────────────────────────────────────────
 // GET GROUPS IN COMMON
 // ─────────────────────────────────────────────
-router.get('/groups-in-common/:userId', async (req, res) => {
+router.get('/groups-in-common/:userId', isAuthenticated, async (req, res) => {
   try {
     const { userId } = req.params;
-    // Returning real-looking data since the full Chat backend overlapping logic is pending
-    res.json({
-      groups: [
-        { id: '1', name: 'FY CS Batch A' },
-        { id: '2', name: 'Web Dev Club' }
-      ]
-    });
+    const myId = req.user._id.toString();
+
+    // Find classrooms where both users are approved members
+    const myMemberships = await ClassroomMembership.find({ student: myId, status: 'approved' }).select('classroom').lean();
+    const myClassroomIds = myMemberships.map(m => m.classroom.toString());
+
+    const theirMemberships = await ClassroomMembership.find({ student: userId, status: 'approved', classroom: { $in: myClassroomIds } })
+      .populate('classroom', 'name')
+      .lean();
+      
+    const commonClassrooms = theirMemberships.map(m => ({
+      id: m.classroom._id,
+      name: m.classroom.name
+    }));
+
+    res.json({ groups: commonClassrooms });
   } catch (error) {
     console.error('Groups in common API Error:', error);
     res.status(500).json({ error: 'Failed to fetch groups in common' });

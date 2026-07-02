@@ -813,6 +813,8 @@ export function ChatPage() {
                 profileBanner: selectedUserForProfile.profileBanner || "",
                 prn: selectedUserForProfile.prn,
                 bio: selectedUserForProfile.bio,
+                organization_name: selectedUserForProfile.organization_name,
+                organization_logo: selectedUserForProfile.organization_logo,
               }}
               onClose={() => setProfileUserId(null)} 
             />
