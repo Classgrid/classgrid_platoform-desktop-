@@ -802,7 +802,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
       if (schedErr) {
          console.error("[Schedule Insert Error]", schedErr);
-         return res.status(500).json({ error: 'Failed to schedule message' });
+         return res.status(500).json({ error: schedErr.message || 'Failed to schedule message' });
       }
       return res.status(201).json({ message: schedMsg, isScheduled: true });
     }

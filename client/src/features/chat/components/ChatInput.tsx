@@ -105,15 +105,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
   const handleOptionsOpenChange = (
     open: boolean,
-    eventDetails?: { event?: Event; cancel?: () => void }
+    event?: Event,
+    reason?: string
   ) => {
     if (open) {
       setIsOptionsOpen(true);
       return;
     }
 
-    const eventTarget = eventDetails?.event?.target;
-    const targetElement = eventTarget instanceof Element ? eventTarget : null;
+    const targetElement = event?.target instanceof Element ? event.target : null;
     const isNestedPickerEvent =
       !targetElement ||
       !targetElement.isConnected ||
@@ -122,7 +122,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       );
 
     if (isNestedPickerEvent) {
-      eventDetails?.cancel?.();
+      event?.preventDefault?.();
       setIsOptionsOpen(true);
       return;
     }

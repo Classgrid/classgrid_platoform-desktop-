@@ -87,16 +87,18 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
   const handlePopoverOpenChange = (
     open: boolean,
-    eventDetails?: { event?: Event; cancel?: () => void }
+    event?: Event,
+    reason?: string
   ) => {
     if (open) {
       setIsOpen(true);
       return;
     }
 
-    const eventTarget = eventDetails?.event?.target;
-    const targetElement = eventTarget instanceof Element ? eventTarget : null;
+    const targetElement = event?.target instanceof Element ? event.target : null;
     const isCalendarSelectEvent =
+      !targetElement ||
+      !targetElement.isConnected ||
       selectCloseGuardRef.current ||
       isSelectOpenRef.current ||
       !!targetElement?.closest(
@@ -104,7 +106,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
       );
 
     if (isCalendarSelectEvent) {
-      eventDetails?.cancel?.();
+      event?.preventDefault?.();
       setIsOpen(true);
       return;
     }
