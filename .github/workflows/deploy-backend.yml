@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Go to the project folder
-            cd ~/classgrid_platoform-desktop-
+            cd /var/www/classgrid_platform
             
             # Pull the latest code from GitHub
             git fetch origin main
