@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import { supabaseService as sb } from '../config/supabaseClient.js';
-import { broadcastToChannel } from '../services/socket.service.js';
-import Notification from '../models/notification.model.js';
-import User from '../models/user.model.js';
+import { primarySupabaseClient as sb } from '../config/supabaseClient.js';
+import { broadcastToChannel } from '../services/realtimeBroadcast.js';
+import Notification from '../models/Notification.js';
+import User from '../models/User.js';
 
 export function initChatSchedulerCron() {
   console.log('⏳ Initializing Chat Scheduler Cron Job');

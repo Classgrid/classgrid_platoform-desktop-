@@ -261,8 +261,11 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       create_poll_policy,
       send_attachments_policy,
       require_message_approval,
+      require_join_approval,
       group_type,
-      is_official
+      is_official,
+      auto_add_roles,
+      admin_roles
     } = req.body;
     
     const updates = {};
@@ -274,7 +277,11 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     if (['all', 'admin_only', 'admin_faculty'].includes(send_attachments_policy)) updates.send_attachments_policy = send_attachments_policy;
     
     if (typeof require_message_approval === 'boolean') updates.require_message_approval = require_message_approval;
+    if (typeof require_join_approval === 'boolean') updates.require_join_approval = require_join_approval;
     if (typeof is_official === 'boolean') updates.is_official = is_official;
+    
+    if (Array.isArray(auto_add_roles)) updates.auto_add_roles = auto_add_roles;
+    if (Array.isArray(admin_roles)) updates.admin_roles = admin_roles;
     
     const validGroupTypes = ['general', 'announcement', 'class', 'department', 'subject', 'exam', 'fees', 'admission', 'faculty', 'parent', 'transport', 'hostel', 'library', 'event'];
     if (validGroupTypes.includes(group_type)) updates.group_type = group_type;
@@ -360,8 +367,8 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
     
     // Check add_member_policy
     const policy = group.add_member_policy || 'admin_only';
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
-    const isFaculty = req.user.role === 'faculty';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
+    const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(req.user.role);
     const isAdmin = membership.role === 'admin' || isOrgAdmin;
 
     if (policy === 'org_admin_only' && !isOrgAdmin) {
@@ -691,7 +698,7 @@ router.get('/:id/polls', isAuthenticated, async (req, res) => {
 // ──────────────────────────────────────────────
 router.get('/audit', isAuthenticated, async (req, res) => {
   try {
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     if (!isOrgAdmin) return res.status(403).json({ error: 'Only org admins can view audit logs' });
 
     // Join with chat_groups to verify org access, or just fetch all since it's admin
@@ -778,7 +785,7 @@ router.get('/:id/join-requests', isAuthenticated, async (req, res) => {
     const { group, membership } = await getGroupMembership(myId, groupId);
     if (!group) return res.status(404).json({ error: 'Group not found' });
     
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const isAdmin = membership?.role === 'admin' || isOrgAdmin;
     
     // Normal users can only see their own requests
@@ -815,7 +822,7 @@ router.patch('/:id/join-requests/:requestId', isAuthenticated, async (req, res) 
     const { group, thread, membership } = await getGroupMembership(myId, groupId);
     if (!group) return res.status(404).json({ error: 'Group not found' });
     
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const isAdmin = membership?.role === 'admin' || isOrgAdmin;
     
     if (!isAdmin) return res.status(403).json({ error: 'Only admins can process join requests' });

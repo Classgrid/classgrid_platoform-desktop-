@@ -241,6 +241,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           unread: unreadMap[thread.id] || 0,
           createdAt: thread.created_at,
           sendMessagesPolicy: group.send_messages_policy || 'all',
+          allowReplies: thread.allow_replies !== false,
           myRole: myRoles[thread.id] || 'member',
           isMuted: mutedThreads.has(thread.id),
           isOfficial: group.is_official || false,
@@ -628,8 +629,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
         .single();
         
       if (group) {
-        const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
-        const isFaculty = req.user.role === 'faculty';
+        const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
+        const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(req.user.role);
         const isAdmin = membership.role === 'admin' || isOrgAdmin;
 
         // Check send_message_policy
@@ -638,6 +639,11 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
         }
         if (group.send_message_policy === 'admin_faculty' && !isAdmin && !isFaculty) {
           return res.status(403).json({ error: 'Only admins and faculty can send messages in this group' });
+        }
+        
+        // Check allow_replies on thread
+        if (thread.allow_replies === false && !isAdmin) {
+          return res.status(403).json({ error: 'Replies are disabled for this thread' });
         }
 
         // Check reply_policy
@@ -1351,6 +1357,46 @@ router.post('/:id/disappearing', isAuthenticated, async (req, res) => {
 });
 
 // ==========================================
+// Thread Settings
+// ==========================================
+router.put('/:id/replies', isAuthenticated, async (req, res) => {
+  try {
+    const threadId = req.params.id;
+    const userId = req.user._id.toString();
+    const { allowReplies } = req.body;
+
+    const { data: thread } = await sb.from('chat_threads').select('id, group_id').eq('id', threadId).single();
+    if (!thread) return res.status(404).json({ error: 'Thread not found' });
+
+    let isAdmin = false;
+    if (thread.group_id) {
+      const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', threadId).eq('user_id', userId).single();
+      const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
+      isAdmin = (membership?.role === 'admin') || isOrgAdmin;
+    }
+
+    if (!isAdmin) return res.status(403).json({ error: 'Only admins can change thread settings' });
+
+    const { data, error } = await sb
+      .from('chat_threads')
+      .update({ allow_replies: allowReplies === true })
+      .eq('id', threadId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    // Broadcast the setting change
+    broadcastToChannel(`thread:${threadId}`, 'thread_updated', { allow_replies: data.allow_replies });
+
+    res.json({ success: true, allowReplies: data.allow_replies });
+  } catch (err) {
+    console.error('Thread replies error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
 // Polls (Threads)
 // ==========================================
 router.post('/:id/polls', isAuthenticated, async (req, res) => {
@@ -1768,7 +1814,7 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
     const { is_pinned } = req.body;
 
     const membership = await validateThreadMembership(userId, threadId);
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     if (!membership && !isOrgAdmin) return res.status(403).json({ error: 'Not authorized' });
     if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can pin messages' });
 
@@ -1800,7 +1846,7 @@ router.patch('/:id/messages/:messageId/approve', isAuthenticated, async (req, re
   try {
     const { id: threadId, messageId } = req.params;
     const userId = req.user._id.toString();
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const membership = await validateThreadMembership(userId, threadId);
     if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can approve messages' });
 
@@ -1821,7 +1867,7 @@ router.patch('/:id/messages/:messageId/reject', isAuthenticated, async (req, res
   try {
     const { id: threadId, messageId } = req.params;
     const userId = req.user._id.toString();
-    const isOrgAdmin = req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const membership = await validateThreadMembership(userId, threadId);
     if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can reject messages' });
 

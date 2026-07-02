@@ -412,4 +412,65 @@ router.get("/sync-group-members", async (req, res) => {
     }
 });
 
+/**
+ * GET /api/cron/delete-expired-messages
+ *
+ * Deletes messages where expires_at is in the past.
+ * Runs every minute or hour via Vercel cron/cron-job.org.
+ */
+router.get("/delete-expired-messages", async (req, res) => {
+    try {
+        const cronSecret = process.env.CRON_SECRET;
+        const querySecret = req.query.secret;
+        const authHeader = req.headers["authorization"];
+
+        if (cronSecret && querySecret !== cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const { primarySupabaseClient } = await import("../config/supabaseClient.js");
+        const sb = primarySupabaseClient;
+
+        const now = new Date().toISOString();
+        
+        // Find messages to delete
+        const { data: expiredMessages, error: fetchErr } = await sb
+            .from('chat_messages')
+            .select('id, thread_id')
+            .lt('expires_at', now)
+            .eq('is_deleted', false);
+            
+        if (fetchErr) throw fetchErr;
+        
+        if (!expiredMessages || expiredMessages.length === 0) {
+            return res.json({ message: "No expired messages to delete", count: 0 });
+        }
+        
+        const messageIds = expiredMessages.map(m => m.id);
+        
+        // Hard delete them
+        const { error: deleteErr } = await sb
+            .from('chat_messages')
+            .delete()
+            .in('id', messageIds);
+            
+        if (deleteErr) throw deleteErr;
+        
+        // Broadcast deletions (fire and forget)
+        const { broadcastToChannel } = await import("../services/realtimeBroadcast.js");
+        for (const msg of expiredMessages) {
+            broadcastToChannel(`thread:${msg.thread_id}`, 'message_deleted', { messageId: msg.id });
+        }
+
+        res.json({
+            message: "Expired messages deleted",
+            count: expiredMessages.length,
+            messageIds
+        });
+    } catch (err) {
+        console.error("[Cron] Delete expired messages error:", err.message);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+});
+
 export default router;

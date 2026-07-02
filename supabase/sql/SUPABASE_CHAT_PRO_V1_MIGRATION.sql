@@ -13,7 +13,9 @@ ADD COLUMN IF NOT EXISTS create_poll_policy TEXT DEFAULT 'all',
 ADD COLUMN IF NOT EXISTS send_attachments_policy TEXT DEFAULT 'all',
 ADD COLUMN IF NOT EXISTS require_message_approval BOOLEAN DEFAULT false,
 ADD COLUMN IF NOT EXISTS group_type TEXT DEFAULT 'general',
-ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
+ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS auto_add_roles JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS admin_roles JSONB DEFAULT '[]'::jsonb;
 
 -- 2. Safe policy constraints
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_send_message_policy_check CHECK (send_message_policy IN ('all', 'admin_only', 'admin_faculty'));
@@ -62,6 +64,16 @@ CREATE TABLE IF NOT EXISTS chat_group_audit_logs (
     new_value JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 5.5 Thread permissions
+ALTER TABLE chat_threads
+ADD COLUMN IF NOT EXISTS allow_replies BOOLEAN DEFAULT true;
+
+-- 5.6 Advanced Message Metadata
+ALTER TABLE chat_messages
+ADD COLUMN IF NOT EXISTS is_silent BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'normal',
+ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 
 -- 6. Indexes for Performance
 CREATE INDEX IF NOT EXISTS idx_chat_msg_ack_message_id ON chat_message_acknowledgements(message_id);
