@@ -225,6 +225,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
             </Button>
           </div>
         </div>
+      </div>
       )}
     </div>
   );
