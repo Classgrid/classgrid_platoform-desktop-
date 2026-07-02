@@ -5,7 +5,8 @@ import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
 import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
 import { useThreadChannel } from "../hooks/useRealtimeChat";
-import { GroupSettingsModal } from "./GroupSettingsModal";
+import { lazy, Suspense } from "react";
+const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { CreatePollModal } from "./CreatePollModal";
 
 interface ChatWindowProps {
@@ -550,12 +551,15 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
 
       {/* Modals */}
       {isSettingsOpen && thread.groupId && (
-        <GroupSettingsModal 
-          groupId={thread.groupId} 
-          onClose={() => setIsSettingsOpen(false)} 
-          onLeaveGroup={() => setIsSettingsOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <GroupSettingsModal 
+            groupId={thread.groupId} 
+            onClose={() => setIsSettingsOpen(false)} 
+            onLeaveGroup={() => setIsSettingsOpen(false)}
+          />
+        </Suspense>
       )}
+
       {isCreatePollOpen && thread.groupId && (
         <CreatePollModal
           groupId={thread.groupId}

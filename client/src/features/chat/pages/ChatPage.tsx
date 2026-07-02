@@ -39,7 +39,8 @@ import { NewChatSidebar } from "../components/NewChatSidebar";
 import { GroupCreateSidebar } from "../components/GroupCreateSidebar";
 import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
-import { GroupSettingsModal } from "../components/GroupSettingsModal";
+import { lazy, Suspense } from "react";
+const GroupSettingsModal = lazy(() => import("../components/GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { StarredMessagesModal } from "../components/StarredMessagesModal";
 import { ForwardMessageModal } from "../components/ForwardMessageModal";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
@@ -746,15 +747,17 @@ export function ChatPage() {
       {/* Modals */}
       
       {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
-        <GroupSettingsModal 
-          groupId={activeThread.groupId} 
-          onClose={() => setIsGroupSettingsOpen(false)}
-          onLeaveGroup={() => {
-            setIsGroupSettingsOpen(false);
-            setActiveThread(null);
-          }}
-          onUserClick={(userId) => setProfileUserId(userId)}
-        />
+        <Suspense fallback={null}>
+          <GroupSettingsModal 
+            groupId={activeThread.groupId} 
+            onClose={() => setIsGroupSettingsOpen(false)}
+            onLeaveGroup={() => {
+              setIsGroupSettingsOpen(false);
+              setActiveThread(null);
+            }}
+            onUserClick={(userId) => setProfileUserId(userId)}
+          />
+        </Suspense>
       )}
 
       {isPollModalOpen && activeThread && (

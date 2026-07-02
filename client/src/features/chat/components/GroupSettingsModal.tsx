@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { Megaphone, BadgeCheck, Building2 } from "lucide-react";
 import { AddGroupMemberSidebar } from "./AddGroupMemberSidebar";
-import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
+import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
 
