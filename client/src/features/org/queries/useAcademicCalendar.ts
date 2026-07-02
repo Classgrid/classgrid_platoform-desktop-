@@ -2,6 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { addDays, subDays } from "date-fns";
 
+export type CalendarEvent = {
+  id: string;
+  date: Date;
+  title: string;
+  type: string;
+};
+
 export function useAcademicCalendar() {
   return useQuery({
     queryKey: ["org-admin", "academic-calendar"],

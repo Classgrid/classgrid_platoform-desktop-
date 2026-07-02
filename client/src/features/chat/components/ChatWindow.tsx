@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useMemo, useEffect, useState } from "react";
-import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useQueryClient, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";

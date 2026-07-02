@@ -9,6 +9,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 
+import React, { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  GraduationCap, Hash, Loader2, CheckCircle, ChevronRight,
+  LayoutGrid, Users, Award, Armchair, DollarSign, UserCheck,
+} from "lucide-react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+
+
 
 
 import {
@@ -17,11 +28,11 @@ import {
 } from "../../admissions/api";
 import { useApplications } from "../../admissions/queries/useApplications";
 import type { AdmissionApplication } from "../../admissions/types";
+import { ExportMenu } from "../components/SharedAdmissions";
 
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 
-// ── Hierarchy config ──
 const HIERARCHIES = [
   { id: "all",         label: "All Divisions" },
   { id: "school",      label: "School" },

@@ -23,6 +23,7 @@ import {
   forwardMessages,
   uploadGroupPhoto,
   toggleMuteThread,
+  exitGroup,
   approveMessage,
   rejectMessage,
   acknowledgeMessage,

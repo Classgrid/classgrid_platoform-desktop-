@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { PageShell, PageHeader } from "../components/SharedAdmissions";
 
 import { FiDownloadCloud, FiFileText, FiDatabase, FiLayers } from "react-icons/fi";
 

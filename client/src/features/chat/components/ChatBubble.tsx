@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 
 import DOMPurify from "dompurify";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
   DropdownMenu,
@@ -92,6 +92,7 @@ export function ChatBubble({
   onApprove,
   onReject,
   onAcknowledge,
+  onForward,
   isAdmin = false,
 }: ChatBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);

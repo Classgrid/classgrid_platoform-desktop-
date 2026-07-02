@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown, FileBox } from "lucide-react";
+import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown, FileBox, ChevronRight } from "lucide-react";
 import {
   fetchGroupInfo,
   uploadGroupPhoto,
@@ -19,6 +19,7 @@ import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { Megaphone, BadgeCheck, Building2 } from "lucide-react";
 import { AddGroupMemberSidebar } from "./AddGroupMemberSidebar";
 import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
+import { SharedMediaView } from "../../shared/components/SharedMediaView";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
