@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search, Users } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, Search, Users, Check, MessageSquarePlus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Input } from "@/components/marketing_ui/input";
 import type { OrgUser } from "../services/chatApi";
@@ -30,7 +30,8 @@ export function NewChatSidebar({
   onNewGroup,
 }: NewChatSidebarProps) {
   const [search, setSearch] = useState("");
-  const [creatingId, setCreatingId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredAndSortedUsers = useMemo(() => {
     let list = users.filter((u) => u._id !== currentUserId);
@@ -113,25 +114,16 @@ export function NewChatSidebar({
                 No contacts found matching "{search}"
               </div>
             ) : (
-              filteredAndSortedUsers.map((user, index) => (
+              filteredAndSortedUsers.map((user, index) => {
+                const isSelected = selectedId === user._id;
+                return (
                 <button
                   key={user._id}
-                  disabled={creatingId !== null}
-                  onClick={async () => {
-                    setCreatingId(user._id);
-                    try {
-                      await onSelectUser(user._id);
-                      onClose();
-                    } finally {
-                      setCreatingId(null);
-                    }
-                  }}
-                  className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={() => setSelectedId(user._id)}
+                  className={`w-full flex items-center gap-4 px-4 py-2 transition-colors text-left group ${isSelected ? 'bg-primary/5' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
                 >
-                  <div className="relative w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden">
-                    {creatingId === user._id ? (
-                      <Spinner className="w-6 h-6 text-primary absolute z-10" />
-                    ) : user.profilePicture ? (
+                  <div className={`relative w-12 h-12 rounded-full font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'bg-primary/10 text-primary'}`}>
+                    {user.profilePicture ? (
                       <img
                         src={user.profilePicture}
                         alt=""
@@ -140,19 +132,61 @@ export function NewChatSidebar({
                     ) : (
                       getInitials(user.name)
                     )}
+                    {isSelected && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm z-10">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
                   </div>
                   <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredAndSortedUsers.length - 1 ? 'border-b border-border' : ''}`}>
-                    <p className="text-[17px] text-foreground truncate group-hover:text-foreground/90">{user.name}</p>
+                    <p className={`text-[17px] truncate transition-colors duration-200 ${isSelected ? 'text-primary font-medium' : 'text-foreground group-hover:text-foreground/90'}`}>{user.name}</p>
                     <p className="text-[13px] text-muted-foreground truncate mt-0.5">
                       {user.role} {user.email ? `• ${user.email}` : ""}
                     </p>
                   </div>
                 </button>
-              ))
+              )})
             )}
           </div>
         )}
       </div>
+
+      {/* Sticky Action Button */}
+      <AnimatePresence>
+        {selectedId !== null && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", duration: 0.2 }}
+            className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-20"
+          >
+            <button
+              onClick={async () => {
+                if (!selectedId) return;
+                setIsSubmitting(true);
+                try {
+                  await onSelectUser(selectedId);
+                  onClose();
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold shadow-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <Spinner className="w-5 h-5 text-white" />
+              ) : (
+                <>
+                  <MessageSquarePlus className="w-5 h-5" />
+                  <span>Start Chat</span>
+                </>
+              )}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
