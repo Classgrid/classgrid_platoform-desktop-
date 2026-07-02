@@ -647,7 +647,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       },
       {
         items: [
-          { label: "My Requests", to: "/join-requests", icon: ClipboardList },
+          { label: "My Requests", to: "/my-requests", icon: ClipboardList },
           { label: "What's New", to: "/whats-new", icon: Sparkles },
           { label: "Organization", to: "/organization", icon: Building2 },
           { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare },

@@ -28,6 +28,7 @@ function NikhilCalendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      fixedWeeks={true}
       className={cn(
         "group/calendar p-3 bg-background",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,

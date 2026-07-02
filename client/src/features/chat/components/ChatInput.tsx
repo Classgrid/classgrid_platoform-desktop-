@@ -14,6 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
+import { DateTimePicker } from "@/components/marketing_ui/date_time_picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 
 interface MessageOptions {
   scheduledFor?: string;
@@ -441,15 +443,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     {/* Priority */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-muted-foreground block">Priority</label>
-                      <select 
-                        value={priority}
-                        onChange={(e) => setPriority(e.target.value)}
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                      >
-                        <option value="normal">Normal</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
+                      <Select value={priority} onValueChange={setPriority}>
+                        <SelectTrigger className="w-full bg-background border border-border h-9 rounded-md text-sm">
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Silent Notice */}
@@ -465,27 +468,23 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     </div>
 
                     {/* Expiry */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 flex flex-col">
                       <label className="text-xs font-medium text-muted-foreground block">Auto-Delete At (Optional)</label>
-                      <input 
-                        type="datetime-local" 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                        value={expiresAt}
-                        onChange={(e) => setExpiresAt(e.target.value)}
-                        min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                      <DateTimePicker 
+                        value={expiresAt ? new Date(expiresAt) : undefined}
+                        onChange={(d) => setExpiresAt(d ? d.toISOString() : "")}
+                        placeholder="Select expiry date & time"
                       />
                     </div>
 
                     {/* Scheduling */}
                     {canSchedule && (
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 flex flex-col mt-3">
                         <label className="text-xs font-medium text-muted-foreground block">Schedule For (Optional)</label>
-                        <input 
-                          type="datetime-local" 
-                          className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                          value={scheduledDate}
-                          onChange={(e) => setScheduledDate(e.target.value)}
-                          min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                        <DateTimePicker 
+                          value={scheduledDate ? new Date(scheduledDate) : undefined}
+                          onChange={(d) => setScheduledDate(d ? d.toISOString() : "")}
+                          placeholder="Select schedule date & time"
                         />
                       </div>
                     )}

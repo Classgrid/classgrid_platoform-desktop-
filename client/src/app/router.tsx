@@ -55,6 +55,7 @@ import { OrgDetailsPage } from "@/features/superadmin/pages/OrgDetailsPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import SandboxProfilePage from "@/features/shared/pages/SandboxProfilePage";
+import DateTimePickerSandbox from "@/features/sandbox/pages/DateTimePickerSandbox";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
@@ -132,6 +133,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
       <Route path="/sandbox-profile" element={<SandboxProfilePage />} />
+      <Route path="/sandbox/datetime" element={<DateTimePickerSandbox />} />
 
       <Route path="/logout" element={<LogoutPage />} />
       {/* ── DYNAMIC AUTH ROUTES (Based on Subdomain) ── */}
@@ -312,11 +314,13 @@ export function AppRouter() {
           <Route path="/drive" element={<GenericPage title="Google Drive" />} />
           <Route path="/virtual-id" element={<GenericPage title="Virtual ID" />} />
           <Route path="/join-requests/:groupId" element={<JoinRequestPage />} />
+          <Route path="/join-requests" element={<GenericPage title="Join Requests" />} />
           <Route path="/whats-new" element={<GenericPage title="What's New" />} />
           <Route path="/organization" element={<GenericPage title="Organization" />} />
           <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
           <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
           <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
+          <Route path="/audit" element={<AuditPage />} />
           <Route path="profile" element={<SharedProfilePage />} />
           <Route path="settings" element={<SharedSettingsPage />} />
           <Route path="classrooms" element={<ClassroomsPage />} />

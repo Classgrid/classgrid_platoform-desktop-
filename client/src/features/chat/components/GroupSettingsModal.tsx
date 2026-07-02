@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown, FileBox, ChevronRight } from "lucide-react";
@@ -28,6 +29,7 @@ import { useOnlineUsers } from "../context/PresenceContext";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 import { Input } from "@/components/marketing_ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 
 interface GroupSettingsModalProps {
   groupId: string;
@@ -40,6 +42,7 @@ interface GroupSettingsModalProps {
 export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick, initialShowAddMember }: GroupSettingsModalProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   const { data: user } = useCurrentUser();
   const onlineUsers = useOnlineUsers();
 
@@ -201,7 +204,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const onlineMembersCount = data?.members?.filter(m => onlineUsers?.has(m.userId)).length || 0;
 
   return (
-    <div className="absolute inset-0 z-50 bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
+    <div className="absolute inset-0 z-50 bg-muted/20 dark:bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
       {/* Breadcrumb Header */}
       <div className="shrink-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
         <div className="flex items-center text-sm text-muted-foreground">
@@ -444,101 +447,125 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                   {/* Send Messages Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can send messages?</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.send_message_policy || data.group.send_messages_policy || 'all'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ send_message_policy: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ send_message_policy: value })}
                      >
-                        <option value="all">Everyone</option>
-                        <option value="admin_faculty">Admins & Faculty</option>
-                        <option value="admin_only">Only Admins</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="all">Everyone</SelectItem>
+                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Reply Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can reply to messages?</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.reply_policy || 'all'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ reply_policy: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ reply_policy: value })}
                      >
-                        <option value="all">Everyone</option>
-                        <option value="admin_faculty">Admins & Faculty</option>
-                        <option value="admin_only">Only Admins</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="all">Everyone</SelectItem>
+                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Send Attachments Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can send attachments?</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.send_attachments_policy || 'all'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ send_attachments_policy: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ send_attachments_policy: value })}
                      >
-                        <option value="all">Everyone</option>
-                        <option value="admin_faculty">Admins & Faculty</option>
-                        <option value="admin_only">Only Admins</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="all">Everyone</SelectItem>
+                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Add Member Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can add members?</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.add_member_policy || 'admin_only'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ add_member_policy: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ add_member_policy: value })}
                      >
-                        <option value="admin_only">Only Admins</option>
-                        <option value="admin_faculty">Admins & Faculty</option>
-                        <option value="org_admin_only">Only Org Admins</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
+                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="org_admin_only">Only Org Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Edit Info Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can edit group info?</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.edit_info_policy || 'admin_only'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ edit_info_policy: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ edit_info_policy: value })}
                      >
-                        <option value="admin_only">Group Admins</option>
-                        <option value="org_admin_only">Only Org Admins</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="admin_only">Group Admins</SelectItem>
+                           <SelectItem value="org_admin_only">Only Org Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Group Type */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Group Type</span>
-                     <select 
-                        className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm"
+                     <Select 
                         value={data.group.group_type || 'general'}
                         disabled={isUpdatingPermissions}
-                        onChange={(e) => handleUpdatePermissions({ group_type: e.target.value })}
+                        onValueChange={(value) => handleUpdatePermissions({ group_type: value })}
                      >
-                        <option value="general">General</option>
-                        <option value="announcement">Announcement</option>
-                        <option value="class">Class</option>
-                        <option value="department">Department</option>
-                        <option value="subject">Subject</option>
-                        <option value="exam">Exam</option>
-                        <option value="fees">Fees</option>
-                        <option value="admission">Admission</option>
-                        <option value="faculty">Faculty</option>
-                        <option value="parent">Parent</option>
-                        <option value="transport">Transport</option>
-                        <option value="hostel">Hostel</option>
-                        <option value="library">Library</option>
-                        <option value="event">Event</option>
-                     </select>
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="general">General</SelectItem>
+                           <SelectItem value="announcement">Announcement</SelectItem>
+                           <SelectItem value="class">Class</SelectItem>
+                           <SelectItem value="department">Department</SelectItem>
+                           <SelectItem value="subject">Subject</SelectItem>
+                           <SelectItem value="exam">Exam</SelectItem>
+                           <SelectItem value="fees">Fees</SelectItem>
+                           <SelectItem value="admission">Admission</SelectItem>
+                           <SelectItem value="faculty">Faculty</SelectItem>
+                           <SelectItem value="parent">Parent</SelectItem>
+                           <SelectItem value="transport">Transport</SelectItem>
+                           <SelectItem value="hostel">Hostel</SelectItem>
+                           <SelectItem value="library">Library</SelectItem>
+                           <SelectItem value="event">Event</SelectItem>
+                        </SelectContent>
+                     </Select>
                   </div>
 
                   {/* Is Official Toggle */}
@@ -641,13 +668,25 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                   <div className="flex items-center gap-3 mt-2 md:col-span-2">
                      <button
                         className="flex-1 py-2 rounded bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                        onClick={() => window.open('/org/audit', '_blank')}
+                        onClick={() => {
+                          onClose();
+                          if (user?.role === 'super_admin') {
+                            navigate('/superadmin/audit'); 
+                          } else if (user?.role === 'org_admin') {
+                            navigate('/org/audit');
+                          } else {
+                            navigate('/audit'); 
+                          }
+                        }}
                      >
                         Audit Logs
                      </button>
                      <button
                         className="flex-1 py-2 rounded bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                        onClick={() => window.open(`/join-requests/${groupId}`, '_blank')}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/join-requests/${groupId}`);
+                        }}
                      >
                         Join Requests
                      </button>

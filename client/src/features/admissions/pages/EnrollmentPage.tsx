@@ -7,21 +7,6 @@ import {
 import { type ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-
-
-import React, { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import {
-  GraduationCap, Hash, Loader2, CheckCircle, ChevronRight,
-  LayoutGrid, Users, Award, Armchair, DollarSign, UserCheck,
-} from "lucide-react";
-import { type ColumnDef } from "@tanstack/react-table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-
-
-
-
 import {
   enrollStudent, batchGeneratePRNs, allocateDivisions,
   getSeatMatrix, getExportUrl,
