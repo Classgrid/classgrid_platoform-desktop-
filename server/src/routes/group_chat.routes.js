@@ -260,6 +260,7 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       add_member_policy,
       create_poll_policy,
       send_attachments_policy,
+      reply_policy,
       require_message_approval,
       require_join_approval,
       group_type,
@@ -271,6 +272,7 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     const updates = {};
     
     if (['all', 'admin_only', 'admin_faculty'].includes(send_message_policy)) updates.send_message_policy = send_message_policy;
+    if (['all', 'admin_only', 'admin_faculty'].includes(reply_policy)) updates.reply_policy = reply_policy;
     if (['admin_only', 'org_admin_only'].includes(edit_info_policy)) updates.edit_info_policy = edit_info_policy;
     if (['admin_only', 'admin_faculty', 'org_admin_only'].includes(add_member_policy)) updates.add_member_policy = add_member_policy;
     if (['all', 'admin_only', 'admin_faculty'].includes(create_poll_policy)) updates.create_poll_policy = create_poll_policy;
