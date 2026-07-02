@@ -87,7 +87,7 @@ export function AddGroupMemberSidebar({
       transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
       className="absolute inset-0 z-50 flex flex-col bg-white dark:bg-black overflow-hidden"
     >
-      <div className="flex flex-col w-full h-full">
+      <div className="flex flex-col w-full h-full relative">
         {/* Header */}
         <div className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-border bg-white dark:bg-black">
           <button
@@ -188,35 +188,35 @@ export function AddGroupMemberSidebar({
               )}
             </div>
           )}
-          
-          {/* Sticky Action Button */}
-          <AnimatePresence>
-            {selectedIds.size > 0 && (
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "tween", duration: 0.2 }}
-                className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-20"
-              >
-                <button
-                  onClick={handleAdd}
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold shadow-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <Spinner className="w-5 h-5 text-white" />
-                  ) : (
-                    <>
-                      <Check className="w-5 h-5" />
-                      <span>Add {selectedIds.size} Member{selectedIds.size !== 1 ? 's' : ''}</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
+        
+        {/* Sticky Action Button */}
+        <AnimatePresence>
+          {selectedIds.size > 0 && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "tween", duration: 0.2 }}
+              className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-20 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)]"
+            >
+              <button
+                onClick={handleAdd}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold shadow-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <Spinner className="w-5 h-5 text-white" />
+                ) : (
+                  <>
+                    <Check className="w-5 h-5" />
+                    <span>Add {selectedIds.size} Member{selectedIds.size !== 1 ? 's' : ''}</span>
+                  </>
+                )}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
