@@ -2292,13 +2292,14 @@ router.get("/join-codes", isAuthenticated, requireRole("org_admin"), async (req,
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
-        const org = await Organization.findById(orgId).select("organizationCode honorCode private_code _id");
+        const org = await Organization.findById(orgId).select("organizationCode honorCode private_code org_type _id");
         if (!org) return res.status(404).json({ message: "Organization not found." });
 
         res.json({
             tenantId: org._id.toString(),
             organizationCode: org.organizationCode || org.private_code || "",
             honorCode: org.honorCode || "",
+            orgType: org.org_type || "",
         });
     } catch (err) {
         console.error("[Join Codes Error]:", err.message);

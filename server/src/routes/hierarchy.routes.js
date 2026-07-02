@@ -9,6 +9,8 @@ import {
     updateNode,
     deleteNode,
     getOrgTerminology,
+    getAllTerminology,
+    getOrgRoles,
     seedHierarchy,
 } from "../controllers/hierarchy.controller.js";
 
@@ -27,6 +29,12 @@ router.get("/tree", getTree);
 
 // GET /api/hierarchy/terminology — Get org-specific labels
 router.get("/terminology", getOrgTerminology);
+
+// GET /api/hierarchy/terminology/all — Get ALL org types' terminology (for settings comparison table)
+router.get("/terminology/all", getAllTerminology);
+
+// GET /api/hierarchy/roles — Get allowed roles based on org type
+router.get("/roles", getOrgRoles);
 
 // GET /api/hierarchy/children/:parentId — Direct children of a node
 router.get("/children/:parentId", getChildren);

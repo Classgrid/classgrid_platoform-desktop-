@@ -592,8 +592,9 @@ export function ChatPage() {
   };
 
   const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(currentUser?.role || '');
+  const isSuperAdmin = currentUser?.role === 'super_admin';
   const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(currentUser?.role || '');
-  const isAdmin = activeThread?.myRole === 'admin' || isOrgAdmin;
+  const isAdmin = activeThread?.myRole === 'admin' || isSuperAdmin;
 
   const isInputDisabled = activeThread?.type === "group" && (
     (activeThread.sendMessagesPolicy === "admin_only" && !isAdmin) ||

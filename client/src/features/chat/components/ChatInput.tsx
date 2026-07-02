@@ -491,6 +491,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                         value={expiresAt ? new Date(expiresAt) : undefined}
                         onChange={(d) => setExpiresAt(d ? d.toISOString() : "")}
                         placeholder="Select expiry date & time"
+                        popDirection="up"
                       />
                     </div>
 
@@ -502,6 +503,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                           value={scheduledDate ? new Date(scheduledDate) : undefined}
                           onChange={(d) => setScheduledDate(d ? d.toISOString() : "")}
                           placeholder="Select schedule date & time"
+                          popDirection="up"
                         />
                       </div>
                     )}

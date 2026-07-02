@@ -27,6 +27,7 @@ import { Switch } from "@/components/marketing_ui/switch";
 import { Button } from "@/components/marketing_ui/button";
 import { useOnlineUsers } from "../context/PresenceContext";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+import { useOrgRoles } from "@/features/org/queries/useOrgRoles";
 
 import { Input } from "@/components/marketing_ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
@@ -57,6 +58,15 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
     queryKey: ["group-info", groupId],
     queryFn: () => fetchGroupInfo(groupId),
   });
+
+  // Fetch dynamic roles based on this organization type
+  const { data: dynamicRolesData } = useOrgRoles();
+  let availableRoles = dynamicRolesData || [];
+
+  // Safety filter: Super admins shouldn't see 'student' in auto-add lists to prevent massive accidental additions
+  if (user?.role === 'super_admin') {
+    availableRoles = availableRoles.filter(r => r !== 'student');
+  }
 
   // ── Data: Org Users (for Add Member) ──
   const { data: orgUsersData } = useQuery({
@@ -285,7 +295,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                   const policy = data.group.add_member_policy || 'admin_only';
                   const isOrgAdmin = user?.role === 'super_admin' || user?.role === 'org_admin';
                   const isFaculty = user?.role === 'faculty';
-                  const isAdmin = data.myRole === 'admin' || isOrgAdmin;
+                  const isSuperAdmin = user?.role === 'super_admin';
+                  const isAdmin = data.myRole === 'admin' || isSuperAdmin;
                   
                   let canAddMember = false;
                   if (policy === 'org_admin_only') canAddMember = isOrgAdmin;
@@ -607,7 +618,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     <span className="text-sm font-medium text-foreground">Auto-Add Members by Role</span>
                     <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically added as regular members.</span>
                     <div className="flex flex-wrap gap-2">
-                      {['student', 'faculty', 'teacher', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head', 'coordinator'].map(role => {
+                      {availableRoles.map(role => {
                         const currentRoles = data.group.auto_add_roles || [];
                         const isSelected = currentRoles.includes(role);
                         return (
@@ -638,7 +649,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     <span className="text-sm font-medium text-foreground">Auto-Grant Admin by Role</span>
                     <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically granted Admin access in this group.</span>
                     <div className="flex flex-wrap gap-2">
-                      {['student', 'faculty', 'teacher', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head', 'coordinator'].map(role => {
+                      {availableRoles.map(role => {
                         const currentRoles = data.group.admin_roles || [];
                         const isSelected = currentRoles.includes(role);
                         return (

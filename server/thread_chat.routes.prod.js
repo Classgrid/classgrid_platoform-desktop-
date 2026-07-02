@@ -710,9 +710,9 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
         .single();
         
       if (group) {
-        const isSuperAdmin = req.user.role === 'super_admin';
+        const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
         const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(req.user.role);
-        const isAdmin = membership.role === 'admin' || isSuperAdmin;
+        const isAdmin = membership.role === 'admin' || isOrgAdmin;
 
         // Check send_message_policy
         if (group.send_message_policy === 'admin_only' && !isAdmin) {
@@ -1453,8 +1453,7 @@ router.put('/:id/replies', isAuthenticated, async (req, res) => {
     if (thread.group_id) {
       const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', threadId).eq('user_id', userId).single();
       const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-      const isSuperAdmin = req.user.role === 'super_admin';
-      isAdmin = (membership?.role === 'admin') || isSuperAdmin;
+      isAdmin = (membership?.role === 'admin') || isOrgAdmin;
     }
 
     if (!isAdmin) return res.status(403).json({ error: 'Only admins can change thread settings' });
@@ -1897,9 +1896,8 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
 
     const membership = await validateThreadMembership(userId, threadId);
     const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-    const isSuperAdmin = req.user.role === 'super_admin';
-    if (!membership && !isSuperAdmin) return res.status(403).json({ error: 'Not authorized' });
-    if (membership?.role !== 'admin' && !isSuperAdmin) return res.status(403).json({ error: 'Only admins can pin messages' });
+    if (!membership && !isOrgAdmin) return res.status(403).json({ error: 'Not authorized' });
+    if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can pin messages' });
 
     const { data: updated, error } = await sb.from('chat_messages').update({
       is_pinned,

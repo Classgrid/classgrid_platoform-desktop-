@@ -1,8 +1,63 @@
 import AcademicHierarchy from "../models/AcademicHierarchy.js";
 import Organization from "../models/Organization.js";
 import { getTerminology } from "../utils/terminology.js";
+import TERMINOLOGY_MAP from "../utils/terminology.js";
+import { getAvailableRoles } from "../utils/roles.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
+
+// Plan metadata for each org_type — defines hierarchy levels and examples
+const ORG_PLAN_META = {
+    engineering: {
+        planNumber: 1,
+        planName: "Engineering (with Divisions)",
+        structureType: "engineering",
+        hierarchyLevels: ["Degree", "Department", "Year", "Semester", "Division", "Sub Batch"],
+        hierarchyExamples: ["B.Tech", "Computer / IT / ENTC", "FY / SY / TY", "Sem 1 / Sem 2", "A / B / C", "A1 / A2"],
+    },
+    school: {
+        planNumber: 2,
+        planName: "School (with Sections)",
+        structureType: "school_with_div",
+        hierarchyLevels: ["Standard", "Section"],
+        hierarchyExamples: ["Class 1–10", "A / B / C"],
+    },
+    junior_college: {
+        planNumber: 5,
+        planName: "Junior College",
+        structureType: "junior_college",
+        hierarchyLevels: ["Stream", "Standard", "Division", "Batch"],
+        hierarchyExamples: ["Science / Commerce / Arts", "11th / 12th", "A / B", "Batch 1"],
+    },
+    coaching: {
+        planNumber: 4,
+        planName: "Coaching Center",
+        structureType: "coaching",
+        hierarchyLevels: ["Course", "Batch"],
+        hierarchyExamples: ["JEE / NEET / CET", "Morning / Evening"],
+    },
+    diploma: {
+        planNumber: 6,
+        planName: "Diploma / Polytechnic",
+        structureType: "diploma",
+        hierarchyLevels: ["Department", "Year", "Semester", "Division"],
+        hierarchyExamples: ["Computer / Mech / Civil", "FY / SY", "Sem 1 / Sem 2", "A / B"],
+    },
+    other: {
+        planNumber: 7,
+        planName: "Custom",
+        structureType: "custom",
+        hierarchyLevels: ["Group", "Sub-Group"],
+        hierarchyExamples: ["Group", "Sub-Group"],
+    },
+};
+
+// Ordered list of comparison columns for the terminology table (shown in settings)
+const TERMINOLOGY_COMPARISON_COLS = ["engineering", "school", "coaching", "junior_college", "diploma"];
+const TERMINOLOGY_COMPARISON_CONCEPTS = [
+    "org_label", "top_level", "course", "year", "period",
+    "division", "sub_batch", "student_id", "teacher", "assignment_label", "exam_label",
+];
 
 /**
  * Hierarchy Controller — CRUD for academic structure nodes.
@@ -266,6 +321,57 @@ export async function getOrgTerminology(req, res) {
         return res.json({ structure_type: org.structure_type, org_type: org.org_type, terminology: terms });
     } catch (err) {
         return res.status(500).json({ error: "Failed to fetch terminology.", details: err.message });
+    }
+}
+
+/**
+ * GET /api/hierarchy/terminology/all
+ * Returns: org-type plan metadata + full terminology map for ALL org types.
+ * Used by the Settings page to render the comparison table without any frontend hardcoding.
+ * No body needed — the response is static metadata derived from server-side TERMINOLOGY_MAP.
+ */
+export async function getAllTerminology(req, res) {
+    try {
+        // Build per-org-type terminology, keyed by org_type
+        const allTerminology = {};
+        for (const orgType of TERMINOLOGY_COMPARISON_COLS) {
+            const meta = ORG_PLAN_META[orgType];
+            if (!meta) continue;
+            try {
+                const terms = getTerminology(meta.structureType);
+                allTerminology[orgType] = {
+                    ...meta,
+                    terminology: terms,
+                };
+            } catch (_) {
+                // skip invalid structure types gracefully
+            }
+        }
+
+        return res.json({
+            comparisonCols: TERMINOLOGY_COMPARISON_COLS,
+            comparisonConcepts: TERMINOLOGY_COMPARISON_CONCEPTS,
+            allTerminology,
+        });
+    } catch (err) {
+        return res.status(500).json({ error: "Failed to fetch all terminology.", details: err.message });
+    }
+}
+
+/**
+ * GET /api/hierarchy/roles
+ * Returns the array of roles allowed for the requesting user's organization type.
+ */
+export async function getOrgRoles(req, res) {
+    try {
+        const orgId = req.user.organization_id;
+        const org = await Organization.findById(orgId).select("org_type").lean();
+        if (!org) return res.status(404).json({ error: "Organization not found." });
+
+        const roles = getAvailableRoles(org.org_type, req.user.role);
+        return res.json({ roles });
+    } catch (err) {
+        return res.status(500).json({ error: "Failed to fetch org roles.", details: err.message });
     }
 }
 

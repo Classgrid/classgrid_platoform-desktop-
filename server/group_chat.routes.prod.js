@@ -797,8 +797,7 @@ router.get('/:id/join-requests', isAuthenticated, async (req, res) => {
     if (!group) return res.status(404).json({ error: 'Group not found' });
     
     const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-    const isSuperAdmin = req.user.role === 'super_admin';
-    const isAdmin = membership?.role === 'admin' || isSuperAdmin;
+    const isAdmin = membership?.role === 'admin' || isOrgAdmin;
     
     // Normal users can only see their own requests
     let query = sb.from('chat_group_join_requests').select('*').eq('group_id', groupId).order('created_at', { ascending: false });
@@ -835,8 +834,7 @@ router.patch('/:id/join-requests/:requestId', isAuthenticated, async (req, res) 
     if (!group) return res.status(404).json({ error: 'Group not found' });
     
     const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-    const isSuperAdmin = req.user.role === 'super_admin';
-    const isAdmin = membership?.role === 'admin' || isSuperAdmin;
+    const isAdmin = membership?.role === 'admin' || isOrgAdmin;
     
     if (!isAdmin) return res.status(403).json({ error: 'Only admins can process join requests' });
     

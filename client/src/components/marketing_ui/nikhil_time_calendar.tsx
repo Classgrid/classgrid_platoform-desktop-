@@ -11,9 +11,10 @@ interface NikhilTimeCalendarProps {
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
+  popDirection?: "up" | "down";
 }
 
-export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className }: NikhilTimeCalendarProps) {
+export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className, popDirection = "down" }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [internalDate, setInternalDate] = useState<Date | undefined>(value);
@@ -115,7 +116,10 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
       {isOpen && (
         <div 
-          className="absolute z-50 top-full right-0 mt-2 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content"
+          className={cn(
+            "absolute z-50 right-0 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content",
+            popDirection === "up" ? "bottom-full mb-2" : "top-full mt-2"
+          )}
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
