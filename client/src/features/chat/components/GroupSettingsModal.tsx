@@ -191,9 +191,9 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   }
 
   return (
-    <div className="absolute inset-0 z-50 bg-background overflow-y-auto animate-in fade-in duration-200">
+    <div className="absolute inset-0 z-50 bg-background overflow-hidden animate-in fade-in duration-200 flex flex-col">
       {/* Breadcrumb Header */}
-      <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
+      <div className="shrink-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">
         <div className="flex items-center text-sm text-muted-foreground">
           <button className="cursor-pointer hover:text-foreground hover:underline transition-colors focus:outline-none" onClick={onClose}>Chat</button>
           <span className="mx-2 opacity-50">/</span>
@@ -201,17 +201,16 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
           <span className="mx-2 opacity-50">/</span>
           <span className="font-semibold text-foreground">Settings</span>
         </div>
-      </div>
-
-      <div className="w-full">
-        {isLoading ? (
-          <div className="flex-1 flex justify-center items-center h-full min-h-[200px]">
-            <Spinner className="w-8 h-8 text-primary" />
-          </div>
-        ) : isError || !data ? (
-          <div className="text-red-500 text-sm py-8 px-4 max-w-2xl mx-auto">Failed to load group info</div>
-        ) : (
-          <SharedProfilePage
+      <div className="flex-1 overflow-y-auto w-full relative">
+        <div className="min-h-full flex flex-col pb-12">
+          {isLoading ? (
+            <div className="flex-1 flex justify-center items-center h-full min-h-[200px]">
+              <Spinner className="w-8 h-8 text-primary" />
+            </div>
+          ) : isError || !data ? (
+            <div className="text-red-500 text-sm py-8 px-4 max-w-2xl mx-auto">Failed to load group info</div>
+          ) : (
+            <SharedProfilePage
             mode="group"
             groupData={data}
             onClose={onClose}
@@ -414,8 +413,21 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
             </div>
           </SharedProfilePage>
         )}
+        </div>
       </div>
       <AnimatePresence>
+        {isLoading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50">
+            <Spinner className="w-8 h-8" />
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-destructive/10 text-destructive text-sm font-medium px-4 py-3 rounded-lg border border-destructive/20">
+              {error}
+            </div>
+          </div>
+        )}
         {showAddMember && data?.myRole === "admin" && (
           <AddGroupMemberSidebar
             onClose={() => setShowAddMember(false)}
