@@ -43,7 +43,7 @@ import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("../components/GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { StarredMessagesModal } from "../components/StarredMessagesModal";
 import { ForwardMessageModal } from "../components/ForwardMessageModal";
-import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
+const SharedProfilePage = lazy(() => import("@/features/shared/pages/SharedProfilePage").then(m => ({ default: m.SharedProfilePage })));
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { SelectionActionBar } from "../components/SelectionActionBar";
 import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
@@ -815,24 +815,26 @@ export function ChatPage() {
         if (!selectedUserForProfile) return null;
         return (
           <div className="absolute inset-0 z-50 bg-background overflow-y-auto animate-in fade-in duration-200">
-            <SharedProfilePage 
-              publicUser={{
-                _id: selectedUserForProfile._id,
-                name: selectedUserForProfile.name,
-                phoneNumber: selectedUserForProfile.phoneNumber || "",
-                email: selectedUserForProfile.email,
-                role: selectedUserForProfile.role,
-                profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
-                profileBanner: selectedUserForProfile.profileBanner || "",
-                prn: selectedUserForProfile.prn,
-                bio: selectedUserForProfile.bio,
-                organization_name: selectedUserForProfile.organization_name,
-                organization_logo: selectedUserForProfile.organization_logo,
-                metadata: selectedUserForProfile.metadata,
-                forumUsername: selectedUserForProfile.forumUsername,
-              }}
-              onClose={() => setProfileUserId(null)} 
-            />
+            <Suspense fallback={null}>
+              <SharedProfilePage 
+                publicUser={{
+                  _id: selectedUserForProfile._id,
+                  name: selectedUserForProfile.name,
+                  phoneNumber: selectedUserForProfile.phoneNumber || "",
+                  email: selectedUserForProfile.email,
+                  role: selectedUserForProfile.role,
+                  profilePicture: selectedUserForProfile.profilePicture || selectedUserForProfile.photoURL || "",
+                  profileBanner: selectedUserForProfile.profileBanner || "",
+                  prn: selectedUserForProfile.prn,
+                  bio: selectedUserForProfile.bio,
+                  organization_name: selectedUserForProfile.organization_name,
+                  organization_logo: selectedUserForProfile.organization_logo,
+                  metadata: selectedUserForProfile.metadata,
+                  forumUsername: selectedUserForProfile.forumUsername,
+                }}
+                onClose={() => setProfileUserId(null)} 
+              />
+            </Suspense>
           </div>
         );
       })()}

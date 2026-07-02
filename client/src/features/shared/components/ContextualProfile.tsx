@@ -16,6 +16,7 @@ import indiaLocations from "@/data/india-locations.json";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { toast } from "sonner";
 import { OnlineStatusDot } from "./OnlineStatusDot";
+import { apiClient } from "@/lib/apiClient";
 
 // ── SUB-COMPONENT FOR DATE FIELD TO HANDLE LOCAL STATE ──
 function DateField({ field, value, onChange, disabled }: { field: any, value: string, onChange: (val: string) => void, disabled?: boolean }) {
@@ -145,9 +146,7 @@ export function ContextualProfile({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // In a real implementation, you might want to use react-query useMutation
-      // but for direct API calls we can use apiClient here
-      const { apiClient } = await import("@/lib/apiClient");
+      // Direct API call using static apiClient
       await apiClient.put("/api/user/update", { ...formData, metadata: formData });
       
       // Update global context/cache if needed here or rely on the parent page
