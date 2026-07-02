@@ -436,7 +436,18 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     <SlidersHorizontal className="w-5 h-5" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent side="top" align="end" className="w-72 p-4 bg-card border border-border shadow-lg rounded-xl">
+                <PopoverContent 
+                  side="top" 
+                  align="end" 
+                  className="w-72 p-4 bg-card border border-border shadow-lg rounded-xl"
+                  onInteractOutside={(e) => {
+                    // Prevent closing when clicking inside a nested select/portal (e.g. DateTimePicker)
+                    const target = e.target as Element;
+                    if (target.closest('[data-radix-portal]')) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
                   <div className="space-y-4">
                     <h4 className="font-semibold text-sm border-b pb-2">Message Options</h4>
                     

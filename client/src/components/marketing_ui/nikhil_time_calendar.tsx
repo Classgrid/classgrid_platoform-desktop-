@@ -91,7 +91,17 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
           {displayString}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent" align="start">
+      <PopoverContent 
+        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent" 
+        align="start"
+        onInteractOutside={(e) => {
+          // Prevent closing when clicking inside a nested select/portal
+          const target = e.target as Element;
+          if (target.closest('[data-radix-portal]')) {
+            e.preventDefault();
+          }
+        }}
+      >
         
         {/* The Unified Picker Widget */}
         <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden">
@@ -140,7 +150,9 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
               classNames={{
                 months: "bg-transparent",
                 month: "bg-transparent",
-                caption: "hidden", // Hide original header
+                month_caption: "hidden", // Hide original header
+                nav: "hidden", // Hide navigation arrows
+                caption: "hidden",
                 table: "w-full border-collapse space-y-1 mx-auto",
               }}
             />
