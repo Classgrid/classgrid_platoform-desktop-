@@ -189,7 +189,7 @@ export function NikhilTimeCalendar({
         <div
           ref={panelRef}
           style={panelStyle}
-          className="rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 duration-150"
+          className="rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl"
         >
           {/* Month / Year header */}
           <div className="flex items-center gap-2 p-3 pb-0">
@@ -198,7 +198,7 @@ export function NikhilTimeCalendar({
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[10000]">
                   {months.map((m, i) => (
                     <SelectItem key={i} value={i.toString()}>{m}</SelectItem>
                   ))}
@@ -210,7 +210,7 @@ export function NikhilTimeCalendar({
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[10000]">
                   {years.map((y) => (
                     <SelectItem key={y} value={y}>{y}</SelectItem>
                   ))}
@@ -261,7 +261,7 @@ export function NikhilTimeCalendar({
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="HH" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[10000]">
                     {hours.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -272,7 +272,7 @@ export function NikhilTimeCalendar({
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[10000]">
                     {minuteOptions.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -283,7 +283,7 @@ export function NikhilTimeCalendar({
                   <SelectTrigger className="h-9 border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-md text-sm font-bold">
                     <SelectValue placeholder="AM/PM" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[10000]">
                     <SelectItem value="AM">AM</SelectItem>
                     <SelectItem value="PM">PM</SelectItem>
                   </SelectContent>
