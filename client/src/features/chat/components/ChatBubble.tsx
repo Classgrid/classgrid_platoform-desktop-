@@ -207,7 +207,7 @@ export function ChatBubble({
               `}
             >
               <span className="font-bold block mb-0.5">{message.reply_to.sender_name}</span>
-              <span className="line-clamp-2">{message.reply_to.message || "Attachment"}</span>
+              <span className="line-clamp-2">{(message.reply_to.message || "Attachment").replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
             </div>
           )}
 

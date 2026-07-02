@@ -26,6 +26,7 @@ import {
 import LinkModal from "@/app/support/components/LinkModal";
 import { uploadToSupabase } from "@/lib/supabase-storage";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/marketing_ui/select";
+import DOMPurify from "dompurify";
 
 // ── Toolbar button ──────────────────────────────────────────────
 
@@ -300,10 +301,15 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
     // Paste handler — preserves rich HTML from ChatGPT etc.
     const handlePaste = useCallback(
       (e: React.ClipboardEvent) => {
-        const html = e.clipboardData.getData("text/html");
+        let html = e.clipboardData.getData("text/html");
         if (html) {
           e.preventDefault();
-          document.execCommand("insertHTML", false, html);
+          html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
+          const cleanHtml = DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
+          });
+          document.execCommand("insertHTML", false, cleanHtml);
           syncContent();
         }
       },

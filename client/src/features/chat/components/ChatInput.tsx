@@ -164,7 +164,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           <div className="flex-1 min-w-0 border-l-4 border-primary pl-3 py-1">
             <span className="text-xs font-bold text-primary block truncate">{replyTo.sender_name}</span>
             <span className="text-sm text-muted-foreground line-clamp-1">
-              {replyTo.is_deleted ? "This message was deleted" : replyTo.message || "📎 Attachment"}
+              {replyTo.is_deleted ? "This message was deleted" : (replyTo.message || "📎 Attachment").replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}
             </span>
           </div>
           <button
