@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import { Clock, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { cn } from "@/lib/utils";
@@ -31,25 +32,6 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
       setAmpm(format(value, "a"));
     }
   }, [value]);
-
-  // Click outside detection for absolute-positioned calendar wrapper
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as Element;
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(target) &&
-        target.isConnected &&
-        !target.closest('[data-radix-portal]') &&
-        !target.closest('[data-radix-popper-content-wrapper]')
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [isOpen]);
   
   // Create month and year state
   const currentYear = new Date().getFullYear();
@@ -99,31 +81,28 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     : placeholder;
 
   return (
-    <div className="relative w-full" ref={containerRef}>
-      <Button
-        type="button"
-        variant={"outline"}
-        className={cn(
-          "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
-          !value && "text-muted-foreground",
-          className
-        )}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <CalendarIcon className="mr-2 h-4 w-4" />
-        {displayString}
-      </Button>
-
-      {isOpen && (
-        <div 
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant={"outline"}
           className={cn(
-            "absolute z-50 right-0 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content",
-            popDirection === "up" ? "bottom-full mb-2" : "top-full mt-2"
+            "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
+            !value && "text-muted-foreground",
+            className
           )}
-          onMouseDown={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
         >
-        
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {displayString}
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent 
+        align="start" 
+        side={popDirection === "up" ? "top" : "bottom"}
+        sideOffset={8}
+        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content z-[100]"
+      >
         {/* The Unified Picker Widget */}
         <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden">
           
@@ -223,14 +202,19 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                 </Select>
               </div>
             </div>
-            
-            <Button onClick={handleApply} className="w-full mt-2 h-9 rounded-md font-semibold text-sm">
+          </div>
+          {/* Action Button */}
+          <div className="p-3 bg-muted/20 border-t border-border">
+            <Button 
+              type="button" 
+              className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium" 
+              onClick={handleApply}
+            >
               Apply Date & Time
             </Button>
           </div>
         </div>
-      </div>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }
