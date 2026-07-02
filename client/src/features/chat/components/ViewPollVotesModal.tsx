@@ -80,7 +80,7 @@ export function ViewPollVotesModal({
                   </div>
                   <div className="flex flex-col gap-2">
                     {optionVoters.map((v, idx) => {
-                      const user = orgUsers.find(u => u.user_id === v.user_id);
+                      const user = orgUsers.find(u => u._id === v.user_id);
                       return (
                         <div key={idx} className="flex items-center gap-2">
                           {user?.profilePicture ? (
