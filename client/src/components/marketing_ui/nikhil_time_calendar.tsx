@@ -22,7 +22,8 @@ function CustomSelect({
   options,
   placeholder,
   className,
-  dropdownClassName
+  dropdownClassName,
+  dropUp = false
 }: {
   value: string;
   onValueChange: (val: string) => void;
@@ -30,6 +31,7 @@ function CustomSelect({
   placeholder?: string;
   className?: string;
   dropdownClassName?: string;
+  dropUp?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +70,8 @@ function CustomSelect({
       {open && (
         <div 
           className={cn(
-            "absolute z-[1000] mt-1 max-h-56 w-full overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+            "absolute z-[1000] max-h-56 w-full overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+            dropUp ? "bottom-full mb-1 origin-bottom" : "top-full mt-1 origin-top",
             dropdownClassName
           )}
           // Prevent click inside dropdown from bubbling
@@ -289,6 +292,7 @@ export function NikhilTimeCalendar({
                   onValueChange={setHour} 
                   options={hourOptions}
                   className="h-9 border-border bg-background font-medium"
+                  dropUp={true}
                 />
               </div>
               <span className="text-lg font-bold text-muted-foreground pb-1">:</span>
@@ -298,6 +302,7 @@ export function NikhilTimeCalendar({
                   onValueChange={setMinute} 
                   options={minuteOptions}
                   className="h-9 border-border bg-background font-medium"
+                  dropUp={true}
                 />
               </div>
               <div className="w-2" />
@@ -307,6 +312,7 @@ export function NikhilTimeCalendar({
                   onValueChange={setAmpm} 
                   options={ampmOptions}
                   className="h-9 border-none bg-emerald-500/10 text-emerald-500 font-bold hover:bg-emerald-500/20"
+                  dropUp={true}
                 />
               </div>
             </div>
