@@ -296,6 +296,11 @@ export async function voteThreadPoll(threadId: string, pollId: string, optionId:
   return res.data;
 }
 
+export async function fetchThreadPolls(threadId: string): Promise<Poll[]> {
+  const res = await apiClient.get<{ polls: Poll[] }>(`/api/threads/${threadId}/polls`);
+  return res.data.polls || [];
+}
+
 export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
   const res = await apiClient.get<{ polls: Poll[] }>(`/api/group-chat/${groupId}/polls`);
   return res.data.polls;

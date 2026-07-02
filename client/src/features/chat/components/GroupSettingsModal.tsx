@@ -23,7 +23,7 @@ import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
 import { useOnlineUsers } from "../context/PresenceContext";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 import { Input } from "@/components/marketing_ui/input";
 
@@ -38,13 +38,13 @@ interface GroupSettingsModalProps {
 export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick, initialShowAddMember }: GroupSettingsModalProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { data: user } = useCurrentUser();
+  const onlineUsers = useOnlineUsers();
 
   // ── Local UI State ──
   const [showAddMember, setShowAddMember] = useState(initialShowAddMember || false);
   const [addSearch, setAddSearch] = useState("");
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
-  const onlineUsers = useOnlineUsers();
 
   // ── Data: Group Info ──
   const { data, isLoading, isError, error } = useQuery({
@@ -540,6 +540,68 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                         handleUpdatePermissions({ require_join_approval: checked });
                       }}
                     />
+                  </div>
+
+                  {/* Auto-Add Roles */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
+                    <span className="text-sm font-medium text-foreground">Auto-Add Members by Role</span>
+                    <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically added as regular members.</span>
+                    <div className="flex flex-wrap gap-2">
+                      {['student', 'faculty', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'coordinator', 'teacher'].map(role => {
+                        const currentRoles = data.group.auto_add_roles || [];
+                        const isSelected = currentRoles.includes(role);
+                        return (
+                          <button
+                            key={role}
+                            disabled={isUpdatingPermissions}
+                            onClick={() => {
+                              const newRoles = isSelected
+                                ? currentRoles.filter((r: string) => r !== role)
+                                : [...currentRoles, role];
+                              handleUpdatePermissions({ auto_add_roles: newRoles });
+                            }}
+                            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                              isSelected 
+                                ? 'bg-primary text-primary-foreground border-primary' 
+                                : 'bg-background text-foreground border-border hover:border-primary/50'
+                            }`}
+                          >
+                            {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Auto-Grant Admin Roles */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
+                    <span className="text-sm font-medium text-foreground">Auto-Grant Admin by Role</span>
+                    <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically granted Admin access in this group.</span>
+                    <div className="flex flex-wrap gap-2">
+                      {['student', 'faculty', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'coordinator', 'teacher'].map(role => {
+                        const currentRoles = data.group.admin_roles || [];
+                        const isSelected = currentRoles.includes(role);
+                        return (
+                          <button
+                            key={role}
+                            disabled={isUpdatingPermissions}
+                            onClick={() => {
+                              const newRoles = isSelected
+                                ? currentRoles.filter((r: string) => r !== role)
+                                : [...currentRoles, role];
+                              handleUpdatePermissions({ admin_roles: newRoles });
+                            }}
+                            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                              isSelected 
+                                ? 'bg-primary text-primary-foreground border-primary' 
+                                : 'bg-background text-foreground border-border hover:border-primary/50'
+                            }`}
+                          >
+                            {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   
                   {/* Actions Row */}
