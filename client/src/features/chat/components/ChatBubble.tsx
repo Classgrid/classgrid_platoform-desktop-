@@ -340,7 +340,7 @@ export function ChatBubble({
                             <div className="flex items-center gap-3">
                               {/* WhatsApp style Radio/Checkbox */}
                               <div className={`w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                ${iVoted ? "border-[#00a884] bg-[#00a884]" : "border-border dark:border-white/30 group-hover:border-white/50"}
+                                ${iVoted ? "border-[#00a884] bg-[#00a884]" : "border-border dark:border-white/30 group-hover:border-[#00a884]/50 dark:group-hover:border-white/50"}
                               `}>
                                 {iVoted && <Check className="w-3.5 h-3.5 text-black" strokeWidth={3} />}
                               </div>
@@ -358,7 +358,7 @@ export function ChatBubble({
                             </div>
                             
                             {/* WhatsApp style thin progress bar */}
-                            <div className="ml-[34px] h-1.5 bg-black/20 rounded-full overflow-hidden">
+                            <div className="ml-[34px] h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-[#00a884] rounded-full transition-all duration-500 ease-out"
                                 style={{ width: `${percent}%` }}
