@@ -156,7 +156,7 @@ export function NikhilTimeCalendar({
   ];
   const monthOptions = monthNames.map((m, i) => ({ label: m, value: i.toString() }));
   
-  const yearOptions = Array.from({ length: 10 }, (_, i) => {
+  const yearOptions = Array.from({ length: 100 }, (_, i) => {
     const v = (currentYear + i).toString();
     return { label: v, value: v };
   });
