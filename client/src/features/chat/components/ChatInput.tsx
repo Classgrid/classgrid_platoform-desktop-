@@ -113,10 +113,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       return;
     }
 
-    const targetElement = event?.target instanceof Element ? event.target : null;
+    const targetNode = event?.target instanceof Node ? event.target : null;
+    const targetElement = targetNode?.nodeType === 3 ? targetNode.parentElement : (targetNode instanceof Element ? targetNode : null);
 
     // Prevent closing if we clicked an element that was instantly unmounted
-    if (reason === "click-outside" && event && targetElement && !targetElement.isConnected) {
+    if (reason === "click-outside" && event && targetNode && !targetNode.isConnected) {
       event.preventDefault?.();
       setIsOptionsOpen(true);
       return;
