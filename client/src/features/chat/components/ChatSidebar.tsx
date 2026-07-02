@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
+import { DEFAULT_USER_AVATAR, DEFAULT_GROUP_AVATAR } from "@/lib/constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 
 interface ChatSidebarProps {
@@ -292,15 +293,11 @@ export function ChatSidebar({
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs ${getAvatarColor(thread.name)}`}
-                    >
-                      {thread.type === "group" ? (
-                        <Users className="w-4 h-4" />
-                      ) : (
-                        getInitials(thread.name)
-                      )}
-                    </div>
+                    <img
+                      src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR}
+                      alt=""
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
                   )}
                   {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
                     <span 

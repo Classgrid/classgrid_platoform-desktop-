@@ -18,7 +18,8 @@ import { toast } from "sonner";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { Megaphone, BadgeCheck, Building2 } from "lucide-react";
 import { AddGroupMemberSidebar } from "./AddGroupMemberSidebar";
-import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
+import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
 
@@ -273,9 +274,11 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                                       alt=""
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-border shrink-0">
-                                      {member.name[0]?.toUpperCase()}
-                                    </div>
+                                    <img
+                                      src={DEFAULT_USER_AVATAR}
+                                      className="w-10 h-10 rounded-full object-cover border border-border shrink-0 cursor-pointer"
+                                      alt=""
+                                    />
                                   )}
                                   <div className="min-w-0 flex-1">
                                     <span className="text-sm font-medium text-foreground block truncate group-hover/member:underline">

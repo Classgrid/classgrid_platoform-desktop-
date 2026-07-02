@@ -7,6 +7,8 @@ import { X, Save, Shield, Camera, Loader, Mail, Phone,
   Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit, ChevronRight
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
+import { Textarea } from "@/components/marketing_ui/textarea";
+import { DEFAULT_BANNER, DEFAULT_USER_AVATAR, DEFAULT_GROUP_AVATAR } from "@/lib/constants";
 import { Button } from "@/components/marketing_ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import { Spinner } from "@/components/marketing_ui/spinner";
@@ -124,8 +126,8 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
         phoneNumber: "",
         email: "",
         role: "Organization Group",
-        profilePicture: groupData.group.avatar_url || "",
-        profileBanner: groupData.group.banner_url || "",
+        profilePicture: groupData.group.avatar_url || DEFAULT_GROUP_AVATAR,
+        profileBanner: groupData.group.banner_url || DEFAULT_BANNER,
         lastLoginAt: undefined,
         createdAt: groupData.group.created_at,
         bio: groupData.group.description || "",
@@ -139,8 +141,8 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
         phoneNumber: publicUser.phoneNumber || "",
         email: publicUser.email || "",
         role: publicUser.role || "User",
-        profilePicture: publicUser.profilePicture || "",
-        profileBanner: publicUser.profileBanner || "",
+        profilePicture: publicUser.profilePicture || DEFAULT_USER_AVATAR,
+        profileBanner: publicUser.profileBanner || DEFAULT_BANNER,
         lastLoginAt: publicUser.lastLoginAt,
         createdAt: publicUser.createdAt,
         prn: publicUser.prn,
@@ -156,8 +158,8 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
         phoneNumber: profileData.user.phoneNumber || "",
         email: profileData.user.email || "",
         role: profileData.user.role || "User",
-        profilePicture: profileData.user.profilePicture || profileData.user.photoURL || "",
-        profileBanner: profileData.user.profileBanner || "",
+        profilePicture: profileData.user.profilePicture || profileData.user.photoURL || DEFAULT_USER_AVATAR,
+        profileBanner: profileData.user.profileBanner || DEFAULT_BANNER,
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
         prn: profileData.user.prn,
@@ -394,7 +396,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
           <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg flex flex-col">
             <div 
               className="h-[250px] relative bg-muted" 
-              style={form.profileBanner ? { backgroundImage: `url(${form.profileBanner})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+              style={{ backgroundImage: `url(${form.profileBanner || DEFAULT_BANNER})`, backgroundSize: "cover", backgroundPosition: "center" }}
             >
 
               {!isReadOnly && (

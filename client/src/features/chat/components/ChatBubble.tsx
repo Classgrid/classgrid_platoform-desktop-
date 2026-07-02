@@ -22,6 +22,7 @@ import {
 } from "@/components/marketing_ui/context-menu";
 import { toast } from "sonner";
 import type { ChatMessage, Poll } from "../services/chatApi";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 
 interface ChatBubbleProps {
@@ -170,9 +171,11 @@ export function ChatBubble({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center">
-                    {getInitials(message.sender_name)}
-                  </div>
+                  <img
+                    src={DEFAULT_USER_AVATAR}
+                    alt={message.sender_name}
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </button>
             ) : null}

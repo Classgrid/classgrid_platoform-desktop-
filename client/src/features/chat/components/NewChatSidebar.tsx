@@ -3,6 +3,7 @@ import { ArrowLeft, Search, Users, Check, MessageSquarePlus } from "lucide-react
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Input } from "@/components/marketing_ui/input";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import type { OrgUser } from "../services/chatApi";
 
 interface NewChatSidebarProps {
@@ -130,7 +131,11 @@ export function NewChatSidebar({
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      getInitials(user.name)
+                      <img
+                        src={DEFAULT_USER_AVATAR}
+                        alt=""
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     )}
                     {isSelected && (
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm z-10">

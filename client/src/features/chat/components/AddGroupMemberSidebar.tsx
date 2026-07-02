@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { ArrowLeft, Search, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { toast } from "sonner";
 import type { OrgUser } from "../services/chatApi";
 
@@ -165,7 +166,11 @@ export function AddGroupMemberSidebar({
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            getInitials(user.name)
+                            <img
+                              src={DEFAULT_USER_AVATAR}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
                           )}
                         </div>
                         {isSelected && (

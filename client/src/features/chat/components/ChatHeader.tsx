@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
+import { DEFAULT_USER_AVATAR, DEFAULT_GROUP_AVATAR } from "@/lib/constants";
 
 
 interface ChatHeaderProps {
@@ -78,9 +79,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
         {hasAvatar ? (
           <img src={thread.avatar!} alt="" className="w-9 h-9 rounded-full object-cover" />
         ) : (
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs ${getAvatarColor(thread.name)}`}>
-            {thread.type === "group" ? <Users className="w-4 h-4" /> : getInitials(thread.name)}
-          </div>
+          <img src={thread.type === "group" ? DEFAULT_GROUP_AVATAR : DEFAULT_USER_AVATAR} alt="" className="w-9 h-9 rounded-full object-cover" />
         )}
         {thread.type === "dm" && (thread.otherUserId || thread.id) && onlineUsers?.has(thread.otherUserId || thread.id) && (
           <span 
