@@ -4,6 +4,7 @@ import { fetchScheduledMessages, cancelScheduledMessage, editScheduledMessage, S
 import { format } from "date-fns";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { useQueryClient } from "@tanstack/react-query";
+import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 
 interface ScheduledMessagesDrawerProps {
   isOpen: boolean;
@@ -120,13 +121,21 @@ export function ScheduledMessagesDrawer({ isOpen, onClose, threadId }: Scheduled
                       onChange={(e) => setEditMessageText(e.target.value)}
                       className="w-full min-h-[80px] text-sm bg-accent/50 border border-border rounded-lg p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 resize-none"
                     />
-                    <input 
-                      type="datetime-local" 
-                      value={editDate}
-                      onChange={(e) => setEditDate(e.target.value)}
-                      className="w-full bg-accent/50 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
-                      min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
-                    />
+                    <div className="w-full">
+                      <NikhilTimeCalendar 
+                        value={editDate ? new Date(editDate) : undefined}
+                        onChange={(d) => {
+                          if (d) {
+                            // Format to local ISO string (YYYY-MM-DDThh:mm)
+                            const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                            setEditDate(localDate);
+                          } else {
+                            setEditDate("");
+                          }
+                        }}
+                        popDirection="bottom"
+                      />
+                    </div>
                     <div className="flex justify-end gap-2 pt-2">
                       <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-sm font-medium hover:bg-accent rounded-lg text-muted-foreground transition-colors">
                         Cancel
