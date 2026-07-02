@@ -122,10 +122,13 @@ export function initChatSchedulerCron() {
               }
               const notificationsToInsert = [];
               members.forEach((m) => {
+                // ALWAYS broadcast thread update so sender's sidebar refreshes immediately
+                broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
+                  threadId: schedMsg.thread_id, messageId: insertedMsg.id, message: broadcastPayload
+                });
+                
+                // ONLY send actual notifications/dings to other people
                 if (m.user_id !== schedMsg.sender_id) {
-                  broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
-                    threadId: schedMsg.thread_id, messageId: insertedMsg.id, message: broadcastPayload
-                  });
                   const mutes = userMutes[m.user_id] || [];
                   if (!mutes.includes(schedMsg.thread_id)) {
                     notificationsToInsert.push({
