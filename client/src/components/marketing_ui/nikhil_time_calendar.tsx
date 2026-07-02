@@ -17,7 +17,7 @@ interface NikhilTimeCalendarProps {
 
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className, popDirection = "down" }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
   
   const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
   const validValue = isValidDate(value) ? value : undefined;
@@ -117,7 +117,8 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
         }}
       >
         {/* The Unified Picker Widget */}
-        <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px]" ref={containerRef} data-calendar-container="true flex flex-col overflow-hidden">
+        <div ref={setPortalContainer} data-calendar-container="true" className="relative w-[320px]">
+          <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-full flex flex-col overflow-hidden">
           
           {/* Custom Month/Year Header */}
           <div className="flex items-center gap-2 p-3 pb-0">
@@ -126,7 +127,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
-                <SelectContent portalContainer={containerRef.current}>
+                <SelectContent portalContainer={portalContainer}>
                   {months.map((m, i) => <SelectItem key={i} value={i.toString()}>{m}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -136,7 +137,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent portalContainer={containerRef.current}>
+                <SelectContent portalContainer={portalContainer}>
                   {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -186,7 +187,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="HH" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={containerRef.current}>
+                  <SelectContent portalContainer={portalContainer}>
                     {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -197,7 +198,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={containerRef.current}>
+                  <SelectContent portalContainer={portalContainer}>
                     {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -208,7 +209,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-md text-sm font-bold">
                     <SelectValue placeholder="AM/PM" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={containerRef.current}>
+                  <SelectContent portalContainer={portalContainer}>
                     <SelectItem value="AM">AM</SelectItem>
                     <SelectItem value="PM">PM</SelectItem>
                   </SelectContent>
@@ -226,6 +227,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
               Apply Date & Time
             </Button>
           </div>
+        </div>
         </div>
       </PopoverContent>
     </Popover>
