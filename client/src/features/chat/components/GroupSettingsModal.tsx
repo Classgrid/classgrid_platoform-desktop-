@@ -43,7 +43,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
 
   // ── Data: Group Info ──
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["group-info", groupId],
     queryFn: () => fetchGroupInfo(groupId),
   });
@@ -428,7 +428,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
         {error && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-destructive/10 text-destructive text-sm font-medium px-4 py-3 rounded-lg border border-destructive/20">
-              {error}
+              {error instanceof Error ? error.message : "An error occurred"}
             </div>
           </div>
         )}
