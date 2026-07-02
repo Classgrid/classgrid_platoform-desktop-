@@ -611,9 +611,6 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
               {children}
             </div>
           )}
-              </div>
-            </div>
-          </div>
 
             {/* Dynamic Contextual Profile Data - Only shown to the user themselves */}
             {!isReadOnly && !isGroup && (
