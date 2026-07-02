@@ -24,7 +24,6 @@ export function NikhilTimeCalendar({
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
 
   const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
   const validValue = isValidDate(value) ? value : undefined;
@@ -80,16 +79,30 @@ export function NikhilTimeCalendar({
     if (top + panelH > vh - 16) top = vh - panelH - 16;
     if (top < 16) top = 16;
 
-    setPanelStyle({ position: "fixed", top, left, width: panelW, zIndex: 9999 });
+    const style: React.CSSProperties = { position: "fixed", top, left, width: panelW, zIndex: 9999 };
+    return style;
   }, [popDirection]);
 
-  // Position + outside-click listener
+  // Compute position synchronously when opening
+  const toggleOpen = useCallback(() => {
+    setIsOpen((prev) => {
+      if (!prev) {
+        // Will open — compute position now
+        requestAnimationFrame(() => updatePosition());
+      }
+      return !prev;
+    });
+  }, [updatePosition]);
+
+  // Reposition + outside-click listener
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ position: "fixed", top: -9999, left: -9999, width: 320, zIndex: 9999 });
   useEffect(() => {
     if (!isOpen) return;
-    updatePosition();
+    const style = updatePosition();
+    if (style) setPanelStyle(style);
 
-    const onResize = () => updatePosition();
-    const onScroll = () => updatePosition();
+    const onResize = () => { const s = updatePosition(); if (s) setPanelStyle(s); };
+    const onScroll = () => { const s = updatePosition(); if (s) setPanelStyle(s); };
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, true);
 
@@ -158,7 +171,7 @@ export function NikhilTimeCalendar({
         ref={triggerRef}
         type="button"
         variant="outline"
-        onClick={() => setIsOpen((v) => !v)}
+        onClick={toggleOpen}
         className={cn(
           "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
           !value && "text-muted-foreground",
