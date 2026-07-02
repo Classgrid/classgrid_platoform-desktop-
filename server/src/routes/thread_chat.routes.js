@@ -1162,9 +1162,49 @@ router.post('/:id/polls', isAuthenticated, async (req, res) => {
       created_by: userId
     }]).select().single();
 
-    broadcastToChannel(`thread:${threadId}`, 'new_poll', { poll, messageId: msg.id });
+    // Broadcast the message AND the poll so both appear in real-time
+    broadcastToChannel(`thread:${threadId}`, 'new_message', {
+      ...msg,
+      sender_name: req.user.name || 'User',
+      user_avatar: req.user.profilePicture || null,
+      attachments: [],
+      reactions: {},
+    });
+    broadcastToChannel(`thread:${threadId}`, 'new_poll', {
+      poll: {
+        ...poll,
+        voteCounts: {},
+        totalVoters: 0,
+        myVotes: [],
+      },
+      messageId: msg.id,
+    });
     res.status(201).json({ poll });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ==========================================
+// GET /threads/:id/polls/:pollId/voters — Get poll voters
+// ==========================================
+router.get('/:id/polls/:pollId/voters', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const { id: threadId, pollId } = req.params;
+
+    const membership = await validateThreadMembership(userId, threadId);
+    if (!membership) return res.status(403).json({ error: 'Not a member' });
+
+    const { data: votes, error } = await sb
+      .from('chat_poll_votes')
+      .select('option_id, user_id')
+      .eq('poll_id', pollId);
+
+    if (error) throw error;
+    res.json({ votes: votes || [] });
+  } catch (err) {
+    console.error('Fetch poll voters error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {

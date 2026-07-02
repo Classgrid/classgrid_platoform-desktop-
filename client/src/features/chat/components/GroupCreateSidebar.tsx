@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Search, Check, Camera, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { toast } from "sonner";
 import type { OrgUser } from "../services/chatApi";
 
@@ -34,6 +35,8 @@ export function GroupCreateSidebar({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupName, setGroupName] = useState("");
   const [groupPhoto, setGroupPhoto] = useState<File | null>(null);
+  const [groupPhotoPreview, setGroupPhotoPreview] = useState<string | null>(null);
+  const [cropperSrc, setCropperSrc] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredAndSortedUsers = useMemo(() => {
@@ -87,8 +90,21 @@ export function GroupCreateSidebar({
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setGroupPhoto(e.target.files[0]);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropperSrc(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      // Reset input so the same file can be re-selected
+      e.target.value = '';
     }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    const file = new File([croppedBlob], 'group-icon.jpg', { type: croppedBlob.type || 'image/jpeg' });
+    setGroupPhoto(file);
+    setGroupPhotoPreview(URL.createObjectURL(croppedBlob));
   };
 
   return (
@@ -249,8 +265,8 @@ export function GroupCreateSidebar({
             {/* Group Icon & Name */}
             <div className="flex flex-col items-center pt-8 px-6 pb-4">
               <label className="w-48 h-48 rounded-full bg-accent flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted transition-colors group relative overflow-hidden mb-8">
-                {groupPhoto ? (
-                  <img src={URL.createObjectURL(groupPhoto)} alt="Group" className="w-full h-full object-cover" />
+                {groupPhotoPreview ? (
+                  <img src={groupPhotoPreview} alt="Group" className="w-full h-full object-cover" />
                 ) : (
                   <>
                     <Camera className="w-10 h-10 mb-2 opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -306,6 +322,17 @@ export function GroupCreateSidebar({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={!!cropperSrc}
+        onClose={() => setCropperSrc(null)}
+        imageSrc={cropperSrc || ''}
+        onCropComplete={handleCropComplete}
+        aspectRatio={1}
+        circularCrop={true}
+        title="Crop Group Icon"
+      />
     </motion.div>
   );
 }

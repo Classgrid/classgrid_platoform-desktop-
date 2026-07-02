@@ -22,6 +22,7 @@ interface ChatConversationProps {
   onViewMedia?: (attachment: any) => void;
   polls?: Poll[];
   onVotePoll?: (pollId: string, optionId: string) => void;
+  onViewVotes?: (pollId: string) => void;
   onStar?: (msgId: string) => void;
   searchQuery?: string;
   isSelectionMode?: boolean;
@@ -46,6 +47,7 @@ export function ChatConversation({
   onViewMedia,
   polls = [],
   onVotePoll,
+  onViewVotes,
   onStar,
   searchQuery = "",
   isSelectionMode = false,
@@ -230,6 +232,7 @@ export function ChatConversation({
                     onViewMedia={onViewMedia}
                     poll={polls.find(p => p.message_id === msg.id)}
                     onVotePoll={onVotePoll}
+                    onViewVotes={onViewVotes}
                     onStar={onStar}
                     isSelectionMode={isSelectionMode}
                     isSelected={selectedMessageIds.has(msg.id)}

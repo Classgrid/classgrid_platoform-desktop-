@@ -471,7 +471,15 @@ router.post('/:id/polls', isAuthenticated, async (req, res) => {
     if (pollErr) throw pollErr;
 
     // Broadcast
-    await broadcastToChannel(`thread:${thread.id}`, 'new_poll', { poll, messageId: msgId });
+    await broadcastToChannel(`thread:${thread.id}`, 'new_poll', {
+      poll: {
+        ...poll,
+        voteCounts: {},
+        totalVoters: 0,
+        myVotes: [],
+      },
+      messageId: msgId,
+    });
 
     res.status(201).json({ poll });
   } catch (err) {
