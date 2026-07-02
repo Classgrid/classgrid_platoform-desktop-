@@ -49,6 +49,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [isSilent, setIsSilent] = useState(false);
   const [priority, setPriority] = useState("normal"); // normal, high, urgent
   const [expiresAt, setExpiresAt] = useState<string>("");
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -101,6 +102,33 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
   };
 
+
+  const handleOptionsOpenChange = (
+    open: boolean,
+    eventDetails?: { event?: Event; cancel?: () => void }
+  ) => {
+    if (open) {
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    const eventTarget = eventDetails?.event?.target;
+    const targetElement = eventTarget instanceof Element ? eventTarget : null;
+    const isNestedPickerEvent =
+      !targetElement ||
+      !targetElement.isConnected ||
+      !!targetElement.closest(
+        '.nikhil-time-calendar-content, [data-calendar-container="true"], [data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]'
+      );
+
+    if (isNestedPickerEvent) {
+      eventDetails?.cancel?.();
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    setIsOptionsOpen(false);
+  };
   const clearAudio = () => {
     setAudioBlob(null);
     setRecordingTime(0);
@@ -427,7 +455,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             )}
 
             {!isRecording && (
-              <Popover>
+              <Popover open={isOptionsOpen} onOpenChange={handleOptionsOpenChange}>
                 <PopoverTrigger asChild>
                   <button
                     className={`p-3 rounded-full transition-colors shrink-0 mb-0.5 flex items-center justify-center w-11 h-11 ${(scheduledDate || isSilent || priority !== 'normal' || expiresAt) ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'bg-accent text-foreground hover:bg-accent/80'}`}
@@ -440,19 +468,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   side="top" 
                   align="end" 
                   className="w-72 p-4 bg-card border border-border shadow-lg rounded-xl"
-                  onInteractOutside={(e) => {
-                    const target = e.target as Element;
-                    // Prevent closing when interacting with nested popovers, select options, or unmounted nodes
-                    if (
-                      !target ||
-                      !target.isConnected ||
-                      target.closest('.nikhil-time-calendar-content') ||
-                      target.closest('[data-radix-portal]') ||
-                      target.closest('[data-radix-popper-content-wrapper]')
-                    ) {
-                      e.preventDefault();
-                    }
-                  }}
+
                 >
                   <div className="space-y-4">
                     <h4 className="font-semibold text-sm border-b pb-2">Message Options</h4>

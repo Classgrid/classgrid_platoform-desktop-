@@ -18,6 +18,9 @@ interface NikhilTimeCalendarProps {
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className, popDirection = "down" }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
+  const selectCloseGuardRef = React.useRef(false);
+  const isSelectOpenRef = React.useRef(false);
+  const selectCloseGuardTimerRef = React.useRef<number | undefined>(undefined);
   
   const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
   const validValue = isValidDate(value) ? value : undefined;
@@ -48,6 +51,66 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const years = Array.from({ length: 100 }, (_, i) => (currentYear - 50 + i).toString());
+  const keepOpenForSelectInteraction = () => {
+    selectCloseGuardRef.current = true;
+    if (selectCloseGuardTimerRef.current !== undefined) {
+      window.clearTimeout(selectCloseGuardTimerRef.current);
+    }
+    selectCloseGuardTimerRef.current = window.setTimeout(() => {
+      if (!isSelectOpenRef.current) {
+        selectCloseGuardRef.current = false;
+      }
+      selectCloseGuardTimerRef.current = undefined;
+    }, 250);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (selectCloseGuardTimerRef.current !== undefined) {
+        window.clearTimeout(selectCloseGuardTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleSelectOpenChange = (open: boolean) => {
+    isSelectOpenRef.current = open;
+    if (open) {
+      selectCloseGuardRef.current = true;
+      if (selectCloseGuardTimerRef.current !== undefined) {
+        window.clearTimeout(selectCloseGuardTimerRef.current);
+        selectCloseGuardTimerRef.current = undefined;
+      }
+      return;
+    }
+    keepOpenForSelectInteraction();
+  };
+
+  const handlePopoverOpenChange = (
+    open: boolean,
+    eventDetails?: { event?: Event; cancel?: () => void }
+  ) => {
+    if (open) {
+      setIsOpen(true);
+      return;
+    }
+
+    const eventTarget = eventDetails?.event?.target;
+    const targetElement = eventTarget instanceof Element ? eventTarget : null;
+    const isCalendarSelectEvent =
+      selectCloseGuardRef.current ||
+      isSelectOpenRef.current ||
+      !!targetElement?.closest(
+        '[data-calendar-select-content="true"], [role="listbox"], [data-radix-popper-content-wrapper]'
+      );
+
+    if (isCalendarSelectEvent) {
+      eventDetails?.cancel?.();
+      setIsOpen(true);
+      return;
+    }
+
+    setIsOpen(false);
+  };
 
   // Handle month/year changes and update calendar date
   const handleMonthChange = (val: string) => {
@@ -83,7 +146,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     : placeholder;
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -104,17 +167,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
         side={popDirection === "up" ? "top" : popDirection === "down" ? "bottom" : popDirection}
         sideOffset={8}
         className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content z-[100]"
-        onInteractOutside={(e) => {
-          const target = e.target as Element | null;
-          if (
-            !target ||
-            !target.isConnected ||
-            target.closest('[data-radix-popper-content-wrapper]') ||
-            target.closest('[role="listbox"]')
-          ) {
-            e.preventDefault();
-          }
-        }}
+
       >
         {/* The Unified Picker Widget */}
         <div ref={setPortalContainer} data-calendar-container="true" className="relative w-[320px]">
@@ -123,21 +176,21 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
           {/* Custom Month/Year Header */}
           <div className="flex items-center gap-2 p-3 pb-0">
             <div className="flex-1">
-              <Select value={selectedMonth} onValueChange={handleMonthChange}>
+              <Select value={selectedMonth} onOpenChange={handleSelectOpenChange} onValueChange={(val) => { keepOpenForSelectInteraction(); handleMonthChange(val); }}>
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
-                <SelectContent portalContainer={portalContainer}>
+                <SelectContent portalContainer={portalContainer} data-calendar-select-content="true">
                   {months.map((m, i) => <SelectItem key={i} value={i.toString()}>{m}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex-1">
-              <Select value={selectedYear} onValueChange={handleYearChange}>
+              <Select value={selectedYear} onOpenChange={handleSelectOpenChange} onValueChange={(val) => { keepOpenForSelectInteraction(); handleYearChange(val); }}>
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent portalContainer={portalContainer}>
+                <SelectContent portalContainer={portalContainer} data-calendar-select-content="true">
                   {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -183,33 +236,33 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
             
             <div className="flex items-center gap-2">
               <div className="flex-[2]">
-                <Select value={hour} onValueChange={setHour}>
+                <Select value={hour} onOpenChange={handleSelectOpenChange} onValueChange={(val) => { keepOpenForSelectInteraction(); setHour(val); }}>
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="HH" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={portalContainer}>
+                  <SelectContent portalContainer={portalContainer} data-calendar-select-content="true">
                     {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <span className="text-lg font-bold text-muted-foreground pb-1">:</span>
               <div className="flex-[2]">
-                <Select value={minute} onValueChange={setMinute}>
+                <Select value={minute} onOpenChange={handleSelectOpenChange} onValueChange={(val) => { keepOpenForSelectInteraction(); setMinute(val); }}>
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={portalContainer}>
+                  <SelectContent portalContainer={portalContainer} data-calendar-select-content="true">
                     {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="w-2" />
               <div className="flex-[2]">
-                <Select value={ampm} onValueChange={setAmpm}>
+                <Select value={ampm} onOpenChange={handleSelectOpenChange} onValueChange={(val) => { keepOpenForSelectInteraction(); setAmpm(val); }}>
                   <SelectTrigger className="h-9 border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-md text-sm font-bold">
                     <SelectValue placeholder="AM/PM" />
                   </SelectTrigger>
-                  <SelectContent portalContainer={portalContainer}>
+                  <SelectContent portalContainer={portalContainer} data-calendar-select-content="true">
                     <SelectItem value="AM">AM</SelectItem>
                     <SelectItem value="PM">PM</SelectItem>
                   </SelectContent>
