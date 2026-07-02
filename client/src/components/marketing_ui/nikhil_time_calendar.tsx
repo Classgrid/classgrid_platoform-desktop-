@@ -115,7 +115,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
       {isOpen && (
         <div 
-          className="absolute z-50 top-full left-0 mt-2 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content"
+          className="absolute z-50 top-full right-0 mt-2 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content"
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
