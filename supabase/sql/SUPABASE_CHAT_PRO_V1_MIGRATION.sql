@@ -18,11 +18,22 @@ ADD COLUMN IF NOT EXISTS auto_add_roles JSONB DEFAULT '[]'::jsonb,
 ADD COLUMN IF NOT EXISTS admin_roles JSONB DEFAULT '[]'::jsonb;
 
 -- 2. Safe policy constraints
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_send_message_policy_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_send_message_policy_check CHECK (send_message_policy IN ('all', 'admin_only', 'admin_faculty'));
+
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_edit_info_policy_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_edit_info_policy_check CHECK (edit_info_policy IN ('admin_only', 'org_admin_only'));
+
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_add_member_policy_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_add_member_policy_check CHECK (add_member_policy IN ('admin_only', 'admin_faculty', 'org_admin_only'));
+
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_create_poll_policy_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_create_poll_policy_check CHECK (create_poll_policy IN ('all', 'admin_only', 'admin_faculty'));
+
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_send_attachments_policy_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_send_attachments_policy_check CHECK (send_attachments_policy IN ('all', 'admin_only', 'admin_faculty'));
+
+ALTER TABLE chat_groups DROP CONSTRAINT IF EXISTS chat_groups_group_type_check;
 ALTER TABLE chat_groups ADD CONSTRAINT chat_groups_group_type_check CHECK (
   group_type IN ('general', 'announcement', 'class', 'department', 'subject', 'exam', 'fees', 'admission', 'faculty', 'parent', 'transport', 'hostel', 'library', 'event')
 );
@@ -40,6 +51,7 @@ ADD COLUMN IF NOT EXISTS rejected_by TEXT,
 ADD COLUMN IF NOT EXISTS rejected_at TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
 
+ALTER TABLE chat_messages DROP CONSTRAINT IF EXISTS chat_messages_status_check;
 ALTER TABLE chat_messages ADD CONSTRAINT chat_messages_status_check CHECK (status IN ('approved', 'pending', 'rejected'));
 
 -- 4. ERP Acknowledgements Table
@@ -96,6 +108,7 @@ CREATE TABLE IF NOT EXISTS chat_scheduled_messages (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE chat_scheduled_messages DROP CONSTRAINT IF EXISTS chat_scheduled_messages_status_check;
 ALTER TABLE chat_scheduled_messages ADD CONSTRAINT chat_scheduled_messages_status_check CHECK (status IN ('pending', 'sent', 'failed', 'cancelled'));
 
 CREATE INDEX IF NOT EXISTS idx_chat_sched_msg_thread_id ON chat_scheduled_messages(thread_id);

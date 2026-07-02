@@ -22,6 +22,7 @@ import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
+import { Button } from "@/components/marketing_ui/button";
 import { useOnlineUsers } from "../context/PresenceContext";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
