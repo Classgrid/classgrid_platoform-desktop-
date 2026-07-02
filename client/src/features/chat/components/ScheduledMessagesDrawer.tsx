@@ -167,7 +167,9 @@ export function ScheduledMessagesDrawer({ isOpen, onClose, threadId }: Scheduled
                       </div>
                     </div>
                     
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{msg.message}</p>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                      {msg.message?.replace(/&nbsp;/g, ' ')}
+                    </p>
                     
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="mt-3 text-xs text-muted-foreground font-medium flex items-center gap-1">
