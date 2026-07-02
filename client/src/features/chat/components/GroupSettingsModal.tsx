@@ -470,8 +470,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     Leave Group
                   </button>
                 </div>
-              </>
-            )}
+                </div>
+              )}
           </div>
         </div>
       </div>
