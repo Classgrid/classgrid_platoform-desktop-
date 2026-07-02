@@ -4,8 +4,7 @@ import { useTheme } from "next-themes";
 import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, BadgeCheck, ShieldAlert,
-  User as UserIcon, ChevronRight, ArrowLeft,
-  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit, Loader2
+  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
@@ -448,7 +447,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                             placeholder="Group Name"
                           />
                           <Button size="sm" onClick={handleSaveGroupInfo} disabled={isSavingGroupInfo} className="h-8">
-                            {isSavingGroupInfo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                            {isSavingGroupInfo ? <Spinner className="w-4 h-4 text-background" /> : "Save"}
                           </Button>
                           <Button size="sm" variant="ghost" onClick={() => setIsEditingName(false)} disabled={isSavingGroupInfo} className="h-8">Cancel</Button>
                         </div>
@@ -639,7 +638,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                         />
                         <div className="flex items-center gap-2">
                           <Button size="sm" onClick={handleSaveGroupInfo} disabled={isSavingGroupInfo} className="h-8">
-                            {isSavingGroupInfo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                            {isSavingGroupInfo ? <Spinner className="w-4 h-4 text-background" /> : "Save"}
                           </Button>
                           <Button size="sm" variant="ghost" onClick={() => setIsEditingBio(false)} disabled={isSavingGroupInfo} className="h-8">Cancel</Button>
                         </div>
