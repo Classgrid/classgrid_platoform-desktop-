@@ -71,6 +71,7 @@ export function ChatPage() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [viewingMedia, setViewingMedia] = useState<any | null>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [viewVotesPollId, setViewVotesPollId] = useState<string | null>(null);
@@ -605,6 +606,20 @@ export function ChatPage() {
               }}
               onClearChat={handleClearChat}
               onDeleteChat={handleDeleteChat}
+              onLeaveGroup={() => {
+                if (!activeThread?.groupId) return;
+                if (window.confirm("Are you sure you want to leave this group?")) {
+                  exitGroup(activeThread.groupId).then(() => {
+                    toast.success("You left the group");
+                    setActiveThread(null);
+                    loadThreads();
+                  }).catch((e: any) => toast.error(e?.response?.data?.error || "Failed to leave group"));
+                }
+              }}
+              onAddMember={() => {
+                setIsAddMemberOpen(true);
+                setIsGroupSettingsOpen(true);
+              }}
               onOpenDisappearingModal={() => setIsDisappearingModalOpen(true)}
               onEnterSelectionMode={() => setIsSelectionMode(true)}
             />
@@ -750,11 +765,15 @@ export function ChatPage() {
         <Suspense fallback={null}>
           <GroupSettingsModal 
             groupId={activeThread.groupId} 
-            onClose={() => setIsGroupSettingsOpen(false)}
+            onClose={() => {
+              setIsGroupSettingsOpen(false);
+              setIsAddMemberOpen(false);
+            }}
             onLeaveGroup={() => {
               setIsGroupSettingsOpen(false);
               setActiveThread(null);
             }}
+            initialShowAddMember={isAddMemberOpen}
             onUserClick={(userId) => setProfileUserId(userId)}
           />
         </Suspense>

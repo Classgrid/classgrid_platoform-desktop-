@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, CheckSquare, Trash2, ShieldAlert, XCircle, Trash } from "lucide-react";
+import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut } from "lucide-react";
 import type { ChatThread } from "../services/chatApi";
 import {
   DropdownMenu,
@@ -24,6 +24,8 @@ interface ChatHeaderProps {
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   onEnterSelectionMode?: () => void;
+  onLeaveGroup?: () => void;
+  onAddMember?: () => void;
 }
 
 function getInitials(name: string) {
@@ -45,7 +47,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -172,8 +174,16 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={onShowInfo} className="cursor-pointer py-2">
               <User className="w-4 h-4 mr-2" />
-              <span>View Profile</span>
+              <span>{thread.type === "group" ? "View Group Info" : "View Profile"}</span>
             </DropdownMenuItem>
+
+            {thread.type === "group" && onAddMember && (
+              <DropdownMenuItem onClick={onAddMember} className="cursor-pointer py-2 text-primary focus:text-primary focus:bg-primary/10">
+                <UserPlus className="w-4 h-4 mr-2" />
+                <span>Add member</span>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSearchOpen(true)}>
               <Search className="w-4 h-4 mr-2" />
               <span>Search in chat</span>
@@ -195,10 +205,18 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <XCircle className="w-4 h-4 mr-2" />
               <span>Clear chat</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onDeleteChat}>
-              <Trash className="w-4 h-4 mr-2" />
-              <span>Delete chat</span>
-            </DropdownMenuItem>
+
+            {thread.type === "group" ? (
+              <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onLeaveGroup || onDeleteChat}>
+                <LogOut className="w-4 h-4 mr-2" />
+                <span>Leave group</span>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onDeleteChat}>
+                <Trash className="w-4 h-4 mr-2" />
+                <span>Delete chat</span>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

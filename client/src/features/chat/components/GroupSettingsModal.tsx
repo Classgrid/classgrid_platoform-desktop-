@@ -29,14 +29,15 @@ interface GroupSettingsModalProps {
   onClose: () => void;
   onLeaveGroup?: () => void;
   onUserClick?: (userId: string) => void;
+  initialShowAddMember?: boolean;
 }
 
-export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick }: GroupSettingsModalProps) {
+export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick, initialShowAddMember }: GroupSettingsModalProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Local UI State ──
-  const [showAddMember, setShowAddMember] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(initialShowAddMember || false);
   const [addSearch, setAddSearch] = useState("");
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
 
