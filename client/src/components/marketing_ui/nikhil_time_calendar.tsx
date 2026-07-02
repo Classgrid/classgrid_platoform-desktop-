@@ -7,14 +7,14 @@ import { Button } from "@/components/marketing_ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import { cn } from "@/lib/utils";
 
-interface DateTimePickerProps {
+interface NikhilTimeCalendarProps {
   value?: Date;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
 }
 
-export function DateTimePicker({ value, onChange, placeholder = "Pick date & time", className }: DateTimePickerProps) {
+export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className }: NikhilTimeCalendarProps) {
   const [internalDate, setInternalDate] = useState<Date | undefined>(value);
   const [hour, setHour] = useState(value ? format(value, "hh") : "10");
   const [minute, setMinute] = useState(value ? format(value, "mm") : "00");

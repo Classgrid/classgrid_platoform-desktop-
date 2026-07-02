@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/marketing_ui/dropdown-menu";
-import { DateTimePicker } from "@/components/marketing_ui/date_time_picker";
+import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 
 interface MessageOptions {
@@ -470,7 +470,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     {/* Expiry */}
                     <div className="space-y-1.5 flex flex-col">
                       <label className="text-xs font-medium text-muted-foreground block">Auto-Delete At (Optional)</label>
-                      <DateTimePicker 
+                      <NikhilTimeCalendar 
                         value={expiresAt ? new Date(expiresAt) : undefined}
                         onChange={(d) => setExpiresAt(d ? d.toISOString() : "")}
                         placeholder="Select expiry date & time"
@@ -481,7 +481,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     {canSchedule && (
                       <div className="space-y-1.5 flex flex-col mt-3">
                         <label className="text-xs font-medium text-muted-foreground block">Schedule For (Optional)</label>
-                        <DateTimePicker 
+                        <NikhilTimeCalendar 
                           value={scheduledDate ? new Date(scheduledDate) : undefined}
                           onChange={(d) => setScheduledDate(d ? d.toISOString() : "")}
                           placeholder="Select schedule date & time"
