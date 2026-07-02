@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { format } from "date-fns";
 import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
@@ -167,23 +168,24 @@ export function NikhilTimeCalendar({
   return (
     <>
       {/* Trigger Button */}
-      <Button
-        ref={triggerRef}
-        type="button"
-        variant="outline"
-        onClick={toggleOpen}
-        className={cn(
-          "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
-          !value && "text-muted-foreground",
-          className
-        )}
-      >
-        <CalendarIcon className="mr-2 h-4 w-4" />
-        {displayString}
-      </Button>
+      <div ref={triggerRef} className="w-full">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={toggleOpen}
+          className={cn(
+            "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
+            !value && "text-muted-foreground",
+            className
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {displayString}
+        </Button>
+      </div>
 
-      {/* Calendar panel — rendered with position:fixed, NOT inside any popover portal */}
-      {isOpen && (
+      {/* Calendar panel — rendered with position:fixed directly to body via createPortal to avoid transform containment */}
+      {isOpen && typeof document !== "undefined" && createPortal(
         <div
           ref={panelRef}
           style={panelStyle}
@@ -300,7 +302,8 @@ export function NikhilTimeCalendar({
               Apply Date &amp; Time
             </Button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
