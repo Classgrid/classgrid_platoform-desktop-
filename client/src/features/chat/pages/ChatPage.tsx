@@ -826,6 +826,7 @@ export function ChatPage() {
                 organization_name: selectedUserForProfile.organization_name,
                 organization_logo: selectedUserForProfile.organization_logo,
                 metadata: selectedUserForProfile.metadata,
+                forumUsername: selectedUserForProfile.forumUsername,
               }}
               onClose={() => setProfileUserId(null)} 
             />

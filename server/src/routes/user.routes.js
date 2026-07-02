@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import Organization from "../models/Organization.js";
 import connectDB from "../../config/db.js";
@@ -42,6 +43,20 @@ router.get("/profile", isAuthenticated, async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch from forum collection
+    let realForumUsername = null;
+    try {
+      const db = mongoose.connection.db;
+      if (db && user.email) {
+        const forumRecord = await db.collection("forumusers").findOne({ email: user.email });
+        if (forumRecord && forumRecord.username) {
+          realForumUsername = forumRecord.username;
+        }
+      }
+    } catch (e) {
+      console.warn("Error fetching forum username:", e.message);
     }
 
     const responseData = {
@@ -90,7 +105,8 @@ router.get("/profile", isAuthenticated, async (req, res) => {
         batch: user.batch || null,
         profile_completed: user.profile_completed,
         pushNotifications: normalizePushNotifications(user.pushNotifications),
-        metadata: user.metadata || {}
+        metadata: user.metadata || {},
+        forumUsername: realForumUsername
       },
     };
 

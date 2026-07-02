@@ -63,6 +63,7 @@ export interface OrgUser {
   organization_name?: string | null;
   organization_logo?: string | null;
   metadata?: Record<string, any>;
+  forumUsername?: string | null;
 }
 
 export interface ChatGroup {
@@ -201,6 +202,11 @@ export async function fetchGroupInfo(groupId: string) {
 
 export async function updateGroupPermissions(groupId: string, permissions: any) {
   const res = await apiClient.put(`/api/group-chat/${groupId}/permissions`, permissions);
+  return res.data.group;
+}
+
+export async function updateGroupInfo(groupId: string, name: string, description: string) {
+  const res = await apiClient.put(`/api/group-chat/${groupId}`, { name, description });
   return res.data.group;
 }
 

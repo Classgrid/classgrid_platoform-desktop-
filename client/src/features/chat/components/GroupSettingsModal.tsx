@@ -11,12 +11,14 @@ import {
   exitGroup,
   toggleAdminRole,
   updateGroupPermissions,
+  updateGroupInfo,
   type OrgUser,
 } from "../services/chatApi";
 import { toast } from "sonner";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { Megaphone, BadgeCheck, Building2 } from "lucide-react";
 import { AddGroupMemberSidebar } from "./AddGroupMemberSidebar";
+import { SharedProfilePage } from "../../shared/pages/SharedProfilePage";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Switch } from "@/components/marketing_ui/switch";
 
@@ -132,6 +134,19 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
     },
   });
 
+  // ── Mutation: Update Info (Name, Description) ──
+  const { mutateAsync: handleUpdateGroupInfo } = useMutation({
+    mutationFn: (updates: { name: string, description: string }) => updateGroupInfo(groupId, updates.name, updates.description),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
+      queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
+      toast.success("Group info updated");
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || "Failed to update group info");
+    }
+  });
+
   // ── Handlers ──
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -164,7 +179,6 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const availableUsers = (orgUsersData || []).filter(
     (u: OrgUser) => !memberIds.has(u._id) && u.name.toLowerCase().includes(addSearch.toLowerCase())
   );
-
   // ── Fullscreen Photo Viewer ──
   if (viewingPhoto) {
     return (
@@ -188,292 +202,219 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="max-w-[1000px] mx-auto w-full pt-6">
-            
-            {isLoading ? (
-              <div className="flex-1 flex justify-center items-center h-full min-h-[200px]">
-                <Spinner className="w-8 h-8 text-primary" />
-              </div>
-            ) : isError || !data ? (
-              <div className="text-red-500 text-sm py-8">Failed to load group info</div>
-            ) : (
-              <div className="flex flex-col gap-6">
-                
-                {/* Identity Header Card */}
-                <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg flex flex-col">
-                  {/* Banner Background */}
-                  <div className="h-[250px] relative bg-gradient-to-r from-emerald-500/30 via-primary/30 to-blue-500/30 w-full" />
-                  
-                  <div className="px-8 pb-8 flex flex-col items-start gap-4">
-                    {/* Avatar Section */}
-                    <div className="relative -mt-[100px] mb-2 group rounded-full overflow-hidden">
-                      {data.group.avatar_url ? (
-                        <img
-                          src={data.group.avatar_url}
-                          alt={data.group.name}
-                          className="w-[160px] h-[160px] rounded-full object-cover border-4 border-background shadow-xl cursor-pointer hover:opacity-90 transition-opacity bg-card"
-                          onClick={() => setViewingPhoto(data.group.avatar_url!)}
-                        />
-                      ) : (
-                        <div className="w-[160px] h-[160px] rounded-full bg-primary/10 flex items-center justify-center text-primary border-4 border-background shadow-xl bg-card">
-                          <Users className="w-20 h-20" />
-                        </div>
-                      )}
-
-                      {/* Admin Upload Overlay */}
-                      {data.myRole === "admin" && (
-                        <>
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100 cursor-pointer rounded-full"
-                          >
-                            {isUploading ? (
-                              <Spinner className="w-8 h-8 text-white" />
-                            ) : (
-                              <>
-                                <Camera className="w-8 h-8 mb-1" />
-                                <span className="text-xs font-bold uppercase tracking-wider">
-                                  Change
-                                </span>
-                              </>
-                            )}
-                          </button>
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            ref={fileInputRef}
-                            onChange={onFileSelect}
-                          />
-                        </>
-                      )}
-                    </div>
-
-                    {/* Group Name & Badges */}
-                    <div className="flex flex-col w-full gap-3">
-                      <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
-                          {data.group.name}
-                          <BadgeCheck className="w-7 h-7 text-emerald-500" />
-                        </h1>
-                      </div>
-                      <div className="flex flex-col gap-3 mt-2">
-                        <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground font-medium">
-                          <span className="flex items-center gap-2.5">
-                            <Building2 className="w-4 h-4 opacity-70" />
-                            <span className="text-[15px] font-semibold text-foreground/90">Organization Group</span>
-                          </span>
-                          <span className="flex items-center gap-2.5">
-                            <Users className="w-4 h-4 opacity-70" />
-                            <span className="text-[15px] font-semibold text-foreground/90">
-                              {data.members.length} {data.members.length === 1 ? "member" : "members"}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ═══════════════════════════════════════════════ */}
-                {/* Members Section                                */}
-                {/* ═══════════════════════════════════════════════ */}
-                <div className="w-full bg-muted/20 rounded-xl p-4 border border-border">
-                  <div className="flex items-center justify-between pb-3 mb-2 border-b border-border">
-                    <h4 className="text-sm font-semibold text-foreground">Group Members</h4>
-                    {/* Add Member Button — Admin Only */}
-                    {data.myRole === "admin" && (
-                      <button
-                        onClick={() => setShowAddMember(true)}
-                        className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors cursor-pointer"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        Add Members
-                      </button>
-                    )}
-                  </div>
-
-                  {/* ── Member List ── */}
-                  <div className="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 pt-2">
-                    {(() => {
-                      const creator = data.members.find((m) => m.userId === data.group.created_by);
-                      const admins = data.members.filter((m) => m.role === "admin" && m.userId !== data.group.created_by);
-                      const regularMembers = data.members.filter((m) => m.role === "member" && m.userId !== data.group.created_by);
-                      
-                      const renderMemberGroup = (title: string, membersList: any[], emptyMsg?: string) => {
-                        if (membersList.length === 0 && !emptyMsg) return null;
-                        return (
-                          <div className="mb-4">
-                            <h5 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-2">{title}</h5>
-                            <div className="space-y-0.5">
-                              {membersList.length === 0 && emptyMsg && (
-                                <p className="text-xs text-muted-foreground px-2 py-1">{emptyMsg}</p>
-                              )}
-                              {membersList.map((member) => {
-                                const isCreator = member.userId === data.group.created_by;
-                                const canRemove = data.myRole === "admin" && !isCreator;
-                                
-                                return (
-                                  <div
-                                    key={member.userId}
-                                    className="flex items-center justify-between p-2 rounded-lg hover:bg-background/80 transition-colors group/member cursor-pointer"
-                                    onClick={() => onUserClick?.(member.userId)}
-                                  >
-                                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                                      {member.profilePicture ? (
-                                        <img
-                                          src={member.profilePicture}
-                                          className="w-10 h-10 rounded-full object-cover border border-border shrink-0 cursor-pointer"
-                                          alt=""
-                                        />
-                                      ) : (
-                                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-border shrink-0">
-                                          {member.name[0]?.toUpperCase()}
-                                        </div>
-                                      )}
-                                      <div className="min-w-0 flex-1">
-                                        <span className="text-sm font-medium text-foreground block truncate group-hover/member:underline">
-                                          {member.name}
-                                        </span>
-                                        {member.userRole && (
-                                          <span className="text-[10px] text-muted-foreground block truncate">
-                                            {member.userRole === 'super_admin' ? 'Super Admin' : member.userRole === 'org_admin' ? 'Org Admin' : member.userRole.charAt(0).toUpperCase() + member.userRole.slice(1)}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 shrink-0">
-                                      {/* Role Badge */}
-                                      {isCreator ? (
-                                        <span className="text-[10px] font-bold bg-warning/10 text-warning px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                                          <Crown className="w-3 h-3" /> Owner
-                                        </span>
-                                      ) : member.role === "admin" ? (
-                                        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                          Admin
-                                        </span>
-                                      ) : null}
-
-                                      {/* Actions — Admin only, not for creator */}
-                                      {canRemove && (
-                                        <div className="flex items-center opacity-0 group-hover/member:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                          <button
-                                            onClick={() => confirmToggleAdmin(member.userId, member.name, member.role)}
-                                            className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer mr-1"
-                                            title={member.role === "admin" ? `Demote ${member.name} to member` : `Promote ${member.name} to admin`}
-                                          >
-                                            {member.role === "admin" ? <Shield className="w-4 h-4 text-primary opacity-50" /> : <Shield className="w-4 h-4" />}
-                                          </button>
-                                          <button
-                                            onClick={() => confirmRemove(member.userId, member.name)}
-                                            className="p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                                            title={`Remove ${member.name}`}
-                                          >
-                                            <Trash2 className="w-4 h-4" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      };
-
-                      return (
-                        <>
-                          {creator && renderMemberGroup("Owner", [creator])}
-                          {renderMemberGroup("Admins", admins)}
-                          {renderMemberGroup("Members", regularMembers, "No other members")}
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* ═══════════════════════════════════════════════ */}
-                {/* Admin Settings Section                         */}
-                {/* ═══════════════════════════════════════════════ */}
-                {data.myRole === "admin" && (
-                  <div className="w-full mt-6">
-                    <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
-                      <h4 className="text-sm font-semibold text-foreground">Group Settings</h4>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-full text-primary">
-                            <Megaphone className="w-4 h-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Announcement Mode</span>
-                            <span className="text-xs text-muted-foreground">Only admins can send messages</span>
-                          </div>
-                        </div>
-                        
-                        {/* Toggle Switch */}
-                        <Switch
-                          checked={data.group.send_messages_policy === 'admin_only'}
-                          disabled={isUpdatingPermissions}
-                          onCheckedChange={(checked) => {
-                            handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
-                          }}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-full text-primary">
-                            <Shield className="w-4 h-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">Restrict Info Edits</span>
-                            <span className="text-xs text-muted-foreground">Only admins can edit group info & photo</span>
-                          </div>
-                        </div>
-                        
-                        {/* Toggle Switch */}
-                        <Switch
-                          checked={data.group.edit_info_policy === 'admin_only'}
-                          disabled={isUpdatingPermissions}
-                          onCheckedChange={(checked) => {
-                            handleUpdatePermissions({ edit_info: checked ? 'admin_only' : 'all' });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ═══════════════════════════════════════════════ */}
-                {/* Leave Group Button                             */}
-                {/* ═══════════════════════════════════════════════ */}
-                <div className="w-full mt-6 pt-4 border-t border-border">
-                  <button
-                    onClick={confirmLeave}
-                    disabled={isLeaving}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    {isLeaving ? (
-                      <Spinner className="w-4 h-4" />
-                    ) : (
-                      <LogOut className="w-4 h-4" />
-                    )}
-                    Leave Group
-                  </button>
-                </div>
-                </div>
-              )}
+      <div className="w-full">
+        {isLoading ? (
+          <div className="flex-1 flex justify-center items-center h-full min-h-[200px]">
+            <Spinner className="w-8 h-8 text-primary" />
           </div>
-        </div>
+        ) : isError || !data ? (
+          <div className="text-red-500 text-sm py-8 px-4 max-w-2xl mx-auto">Failed to load group info</div>
+        ) : (
+          <SharedProfilePage
+            mode="group"
+            groupData={data}
+            onClose={onClose}
+            onUpdateGroup={async (updates) => {
+              await handleUpdateGroupInfo(updates);
+            }}
+            onUpdateGroupPhoto={async (blob, type) => {
+              if (type === "avatar") {
+                const file = new File([blob], "avatar.jpg", { type: blob.type });
+                await handleUpload(file);
+              }
+            }}
+          >
+            {/* ═══════════════════════════════════════════════ */}
+            {/* Members Section                                */}
+            {/* ═══════════════════════════════════════════════ */}
+            <div className="w-full max-w-[1000px] mx-auto bg-muted/20 rounded-xl p-4 border border-border mt-4">
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-border">
+                <h4 className="text-sm font-semibold text-foreground">Group Members</h4>
+                {/* Add Member Button — Admin Only */}
+                {data.myRole === "admin" && (
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" /> Add Member
+                  </button>
+                )}
+              </div>
+
+              {/* ── Member List ── */}
+              <div className="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 pt-2">
+                {(() => {
+                  const creator = data.members.find((m) => m.userId === data.group.created_by);
+                  const admins = data.members.filter((m) => m.role === "admin" && m.userId !== data.group.created_by);
+                  const regularMembers = data.members.filter((m) => m.role === "member" && m.userId !== data.group.created_by);
+                  
+                  const renderMemberGroup = (title: string, membersList: any[], emptyMsg?: string) => {
+                    if (membersList.length === 0 && !emptyMsg) return null;
+                    return (
+                      <div className="mb-4">
+                        <h5 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-2">{title}</h5>
+                        <div className="space-y-0.5">
+                          {membersList.length === 0 && emptyMsg && (
+                            <p className="text-xs text-muted-foreground px-2 py-1">{emptyMsg}</p>
+                          )}
+                          {membersList.map((member) => {
+                            const isCreator = member.userId === data.group.created_by;
+                            const canRemove = data.myRole === "admin" && !isCreator;
+                            
+                            return (
+                              <div
+                                key={member.userId}
+                                className="flex items-center justify-between p-2 rounded-lg hover:bg-background/80 transition-colors group/member cursor-pointer"
+                                onClick={() => onUserClick?.(member.userId)}
+                              >
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                  {member.profilePicture ? (
+                                    <img
+                                      src={member.profilePicture}
+                                      className="w-10 h-10 rounded-full object-cover border border-border shrink-0 cursor-pointer"
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold border border-border shrink-0">
+                                      {member.name[0]?.toUpperCase()}
+                                    </div>
+                                  )}
+                                  <div className="min-w-0 flex-1">
+                                    <span className="text-sm font-medium text-foreground block truncate group-hover/member:underline">
+                                      {member.name}
+                                    </span>
+                                    {member.userRole && (
+                                      <span className="text-[10px] text-muted-foreground block truncate">
+                                        {member.userRole === 'super_admin' ? 'Super Admin' : member.userRole === 'org_admin' ? 'Org Admin' : member.userRole.charAt(0).toUpperCase() + member.userRole.slice(1)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {/* Role Badge */}
+                                  {isCreator ? (
+                                    <span className="text-[10px] font-bold bg-warning/10 text-warning px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                                      <Crown className="w-3 h-3" /> Owner
+                                    </span>
+                                  ) : member.role === "admin" ? (
+                                    <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                                      Admin
+                                    </span>
+                                  ) : null}
+
+                                  {/* Actions — Admin only, not for creator */}
+                                  {canRemove && (
+                                    <div className="flex items-center opacity-0 group-hover/member:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                      <button
+                                        onClick={() => confirmToggleAdmin(member.userId, member.name, member.role)}
+                                        className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer mr-1"
+                                        title={member.role === "admin" ? `Demote ${member.name} to member` : `Promote ${member.name} to admin`}
+                                      >
+                                        {member.role === "admin" ? <Shield className="w-4 h-4 text-primary opacity-50" /> : <Shield className="w-4 h-4" />}
+                                      </button>
+                                      <button
+                                        onClick={() => confirmRemove(member.userId, member.name)}
+                                        className="p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                                        title={`Remove ${member.name}`}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  };
+
+                  return (
+                    <>
+                      {creator && renderMemberGroup("Owner", [creator])}
+                      {renderMemberGroup("Admins", admins)}
+                      {renderMemberGroup("Members", regularMembers, "No other members")}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* ═══════════════════════════════════════════════ */}
+            {/* Admin Settings Section                         */}
+            {/* ═══════════════════════════════════════════════ */}
+            {data.myRole === "admin" && (
+              <div className="w-full max-w-[1000px] mx-auto mt-2">
+                <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+                  <h4 className="text-sm font-semibold text-foreground">Group Settings</h4>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-full text-primary">
+                        <Megaphone className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">Announcement Mode</span>
+                        <span className="text-xs text-muted-foreground">Only admins can send messages</span>
+                      </div>
+                    </div>
+                    
+                    {/* Toggle Switch */}
+                    <Switch
+                      checked={data.group.send_messages_policy === 'admin_only'}
+                      disabled={isUpdatingPermissions}
+                      onCheckedChange={(checked) => {
+                        handleUpdatePermissions({ send_messages: checked ? 'admin_only' : 'all' });
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-full text-primary">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">Restrict Info Edits</span>
+                        <span className="text-xs text-muted-foreground">Only admins can edit group info & photo</span>
+                      </div>
+                    </div>
+                    
+                    {/* Toggle Switch */}
+                    <Switch
+                      checked={data.group.edit_info_policy === 'admin_only'}
+                      disabled={isUpdatingPermissions}
+                      onCheckedChange={(checked) => {
+                        handleUpdatePermissions({ edit_info: checked ? 'admin_only' : 'all' });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════ */}
+            {/* Leave Group Button                             */}
+            {/* ═══════════════════════════════════════════════ */}
+            <div className="w-full max-w-[1000px] mx-auto mt-2 pt-4 border-t border-border">
+              <button
+                onClick={confirmLeave}
+                disabled={isLeaving}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isLeaving ? (
+                  <Spinner className="w-4 h-4" />
+                ) : (
+                  <LogOut className="w-4 h-4" />
+                )}
+                Leave Group
+              </button>
+            </div>
+          </SharedProfilePage>
+        )}
       </div>
       <AnimatePresence>
         {showAddMember && data?.myRole === "admin" && (

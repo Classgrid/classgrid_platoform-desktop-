@@ -32,11 +32,13 @@ type ProfileData = {
   profileBanner?: string;
   lastLoginAt?: string;
   createdAt?: string;
-  prn?: string;
-  bio?: string;
-  organization_name?: string;
-  organization_logo?: string;
+  department?: string;
+  bio?: string | null;
+  prn?: string | null;
+  organization_name?: string | null;
+  organization_logo?: string | null;
   metadata?: Record<string, any>;
+  forumUsername?: string | null;
 };
 
 type EmailPrefs = {
@@ -46,10 +48,15 @@ type EmailPrefs = {
 
 interface SharedProfilePageProps {
   publicUser?: ProfileData;
+  groupData?: any;
+  mode?: "user" | "group";
   onClose?: () => void;
+  children?: React.ReactNode;
+  onUpdateGroup?: (updates: { name: string; description: string }) => Promise<void>;
+  onUpdateGroupPhoto?: (blob: Blob, type: "avatar" | "banner") => Promise<void>;
 }
 
-export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProps) {
+export function SharedProfilePage({ publicUser, groupData, mode = "user", onClose, children, onUpdateGroup, onUpdateGroupPhoto }: SharedProfilePageProps) {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +65,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   const [activeView, setActiveView] = useState<"profile" | "shared-media">("profile");
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState<ProfileData>({
-    name: "", phoneNumber: "", email: "", role: "", profilePicture: "", profileBanner: ""
+    name: "", phoneNumber: "", email: "", role: "", profilePicture: "", profileBanner: "", bio: ""
   });
   const [prefs, setPrefs] = useState<EmailPrefs>({ global: true, announcements: true });
   const [errors, setErrors] = useState<{ name?: string }>({});
@@ -67,8 +74,14 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"avatar" | "banner">("avatar");
 
-  const isReadOnly = !!publicUser;
+  // Read-only logic:
+  // For users, it's read-only if publicUser is passed.
+  // For groups, it's editable only if the current user is the owner (creator).
+  const isReadOnly = mode === "group" 
+    ? (groupData?.group?.created_by !== currentUser?._id)
+    : !!publicUser;
   
+  const isGroup = mode === "group";
   // Fetch current user from react-query cache to know their real role/org structure for ContextualProfile
   const { data: currentUser } = useCurrentUser();
   const onlineUsers = useOnlineUsers();
@@ -77,31 +90,46 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["global-profile"],
     queryFn: () => apiClient.get("/api/user/profile").then((r) => r.data),
-    enabled: !isReadOnly,
+    enabled: !isReadOnly && !isGroup,
   });
 
   const { data: prefsData, isLoading: prefsLoading } = useQuery({
     queryKey: ["global-settings"],
     queryFn: () => apiClient.get("/api/user/email-preferences").then((r) => r.data),
-    enabled: !isReadOnly,
+    enabled: !isReadOnly && !isGroup,
   });
 
-  const targetUserId = (publicUser as any)?._id || profileData?.user?._id;
+  const targetUserId = isGroup ? undefined : ((publicUser as any)?._id || profileData?.user?._id);
 
   const { data: groupsData, isLoading: groupsLoading } = useQuery({
     queryKey: ["groups-in-common", targetUserId],
     queryFn: () => apiClient.get(`/api/chat/groups-in-common/${targetUserId}`).then((r) => r.data),
-    enabled: !!targetUserId,
+    enabled: !!targetUserId && !isGroup,
   });
 
   const { data: academicData, isLoading: academicLoading } = useQuery({
     queryKey: ["academic-status", targetUserId],
     queryFn: () => apiClient.get(`/api/classroom/academic-status/${targetUserId}`).then((r) => r.data),
-    enabled: !!targetUserId,
+    enabled: !!targetUserId && !isGroup,
   });
 
   useEffect(() => {
-    if (publicUser) {
+    if (isGroup && groupData) {
+      setForm({
+        name: groupData.group.name || "",
+        phoneNumber: "",
+        email: "",
+        role: "Organization Group",
+        profilePicture: groupData.group.avatar_url || "",
+        profileBanner: groupData.group.banner_url || "",
+        lastLoginAt: undefined,
+        createdAt: groupData.group.created_at,
+        bio: groupData.group.description || "",
+        organization_name: "", // handled below
+        organization_logo: "",
+        metadata: {},
+      });
+    } else if (publicUser) {
       setForm({
         name: publicUser.name || "",
         phoneNumber: publicUser.phoneNumber || "",
@@ -112,7 +140,8 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         lastLoginAt: publicUser.lastLoginAt,
         createdAt: publicUser.createdAt,
         prn: publicUser.prn,
-        bio: publicUser.bio,
+        forumUsername: publicUser.forumUsername,
+        bio: publicUser.bio || "",
         organization_name: publicUser.organization_name,
         organization_logo: publicUser.organization_logo,
         metadata: publicUser.metadata || {},
@@ -127,21 +156,24 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
         profileBanner: profileData.user.profileBanner || "",
         lastLoginAt: profileData.user.lastLoginAt,
         createdAt: profileData.user.createdAt,
+        prn: profileData.user.prn,
+        forumUsername: profileData.user.forumUsername,
+        bio: profileData.user.bio || "",
         organization_name: profileData.user.organization_name || (profileData.user.organization_id && profileData.user.organization_id.name) || (profileData.user.organization && profileData.user.organization.name) || currentUser?.organization?.name || currentUser?.organization_name || "",
         organization_logo: (profileData.user.organization_id && profileData.user.organization_id.logo_url) || (profileData.user.organization && profileData.user.organization.logo_url) || currentUser?.organization?.logo_url || "",
         metadata: profileData.user.metadata || {},
       });
     }
-  }, [profileData, publicUser, currentUser]);
+  }, [profileData, publicUser, currentUser, isGroup, groupData]);
 
   useEffect(() => {
-    if (!isReadOnly && prefsData?.emailNotifications) {
+    if (!isReadOnly && !isGroup && prefsData?.emailNotifications) {
       setPrefs({
         global: prefsData.emailNotifications.global ?? true,
         announcements: prefsData.emailNotifications.announcements ?? true,
       });
     }
-  }, [prefsData, isReadOnly]);
+  }, [prefsData, isReadOnly, isGroup]);
 
   const updateProfile = useMutation({
     mutationFn: (updates: Partial<ProfileData>) => apiClient.put("/api/user/update", updates),
@@ -151,6 +183,16 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
       setIsDirty(false);
     },
   });
+
+  const handleGroupSave = async () => {
+    if (!onUpdateGroup) return;
+    try {
+      await onUpdateGroup({ name: form.name, description: form.bio || "" });
+      setIsDirty(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -194,25 +236,39 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
       const ext = blob.type === "image/png" ? "png" : "jpg";
       const fileName = `${type}-${Date.now()}.${ext}`;
       
-      const { data } = await apiClient.post("/api/user/upload-url", {
-        fileName,
-        fileType: blob.type
-      });
+      // Skip fetching signed URL for groups if handled by external callback
+      let data = { uploadUrl: "", publicUrl: "" };
+      let response: Response | null = null;
+      if (!isGroup) {
+        const res = await apiClient.post("/api/user/upload-url", {
+          fileName,
+          fileType: blob.type
+        });
+        data = res.data;
 
-      const response = await fetch(data.uploadUrl, {
-        method: "PUT",
-        body: blob,
-        headers: { "Content-Type": blob.type }
-      });
+        response = await fetch(data.uploadUrl, {
+          method: "PUT",
+          body: blob,
+          headers: { "Content-Type": blob.type }
+        });
 
-      if (!response.ok) throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+        if (!response.ok) throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
 
-      const updatePayload = type === "avatar" 
-        ? { profilePicture: data.publicUrl }
-        : { profileBanner: data.publicUrl };
+      if (isGroup && onUpdateGroupPhoto) {
+        await onUpdateGroupPhoto(blob, type);
+        const updatePayload = type === "avatar" 
+          ? { profilePicture: URL.createObjectURL(blob) } // Optimistic
+          : { profileBanner: URL.createObjectURL(blob) };
+        setForm((prev) => ({ ...prev, ...updatePayload }));
+      } else {
+        const updatePayload = type === "avatar" 
+          ? { profilePicture: data.publicUrl }
+          : { profileBanner: data.publicUrl };
 
-      setForm((prev) => ({ ...prev, ...updatePayload }));
-      updateProfile.mutate(updatePayload);
+        setForm((prev) => ({ ...prev, ...updatePayload }));
+        updateProfile.mutate(updatePayload);
+      }
       
       toast.success(`${type} updated successfully!`, { id: loadingToast });
     } catch (err) {
@@ -224,8 +280,12 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
 
   const handleSave = () => {
     if (!form.name.trim()) { setErrors({ name: "Required" }); return; }
-    updateProfile.mutate({ name: form.name, phoneNumber: form.phoneNumber });
-    apiClient.put("/api/user/email-preferences", prefs);
+    if (isGroup) {
+      handleGroupSave();
+    } else {
+      updateProfile.mutate({ name: form.name, phoneNumber: form.phoneNumber });
+      apiClient.put("/api/user/email-preferences", prefs);
+    }
   };
 
   const isLoading = !isReadOnly && (profileLoading || prefsLoading);
@@ -358,13 +418,25 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
               <div className="flex flex-col w-full gap-3">
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
-                    {form.name}
+                    {isGroup ? (
+                      <Input 
+                        value={form.name} 
+                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        readOnly={isReadOnly}
+                        className="text-3xl font-bold h-auto py-1 px-2 -ml-2 bg-transparent border-transparent hover:border-border focus:border-primary focus:bg-background transition-all"
+                        placeholder="Group Name"
+                      />
+                    ) : (
+                      form.name
+                    )}
                     <VerifiedBadge role={form.role} iconClassName="w-7 h-7" />
                   </h1>
                 </div>
                 <div className="flex flex-col gap-3 mt-2">
                   <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground font-medium">
-                    <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
+                    {!isGroup && form.email && (
+                      <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
+                    )}
                     <span className="flex items-center gap-2.5">
                       {form.role === "super_admin" || form.role === "Super Admin" ? (
                         <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
@@ -391,50 +463,62 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                         {form.lastLoginAt ? `Last seen ${formatDistanceToNow(new Date(form.lastLoginAt), { addSuffix: true })}` : "Offline"}
                       </span>
                     )}
-                    <span className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
-                      @{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}
-                    </span>
+                    {form.forumUsername ? (
+                      <a 
+                        href={`https://forum.classgrid.in/u/${form.forumUsername}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                      >
+                        @{form.forumUsername}
+                      </a>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
+                        @{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Social Links with Premium Hover Effects */}
-                <div className="flex items-center gap-3 mt-4">
-                  {form.metadata?.instagram_url && (
-                    <a href={form.metadata.instagram_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-pink-600 hover:border-pink-500 hover:bg-pink-500/10 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                        <Instagram size={18} />
-                      </Button>
-                    </a>
-                  )}
-                  {form.metadata?.facebook_url && (
-                    <a href={form.metadata.facebook_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-blue-600 hover:border-blue-600 hover:bg-blue-600/10 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                        <Facebook size={18} />
-                      </Button>
-                    </a>
-                  )}
-                  {form.metadata?.linkedin_url && (
-                    <a href={form.metadata.linkedin_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-sky-500 hover:border-sky-500 hover:bg-sky-500/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-0.5">
-                        <Linkedin size={18} />
-                      </Button>
-                    </a>
-                  )}
-                  {form.metadata?.github_url && (
-                    <a href={form.metadata.github_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-foreground/5 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5">
-                        <Github size={18} />
-                      </Button>
-                    </a>
-                  )}
-                  {(!form.metadata?.instagram_url && !form.metadata?.facebook_url && !form.metadata?.linkedin_url && !form.metadata?.github_url) && (
-                     <div className="text-xs text-muted-foreground italic mt-2">No social links added yet.</div>
-                  )}
-                </div>
+                {!isGroup && (
+                  <div className="flex items-center gap-3 mt-4">
+                    {form.metadata?.instagram_url && (
+                      <a href={form.metadata.instagram_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-pink-600 hover:border-pink-500 hover:bg-pink-500/10 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                          <Instagram size={18} />
+                        </Button>
+                      </a>
+                    )}
+                    {form.metadata?.facebook_url && (
+                      <a href={form.metadata.facebook_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-blue-600 hover:border-blue-600 hover:bg-blue-600/10 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                          <Facebook size={18} />
+                        </Button>
+                      </a>
+                    )}
+                    {form.metadata?.linkedin_url && (
+                      <a href={form.metadata.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-sky-500 hover:border-sky-500 hover:bg-sky-500/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300 hover:-translate-y-0.5">
+                          <Linkedin size={18} />
+                        </Button>
+                      </a>
+                    )}
+                    {form.metadata?.github_url && (
+                      <a href={form.metadata.github_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-full bg-background/50 backdrop-blur border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground hover:bg-foreground/5 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5">
+                          <Github size={18} />
+                        </Button>
+                      </a>
+                    )}
+                    {(!form.metadata?.instagram_url && !form.metadata?.facebook_url && !form.metadata?.linkedin_url && !form.metadata?.github_url) && (
+                       <div className="text-xs text-muted-foreground italic mt-2">No social links added yet.</div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="w-full h-px bg-border my-6" />
 
-                {isReadOnly && (
+                {isReadOnly && !isGroup && (
                   <>
                     {/* Media & Docs Prominent Button */}
                     <div className="w-full sm:w-auto relative group">
@@ -505,12 +589,34 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
                     </div>
                   </>
                 )}
+
+                {isGroup && (
+                  <div className="w-full mt-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Group Description</label>
+                    <Input 
+                      value={form.bio}
+                      onChange={(e) => handleInputChange("bio", e.target.value)}
+                      readOnly={isReadOnly}
+                      className="w-full bg-background/50 border-border/50"
+                      placeholder="Add a group description..."
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {isGroup && children && (
+            <div className="mt-8 flex flex-col gap-6">
+              {children}
+            </div>
+          )}
               </div>
             </div>
           </div>
 
             {/* Dynamic Contextual Profile Data - Only shown to the user themselves */}
-            {!isReadOnly && (
+            {!isReadOnly && !isGroup && (
               <div className="mt-8 mb-6">
                 <ContextualProfile 
                   targetRole={form.role || "student"} 
@@ -558,7 +664,7 @@ export function SharedProfilePage({ publicUser, onClose }: SharedProfilePageProp
     </div>
   );
 
-  if (isReadOnly) {
+  if (isReadOnly && !isGroup) {
     return (
       <div className="w-full h-full pb-12 flex flex-col">
         <div className="sticky top-0 z-50 w-full h-14 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center px-4 md:px-6">

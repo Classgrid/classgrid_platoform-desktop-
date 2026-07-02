@@ -173,9 +173,10 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(403).json({ error: 'Only admins can edit group info' });
     }
 
-    const { name } = req.body;
+    const { name, description } = req.body;
     const updates = {};
     if (name !== undefined) updates.name = name.trim();
+    if (description !== undefined) updates.description = description.trim();
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: 'Nothing to update' });

@@ -46,6 +46,18 @@ router.get('/users', isAuthenticated, async (req, res) => {
       .populate('organization_id', 'name logo_url')
       .lean();
       
+    // Fetch forum usernames
+    const mongoose = (await import('mongoose')).default;
+    const db = mongoose.connection.db;
+    let forumMap = {};
+    if (db && members.length > 0) {
+      const emails = members.map(m => m.email).filter(Boolean);
+      const forumUsers = await db.collection("forumusers").find({ email: { $in: emails } }).toArray();
+      forumUsers.forEach(f => {
+        if (f.email) forumMap[f.email] = f.username;
+      });
+    }
+
     const formatted = members.map(m => ({
       _id: m._id.toString(),
       name: m.name,
@@ -56,6 +68,7 @@ router.get('/users', isAuthenticated, async (req, res) => {
       phoneNumber: m.phoneNumber || null,
       bio: m.bio || null,
       prn: m.prn || null,
+      forumUsername: forumMap[m.email] || null,
       metadata: m.metadata || {},
       organization_name: m.organization_id?.name || null,
       organization_logo: m.organization_id?.logo_url || null,
