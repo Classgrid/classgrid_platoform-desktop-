@@ -4,7 +4,6 @@ import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { Clock, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import { cn } from "@/lib/utils";
 
 interface NikhilTimeCalendarProps {
@@ -16,6 +15,7 @@ interface NikhilTimeCalendarProps {
 
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [internalDate, setInternalDate] = useState<Date | undefined>(value);
   const [hour, setHour] = useState(value ? format(value, "hh") : "10");
   const [minute, setMinute] = useState(value ? format(value, "mm") : "00");
@@ -30,6 +30,25 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
       setAmpm(format(value, "a"));
     }
   }, [value]);
+
+  // Click outside detection for absolute-positioned calendar wrapper
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        target.isConnected &&
+        !target.closest('[data-radix-portal]') &&
+        !target.closest('[data-radix-popper-content-wrapper]')
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isOpen]);
   
   // Create month and year state
   const currentYear = new Date().getFullYear();
@@ -79,36 +98,27 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     : placeholder;
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen} modal={true}>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
-            !value && "text-muted-foreground",
-            className
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {displayString}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent 
-        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content" 
-        align="start"
-        onInteractOutside={(e) => {
-          const target = e.target as Element;
-          // Prevent closing when clicking inside nested portals or if the element is unmounted (e.g. Select option clicks)
-          if (
-            !target ||
-            !target.isConnected ||
-            target.closest('[data-radix-portal]') ||
-            target.closest('[data-radix-popper-content-wrapper]')
-          ) {
-            e.preventDefault();
-          }
-        }}
+    <div className="relative w-full" ref={containerRef}>
+      <Button
+        type="button"
+        variant={"outline"}
+        className={cn(
+          "w-full justify-start text-left font-normal border-border bg-background hover:bg-accent/50",
+          !value && "text-muted-foreground",
+          className
+        )}
+        onClick={() => setIsOpen(!isOpen)}
       >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {displayString}
+      </Button>
+
+      {isOpen && (
+        <div 
+          className="absolute z-50 top-full left-0 mt-2 p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content"
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
         
         {/* The Unified Picker Widget */}
         <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden">
@@ -215,7 +225,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
             </Button>
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }
