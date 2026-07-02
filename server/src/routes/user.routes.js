@@ -407,6 +407,7 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
         name: user.name,
         email: user.email,
         role: user.role,
+        sidebar_name: user.sidebar_name || "",
         phoneNumber: user.phoneNumber || "",
         profilePicture: user.profilePicture || "",
         platformLogo: user.platformLogo || "",

@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    sidebar_name: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    platformLogo: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     // 🎓 Primary role (determines main dashboard view)
     role: {
       type: String,
