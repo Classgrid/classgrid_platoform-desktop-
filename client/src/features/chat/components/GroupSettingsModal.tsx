@@ -191,12 +191,9 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-          
-          {/* Banner Background */}
-          <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-r from-emerald-500/20 via-primary/20 to-blue-500/20 pointer-events-none" />
-          
-          <div className="relative p-4 flex flex-col items-center pt-20">
+        <div className="flex-1 overflow-y-auto custom-scrollbar relative px-4 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="max-w-[1000px] mx-auto w-full pt-6">
+            
             {isLoading ? (
               <div className="flex-1 flex justify-center items-center h-full min-h-[200px]">
                 <Spinner className="w-8 h-8 text-primary" />
@@ -204,67 +201,82 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
             ) : isError || !data ? (
               <div className="text-red-500 text-sm py-8">Failed to load group info</div>
             ) : (
-              <>
-                {/* Avatar Section */}
-                <div className="relative group mb-4">
-                  {data.group.avatar_url ? (
-                    <img
-                      src={data.group.avatar_url}
-                      alt={data.group.name}
-                      className="w-28 h-28 rounded-full object-cover border-4 border-background shadow-xl cursor-pointer hover:opacity-90 transition-opacity bg-background"
-                      onClick={() => setViewingPhoto(data.group.avatar_url!)}
-                    />
-                  ) : (
-                    <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center text-primary border-4 border-background shadow-xl bg-background">
-                      <Users className="w-12 h-12" />
+              <div className="flex flex-col gap-6">
+                
+                {/* Identity Header Card */}
+                <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg flex flex-col">
+                  {/* Banner Background */}
+                  <div className="h-[250px] relative bg-gradient-to-r from-emerald-500/30 via-primary/30 to-blue-500/30 w-full" />
+                  
+                  <div className="px-8 pb-8 flex flex-col items-start gap-4">
+                    {/* Avatar Section */}
+                    <div className="relative -mt-[100px] mb-2 group rounded-full overflow-hidden">
+                      {data.group.avatar_url ? (
+                        <img
+                          src={data.group.avatar_url}
+                          alt={data.group.name}
+                          className="w-[160px] h-[160px] rounded-full object-cover border-4 border-background shadow-xl cursor-pointer hover:opacity-90 transition-opacity bg-card"
+                          onClick={() => setViewingPhoto(data.group.avatar_url!)}
+                        />
+                      ) : (
+                        <div className="w-[160px] h-[160px] rounded-full bg-primary/10 flex items-center justify-center text-primary border-4 border-background shadow-xl bg-card">
+                          <Users className="w-20 h-20" />
+                        </div>
+                      )}
+
+                      {/* Admin Upload Overlay */}
+                      {data.myRole === "admin" && (
+                        <>
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100 cursor-pointer rounded-full"
+                          >
+                            {isUploading ? (
+                              <Spinner className="w-8 h-8 text-white" />
+                            ) : (
+                              <>
+                                <Camera className="w-8 h-8 mb-1" />
+                                <span className="text-xs font-bold uppercase tracking-wider">
+                                  Change
+                                </span>
+                              </>
+                            )}
+                          </button>
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={onFileSelect}
+                          />
+                        </>
+                      )}
                     </div>
-                  )}
 
-                  {/* Admin Upload Overlay */}
-                  {data.myRole === "admin" && (
-                    <>
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100 cursor-pointer"
-                      >
-                        {isUploading ? (
-                          <Spinner className="w-6 h-6 text-white" />
-                        ) : (
-                          <>
-                            <Camera className="w-6 h-6 mb-1" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">
-                              Change
+                    {/* Group Name & Badges */}
+                    <div className="flex flex-col w-full gap-3">
+                      <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white flex items-center gap-2">
+                          {data.group.name}
+                          <BadgeCheck className="w-7 h-7 text-emerald-500" />
+                        </h1>
+                      </div>
+                      <div className="flex flex-col gap-3 mt-2">
+                        <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground font-medium">
+                          <span className="flex items-center gap-2.5">
+                            <Building2 className="w-4 h-4 opacity-70" />
+                            <span className="text-[15px] font-semibold text-foreground/90">Organization Group</span>
+                          </span>
+                          <span className="flex items-center gap-2.5">
+                            <Users className="w-4 h-4 opacity-70" />
+                            <span className="text-[15px] font-semibold text-foreground/90">
+                              {data.members.length} {data.members.length === 1 ? "member" : "members"}
                             </span>
-                          </>
-                        )}
-                      </button>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        ref={fileInputRef}
-                        onChange={onFileSelect}
-                      />
-                    </>
-                  )}
-                </div>
-
-                {/* Group Name & Badges */}
-                <div className="flex flex-col items-center mb-6">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <h3 className="text-2xl font-bold text-foreground">{data.group.name}</h3>
-                    <BadgeCheck className="w-6 h-6 text-emerald-500" />
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Building2 className="w-4 h-4 opacity-70" />
-                      Organization Group
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-4 h-4 opacity-70" />
-                      {data.members.length} {data.members.length === 1 ? "member" : "members"}
-                    </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
