@@ -39,6 +39,7 @@ interface ChatBubbleProps {
   onUserClick?: (userId: string) => void;
   onViewMedia?: (attachment: any) => void;
   onStar?: (msgId: string) => void;
+  onForward?: (msgId: string) => void;
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
@@ -436,7 +437,7 @@ export function ChatBubble({
                   <Copy className="w-4 h-4 mr-2" /> Copy
                 </ContextMenuItem>
               )}
-              <ContextMenuItem className="cursor-pointer py-2" disabled>
+              <ContextMenuItem onClick={() => onForward?.(message.id)} className="cursor-pointer py-2">
                 <Forward className="w-4 h-4 mr-2" /> Forward
               </ContextMenuItem>
               <ContextMenuItem className="cursor-pointer py-2" disabled>
@@ -453,7 +454,7 @@ export function ChatBubble({
                 </ContextMenuItem>
               )}
               <ContextMenuSeparator />
-              <ContextMenuItem className="cursor-pointer py-2" disabled>
+              <ContextMenuItem onClick={() => onToggleSelect?.()} className="cursor-pointer py-2">
                 <CheckSquare className="w-4 h-4 mr-2" /> Select
               </ContextMenuItem>
               {isMine && (

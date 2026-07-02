@@ -24,6 +24,7 @@ interface ChatConversationProps {
   onVotePoll?: (pollId: string, optionId: string) => void;
   onViewVotes?: (pollId: string) => void;
   onStar?: (msgId: string) => void;
+  onForward?: (msgId: string) => void;
   searchQuery?: string;
   isSelectionMode?: boolean;
   selectedMessageIds?: Set<string>;
@@ -49,6 +50,7 @@ export function ChatConversation({
   onVotePoll,
   onViewVotes,
   onStar,
+  onForward,
   searchQuery = "",
   isSelectionMode = false,
   selectedMessageIds = new Set(),
@@ -234,6 +236,7 @@ export function ChatConversation({
                     onVotePoll={onVotePoll}
                     onViewVotes={onViewVotes}
                     onStar={onStar}
+                    onForward={onForward}
                     isSelectionMode={isSelectionMode}
                     isSelected={selectedMessageIds.has(msg.id)}
                     onToggleSelect={() => onToggleMessageSelection?.(msg.id)}

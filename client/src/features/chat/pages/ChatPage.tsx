@@ -659,9 +659,14 @@ export function ChatPage() {
               polls={polls}
               onVotePoll={handleVotePoll}
               onViewVotes={(pollId) => setViewVotesPollId(pollId)}
+              onForward={(id) => {
+                setSelectedMessageIds(new Set([id]));
+                setIsForwardModalOpen(true);
+              }}
               isSelectionMode={isSelectionMode}
               selectedMessageIds={selectedMessageIds}
               onToggleMessageSelection={(id) => {
+                setIsSelectionMode(true);
                 setSelectedMessageIds(prev => {
                   const next = new Set(prev);
                   if (next.has(id)) next.delete(id);
