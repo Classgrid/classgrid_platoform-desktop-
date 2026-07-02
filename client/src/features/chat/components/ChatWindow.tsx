@@ -644,6 +644,7 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
               currentUserId={currentUserId}
               showAvatar={showAvatar}
               onReply={(msg) => setReplyTo(msg)}
+              canReply={!isInputDisabled}
               onDelete={handleDeleteMessage}
               onEdit={handleEditMessage}
               onReact={handleReact}

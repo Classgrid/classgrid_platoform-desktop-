@@ -13,6 +13,7 @@ import {
   toggleAdminRole,
   updateGroupPermissions,
   updateGroupInfo,
+  deleteGroup,
   type OrgUser,
 } from "../services/chatApi";
 import { toast } from "sonner";
@@ -128,6 +129,20 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.error || "Failed to leave group");
+    },
+  });
+
+  // ── Mutation: Delete Group ──
+  const { mutate: handleDeleteGroup, isPending: isDeleting } = useMutation({
+    mutationFn: () => deleteGroup(groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
+      toast.success("Group deleted successfully");
+      onClose();
+      onLeaveGroup?.();
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || "Failed to delete group");
     },
   });
 
@@ -318,7 +333,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
               <div className="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 pt-2">
                 {(() => {
                   const creator = data.members.find((m) => m.userId === data.group.created_by);
-                  const admins = data.members.filter((m) => m.role === "admin");
+                  const admins = data.members.filter((m) => m.role === "admin" && m.userId !== data.group.created_by);
                   const regularMembers = data.members.filter((m) => m.role === "member");
                   
                   const renderMemberGroup = (title: string, membersList: any[], emptyMsg?: string) => {
@@ -708,12 +723,12 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
             )}
 
             {/* ═══════════════════════════════════════════════ */}
-            {/* Leave Group Button                             */}
+            {/* Leave / Delete Group Button                    */}
             {/* ═══════════════════════════════════════════════ */}
-            <div className="w-full max-w-[1000px] mx-auto mt-2 pt-4 border-t border-border">
+            <div className="w-full max-w-[1000px] mx-auto mt-2 pt-4 border-t border-border flex flex-col gap-2">
               <button
                 onClick={confirmLeave}
-                disabled={isLeaving}
+                disabled={isLeaving || isDeleting}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isLeaving ? (
@@ -723,6 +738,25 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                 )}
                 Leave Group
               </button>
+
+              {data.myRole === "admin" && (
+                <button
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to permanently delete this group and all its messages? This action cannot be undone.")) {
+                      handleDeleteGroup();
+                    }
+                  }}
+                  disabled={isLeaving || isDeleting}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-white bg-destructive hover:bg-destructive/90 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isDeleting ? (
+                    <Spinner className="w-4 h-4 text-white" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  Delete Group
+                </button>
+              )}
             </div>
             </>
             )}

@@ -40,6 +40,7 @@ interface ChatBubbleProps {
   onUserClick?: (userId: string) => void;
   onViewMedia?: (attachment: any) => void;
   onStar?: (msgId: string) => void;
+  canReply?: boolean;
   onForward?: (msgId: string) => void;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -85,6 +86,7 @@ export function ChatBubble({
   onUserClick,
   onViewMedia,
   onStar,
+  canReply = true,
   isSelectionMode = false,
   isSelected = false,
   onToggleSelect,
@@ -504,6 +506,10 @@ export function ChatBubble({
                   </>
                 );
               })()}
+              
+              {message.is_starred && (
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 absolute -right-4 -bottom-1" />
+              )}
             </div>
           )}
 
@@ -533,9 +539,11 @@ export function ChatBubble({
           </ContextMenuTrigger>
           {!message.is_deleted && (
             <ContextMenuContent className="w-56" align={isMine ? "end" : "start"}>
-              <ContextMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
-                <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
-              </ContextMenuItem>
+              {canReply && (
+                <ContextMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
+                  <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
+                </ContextMenuItem>
+              )}
               {message.message && (
                 <ContextMenuItem onClick={() => {
                   navigator.clipboard.writeText(message.message);
@@ -628,9 +636,11 @@ export function ChatBubble({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align={isMine ? "end" : "start"}>
-                <DropdownMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
-                  <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
-                </DropdownMenuItem>
+                {canReply && (
+                  <DropdownMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
+                    <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
+                  </DropdownMenuItem>
+                )}
                 {message.message && (
                   <DropdownMenuItem onClick={() => {
                     navigator.clipboard.writeText(message.message);

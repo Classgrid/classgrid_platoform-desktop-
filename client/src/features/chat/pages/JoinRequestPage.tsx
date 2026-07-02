@@ -51,9 +51,6 @@ export function JoinRequestPage() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-4">
-          <Link to="/chat" className="p-2 hover:bg-muted rounded-full transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
           <div>
             <h1 className="font-bold text-lg">Join Requests</h1>
             <p className="text-xs text-muted-foreground">{groupData?.group?.name || 'Group'}</p>

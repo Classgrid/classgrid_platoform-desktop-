@@ -433,8 +433,10 @@ export function ChatPage() {
 
   const handleStarMessage = async (messageId: string) => {
     try {
-      await toggleStarMessage(messageId);
-      toast.success("Message starred/unstarred");
+      const res = await toggleStarMessage(messageId);
+      // Optimistic update
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_starred: res.isStarred } : m));
+      toast.success(res.isStarred ? "Message starred" : "Message unstarred");
     } catch (err) {
       toast.error("Failed to star message");
     }
@@ -725,6 +727,7 @@ export function ChatPage() {
               hasMore={hasMoreMessages}
               onLoadMore={handleLoadMore}
               onReply={setReplyTo}
+              canReply={!isInputDisabled}
               onStar={handleStarMessage}
               onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
               onEdit={async (id, text) => {

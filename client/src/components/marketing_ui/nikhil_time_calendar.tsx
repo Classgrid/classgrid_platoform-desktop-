@@ -12,7 +12,7 @@ interface NikhilTimeCalendarProps {
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
-  popDirection?: "up" | "down";
+  popDirection?: "up" | "down" | "left" | "right";
 }
 
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className, popDirection = "down" }: NikhilTimeCalendarProps) {
@@ -104,7 +104,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
 
       <PopoverContent 
         align="start" 
-        side={popDirection === "up" ? "top" : "bottom"}
+        side={popDirection === "up" ? "top" : popDirection === "down" ? "bottom" : popDirection}
         sideOffset={8}
         className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content z-[100]"
       >

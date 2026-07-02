@@ -59,6 +59,7 @@ export interface ChatMessage {
   priority?: string;
   is_silent?: boolean;
   expires_at?: string;
+  is_starred?: boolean;
 }
 
 export interface OrgUser {
@@ -383,4 +384,8 @@ export async function fetchJoinRequests(groupId: string) {
 export async function processJoinRequest(groupId: string, requestId: string, status: 'approved' | 'rejected') {
   const res = await apiClient.patch(`/api/group-chat/${groupId}/join-requests/${requestId}`, { status });
   return res.data;
+}
+
+export async function deleteGroup(groupId: string) {
+  await apiClient.delete(/api/group-chat/);
 }
