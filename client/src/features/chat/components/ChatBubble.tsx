@@ -134,7 +134,13 @@ export function ChatBubble({
     setIsEditing(false);
   };
 
-  const timeString = format(new Date(message.created_at), "h:mm a");
+  let timeString = "";
+  if (message.created_at) {
+    const d = new Date(message.created_at);
+    if (!isNaN(d.getTime())) {
+      timeString = format(d, "h:mm a");
+    }
+  }
 
   return (
     <div 
@@ -220,7 +226,7 @@ export function ChatBubble({
               `}
             >
               <span className="font-bold block mb-0.5">{message.reply_to.sender_name}</span>
-              <span className="line-clamp-2">{(message.reply_to.message || "Attachment").replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
+              <span className="line-clamp-2">{(typeof message.reply_to.message === 'string' ? message.reply_to.message : String(message.reply_to.message || "Attachment")).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
             </div>
           )}
 
@@ -378,7 +384,7 @@ export function ChatBubble({
                 {message.message && !poll && (
                   <div className="relative text-[15px] whitespace-pre-wrap leading-relaxed break-words prose prose-sm dark:prose-invert max-w-none [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1">
                     <span dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize((message.message || '').replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { 
+                      __html: DOMPurify.sanitize((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { 
                         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
                         ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
                       }) 
