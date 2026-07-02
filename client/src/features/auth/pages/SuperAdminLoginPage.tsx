@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect } from "react";
+﻿import { useState, type FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ export function SuperAdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
-  // 🔐 Domain Lock: Super Admin login is EXCLUSIVELY on superadmin.classgrid.in
+  // ðŸ” Domain Lock: Super Admin login is EXCLUSIVELY on superadmin.classgrid.in
   // If someone navigates to /superadmin/login on any other subdomain, hard-redirect them.
   useEffect(() => {
     const hostname = window.location.hostname;
@@ -235,7 +235,7 @@ export function SuperAdminLoginPage() {
 
             {/* Footer */}
             <div className="page-footer">
-              <p>© {new Date().getFullYear()} Classgrid. All rights reserved.</p>
+              <p>Â© {new Date().getFullYear()} Classgrid. All rights reserved.</p>
             </div>
 
           </div>

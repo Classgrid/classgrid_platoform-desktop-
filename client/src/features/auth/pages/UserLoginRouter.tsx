@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { AuthUserRole, AuthBranding } from "../types";
 import { ClassgridSubdomainUserLoginPage } from "./ClassgridSubdomainUserLoginPage";
 import { CustomDomainUserLoginPage } from "./CustomDomainUserLoginPage";
@@ -21,7 +21,7 @@ export function UserLoginRouter({ preferredRole }: UserLoginRouterProps) {
 
   useEffect(() => {
     let isMounted = true;
-    const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
+    const isLocalhost = hostname === "localhost" || hostname.endsWith(".localhost") || hostname.startsWith("127.0.0.1");
     const isClassgrid = hostname.endsWith("classgrid.in");
     
     const searchParams = new URLSearchParams(window.location.search);

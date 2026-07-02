@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Globe, Facebook, Instagram, Linkedin, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
 import type { AuthUserRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
-/* ── Constants ── */
+/* â”€â”€ Constants â”€â”€ */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
 
 const DEFAULT_CAMPUS = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=550&h=720&auto=format&fit=crop";
@@ -20,7 +20,7 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
   const [activeRole, setActiveRole] = useState<AuthUserRole>(preferredRole || "student");
   const [showPassword, setShowPassword] = useState(false);
 
-  // ── Branding State ──
+  // â”€â”€ Branding State â”€â”€
   const [branding, setBranding] = useState<AuthBranding | null>({
     name: 'Greenfield University',
     siteTitle: 'Greenfield Portal',
@@ -30,7 +30,7 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
   });
   const [brandingError, setBrandingError] = useState(false);
 
-  // ── Backend State ──
+  // â”€â”€ Backend State â”€â”€
   const [step, setStep] = useState<1 | "device">(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +48,7 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
   useEffect(() => {
     let isMounted = true;
     const hostname = window.location.hostname;
-    const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
+    const isLocalhost = hostname === "localhost" || hostname.endsWith(".localhost") || hostname.startsWith("127.0.0.1");
     const isClassgrid = hostname.endsWith("classgrid.in");
     
     const searchParams = new URLSearchParams(location.search);
@@ -220,7 +220,7 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
     window.location.assign(getGoogleAuthUrl({ audience: "user", role: activeRole }));
   };
 
-  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
+  // Load Google reCAPTCHA v3 â€” shows official badge at bottom-right
   useEffect(() => {
     if (brandingError || !branding) return;
 
@@ -253,15 +253,15 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
 
 
   return (
-    /* 1. Full Screen — fills exactly the viewport, never scrolls */
+    /* 1. Full Screen â€” fills exactly the viewport, never scrolls */
     <main className="h-screen w-screen bg-background dark:bg-[#0f0f0f]">
 
       {/* Container holding the 2-column grid */}
       <div className="grid h-full w-full grid-cols-1 lg:grid-cols-2 overflow-hidden">
 
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 3. LEFT PANEL                               */}
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section className="relative flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden">
           
           {/* 1. Full-Bleed Campus Photo */}
@@ -332,9 +332,9 @@ export function TestFullScreenLoginPage({ preferredRole }: { preferredRole?: Aut
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 8. RIGHT PANEL                              */}
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section className="flex h-full items-center justify-center bg-muted dark:bg-[#111111] px-6 overflow-hidden">
 
             {/* 9. Inner Login Box */}

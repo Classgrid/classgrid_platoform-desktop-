@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,7 +7,7 @@ import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
 import type { AuthUserRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
-/* ── Constants ── */
+/* â”€â”€ Constants â”€â”€ */
 const RECAPTCHA_SITE_KEY = "6Ld6wTotAAAAAGSbuFnwbg8fraYhmIW9G63yF2on";
 
 const CLASSGRID_LOGO =
@@ -21,11 +21,11 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
   const [activeRole, setActiveRole] = useState<AuthUserRole>(preferredRole || "student");
   const [showPassword, setShowPassword] = useState(false);
 
-  // ── Branding State ──
+  // â”€â”€ Branding State â”€â”€
   const [branding, setBranding] = useState<AuthBranding | null>(null);
   const [brandingError, setBrandingError] = useState(false);
 
-  // ── Backend State ──
+  // â”€â”€ Backend State â”€â”€
   const [step, setStep] = useState<1 | "device">(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +43,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
   useEffect(() => {
     let isMounted = true;
     const hostname = window.location.hostname;
-    const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
+    const isLocalhost = hostname === "localhost" || hostname.endsWith(".localhost") || hostname.startsWith("127.0.0.1");
     const isClassgrid = hostname.endsWith("classgrid.in");
 
     const searchParams = new URLSearchParams(location.search);
@@ -209,7 +209,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
     window.location.assign(getGoogleAuthUrl({ audience: "user", role: activeRole }));
   };
 
-  // Load Google reCAPTCHA v3 — shows official badge at bottom-right
+  // Load Google reCAPTCHA v3 â€” shows official badge at bottom-right
   useEffect(() => {
     if (brandingError || !branding) return;
 
@@ -240,10 +240,10 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
   }
 
   return (
-    /* 1. Full Screen — fills exactly the viewport, never scrolls */
+    /* 1. Full Screen â€” fills exactly the viewport, never scrolls */
     <main className="h-screen w-screen bg-background dark:bg-[#080808] flex items-center justify-center overflow-hidden">
 
-      {/* 2. Outer Floating Container — responsive to screen */}
+      {/* 2. Outer Floating Container â€” responsive to screen */}
       <div
         className="relative grid overflow-hidden bg-background dark:bg-[#0f0f0f]"
         style={{
@@ -253,9 +253,9 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
         }}
       >
 
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 3. LEFT PANEL                               */}
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section className="relative flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden px-10">
 
           {/* TOP GREEN EFFECT - left to right direction */}
@@ -276,7 +276,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
             }}
           />
 
-          {/* WHITE DOTTED GRID — top-right, fades before logo */}
+          {/* WHITE DOTTED GRID â€” top-right, fades before logo */}
           <div
             className="pointer-events-none absolute right-0 top-0 h-[160px] w-[280px]"
             style={{
@@ -289,7 +289,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
             aria-hidden="true"
           />
 
-          {/* WHITE DOTTED GRID — middle-right, fades left to fill gap */}
+          {/* WHITE DOTTED GRID â€” middle-right, fades left to fill gap */}
           <div
             className="pointer-events-none absolute right-0 top-[140px] h-[260px] w-[200px]"
             style={{
@@ -302,7 +302,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
             aria-hidden="true"
           />
 
-          {/* WHITE DOTTED GRID — middle-left, fades right to fill gap */}
+          {/* WHITE DOTTED GRID â€” middle-left, fades right to fill gap */}
           <div
             className="pointer-events-none absolute left-0 bottom-[140px] h-[240px] w-[180px]"
             style={{
@@ -315,7 +315,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
             aria-hidden="true"
           />
 
-          {/* WHITE DOTTED GRID — bottom-left, fades before content */}
+          {/* WHITE DOTTED GRID â€” bottom-left, fades before content */}
           <div
             className="pointer-events-none absolute bottom-0 left-0 h-[180px] w-[320px]"
             style={{
@@ -417,9 +417,9 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 8. RIGHT PANEL                              */}
-        {/* ═══════════════════════════════════════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         <section className="flex h-full items-center justify-center bg-muted dark:bg-[#111111] px-6 overflow-hidden">
 
           {/* 9. Inner Login Box */}

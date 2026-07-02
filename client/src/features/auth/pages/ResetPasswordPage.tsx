@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+﻿import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Check, Eye, EyeOff, XCircle, AlertCircle } from "lucide-react";
 
@@ -183,7 +183,7 @@ export function ResetPasswordPage() {
           </p>
         </div>
         <footer className="absolute bottom-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+          Â© {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
         </footer>
       </main>
     );
@@ -238,7 +238,7 @@ export function ResetPasswordPage() {
         `}</style>
         
         <footer className="absolute bottom-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+          Â© {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
         </footer>
       </main>
     );
@@ -399,7 +399,7 @@ export function ResetPasswordPage() {
       </div>
 
       <footer className="absolute bottom-6 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
+        Â© {new Date().getFullYear()}, Classgrid Education. All Rights Reserved.
       </footer>
     </main>
   );

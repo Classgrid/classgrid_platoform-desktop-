@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { AuthBranding } from "../types";
 import { ClassgridSubdomainAdminLoginPage } from "./ClassgridSubdomainAdminLoginPage";
 import { CustomDomainAdminLoginPage } from "./CustomDomainAdminLoginPage";
@@ -17,7 +17,7 @@ export function AdminLoginRouter() {
 
   useEffect(() => {
     let isMounted = true;
-    const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
+    const isLocalhost = hostname === "localhost" || hostname.endsWith(".localhost") || hostname.startsWith("127.0.0.1");
     const isClassgrid = hostname.endsWith("classgrid.in");
     
     const searchParams = new URLSearchParams(window.location.search);
