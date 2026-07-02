@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { X, Save, Shield, Camera, Loader, Mail, Phone, 
   Lock, Smartphone, Globe, Calendar, Clock,
   Palette, Activity, BadgeCheck, ShieldAlert,
-  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit
+  Instagram, Facebook, Linkedin, Github, FileBox, Users, GraduationCap, Edit, ChevronRight
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
