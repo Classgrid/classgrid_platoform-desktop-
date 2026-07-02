@@ -189,7 +189,7 @@ export function NikhilTimeCalendar({
         <div
           ref={panelRef}
           style={panelStyle}
-          className="rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl"
+          className="rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl nikhil-time-calendar-portal"
         >
           {/* Month / Year header */}
           <div className="flex items-center gap-2 p-3 pb-0">

@@ -103,8 +103,35 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   };
 
 
-  const handleOptionsOpenChange = (open: boolean) => {
-    setIsOptionsOpen(open);
+  const handleOptionsOpenChange = (
+    open: boolean,
+    eventDetails?: any
+  ) => {
+    if (open) {
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    const event = eventDetails?.event;
+    const reason = eventDetails?.reason;
+    const targetNode = event?.target instanceof Node ? event.target : null;
+    const targetElement = targetNode?.nodeType === 3 ? targetNode.parentElement : (targetNode instanceof Element ? targetNode : null);
+
+    // Prevent closing if we clicked an element that was instantly unmounted
+    if (reason === "outside-press" && event && targetNode && !targetNode.isConnected) {
+      eventDetails?.cancel?.();
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    // Prevent closing if we clicked inside our calendar portal or its nested Radix portals
+    if (targetElement?.closest('.nikhil-time-calendar-portal, [role="listbox"], [data-radix-popper-content-wrapper]')) {
+      eventDetails?.cancel?.();
+      setIsOptionsOpen(true);
+      return;
+    }
+
+    setIsOptionsOpen(false);
   };
   const clearAudio = () => {
     setAudioBlob(null);
