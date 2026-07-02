@@ -117,7 +117,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
         }}
       >
         {/* The Unified Picker Widget */}
-        <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px] flex flex-col overflow-hidden">
+        <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-xl w-[320px]" ref={containerRef} data-calendar-container="true flex flex-col overflow-hidden">
           
           {/* Custom Month/Year Header */}
           <div className="flex items-center gap-2 p-3 pb-0">
@@ -126,7 +126,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent portalContainer={containerRef.current}>
                   {months.map((m, i) => <SelectItem key={i} value={i.toString()}>{m}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -136,7 +136,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                 <SelectTrigger className="h-8 border-none bg-accent/50 hover:bg-accent rounded-md text-sm font-semibold">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent portalContainer={containerRef.current}>
                   {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -186,7 +186,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="HH" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent portalContainer={containerRef.current}>
                     {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -197,7 +197,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-border bg-background rounded-md text-sm font-medium">
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent portalContainer={containerRef.current}>
                     {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -208,7 +208,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
                   <SelectTrigger className="h-9 border-none bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 rounded-md text-sm font-bold">
                     <SelectValue placeholder="AM/PM" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent portalContainer={containerRef.current}>
                     <SelectItem value="AM">AM</SelectItem>
                     <SelectItem value="PM">PM</SelectItem>
                   </SelectContent>
