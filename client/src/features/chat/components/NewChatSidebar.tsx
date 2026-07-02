@@ -9,7 +9,7 @@ interface NewChatSidebarProps {
   onClose: () => void;
   users: OrgUser[];
   currentUserId: string;
-  onSelectUser: (userId: string) => void;
+  onSelectUser: (userId: string) => Promise<void>;
   isLoading: boolean;
   onNewGroup: () => void;
 }
@@ -30,6 +30,7 @@ export function NewChatSidebar({
   onNewGroup,
 }: NewChatSidebarProps) {
   const [search, setSearch] = useState("");
+  const [creatingId, setCreatingId] = useState<string | null>(null);
 
   const filteredAndSortedUsers = useMemo(() => {
     let list = users.filter((u) => u._id !== currentUserId);
@@ -115,14 +116,22 @@ export function NewChatSidebar({
               filteredAndSortedUsers.map((user, index) => (
                 <button
                   key={user._id}
-                  onClick={() => {
-                    onSelectUser(user._id);
-                    onClose();
+                  disabled={creatingId !== null}
+                  onClick={async () => {
+                    setCreatingId(user._id);
+                    try {
+                      await onSelectUser(user._id);
+                      onClose();
+                    } finally {
+                      setCreatingId(null);
+                    }
                   }}
-                  className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group"
+                  className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
-                    {user.profilePicture ? (
+                  <div className="relative w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden">
+                    {creatingId === user._id ? (
+                      <Spinner className="w-6 h-6 text-primary absolute z-10" />
+                    ) : user.profilePicture ? (
                       <img
                         src={user.profilePicture}
                         alt=""
