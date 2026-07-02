@@ -81,9 +81,9 @@ export function AddGroupMemberSidebar({
 
   return (
     <motion.div
-      initial={{ x: "-100%" }}
+      initial={{ x: "100%" }}
       animate={{ x: 0 }}
-      exit={{ x: "-100%" }}
+      exit={{ x: "100%" }}
       transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
       className="absolute inset-0 z-50 flex flex-col bg-white dark:bg-black overflow-hidden"
     >
