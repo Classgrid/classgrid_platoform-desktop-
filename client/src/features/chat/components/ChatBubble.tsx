@@ -216,7 +216,7 @@ export function ChatBubble({
               ${message.is_deleted 
                 ? "bg-muted text-muted-foreground italic border border-border" 
                 : isMine 
-                  ? "bg-primary text-[#0f172a] font-medium rounded-tr-sm shadow-sm" 
+                  ? "bg-emerald-50 dark:bg-[#005c4b] text-[#111b21] dark:text-white/90 font-medium rounded-tr-sm shadow-sm border border-emerald-100 dark:border-[#00705a]" 
                   : "bg-white dark:bg-[#202c33] text-foreground dark:text-[#e9edef] border border-black/5 dark:border-transparent rounded-tl-sm shadow-sm"
               }
             `}
@@ -388,7 +388,7 @@ export function ChatBubble({
             )}
 
             {/* Meta (Time + Checks) */}
-            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 ${isMine ? "text-[#0f172a]/70 font-semibold" : "text-muted-foreground"} text-[10px]`}>
+            <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 text-[10px] ${isMine ? "text-[#111b21]/70 dark:text-white/60 font-semibold" : "text-muted-foreground"}`}>
               <span>{timeString}</span>
               {isMine && !message.is_deleted && (
                 message.isSending ? (
@@ -396,9 +396,9 @@ export function ChatBubble({
                 ) : message.isError ? (
                   <span className="text-red-600 font-bold ml-0.5">!</span>
                 ) : message.isSeen ? (
-                  <CheckCheck className="w-4 h-4 text-blue-700 font-extrabold" />
+                  <CheckCheck className="w-4 h-4 text-[#34d399]" />
                 ) : (
-                  <Check className="w-4 h-4 text-[#0f172a]" />
+                  <Check className="w-4 h-4 text-[#34d399] opacity-70" />
                 )
               )}
             </div>
