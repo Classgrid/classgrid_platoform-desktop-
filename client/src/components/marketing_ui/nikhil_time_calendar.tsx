@@ -18,18 +18,23 @@ interface NikhilTimeCalendarProps {
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className, popDirection = "down" }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [internalDate, setInternalDate] = useState<Date | undefined>(value);
-  const [hour, setHour] = useState(value ? format(value, "hh") : "10");
-  const [minute, setMinute] = useState(value ? format(value, "mm") : "00");
-  const [ampm, setAmpm] = useState(value ? format(value, "a") : "AM");
+  
+  const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
+  const validValue = isValidDate(value) ? value : undefined;
+
+  const [internalDate, setInternalDate] = useState<Date | undefined>(validValue);
+  const [hour, setHour] = useState(validValue ? format(validValue, "hh") : "10");
+  const [minute, setMinute] = useState(validValue ? format(validValue, "mm") : "00");
+  const [ampm, setAmpm] = useState(validValue ? format(validValue, "a") : "AM");
 
   // Keep internal state synced if value changes externally
   useEffect(() => {
-    if (value) {
-      setInternalDate(value);
-      setHour(format(value, "hh"));
-      setMinute(format(value, "mm"));
-      setAmpm(format(value, "a"));
+    if (isValidDate(value)) {
+      const validVal = value as Date;
+      setInternalDate(validVal);
+      setHour(format(validVal, "hh"));
+      setMinute(format(validVal, "mm"));
+      setAmpm(format(validVal, "a"));
     }
   }, [value]);
   
@@ -76,8 +81,8 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     setIsOpen(false);
   };
 
-  const displayString = value 
-    ? `${format(value, 'MMM do, yyyy')} at ${format(value, 'hh:mm a')}`
+  const displayString = isValidDate(value)
+    ? `${format(value as Date, 'MMM do, yyyy')} at ${format(value as Date, 'hh:mm a')}`
     : placeholder;
 
   return (
