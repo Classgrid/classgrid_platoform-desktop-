@@ -15,6 +15,7 @@ interface NikhilTimeCalendarProps {
 }
 
 export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date & time", className }: NikhilTimeCalendarProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [internalDate, setInternalDate] = useState<Date | undefined>(value);
   const [hour, setHour] = useState(value ? format(value, "hh") : "10");
   const [minute, setMinute] = useState(value ? format(value, "mm") : "00");
@@ -70,6 +71,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     finalDate.setSeconds(0);
     finalDate.setMilliseconds(0);
     onChange(finalDate);
+    setIsOpen(false);
   };
 
   const displayString = value 
@@ -77,7 +79,7 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
     : placeholder;
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -92,12 +94,17 @@ export function NikhilTimeCalendar({ value, onChange, placeholder = "Pick date &
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent" 
+        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent nikhil-time-calendar-content" 
         align="start"
         onInteractOutside={(e) => {
-          // Prevent closing when clicking inside a nested select/portal
           const target = e.target as Element;
-          if (target.closest('[data-radix-portal]')) {
+          // Prevent closing when clicking inside nested portals or if the element is unmounted (e.g. Select option clicks)
+          if (
+            !target ||
+            !target.isConnected ||
+            target.closest('[data-radix-portal]') ||
+            target.closest('[data-radix-popper-content-wrapper]')
+          ) {
             e.preventDefault();
           }
         }}

@@ -441,9 +441,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   align="end" 
                   className="w-72 p-4 bg-card border border-border shadow-lg rounded-xl"
                   onInteractOutside={(e) => {
-                    // Prevent closing when clicking inside a nested select/portal (e.g. DateTimePicker)
                     const target = e.target as Element;
-                    if (target.closest('[data-radix-portal]')) {
+                    // Prevent closing when interacting with nested popovers, select options, or unmounted nodes
+                    if (
+                      !target ||
+                      !target.isConnected ||
+                      target.closest('.nikhil-time-calendar-content') ||
+                      target.closest('[data-radix-portal]') ||
+                      target.closest('[data-radix-popper-content-wrapper]')
+                    ) {
                       e.preventDefault();
                     }
                   }}
