@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/marketing_ui/nikhil_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
@@ -22,7 +22,9 @@ export function NikhilTimeCalendar({
   popDirection = "down",
 }: NikhilTimeCalendarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
 
   const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
   const validValue = isValidDate(value) ? value : undefined;
@@ -34,7 +36,6 @@ export function NikhilTimeCalendar({
   const [selectedMonth, setSelectedMonth] = useState((validValue || new Date()).getMonth().toString());
   const [selectedYear, setSelectedYear] = useState((validValue || new Date()).getFullYear().toString());
 
-  // Sync if value changes externally
   useEffect(() => {
     if (isValidDate(value)) {
       const v = value as Date;
@@ -47,22 +48,78 @@ export function NikhilTimeCalendar({
     }
   }, [value]);
 
-  // Close when clicking outside the whole widget
+  // Calculate position of the floating panel relative to the trigger
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const panelW = 320;
+    const panelH = 520; // approx height
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let top: number;
+    let left: number;
+
+    if (popDirection === "up") {
+      top = rect.top - panelH - 8;
+      left = rect.left;
+    } else if (popDirection === "left") {
+      top = rect.top;
+      left = rect.left - panelW - 8;
+    } else if (popDirection === "right") {
+      top = rect.top;
+      left = rect.right + 8;
+    } else {
+      // down
+      top = rect.bottom + 8;
+      left = rect.left;
+    }
+
+    // Clamp so it doesn't go off-screen
+    if (left + panelW > vw - 16) left = vw - panelW - 16;
+    if (left < 16) left = 16;
+    if (top + panelH > vh - 16) top = vh - panelH - 16;
+    if (top < 16) top = 16;
+
+    setPanelStyle({ position: "fixed", top, left, width: panelW, zIndex: 9999 });
+  }, [popDirection]);
+
+  // Position + outside-click listener
   useEffect(() => {
     if (!isOpen) return;
+    updatePosition();
+
+    const onResize = () => updatePosition();
+    const onScroll = () => updatePosition();
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll, true);
+
     const handleOutsideClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+      const target = e.target as Node;
+      if (
+        triggerRef.current?.contains(target) ||
+        panelRef.current?.contains(target)
+      ) {
+        return; // click is inside our widget
       }
+      // Check if click is inside a Radix Select portal (they render to body)
+      const el = e.target as Element;
+      if (el?.closest?.('[role="listbox"], [data-radix-popper-content-wrapper]')) {
+        return; // click is inside a Select dropdown
+      }
+      setIsOpen(false);
     };
-    // Use capture phase so we get the click before Radix portals swallow it
     document.addEventListener("mousedown", handleOutsideClick, true);
-    return () => document.removeEventListener("mousedown", handleOutsideClick, true);
-  }, [isOpen]);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll, true);
+      document.removeEventListener("mousedown", handleOutsideClick, true);
+    };
+  }, [isOpen, updatePosition]);
 
   const currentYear = new Date().getFullYear();
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, "0"));
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const years = Array.from({ length: 100 }, (_, i) => (currentYear - 50 + i).toString());
 
@@ -94,21 +151,11 @@ export function NikhilTimeCalendar({
     ? `${format(value as Date, "MMM do, yyyy")} at ${format(value as Date, "hh:mm a")}`
     : placeholder;
 
-  // Position class based on popDirection
-  const positionClass =
-    popDirection === "up"
-      ? "bottom-full mb-2"
-      : popDirection === "left"
-      ? "right-full mr-2 top-0"
-      : popDirection === "right"
-      ? "left-full ml-2 top-0"
-      : "top-full mt-2"; // default: down
-
   return (
-    // Single containing div — no portal, no Base UI Popover conflict
-    <div ref={containerRef} className="relative w-full">
+    <>
       {/* Trigger Button */}
       <Button
+        ref={triggerRef}
         type="button"
         variant="outline"
         onClick={() => setIsOpen((v) => !v)}
@@ -122,15 +169,12 @@ export function NikhilTimeCalendar({
         {displayString}
       </Button>
 
-      {/* Calendar panel — rendered as a normal div, NOT a portal */}
+      {/* Calendar panel — rendered with position:fixed, NOT inside any popover portal */}
       {isOpen && (
         <div
-          className={cn(
-            "absolute z-[200] w-[320px] rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl",
-            positionClass
-          )}
-          // Stop mousedown so it doesn't bubble up to our outside-click listener
-          onMouseDown={(e) => e.stopPropagation()}
+          ref={panelRef}
+          style={panelStyle}
+          className="rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 duration-150"
         >
           {/* Month / Year header */}
           <div className="flex items-center gap-2 p-3 pb-0">
@@ -214,7 +258,7 @@ export function NikhilTimeCalendar({
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
                   <SelectContent>
-                    {minutes.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {minuteOptions.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -234,7 +278,7 @@ export function NikhilTimeCalendar({
           </div>
 
           {/* Apply button */}
-          <div className="p-3 bg-muted/20 border-t border-border">
+          <div className="p-3 bg-muted/20 border-t border-border rounded-b-xl">
             <Button
               type="button"
               className="w-full bg-foreground text-background hover:bg-foreground/90 font-medium"
@@ -245,6 +289,6 @@ export function NikhilTimeCalendar({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
