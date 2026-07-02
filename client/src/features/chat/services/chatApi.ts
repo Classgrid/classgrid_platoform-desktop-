@@ -212,8 +212,8 @@ export async function updateGroupInfo(groupId: string, name: string, description
 
 export async function uploadGroupPhoto(groupId: string, file: File, type: "avatar" | "banner" = "avatar") {
   const formData = new FormData();
-  formData.append("photo", file);
   formData.append("type", type);
+  formData.append("photo", file);
   const res = await apiClient.post(`/api/group-chat/${groupId}/photo`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });

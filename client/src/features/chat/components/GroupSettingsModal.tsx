@@ -55,7 +55,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   });
 
   // ── Mutation: Upload Group Photo ──
-  const { mutate: handleUpload, isPending: isUploading } = useMutation({
+  const { mutateAsync: handleUpload, isPending: isUploading } = useMutation({
     mutationFn: ({ file, type }: { file: File, type: "avatar" | "banner" }) => uploadGroupPhoto(groupId, file, type),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
