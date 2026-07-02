@@ -11,6 +11,8 @@ import {
   PopoverContent,
 } from "@/components/marketing_ui/popover";
 import { Switch } from "@/components/marketing_ui/switch";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+import { useUserChannel } from "@/features/chat/hooks/useRealtimeChat";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -42,8 +44,17 @@ type SidebarNotificationsProps = {
 };
 
 export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNotificationsProps) {
+  const { data: currentUser } = useCurrentUser();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"inbox" | "archive" | "settings">("inbox");
+  
+  // Listen for real-time chat updates to instantly refresh the bell
+  useUserChannel(currentUser?._id || null, (payload) => {
+    if (payload.action === 'new_group' || (payload.threadId && payload.message)) {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {

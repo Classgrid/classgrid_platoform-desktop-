@@ -103,6 +103,15 @@ router.post('/', isAuthenticated, async (req, res) => {
     const { error: memErr } = await sb.from('chat_thread_members').insert(memberRecords);
     if (memErr) throw memErr;
 
+    // Broadcast to all members so their sidebar updates in real-time
+    Promise.all(allIds.map(memberId => 
+      broadcastToChannel(`user:${memberId}`, 'thread_updated', {
+        threadId: thread.id,
+        action: 'new_group',
+        groupId: group.id
+      })
+    )).catch(err => console.error('Group broadcast error:', err));
+
     res.status(201).json({ group, thread });
   } catch (err) {
     console.error('Group create error:', err);

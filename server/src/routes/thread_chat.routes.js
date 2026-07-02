@@ -240,7 +240,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
           createdAt: thread.created_at,
-          sendMessagesPolicy: group.send_messages_policy || 'all',
+          sendMessagesPolicy: group.send_message_policy || 'all',
           allowReplies: thread.allow_replies !== false,
           myRole: myRoles[thread.id] || 'member',
           isMuted: mutedThreads.has(thread.id),

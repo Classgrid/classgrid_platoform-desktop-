@@ -307,8 +307,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
               <div className="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 pt-2">
                 {(() => {
                   const creator = data.members.find((m) => m.userId === data.group.created_by);
-                  const admins = data.members.filter((m) => m.role === "admin" && m.userId !== data.group.created_by);
-                  const regularMembers = data.members.filter((m) => m.role === "member" && m.userId !== data.group.created_by);
+                  const admins = data.members.filter((m) => m.role === "admin");
+                  const regularMembers = data.members.filter((m) => m.role === "member");
                   
                   const renderMemberGroup = (title: string, membersList: any[], emptyMsg?: string) => {
                     if (membersList.length === 0 && !emptyMsg) return null;
@@ -367,7 +367,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                                   {/* Role Badge */}
                                   {isCreator ? (
                                     <span className="text-[10px] font-bold bg-warning/10 text-warning px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                                      <Crown className="w-3 h-3" /> Owner
+                                      <Crown className="w-3 h-3" /> Admin
                                     </span>
                                   ) : member.role === "admin" ? (
                                     <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -405,7 +405,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
 
                   return (
                     <>
-                      {creator && renderMemberGroup("Owner", [creator])}
+                      {creator && renderMemberGroup("Admin", [creator])}
                       {renderMemberGroup("Admins", admins)}
                       {renderMemberGroup("Members", regularMembers, "No other members")}
                     </>
@@ -607,7 +607,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     <span className="text-sm font-medium text-foreground">Auto-Add Members by Role</span>
                     <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically added as regular members.</span>
                     <div className="flex flex-wrap gap-2">
-                      {['student', 'faculty', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'coordinator', 'teacher'].map(role => {
+                      {['student', 'faculty', 'teacher', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head', 'coordinator'].map(role => {
                         const currentRoles = data.group.auto_add_roles || [];
                         const isSelected = currentRoles.includes(role);
                         return (
@@ -638,7 +638,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     <span className="text-sm font-medium text-foreground">Auto-Grant Admin by Role</span>
                     <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically granted Admin access in this group.</span>
                     <div className="flex flex-wrap gap-2">
-                      {['student', 'faculty', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'coordinator', 'teacher'].map(role => {
+                      {['student', 'faculty', 'teacher', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head', 'coordinator'].map(role => {
                         const currentRoles = data.group.admin_roles || [];
                         const isSelected = currentRoles.includes(role);
                         return (

@@ -444,6 +444,11 @@ export function ChatPage() {
   
   // 1. Sidebar Updates (via User channel)
   useUserChannel(currentUserId || null, (payload) => {
+    if (payload.action === 'new_group') {
+      loadThreads();
+      return;
+    }
+
     if (payload.threadId && payload.message) {
       // Reorder sidebar and update last message
       setThreads((prev) => {
@@ -585,6 +590,15 @@ export function ChatPage() {
       toast.error("Failed to acknowledge message");
     }
   };
+
+  const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(currentUser?.role || '');
+  const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(currentUser?.role || '');
+  const isAdmin = activeThread?.myRole === 'admin' || isOrgAdmin;
+
+  const isInputDisabled = activeThread?.type === "group" && (
+    (activeThread.sendMessagesPolicy === "admin_only" && !isAdmin) ||
+    (activeThread.sendMessagesPolicy === "admin_faculty" && !isAdmin && !isFaculty)
+  );
 
   // -- Layout --
   return (
@@ -812,9 +826,9 @@ export function ChatPage() {
                   }
                 }}
               />
-            ) : (activeThread.type === "group" && activeThread.sendMessagesPolicy === "admin_only" && activeThread.myRole !== "admin") ? (
+            ) : isInputDisabled ? (
               <div className="p-4 bg-background border-t border-border flex items-center justify-center text-sm text-muted-foreground">
-                Only admins can send messages
+                Only {activeThread?.sendMessagesPolicy === 'admin_faculty' ? 'admins and faculty' : 'admins'} can send messages
               </div>
             ) : (
               <ChatInput
