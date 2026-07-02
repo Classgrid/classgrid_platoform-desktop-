@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown } from "lucide-react";
 import {
