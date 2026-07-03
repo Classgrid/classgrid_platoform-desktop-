@@ -362,6 +362,8 @@ export function OrgBrandingCard() {
         queryClient.setQueryData(["org-branding"], (old: any) => ({ ...old, ...variables }));
       }
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     },
   });
 
