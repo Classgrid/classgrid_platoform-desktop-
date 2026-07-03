@@ -529,6 +529,22 @@ export function ChatPage() {
         if (prev.some((msg) => msg.id === payload.id)) {
           return prev;
         }
+
+        // Anti-Flash & Double Bubble Fix:
+        // If this message is from US, find our optimistic 'temp' message and replace it!
+        if (payload.sender_id === currentUserId) {
+          const tempMsgIndex = prev.findIndex(msg => 
+            msg.id.toString().startsWith('temp-') && 
+            msg.message === payload.message
+          );
+          
+          if (tempMsgIndex !== -1) {
+            const next = [...prev];
+            next[tempMsgIndex] = payload;
+            return next;
+          }
+        }
+
         return [...prev, payload];
       });
       // Immediately clear their typing/uploading indicator once their message arrives
