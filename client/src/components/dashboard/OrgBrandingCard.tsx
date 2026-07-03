@@ -6,6 +6,8 @@ import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/marketing_ui/dialog";
+import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { toast } from "sonner";
 
 type BrandColorSettings = {
@@ -524,11 +526,20 @@ export function OrgBrandingCard() {
       <div className="flex items-center gap-2">
         {imgUrl && (
           <>
-            <Button variant="outline" size="sm" onClick={() => window.open(imgUrl, "_blank")} className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
-              Preview
-            </Button>
-            <Button variant="outline" size="sm" onClick={onDelete} disabled={updateBranding.isPending} className="shrink-0 bg-background shadow-sm text-destructive hover:bg-destructive/10 border-destructive/20 h-8 px-3">
-              Delete
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
+                  Preview
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl sm:max-w-xl">
+                <div className="flex items-center justify-center p-2">
+                  <img src={imgUrl} alt={title} className="max-w-full max-h-[70vh] object-contain rounded-md" />
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" size="icon" onClick={onDelete} disabled={updateBranding.isPending} className="shrink-0 bg-background shadow-sm text-destructive hover:bg-destructive/10 border-destructive/20 h-8 w-8">
+              <Trash2 size={16} />
             </Button>
           </>
         )}
@@ -539,7 +550,17 @@ export function OrgBrandingCard() {
     </div>
   );
 
-  if (isLoading) return <div className="p-8 flex justify-center"><Spinner /></div>;
+  if (isLoading) return (
+    <div className="bg-card border border-border rounded-xl shadow-sm mb-6 p-5 space-y-6">
+      <Skeleton className="h-8 w-1/3" />
+      <Skeleton className="h-4 w-1/2" />
+      <div className="space-y-4 pt-4">
+        <Skeleton className="h-[200px] w-full rounded-xl" />
+        <Skeleton className="h-[200px] w-full rounded-xl" />
+        <Skeleton className="h-[200px] w-full rounded-xl" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-card border border-border rounded-xl shadow-sm mb-6">
