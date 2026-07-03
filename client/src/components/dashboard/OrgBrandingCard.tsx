@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/a
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { toast } from "sonner";
 
 type BrandColorSettings = {
@@ -657,19 +658,20 @@ export function OrgBrandingCard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex flex-col gap-3">
               <div className="flex gap-2">
-                <select
-                  value={selectedPlatform}
-                  onChange={(e) => setSelectedPlatform(e.target.value)}
-                  className="bg-background border border-border rounded-lg px-2 py-2 text-sm focus:ring-1 focus:ring-primary outline-none"
-                >
-                  <option value="instagram_url">Instagram</option>
-                  <option value="youtube_url">YouTube</option>
-                  <option value="facebook_url">Facebook</option>
-                  <option value="linkedin_url">LinkedIn</option>
-                  <option value="twitter_url">Twitter</option>
-                  <option value="github_url">GitHub</option>
-                  <option value="website_url">Website</option>
-                </select>
+                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                  <SelectTrigger className="w-[140px] bg-background border border-border rounded-lg text-sm focus:ring-1 focus:ring-primary">
+                    <SelectValue placeholder="Platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="instagram_url">Instagram</SelectItem>
+                    <SelectItem value="youtube_url">YouTube</SelectItem>
+                    <SelectItem value="facebook_url">Facebook</SelectItem>
+                    <SelectItem value="linkedin_url">LinkedIn</SelectItem>
+                    <SelectItem value="twitter_url">Twitter</SelectItem>
+                    <SelectItem value="github_url">GitHub</SelectItem>
+                    <SelectItem value="website_url">Website</SelectItem>
+                  </SelectContent>
+                </Select>
                 <input
                   type="url"
                   placeholder="https://..."
