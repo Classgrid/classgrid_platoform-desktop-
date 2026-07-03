@@ -297,7 +297,7 @@ function SocialLinkRow({ keyName, url, iconSrc, label, onUpdate, onRemove }: any
         </div>
         <input type="url" value={localUrl} onChange={e => setLocalUrl(e.target.value)} className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary" />
         <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
-          <Button size="sm" onClick={handleSave} disabled={isSaving || !localUrl.trim()}>
+          <Button size="sm" onClick={handleSave} disabled={isSaving || !localUrl.trim()} className="bg-emerald-600 hover:bg-emerald-700 text-white">
             {isSaving ? <Spinner size="sm" /> : "Save"}
           </Button>
           <Button size="sm" variant="ghost" onClick={() => { setLocalUrl(url); setIsEditing(false); }} disabled={isSaving}>Cancel</Button>
@@ -824,7 +824,7 @@ export function OrgBrandingCard() {
                 
                 <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
                 
-                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
+                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6 bg-emerald-600 hover:bg-emerald-700 text-white">
                   Add Link
                 </Button>
               </div>
