@@ -3,11 +3,18 @@ import PushSubscription from "../models/PushSubscription.js";
 
 // Initialize web-push with VAPID keys
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-    webPush.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:admin@classgrid.in',
-        process.env.VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-    );
+    try {
+        webPush.setVapidDetails(
+            process.env.VAPID_SUBJECT || 'mailto:admin@classgrid.in',
+            process.env.VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+        );
+    } catch (err) {
+        console.error("Failed to initialize VAPID details:", err.message);
+        // Clear keys to gracefully degrade if invalid
+        process.env.VAPID_PUBLIC_KEY = "";
+        process.env.VAPID_PRIVATE_KEY = "";
+    }
 }
 
 /**
