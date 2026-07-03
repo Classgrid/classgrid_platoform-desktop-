@@ -295,7 +295,7 @@ function SocialLinkRow({ keyName, url, iconSrc, label, onUpdate, onRemove }: any
           {iconSrc ? <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" /> : <LinkIcon size={16} className="text-muted-foreground" />}
           <span className="text-sm font-semibold text-foreground">{label}</span>
         </div>
-        <input type="url" value={localUrl} onChange={e => setLocalUrl(e.target.value)} className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary" />
+        <input type="url" value={localUrl} onChange={e => setLocalUrl(e.target.value)} className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-emerald-500" />
         <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
           <Button size="sm" onClick={handleSave} disabled={isSaving || !localUrl.trim()} className="bg-emerald-600 hover:bg-emerald-700 text-white">
             {isSaving ? <Spinner size="sm" /> : "Save"}
@@ -808,7 +808,7 @@ export function OrgBrandingCard() {
             <div className="flex flex-col ml-7">
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-                  <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10">
+                  <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10 focus:ring-1 focus:ring-emerald-500">
                     <SelectValue placeholder="Platform" />
                   </SelectTrigger>
                   <SelectContent>
@@ -822,7 +822,7 @@ export function OrgBrandingCard() {
                   </SelectContent>
                 </Select>
                 
-                <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
+                <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-emerald-500 max-w-sm" />
                 
                 <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6 bg-emerald-600 hover:bg-emerald-700 text-white">
                   Add Link
