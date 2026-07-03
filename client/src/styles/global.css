@@ -206,7 +206,13 @@
 
   * {
     border-color: var(--border);
-    outline-color: var(--ring);
+  }
+
+  /* Global rule to force emerald green focus rings on all inputs/elements */
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 1px #10b981 !important;
+    border-color: #10b981 !important;
   }
 
   body {
