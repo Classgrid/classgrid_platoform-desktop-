@@ -15,10 +15,10 @@ import Notification from '../models/Notification.js';
 const router = express.Router();
 const sb = primarySupabaseClient;
 
-// Multi-file upload: max 50 files, 40MB each
+// Multi-file upload: max 80 files total, max 100MB each
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 40 * 1024 * 1024 }
+  limits: { fileSize: 100 * 1024 * 1024 }
 });
 
 // ──────────────────────────────────────────────
@@ -750,7 +750,7 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
 // ──────────────────────────────────────────────
 // POST /threads/:id/messages — Send message (atomic)
 // ──────────────────────────────────────────────
-router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (req, res) => {
+router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (req, res) => {
   try {
     const userId = req.user._id.toString();
     const threadId = req.params.id;
@@ -846,12 +846,36 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       }
     }
 
-    // Validate file types (local, no DB call)
+    // Validate file types and limits (local, no DB call)
+    let imgCount = 0, vidCount = 0, pdfCount = 0, otherCount = 0;
     for (const file of files) {
       if (!isAllowedMime(file.mimetype)) {
         return res.status(400).json({ error: `File type not allowed: ${file.mimetype}` });
       }
+      
+      const isImage = file.mimetype.startsWith('image/');
+      const isVideo = file.mimetype.startsWith('video/');
+      const isPdf = file.mimetype === 'application/pdf';
+      
+      if (isImage) {
+        if (file.size > 12 * 1024 * 1024) return res.status(400).json({ error: `Image too large: max 12MB. (${file.originalname})` });
+        imgCount++;
+      } else if (isVideo) {
+        if (file.size > 100 * 1024 * 1024) return res.status(400).json({ error: `Video too large: max 100MB. (${file.originalname})` });
+        vidCount++;
+      } else if (isPdf) {
+        if (file.size > 100 * 1024 * 1024) return res.status(400).json({ error: `PDF too large: max 100MB. (${file.originalname})` });
+        pdfCount++;
+      } else {
+        if (file.size > 100 * 1024 * 1024) return res.status(400).json({ error: `File too large: max 100MB. (${file.originalname})` });
+        otherCount++;
+      }
     }
+    
+    if (imgCount > 30) return res.status(400).json({ error: `Max 30 images allowed.` });
+    if (vidCount > 10) return res.status(400).json({ error: `Max 10 videos allowed.` });
+    if (pdfCount > 20) return res.status(400).json({ error: `Max 20 PDFs allowed.` });
+    if (otherCount > 20) return res.status(400).json({ error: `Max 20 other files allowed.` });
 
     // Parse reply_to (local, no DB call)
     let replyData = null;

@@ -215,9 +215,55 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const processFiles = (newFiles: File[], currentFiles: File[]) => {
+    let imgCount = currentFiles.filter(f => f.type.startsWith('image/')).length;
+    let vidCount = currentFiles.filter(f => f.type.startsWith('video/')).length;
+    let pdfCount = currentFiles.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')).length;
+    let otherCount = currentFiles.filter(f => !f.type.startsWith('image/') && !f.type.startsWith('video/') && !(f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))).length;
+
+    const validFiles: File[] = [];
+    let errorMsg = "";
+
+    newFiles.forEach(file => {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      
+      let maxSize = 100 * 1024 * 1024; // 100 MB default
+      if (isImage) maxSize = 12 * 1024 * 1024; // 12 MB for images
+
+      if (file.size > maxSize) {
+        errorMsg = `Some files are too large. Max size: Images 12MB, Videos/PDFs/Others 100MB.`;
+        return; 
+      }
+
+      if (isImage) {
+        if (imgCount >= 30) { errorMsg = "Max 30 images allowed."; return; }
+        imgCount++;
+      } else if (isVideo) {
+        if (vidCount >= 10) { errorMsg = "Max 10 videos allowed."; return; }
+        vidCount++;
+      } else if (isPdf) {
+        if (pdfCount >= 20) { errorMsg = "Max 20 PDFs allowed."; return; }
+        pdfCount++;
+      } else {
+        if (otherCount >= 20) { errorMsg = "Max 20 other files allowed."; return; }
+        otherCount++;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (errorMsg) {
+      toast.error("File limit reached", { description: errorMsg });
+    }
+    return [...currentFiles, ...validFiles];
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles((prev) => [...prev, ...Array.from(e.target.files!)].slice(0, 50));
+      const selectedFiles = Array.from(e.target.files);
+      setFiles((prev) => processFiles(selectedFiles, prev));
     }
     // Reset input so the same file can be selected again
     if (fileInputRef.current) {
@@ -465,7 +511,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   e.preventDefault();
                   if (e.clipboardData.files && e.clipboardData.files.length > 0) {
                     const pastedFiles = Array.from(e.clipboardData.files);
-                    setFiles(prev => [...prev, ...pastedFiles].slice(0, 50));
+                    setFiles(prev => processFiles(pastedFiles, prev));
                     return;
                   }
                   
