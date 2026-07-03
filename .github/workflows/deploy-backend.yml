@@ -39,6 +39,7 @@ jobs:
             
             # Go into server folder, install new packages, and restart PM2
             cd server
+            echo "${{ secrets.PRODUCTION_ENV }}" > .env
             npm install --omit=dev
             pm2 restart all
 

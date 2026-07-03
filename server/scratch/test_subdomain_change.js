@@ -1,6 +1,6 @@
 // Native fetch is available in Node.js
 
-const BASE_URL = 'http://localhost:3000'; // Assuming standard dev port
+const BASE_URL = 'https://api.classgrid.in'; // Assuming standard dev port
 
 async function testSubdomainChange() {
     console.log("🚀 Starting Subdomain Edit Test...");

@@ -22,7 +22,7 @@ function getArg(name, fallback) {
     return idx !== -1 && args[idx + 1] ? args[idx + 1] : fallback;
 }
 
-const BASE_URL = getArg("url", "http://localhost:3000");
+const BASE_URL = getArg("url", "https://api.classgrid.in");
 const TARGET_RPS = parseInt(getArg("target", "100"));
 const DURATION = parseInt(getArg("duration", "10")); // seconds
 const CONNECTIONS = parseInt(getArg("connections", Math.min(TARGET_RPS, 500).toString()));

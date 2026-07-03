@@ -139,8 +139,8 @@ app.use(
       if (!origin) return callback(null, true);
 
       const allowedStatic = [
-        "http://localhost:3000",
-        "http://localhost:5173",
+        "https://api.classgrid.in",
+        "https://classgrid.in",
         "http://127.0.0.1:3000",
         "https://www.classgrid.in",
         "https://classgrid.in",

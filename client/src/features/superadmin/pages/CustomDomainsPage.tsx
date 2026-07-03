@@ -153,7 +153,7 @@ export function CustomDomainsPage() {
 
   const cloudflareJSON = useMemo(() => {
     const origins = [
-      "http://localhost:5173",
+      "https://classgrid.in",
       "https://*.classgrid.in",
       "https://classgrid.in",
       ...activeDomains
