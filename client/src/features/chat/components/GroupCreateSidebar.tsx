@@ -66,8 +66,8 @@ export function GroupCreateSidebar({
     if (next.has(userId)) {
       next.delete(userId);
     } else {
-      if (next.size >= 50) {
-        toast.error("You can only add up to 50 members to a group.");
+      if (next.size >= 200) {
+        toast.error("You can only add up to 200 members to a group.");
         return;
       }
       next.add(userId);
@@ -138,7 +138,7 @@ export function GroupCreateSidebar({
               </button>
               <div className="flex flex-col">
                 <h2 className="text-lg font-bold text-foreground leading-tight">Add group members</h2>
-                <span className="text-xs text-muted-foreground">{selectedIds.size} of 50 selected</span>
+                <span className="text-xs text-muted-foreground">{selectedIds.size} of 200 selected</span>
               </div>
             </div>
 

@@ -1,15 +1,41 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
+import type { LucideIcon } from "lucide-react";
+
+type StatCardIcon = React.ReactNode | LucideIcon;
 
 export interface StatCardProps {
   title: string;
   value: string | number;
-  icon?: React.ReactNode;
+  icon?: StatCardIcon;
   trend?: string | { value: string | number; label: string };
   trendDirection?: "up" | "down" | "neutral";
 }
 
 export function StatCard({ title, value, icon, trend, trendDirection }: StatCardProps) {
+  const renderIcon = (): React.ReactNode => {
+    if (!icon || typeof icon === "boolean") return null;
+
+    if (React.isValidElement(icon) || Array.isArray(icon)) {
+      return icon;
+    }
+
+    if (typeof icon === "function") {
+      const Icon = icon as unknown as React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+      return <Icon className="h-4 w-4" aria-hidden />;
+    }
+
+    if (typeof icon === "object" && "$$typeof" in icon && ("render" in icon || "type" in icon)) {
+      const Icon = icon as unknown as React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+      return <Icon className="h-4 w-4" aria-hidden />;
+    }
+
+    if (typeof icon === "string" || typeof icon === "number" || typeof icon === "bigint") {
+      return icon;
+    }
+
+    return null;
+  };
   // Determine text content for trend to avoid rendering an object directly
   const renderTrend = () => {
     if (!trend) return null;
@@ -29,7 +55,7 @@ export function StatCard({ title, value, icon, trend, trendDirection }: StatCard
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon && (
           <div className="text-muted-foreground [&>svg]:w-4 [&>svg]:h-4">
-            {icon}
+            {renderIcon()}
           </div>
         )}
       </CardHeader>

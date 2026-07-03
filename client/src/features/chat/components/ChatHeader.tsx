@@ -126,25 +126,10 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
                 {(() => {
                   let isTypingSubtitle = false;
                   let typingText = "";
-                  if (typingUsers && orgUsers && typingUsers.length > 0) {
-                    const typingNames: string[] = [];
-                    typingUsers.forEach((data) => {
-                      const u = orgUsers.find(o => o._id === data.id);
-                      if (u) {
-                        typingNames.push(u.name.split(" ")[0]);
-                      }
-                    });
-                    if (typingNames.length > 0) {
-                      isTypingSubtitle = true;
-                      if (typingNames.length === 1) {
-                        const typeStr = typingUsers[0].type;
-                        typingText = `${typingNames[0]} is ${typeStr}...`;
-                      } else if (typingNames.length === 2) {
-                        typingText = `${typingNames[0]} and ${typingNames[1]} are typing...`;
-                      } else {
-                        typingText = `${typingNames[0]}, ${typingNames[1]} and ${typingNames.length - 2} others are typing...`;
-                      }
-                    }
+                  if (thread?.type === 'dm' && typingUsers && typingUsers.length > 0) {
+                    const typeStr = typingUsers[0].type === 'recording' ? 'recording audio' : typingUsers[0].type === 'uploading' ? 'uploading file' : 'typing';
+                    typingText = `${(thread?.name || "Someone").split(" ")[0]} is ${typeStr}...`;
+                    isTypingSubtitle = true;
                   }
 
                   if (isTypingSubtitle) {

@@ -283,7 +283,7 @@ export function ChatConversation({
 
       {/* Typing Indicator */}
       <AnimatePresence>
-        {typingUsers.length > 0 && (
+        {typingUsers.length > 0 && thread.type === 'group' && (
           <motion.div 
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -291,15 +291,17 @@ export function ChatConversation({
             layout
             className="flex items-end gap-2 mt-4 ml-2 mb-2"
           >
-          <div className="flex -space-x-2 relative z-10 shrink-0">
-            {typingUsers.slice(0, 3).map((user, index) => {
+          <div className="flex -space-x-2 relative z-10 shrink-0 max-w-[50%] overflow-x-auto custom-scrollbar pb-1">
+            {typingUsers.map((user, index) => {
               const u = orgUsers.find(ou => ou._id === user.id);
+              const fallbackName = messages.find(m => m.sender_id === user.id)?.sender_name || (thread?.type === 'dm' ? thread?.name : "Someone") || "Someone";
+              const initial = u?.name?.[0]?.toUpperCase() || fallbackName?.[0]?.toUpperCase() || "?";
               return (
-                <div key={user.id} className="w-8 h-8 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden z-10 relative shadow-sm">
+                <div key={user.id} className="w-8 h-8 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden z-10 relative shadow-sm shrink-0">
                   {u?.profilePicture ? (
                     <img src={u.profilePicture} className="w-full h-full object-cover" alt={u.name} />
                   ) : (
-                    <span className="text-[10px] font-bold text-muted-foreground">{u?.name?.[0]?.toUpperCase() || "?"}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">{initial}</span>
                   )}
                 </div>
               );
@@ -313,7 +315,13 @@ export function ChatConversation({
             </div>
             <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
               {typingUsers
-                .map((user) => orgUsers.find((u) => u._id === user.id)?.name.split(" ")[0] || "Someone")
+                .map((user) => {
+                   const u = orgUsers.find((ou) => ou._id === user.id);
+                   if (u) return u.name.split(" ")[0];
+                   const msg = messages.find(m => m.sender_id === user.id);
+                   if (msg) return msg.sender_name.split(" ")[0];
+                   return thread?.type === 'dm' ? (thread?.name || "Someone").split(" ")[0] : "Someone";
+                })
                 .join(", ")}{" "}
               {typingUsers.length > 1 ? "are" : "is"}{" "}
               {typingUsers[0].type === 'recording' ? 'recording audio' : 
