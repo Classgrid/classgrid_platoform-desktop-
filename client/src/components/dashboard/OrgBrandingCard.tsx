@@ -65,20 +65,28 @@ const toColorPickerValue = (value: string) => {
 };
 
 const resolveBrandColors = (branding?: BrandingData) => {
+  // If the user has explicitly saved their own colors in brand_colors, always respect them.
+  if (branding?.brand_colors?.primary) {
+    return {
+      primary: normalizeHexInput(branding.brand_colors.primary),
+      secondary: normalizeHexInput(branding.brand_colors.secondary || DEFAULT_BRAND_COLORS.secondary),
+    };
+  }
+
+  // Otherwise, fallback to the system theme_colors or default colors.
   let primary = normalizeHexInput(
-    branding?.brand_colors?.primary ||
-      branding?.theme_colors?.primary ||
-      branding?.branding?.theme_colors?.primary ||
-      DEFAULT_BRAND_COLORS.primary
+    branding?.theme_colors?.primary ||
+    branding?.branding?.theme_colors?.primary ||
+    DEFAULT_BRAND_COLORS.primary
   );
+  
   let secondary = normalizeHexInput(
-    branding?.brand_colors?.secondary ||
-      branding?.theme_colors?.secondary ||
-      branding?.branding?.theme_colors?.secondary ||
-      DEFAULT_BRAND_COLORS.secondary
+    branding?.theme_colors?.secondary ||
+    branding?.branding?.theme_colors?.secondary ||
+    DEFAULT_BRAND_COLORS.secondary
   );
 
-  // If the backend returns the old default blue, override it to the new emerald green for the previews
+  // If the backend returns the old system default blue and the user hasn't overridden it, show emerald green for previews.
   if (primary.toLowerCase() === "#6366f1") primary = "#10b981";
   if (secondary.toLowerCase() === "#4f46e5") secondary = "#059669";
 
