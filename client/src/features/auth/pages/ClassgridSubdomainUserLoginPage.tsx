@@ -460,13 +460,13 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
                 </div>
 
                 {/* 14. Email Input */}
-                <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4">
+                <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50">
                   <Mail className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40" placeholder="Email / Student ID" />
                 </div>
 
                 {/* Password Input */}
-                <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4">
+                <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
                   <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40" placeholder="Password" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-muted-foreground dark:text-white/70 transition-colors hover:text-white">
