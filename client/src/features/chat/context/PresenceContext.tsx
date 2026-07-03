@@ -16,7 +16,7 @@ let _presenceSb: ReturnType<typeof createClient> | null = null;
 function getPresenceSupabase() {
   if (!_presenceSb && SUPABASE_CHAT_URL && SUPABASE_CHAT_KEY) {
     _presenceSb = createClient(SUPABASE_CHAT_URL, SUPABASE_CHAT_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: { persistSession: false, autoRefreshToken: false, storageKey: 'presence-sb-key' },
     });
   }
   return _presenceSb;

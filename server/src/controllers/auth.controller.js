@@ -987,7 +987,8 @@ export const login = async (req, res) => {
                 authProvider: user.authProvider,
                 profile_completed: user.profile_completed || false,
             },
-            organization
+            organization,
+            token
         });
     } catch (err) {
         console.error("Login Error:", err);
@@ -1991,7 +1992,8 @@ export const verifyDeviceOtp = async (req, res) => {
                 organization_id: user.organization_id || null,
                 authProvider: user.authProvider,
             },
-            organization: brandInfo
+            organization: brandInfo,
+            token
         });
     } catch (err) {
         console.error("Device Verification Error:", err);

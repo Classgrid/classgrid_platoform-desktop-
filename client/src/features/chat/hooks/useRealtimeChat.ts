@@ -17,7 +17,7 @@ let _chatSb: ReturnType<typeof createClient> | null = null;
 function getChatSupabase() {
   if (!_chatSb && SUPABASE_CHAT_URL && SUPABASE_CHAT_KEY) {
     _chatSb = createClient(SUPABASE_CHAT_URL, SUPABASE_CHAT_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: { persistSession: false, autoRefreshToken: false, storageKey: 'chat-sb-key' },
     });
   }
   return _chatSb;

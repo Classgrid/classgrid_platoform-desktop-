@@ -66,6 +66,7 @@ export type LoginResponse = {
   needsOrgCode?: boolean;
   needsDeviceOtp?: boolean;
   retryAfterSeconds?: number;
+  token?: string;
   user?: {
     id: string;
     name: string;

@@ -40,6 +40,10 @@ export async function loginWithPassword({ email, password, audience, role }: Log
     role: loginIntent,
   });
 
+  if (response.data.token) {
+    localStorage.setItem("token", response.data.token);
+  }
+
   return response.data;
 }
 
@@ -78,6 +82,10 @@ export async function verifyDeviceOtp({ email, otp }: { email: string; otp: stri
     email,
     otp,
   });
+
+  if (response.data.token) {
+    localStorage.setItem("token", response.data.token);
+  }
 
   return response.data;
 }
