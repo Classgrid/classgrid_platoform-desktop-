@@ -628,7 +628,7 @@ export function OrgBrandingCard() {
                     <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
                       {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Building2 size={12} style={{ color: brandColors.primary }} />}
                     </div>
-                    <span className="text-[11px] font-semibold text-foreground truncate flex-1">{localSiteTitle || data?.site_title || "Organization"} | Home</span>
+                    <span className="text-[11px] font-semibold text-foreground truncate flex-1">{localSiteTitle || data?.site_title || "Organization"}</span>
                     <X size={10} className="text-muted-foreground shrink-0 hover:text-foreground cursor-pointer" />
                   </div>
                 </div>
