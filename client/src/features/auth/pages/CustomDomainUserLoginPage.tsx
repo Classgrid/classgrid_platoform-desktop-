@@ -298,27 +298,27 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
               )}
               {branding.socialLinks?.facebook_url && (
                 <a href={branding.socialLinks.facebook_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <Facebook size={20} />
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/facebook-icon-logo-svgrepo-com.svg" alt="Facebook" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.instagram_url && (
                 <a href={branding.socialLinks.instagram_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <Instagram size={20} />
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Instagram_icon.png" alt="Instagram" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.linkedin_url && (
                 <a href={branding.socialLinks.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <Linkedin size={20} />
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/linkedin-svgrepo-com.svg" alt="LinkedIn" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.twitter_url && (
                 <a href={branding.socialLinks.twitter_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <span className="font-bold text-[18px]">X</span>
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/new-twitter-x-logo-twitter-icon-x-social-media-icon-free-png.webp" alt="X" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.youtube_url && (
                 <a href={branding.socialLinks.youtube_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <span className="font-bold text-[14px]">YT</span>
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/youtube-color-svgrepo-com.svg" alt="YouTube" className="w-5 h-5 object-contain" />
                 </a>
               )}
             </div>
