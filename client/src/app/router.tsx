@@ -346,21 +346,7 @@ export function AppRouter() {
 function DefaultDashboardRedirect() {
   const { data: user } = useCurrentUser();
 
-  // 🔒 ERP Domain Guard
-  // The ERP custom domain (e.g. erp.myschool.edu) is ONLY for students and faculty.
-  // If an admin is logged in and visits the root of the ERP domain,
-  // show them the user login page instead of redirecting to the admin dashboard.
-  const hostname = window.location.hostname;
-  const isClassgridUrl = hostname.endsWith(".classgrid.in") || hostname === "classgrid.in" || hostname === "localhost" || hostname.startsWith("127.0.0.1");
-  const orgErpDomain = (user?.organization as any)?.erp_domain?.domain;
-
-  const isOnErpDomain = !isClassgridUrl && orgErpDomain && hostname === orgErpDomain;
-  const isAdminRole = user?.role && isInstitutionAdminRole(user.role);
-
-  if (isOnErpDomain && isAdminRole) {
-    // Admin visiting the ERP domain root → show the student/faculty login page
-    return <Navigate to="/login" replace />;
-  }
+  // (Removed ERP Domain Guard to allow Admins to use the ERP domain)
 
   return <Navigate to={getRedirectPath(user?.role)} replace />;
 }
