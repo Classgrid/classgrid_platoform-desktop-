@@ -2411,6 +2411,7 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         if (updatedOrg.subdomain) {
             await redis.del(`branding:${String(updatedOrg.subdomain).toLowerCase().trim()}`);
         }
+        await redis.del(`user:profile:${req.user._id}`);
 
         res.json({
             message: "Organization branding updated successfully",
