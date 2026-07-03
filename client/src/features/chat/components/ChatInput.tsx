@@ -193,8 +193,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       await onSendMessage(text, finalFiles, options);
     } finally {
       if (onTyping && hasMedia) {
-        onTyping(false, 'uploading');
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        // Force the uploading indicator to stay visible for 8 seconds
+        typingTimeoutRef.current = setTimeout(() => {
+          onTyping(false, 'uploading');
+        }, 8000);
       }
     }
   };
@@ -387,15 +390,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   }
                 }}
                 onPaste={(e) => {
-                  let html = e.clipboardData.getData("text/html");
-                  if (html) {
-                    e.preventDefault();
-                    html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
-                    const cleanHtml = DOMPurify.sanitize(html, {
-                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'],
-                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
-                    });
-                    document.execCommand("insertHTML", false, cleanHtml);
+                  e.preventDefault();
+                  if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+                    const pastedFiles = Array.from(e.clipboardData.files);
+                    setFiles(prev => [...prev, ...pastedFiles].slice(0, 50));
+                    return;
+                  }
+                  const text = e.clipboardData.getData("text/plain");
+                  if (text) {
+                    document.execCommand("insertText", false, text);
                   }
                 }}
                 onKeyDown={(e) => {

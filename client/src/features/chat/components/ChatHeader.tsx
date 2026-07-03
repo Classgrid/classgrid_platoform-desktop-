@@ -21,7 +21,7 @@ interface ChatHeaderProps {
   onShowInfo: () => void;
   onAvatarClick?: () => void;
   onlineUsers?: Set<string>;
-  typingUsers?: Record<string, { type: string; timeout: any }>;
+  typingUsers?: { id: string; type: string }[];
   orgUsers?: OrgUser[];
   onClearChat: () => void;
   onDeleteChat: () => void;
@@ -126,10 +126,10 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
                 {(() => {
                   let isTypingSubtitle = false;
                   let typingText = "";
-                  if (typingUsers && orgUsers && Object.keys(typingUsers).length > 0) {
+                  if (typingUsers && orgUsers && typingUsers.length > 0) {
                     const typingNames: string[] = [];
-                    Object.entries(typingUsers).forEach(([uid, data]) => {
-                      const u = orgUsers.find(o => o._id === uid);
+                    typingUsers.forEach((data) => {
+                      const u = orgUsers.find(o => o._id === data.id);
                       if (u) {
                         typingNames.push(u.name.split(" ")[0]);
                       }
@@ -137,7 +137,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
                     if (typingNames.length > 0) {
                       isTypingSubtitle = true;
                       if (typingNames.length === 1) {
-                        const typeStr = Object.values(typingUsers)[0].type;
+                        const typeStr = typingUsers[0].type;
                         typingText = `${typingNames[0]} is ${typeStr}...`;
                       } else if (typingNames.length === 2) {
                         typingText = `${typingNames[0]} and ${typingNames[1]} are typing...`;

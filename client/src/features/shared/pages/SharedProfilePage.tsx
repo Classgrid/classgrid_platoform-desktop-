@@ -497,7 +497,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                     ) : (
                       <span className="flex items-center gap-1.5 text-muted-foreground bg-muted/20 border border-border/40 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
                         <Clock size={14} className="opacity-70" /> 
-                        {form.lastLoginAt ? `Last seen ${formatDistanceToNow(new Date(form.lastLoginAt), { addSuffix: true })}` : "Offline"}
+                        {form.lastLoginAt ? `Last seen ${new Date(form.lastLoginAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : "Offline"}
                       </span>
                     )}
                     {form.forumUsername ? (

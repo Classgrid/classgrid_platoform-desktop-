@@ -193,7 +193,17 @@ export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNoti
                     key={n._id}
                     onClick={() => {
                       if (!n.isRead) markReadMutation.mutate(n._id);
-                      if (n.link) window.open(n.link, "_blank");
+                      if (n.link) {
+                        let finalLink = n.link;
+                        if (finalLink.includes('/platform/chat')) {
+                          let chatPath = '/chat';
+                          if (currentUser?.role === 'org_admin') chatPath = '/org/admin/chat';
+                          else if (currentUser?.role === 'student') chatPath = '/org/student/chat';
+                          else if (currentUser?.role === 'faculty') chatPath = '/faculty/chat';
+                          finalLink = finalLink.replace('/platform/chat', chatPath);
+                        }
+                        window.open(finalLink, "_blank");
+                      }
                     }}
                     className={`flex items-start gap-3 p-4 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${!n.isRead ? 'bg-muted/20' : ''}`}
                   >
@@ -202,7 +212,7 @@ export function SidebarNotifications({ settingsPath = "/settings" }: SidebarNoti
                     </div>
                     <div className="flex-1 text-sm leading-tight">
                       <span className="font-semibold mr-1">{n.title}:</span>
-                      {n.message}
+                      <span dangerouslySetInnerHTML={{ __html: n.message }} />
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }).replace('about ', '')}

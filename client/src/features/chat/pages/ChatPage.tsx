@@ -212,8 +212,10 @@ export function ChatPage() {
     try {
       const data = await fetchThreads(activeFilter);
       setThreads(data);
+      return data;
     } catch (err) {
       toast.error("Failed to load chat threads");
+      return [];
     } finally {
       setThreadsLoading(false);
     }
@@ -352,16 +354,29 @@ export function ChatPage() {
   const handleSelectUserDM = async (userId: string) => {
     try {
       const { thread } = await findOrCreateDM(userId);
+      let currentThreads = threads;
+      
       // Map to UI thread format if new
-      if (!threads.find((t) => t.id === thread.id)) {
-        await loadThreads(); // Refresh full list to get proper names/avatars
+      if (!currentThreads.find((t) => t.id === thread.id)) {
+        currentThreads = await loadThreads(); // Refresh full list to get proper names/avatars
       }
+      
       // Select it
-      const target = threads.find((t) => t.id === thread.id) || {
+      const target = currentThreads.find((t) => t.id === thread.id) || {
         ...thread,
         name: "Loading...",
         unread: 0,
       };
+      
+      // If target is still fallback, let's try to get name from orgUsers
+      if (target.name === "Loading...") {
+        const otherUser = orgUsers.find(u => u._id === userId);
+        if (otherUser) {
+          target.name = otherUser.name;
+          target.avatar = otherUser.profilePicture;
+        }
+      }
+      
       setActiveThread(target as ChatThread);
     } catch (err) {
       toast.error("Failed to start chat");
@@ -958,6 +973,7 @@ export function ChatPage() {
                   organization_logo: selectedUserForProfile.organization_logo,
                   metadata: selectedUserForProfile.metadata,
                   forumUsername: selectedUserForProfile.forumUsername,
+                  lastLoginAt: selectedUserForProfile.lastLoginAt,
                 }}
                 onClose={() => setProfileUserId(null)} 
               />

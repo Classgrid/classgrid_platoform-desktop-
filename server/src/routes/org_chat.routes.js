@@ -42,7 +42,7 @@ router.get('/users', isAuthenticated, async (req, res) => {
       return res.json({ users: [] });
     }
 
-    const members = await User.find(query, 'name role email profilePicture profileBanner phoneNumber bio prn _id organization_id metadata')
+    const members = await User.find(query, 'name role email profilePicture profileBanner phoneNumber bio prn _id organization_id metadata lastLoginAt')
       .populate('organization_id', 'name logo_url')
       .lean();
       
@@ -72,6 +72,7 @@ router.get('/users', isAuthenticated, async (req, res) => {
       metadata: m.metadata || {},
       organization_name: m.organization_id?.name || null,
       organization_logo: m.organization_id?.logo_url || null,
+      lastLoginAt: m.lastLoginAt || null,
     }));
     res.json({ users: formatted });
   } catch (err) {

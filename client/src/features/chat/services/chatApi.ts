@@ -76,6 +76,7 @@ export interface OrgUser {
   organization_logo?: string | null;
   metadata?: Record<string, any>;
   forumUsername?: string | null;
+  lastLoginAt?: string | null;
 }
 
 export interface ChatGroup {
@@ -155,7 +156,7 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return res.data;
+  return res.data.message;
 }
 
 export interface ScheduledMessage {

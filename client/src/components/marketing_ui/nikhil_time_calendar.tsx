@@ -216,9 +216,9 @@ export function NikhilTimeCalendar({
 
       <PopoverContent
         align="start"
-        side={popDirection === "up" ? "top" : popDirection === "down" ? "bottom" : popDirection}
+        side={popDirection === "up" ? "top" : popDirection === "down" ? "bottom" : popDirection as any}
         sideOffset={8}
-        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent z-[100] nikhil-time-calendar-portal"
+        className="w-auto p-0 border-none shadow-2xl rounded-xl bg-transparent z-[1000] nikhil-time-calendar-portal"
       >
         <div
           // Removed overflow-hidden so our custom dropdowns can pop out seamlessly!
