@@ -8,7 +8,7 @@
  * - Canteen KDS
  * - Admission broadcasts
  * 
- * The org-wide DM/group chat uses Supabase Realtime (see useRealtimeChat.ts).
+ * - Thread-based DM/group chat (replaces Supabase Realtime)
  * This Socket.io connection handles everything else.
  */
 import { io, Socket } from "socket.io-client";
@@ -129,6 +129,36 @@ export function endCall(targetId: string) {
   socket?.emit("end_call", { targetId });
 }
 
+// ── Thread Chat (Native WebSocket) ──
+
+/**
+ * Join a thread chat room for real-time messages.
+ */
+export function joinThread(threadId: string) {
+  socket?.emit("join_thread", threadId);
+}
+
+/**
+ * Leave a thread chat room.
+ */
+export function leaveThread(threadId: string) {
+  socket?.emit("leave_thread", threadId);
+}
+
+/**
+ * Join the user's personal channel for sidebar updates.
+ */
+export function joinUserChannel(userId: string) {
+  socket?.emit("join_user_channel", userId);
+}
+
+/**
+ * Emit typing indicator for thread chat.
+ */
+export function emitThreadTyping(threadId: string, isTyping: boolean, activityType: 'typing' | 'recording' | 'uploading' | null = 'typing') {
+  socket?.emit("thread_typing", { threadId, isTyping, activityType });
+}
+
 export default {
   connectSocket,
   getSocket,
@@ -142,4 +172,8 @@ export default {
   initiateCall,
   answerCall,
   endCall,
+  joinThread,
+  leaveThread,
+  joinUserChannel,
+  emitThreadTyping,
 };

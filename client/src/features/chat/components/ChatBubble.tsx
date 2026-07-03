@@ -554,9 +554,16 @@ export function ChatBubble({
               {message.message && (
                 <ContextMenuItem onClick={async () => {
                   try {
-                    const blobHtml = new Blob([message.message], { type: 'text/html' });
+                    const rawStr = typeof message.message === 'string' ? message.message : String(message.message || '');
+                    const rawHtml = marked.parse(rawStr.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string;
+                    const cleanHtml = DOMPurify.sanitize(rawHtml, { 
+                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
+                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
+                    });
+
+                    const blobHtml = new Blob([cleanHtml], { type: 'text/html' });
                     const tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = message.message;
+                    tempDiv.innerHTML = cleanHtml;
                     const plainText = tempDiv.innerText || tempDiv.textContent || '';
                     const blobText = new Blob([plainText], { type: 'text/plain' });
                     const item = new ClipboardItem({
@@ -567,8 +574,10 @@ export function ChatBubble({
                     toast.success("Copied to clipboard");
                   } catch (err) {
                     // Fallback for browsers that don't support ClipboardItem fully
+                    const rawStr = typeof message.message === 'string' ? message.message : String(message.message || '');
+                    const rawHtml = marked.parse(rawStr.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string;
                     const tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = message.message;
+                    tempDiv.innerHTML = DOMPurify.sanitize(rawHtml);
                     navigator.clipboard.writeText(tempDiv.innerText || tempDiv.textContent || message.message);
                     toast.success("Copied to clipboard");
                   }

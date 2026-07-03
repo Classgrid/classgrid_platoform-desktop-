@@ -76,6 +76,34 @@ export const initSocket = (server) => {
             console.log(`User ${socket.userId} joined room ${roomName}`);
         });
 
+        // ── Thread Chat (replaces Supabase Realtime) ──
+        socket.on("join_thread", (threadId) => {
+            if (!threadId) return;
+            const roomName = `thread:${threadId}`;
+            socket.join(roomName);
+        });
+
+        socket.on("leave_thread", (threadId) => {
+            if (!threadId) return;
+            const roomName = `thread:${threadId}`;
+            socket.leave(roomName);
+        });
+
+        socket.on("join_user_channel", (userId) => {
+            if (!userId) return;
+            const roomName = `user:${userId}`;
+            socket.join(roomName);
+        });
+
+        socket.on("thread_typing", ({ threadId, isTyping, activityType }) => {
+            if (!threadId) return;
+            socket.to(`thread:${threadId}`).emit("thread:typing", {
+                userId: socket.userId,
+                isTyping,
+                activityType: activityType || "typing",
+            });
+        });
+
         socket.on("join_org_support", () => {
             const roomName = `org_support:${orgId}`;
             socket.join(roomName);

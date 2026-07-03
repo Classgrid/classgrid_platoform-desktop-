@@ -106,14 +106,32 @@ export function ChatConversation({
     }
   }, [messages.length]);
 
+  const firstLoadRef = useRef(true);
+
+  // Reset firstLoad when we switch threads
+  useEffect(() => {
+    firstLoadRef.current = true;
+  }, [thread?.id]);
+
   // Scroll to bottom on first load or when new messages arrive (if already at bottom)
   useEffect(() => {
     if (scrollRef.current) {
       if (isNearBottomRef.current) {
+        const behavior = firstLoadRef.current ? "auto" : "smooth";
         scrollRef.current.scrollTo({
           top: scrollRef.current.scrollHeight,
-          behavior: "smooth"
+          behavior: behavior
         });
+        
+        // Use requestAnimationFrame for a double-check on first load in case images push it down
+        if (firstLoadRef.current) {
+           requestAnimationFrame(() => {
+             if (scrollRef.current) {
+               scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
+             }
+           });
+        }
+        firstLoadRef.current = false;
       } else {
         // We received a new message but we are not at the bottom
         // Increment unread count if it's a new message (we could be more precise but this is a good heuristic)

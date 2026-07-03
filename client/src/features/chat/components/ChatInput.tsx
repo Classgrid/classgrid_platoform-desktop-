@@ -449,7 +449,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     }
                   }
                 }}
-                className="w-full bg-transparent resize-none outline-none focus:outline-none focus:ring-0 py-3 px-4 text-sm text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none min-h-[44px] max-h-[120px] overflow-y-auto cursor-text [&_a]:text-blue-500 [&_a]:underline"
+                className="w-full bg-transparent resize-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 py-3 px-4 text-sm text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none min-h-[44px] max-h-[120px] overflow-y-auto cursor-text [&_a]:text-blue-500 [&_a]:underline border-none"
+                style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
               />
             </div>
             )}

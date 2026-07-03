@@ -64,7 +64,7 @@ export function ForwardMessageModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md p-0 flex flex-col max-h-[85vh] bg-black border border-white/10 overflow-hidden text-white">
+      <DialogContent showCloseButton={false} className="max-w-md p-0 flex flex-col max-h-[85vh] bg-black border border-white/10 overflow-hidden text-white">
         <DialogHeader className="p-4 pb-2 border-b border-white/10 bg-black">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-white">Forward message to</DialogTitle>
@@ -81,18 +81,6 @@ export function ForwardMessageModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-2 bg-[#0f0f0f]">
-          {/* New Group Button */}
-          <div
-            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-white/5 transition-colors mb-2"
-            onClick={onNewGroup}
-          >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 text-emerald-500">
-              <Users className="w-5 h-5" />
-            </div>
-            <div className="flex-1 font-medium text-sm text-emerald-500">
-              New group
-            </div>
-          </div>
 
           <div className="px-2 py-1 mb-1 text-xs font-semibold text-white/50 uppercase tracking-wider">
             Recent chats

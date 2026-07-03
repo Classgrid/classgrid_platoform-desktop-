@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import {
@@ -66,6 +66,7 @@ export function ChatPage() {
   const [threadsLoading, setThreadsLoading] = useState(true);
 
   // -- State: Messages (Active Thread) --
+  const messageCache = useRef<Record<string, ChatMessage[]>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
@@ -239,6 +240,12 @@ export function ChatPage() {
 
   // -- Load Messages when Thread Selected --
   useEffect(() => {
+    if (activeThread && messages.length > 0) {
+      messageCache.current[activeThread.id] = messages;
+    }
+  }, [messages, activeThread]);
+
+  useEffect(() => {
     if (activeThread) {
       setTypingUsers({});
       loadMessages(activeThread.id);
@@ -255,7 +262,13 @@ export function ChatPage() {
   }, [activeThread]);
 
   const loadMessages = async (threadId: string, before?: string) => {
-    if (!before) setMessagesLoading(true);
+    if (!before) {
+      if (messageCache.current[threadId]) {
+        setMessages(messageCache.current[threadId]);
+      } else {
+        setMessagesLoading(true);
+      }
+    }
     try {
       const msgs = await fetchMessages(threadId, before);
       if (before) {
@@ -282,6 +295,8 @@ export function ChatPage() {
     if (!activeThread || !currentUserId) return;
     if (!text.trim() && files.length === 0) return;
     
+    const hasMedia = files.length > 0 || !!audioBlob;
+
     // If scheduled message
     if (options?.scheduledFor) {
       setIsSending(true);
@@ -300,7 +315,9 @@ export function ChatPage() {
       return;
     }
 
-    setIsSending(true);
+    if (hasMedia) {
+      setIsSending(true);
+    }
     const tempId = `temp-${Date.now()}`;
     const tempMessage: ChatMessage = {
       id: tempId,
@@ -346,7 +363,9 @@ export function ChatPage() {
         prev.map((m) => (m.id === tempId ? { ...m, isSending: false, isError: true } : m))
       );
     } finally {
-      setIsSending(false);
+      if (hasMedia) {
+        setIsSending(false);
+      }
     }
   };
 
