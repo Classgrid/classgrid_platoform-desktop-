@@ -1,11 +1,9 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Image as ImageIcon, Globe, Shield, Trash2, Eye, Upload, Check, X, Plus, Palette } from "lucide-react";
+import { Camera, Globe, Trash2, Eye, Upload, Plus, X, Palette, Image as ImageIcon, Link as LinkIcon, Building2, Layout, LayoutTemplate } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { toast } from "sonner";
@@ -17,6 +15,7 @@ type BrandColorSettings = {
 
 type BrandingData = {
   logo_url: string;
+  sidebar_logo_url?: string;
   favicon_url: string;
   campus_photo_url: string;
   social_links: {
@@ -80,6 +79,15 @@ const resolveBrandColors = (branding?: BrandingData) => ({
   ),
 });
 
+const SOCIAL_ICONS: Record<string, string> = {
+  instagram_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/instagram-2-1-logo-svgrepo-com.svg",
+  youtube_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/youtube-color-svgrepo-com.svg",
+  facebook_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/facebook-icon-logo-svgrepo-com.svg",
+  linkedin_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/linkedin-svgrepo-com.svg",
+  twitter_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/new-twitter-x-logo-twitter-icon-x-social-media-icon-free-png.webp",
+  github_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/github-svgrepo-com.svg",
+};
+
 export function OrgBrandingCard() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,8 +99,11 @@ export function OrgBrandingCard() {
   const [cropSrc, setCropSrc] = useState("");
   const [cropType, setCropType] = useState<"logo" | "sidebar_logo" | "favicon" | "campus">("logo");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  
   const [localSiteTitle, setLocalSiteTitle] = useState("");
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [localName, setLocalName] = useState("");
+  const [localSidebarName, setLocalSidebarName] = useState("");
+  
   const [brandColors, setBrandColors] = useState(DEFAULT_BRAND_COLORS);
 
   const [selectedPlatform, setSelectedPlatform] = useState("instagram_url");
@@ -112,39 +123,31 @@ export function OrgBrandingCard() {
         queryClient.setQueryData(["org-branding"], (old: any) => ({ ...old, ...variables }));
       }
       queryClient.invalidateQueries({ queryKey: ["org-branding"] });
-      if (variables.site_title !== undefined) {
-        setIsEditingTitle(false);
-      }
     },
   });
 
-  // Dynamically update the favicon and title in the browser tab
   React.useEffect(() => {
-    if (data?.site_title) {
-      document.title = data.site_title;
-      setLocalSiteTitle(data.site_title);
-      localStorage.setItem("org_title", data.site_title);
-    } else if (data && !data.site_title) {
-      localStorage.removeItem("org_title");
-    }
-    
-    if (data?.favicon_url) {
-      localStorage.setItem("org_favicon", data.favicon_url);
+    if (data) {
+      if (data.site_title) {
+        document.title = data.site_title;
+        setLocalSiteTitle(data.site_title);
+        localStorage.setItem("org_title", data.site_title);
+      }
+      if (data.name) setLocalName(data.name);
+      if (data.sidebar_name) setLocalSidebarName(data.sidebar_name);
+      setBrandColors(resolveBrandColors(data));
       
-      const link1 = document.getElementById('favicon-32') as HTMLLinkElement;
-      const link2 = document.getElementById('favicon-16') as HTMLLinkElement;
-      const link3 = document.getElementById('favicon-ico') as HTMLLinkElement;
-      const cacheBustedUrl = `${data.favicon_url}?t=${Date.now()}`;
-      if (link1) link1.href = cacheBustedUrl;
-      if (link2) link2.href = cacheBustedUrl;
-      if (link3) link3.href = cacheBustedUrl;
-    } else if (data && !data.favicon_url) {
-      localStorage.removeItem("org_favicon");
+      if (data.favicon_url) {
+        localStorage.setItem("org_favicon", data.favicon_url);
+        const link1 = document.getElementById('favicon-32') as HTMLLinkElement;
+        const link2 = document.getElementById('favicon-16') as HTMLLinkElement;
+        const link3 = document.getElementById('favicon-ico') as HTMLLinkElement;
+        const cacheBustedUrl = `${data.favicon_url}?t=${Date.now()}`;
+        if (link1) link1.href = cacheBustedUrl;
+        if (link2) link2.href = cacheBustedUrl;
+        if (link3) link3.href = cacheBustedUrl;
+      }
     }
-  }, [data?.favicon_url, data?.site_title]);
-
-  React.useEffect(() => {
-    if (data) setBrandColors(resolveBrandColors(data));
   }, [data]);
 
   const openCropper = (file: File, type: "logo" | "sidebar_logo" | "favicon" | "campus") => {
@@ -159,30 +162,6 @@ export function OrgBrandingCard() {
       setCropType(type);
       setCropOpen(true);
     };
-  };
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openCropper(file, "logo");
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleSidebarLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openCropper(file, "sidebar_logo");
-    if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = "";
-  };
-
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openCropper(file, "favicon");
-    if (faviconInputRef.current) faviconInputRef.current.value = "";
-  };
-
-  const handleCampusUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openCropper(file, "campus");
-    if (campusInputRef.current) campusInputRef.current.value = "";
   };
 
   const uploadToR2 = async (blob: Blob, type: "logo" | "sidebar_logo" | "favicon" | "campus") => {
@@ -212,29 +191,10 @@ export function OrgBrandingCard() {
 
       await updateBranding.mutateAsync(payload);
       
-      const typeLabel = type === "logo" ? "College Logo" : type === "sidebar_logo" ? "Sidebar Logo" : type === "campus" ? "Campus Photo" : "Favicon";
-      toast.success(`${typeLabel} updated successfully!`, { id: loadingToast });
+      toast.success(`${type} updated successfully!`, { id: loadingToast });
       setCropOpen(false);
     } catch (err) {
-      console.error(err);
       toast.error(`Failed to upload ${type}`, { id: loadingToast });
-    }
-  };
-
-  const handleDelete = async (type: "logo" | "sidebar_logo" | "favicon" | "campus") => {
-    const loadingToast = toast.loading(`Removing ${type}...`);
-    try {
-      let payload = {};
-      if (type === "logo") payload = { logo_url: "" };
-      else if (type === "sidebar_logo") payload = { sidebar_logo_url: "" };
-      else if (type === "favicon") payload = { favicon_url: "" };
-      else if (type === "campus") payload = { campus_photo_url: "" };
-
-      await updateBranding.mutateAsync(payload);
-      const typeLabel = type === "logo" ? "College Logo" : type === "sidebar_logo" ? "Sidebar Logo" : type === "campus" ? "Campus Photo" : "Favicon";
-      toast.success(`${typeLabel} removed successfully!`, { id: loadingToast });
-    } catch (error) {
-      toast.error(`Failed to remove ${type}`, { id: loadingToast });
     }
   };
 
@@ -244,13 +204,9 @@ export function OrgBrandingCard() {
       return;
     }
     const currentLinks = data?.social_links || {};
-    const payload = {
-      social_links: {
-        ...currentLinks,
-        [selectedPlatform]: platformUrl.trim()
-      }
-    };
-    await updateBranding.mutateAsync(payload);
+    await updateBranding.mutateAsync({
+      social_links: { ...currentLinks, [selectedPlatform]: platformUrl.trim() }
+    });
     setPlatformUrl("");
     toast.success("Social link added successfully!");
   };
@@ -262,26 +218,13 @@ export function OrgBrandingCard() {
     toast.success("Social link removed!");
   };
 
-  const savedBrandColors = resolveBrandColors(data);
-  const normalizedBrandColors = {
-    primary: normalizeHexInput(brandColors.primary),
-    secondary: normalizeHexInput(brandColors.secondary),
-  };
-  const brandColorsAreValid = isValidHexColor(brandColors.primary) && isValidHexColor(brandColors.secondary);
-  const brandColorsChanged =
-    normalizedBrandColors.primary !== savedBrandColors.primary ||
-    normalizedBrandColors.secondary !== savedBrandColors.secondary;
-
-  const handleBrandColorChange = (key: keyof BrandColorSettings, value: string) => {
-    setBrandColors((current) => ({ ...current, [key]: value }));
-  };
-
-  const handleBrandColorBlur = (key: keyof BrandColorSettings) => {
-    setBrandColors((current) => ({ ...current, [key]: normalizeHexInput(current[key] || "") }));
-  };
-
-  const handleResetBrandColors = () => {
-    setBrandColors(savedBrandColors);
+  const handleSaveIdentity = async () => {
+    await updateBranding.mutateAsync({
+      site_title: localSiteTitle,
+      name: localName,
+      sidebar_name: localSidebarName
+    });
+    toast.success("Website Identity saved successfully!");
   };
 
   const handleSaveBrandColors = async () => {
@@ -289,422 +232,314 @@ export function OrgBrandingCard() {
       primary: normalizeHexInput(brandColors.primary),
       secondary: normalizeHexInput(brandColors.secondary),
     };
-
     if (!HEX_COLOR_PATTERN.test(payload.primary) || !HEX_COLOR_PATTERN.test(payload.secondary)) {
-      toast.error("Enter valid hex colors like #00E590.");
+      toast.error("Enter valid hex colors.");
       return;
     }
-
-    try {
-      await updateBranding.mutateAsync({ brand_colors: payload });
-      setBrandColors(payload);
-      toast.success("Brand colors updated successfully!");
-    } catch (error) {
-      toast.error("Failed to update brand colors.");
-    }
+    await updateBranding.mutateAsync({ brand_colors: payload });
+    toast.success("Theme colors updated successfully!");
   };
 
-  // Removed individual card spinner to use global page spinner
+  // UI Components
+  const SectionHeader = ({ num, title, description }: { num: number, title: string, description: string }) => (
+    <div className="flex flex-col gap-1 mb-6">
+      <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
+        <span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{num}</span>
+        {title}
+      </h3>
+      <p className="text-xs text-muted-foreground ml-7">{description}</p>
+    </div>
+  );
+
+  const AssetRow = ({ 
+    title, description, imgUrl, onUploadClick, type, fallbackIcon 
+  }: { 
+    title: string, description: string, imgUrl?: string, onUploadClick: () => void, type: string, fallbackIcon: React.ReactNode 
+  }) => (
+    <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-card hover:bg-muted/10 transition-colors group">
+      <div className="flex gap-4 items-center">
+        <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 flex items-center justify-center overflow-hidden shrink-0">
+          {imgUrl ? (
+             <img src={imgUrl} alt={title} className="w-full h-full object-contain p-1" />
+          ) : (
+            <div className="text-muted-foreground opacity-50">{fallbackIcon}</div>
+          )}
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-foreground">{title}</span>
+          <span className="text-xs text-muted-foreground">{description}</span>
+        </div>
+      </div>
+      <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-accent">
+        Upload / Replace
+      </Button>
+    </div>
+  );
+
+  if (isLoading) return <div className="p-8 flex justify-center"><Spinner /></div>;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-6 shadow-sm hover:shadow-md transition-all">
-      <div className="border-b border-border pb-4 flex flex-col gap-2">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <ImageIcon size={18} /> Organization Branding
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1 opacity-80">
-          Upload your college logo, custom favicon, site title, and brand colors to white-label the platform.
-        </p>
+    <div className="flex flex-col w-full max-w-6xl mx-auto pb-20">
+      
+      {/* 0. Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Organization Branding</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage logos, favicon, website title, colors, and social links to white-label your platform.</p>
+        </div>
+        {/* The user wireframe scribbled this out, but keeping it invisible or subtle just in case. Leaving it out entirely to match mockup. */}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
         
-        {/* College Logo Upload */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              College Logo
-            </label>
-            <p className="text-[11px] text-muted-foreground">
-              Displayed on your Login Page and Admin Sidebar.
-            </p>
-          </div>
-          <div 
-            className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border w-[200px] h-[100px] flex items-center justify-center bg-muted/30"
-          >
-            {data?.logo_url ? (
-              <img src={data.logo_url} alt="Logo" className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                <Camera size={24} />
-                <span className="text-xs font-medium">Upload Logo</span>
-              </div>
-            )}
+        {/* LEFT COLUMN */}
+        <div className="flex flex-col gap-6 w-full xl:w-5/12">
+          
+          {/* 1. Brand Preview */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <SectionHeader num={1} title="Brand Preview" description="See how your branding will appear across the platform." />
             
-            {/* Micro-interaction Overlay */}
-            {data?.logo_url && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={() => setPreviewImage(data.logo_url)}>
-                  <Eye size={14} />
-                </Button>
-                <Button size="icon" variant="default" className="h-8 w-8 rounded-full" onClick={() => fileInputRef.current?.click()}>
-                  <Upload size={14} />
-                </Button>
-                <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => handleDelete("logo")}>
-                  <Trash2 size={14} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Sidebar Preview */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-muted-foreground text-center">Sidebar Preview</span>
+                <div className="border border-border rounded-lg bg-background p-3 flex flex-col gap-3 h-32 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-muted rounded flex items-center justify-center overflow-hidden shrink-0">
+                      {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain" /> : <Building2 size={12} className="opacity-40" />}
+                    </div>
+                    <span className="text-sm font-bold truncate">{localSidebarName || data?.sidebar_name || "Organization"}</span>
+                  </div>
+                  <div className="flex flex-col gap-2 mt-2 opacity-40">
+                    <div className="h-2 w-16 bg-muted-foreground rounded-full" />
+                    <div className="h-2 w-20 bg-muted-foreground rounded-full" />
+                    <div className="h-2 w-12 bg-muted-foreground rounded-full" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Login Preview */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-muted-foreground text-center">Login Page Preview</span>
+                <div className="border border-border rounded-lg bg-background h-32 relative overflow-hidden shadow-sm">
+                   {data?.campus_photo_url ? (
+                     <img src={data.campus_photo_url} className="absolute inset-0 w-full h-full object-cover blur-[2px] opacity-60" />
+                   ) : (
+                     <div className="absolute inset-0 bg-primary/10" />
+                   )}
+                   <div className="absolute inset-x-2 top-4 bottom-2 bg-background/90 backdrop-blur-md rounded border border-border shadow-lg flex flex-col items-center justify-center p-2 gap-2">
+                     <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden border border-border/50">
+                        {data?.logo_url ? <img src={data.logo_url} className="w-full h-full object-contain p-1" /> : <ImageIcon size={14} className="opacity-40" />}
+                     </div>
+                     <span className="text-[10px] font-bold text-center truncate w-full">{localName || data?.name || "Welcome"}</span>
+                     <div className="w-16 h-4 bg-primary rounded mt-auto" style={{ backgroundColor: brandColors.primary }} />
+                   </div>
+                </div>
+              </div>
+
+              {/* Tab Preview */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-muted-foreground text-center">Browser Tab Preview</span>
+                <div className="border border-border rounded-lg bg-muted/30 h-32 p-2 flex flex-col shadow-sm">
+                  <div className="bg-background border border-border rounded flex items-center gap-2 p-1.5 shadow-sm max-w-[150px]">
+                    <div className="w-3.5 h-3.5 rounded-sm overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                      {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Globe size={10} className="opacity-40" />}
+                    </div>
+                    <span className="text-[10px] truncate">{localSiteTitle || data?.site_title || "Classgrid"}</span>
+                    <X size={10} className="ml-auto opacity-40 shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 px-1 opacity-40">
+                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Website Identity */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <SectionHeader num={3} title="Website Identity" description="Set the names and title used across the platform." />
+            
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Browser Tab Title</label>
+                <input type="text" value={localSiteTitle} onChange={e => setLocalSiteTitle(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Institution - Home" />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Institution Name (Full)</label>
+                <input type="text" value={localName} onChange={e => setLocalName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Vishwakarma Institute..." />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Sidebar Short Name</label>
+                <input type="text" value={localSidebarName} onChange={e => setLocalSidebarName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="VIT" maxLength={22} />
+              </div>
+              
+              <div className="flex justify-end mt-2">
+                <Button size="sm" onClick={handleSaveIdentity} disabled={updateBranding.isPending}>
+                  {updateBranding.isPending ? <Spinner /> : "Save Identity"}
                 </Button>
               </div>
-            )}
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+            </div>
+          </div>
+
+          {/* 4. Theme Colors */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-foreground">Primary Brand Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={toColorPickerValue(brandColors.primary || "")} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
+                  <input type="text" value={brandColors.primary} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-foreground">Secondary Brand Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={toColorPickerValue(brandColors.secondary || "")} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
+                  <input type="text" value={brandColors.secondary} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 border border-border rounded-xl bg-muted/20 flex flex-wrap items-center gap-4">
+              <span className="text-xs font-semibold text-muted-foreground mr-2">Preview:</span>
+              <button className="px-4 py-2 rounded-lg text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: brandColors.primary }}>
+                Primary Button
+              </button>
+              <button className="px-4 py-2 rounded-lg text-sm font-semibold border bg-transparent transition-colors hover:bg-muted" style={{ borderColor: brandColors.secondary, color: brandColors.secondary }}>
+                Secondary Button
+              </button>
+              <span className="text-sm font-semibold hover:underline cursor-pointer" style={{ color: brandColors.primary }}>
+                Link Text
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <Button size="sm" variant="outline" onClick={() => setBrandColors(resolveBrandColors(data))}>Reset</Button>
+              <Button size="sm" onClick={handleSaveBrandColors} disabled={updateBranding.isPending}>Save Colors</Button>
+            </div>
           </div>
         </div>
 
-        {/* Sidebar Logo Upload */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Sidebar Logo
-            </label>
-            <p className="text-[11px] text-muted-foreground">
-              Displayed in the top-left sidebar menu.
-            </p>
-          </div>
-          <div 
-            className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border w-[100px] h-[100px] flex items-center justify-center bg-muted/30"
-          >
-            {data?.sidebar_logo_url ? (
-              <img src={data.sidebar_logo_url} alt="Sidebar Logo" className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground cursor-pointer" onClick={() => sidebarLogoInputRef.current?.click()}>
-                <Camera size={24} />
-                <span className="text-[10px] font-medium text-center px-2">Upload Sidebar Logo</span>
-              </div>
-            )}
+
+        {/* RIGHT COLUMN */}
+        <div className="flex flex-col gap-6 w-full xl:w-7/12">
+          
+          {/* 2. Brand Assets */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <SectionHeader num={2} title="Brand Assets" description="Upload your logos, favicon and campus photo." />
             
-            {/* Micro-interaction Overlay */}
-            {data?.sidebar_logo_url && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-                <Button size="icon" variant="secondary" className="h-7 w-7 rounded-full" onClick={() => setPreviewImage(data.sidebar_logo_url)}>
-                  <Eye size={12} />
-                </Button>
-                <Button size="icon" variant="default" className="h-7 w-7 rounded-full" onClick={() => sidebarLogoInputRef.current?.click()}>
-                  <Upload size={12} />
-                </Button>
-                <Button size="icon" variant="destructive" className="h-7 w-7 rounded-full" onClick={() => handleDelete("sidebar_logo")}>
-                  <Trash2 size={12} />
-                </Button>
-              </div>
-            )}
-            <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={handleSidebarLogoUpload} />
-          </div>
-        </div>
-
-        {/* Custom Favicon Upload */}
-        {data?.has_erp_domain && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Custom Favicon
-                </label>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Browser tab icon. Uses standard PNG format (no .ico needed).
-              </p>
-            </div>
-
-            <div className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border w-[100px] h-[100px] flex items-center justify-center bg-muted/30 hover:border-primary/50">
-              {data?.favicon_url ? (
-                <img src={data.favicon_url} alt="Favicon" className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-300" />
-              ) : (
-                <div 
-                  className="flex flex-col items-center gap-2 text-muted-foreground cursor-pointer"
-                  onClick={() => faviconInputRef.current?.click()}
-                >
-                  <Globe size={24} />
-                  <span className="text-[10px] font-medium text-center px-2">Upload PNG</span>
-                </div>
-              )}
-              {data?.favicon_url && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-                  <Button size="icon" variant="secondary" className="h-7 w-7 rounded-full" onClick={() => setPreviewImage(data.favicon_url)}>
-                    <Eye size={12} />
-                  </Button>
-                  <Button size="icon" variant="default" className="h-7 w-7 rounded-full" onClick={() => faviconInputRef.current?.click()}>
-                    <Upload size={12} />
-                  </Button>
-                  <Button size="icon" variant="destructive" className="h-7 w-7 rounded-full" onClick={() => handleDelete("favicon")}>
-                    <Trash2 size={12} />
-                  </Button>
-                </div>
-              )}
-              <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={handleFaviconUpload} />
-            </div>
-          </div>
-        )}
-
-        {/* Campus Photo Upload */}
-        {data?.has_erp_domain && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Campus Photo
-                </label>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Dimensions: 1350x1800px (3:4 ratio). Background for your login page.
-              </p>
-            </div>
-
-            <div className="relative group rounded-xl overflow-hidden border-2 border-dashed border-border w-[120px] h-[160px] flex items-center justify-center bg-muted/30 hover:border-primary/50">
-              {data?.campus_photo_url ? (
-                <img src={data.campus_photo_url} alt="Campus" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              ) : (
-                <div 
-                  className="flex flex-col items-center gap-2 text-muted-foreground cursor-pointer"
-                  onClick={() => campusInputRef.current?.click()}
-                >
-                  <Camera size={24} />
-                  <span className="text-[10px] font-medium text-center px-2">Upload Photo</span>
-                </div>
-              )}
-              
-              {data?.campus_photo_url && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={() => setPreviewImage(data.campus_photo_url)}>
-                    <Eye size={14} />
-                  </Button>
-                  <Button size="icon" variant="default" className="h-8 w-8 rounded-full" onClick={() => campusInputRef.current?.click()}>
-                    <Upload size={14} />
-                  </Button>
-                  <Button size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => handleDelete("campus")}>
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
-              )}
-              <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={handleCampusUpload} />
-            </div>
-          </div>
-        )}
-
-        {/* Site Title Settings */}
-        {data?.has_erp_domain && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Browser Tab Title
-                </label>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Replaces "Classgrid ERP" in the browser tab.
-              </p>
-            </div>
-
             <div className="flex flex-col gap-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={isEditingTitle ? localSiteTitle : (data?.site_title || "Classgrid ERP")}
-                  onChange={(e) => setLocalSiteTitle(e.target.value)}
-                  disabled={!isEditingTitle}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm disabled:opacity-70 disabled:bg-muted/30 focus:ring-1 focus:ring-primary outline-none transition-all"
-                />
-              </div>
+              <AssetRow 
+                title="College Logo" description="Displayed on Login Page and Admin Sidebar."
+                imgUrl={data?.logo_url} type="logo" fallbackIcon={<Building2 size={24} />}
+                onUploadClick={() => fileInputRef.current?.click()}
+              />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "logo"); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
+
+              <AssetRow 
+                title="Sidebar Logo" description="Displayed in the top-left sidebar menu."
+                imgUrl={data?.sidebar_logo_url} type="sidebar_logo" fallbackIcon={<Layout size={24} />}
+                onUploadClick={() => sidebarLogoInputRef.current?.click()}
+              />
+              <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "sidebar_logo"); if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = ""; }} />
+
+              <AssetRow 
+                title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
+                imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
+                onUploadClick={() => faviconInputRef.current?.click()}
+              />
+              <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
+
+              <AssetRow 
+                title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
+                imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
+                onUploadClick={() => campusInputRef.current?.click()}
+              />
+              <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
+            </div>
+          </div>
+
+          {/* 5. Social Links */}
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <SectionHeader num={5} title="Social Links" description="Add your social media links to display on the login page." />
+            
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10">
+                  <SelectValue placeholder="Platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram_url">Instagram</SelectItem>
+                  <SelectItem value="youtube_url">YouTube</SelectItem>
+                  <SelectItem value="facebook_url">Facebook</SelectItem>
+                  <SelectItem value="linkedin_url">LinkedIn</SelectItem>
+                  <SelectItem value="twitter_url">Twitter</SelectItem>
+                  <SelectItem value="github_url">GitHub</SelectItem>
+                  <SelectItem value="website_url">Website</SelectItem>
+                </SelectContent>
+              </Select>
               
-              {isEditingTitle ? (
-                <div className="flex items-center gap-2">
-                  <Button 
-                    size="sm" 
-                    onClick={() => updateBranding.mutate({ site_title: localSiteTitle })}
-                    disabled={updateBranding.isPending || !localSiteTitle.trim()}
-                    className="flex-1"
-                  >
-                    {updateBranding.isPending ? <Spinner /> : "Save"}
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => {
-                      setIsEditingTitle(false);
-                      setLocalSiteTitle(data?.site_title || "Classgrid ERP");
-                    }}
-                    className="px-3"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => setIsEditingTitle(true)}
-                  className="w-full text-xs font-medium"
-                >
-                  Edit Title
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Website Theme Colors */}
-        {data?.has_custom_domain && (
-          <div className="flex flex-col gap-4 md:col-span-2 lg:col-span-2">
-            <div className="flex flex-col gap-1">
-              <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <Palette size={14} /> Website Theme Colors
-              </label>
-              <p className="text-[11px] text-muted-foreground">
-                Primary and secondary hex colors for the public college website.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="primary-brand-color" className="text-xs font-medium text-foreground">
-                  Primary Brand Color
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    aria-label="Primary brand color swatch"
-                    type="color"
-                    value={toColorPickerValue(brandColors.primary)}
-                    onChange={(e) => handleBrandColorChange("primary", e.target.value)}
-                    className="h-10 w-11 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
-                  />
-                  <input
-                    id="primary-brand-color"
-                    type="text"
-                    inputMode="text"
-                    value={brandColors.primary}
-                    placeholder="#00E590"
-                    onChange={(e) => handleBrandColorChange("primary", e.target.value)}
-                    onBlur={() => handleBrandColorBlur("primary")}
-                    className={`w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none transition-all ${
-                      brandColors.primary && !isValidHexColor(brandColors.primary)
-                        ? "border-destructive focus:ring-1 focus:ring-destructive"
-                        : "border-border focus:ring-1 focus:ring-primary"
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="secondary-brand-color" className="text-xs font-medium text-foreground">
-                  Secondary Brand Color
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    aria-label="Secondary brand color swatch"
-                    type="color"
-                    value={toColorPickerValue(brandColors.secondary)}
-                    onChange={(e) => handleBrandColorChange("secondary", e.target.value)}
-                    className="h-10 w-11 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
-                  />
-                  <input
-                    id="secondary-brand-color"
-                    type="text"
-                    inputMode="text"
-                    value={brandColors.secondary}
-                    placeholder="#4f46e5"
-                    onChange={(e) => handleBrandColorChange("secondary", e.target.value)}
-                    onBlur={() => handleBrandColorBlur("secondary")}
-                    className={`w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none transition-all ${
-                      brandColors.secondary && !isValidHexColor(brandColors.secondary)
-                        ? "border-destructive focus:ring-1 focus:ring-destructive"
-                        : "border-border focus:ring-1 focus:ring-primary"
-                    }`}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                onClick={handleSaveBrandColors}
-                disabled={isLoading || updateBranding.isPending || !brandColorsAreValid || !brandColorsChanged}
-                className="w-fit"
-              >
-                {updateBranding.isPending ? <Spinner /> : "Save Colors"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleResetBrandColors}
-                disabled={isLoading || updateBranding.isPending || !brandColorsChanged}
-                className="w-fit"
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {data?.has_erp_domain && (
-        <div className="border-t border-border pt-6 mt-2">
-          <div className="flex flex-col gap-1 mb-4">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wider">
-              <Globe size={16} /> Social Links
-            </h3>
-            <p className="text-[11px] text-muted-foreground">
-              Connect your institution's social media accounts to display them on the login page. Must start with http:// or https://.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-2">
-                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-                  <SelectTrigger className="w-[140px] bg-background border border-border rounded-lg text-sm focus:ring-1 focus:ring-primary">
-                    <SelectValue placeholder="Platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="instagram_url">Instagram</SelectItem>
-                    <SelectItem value="youtube_url">YouTube</SelectItem>
-                    <SelectItem value="facebook_url">Facebook</SelectItem>
-                    <SelectItem value="linkedin_url">LinkedIn</SelectItem>
-                    <SelectItem value="twitter_url">Twitter</SelectItem>
-                    <SelectItem value="github_url">GitHub</SelectItem>
-                    <SelectItem value="website_url">Website</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={platformUrl}
-                  onChange={(e) => setPlatformUrl(e.target.value)}
-                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none"
-                />
-              </div>
-              <Button size="sm" onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="w-fit">
-                <Plus size={14} className="mr-1" /> Add Link
+              <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary" />
+              
+              <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
+                Add Link
               </Button>
             </div>
 
-            <div className="md:col-span-1 lg:col-span-2 flex flex-wrap gap-2">
-              {data?.social_links && Object.entries(data.social_links).map(([key, url]) => {
+            {/* List Header */}
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-muted-foreground border-b border-border mb-2">
+              <div className="col-span-3">Platform</div>
+              <div className="col-span-7">URL</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+
+            {/* List Items */}
+            <div className="flex flex-col gap-2">
+              {data?.social_links && Object.keys(data.social_links).length > 0 ? Object.entries(data.social_links).map(([key, url]) => {
                 if (!url) return null;
                 const label = key.replace("_url", "").charAt(0).toUpperCase() + key.replace("_url", "").slice(1);
+                const iconSrc = SOCIAL_ICONS[key];
+                
                 return (
-                  <div key={key} className="flex items-center gap-2 bg-muted/50 border border-border rounded-full px-3 py-1.5 text-xs">
-                    <span className="font-medium text-foreground">{label}</span>
-                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary max-w-[150px] truncate" title={url}>
-                      {url}
-                    </a>
-                    <button onClick={() => handleRemoveSocialLink(key)} className="text-muted-foreground hover:text-destructive ml-1">
-                      <X size={14} />
-                    </button>
+                  <div key={key} className="grid grid-cols-12 gap-4 px-4 py-3 bg-background border border-border rounded-lg items-center hover:bg-muted/30 transition-colors">
+                    <div className="col-span-3 flex items-center gap-3">
+                      {iconSrc ? (
+                         <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" />
+                      ) : (
+                         <LinkIcon size={16} className="text-muted-foreground" />
+                      )}
+                      <span className="text-sm font-semibold text-foreground">{label}</span>
+                    </div>
+                    <div className="col-span-7">
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate block w-full">
+                        {url}
+                      </a>
+                    </div>
+                    <div className="col-span-2 flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                        <Camera size={14} /> {/* Placeholder for edit if they want it later */}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleRemoveSocialLink(key)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </div>
                 );
-              })}
+              }) : (
+                <div className="text-center py-6 text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-muted/10">
+                  No social links added yet.
+                </div>
+              )}
             </div>
           </div>
+
         </div>
-      )}
+      </div>
 
       <ImageCropperModal
         isOpen={cropOpen}
@@ -712,34 +547,9 @@ export function OrgBrandingCard() {
         imageSrc={cropSrc}
         aspectRatio={cropType === "favicon" ? 1 : cropType === "campus" ? 0.75 : undefined}
         circularCrop={cropType === "favicon"}
-        title={cropType === "favicon" ? "Crop Favicon (Square PNG)" : cropType === "campus" ? "Crop Campus Photo (3:4)" : "Crop College Logo"}
+        title={`Crop ${cropType}`}
         onCropComplete={(blob) => uploadToR2(blob, cropType)}
       />
-
-      {/* Full Screen Image Preview Modal */}
-      {previewImage && (
-        <div 
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="absolute -top-12 right-0 rounded-full bg-background/20 text-white border-white/20 hover:bg-white/20 hover:text-white"
-              onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }}
-            >
-              <X size={20} />
-            </Button>
-            <img 
-              src={previewImage} 
-              alt="Preview" 
-              className="max-w-full max-h-[85vh] object-contain drop-shadow-2xl rounded-lg" 
-              onClick={(e) => e.stopPropagation()} 
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
