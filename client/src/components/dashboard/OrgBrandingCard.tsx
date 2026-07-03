@@ -769,7 +769,7 @@ export function OrgBrandingCard() {
         </div>
 
         {/* 4. Theme Colors */}
-        {data?.has_erp_domain && (
+        {data?.has_custom_domain && (
           <div className="flex flex-col">
             <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
             
