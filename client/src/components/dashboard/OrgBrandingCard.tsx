@@ -712,21 +712,25 @@ export function OrgBrandingCard() {
             />
             <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "sidebar_logo"); if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = ""; }} />
 
-            <AssetRow 
-              title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
-              imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
-              onUploadClick={() => faviconInputRef.current?.click()}
-              onDelete={() => handleDeleteAsset("favicon_url")}
-            />
-            <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
+            {data?.has_erp_domain && (
+              <>
+                <AssetRow 
+                  title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
+                  imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
+                  onUploadClick={() => faviconInputRef.current?.click()}
+                  onDelete={() => handleDeleteAsset("favicon_url")}
+                />
+                <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
 
-            <AssetRow 
-              title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
-              imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
-              onUploadClick={() => campusInputRef.current?.click()}
-              onDelete={() => handleDeleteAsset("campus_photo_url")}
-            />
-            <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
+                <AssetRow 
+                  title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
+                  imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
+                  onUploadClick={() => campusInputRef.current?.click()}
+                  onDelete={() => handleDeleteAsset("campus_photo_url")}
+                />
+                <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
+              </>
+            )}
           </div>
         </div>
 
@@ -735,13 +739,15 @@ export function OrgBrandingCard() {
           <SectionHeader num={3} title="Organization Identity" description="Set the names and title used across the platform." />
           
           <div className="flex flex-col gap-6 ml-7 max-w-sm">
-            <FieldEditor
-              label="Browser Tab Title"
-              value={data?.site_title || ""}
-              placeholder="Institution - Home"
-              isSaving={updateBranding.isPending}
-              onSave={(site_title, onSuccess) => handleSaveIdentity({ site_title }, onSuccess)}
-            />
+            {data?.has_erp_domain && (
+              <FieldEditor
+                label="Browser Tab Title"
+                value={data?.site_title || ""}
+                placeholder="Institution - Home"
+                isSaving={updateBranding.isPending}
+                onSave={(site_title, onSuccess) => handleSaveIdentity({ site_title }, onSuccess)}
+              />
+            )}
             
             <FieldEditor
               label="Institution Name (Full)"
@@ -763,86 +769,90 @@ export function OrgBrandingCard() {
         </div>
 
         {/* 4. Theme Colors */}
-        <div className="flex flex-col">
-          <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
-          
-          <div className="flex flex-col gap-6 ml-7 max-w-sm">
-            <ColorFieldEditor
-              label="Primary Color"
-              value={brandColors.primary}
-              isSaving={updateBranding.isPending}
-              onSave={(val, onSuccess) => {
-                updateBranding.mutate({
-                  brand_colors: { primary: val, secondary: brandColors.secondary },
-                }, { onSuccess: () => { toast.success("Primary color updated"); onSuccess(); setBrandColors(c => ({...c, primary: val})); }});
-              }}
-            />
-            <ColorFieldEditor
-              label="Secondary Color"
-              value={brandColors.secondary}
-              isSaving={updateBranding.isPending}
-              onSave={(val, onSuccess) => {
-                updateBranding.mutate({
-                  brand_colors: { primary: brandColors.primary, secondary: val },
-                }, { onSuccess: () => { toast.success("Secondary color updated"); onSuccess(); setBrandColors(c => ({...c, secondary: val})); }});
-              }}
-            />
+        {data?.has_erp_domain && (
+          <div className="flex flex-col">
+            <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
+            
+            <div className="flex flex-col gap-6 ml-7 max-w-sm">
+              <ColorFieldEditor
+                label="Primary Color"
+                value={brandColors.primary}
+                isSaving={updateBranding.isPending}
+                onSave={(val, onSuccess) => {
+                  updateBranding.mutate({
+                    brand_colors: { primary: val, secondary: brandColors.secondary },
+                  }, { onSuccess: () => { toast.success("Primary color updated"); onSuccess(); setBrandColors(c => ({...c, primary: val})); }});
+                }}
+              />
+              <ColorFieldEditor
+                label="Secondary Color"
+                value={brandColors.secondary}
+                isSaving={updateBranding.isPending}
+                onSave={(val, onSuccess) => {
+                  updateBranding.mutate({
+                    brand_colors: { primary: brandColors.primary, secondary: val },
+                  }, { onSuccess: () => { toast.success("Secondary color updated"); onSuccess(); setBrandColors(c => ({...c, secondary: val})); }});
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 5. Social Links */}
-        <div className="flex flex-col">
-          <SectionHeader num={5} title="Social Links" description="Add your social media links to display on the login page." />
-          
-          <div className="flex flex-col ml-7">
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
-              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-                <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10">
-                  <SelectValue placeholder="Platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instagram_url">Instagram</SelectItem>
-                  <SelectItem value="youtube_url">YouTube</SelectItem>
-                  <SelectItem value="facebook_url">Facebook</SelectItem>
-                  <SelectItem value="linkedin_url">LinkedIn</SelectItem>
-                  <SelectItem value="twitter_url">Twitter</SelectItem>
-                  <SelectItem value="github_url">GitHub</SelectItem>
-                  <SelectItem value="website_url">Website</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
-              
-              <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
-                Add Link
-              </Button>
-            </div>
-
-            <div className="flex flex-col gap-2 max-w-2xl">
-              {data?.social_links && Object.keys(data.social_links).length > 0 ? Object.entries(data.social_links).map(([key, url]) => {
-                if (!url) return null;
-                const label = key.replace("_url", "").charAt(0).toUpperCase() + key.replace("_url", "").slice(1);
-                const iconSrc = SOCIAL_ICONS[key];
+        {data?.has_erp_domain && (
+          <div className="flex flex-col">
+            <SectionHeader num={5} title="Social Links" description="Add your social media links to display on the login page." />
+            
+            <div className="flex flex-col ml-7">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                  <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10">
+                    <SelectValue placeholder="Platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="instagram_url">Instagram</SelectItem>
+                    <SelectItem value="youtube_url">YouTube</SelectItem>
+                    <SelectItem value="facebook_url">Facebook</SelectItem>
+                    <SelectItem value="linkedin_url">LinkedIn</SelectItem>
+                    <SelectItem value="twitter_url">Twitter</SelectItem>
+                    <SelectItem value="github_url">GitHub</SelectItem>
+                    <SelectItem value="website_url">Website</SelectItem>
+                  </SelectContent>
+                </Select>
                 
-                return (
-                  <SocialLinkRow 
-                    key={key} 
-                    keyName={key} 
-                    url={url} 
-                    iconSrc={iconSrc} 
-                    label={label} 
-                    onUpdate={handleUpdateSocialLink} 
-                    onRemove={handleRemoveSocialLink} 
-                  />
-                );
-              }) : (
-                <div className="text-center py-6 text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-muted/10">
-                  No social links added yet.
-                </div>
-              )}
+                <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
+                
+                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
+                  Add Link
+                </Button>
+              </div>
+
+              <div className="flex flex-col gap-2 max-w-2xl">
+                {data?.social_links && Object.keys(data.social_links).length > 0 ? Object.entries(data.social_links).map(([key, url]) => {
+                  if (!url) return null;
+                  const label = key.replace("_url", "").charAt(0).toUpperCase() + key.replace("_url", "").slice(1);
+                  const iconSrc = SOCIAL_ICONS[key];
+                  
+                  return (
+                    <SocialLinkRow 
+                      key={key} 
+                      keyName={key} 
+                      url={url} 
+                      iconSrc={iconSrc} 
+                      label={label} 
+                      onUpdate={handleUpdateSocialLink} 
+                      onRemove={handleRemoveSocialLink} 
+                    />
+                  );
+                }) : (
+                  <div className="text-center py-6 text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-muted/10">
+                    No social links added yet.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
 
