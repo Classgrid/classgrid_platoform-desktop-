@@ -33,6 +33,7 @@ export function useUpdateCustomDomainSettings() {
                 custom_domain: data.custom_domain,
                 erp_domain: data.erp_domain
             }));
+            queryClient.invalidateQueries({ queryKey: ["org-branding"] });
         },
     });
 }
@@ -66,6 +67,7 @@ export function useRegisterCustomDomain() {
                 custom_domain: data.custom_domain,
                 erp_domain: data.erp_domain
             }));
+            queryClient.invalidateQueries({ queryKey: ["org-branding"] });
         },
     });
 }
@@ -79,6 +81,7 @@ export function useVerifyCustomDomain() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["org-custom-domain"] });
+            queryClient.invalidateQueries({ queryKey: ["org-branding"] });
         },
     });
 }
@@ -109,6 +112,7 @@ export function useRemoveCustomDomain() {
                     }
                 };
             });
+            queryClient.invalidateQueries({ queryKey: ["org-branding"] });
         },
     });
 }
