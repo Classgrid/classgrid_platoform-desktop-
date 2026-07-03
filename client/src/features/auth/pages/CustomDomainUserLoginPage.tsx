@@ -303,7 +303,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
               )}
               {branding.socialLinks?.instagram_url && (
                 <a href={branding.socialLinks.instagram_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
-                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Instagram_icon.png" alt="Instagram" className="w-5 h-5 object-contain" />
+                  <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/instagram-2-1-logo-svgrepo-com.svg" alt="Instagram" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.linkedin_url && (
