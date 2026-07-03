@@ -38,7 +38,7 @@ const generateActivationCredentials = () => {
 
 const FRONTEND_URL =
   process.env.FRONTEND_URL?.trim() ||
-  (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+  (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 
 const normalizeOrgType = (value = "") => {
   const normalized = String(value || "")

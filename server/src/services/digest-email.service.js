@@ -19,7 +19,7 @@ const FRONTEND_URL = () =>
     process.env.FRONTEND_URL?.trim() ||
     (process.env.NODE_ENV === "production"
         ? "https://classgrid.in"
-        : "http://localhost:3000");
+        : "https://classgrid.in");
 
 // ─────────────────────────────────────────────────
 // HELPER: Send emails in batches

@@ -17,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 
 // Function to get the correct frontend URL based on environment
 const getFrontendUrl = () => {
-    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 };
 
 // ─────────────────────────────────────────────
@@ -235,7 +235,7 @@ export const testGoogleAuth = async (req, res) => {
 // Get Google OAuth URL
 export const getGoogleAuthUrl = async (req, res) => {
     try {
-        const backendUrl = process.env.BACKEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const backendUrl = process.env.BACKEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         const callbackUrl = process.env.GOOGLE_CALLBACK_URL?.trim() || `${backendUrl}/api/auth/google/callback`;
 
         const clientId = process.env.GOOGLE_CLIENT_ID;

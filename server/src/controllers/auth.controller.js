@@ -31,7 +31,7 @@ import { syncDerivedOnboardingProgress } from "../services/onboarding-progress.s
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 const getFrontendUrl = () => {
-    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 };
 
 const FRONTEND_URL = getFrontendUrl();
@@ -1198,13 +1198,13 @@ export const oauthCallback = async (req, res) => {
     // Passport populates req.user
     if (!req.user) {
         // Fallback to default frontend URL if user parsing fails before state parsing
-        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         return res.redirect(`${defaultFrontendUrl}/login?error=AuthFailed`);
     }
 
     // Status checks
     if (req.user.status === "suspended" || req.user.status === "blocked") {
-        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         return res.redirect(`${defaultFrontendUrl}/login?error=account_suspended`);
     }
 
@@ -1224,7 +1224,7 @@ export const oauthCallback = async (req, res) => {
         }
     }
 
-    const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
     const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
     const TARGET_URL = host ? `${scheme}${host}` : defaultFrontendUrl;
 

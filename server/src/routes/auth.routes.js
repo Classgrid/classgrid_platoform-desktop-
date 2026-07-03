@@ -13,7 +13,7 @@ import {
 const router = express.Router();
 
 const getFrontendUrl = () => {
-    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+    return process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 };
 
 // Public System Config
@@ -76,7 +76,7 @@ router.get(
                 loginTab = decoded.t || '';
             } catch (e) {}
         }
-        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
         const TARGET_URL = host ? `${scheme}${host}` : defaultFrontendUrl;
         const errorPath = loginTab === 'super_admin' ? '/superadmin/login' : '/login';

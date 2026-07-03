@@ -14,7 +14,7 @@ function getMarketingSiteUrl() {
         process.env.MARKETING_SITE_URL?.trim() ||
         (process.env.NODE_ENV === "production"
             ? "https://classgrid.in"
-            : "http://localhost:3000")
+            : "https://classgrid.in")
     ).replace(/\/$/, "");
 }
 

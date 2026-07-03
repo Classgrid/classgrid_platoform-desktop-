@@ -232,7 +232,7 @@ export const addFaculty = async (req, res) => {
             await user.save();
         }
 
-        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 
         const verifyLink = `${frontendUrl}/faculty/activate?token=${rawToken}`;
 
@@ -488,7 +488,7 @@ export const resetFacultyPassword = async (req, res) => {
         await faculty.save();
 
         const { getPasswordResetEmailHtml, getPasswordResetEmailPlainText } = await import("../services/email-templates.service.js");
-        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 
         const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
@@ -1247,7 +1247,7 @@ export const requestDeleteOrganization = async (req, res) => {
         });
 
         // Build verification link
-        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         const verifyLink = `${frontendUrl}/api/organization/verify-delete?token=${rawToken}`;
 
         // Send verification email

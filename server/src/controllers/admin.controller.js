@@ -117,7 +117,7 @@ export const approveOrganization = async (req, res) => {
             });
         }
 
-        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || "support@classgrid.in";
 
         const {
@@ -386,7 +386,7 @@ export const resetOrgAdminPassword = async (req, res) => {
 
         const { getPasswordResetEmailHtml, getPasswordResetEmailPlainText } = await import("../services/email-templates.service.js");
 
-        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 
         const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`;
 
@@ -664,7 +664,7 @@ export const createSuperAdmin = async (req, res) => {
         try {
             const { sendEmail } = await import("../services/brevo.service.js");
             const { getSuperAdminCredentialsHtml, getSuperAdminCredentialsPlainText } = await import("../services/email-templates.service.js");
-            const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "http://localhost:3000");
+            const frontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
 
             const loginLink = `${frontendUrl}/superadmin/login`;
 
