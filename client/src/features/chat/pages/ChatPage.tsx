@@ -295,7 +295,7 @@ export function ChatPage() {
     if (!activeThread || !currentUserId) return;
     if (!text.trim() && files.length === 0) return;
     
-    const hasMedia = files.length > 0 || !!audioBlob;
+    const hasMedia = files.length > 0;
 
     // If scheduled message
     if (options?.scheduledFor) {

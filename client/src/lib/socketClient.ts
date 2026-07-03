@@ -53,6 +53,12 @@ export function connectSocket(token: string): Socket {
  * Returns null if not connected.
  */
 export function getSocket(): Socket | null {
+  if (!socket) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      return connectSocket(token);
+    }
+  }
   return socket;
 }
 
