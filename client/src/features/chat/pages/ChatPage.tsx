@@ -518,7 +518,7 @@ export function ChatPage() {
 
   // 2. Active Thread Updates (via Thread channel)
   const { sendTyping } = useThreadChannel(activeThread?.id || null, currentUserId || null, {
-    new_message: (payload: any) => {
+    onNewMessage: (payload: any) => {
       // Security/Sanity Check: Make sure the message actually belongs to this thread!
       // This prevents ghost messages if the Socket is accidentally still subscribed to multiple threads.
       if (activeThread && payload.thread_id !== activeThread.id) {
