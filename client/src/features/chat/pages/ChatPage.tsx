@@ -955,6 +955,11 @@ export function ChatPage() {
       {isDisappearingModalOpen && activeThread && (
         <DisappearingMessagesModal
           threadId={activeThread.id}
+          currentTtl={activeThread.messageTtl || 0}
+          onSaved={(ttl) => {
+            setActiveThread((prev) => prev ? { ...prev, messageTtl: ttl } : null);
+            setThreads((prev) => prev.map((t) => t.id === activeThread.id ? { ...t, messageTtl: ttl } : t));
+          }}
           onClose={() => setIsDisappearingModalOpen(false)}
         />
       )}

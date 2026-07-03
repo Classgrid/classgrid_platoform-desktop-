@@ -9,14 +9,17 @@ interface DisappearingMessagesModalProps {
   threadId: string;
   currentTtl?: number; // in seconds
   onClose: () => void;
+  onSaved?: (ttl: number) => void;
 }
 
-export function DisappearingMessagesModal({ threadId, currentTtl = 0, onClose }: DisappearingMessagesModalProps) {
+export function DisappearingMessagesModal({ threadId, currentTtl = 0, onClose, onSaved }: DisappearingMessagesModalProps) {
   const [ttl, setTtl] = useState(currentTtl);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (newTtl: number) => setDisappearingMessages(threadId, newTtl),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const savedTtl = Number(data?.ttl ?? ttl);
+      onSaved?.(savedTtl);
       toast.success("Disappearing messages updated");
       onClose();
     },

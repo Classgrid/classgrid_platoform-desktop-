@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS chat_threads (
   last_message TEXT,
   last_message_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  message_ttl INTEGER NOT NULL DEFAULT 0 CHECK (message_ttl IN (0, 86400, 604800, 7776000))
 );
 
 -- ═══ THREAD MEMBERS ═══
@@ -50,7 +51,8 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   message TEXT DEFAULT '' CHECK (char_length(message) <= 5000),
   reply_to JSONB,
   is_deleted BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
 );
 
 -- ═══ ATTACHMENTS (Multi-file support) ═══
@@ -107,6 +109,7 @@ CREATE INDEX IF NOT EXISTS idx_thread_members_thread ON chat_thread_members(thre
 CREATE INDEX IF NOT EXISTS idx_threads_org ON chat_threads(org_id);
 CREATE INDEX IF NOT EXISTS idx_threads_last_msg ON chat_threads(org_id, last_message_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_thread ON chat_messages(thread_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_expires_at ON chat_messages(expires_at) WHERE expires_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_message_reads_user ON message_reads(user_id);
 CREATE INDEX IF NOT EXISTS idx_message_reads_message ON message_reads(message_id);
 CREATE INDEX IF NOT EXISTS idx_thread_reads_user ON thread_reads(user_id);

@@ -24,6 +24,7 @@ export interface ChatThread {
   createdAt: string;
   isMuted?: boolean;
   isOfficial?: boolean;
+  messageTtl?: number;
 }
 
 export interface ChatAttachment {
@@ -310,7 +311,7 @@ export async function fetchThreadPolls(threadId: string): Promise<Poll[]> {
 }
 
 export async function setDisappearingMessages(threadId: string, ttl: number) {
-  const res = await apiClient.post(`/api/threads/${threadId}/disappearing-messages`, { ttl });
+  const res = await apiClient.post(`/api/threads/${threadId}/disappearing`, { ttl });
   return res.data;
 }
 

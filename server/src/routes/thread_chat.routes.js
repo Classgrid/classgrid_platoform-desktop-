@@ -1,7 +1,9 @@
 import express from 'express';
 import multer from 'multer';
+import { randomUUID } from 'crypto';
 import { isAuthenticated } from '../middleware/auth.middleware.js';
 import User from '../models/User.js';
+import Organization from '../models/Organization.js';
 import { primarySupabaseClient } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import { studentNotesClient } from '../config/supabaseClient.js';
@@ -60,6 +62,84 @@ function isAllowedMime(mimeType) {
   return ALLOWED_MIME_EXACT.includes(mimeType);
 }
 
+function toStorageSlug(value, fallback = 'unknown') {
+  const raw = String(value || fallback).trim().toLowerCase();
+  const ascii = raw.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  return ascii
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || fallback;
+}
+
+function shortStorageId(value) {
+  return String(value || 'unknown').replace(/[^a-zA-Z0-9]/g, '').slice(-8) || 'unknown';
+}
+
+function getChatFileFolder(mimeType = '') {
+  if (mimeType.startsWith('image/')) return 'images';
+  if (mimeType.startsWith('video/')) return 'videos';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  if (mimeType === 'application/pdf') return 'pdfs';
+  if (mimeType.includes('word') || mimeType.includes('presentation') || mimeType.includes('spreadsheet')) return 'documents';
+  if (mimeType.includes('zip') || mimeType.includes('rar')) return 'archives';
+  return 'files';
+}
+
+function sanitizeStorageFileName(fileName) {
+  const fallback = `upload-${Date.now()}`;
+  return String(fileName || fallback)
+    .replace(/[\\/:*?"<>|]+/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .slice(0, 120) || fallback;
+}
+
+async function getChatStorageContext(thread, threadId, group) {
+  let orgLabel = thread.org_id || 'platform';
+
+  if (thread.org_id && /^[0-9a-fA-F]{24}$/.test(thread.org_id)) {
+    try {
+      const org = await Organization.findById(thread.org_id)
+        .select('name sidebar_name subdomain')
+        .lean();
+      orgLabel = org?.subdomain || org?.sidebar_name || org?.name || orgLabel;
+    } catch (err) {
+      console.warn('[Chat Storage] Failed to resolve organization name:', err.message);
+    }
+  }
+
+  const chatLabel = thread.type === 'group'
+    ? group?.name || `group-${thread.group_id || threadId}`
+    : `direct-message-${threadId}`;
+
+  return {
+    orgFolder: `${toStorageSlug(orgLabel, 'platform')}-${shortStorageId(thread.org_id)}`,
+    chatTypeFolder: thread.type === 'group' ? 'groups' : 'direct-messages',
+    chatFolder: `${toStorageSlug(chatLabel, thread.type === 'group' ? 'group-chat' : 'direct-message')}-${shortStorageId(threadId)}`,
+  };
+}
+
+function buildChatAttachmentStoragePath(file, context) {
+  const now = new Date();
+  const year = String(now.getUTCFullYear());
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const safeName = sanitizeStorageFileName(file.originalname);
+  const folder = getChatFileFolder(file.mimetype || '');
+  const storageContext = context || { orgFolder: 'platform-unknown', chatTypeFolder: 'unknown-chat', chatFolder: 'thread-unknown' };
+
+  return [
+    'chat',
+    'orgs',
+    storageContext.orgFolder,
+    storageContext.chatTypeFolder,
+    storageContext.chatFolder,
+    folder,
+    year,
+    month,
+    `${Date.now()}-${randomUUID()}-${safeName}`,
+  ].join('/');
+}
+
 // ──────────────────────────────────────────────
 // GET /threads — List user's threads (LIMIT 50)
 // ──────────────────────────────────────────────
@@ -80,14 +160,14 @@ router.get('/', isAuthenticated, async (req, res) => {
           const groupsToJoinAsMember = autoGroups.filter(g => (g.auto_add_roles || []).includes(userRoleStr)).map(g => g.id);
           const groupsToJoinAsAdmin = autoGroups.filter(g => (g.admin_roles || []).includes(userRoleStr)).map(g => g.id);
           const allGroupsToJoin = [...new Set([...groupsToJoinAsMember, ...groupsToJoinAsAdmin])];
-          
+
           if (allGroupsToJoin.length > 0) {
             const { data: groupThreads } = await sb.from('chat_threads').select('id, group_id').in('group_id', allGroupsToJoin);
             if (groupThreads && groupThreads.length > 0) {
               const { data: myMems } = await sb.from('chat_thread_members').select('thread_id, role').eq('user_id', userId).in('thread_id', groupThreads.map(t => t.id));
               const myMemMap = {};
               (myMems || []).forEach(m => { myMemMap[m.thread_id] = m.role; });
-              
+
               const newMemberships = [];
               const upgradeMemberships = [];
               for (const t of groupThreads) {
@@ -118,7 +198,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       .select('thread_id, role')
       .eq('user_id', userId);
     if (memErr) throw memErr;
-    
+
     const myRoles = {};
     (memberships || []).forEach(m => { myRoles[m.thread_id] = m.role; });
 
@@ -130,20 +210,20 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (!isSuperAdmin) {
       threadQuery = threadQuery.eq('org_id', orgId);
     }
-    
+
     // Apply category filters
     if (filter === 'Groups') {
       threadQuery = threadQuery.eq('type', 'group');
     } else if (filter === 'Admins' || filter === 'Faculty') {
       threadQuery = threadQuery.eq('type', 'dm');
     }
-    
+
     threadQuery = threadQuery.order('last_message_at', { ascending: false, nullsFirst: false }).limit(50);
 
     const [threadsResult, readsResult, userResult] = await Promise.all([
       threadQuery,
       sb.from('thread_reads').select('thread_id, last_read_at').eq('user_id', userId).in('thread_id', threadIds),
-      User.findById(userId).select('muted_chat_threads').lean()
+      User.findById(userId).select('muted_chat_threads cleared_chat_threads').lean()
     ]);
 
     if (threadsResult.error) throw threadsResult.error;
@@ -206,6 +286,14 @@ router.get('/', isAuthenticated, async (req, res) => {
     otherMembers.forEach(m => { otherMemberMap[m.thread_id] = m.user_id; });
 
     const formatted = (threads || []).map(thread => {
+      const clearedAt = userResult?.cleared_chat_threads?.[thread.id];
+      const threadLastMsgAt = thread.last_message_at ? new Date(thread.last_message_at) : null;
+      let displayLastMessage = thread.last_message;
+
+      if (clearedAt && threadLastMsgAt && threadLastMsgAt <= new Date(clearedAt)) {
+        displayLastMessage = '';
+      }
+
       if (thread.type === 'dm') {
         const otherUserId = otherMemberMap[thread.id];
         const otherUser = userMap[otherUserId];
@@ -220,11 +308,12 @@ router.get('/', isAuthenticated, async (req, res) => {
           phoneNumber: otherUser?.phoneNumber || '',
           bio: otherUser?.bio || '',
           prn: otherUser?.prn || '',
-          lastMessage: thread.last_message,
+          lastMessage: displayLastMessage,
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
           createdAt: thread.created_at,
           isMuted: mutedThreads.has(thread.id),
+          messageTtl: thread.message_ttl || 0,
         };
       } else {
         const group = groupInfoMap[thread.group_id] || {};
@@ -236,7 +325,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           description: group.description || '',
           avatar: group.avatar_url || null,
           avatarColor: group.avatar_color || '#1a73e8',
-          lastMessage: thread.last_message,
+          lastMessage: displayLastMessage,
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
           createdAt: thread.created_at,
@@ -245,6 +334,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           myRole: myRoles[thread.id] || 'member',
           isMuted: mutedThreads.has(thread.id),
           isOfficial: group.is_official || false,
+          messageTtl: thread.message_ttl || 0,
         };
       }
     });
@@ -354,7 +444,7 @@ router.get('/dm/:userId/shared-media', isAuthenticated, async (req, res) => {
   try {
     const myId = req.user._id.toString();
     const otherId = req.params.userId;
-    
+
     // Find DM thread ID
     const { data: myThreads } = await sb.from('chat_thread_members').select('thread_id').eq('user_id', myId);
     const { data: theirThreads } = await sb.from('chat_thread_members').select('thread_id').eq('user_id', otherId);
@@ -463,7 +553,7 @@ router.post('/dm/:userId', isAuthenticated, async (req, res) => {
     const otherId = req.params.userId;
     const myOrgId = req.user.organization_id?.toString();
     const myRole = req.user.role;
-    
+
     if (myId === otherId) return res.status(400).json({ error: 'Cannot message yourself' });
 
     // Verify other user exists
@@ -552,7 +642,7 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
       validateThreadMembership(userId, threadId),
       User.findById(userId).select('cleared_chat_threads').lean()
     ]);
-    
+
     const membership = membershipResult;
     if (!membership) return res.status(403).json({ error: 'Not a member of this thread' });
 
@@ -560,7 +650,7 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
 
     let query = sb.from('chat_messages').select('*').eq('thread_id', threadId).order('created_at', { ascending: false }).limit(50);
     if (before) query = query.lt('created_at', before);
-    
+
     // Status Filter for Pro ERP Backend
     if (!isAdmin) {
       // Normal members only see approved messages, or their own pending/rejected messages
@@ -686,7 +776,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
     // ── PARALLEL: Validate membership + fetch thread in one round-trip ──
     const [membershipResult, threadResult] = await Promise.all([
       validateThreadMembership(userId, threadId),
-      sb.from('chat_threads').select('org_id, type, group_id').eq('id', threadId).single(),
+      sb.from('chat_threads').select('org_id, type, group_id, message_ttl').eq('id', threadId).single(),
     ]);
 
     const membership = membershipResult;
@@ -702,14 +792,16 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
     // Check group policies
     let msgStatus = 'approved';
     const requires_acknowledgement = req.body.requires_acknowledgement === true || req.body.requires_acknowledgement === 'true';
-    
+    let groupForThread = null;
+
     if (thread.type === 'group' && thread.group_id) {
       const { data: group } = await sb.from('chat_groups')
-        .select('send_message_policy, send_attachments_policy, require_message_approval, reply_policy')
+        .select('name, send_message_policy, send_attachments_policy, require_message_approval, reply_policy')
         .eq('id', thread.group_id)
         .single();
-        
+
       if (group) {
+        groupForThread = group;
         const isSuperAdmin = req.user.role === 'super_admin';
         const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(req.user.role);
         const isAdmin = membership.role === 'admin' || isSuperAdmin;
@@ -721,7 +813,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
         if (group.send_message_policy === 'admin_faculty' && !isAdmin && !isFaculty) {
           return res.status(403).json({ error: 'Only admins and faculty can send messages in this group' });
         }
-        
+
         // Check allow_replies on thread
         if (thread.allow_replies === false && !isAdmin) {
           return res.status(403).json({ error: 'Replies are disabled for this thread' });
@@ -746,7 +838,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
              return res.status(403).json({ error: 'Only admins and faculty can send attachments in this group' });
           }
         }
-        
+
         // Check message approval
         if (group.require_message_approval && !isAdmin) {
            msgStatus = 'pending';
@@ -769,18 +861,21 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       } catch { replyData = null; }
     }
 
+    const storageContext = files.length > 0
+      ? await getChatStorageContext(thread, threadId, groupForThread)
+      : null;
+
     // ── Handle Scheduled Messages (Pro V2) ──
     if (scheduledFor) {
       const scheduledTime = new Date(scheduledFor);
       if (isNaN(scheduledTime.getTime()) || scheduledTime <= new Date()) {
         return res.status(400).json({ error: 'scheduledFor must be a valid future date' });
       }
-      
+
       const uploadedAttachments = [];
       for (const file of files) {
-        const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const storagePath = `chat/threads/${threadId}/${Date.now()}_${safeName}`;
-        const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
+        const storagePath = buildChatAttachmentStoragePath(file, storageContext);
+        const publicUrl = await uploadBufferToR2(file.buffer, file.originalname || 'upload.file', file.mimetype || 'application/octet-stream', storagePath);
         uploadedAttachments.push({
           file_url: publicUrl,
           file_name: file.originalname,
@@ -807,6 +902,12 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       return res.status(201).json({ message: schedMsg, isScheduled: true });
     }
 
+    // Calculate dynamic expires_at if thread has a TTL setting
+    let finalExpiresAt = expiresAt || null;
+    if (!finalExpiresAt && thread.message_ttl && thread.message_ttl > 0) {
+      finalExpiresAt = new Date(Date.now() + thread.message_ttl * 1000).toISOString();
+    }
+
     // Insert message directly
     const now = new Date().toISOString();
     const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
@@ -821,9 +922,9 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       requires_acknowledgement: requires_acknowledgement,
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
-      expires_at: expiresAt || null
+      expires_at: finalExpiresAt
     }).select('id').single();
-    
+
     if (insertErr) {
       console.error("[Message Insert Error]", insertErr);
       return res.status(500).json({ error: 'Failed to send message' });
@@ -848,9 +949,9 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     // Update thread metadata manually
     sb.from('chat_threads')
-      .update({ 
-        last_message: lastMsgText, 
-        last_message_at: now 
+      .update({
+        last_message: lastMsgText,
+        last_message_at: now
       })
       .eq('id', threadId)
       .then(() => {})
@@ -869,7 +970,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
       created_at: now,
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
-      expires_at: expiresAt || null,
+      expires_at: finalExpiresAt,
       attachments: [],
     };
 
@@ -901,7 +1002,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
               notificationsToInsert.push({
                 recipient: m.user_id,
                 type: 'chat',
-                title: thread.type === 'group' ? `New message in ${thread.name || 'Group'}` : `New message from ${req.user.name || 'User'}`,
+                title: thread.type === 'group' ? `New message in ${groupForThread?.name || 'Group'}` : `New message from ${req.user.name || 'User'}`,
                 message: lastMsgText,
                 link: `/platform/chat?threadId=${threadId}`,
                 relatedId: threadId,
@@ -940,10 +1041,9 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
 
     const uploadedAttachments = [];
     for (const file of files) {
-      const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const storagePath = `chat/threads/${threadId}/${Date.now()}_${safeName}`;
+      const storagePath = buildChatAttachmentStoragePath(file, storageContext);
 
-      const publicUrl = await uploadBufferToR2(file.buffer, file.buffer.originalname || 'upload.file', file.buffer.mimetype || 'application/octet-stream', storagePath);
+      const publicUrl = await uploadBufferToR2(file.buffer, file.originalname || 'upload.file', file.mimetype || 'application/octet-stream', storagePath);
       /* Error handled by route try-catch */
 
       const signedData = { signedUrl: publicUrl }; /* Signed URL mocked by R2 public URL */
@@ -1144,7 +1244,7 @@ router.patch('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
       .eq('id', msgId);
 
     if (error) throw error;
-    
+
     // Broadcast is handled by the client now
 
     res.json({ ok: true });
@@ -1259,7 +1359,7 @@ router.post('/:id/clear', isAuthenticated, async (req, res) => {
   try {
     const threadId = req.params.id;
     const userId = req.user._id.toString();
-    
+
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -1268,7 +1368,7 @@ router.post('/:id/clear', isAuthenticated, async (req, res) => {
     }
     user.cleared_chat_threads.set(threadId, new Date());
     await user.save();
-    
+
     res.json({ ok: true });
   } catch(err) {
     res.status(500).json({ error: err.message });
@@ -1280,7 +1380,7 @@ router.post('/:id/mute', isAuthenticated, async (req, res) => {
   try {
     const threadId = req.params.id;
     const userId = req.user._id.toString();
-    
+
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -1292,7 +1392,7 @@ router.post('/:id/mute', isAuthenticated, async (req, res) => {
       isMuted = true;
     }
     await user.save();
-    
+
     res.json({ success: true, isMuted });
   } catch(err) {
     res.status(500).json({ error: err.message });
@@ -1357,10 +1457,10 @@ router.post('/bulk-delete', isAuthenticated, async (req, res) => {
     if (!threadIds || !Array.isArray(threadIds)) return res.status(400).json({ error: 'Invalid threadIds' });
 
     const userId = req.user._id.toString();
-    
+
     // For DMs, delete the thread_members record for this user (hide it)
     // For Groups, leave the group.
-    
+
     for (const threadId of threadIds) {
       await sb.from('chat_thread_members').delete().match({ thread_id: threadId, user_id: userId });
     }
@@ -1403,40 +1503,62 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
 // ==========================================
 // Disappearing Messages
 // ==========================================
-router.post('/:id/disappearing', isAuthenticated, async (req, res) => {
+const ALLOWED_DISAPPEARING_TTLS = new Set([0, 86400, 604800, 7776000]);
+
+function getDisappearingTimeText(ttl) {
+  if (ttl === 86400) return '24 hours';
+  if (ttl === 604800) return '7 days';
+  if (ttl === 7776000) return '90 days';
+  return 'Off';
+}
+
+async function updateDisappearingMessages(req, res) {
   try {
     const threadId = req.params.id;
-    const { ttl } = req.body;
+    const ttl = Number(req.body.ttl ?? 0);
     const userId = req.user._id.toString();
 
-    // Verify membership
-    const { data: member } = await sb.from('chat_thread_members').select('id').eq('thread_id', threadId).eq('user_id', userId).maybeSingle();
+    if (!ALLOWED_DISAPPEARING_TTLS.has(ttl)) {
+      return res.status(400).json({ error: 'Invalid disappearing message duration' });
+    }
+
+    const { data: member } = await sb
+      .from('chat_thread_members')
+      .select('id')
+      .eq('thread_id', threadId)
+      .eq('user_id', userId)
+      .maybeSingle();
     if (!member) return res.status(403).json({ error: 'Not a member' });
 
-    // Format the time text
-    let timeText = 'Off';
-    if (ttl === 86400) timeText = '24 hours';
-    else if (ttl === 604800) timeText = '7 days';
-    else if (ttl === 7776000) timeText = '90 days';
+    const { error: threadErr } = await sb
+      .from('chat_threads')
+      .update({ message_ttl: ttl, updated_at: new Date().toISOString() })
+      .eq('id', threadId);
+    if (threadErr) throw threadErr;
 
-    // Insert a system message noting the change
-    const msgText = ttl === 0 
-      ? `Disappearing messages were turned off.`
+    const timeText = getDisappearingTimeText(ttl);
+    const msgText = ttl === 0
+      ? 'Disappearing messages were turned off.'
       : `Disappearing messages were set to ${timeText}.`;
 
-    const { data: msg } = await sb.from('chat_messages').insert([{
+    const { data: msg, error: msgErr } = await sb.from('chat_messages').insert([{
       thread_id: threadId,
       sender_id: userId,
+      sender_name: req.user.name || 'User',
+      user_avatar: req.user.profilePicture || null,
       message: JSON.stringify({ type: 'system', action: 'set_ttl', ttl, text: msgText }),
     }]).select().single();
+    if (msgErr) throw msgErr;
 
     broadcastToChannel(`thread:${threadId}`, 'new_message', { ...msg, attachments: [], reactions: {} });
     res.json({ success: true, ttl });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+}
 
+router.post('/:id/disappearing', isAuthenticated, updateDisappearingMessages);
+router.post('/:id/disappearing-messages', isAuthenticated, updateDisappearingMessages);
 // ==========================================
 // Thread Settings
 // ==========================================
@@ -1467,7 +1589,7 @@ router.put('/:id/replies', isAuthenticated, async (req, res) => {
       .single();
 
     if (error) throw error;
-    
+
     // Broadcast the setting change
     broadcastToChannel(`thread:${threadId}`, 'thread_updated', { allow_replies: data.allow_replies });
 
@@ -1577,9 +1699,9 @@ router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
     if (!poll.allow_multiple) {
       await sb.from('chat_poll_votes').delete().eq('poll_id', pollId).eq('user_id', userId);
     }
-    
+
     const { data: existing } = await sb.from('chat_poll_votes').select('id').eq('poll_id', pollId).eq('user_id', userId).eq('option_id', optionId).maybeSingle();
-    
+
     if (existing) {
       await sb.from('chat_poll_votes').delete().eq('id', existing.id);
     } else {
@@ -1592,10 +1714,10 @@ router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
       voteCounts[v.option_id] = (voteCounts[v.option_id] || 0) + 1;
     });
 
-    broadcastToChannel(`thread:${threadId}`, 'poll_vote', { 
-      pollId, 
+    broadcastToChannel(`thread:${threadId}`, 'poll_vote', {
+      pollId,
       voteCounts,
-      totalVoters: new Set((allVotes || []).map(v => v.user_id)).size 
+      totalVoters: new Set((allVotes || []).map(v => v.user_id)).size
     });
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
@@ -1613,7 +1735,7 @@ router.get('/:id/polls', isAuthenticated, async (req, res) => {
   try {
     const threadId = req.params.id;
     const { data: polls } = await sb.from('chat_polls').select('*').eq('thread_id', threadId).order('created_at', { ascending: false });
-    
+
     const result = await Promise.all((polls || []).map(async (poll) => {
       const { data: votes } = await sb.from('chat_poll_votes').select('option_id, user_id').eq('poll_id', poll.id);
       const voteCounts = {};
@@ -1791,7 +1913,7 @@ router.post('/forward', isAuthenticated, async (req, res) => {
 
     // 3. Prepare new messages and attachments
     const newMessagesToInsert = [];
-    
+
     // Sort original messages by creation time so they are forwarded in order
     const sortedMessages = originalMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     const now = new Date().toISOString();
@@ -1859,11 +1981,11 @@ router.post('/forward', isAuthenticated, async (req, res) => {
     }
 
     // 4. Update last_message metadata for all target threads
-    const updatePromises = validThreadIds.map(tid => 
+    const updatePromises = validThreadIds.map(tid =>
       sb.from('chat_threads')
-        .update({ 
-          last_message: 'Forwarded message', 
-          last_message_at: now 
+        .update({
+          last_message: 'Forwarded message',
+          last_message_at: now
         })
         .eq('id', tid)
     );
@@ -1908,7 +2030,7 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
     }).eq('id', messageId).eq('thread_id', threadId).select().single();
 
     if (error) throw error;
-    
+
     // Audit Log
     const { data: thread } = await sb.from('chat_threads').select('group_id').eq('id', threadId).single();
     if (thread?.group_id) {
@@ -1993,7 +2115,7 @@ router.get('/:id/messages/scheduled', isAuthenticated, async (req, res) => {
     const threadId = req.params.id;
     const userId = req.user._id.toString();
     const membership = await validateThreadMembership(userId, threadId);
-    
+
     // Allow users to see their own scheduled messages, admins to see all
     const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
     if (!membership && !isAdmin) return res.status(403).json({ error: 'Not authorized' });
@@ -2003,7 +2125,7 @@ router.get('/:id/messages/scheduled', isAuthenticated, async (req, res) => {
        query = query.eq('sender_id', userId);
     }
     const { data: messages, error } = await query.order('scheduled_for', { ascending: true });
-    
+
     if (error) throw error;
     res.json({ messages });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -2017,7 +2139,7 @@ router.patch('/:id/messages/scheduled/:msgId', isAuthenticated, async (req, res)
     const { id: threadId, msgId } = req.params;
     const userId = req.user._id.toString();
     const { message, scheduledFor } = req.body;
-    
+
     const membership = await validateThreadMembership(userId, threadId);
     const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
 

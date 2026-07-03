@@ -33,7 +33,7 @@ export function initChatSchedulerCron() {
       for (const schedMsg of pendingMessages) {
         try {
           // Check if thread still exists
-          const { data: thread, error: threadErr } = await sb.from('chat_threads').select('type, group_id').eq('id', schedMsg.thread_id).single();
+          const { data: thread, error: threadErr } = await sb.from('chat_threads').select('type, group_id, message_ttl').eq('id', schedMsg.thread_id).single();
           if (threadErr || !thread) {
             console.error('[ChatScheduler] Thread fetch failed', threadErr);
             await sb.from('chat_scheduled_messages').update({ status: 'failed' }).eq('id', schedMsg.id);
@@ -56,6 +56,10 @@ export function initChatSchedulerCron() {
             }
           }
 
+          const expiresAt = thread.message_ttl && thread.message_ttl > 0
+            ? new Date(Date.now() + thread.message_ttl * 1000).toISOString()
+            : null;
+
           // Insert into chat_messages
           const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
             thread_id: schedMsg.thread_id,
@@ -65,6 +69,7 @@ export function initChatSchedulerCron() {
             reply_to: schedMsg.reply_to,
             created_at: new Date().toISOString(),
             status: msgStatus,
+            expires_at: expiresAt,
             requires_acknowledgement: false // Could be added to scheduled messages if needed
           }).select('id').single();
 
@@ -96,6 +101,7 @@ export function initChatSchedulerCron() {
             reply_to: schedMsg.reply_to,
             is_deleted: false,
             created_at: new Date().toISOString(),
+            expires_at: expiresAt,
             attachments: actualAttachments,
           };
 

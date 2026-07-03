@@ -181,6 +181,15 @@ router.get("/process-scheduled-messages", async (req, res) => {
 
         for (const msg of pendingMessages) {
             try {
+                const { data: thread } = await sb
+                    .from('chat_threads')
+                    .select('message_ttl')
+                    .eq('id', msg.thread_id)
+                    .single();
+                const expiresAt = thread?.message_ttl && thread.message_ttl > 0
+                    ? new Date(Date.now() + thread.message_ttl * 1000).toISOString()
+                    : null;
+
                 // 1. Insert into chat_messages
                 const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
                     thread_id: msg.thread_id,
@@ -191,6 +200,7 @@ router.get("/process-scheduled-messages", async (req, res) => {
                     reply_to: msg.reply_to,
                     created_at: new Date().toISOString(),
                     status: 'approved',
+                    expires_at: expiresAt,
                 }).select('id').single();
 
                 if (insertErr) throw insertErr;
@@ -239,6 +249,7 @@ router.get("/process-scheduled-messages", async (req, res) => {
                     reply_to: msg.reply_to,
                     is_deleted: false,
                     created_at: new Date().toISOString(),
+                    expires_at: expiresAt,
                     attachments: attachments,
                 };
                 
@@ -448,6 +459,21 @@ router.get("/delete-expired-messages", async (req, res) => {
         
         const messageIds = expiredMessages.map(m => m.id);
         
+        // Fetch attachments for R2 cleanup
+        const { data: attachments } = await sb
+            .from('chat_attachments')
+            .select('file_url')
+            .in('message_id', messageIds);
+
+        if (attachments && attachments.length > 0) {
+            const { deleteFromR2 } = await import("../config/r2Client.js");
+            for (const att of attachments) {
+                if (att.file_url) {
+                    await deleteFromR2(att.file_url).catch(e => console.error("[Cron R2 Delete Error]", e.message));
+                }
+            }
+        }
+
         // Hard delete them
         const { error: deleteErr } = await sb
             .from('chat_messages')

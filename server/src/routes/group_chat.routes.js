@@ -1,7 +1,9 @@
 import express from 'express';
 import multer from 'multer';
+import { randomUUID } from 'crypto';
 import { isAuthenticated } from '../middleware/auth.middleware.js';
 import User from '../models/User.js';
+import Organization from '../models/Organization.js';
 import { primarySupabaseClient, studentNotesClient } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
@@ -14,6 +16,70 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB for group photos
 });
+
+function toStorageSlug(value, fallback = 'unknown') {
+  const raw = String(value || fallback).trim().toLowerCase();
+  const ascii = raw.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  return ascii
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || fallback;
+}
+
+function shortStorageId(value) {
+  return String(value || 'unknown').replace(/[^a-zA-Z0-9]/g, '').slice(-8) || 'unknown';
+}
+
+function sanitizeStorageFileName(fileName) {
+  const fallback = `group-photo-${Date.now()}`;
+  return String(fileName || fallback)
+    .replace(/[\\/:*?"<>|]+/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .slice(0, 120) || fallback;
+}
+
+async function getGroupAssetStorageContext(group, thread) {
+  let orgLabel = thread?.org_id || group?.org_id || 'platform';
+  if (orgLabel && /^[0-9a-fA-F]{24}$/.test(orgLabel)) {
+    try {
+      const org = await Organization.findById(orgLabel)
+        .select('name sidebar_name subdomain')
+        .lean();
+      orgLabel = org?.subdomain || org?.sidebar_name || org?.name || orgLabel;
+    } catch (err) {
+      console.warn('[Group Storage] Failed to resolve organization name:', err.message);
+    }
+  }
+
+  const groupLabel = group?.name || `group-${group?.id || thread?.group_id || 'unknown'}`;
+
+  return {
+    orgFolder: `${toStorageSlug(orgLabel, 'platform')}-${shortStorageId(thread?.org_id || group?.org_id)}`,
+    groupFolder: `${toStorageSlug(groupLabel, 'group-chat')}-${shortStorageId(thread?.id || group?.id)}`,
+  };
+}
+
+function buildGroupPhotoStoragePath(file, type, context) {
+  const now = new Date();
+  const year = String(now.getUTCFullYear());
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const safeName = sanitizeStorageFileName(file.originalname);
+  const assetFolder = type === 'banner' ? 'banners' : 'avatars';
+
+  return [
+    'chat',
+    'orgs',
+    context.orgFolder,
+    'groups',
+    context.groupFolder,
+    'group-profile',
+    assetFolder,
+    year,
+    month,
+    `${Date.now()}-${randomUUID()}-${safeName}`,
+  ].join('/');
+}
 
 // ──────────────────────────────────────────────
 // HELPERS
@@ -228,8 +294,8 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
     const type = req.body.type || 'avatar';
     if (type !== 'avatar' && type !== 'banner') return res.status(400).json({ error: 'Invalid photo type' });
 
-    const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const storagePath = `chat/groups/${req.params.id}/${type}_${Date.now()}_${safeName}`;
+    const storageContext = await getGroupAssetStorageContext(group, thread);
+    const storagePath = buildGroupPhotoStoragePath(req.file, type, storageContext);
 
     const publicUrl = await uploadBufferToR2(req.file.buffer, req.file.originalname || 'upload.file', req.file.mimetype || 'application/octet-stream', storagePath);
 
