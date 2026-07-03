@@ -26,10 +26,13 @@ jobs:
 
       - name: SSH and Deploy Backend
         uses: appleboy/ssh-action@master
+        env:
+          PRODUCTION_ENV: ${{ secrets.PRODUCTION_ENV }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: PRODUCTION_ENV
           script: |
             cd /var/www/classgrid_platform
             
@@ -39,7 +42,7 @@ jobs:
             
             # Go into server folder, install new packages, and restart PM2
             cd server
-            echo "${{ secrets.PRODUCTION_ENV }}" > .env
+            echo "$PRODUCTION_ENV" > .env
             npm install --omit=dev
             pm2 restart all
 
