@@ -1,0 +1,9 @@
+# CRITICAL PROJECT RULES
+
+**DO NOT EVER TEST LOCALLY. THIS IS STRICTLY BANNED.**
+
+1. This repository is **production-first**.
+2. **Localhost testing is strictly forbidden** and completely disabled for this project.
+3. No AI assistant (including this one) is allowed to ask the user to run `npm start` or `npm run dev` locally.
+4. Do not assume the user wants to test on their local computer. All testing, verifying, and operations must happen on the live production environment (`ganesha.classgrid.in`).
+5. **Never** advise the user to test anything on `localhost`.

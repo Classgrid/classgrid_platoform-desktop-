@@ -242,7 +242,7 @@ export function OrgBrandingCard() {
 
   // UI Components
   const SectionHeader = ({ num, title, description }: { num: number, title: string, description: string }) => (
-    <div className="flex flex-col gap-1 mb-6">
+    <div className="flex flex-col gap-1 mb-5">
       <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
         <span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{num}</span>
         {title}
@@ -256,9 +256,9 @@ export function OrgBrandingCard() {
   }: { 
     title: string, description: string, imgUrl?: string, onUploadClick: () => void, type: string, fallbackIcon: React.ReactNode 
   }) => (
-    <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-card hover:bg-muted/10 transition-colors group">
+    <div className="flex items-center justify-between py-3 group">
       <div className="flex gap-4 items-center">
-        <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-14 h-14 rounded-lg border border-border bg-muted/20 flex items-center justify-center overflow-hidden shrink-0">
           {imgUrl ? (
              <img src={imgUrl} alt={title} className="w-full h-full object-contain p-1" />
           ) : (
@@ -271,7 +271,7 @@ export function OrgBrandingCard() {
         </div>
       </div>
       <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-accent">
-        Upload / Replace
+        Upload
       </Button>
     </div>
   );
@@ -279,196 +279,177 @@ export function OrgBrandingCard() {
   if (isLoading) return <div className="p-8 flex justify-center"><Spinner /></div>;
 
   return (
-    <div className="flex flex-col w-full max-w-6xl mx-auto pb-20">
-      
-      {/* 0. Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+    <div className="bg-card border border-border rounded-xl shadow-sm mb-6">
+      <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Organization Branding</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage logos, favicon, website title, colors, and social links to white-label your platform.</p>
+          <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
+            <Palette size={18} className="text-foreground" /> Organization Branding
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Manage logos, favicon, website title, colors, and social links.</p>
         </div>
-        {/* The user wireframe scribbled this out, but keeping it invisible or subtle just in case. Leaving it out entirely to match mockup. */}
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-6 items-start">
-        
-        {/* LEFT COLUMN */}
-        <div className="flex flex-col gap-6 w-full xl:w-5/12">
+      <div className="flex flex-col gap-10 p-5 sm:p-6">
           
-          {/* 1. Brand Preview */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <SectionHeader num={1} title="Brand Preview" description="See how your branding will appear across the platform." />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Sidebar Preview */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold text-muted-foreground text-center">Sidebar Preview</span>
-                <div className="border border-border rounded-lg bg-background p-3 flex flex-col gap-3 h-32 shadow-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-muted rounded flex items-center justify-center overflow-hidden shrink-0">
-                      {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain" /> : <Building2 size={12} className="opacity-40" />}
-                    </div>
-                    <span className="text-sm font-bold truncate">{localSidebarName || data?.sidebar_name || "Organization"}</span>
-                  </div>
-                  <div className="flex flex-col gap-2 mt-2 opacity-40">
-                    <div className="h-2 w-16 bg-muted-foreground rounded-full" />
-                    <div className="h-2 w-20 bg-muted-foreground rounded-full" />
-                    <div className="h-2 w-12 bg-muted-foreground rounded-full" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Login Preview */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold text-muted-foreground text-center">Login Page Preview</span>
-                <div className="border border-border rounded-lg bg-background h-32 relative overflow-hidden shadow-sm">
-                   {data?.campus_photo_url ? (
-                     <img src={data.campus_photo_url} className="absolute inset-0 w-full h-full object-cover blur-[2px] opacity-60" />
-                   ) : (
-                     <div className="absolute inset-0 bg-primary/10" />
-                   )}
-                   <div className="absolute inset-x-2 top-4 bottom-2 bg-background/90 backdrop-blur-md rounded border border-border shadow-lg flex flex-col items-center justify-center p-2 gap-2">
-                     <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden border border-border/50">
-                        {data?.logo_url ? <img src={data.logo_url} className="w-full h-full object-contain p-1" /> : <ImageIcon size={14} className="opacity-40" />}
-                     </div>
-                     <span className="text-[10px] font-bold text-center truncate w-full">{localName || data?.name || "Welcome"}</span>
-                     <div className="w-16 h-4 bg-primary rounded mt-auto" style={{ backgroundColor: brandColors.primary }} />
-                   </div>
-                </div>
-              </div>
-
-              {/* Tab Preview */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold text-muted-foreground text-center">Browser Tab Preview</span>
-                <div className="border border-border rounded-lg bg-muted/30 h-32 p-2 flex flex-col shadow-sm">
-                  <div className="bg-background border border-border rounded flex items-center gap-2 p-1.5 shadow-sm max-w-[150px]">
-                    <div className="w-3.5 h-3.5 rounded-sm overflow-hidden shrink-0 bg-muted flex items-center justify-center">
-                      {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Globe size={10} className="opacity-40" />}
-                    </div>
-                    <span className="text-[10px] truncate">{localSiteTitle || data?.site_title || "Classgrid"}</span>
-                    <X size={10} className="ml-auto opacity-40 shrink-0" />
-                  </div>
-                  <div className="flex items-center gap-2 mt-2 px-1 opacity-40">
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. Website Identity */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <SectionHeader num={3} title="Website Identity" description="Set the names and title used across the platform." />
-            
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Browser Tab Title</label>
-                <input type="text" value={localSiteTitle} onChange={e => setLocalSiteTitle(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Institution - Home" />
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Institution Name (Full)</label>
-                <input type="text" value={localName} onChange={e => setLocalName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Vishwakarma Institute..." />
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <label className="text-xs font-semibold text-foreground w-40 shrink-0">Sidebar Short Name</label>
-                <input type="text" value={localSidebarName} onChange={e => setLocalSidebarName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="VIT" maxLength={22} />
-              </div>
-              
-              <div className="flex justify-end mt-2">
-                <Button size="sm" onClick={handleSaveIdentity} disabled={updateBranding.isPending}>
-                  {updateBranding.isPending ? <Spinner /> : "Save Identity"}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. Theme Colors */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-foreground">Primary Brand Color</label>
+        {/* 1. Brand Preview */}
+        <div className="flex flex-col">
+          <SectionHeader num={1} title="Brand Preview" description="See how your branding will appear across the platform." />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 ml-7">
+            {/* Sidebar Preview */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-muted-foreground text-center">Sidebar Preview</span>
+              <div className="border border-border rounded-lg bg-background p-3 flex flex-col gap-3 h-32 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <input type="color" value={toColorPickerValue(brandColors.primary || "")} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
-                  <input type="text" value={brandColors.primary} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                  <div className="w-6 h-6 bg-muted rounded flex items-center justify-center overflow-hidden shrink-0">
+                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain" /> : <Building2 size={12} className="opacity-40" />}
+                  </div>
+                  <span className="text-sm font-bold truncate">{localSidebarName || data?.sidebar_name || "Organization"}</span>
                 </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-foreground">Secondary Brand Color</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={toColorPickerValue(brandColors.secondary || "")} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
-                  <input type="text" value={brandColors.secondary} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                <div className="flex flex-col gap-2 mt-2 opacity-40">
+                  <div className="h-2 w-16 bg-muted-foreground rounded-full" />
+                  <div className="h-2 w-20 bg-muted-foreground rounded-full" />
+                  <div className="h-2 w-12 bg-muted-foreground rounded-full" />
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 p-4 border border-border rounded-xl bg-muted/20 flex flex-wrap items-center gap-4">
-              <span className="text-xs font-semibold text-muted-foreground mr-2">Preview:</span>
-              <button className="px-4 py-2 rounded-lg text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90" style={{ backgroundColor: brandColors.primary }}>
-                Primary Button
-              </button>
-              <button className="px-4 py-2 rounded-lg text-sm font-semibold border bg-transparent transition-colors hover:bg-muted" style={{ borderColor: brandColors.secondary, color: brandColors.secondary }}>
-                Secondary Button
-              </button>
-              <span className="text-sm font-semibold hover:underline cursor-pointer" style={{ color: brandColors.primary }}>
-                Link Text
-              </span>
+            {/* Login Preview */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-muted-foreground text-center">Login Preview</span>
+              <div className="border border-border rounded-lg bg-background h-32 relative overflow-hidden shadow-sm">
+                  {data?.campus_photo_url ? (
+                    <img src={data.campus_photo_url} className="absolute inset-0 w-full h-full object-cover blur-[2px] opacity-60" />
+                  ) : (
+                    <div className="absolute inset-0 bg-primary/10" />
+                  )}
+                  <div className="absolute inset-x-2 top-4 bottom-2 bg-background/90 backdrop-blur-md rounded border border-border shadow-lg flex flex-col items-center justify-center p-2 gap-2">
+                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden border border-border/50">
+                      {data?.logo_url ? <img src={data.logo_url} className="w-full h-full object-contain p-1" /> : <ImageIcon size={14} className="opacity-40" />}
+                    </div>
+                    <span className="text-[10px] font-bold text-center truncate w-full">{localName || data?.name || "Welcome"}</span>
+                    <div className="w-16 h-4 bg-primary rounded mt-auto" style={{ backgroundColor: brandColors.primary }} />
+                  </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 mt-6">
-              <Button size="sm" variant="outline" onClick={() => setBrandColors(resolveBrandColors(data))}>Reset</Button>
-              <Button size="sm" onClick={handleSaveBrandColors} disabled={updateBranding.isPending}>Save Colors</Button>
+            {/* Tab Preview */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-muted-foreground text-center">Tab View</span>
+              <div className="border border-border rounded-lg bg-muted/30 h-32 p-2 flex flex-col shadow-sm">
+                <div className="bg-background border border-border rounded flex items-center gap-2 p-1.5 shadow-sm max-w-[150px]">
+                  <div className="w-3.5 h-3.5 rounded-sm overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                    {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Globe size={10} className="opacity-40" />}
+                  </div>
+                  <span className="text-[10px] truncate">{localSiteTitle || data?.site_title || "Classgrid"}</span>
+                  <X size={10} className="ml-auto opacity-40 shrink-0" />
+                </div>
+                <div className="flex items-center gap-2 mt-2 px-1 opacity-40">
+                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-
-        {/* RIGHT COLUMN */}
-        <div className="flex flex-col gap-6 w-full xl:w-7/12">
+        {/* 2. Brand Assets */}
+        <div className="flex flex-col">
+          <SectionHeader num={2} title="Brand Assets" description="Upload your logos, favicon and campus photo." />
           
-          {/* 2. Brand Assets */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <SectionHeader num={2} title="Brand Assets" description="Upload your logos, favicon and campus photo." />
+          <div className="flex flex-col ml-7 divide-y divide-border">
+            <AssetRow 
+              title="College Logo" description="Displayed on Login Page and Admin Sidebar."
+              imgUrl={data?.logo_url} type="logo" fallbackIcon={<Building2 size={24} />}
+              onUploadClick={() => fileInputRef.current?.click()}
+            />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "logo"); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
+
+            <AssetRow 
+              title="Sidebar Logo" description="Displayed in the top-left sidebar menu."
+              imgUrl={data?.sidebar_logo_url} type="sidebar_logo" fallbackIcon={<Layout size={24} />}
+              onUploadClick={() => sidebarLogoInputRef.current?.click()}
+            />
+            <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "sidebar_logo"); if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = ""; }} />
+
+            <AssetRow 
+              title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
+              imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
+              onUploadClick={() => faviconInputRef.current?.click()}
+            />
+            <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
+
+            <AssetRow 
+              title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
+              imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
+              onUploadClick={() => campusInputRef.current?.click()}
+            />
+            <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
+          </div>
+        </div>
+
+        {/* 3. Website Identity */}
+        <div className="flex flex-col">
+          <SectionHeader num={3} title="Website Identity" description="Set the names and title used across the platform." />
+          
+          <div className="flex flex-col gap-4 ml-7">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
+              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Browser Tab Title</label>
+              <input type="text" value={localSiteTitle} onChange={e => setLocalSiteTitle(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Institution - Home" />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
+              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Institution Name</label>
+              <input type="text" value={localName} onChange={e => setLocalName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Vishwakarma Institute..." />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
+              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Sidebar Short Name</label>
+              <input type="text" value={localSidebarName} onChange={e => setLocalSidebarName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="VIT" maxLength={22} />
+            </div>
             
-            <div className="flex flex-col gap-3">
-              <AssetRow 
-                title="College Logo" description="Displayed on Login Page and Admin Sidebar."
-                imgUrl={data?.logo_url} type="logo" fallbackIcon={<Building2 size={24} />}
-                onUploadClick={() => fileInputRef.current?.click()}
-              />
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "logo"); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
-
-              <AssetRow 
-                title="Sidebar Logo" description="Displayed in the top-left sidebar menu."
-                imgUrl={data?.sidebar_logo_url} type="sidebar_logo" fallbackIcon={<Layout size={24} />}
-                onUploadClick={() => sidebarLogoInputRef.current?.click()}
-              />
-              <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "sidebar_logo"); if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = ""; }} />
-
-              <AssetRow 
-                title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
-                imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
-                onUploadClick={() => faviconInputRef.current?.click()}
-              />
-              <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
-
-              <AssetRow 
-                title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
-                imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
-                onUploadClick={() => campusInputRef.current?.click()}
-              />
-              <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
+            <div className="mt-2">
+              <Button size="sm" onClick={handleSaveIdentity} disabled={updateBranding.isPending}>
+                {updateBranding.isPending ? <Spinner className="mr-2" /> : null} Save Identity
+              </Button>
             </div>
           </div>
+        </div>
 
-          {/* 5. Social Links */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <SectionHeader num={5} title="Social Links" description="Add your social media links to display on the login page." />
-            
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {/* 4. Theme Colors */}
+        <div className="flex flex-col">
+          <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
+          
+          <div className="flex flex-col gap-6 ml-7">
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-foreground">Primary Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={toColorPickerValue(brandColors.primary || "")} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
+                  <input type="text" value={brandColors.primary} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="w-32 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-foreground">Secondary Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={toColorPickerValue(brandColors.secondary || "")} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
+                  <input type="text" value={brandColors.secondary} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="w-32 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button size="sm" onClick={handleSaveBrandColors} disabled={updateBranding.isPending}>Save Colors</Button>
+              <Button size="sm" variant="outline" onClick={() => setBrandColors(resolveBrandColors(data))}>Reset</Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. Social Links */}
+        <div className="flex flex-col">
+          <SectionHeader num={5} title="Social Links" description="Add your social media links to display on the login page." />
+          
+          <div className="flex flex-col ml-7">
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
                 <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10">
                   <SelectValue placeholder="Platform" />
@@ -484,50 +465,35 @@ export function OrgBrandingCard() {
                 </SelectContent>
               </Select>
               
-              <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary" />
+              <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
               
               <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
                 Add Link
               </Button>
             </div>
 
-            {/* List Header */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-muted-foreground border-b border-border mb-2">
-              <div className="col-span-3">Platform</div>
-              <div className="col-span-7">URL</div>
-              <div className="col-span-2 text-right">Actions</div>
-            </div>
-
-            {/* List Items */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-w-2xl">
               {data?.social_links && Object.keys(data.social_links).length > 0 ? Object.entries(data.social_links).map(([key, url]) => {
                 if (!url) return null;
                 const label = key.replace("_url", "").charAt(0).toUpperCase() + key.replace("_url", "").slice(1);
                 const iconSrc = SOCIAL_ICONS[key];
                 
                 return (
-                  <div key={key} className="grid grid-cols-12 gap-4 px-4 py-3 bg-background border border-border rounded-lg items-center hover:bg-muted/30 transition-colors">
-                    <div className="col-span-3 flex items-center gap-3">
+                  <div key={key} className="flex items-center justify-between px-4 py-3 bg-muted/20 border border-border rounded-lg hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-3">
                       {iconSrc ? (
                          <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" />
                       ) : (
                          <LinkIcon size={16} className="text-muted-foreground" />
                       )}
-                      <span className="text-sm font-semibold text-foreground">{label}</span>
-                    </div>
-                    <div className="col-span-7">
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate block w-full">
+                      <span className="text-sm font-semibold text-foreground w-24">{label}</span>
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate max-w-xs">
                         {url}
                       </a>
                     </div>
-                    <div className="col-span-2 flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                        <Camera size={14} /> {/* Placeholder for edit if they want it later */}
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleRemoveSocialLink(key)}>
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleRemoveSocialLink(key)}>
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
                 );
               }) : (
@@ -537,8 +503,8 @@ export function OrgBrandingCard() {
               )}
             </div>
           </div>
-
         </div>
+
       </div>
 
       <ImageCropperModal
@@ -553,3 +519,4 @@ export function OrgBrandingCard() {
     </div>
   );
 }
+

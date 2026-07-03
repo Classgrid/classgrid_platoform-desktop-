@@ -132,7 +132,6 @@ export function SharedSettingsPage() {
       {profileData?.role === "org_admin" && (
         <>
           <OrgBrandingCard />
-          <OrgNameCard />
           <CustomDomainCard />
           <OrgCodesCard />
           <DeleteOrgCard />
