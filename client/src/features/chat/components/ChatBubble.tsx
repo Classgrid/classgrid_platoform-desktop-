@@ -3,9 +3,11 @@ import { format } from "date-fns";
 
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield, Play } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield, Play, Info, Camera, Video } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
+import { MessageInfoModal } from "./MessageInfoModal";
 import { ImageGallery } from "@/features/shared/components/ImageGallery";
+import { PdfAttachment } from "./PdfAttachment";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,6 +107,7 @@ export function ChatBubble({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFullPicker, setShowFullPicker] = useState(false);
   const [isTextExpanded, setIsTextExpanded] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const isLongMessage = message.message && message.message.length > 800;
@@ -222,33 +225,7 @@ export function ChatBubble({
             </button>
           )}
 
-          {/* Reply Context — WhatsApp style */}
-          {message.reply_to && !(message.reply_to as any).isForwarded && !message.is_deleted && (
-            <div
-              className={`mb-1 rounded-lg overflow-hidden cursor-pointer w-full
-                ${isMine 
-                  ? "bg-[#0b6156] dark:bg-[#025144]" 
-                  : "bg-[#f0f0f0] dark:bg-[#1a2a32]"}
-              `}
-            >
-              <div className={`flex flex-col gap-0.5 pl-3 pr-3 py-2 border-l-4
-                ${isMine 
-                  ? "border-[#06cf9c]" 
-                  : "border-[#53bdeb] dark:border-[#53bdeb]"}
-              `}>
-                <span className={`text-[13px] font-semibold
-                  ${isMine 
-                    ? "text-[#06cf9c]" 
-                    : "text-[#53bdeb]"}
-                `}>{message.reply_to.sender_name}</span>
-                <span className={`text-[13px] line-clamp-2
-                  ${isMine 
-                    ? "text-white/70" 
-                    : "text-[#667781] dark:text-[#8696a0]"}
-                `}>{(typeof message.reply_to.message === 'string' ? message.reply_to.message : String(message.reply_to.message || "📎 Attachment")).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
-              </div>
-            </div>
-          )}
+
 
           <div
             className={`relative rounded-2xl px-4 py-2 flex flex-col gap-1 min-w-[120px] max-w-full overflow-hidden
@@ -298,6 +275,62 @@ export function ChatBubble({
                 <span>Forwarded</span>
               </div>
             )}
+
+            {message.reply_to && !(message.reply_to as any).isForwarded && !message.is_deleted && (() => {
+              const isReplyMe = message.reply_to.sender_id === currentUserId;
+              const senderName = isReplyMe ? "You" : message.reply_to.sender_name;
+              const nameColor = isReplyMe ? "text-emerald-600 dark:text-emerald-500" : "text-blue-500 dark:text-blue-400";
+              
+              let mediaIcon = null;
+              let mediaText = "";
+              let thumbUrl = null;
+              
+              if (message.reply_to.attachments && message.reply_to.attachments.length > 0) {
+                const firstAtt = message.reply_to.attachments[0];
+                if (firstAtt.file_type.startsWith("image/")) {
+                  mediaIcon = <Camera className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+                  mediaText = "Photo";
+                  thumbUrl = firstAtt.file_url;
+                } else if (firstAtt.file_type.startsWith("video/")) {
+                  mediaIcon = <Video className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+                  mediaText = "Video";
+                  thumbUrl = firstAtt.file_url;
+                } else if (firstAtt.file_type === "application/pdf") {
+                  mediaIcon = <FileText className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+                  mediaText = "PDF Document";
+                } else {
+                  mediaIcon = <FileText className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+                  mediaText = "Document";
+                }
+              }
+              
+              const textContent = message.reply_to.is_deleted ? "This message was deleted" : (message.reply_to.message ? String(message.reply_to.message).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "");
+
+              return (
+                <div className="relative bg-black/5 dark:bg-black/20 rounded-lg p-2 mb-1.5 overflow-hidden flex items-stretch gap-2 cursor-pointer hover:bg-black/10 dark:hover:bg-black/30 transition-colors">
+                  <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-emerald-500"></div>
+                  
+                  <div className="flex-1 min-w-0 pl-2 flex flex-col justify-center">
+                    <span className={`${nameColor} text-[13px] font-semibold leading-tight block mb-0.5 truncate`}>
+                      {senderName}
+                    </span>
+                    <span className="text-black/60 dark:text-white/70 text-[13px] leading-tight line-clamp-3 overflow-hidden flex items-start">
+                      {mediaIcon}
+                      <span className="line-clamp-3">
+                        {mediaText ? mediaText : textContent}
+                        {mediaText && textContent ? ` - ${textContent}` : ""}
+                      </span>
+                    </span>
+                  </div>
+                  
+                  {thumbUrl && (
+                    <div className="w-10 h-10 rounded shrink-0 bg-black/10 overflow-hidden flex items-center justify-center self-center ml-2">
+                       <img src={thumbUrl} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {message.is_deleted ? (
               <span className="text-[15px]">This message was deleted</span>
@@ -349,27 +382,15 @@ export function ChatBubble({
                         </div>
                       ))}
 
-                      {/* PDF attachments — thumbnail with preview */}
+                      {/* PDF attachments — WhatsApp style thumbnail with preview */}
                       {pdfAtts.map((att) => (
-                        <div
-                          key={att.id}
-                          onClick={() => onViewMedia?.(att)}
-                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-white/10 relative group cursor-pointer max-w-[300px]"
-                        >
-                          <div className="w-full h-[150px] bg-zinc-100 dark:bg-zinc-900 flex flex-col items-center justify-center gap-2">
-                            <FileText className="w-10 h-10 text-red-500" />
-                            <span className="text-zinc-600 dark:text-zinc-400 text-xs font-medium truncate max-w-[200px] px-2">{att.file_name}</span>
-                            <span className="text-zinc-400 dark:text-zinc-500 text-[10px]">{formatBytes(att.file_size)} • PDF</span>
-                          </div>
-                          <div className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${message.isSending ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}>
-                            <Plus className="text-white w-8 h-8" />
-                          </div>
-                          {message.isSending && (
-                            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
-                              <Spinner className="w-8 h-8 text-white mb-2" />
-                              <span className="text-white text-xs font-semibold tracking-wide">Uploading...</span>
-                            </div>
-                          )}
+                        <div key={att.id} className="w-[300px] mb-1">
+                          <PdfAttachment 
+                            url={att.file_url} 
+                            filename={att.file_name} 
+                            size={att.file_size} 
+                            isSending={message.isSending}
+                          />
                         </div>
                       ))}
 
@@ -623,6 +644,11 @@ export function ChatBubble({
                   <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
                 </ContextMenuItem>
               )}
+              {isMine && !message.is_deleted && (
+                <ContextMenuItem onClick={() => setInfoModalOpen(true)} className="cursor-pointer py-2">
+                  <Info className="w-4 h-4 mr-2" /> Message Info
+                </ContextMenuItem>
+              )}
               {message.message && (
                 <ContextMenuItem onClick={async () => {
                   try {
@@ -788,6 +814,7 @@ export function ChatBubble({
 
       </div>
     </div>
+    {infoModalOpen && <MessageInfoModal message={message} onClose={() => setInfoModalOpen(false)} />}
     </div>
   );
 }

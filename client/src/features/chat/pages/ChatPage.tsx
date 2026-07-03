@@ -901,6 +901,7 @@ export function ChatPage() {
                 onTyping={(isTyping, type) => sendTyping && sendTyping(isTyping, type)}
                 onOpenPollModal={() => setIsPollModalOpen(true)}
                 canSchedule={true}
+                currentUserId={currentUserId}
               />
             )}
           </>

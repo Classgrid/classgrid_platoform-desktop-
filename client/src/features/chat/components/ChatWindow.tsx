@@ -683,6 +683,7 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
           disabledReason={disabledReason}
           onOpenPollModal={thread.type === 'group' ? () => setIsCreatePollOpen(true) : undefined}
           canSchedule={true}
+          currentUserId={currentUserId}
           onTyping={() => {
             channelRef.current?.send({
               type: "broadcast",

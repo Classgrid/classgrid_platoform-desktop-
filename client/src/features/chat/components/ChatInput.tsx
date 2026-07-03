@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell } from "lucide-react";
+import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage } from "../services/chatApi";
@@ -35,9 +35,10 @@ interface ChatInputProps {
   disabledReason?: string;
   onOpenPollModal?: () => void;
   canSchedule?: boolean;
+  currentUserId?: string;
 }
 
-export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false, currentUserId }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -276,22 +277,68 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   return (
     <div className="flex flex-col bg-background border-t border-border">
       {/* Reply Preview */}
-      {replyTo && (
-        <div className="px-4 py-2 bg-accent/30 border-b border-border flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0 border-l-4 border-primary pl-3 py-1">
-            <span className="text-xs font-bold text-primary block truncate">{replyTo.sender_name}</span>
-            <span className="text-sm text-muted-foreground line-clamp-1">
-              {replyTo.is_deleted ? "This message was deleted" : (replyTo.message || "📎 Attachment").replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}
-            </span>
+      {replyTo && (() => {
+        const isMe = replyTo.sender_id === currentUserId;
+        const senderName = isMe ? "You" : replyTo.sender_name;
+        const nameColor = isMe ? "text-emerald-600 dark:text-emerald-500" : "text-blue-500 dark:text-blue-400";
+        
+        let mediaIcon = null;
+        let mediaText = "";
+        let thumbUrl = null;
+        
+        if (replyTo.attachments && replyTo.attachments.length > 0) {
+          const firstAtt = replyTo.attachments[0];
+          if (firstAtt.file_type.startsWith("image/")) {
+            mediaIcon = <Camera className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+            mediaText = "Photo";
+            thumbUrl = firstAtt.file_url;
+          } else if (firstAtt.file_type.startsWith("video/")) {
+            mediaIcon = <Video className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+            mediaText = "Video";
+            thumbUrl = firstAtt.file_url;
+          } else if (firstAtt.file_type === "application/pdf") {
+            mediaIcon = <FileText className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+            mediaText = "PDF Document";
+          } else {
+            mediaIcon = <FileText className="w-3.5 h-3.5 inline mr-1 opacity-70" />;
+            mediaText = "Document";
+          }
+        }
+        
+        const textContent = replyTo.is_deleted ? "This message was deleted" : (replyTo.message ? String(replyTo.message).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "");
+
+        return (
+          <div className="px-3 py-2 bg-transparent">
+            <div className="relative bg-black/5 dark:bg-black/20 rounded-lg p-2 overflow-hidden flex items-stretch gap-2 transition-colors">
+              <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-emerald-500"></div>
+              
+              <div className="flex-1 min-w-0 pl-2 flex flex-col justify-center">
+                <span className={`${nameColor} text-[13px] font-semibold leading-tight block mb-0.5 truncate`}>
+                  {senderName}
+                </span>
+                <span className="text-black/60 dark:text-white/70 text-[13px] leading-tight line-clamp-1 truncate flex items-center">
+                  {mediaIcon}
+                  {mediaText ? mediaText : textContent}
+                  {mediaText && textContent ? ` - ${textContent}` : ""}
+                </span>
+              </div>
+              
+              {thumbUrl && (
+                <div className="w-10 h-10 rounded shrink-0 bg-black/10 overflow-hidden flex items-center justify-center">
+                   <img src={thumbUrl} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <button
+                onClick={onCancelReply}
+                className="p-1.5 ml-2 mr-1 rounded-full hover:bg-black/10 dark:hover:bg-black/30 text-muted-foreground shrink-0 self-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onCancelReply}
-            className="p-1 rounded-full hover:bg-accent text-muted-foreground shrink-0"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Audio Preview */}
       {audioUrl && (

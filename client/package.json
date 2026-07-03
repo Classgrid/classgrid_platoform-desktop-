@@ -97,6 +97,7 @@
     "react-image-crop": "^11.1.2",
     "react-markdown": "^10.1.0",
     "react-mathquill": "^1.0.4",
+    "react-pdf": "^10.4.1",
     "react-player": "^3.4.0",
     "react-resizable-panels": "^4.9.0",
     "react-router-dom": "^7.13.1",
