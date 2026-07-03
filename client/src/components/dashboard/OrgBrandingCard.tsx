@@ -181,6 +181,86 @@ function FieldEditor({
           </Button>
         )}
       </div>
+  );
+}
+
+function ColorFieldEditor({ 
+  label, 
+  value, 
+  onSave, 
+  isSaving,
+}: { 
+  label: string;
+  value: string;
+  onSave: (val: string, onSuccessCallback: () => void) => void;
+  isSaving: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
+
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleSave = () => {
+    onSave(localValue, () => setIsEditing(false));
+  };
+
+  const handleCancel = () => {
+    setLocalValue(value);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase font-bold text-muted-foreground">{label}</label>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <input type="color" value={toColorPickerValue(localValue || "")} onChange={e => setLocalValue(e.target.value)} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
+            <input type="text" value={localValue} onChange={e => setLocalValue(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase outline-none transition-all" />
+          </div>
+        ) : (
+          <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground min-h-[38px] flex items-center gap-2">
+            <div className="h-5 w-5 rounded-md shadow-sm border border-border/50 shrink-0" style={{ backgroundColor: value }} />
+            <span className="uppercase">{value || <span className="text-muted-foreground italic">Not set</span>}</span>
+          </div>
+        )}
+
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={isSaving || !isValidHexColor(localValue)} 
+              className="flex-1 h-8 bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {isSaving ? <Spinner size="sm" className="mr-2" /> : null} Save
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleCancel} 
+              disabled={isSaving} 
+              className="px-3 h-8"
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => setIsEditing(true)} 
+            className="w-full text-xs font-medium h-8"
+          >
+            Edit
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -631,28 +711,27 @@ export function OrgBrandingCard() {
         <div className="flex flex-col">
           <SectionHeader num={4} title="Theme Colors" description="Choose primary and secondary colors for the public website." />
           
-          <div className="flex flex-col gap-6 ml-7">
-            <div className="flex flex-col sm:flex-row gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-foreground">Primary Color</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={toColorPickerValue(brandColors.primary || "")} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
-                  <input type="text" value={brandColors.primary} onChange={e => setBrandColors(c => ({...c, primary: e.target.value}))} className="w-32 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-foreground">Secondary Color</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={toColorPickerValue(brandColors.secondary || "")} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1" />
-                  <input type="text" value={brandColors.secondary} onChange={e => setBrandColors(c => ({...c, secondary: e.target.value}))} className="w-32 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary uppercase" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button size="sm" onClick={handleSaveBrandColors} disabled={updateBranding.isPending}>Save Colors</Button>
-              <Button size="sm" variant="outline" onClick={() => setBrandColors(resolveBrandColors(data))}>Reset</Button>
-            </div>
+          <div className="flex flex-col gap-6 ml-7 max-w-sm">
+            <ColorFieldEditor
+              label="Primary Color"
+              value={brandColors.primary}
+              isSaving={updateBranding.isPending}
+              onSave={(val, onSuccess) => {
+                updateBranding.mutate({
+                  brand_colors: { primary: val, secondary: brandColors.secondary },
+                }, { onSuccess: () => { toast.success("Primary color updated"); onSuccess(); setBrandColors(c => ({...c, primary: val})); }});
+              }}
+            />
+            <ColorFieldEditor
+              label="Secondary Color"
+              value={brandColors.secondary}
+              isSaving={updateBranding.isPending}
+              onSave={(val, onSuccess) => {
+                updateBranding.mutate({
+                  brand_colors: { primary: brandColors.primary, secondary: val },
+                }, { onSuccess: () => { toast.success("Secondary color updated"); onSuccess(); setBrandColors(c => ({...c, secondary: val})); }});
+              }}
+            />
           </div>
         </div>
 
