@@ -679,8 +679,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 50), async (
     }
 
     // Message length
-    if (msgText.length > 30000) {
-      return res.status(400).json({ error: 'Message too long (max 30000 characters)' });
+    if (msgText.length > 65536) {
+      return res.status(400).json({ error: 'Message too long (max 65536 characters)' });
     }
 
     // ── PARALLEL: Validate membership + fetch thread in one round-trip ──
