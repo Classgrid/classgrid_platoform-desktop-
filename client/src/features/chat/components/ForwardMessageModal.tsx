@@ -28,9 +28,15 @@ export function ForwardMessageModal({
   const [selectedTargetIds, setSelectedTargetIds] = useState<Set<string>>(new Set());
   const [isForwarding, setIsForwarding] = useState(false);
 
-  const filteredThreads = threads.filter((t) =>
-    t.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredThreads = threads.filter((t) => {
+    const isAnnouncementMode = t.sendMessagesPolicy === "admin_only";
+    const amIMember = t.myRole === "member";
+    const isInputDisabled = (isAnnouncementMode || t.allowReplies === false) && amIMember;
+    
+    if (isInputDisabled) return false;
+    
+    return t.name?.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const handleToggleSelect = (threadId: string) => {
     const next = new Set(selectedTargetIds);

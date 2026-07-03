@@ -356,7 +356,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 </div>
               </div>
             ) : (
-            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-2xl flex items-end hover:border-primary focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all duration-200 pl-2">
+            <div className="flex-1 min-h-[44px] bg-accent/50 border border-border rounded-[24px] flex items-end hover:border-primary focus-within:border-primary transition-all duration-200 pl-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="p-2 mb-1 text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none rounded-full hover:bg-muted">
@@ -396,9 +396,19 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     setFiles(prev => [...prev, ...pastedFiles].slice(0, 50));
                     return;
                   }
-                  const text = e.clipboardData.getData("text/plain");
-                  if (text) {
-                    document.execCommand("insertText", false, text);
+                  let html = e.clipboardData.getData("text/html");
+                  if (html) {
+                    html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
+                    const cleanHtml = DOMPurify.sanitize(html, {
+                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'],
+                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
+                    });
+                    document.execCommand("insertHTML", false, cleanHtml);
+                  } else {
+                    const text = e.clipboardData.getData("text/plain");
+                    if (text) {
+                      document.execCommand("insertText", false, text);
+                    }
                   }
                 }}
                 onKeyDown={(e) => {
@@ -439,7 +449,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     }
                   }
                 }}
-                className="w-full bg-transparent resize-none outline-none py-3 px-4 text-sm text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none min-h-[44px] max-h-[120px] overflow-y-auto cursor-text [&_a]:text-blue-500 [&_a]:underline"
+                className="w-full bg-transparent resize-none outline-none focus:outline-none focus:ring-0 py-3 px-4 text-sm text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none min-h-[44px] max-h-[120px] overflow-y-auto cursor-text [&_a]:text-blue-500 [&_a]:underline"
               />
             </div>
             )}

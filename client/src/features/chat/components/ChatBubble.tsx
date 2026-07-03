@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 
 import DOMPurify from "dompurify";
+import { marked } from "marked";
 import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
@@ -384,7 +385,7 @@ export function ChatBubble({
                 {message.message && !poll && (
                   <div className="relative text-[15px] whitespace-pre-wrap leading-relaxed break-words break-all [word-break:break-word] prose prose-sm dark:prose-invert max-w-none [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1">
                     <span dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { 
+                      __html: DOMPurify.sanitize(marked.parse((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string, { 
                         ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
                         ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
                       }) 
@@ -551,9 +552,26 @@ export function ChatBubble({
                 </ContextMenuItem>
               )}
               {message.message && (
-                <ContextMenuItem onClick={() => {
-                  navigator.clipboard.writeText(message.message);
-                  toast.success("Copied to clipboard");
+                <ContextMenuItem onClick={async () => {
+                  try {
+                    const blobHtml = new Blob([message.message], { type: 'text/html' });
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = message.message;
+                    const plainText = tempDiv.innerText || tempDiv.textContent || '';
+                    const blobText = new Blob([plainText], { type: 'text/plain' });
+                    const item = new ClipboardItem({
+                      'text/html': blobHtml,
+                      'text/plain': blobText
+                    });
+                    await navigator.clipboard.write([item]);
+                    toast.success("Copied to clipboard");
+                  } catch (err) {
+                    // Fallback for browsers that don't support ClipboardItem fully
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = message.message;
+                    navigator.clipboard.writeText(tempDiv.innerText || tempDiv.textContent || message.message);
+                    toast.success("Copied to clipboard");
+                  }
                 }} className="cursor-pointer py-2">
                   <Copy className="w-4 h-4 mr-2" /> Copy
                 </ContextMenuItem>
