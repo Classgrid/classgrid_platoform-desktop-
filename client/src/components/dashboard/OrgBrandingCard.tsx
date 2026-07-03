@@ -311,7 +311,7 @@ function SocialLinkRow({ keyName, url, iconSrc, label, onUpdate, onRemove }: any
       <div className="flex items-center gap-3 overflow-hidden">
         {iconSrc ? <img src={iconSrc} alt={label} className="w-5 h-5 object-contain shrink-0" /> : <LinkIcon size={16} className="text-muted-foreground shrink-0" />}
         <span className="text-sm font-semibold text-foreground w-20 sm:w-24 shrink-0">{label}</span>
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate block">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-emerald-500 truncate block">
           {url}
         </a>
       </div>
