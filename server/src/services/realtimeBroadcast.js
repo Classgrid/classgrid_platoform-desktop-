@@ -15,24 +15,19 @@
  *   - "classroom:{id}"     → classroom chat
  */
 
-let _getIO = null;
+let _socketModule = null;
 
-// Lazy import to avoid circular dependency (socket.service.js imports models, etc.)
+// Lazy import to avoid circular dependency
 async function getIO() {
-  if (!_getIO) {
+  if (!_socketModule) {
     try {
-      const { getIO: fn } = await import("./socket.service.js");
-      _getIO = fn;
+      _socketModule = await import("./socket.service.js");
     } catch (err) {
       console.error("[Realtime] Failed to import socket.service.js:", err.message);
       return null;
     }
   }
-  try {
-    return _getIO();
-  } catch {
-    return null;
-  }
+  return _socketModule.io;
 }
 
 /**
