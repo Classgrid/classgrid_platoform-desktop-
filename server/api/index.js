@@ -216,6 +216,20 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ---------- API ROOT STATUS INTERCEPTOR ---------- */
+app.get("/", (req, res, next) => {
+  const host = req.hostname || "";
+  if (host === "api.classgrid.in" || host.startsWith("api.localhost") || host === "localhost") {
+    return res.json({ 
+      name: "Ultimate Classgrid API", 
+      version: "3.0.0", 
+      status: "online", 
+      env: process.env.NODE_ENV
+    });
+  }
+  next();
+});
+
 /* ---------- STATIC FILES ---------- */
 const isProduction = process.env.NODE_ENV === "production";
 const clientDistPath = path.join(__dirname, "../../client/dist");
