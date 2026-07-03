@@ -104,6 +104,16 @@ const SOCIAL_ICONS: Record<string, string> = {
   github_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/github-svgrepo-com.svg",
 };
 
+const ALL_SOCIAL_OPTIONS = [
+  { value: "instagram_url", label: "Instagram" },
+  { value: "youtube_url", label: "YouTube" },
+  { value: "facebook_url", label: "Facebook" },
+  { value: "linkedin_url", label: "LinkedIn" },
+  { value: "twitter_url", label: "Twitter" },
+  { value: "github_url", label: "GitHub" },
+  { value: "website_url", label: "Website" },
+];
+
 function FieldEditor({ 
   label, 
   value, 
@@ -352,6 +362,20 @@ export function OrgBrandingCard() {
     queryKey: ["org-branding"],
     queryFn: () => apiClient.get("/api/org-admin/branding").then((r) => r.data),
   });
+
+  const availableSocialOptions = ALL_SOCIAL_OPTIONS.filter(
+    (opt) => !(data?.social_links as any)?.[opt.value]
+  );
+
+  React.useEffect(() => {
+    if (availableSocialOptions.length > 0) {
+      if (!selectedPlatform || !availableSocialOptions.some(opt => opt.value === selectedPlatform)) {
+        setSelectedPlatform(availableSocialOptions[0].value);
+      }
+    } else {
+      setSelectedPlatform("");
+    }
+  }, [data?.social_links, selectedPlatform]);
 
   const updateBranding = useMutation({
     mutationFn: (updates: Partial<BrandingData>) => apiClient.patch("/api/org-admin/branding", updates),
@@ -807,24 +831,20 @@ export function OrgBrandingCard() {
             
             <div className="flex flex-col ml-7">
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                <Select value={selectedPlatform} onValueChange={setSelectedPlatform} disabled={availableSocialOptions.length === 0}>
                   <SelectTrigger className="w-full sm:w-[160px] bg-background border-border h-10 focus:ring-1 focus:ring-emerald-500">
-                    <SelectValue placeholder="Platform" />
+                    <SelectValue placeholder={availableSocialOptions.length === 0 ? "All Added" : "Platform"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="instagram_url">Instagram</SelectItem>
-                    <SelectItem value="youtube_url">YouTube</SelectItem>
-                    <SelectItem value="facebook_url">Facebook</SelectItem>
-                    <SelectItem value="linkedin_url">LinkedIn</SelectItem>
-                    <SelectItem value="twitter_url">Twitter</SelectItem>
-                    <SelectItem value="github_url">GitHub</SelectItem>
-                    <SelectItem value="website_url">Website</SelectItem>
+                    {availableSocialOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 
-                <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 max-w-sm" />
+                <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} disabled={availableSocialOptions.length === 0} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 max-w-sm disabled:opacity-50" />
                 
-                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending || availableSocialOptions.length === 0} className="h-10 shrink-0 px-6 bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
                   Add Link
                 </Button>
               </div>
