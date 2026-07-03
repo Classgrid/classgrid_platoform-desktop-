@@ -709,8 +709,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             >
               {scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {previewFile && (

@@ -215,8 +215,8 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
               </div>
             )}
           </motion.div>
-        )
-        )}
+          );
+        })}
       </div>
 
       {/* ──────────── FULL SCREEN LIGHTBOX ──────────── */}
