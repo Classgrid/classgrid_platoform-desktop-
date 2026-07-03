@@ -64,20 +64,26 @@ const toColorPickerValue = (value: string) => {
   return "#000000";
 };
 
-const resolveBrandColors = (branding?: BrandingData) => ({
-  primary: normalizeHexInput(
+const resolveBrandColors = (branding?: BrandingData) => {
+  let primary = normalizeHexInput(
     branding?.brand_colors?.primary ||
       branding?.theme_colors?.primary ||
       branding?.branding?.theme_colors?.primary ||
       DEFAULT_BRAND_COLORS.primary
-  ),
-  secondary: normalizeHexInput(
+  );
+  let secondary = normalizeHexInput(
     branding?.brand_colors?.secondary ||
       branding?.theme_colors?.secondary ||
       branding?.branding?.theme_colors?.secondary ||
       DEFAULT_BRAND_COLORS.secondary
-  ),
-});
+  );
+
+  // If the backend returns the old default blue, override it to the new emerald green for the previews
+  if (primary.toLowerCase() === "#6366f1") primary = "#10b981";
+  if (secondary.toLowerCase() === "#4f46e5") secondary = "#059669";
+
+  return { primary, secondary };
+};
 
 const SOCIAL_ICONS: Record<string, string> = {
   instagram_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/instagram-2-1-logo-svgrepo-com.svg",
