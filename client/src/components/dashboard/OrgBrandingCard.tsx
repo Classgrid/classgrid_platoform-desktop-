@@ -566,10 +566,10 @@ export function OrgBrandingCard() {
                 {/* Org header */}
                 <div className="flex items-center gap-2">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 text-white shadow-sm"
-                    style={{ backgroundColor: brandColors.primary }}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 text-white shadow-sm ${data?.sidebar_logo_url ? 'bg-transparent' : ''}`}
+                    style={data?.sidebar_logo_url ? {} : { backgroundColor: brandColors.primary }}
                   >
-                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain p-0.5" /> : <Building2 size={18} />}
+                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain rounded-xl" /> : <Building2 size={18} />}
                   </div>
                   <div className="flex flex-col flex-1 truncate">
                     <span className="text-[14px] font-bold truncate text-foreground leading-tight">{localSidebarName || data?.sidebar_name || "Organization"}</span>
