@@ -83,13 +83,13 @@ export function SidebarUserMenu({ user, customTrigger }: { user: { name: string;
             <DropdownMenuItem className="justify-between rounded-md py-1.5 px-3 text-sm focus:bg-transparent cursor-default">
               <span>Theme</span>
               <div className="flex items-center gap-1 bg-muted rounded-full p-0.5 border border-border">
-                <div onClick={() => setTheme("system")} className={`p-1 rounded-full cursor-pointer ${theme === 'system' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                <div onClick={() => setTheme("system")} className={`p-1 rounded-full cursor-pointer transition-all ${theme === 'system' ? 'bg-foreground text-background shadow-md' : 'hover:bg-foreground/10 text-muted-foreground'}`}>
                   <Icons.Monitor className="w-3 h-3" />
                 </div>
-                <div onClick={() => setTheme("light")} className={`p-1 rounded-full cursor-pointer ${theme === 'light' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                <div onClick={() => setTheme("light")} className={`p-1 rounded-full cursor-pointer transition-all ${theme === 'light' ? 'bg-foreground text-background shadow-md' : 'hover:bg-foreground/10 text-muted-foreground'}`}>
                   <Icons.Sun className="w-3 h-3" />
                 </div>
-                <div onClick={() => setTheme("dark")} className={`p-1 rounded-full cursor-pointer ${theme === 'dark' ? 'bg-background shadow-sm border border-border/50 text-foreground' : 'hover:bg-background/50 text-muted-foreground'}`}>
+                <div onClick={() => setTheme("dark")} className={`p-1 rounded-full cursor-pointer transition-all ${theme === 'dark' ? 'bg-foreground text-background shadow-md' : 'hover:bg-foreground/10 text-muted-foreground'}`}>
                   <Icons.Moon className="w-3 h-3" />
                 </div>
               </div>
