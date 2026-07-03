@@ -518,17 +518,25 @@ export function ChatPage() {
 
   // 2. Active Thread Updates (via Thread channel)
   const { sendTyping } = useThreadChannel(activeThread?.id || null, currentUserId || null, {
-    onNewMessage: (msg: ChatMessage) => {
+    new_message: (payload: any) => {
+      // Security/Sanity Check: Make sure the message actually belongs to this thread!
+      // This prevents ghost messages if the Socket is accidentally still subscribed to multiple threads.
+      if (activeThread && payload.thread_id !== activeThread.id) {
+        return;
+      }
       setMessages((prev) => {
-        if (prev.find((m) => m.id === msg.id)) return prev;
-        return [...prev, msg];
+        // If we already have this message (e.g. from optimistic UI), don't duplicate it.
+        if (prev.some((msg) => msg.id === payload.id)) {
+          return prev;
+        }
+        return [...prev, payload];
       });
       // Immediately clear their typing/uploading indicator once their message arrives
       setTypingUsers((prev) => {
         const next = { ...prev };
-        if (next[msg.sender_id]) {
-          clearTimeout(next[msg.sender_id].timeout);
-          delete next[msg.sender_id];
+        if (next[payload.sender_id]) {
+          clearTimeout(next[payload.sender_id].timeout);
+          delete next[payload.sender_id];
         }
         return next;
       });

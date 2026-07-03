@@ -63,7 +63,7 @@ export const initSocket = (server) => {
         console.log(`🔌 Socket connected: ${socket.userId} (Org: ${orgId})`);
 
         // Ensure consumer group exists (catch if it already exists)
-        if (orgId) {
+        if (orgId && redisClient) {
             redisClient.xgroup("CREATE", orgStreamKey, STREAM_GROUP, "0", "MKSTREAM").catch(() => {});
         }
 
