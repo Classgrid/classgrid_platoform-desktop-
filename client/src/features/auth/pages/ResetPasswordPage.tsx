@@ -293,7 +293,7 @@ export function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none focus:ring-0 border-none focus:border-transparent"
               >
                 {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </button>
@@ -352,7 +352,7 @@ export function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground dark:text-white transition-colors focus:outline-none focus:ring-0 border-none focus:border-transparent"
                 >
                   {showConfirmPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </button>
