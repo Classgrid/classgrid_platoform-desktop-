@@ -134,6 +134,7 @@ export function SharedSettingsPage() {
           <OrgBrandingCard />
           <CustomDomainCard />
           <OrgCodesCard />
+          <SettingsChangePasswordCard />
           <DeleteOrgCard />
         </>
       )}
