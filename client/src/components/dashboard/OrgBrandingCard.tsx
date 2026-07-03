@@ -185,7 +185,7 @@ function FieldEditor({
             size="sm" 
             variant="outline" 
             onClick={() => setIsEditing(true)} 
-            className="w-full text-xs font-medium h-8"
+            className="w-full text-xs font-medium h-8 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30"
           >
             Edit
           </Button>
@@ -266,7 +266,7 @@ function ColorFieldEditor({
             size="sm" 
             variant="outline" 
             onClick={() => setIsEditing(true)} 
-            className="w-full text-xs font-medium h-8"
+            className="w-full text-xs font-medium h-8 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30"
           >
             Edit
           </Button>
@@ -316,7 +316,7 @@ function SocialLinkRow({ keyName, url, iconSrc, label, onUpdate, onRemove }: any
         </a>
       </div>
       <div className="flex items-center gap-1 shrink-0 ml-2">
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setIsEditing(true)}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10" onClick={() => setIsEditing(true)}>
           <Pencil size={14} />
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => onRemove(keyName)}>
@@ -530,7 +530,7 @@ export function OrgBrandingCard() {
           <>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
+                <Button variant="outline" size="sm" className="shrink-0 bg-background shadow-sm hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 h-8 px-3">
                   Preview
                 </Button>
               </DialogTrigger>
@@ -545,7 +545,7 @@ export function OrgBrandingCard() {
             </Button>
           </>
         )}
-        <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
+        <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 h-8 px-3">
           {imgUrl ? "Change" : "Upload"}
         </Button>
       </div>
@@ -824,7 +824,7 @@ export function OrgBrandingCard() {
                 
                 <input type="url" placeholder="https://..." value={platformUrl} onChange={e => setPlatformUrl(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm h-10 focus:ring-1 focus:ring-primary max-w-sm" />
                 
-                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6">
+                <Button onClick={handleAddSocialLink} disabled={!platformUrl.trim() || updateBranding.isPending} className="h-10 shrink-0 px-6 bg-emerald-600 hover:bg-emerald-700 text-white">
                   Add Link
                 </Button>
               </div>
