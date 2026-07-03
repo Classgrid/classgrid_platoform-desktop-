@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Globe, Trash2, Eye, Upload, Plus, X, Palette, Image as ImageIcon, Link as LinkIcon, Building2, Layout, LayoutTemplate } from "lucide-react";
+import { Camera, Globe, Trash2, Eye, Upload, Plus, X, Palette, Image as ImageIcon, Link as LinkIcon, Building2, Layout, LayoutTemplate, Home, Users, User, ArrowLeft, ArrowRight, RotateCw, Lock, Pencil } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
@@ -87,6 +87,148 @@ const SOCIAL_ICONS: Record<string, string> = {
   twitter_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/new-twitter-x-logo-twitter-icon-x-social-media-icon-free-png.webp",
   github_url: "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/github-svgrepo-com.svg",
 };
+
+function FieldEditor({ 
+  label, 
+  value, 
+  onSave, 
+  isSaving,
+  placeholder, 
+  maxLength 
+}: { 
+  label: string;
+  value: string;
+  onSave: (val: string, onSuccessCallback: () => void) => void;
+  isSaving: boolean;
+  placeholder: string;
+  maxLength?: number;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
+
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleSave = () => {
+    onSave(localValue, () => setIsEditing(false));
+  };
+
+  const handleCancel = () => {
+    setLocalValue(value);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase font-bold text-muted-foreground">{label}</label>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {isEditing ? (
+          <input
+            type="text"
+            value={localValue}
+            onChange={(e) => {
+              const val = maxLength ? e.target.value.slice(0, maxLength) : e.target.value;
+              setLocalValue(val);
+            }}
+            maxLength={maxLength}
+            placeholder={placeholder}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
+        ) : (
+          <div className="w-full bg-muted/20 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground min-h-[38px] flex items-center">
+            {value ? value : <span className="text-muted-foreground italic">Not set</span>}
+          </div>
+        )}
+
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={isSaving || !localValue.trim()} 
+              className="flex-1 h-8"
+            >
+              {isSaving ? <Spinner size="sm" className="mr-2" /> : null} Save
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleCancel} 
+              disabled={isSaving} 
+              className="px-3 h-8"
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => setIsEditing(true)} 
+            className="w-full text-xs font-medium h-8"
+          >
+            Edit
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SocialLinkRow({ keyName, url, iconSrc, label, onUpdate, onRemove }: any) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localUrl, setLocalUrl] = useState(url);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onUpdate(keyName, localUrl);
+    setIsSaving(false);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-4 py-3 bg-muted/30 border border-border rounded-lg">
+        <div className="flex items-center gap-3 w-32 shrink-0">
+          {iconSrc ? <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" /> : <LinkIcon size={16} className="text-muted-foreground" />}
+          <span className="text-sm font-semibold text-foreground">{label}</span>
+        </div>
+        <input type="url" value={localUrl} onChange={e => setLocalUrl(e.target.value)} className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary" />
+        <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
+          <Button size="sm" onClick={handleSave} disabled={isSaving || !localUrl.trim()}>
+            {isSaving ? <Spinner size="sm" /> : "Save"}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => { setLocalUrl(url); setIsEditing(false); }} disabled={isSaving}>Cancel</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between px-4 py-3 bg-muted/20 border border-border rounded-lg hover:bg-muted/30 transition-colors">
+      <div className="flex items-center gap-3 overflow-hidden">
+        {iconSrc ? <img src={iconSrc} alt={label} className="w-5 h-5 object-contain shrink-0" /> : <LinkIcon size={16} className="text-muted-foreground shrink-0" />}
+        <span className="text-sm font-semibold text-foreground w-20 sm:w-24 shrink-0">{label}</span>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate block">
+          {url}
+        </a>
+      </div>
+      <div className="flex items-center gap-1 shrink-0 ml-2">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setIsEditing(true)}>
+          <Pencil size={14} />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => onRemove(keyName)}>
+          <Trash2 size={14} />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function OrgBrandingCard() {
   const queryClient = useQueryClient();
@@ -218,13 +360,18 @@ export function OrgBrandingCard() {
     toast.success("Social link removed!");
   };
 
-  const handleSaveIdentity = async () => {
+  const handleUpdateSocialLink = async (key: string, url: string) => {
+    const currentLinks = data?.social_links || {};
     await updateBranding.mutateAsync({
-      site_title: localSiteTitle,
-      name: localName,
-      sidebar_name: localSidebarName
+      social_links: { ...currentLinks, [key]: url.trim() }
     });
-    toast.success("Website Identity saved successfully!");
+    toast.success("Social link updated successfully!");
+  };
+
+  const handleSaveIdentity = async (updates: Partial<BrandingData>, onSuccess: () => void) => {
+    await updateBranding.mutateAsync(updates);
+    toast.success("Identity updated successfully!");
+    onSuccess();
   };
 
   const handleSaveBrandColors = async () => {
@@ -295,60 +442,87 @@ export function OrgBrandingCard() {
         <div className="flex flex-col">
           <SectionHeader num={1} title="Brand Preview" description="See how your branding will appear across the platform." />
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 ml-7">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ml-0 sm:ml-7">
             {/* Sidebar Preview */}
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold text-muted-foreground text-center">Sidebar Preview</span>
-              <div className="border border-border rounded-lg bg-background p-3 flex flex-col gap-3 h-32 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-muted rounded flex items-center justify-center overflow-hidden shrink-0">
-                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain" /> : <Building2 size={12} className="opacity-40" />}
+            <div className="border border-border/40 rounded-xl p-5 flex flex-col items-center gap-4 bg-background">
+              <span className="text-sm font-bold text-foreground">Sidebar Preview</span>
+              <div className="w-full max-w-[200px] border border-border/40 rounded-xl bg-background p-4 flex flex-col gap-4 h-56 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 text-white shadow-sm"
+                    style={{ backgroundColor: brandColors.primary }}
+                  >
+                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain p-0.5" /> : <Building2 size={20} />}
                   </div>
-                  <span className="text-sm font-bold truncate">{localSidebarName || data?.sidebar_name || "Organization"}</span>
+                  <span className="text-[15px] font-bold truncate text-foreground">{localSidebarName || data?.sidebar_name || "Organization"}</span>
                 </div>
-                <div className="flex flex-col gap-2 mt-2 opacity-40">
-                  <div className="h-2 w-16 bg-muted-foreground rounded-full" />
-                  <div className="h-2 w-20 bg-muted-foreground rounded-full" />
-                  <div className="h-2 w-12 bg-muted-foreground rounded-full" />
+                <div className="w-full h-[1px] bg-border/30" />
+                <div className="flex flex-col gap-4 mt-1">
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <Home size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Dashboard</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <Users size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Students</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <User size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Faculty</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Login Preview */}
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold text-muted-foreground text-center">Login Preview</span>
-              <div className="border border-border rounded-lg bg-background h-32 relative overflow-hidden shadow-sm">
-                  {data?.campus_photo_url ? (
-                    <img src={data.campus_photo_url} className="absolute inset-0 w-full h-full object-cover blur-[2px] opacity-60" />
-                  ) : (
-                    <div className="absolute inset-0 bg-primary/10" />
-                  )}
-                  <div className="absolute inset-x-2 top-4 bottom-2 bg-background/90 backdrop-blur-md rounded border border-border shadow-lg flex flex-col items-center justify-center p-2 gap-2">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden border border-border/50">
-                      {data?.logo_url ? <img src={data.logo_url} className="w-full h-full object-contain p-1" /> : <ImageIcon size={14} className="opacity-40" />}
-                    </div>
-                    <span className="text-[10px] font-bold text-center truncate w-full">{localName || data?.name || "Welcome"}</span>
-                    <div className="w-16 h-4 bg-primary rounded mt-auto" style={{ backgroundColor: brandColors.primary }} />
+            <div className="border border-border/40 rounded-xl p-5 flex flex-col items-center gap-4 bg-background">
+              <span className="text-sm font-bold text-foreground">Login Page Preview</span>
+              <div className="w-full max-w-[200px] rounded-xl overflow-hidden h-56 relative flex flex-col items-center shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-border/20">
+                <div 
+                  className="absolute inset-0 z-0 opacity-90" 
+                  style={data?.campus_photo_url ? {} : { background: `linear-gradient(135deg, ${brandColors.primary}bb, ${brandColors.secondary})` }}
+                >
+                  {data?.campus_photo_url && <img src={data.campus_photo_url} className="w-full h-full object-cover blur-[1px]" />}
+                </div>
+                <div className="absolute inset-0 z-0 bg-gradient-to-t from-background/20 to-transparent" />
+                
+                <div className="relative z-10 w-16 h-16 bg-white rounded-full mt-6 flex items-center justify-center shadow-lg overflow-hidden border-4 border-white/20">
+                  {data?.logo_url ? <img src={data.logo_url} className="w-full h-full object-contain p-2" /> : <Building2 size={26} style={{ color: brandColors.primary }} />}
+                </div>
+
+                <div className="relative z-10 mt-auto mb-3 w-[85%] bg-white rounded-xl shadow-xl flex flex-col items-center p-3.5 gap-2.5">
+                  <span className="text-[13px] font-bold text-black truncate w-full text-center tracking-tight">{localName || data?.name || "Organization"}</span>
+                  <div 
+                    className="w-full py-1.5 rounded-md text-white text-[11px] font-semibold text-center shadow-sm"
+                    style={{ backgroundColor: brandColors.primary }}
+                  >
+                    Sign in
                   </div>
+                </div>
               </div>
             </div>
 
             {/* Tab Preview */}
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold text-muted-foreground text-center">Tab View</span>
-              <div className="border border-border rounded-lg bg-muted/30 h-32 p-2 flex flex-col shadow-sm">
-                <div className="bg-background border border-border rounded flex items-center gap-2 p-1.5 shadow-sm max-w-[150px]">
-                  <div className="w-3.5 h-3.5 rounded-sm overflow-hidden shrink-0 bg-muted flex items-center justify-center">
-                    {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Globe size={10} className="opacity-40" />}
+            <div className="border border-border/40 rounded-xl p-5 flex flex-col items-center gap-4 bg-background">
+              <span className="text-sm font-bold text-foreground">Browser Tab Preview</span>
+              <div className="w-full max-w-[240px] rounded-xl overflow-hidden h-56 border border-border/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col bg-white">
+                <div className="bg-[#f0f1f4] dark:bg-muted/30 h-10 flex items-end px-2 pt-2 gap-1 relative z-0">
+                  <div className="bg-white h-[28px] rounded-t-lg px-3 flex items-center gap-2 min-w-[130px] shadow-sm relative z-10 border-t border-x border-border/20">
+                    <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+                      {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Building2 size={12} style={{ color: brandColors.primary }} />}
+                    </div>
+                    <span className="text-[11px] font-semibold text-black truncate flex-1">{localSiteTitle || data?.site_title || "Organization"} | Home</span>
+                    <X size={10} className="text-muted-foreground shrink-0 hover:text-black cursor-pointer" />
                   </div>
-                  <span className="text-[10px] truncate">{localSiteTitle || data?.site_title || "Classgrid"}</span>
-                  <X size={10} className="ml-auto opacity-40 shrink-0" />
                 </div>
-                <div className="flex items-center gap-2 mt-2 px-1 opacity-40">
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+                <div className="bg-white h-10 border-b border-border/40 flex items-center px-2.5 gap-3 relative z-20 shadow-sm">
+                  <div className="flex items-center gap-2.5 text-muted-foreground">
+                    <ArrowLeft size={13} strokeWidth={2.5} />
+                    <ArrowRight size={13} strokeWidth={2.5} className="opacity-30" />
+                    <RotateCw size={12} strokeWidth={2.5} />
+                  </div>
+                  <div className="flex-1 h-6 bg-[#f0f1f4] dark:bg-muted/30 rounded-full flex items-center px-3 gap-2">
+                    <Lock size={10} className="text-muted-foreground" />
+                  </div>
                 </div>
+                <div className="flex-1 bg-white" />
               </div>
             </div>
           </div>
@@ -389,29 +563,35 @@ export function OrgBrandingCard() {
           </div>
         </div>
 
-        {/* 3. Website Identity */}
+        {/* 3. Organization Identity */}
         <div className="flex flex-col">
-          <SectionHeader num={3} title="Website Identity" description="Set the names and title used across the platform." />
+          <SectionHeader num={3} title="Organization Identity" description="Set the names and title used across the platform." />
           
-          <div className="flex flex-col gap-4 ml-7">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
-              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Browser Tab Title</label>
-              <input type="text" value={localSiteTitle} onChange={e => setLocalSiteTitle(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Institution - Home" />
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
-              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Institution Name</label>
-              <input type="text" value={localName} onChange={e => setLocalName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="Vishwakarma Institute..." />
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 max-w-lg">
-              <label className="text-xs font-semibold text-foreground w-40 shrink-0">Sidebar Short Name</label>
-              <input type="text" value={localSidebarName} onChange={e => setLocalSidebarName(e.target.value)} className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary" placeholder="VIT" maxLength={22} />
-            </div>
+          <div className="flex flex-col gap-6 ml-7 max-w-sm">
+            <FieldEditor
+              label="Browser Tab Title"
+              value={data?.site_title || ""}
+              placeholder="Institution - Home"
+              isSaving={updateBranding.isPending}
+              onSave={(site_title, onSuccess) => handleSaveIdentity({ site_title }, onSuccess)}
+            />
             
-            <div className="mt-2">
-              <Button size="sm" onClick={handleSaveIdentity} disabled={updateBranding.isPending}>
-                {updateBranding.isPending ? <Spinner className="mr-2" /> : null} Save Identity
-              </Button>
-            </div>
+            <FieldEditor
+              label="Institution Name (Full)"
+              value={data?.name || ""}
+              placeholder="Vishwakarma Institute..."
+              isSaving={updateBranding.isPending}
+              onSave={(name, onSuccess) => handleSaveIdentity({ name }, onSuccess)}
+            />
+            
+            <FieldEditor
+              label="Sidebar Short Name"
+              value={data?.sidebar_name || ""}
+              placeholder="VIT"
+              maxLength={22}
+              isSaving={updateBranding.isPending}
+              onSave={(sidebar_name, onSuccess) => handleSaveIdentity({ sidebar_name }, onSuccess)}
+            />
           </div>
         </div>
 
@@ -479,22 +659,15 @@ export function OrgBrandingCard() {
                 const iconSrc = SOCIAL_ICONS[key];
                 
                 return (
-                  <div key={key} className="flex items-center justify-between px-4 py-3 bg-muted/20 border border-border rounded-lg hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      {iconSrc ? (
-                         <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" />
-                      ) : (
-                         <LinkIcon size={16} className="text-muted-foreground" />
-                      )}
-                      <span className="text-sm font-semibold text-foreground w-24">{label}</span>
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary truncate max-w-xs">
-                        {url}
-                      </a>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleRemoveSocialLink(key)}>
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
+                  <SocialLinkRow 
+                    key={key} 
+                    keyName={key} 
+                    url={url} 
+                    iconSrc={iconSrc} 
+                    label={label} 
+                    onUpdate={handleUpdateSocialLink} 
+                    onRemove={handleRemoveSocialLink} 
+                  />
                 );
               }) : (
                 <div className="text-center py-6 text-sm text-muted-foreground border border-dashed border-border rounded-lg bg-muted/10">

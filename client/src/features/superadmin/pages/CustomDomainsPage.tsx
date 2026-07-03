@@ -19,6 +19,29 @@ import { useNavigate } from "react-router-dom";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
+const renderDomainStatus = (domainObj: any) => {
+  if (!domainObj) return null;
+  const s = domainObj.status ?? "pending_verification";
+  if (s === "verified" || s === "active") {
+    const v = domainObj.verified_at;
+    const verifiedText = v ? formatDate(v, "dd MMM, yyyy 'at' hh:mm a") : "-";
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-help inline-flex">
+              <Badge variant="success" dot>Verified</Badge>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">Verified on: {verifiedText}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+  if (s === "pending_verification") return <Badge variant="warning">Pending</Badge>;
+  return <Badge variant="warning">{s}</Badge>;
+};
+
 export function CustomDomainsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -37,11 +60,11 @@ export function CustomDomainsPage() {
     {
       key: "name", 
       header: "Organization", 
-      width: "w-[30%]",
+      width: "w-[25%]",
       render: (val: any, row: any) => (
         <div>
           <div >{row.name}</div>
-          <div >
+          <div className="text-muted-foreground text-xs mt-0.5">
             {row.subdomain}.classgrid.in
           </div>
         </div>
@@ -49,11 +72,35 @@ export function CustomDomainsPage() {
     },
     {
       key: "domain", 
-      header: "Custom Domain", 
+      header: "Custom Domains", 
       width: "w-[30%]",
       render: (val: any, row: any) => {
-        const domain = row.custom_domain?.domain;
-        return <span className="font-mono text-sm font-semibold text-primary/90">{domain}</span>;
+        const websiteDomain = row.custom_domain?.domain;
+        const erpDomain = row.erp_domain?.domain;
+        return (
+          <div className="flex flex-col gap-2 py-1">
+            {websiteDomain && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-mono text-sm font-semibold text-primary/90 cursor-help w-fit">{websiteDomain}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Website Domain</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            {erpDomain && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-mono text-sm font-semibold text-primary/90 cursor-help w-fit">{erpDomain}</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">ERP Domain</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        );
       },
     },
     {
@@ -61,28 +108,14 @@ export function CustomDomainsPage() {
       header: "Status", 
       width: "w-[20%]",
       render: (val: any, row: any) => {
-        const s = row.custom_domain?.status ?? "pending_verification";
-        if (s === "verified" || s === "active") {
-          const v = row.custom_domain?.verified_at;
-          const verifiedText = v ? formatDate(v, "dd MMM, yyyy 'at' hh:mm a") : "-";
-          
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="cursor-help inline-flex">
-                    <Badge variant="success" dot>Verified</Badge>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  Verified on: {verifiedText}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        }
-        if (s === "pending_verification") return <Badge variant="warning">Pending</Badge>;
-        return <Badge variant="warning">{s}</Badge>;
+        const websiteDomain = row.custom_domain?.domain;
+        const erpDomain = row.erp_domain?.domain;
+        return (
+          <div className="flex flex-col gap-2 py-1">
+            {websiteDomain && <div className="h-5 flex items-center">{renderDomainStatus(row.custom_domain)}</div>}
+            {erpDomain && <div className="h-5 flex items-center">{renderDomainStatus(row.erp_domain)}</div>}
+          </div>
+        );
       },
     },
     {
@@ -106,9 +139,16 @@ export function CustomDomainsPage() {
 
   // Generate Cloudflare JSON
   const activeDomains = useMemo(() => {
-    return orgs
-      .filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active")
-      .map(o => `https://${o.custom_domain.domain}`);
+    const domains = new Set<string>();
+    orgs.forEach(o => {
+      if ((o.custom_domain?.status === "verified" || o.custom_domain?.status === "active") && o.custom_domain?.domain) {
+        domains.add(o.custom_domain.domain);
+      }
+      if ((o.erp_domain?.status === "verified" || o.erp_domain?.status === "active") && o.erp_domain?.domain) {
+        domains.add(o.erp_domain.domain);
+      }
+    });
+    return Array.from(domains).map(d => `https://${d}`);
   }, [orgs]);
 
   const cloudflareJSON = useMemo(() => {
@@ -130,14 +170,27 @@ export function CustomDomainsPage() {
   }, [activeDomains]);
 
   const recaptchaDomainsList = useMemo(() => {
-    const domains = orgs
-      .filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active")
-      .map(o => o.custom_domain.domain);
-    return domains.join("\n");
+    const domains = new Set<string>();
+    orgs.forEach(o => {
+      if ((o.custom_domain?.status === "verified" || o.custom_domain?.status === "active") && o.custom_domain?.domain) {
+        domains.add(o.custom_domain.domain);
+      }
+      if ((o.erp_domain?.status === "verified" || o.erp_domain?.status === "active") && o.erp_domain?.domain) {
+        domains.add(o.erp_domain.domain);
+      }
+    });
+    return Array.from(domains).join("\n");
   }, [orgs]);
 
-  const totalVerified = orgs.filter(o => o.custom_domain?.status === "verified" || o.custom_domain?.status === "active").length;
-  const totalPending = orgs.filter(o => o.custom_domain?.status === "pending_verification").length;
+  const totalVerified = orgs.filter(o => 
+    o.custom_domain?.status === "verified" || o.custom_domain?.status === "active" ||
+    o.erp_domain?.status === "verified" || o.erp_domain?.status === "active"
+  ).length;
+  
+  const totalPending = orgs.filter(o => 
+    (o.custom_domain?.domain && o.custom_domain?.status === "pending_verification") ||
+    (o.erp_domain?.domain && o.erp_domain?.status === "pending_verification")
+  ).length;
 
   if (isLoading) {
     return (

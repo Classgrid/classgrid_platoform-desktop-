@@ -421,11 +421,14 @@ router.get("/custom-domains", async (req, res) => {
         const Organization = (await import("../models/Organization.js")).default;
 
         const orgsWithDomains = await Organization.find({
-            "custom_domain.domain": { $ne: null, $exists: true }
+            $or: [
+                { "custom_domain.domain": { $ne: null, $exists: true } },
+                { "erp_domain.domain": { $ne: null, $exists: true } }
+            ]
         })
-            .select("name subdomain custom_domain createdAt ownerName ownerEmail owner_id")
+            .select("name subdomain custom_domain erp_domain createdAt ownerName ownerEmail owner_id")
             .populate("owner_id", "name email")
-            .sort({ "custom_domain.created_at": -1 })
+            .sort({ "createdAt": -1 })
             .lean();
 
         res.json({ success: true, data: orgsWithDomains });

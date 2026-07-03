@@ -1,4 +1,4 @@
-﻿import { useState, type FormEvent, useEffect } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -29,11 +29,11 @@ export function SuperAdminLoginPage() {
   useEffect(() => {
     // Load Recaptcha script dynamically to show the badge
     const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js?render=6LfszXMsAAAAAGeNSmNtsKs_VRxaH4vy8r-rs7fM";
+    script.src = "https://www.google.com/recaptcha/api.js?render=6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
     script.async = true;
     document.head.appendChild(script);
 
-    window.RECAPTCHA_SITE_KEY = "6LfszXMsAAAAAGeNSmNtsKs_VRxaH4vy8r-rs7fM";
+    window.RECAPTCHA_SITE_KEY = "6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
 
     return () => {
       // Optional: Cleanup if needed when leaving the page
