@@ -6,6 +6,7 @@ import type { ChatMessage } from "../services/chatApi";
 import EmojiPicker from 'emoji-picker-react';
 import DOMPurify from "dompurify";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
+import { toast } from "sonner";
 
 import { Input } from "@/components/marketing_ui/input";
 import {
@@ -396,7 +397,19 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     setFiles(prev => [...prev, ...pastedFiles].slice(0, 50));
                     return;
                   }
+                  
                   let html = e.clipboardData.getData("text/html");
+                  let text = e.clipboardData.getData("text/plain");
+                  
+                  const MAX_CHARS = 65000;
+                  const currentTextLength = editorRef.current?.textContent?.length || 0;
+                  const addedLength = text ? text.length : (html ? html.replace(/<[^>]*>?/gm, '').length : 0);
+                  
+                  if (currentTextLength + addedLength > MAX_CHARS) {
+                    toast.error("Message too long", { description: "The message you're pasting is too long. Try shortening it or sending it in multiple parts." });
+                    return;
+                  }
+
                   if (html) {
                     html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
                     const cleanHtml = DOMPurify.sanitize(html, {
@@ -404,14 +417,22 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                       ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
                     });
                     document.execCommand("insertHTML", false, cleanHtml);
-                  } else {
-                    const text = e.clipboardData.getData("text/plain");
-                    if (text) {
-                      document.execCommand("insertText", false, text);
-                    }
+                  } else if (text) {
+                    document.execCommand("insertText", false, text);
                   }
                 }}
                 onKeyDown={(e) => {
+                  const MAX_CHARS = 65000;
+                  const currentTextLength = editorRef.current?.textContent?.length || 0;
+                  
+                  // Allow navigation and deletion keys
+                  const isAllowedKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key) || e.ctrlKey || e.metaKey || e.altKey;
+                  
+                  if (!isAllowedKey && currentTextLength >= MAX_CHARS) {
+                    e.preventDefault();
+                    return;
+                  }
+
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();

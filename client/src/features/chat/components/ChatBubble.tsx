@@ -103,7 +103,10 @@ export function ChatBubble({
   const [isHovered, setIsHovered] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFullPicker, setShowFullPicker] = useState(false);
+  const [isTextExpanded, setIsTextExpanded] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const isLongMessage = message.message && message.message.length > 800;
 
   let isSystem = false;
   let systemText = "";
@@ -384,14 +387,29 @@ export function ChatBubble({
                 {/* Text Message */}
                 {message.message && !poll && (
                   <div className="relative text-[15px] whitespace-pre-wrap leading-relaxed break-words break-all [word-break:break-word] prose prose-sm dark:prose-invert max-w-none [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1">
-                    <span dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize(marked.parse((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string, { 
-                        ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
-                        ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
-                      }) 
-                    }} />
-                    {message.is_edited && (
-                      <span className="text-[10px] opacity-60 italic ml-2 align-bottom">(edited)</span>
+                    <div style={!isTextExpanded && isLongMessage ? {
+                      display: '-webkit-box',
+                      WebkitLineClamp: 15,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    } : {}}>
+                      <span dangerouslySetInnerHTML={{ 
+                        __html: DOMPurify.sanitize(marked.parse((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string, { 
+                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
+                          ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
+                        }) 
+                      }} />
+                      {message.is_edited && (
+                        <span className="text-[10px] opacity-60 italic ml-2 align-bottom">(edited)</span>
+                      )}
+                    </div>
+                    {isLongMessage && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setIsTextExpanded(!isTextExpanded); }}
+                        className="text-primary hover:underline text-sm font-medium mt-1 select-none"
+                      >
+                        {isTextExpanded ? "Show less" : "Read more"}
+                      </button>
                     )}
                   </div>
                 )}
