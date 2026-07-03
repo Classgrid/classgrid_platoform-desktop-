@@ -221,16 +221,31 @@ export function ChatBubble({
             </button>
           )}
 
-          {/* Reply Context */}
+          {/* Reply Context — WhatsApp style */}
           {message.reply_to && !(message.reply_to as any).isForwarded && !message.is_deleted && (
             <div
-              className={`mb-1 p-2 rounded-lg text-xs opacity-80 cursor-pointer w-full
-                ${isMine ? "bg-primary/20 text-primary-foreground/90 border-l-2 border-primary-foreground/50" 
-                         : "bg-accent border-l-2 border-primary text-foreground"}
+              className={`mb-1 rounded-lg overflow-hidden cursor-pointer w-full
+                ${isMine 
+                  ? "bg-[#0b6156] dark:bg-[#025144]" 
+                  : "bg-[#f0f0f0] dark:bg-[#1a2a32]"}
               `}
             >
-              <span className="font-bold block mb-0.5">{message.reply_to.sender_name}</span>
-              <span className="line-clamp-2">{(typeof message.reply_to.message === 'string' ? message.reply_to.message : String(message.reply_to.message || "Attachment")).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
+              <div className={`flex flex-col gap-0.5 pl-3 pr-3 py-2 border-l-4
+                ${isMine 
+                  ? "border-[#06cf9c]" 
+                  : "border-[#53bdeb] dark:border-[#53bdeb]"}
+              `}>
+                <span className={`text-[13px] font-semibold
+                  ${isMine 
+                    ? "text-[#06cf9c]" 
+                    : "text-[#53bdeb]"}
+                `}>{message.reply_to.sender_name}</span>
+                <span className={`text-[13px] line-clamp-2
+                  ${isMine 
+                    ? "text-white/70" 
+                    : "text-[#667781] dark:text-[#8696a0]"}
+                `}>{(typeof message.reply_to.message === 'string' ? message.reply_to.message : String(message.reply_to.message || "📎 Attachment")).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim()}</span>
+              </div>
             </div>
           )}
 
@@ -404,20 +419,22 @@ export function ChatBubble({
                         <div 
                            key={att.id} 
                            onClick={() => onViewMedia?.(att)}
-                           className={`relative flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer overflow-hidden max-w-[300px]
-                            ${isMine ? "bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20" : "bg-background border-border hover:bg-muted"}
+                           className={`relative flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer overflow-hidden max-w-[300px]
+                            ${isMine 
+                              ? "bg-[#0b6156]/50 dark:bg-[#025144]/60 border-white/10 hover:bg-[#0b6156]/70 dark:hover:bg-[#025144]/80" 
+                              : "bg-[#f5f6f6] dark:bg-[#1a2a32] border-black/5 dark:border-white/10 hover:bg-[#ecedef] dark:hover:bg-[#1f3640]"}
                            `}>
-                          <div className={`p-2 rounded ${isMine ? "bg-primary-foreground/20" : "bg-muted"}`}>
-                            <FileText className="w-5 h-5" />
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isMine ? "bg-white/15" : "bg-primary/10 dark:bg-[#53bdeb]/10"}`}>
+                            <FileText className={`w-5 h-5 ${isMine ? "text-white/80" : "text-primary dark:text-[#53bdeb]"}`} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{att.file_name}</p>
-                            <p className="text-xs opacity-70">{formatBytes(att.file_size)}</p>
+                            <p className={`text-sm font-semibold truncate ${isMine ? "text-white/90" : "text-foreground"}`}>{att.file_name}</p>
+                            <p className={`text-xs ${isMine ? "text-white/50" : "text-muted-foreground"}`}>{formatBytes(att.file_size)}</p>
                           </div>
                           {message.isSending && (
-                            <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] flex items-center justify-center z-10">
-                              <Spinner className="w-5 h-5 text-primary mr-2" />
-                              <span className="text-primary text-xs font-semibold">Uploading...</span>
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center z-10">
+                              <Spinner className="w-5 h-5 text-white mr-2" />
+                              <span className="text-white text-xs font-semibold">Uploading...</span>
                             </div>
                           )}
                         </div>
@@ -558,14 +575,24 @@ export function ChatBubble({
                 message.isSending ? (
                   <Spinner className="w-3 h-3 text-current ml-0.5" />
                 ) : message.isError ? (
-                  <span className="text-red-600 font-bold ml-0.5">!</span>
+                  <span className="ml-0.5" title="Message failed to send">
+                    <AlertCircle className="w-4 h-4 text-red-500" />
+                  </span>
                 ) : message.isSeen ? (
-                  <CheckCheck className="w-4 h-4 text-[#34d399]" />
+                  <CheckCheck className="w-4 h-4 text-[#53bdeb]" />
                 ) : (
-                  <Check className="w-4 h-4 text-[#34d399] opacity-70" />
+                  <CheckCheck className="w-4 h-4 text-[#667781] dark:text-white/50" />
                 )
               )}
             </div>
+
+            {/* Failed message banner */}
+            {message.isError && (
+              <div className="flex items-center gap-2 mt-1 -mx-2 -mb-1 px-3 py-1.5 bg-red-500/10 dark:bg-red-500/20 border-t border-red-500/20 rounded-b-2xl">
+                <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                <span className="text-[11px] text-red-600 dark:text-red-400 font-medium flex-1">Failed to send. Tap to retry.</span>
+              </div>
+            )}
           </div>
 
           {/* Acknowledgements Row */}
