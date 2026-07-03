@@ -6,6 +6,7 @@ import { apiClient } from "@/lib/apiClient";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/marketing_ui/avatar";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 
 interface SharedMediaViewProps {
   targetUserId?: string;
@@ -13,6 +14,8 @@ interface SharedMediaViewProps {
 }
 
 export function SharedMediaView({ targetUserId, threadId }: SharedMediaViewProps) {
+  const [viewingMedia, setViewingMedia] = useState<any | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["shared-media", targetUserId, threadId],
     queryFn: () => {
@@ -33,7 +36,7 @@ export function SharedMediaView({ targetUserId, threadId }: SharedMediaViewProps
     );
   }
 
-  const media = data?.media || [];
+  const media = (data?.media || []).filter((item: any) => !item.file_type.startsWith('audio/'));
   const docs = data?.docs || [];
   const links = data?.links || [];
 
@@ -71,7 +74,11 @@ export function SharedMediaView({ targetUserId, threadId }: SharedMediaViewProps
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {media.map((item: any) => (
-                  <div key={item.id} className="aspect-square relative group overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm">
+                  <div 
+                    key={item.id} 
+                    onClick={() => setViewingMedia(item)}
+                    className="aspect-square relative group overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm cursor-pointer"
+                  >
                     {item.file_type.startsWith('video/') ? (
                       <video src={item.file_url} className="w-full h-full object-cover" />
                     ) : (
@@ -159,6 +166,17 @@ export function SharedMediaView({ targetUserId, threadId }: SharedMediaViewProps
           </TabsContent>
         </div>
       </Tabs>
+
+      {!!viewingMedia && (
+        <FilePreviewModal 
+          file={{ 
+            src: viewingMedia.file_url, 
+            name: viewingMedia.file_name || "Media File", 
+            mimeType: viewingMedia.file_type 
+          }} 
+          onClose={() => setViewingMedia(null)} 
+        />
+      )}
     </div>
   );
 }

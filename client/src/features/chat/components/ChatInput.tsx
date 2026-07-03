@@ -153,6 +153,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     const text = message.trim();
     if (!text && files.length === 0 && !audioBlob) return;
 
+    if (text.length > 65000) {
+      toast.error("Message too long", { description: "The message size exceeds the maximum allowed length. Please shorten it." });
+      return;
+    }
+
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     const hasMedia = files.length > 0 || !!audioBlob;
@@ -179,19 +184,20 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       expiresAt: expiresAt || undefined
     };
     
-    setMessage("");
-    setFiles([]);
-    setScheduledDate("");
-    setIsSilent(false);
-    setPriority("normal");
-    setExpiresAt("");
-    clearAudio();
-    if (editorRef.current) {
-      editorRef.current.innerHTML = "";
-    }
-
     try {
       await onSendMessage(text, finalFiles, options);
+      
+      // Clear input ONLY after successful send
+      setMessage("");
+      setFiles([]);
+      setScheduledDate("");
+      setIsSilent(false);
+      setPriority("normal");
+      setExpiresAt("");
+      clearAudio();
+      if (editorRef.current) {
+        editorRef.current.innerHTML = "";
+      }
     } finally {
       if (onTyping && hasMedia) {
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -251,34 +257,99 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
       {/* File Previews */}
       {files.length > 0 && (
-        <div className="px-4 py-3 flex gap-3 overflow-x-auto border-b border-border">
-          {files.map((file, i) => (
-            <div
-              key={i}
-              className="relative shrink-0 w-16 h-16 rounded-lg border border-border bg-muted overflow-hidden group"
-            >
-              {file.type.startsWith("image/") ? (
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-1 text-muted-foreground p-1">
-                  <FileText className="w-6 h-6" />
-                  <span className="text-[8px] font-medium truncate w-full text-center">
-                    {file.name.split(".").pop()?.toUpperCase() || "FILE"}
-                  </span>
+        <div className="px-4 py-3 border-b border-border">
+          <div className="flex gap-2.5 overflow-x-auto pb-1 custom-scrollbar">
+            {files.map((file, i) => {
+              const ext = file.name.split(".").pop()?.toLowerCase() || "";
+              const isImage = file.type.startsWith("image/");
+              const isVideo = file.type.startsWith("video/");
+              const isAudio = file.type.startsWith("audio/");
+              const isPdf = file.type === "application/pdf" || ext === "pdf";
+              const isWord = ["doc", "docx"].includes(ext);
+              const isExcel = ["xls", "xlsx", "csv"].includes(ext);
+              const isPpt = ["ppt", "pptx"].includes(ext);
+              const isMd = ext === "md";
+
+              // Icon color and label for doc types
+              const getDocStyle = () => {
+                if (isPdf) return { color: "text-red-500 bg-red-500/10", label: "PDF" };
+                if (isWord) return { color: "text-blue-500 bg-blue-500/10", label: "DOC" };
+                if (isExcel) return { color: "text-green-500 bg-green-500/10", label: "XLS" };
+                if (isPpt) return { color: "text-orange-500 bg-orange-500/10", label: "PPT" };
+                if (isMd) return { color: "text-purple-500 bg-purple-500/10", label: "MD" };
+                if (isAudio) return { color: "text-violet-500 bg-violet-500/10", label: ext.toUpperCase() };
+                return { color: "text-muted-foreground bg-muted", label: ext.toUpperCase() || "FILE" };
+              };
+
+              const formatSize = (bytes: number) => {
+                if (bytes < 1024) return `${bytes} B`;
+                if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+                return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+              };
+
+              return (
+                <div
+                  key={i}
+                  className="relative shrink-0 group"
+                >
+                  {isImage ? (
+                    /* Image thumbnail */
+                    <div className="w-20 h-20 rounded-xl border border-border bg-muted overflow-hidden">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : isVideo ? (
+                    /* Video thumbnail with play icon */
+                    <div className="w-20 h-20 rounded-xl border border-border bg-black overflow-hidden relative">
+                      <video
+                        src={URL.createObjectURL(file)}
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                        muted
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center border border-white/20">
+                          <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Document file card */
+                    <div className={`flex items-center gap-2.5 h-20 px-3 rounded-xl border border-border bg-card min-w-[160px] max-w-[200px]`}>
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getDocStyle().color}`}>
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <span className="text-xs font-semibold truncate text-foreground">{file.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{getDocStyle().label} • {formatSize(file.size)}</span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Remove button */}
+                  <button
+                    onClick={() => removeFile(i)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-              )}
+              );
+            })}
+          </div>
+          {files.length > 1 && (
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+              <span className="text-[11px] text-muted-foreground font-medium">{files.length} files selected</span>
               <button
-                onClick={() => removeFile(i)}
-                className="absolute top-1 right-1 p-0.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => setFiles([])}
+                className="text-[11px] text-red-500 hover:text-red-600 font-semibold transition-colors"
               >
-                <X className="w-3 h-3" />
+                Remove All
               </button>
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -583,7 +654,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             
             <button
               onClick={handleSend}
-              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording}
+              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
               className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
               title={scheduledDate ? 'Schedule Message' : 'Send Message'}
             >

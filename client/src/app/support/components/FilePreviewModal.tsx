@@ -13,6 +13,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCw,
+  Headphones,
 } from "lucide-react";
 import { CustomVideoPlayer } from "@/features/shared/components/CustomVideoPlayer";
 
@@ -53,6 +54,8 @@ function getMimeType(file: FilePreviewSource): string {
     avif: "image/avif",
     mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime",
     mkv: "video/x-matroska", avi: "video/x-msvideo",
+    mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg",
+    m4a: "audio/mp4", aac: "audio/aac", flac: "audio/flac",
     pdf: "application/pdf",
     doc: "application/msword",
     docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -65,6 +68,7 @@ function getMimeType(file: FilePreviewSource): string {
 
 function isImage(mime: string) { return mime.startsWith("image/"); }
 function isVideo(mime: string) { return mime.startsWith("video/"); }
+function isAudio(mime: string) { return mime.startsWith("audio/"); }
 function isPDF(mime: string) { return mime === "application/pdf"; }
 function isText(mime: string) { return mime.startsWith("text/") && mime !== "text/csv"; }
 function isOfficeDoc(mime: string) {
@@ -159,6 +163,8 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
               <FileImage className="w-5 h-5 text-emerald-400 shrink-0" />
             ) : isVideo(mime) ? (
               <FileVideo className="w-5 h-5 text-blue-400 shrink-0" />
+            ) : isAudio(mime) ? (
+              <Headphones className="w-5 h-5 text-purple-400 shrink-0" />
             ) : isPDF(mime) ? (
               <FileText className="w-5 h-5 text-red-400 shrink-0" />
             ) : (
@@ -272,6 +278,23 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
             </div>
           )}
 
+          {/* Audio viewer */}
+          {isAudio(mime) && srcUrl && (
+            <div className="flex flex-col items-center gap-6 w-full max-w-md">
+              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl">
+                <Headphones className="w-14 h-14 text-white" />
+              </div>
+              <p className="text-white font-semibold text-lg text-center">{file.name}</p>
+              <audio
+                src={srcUrl}
+                controls
+                autoPlay
+                className="w-full"
+                style={{ filter: 'invert(1) hue-rotate(180deg)' }}
+              />
+            </div>
+          )}
+
           {/* PDF viewer */}
           {isPDF(mime) && srcUrl && (
             <iframe
@@ -302,7 +325,7 @@ export default function FilePreviewModal({ file, onClose, onDelete }: FilePrevie
           )}
 
           {/* Unsupported file type (or local office docs) */}
-          {!isImage(mime) && !isVideo(mime) && !isPDF(mime) && !isText(mime) && !(isOfficeDoc(mime) && srcUrl && !srcUrl.startsWith("blob:")) && (
+          {!isImage(mime) && !isVideo(mime) && !isAudio(mime) && !isPDF(mime) && !isText(mime) && !(isOfficeDoc(mime) && srcUrl && !srcUrl.startsWith("blob:")) && (
             <div className="flex flex-col items-center gap-5 text-center">
               <div className="w-20 h-20 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
                 <File className="w-10 h-10 text-zinc-400" />

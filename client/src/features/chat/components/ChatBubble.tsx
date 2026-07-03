@@ -3,7 +3,7 @@ import { format } from "date-fns";
 
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield } from "lucide-react";
+import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield, Play } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import {
   DropdownMenu,
@@ -302,22 +302,91 @@ export function ChatBubble({
             ) : (
               <>
                 {/* Attachments */}
-                {message.attachments && message.attachments.length > 0 && (
-                  <div className="flex flex-col gap-2 mb-2 w-full max-w-[300px]">
-                    {message.attachments.map((att) => (
-                      att.file_type.startsWith("image/") || att.file_type.startsWith("video/") || att.file_type === "application/pdf" ? (
-                        <div 
-                          key={att.id} 
+                {message.attachments && message.attachments.length > 0 && (() => {
+                  const mediaAtts = message.attachments.filter(a => a.file_type.startsWith("image/") || a.file_type.startsWith("video/"));
+                  const audioAtts = message.attachments.filter(a => a.file_type.startsWith("audio/"));
+                  const pdfAtts = message.attachments.filter(a => a.file_type === "application/pdf");
+                  const otherAtts = message.attachments.filter(a => !a.file_type.startsWith("image/") && !a.file_type.startsWith("video/") && !a.file_type.startsWith("audio/") && a.file_type !== "application/pdf");
+
+                  return (
+                    <div className="flex flex-col gap-2 mb-2 w-full">
+                      {/* Media Grid (images + videos) — WhatsApp style */}
+                      {mediaAtts.length > 0 && (
+                        <div className={`grid gap-1 rounded-lg overflow-hidden ${mediaAtts.length === 1 ? 'grid-cols-1 max-w-[300px]' : 'grid-cols-2 max-w-[300px]'}`}>
+                          {mediaAtts.map((att, idx) => {
+                            // For grids with odd count > 2, make first item span full width
+                            const isFullWidth = mediaAtts.length > 2 && mediaAtts.length % 2 !== 0 && idx === 0;
+                            return (
+                              <div
+                                key={att.id}
+                                onClick={() => onViewMedia?.(att)}
+                                className={`relative group cursor-pointer overflow-hidden bg-black/5 dark:bg-white/5 ${isFullWidth ? 'col-span-2' : ''} ${mediaAtts.length === 1 ? 'rounded-lg' : 'rounded-sm'}`}
+                                style={{ aspectRatio: mediaAtts.length === 1 ? undefined : '1' }}
+                              >
+                                {att.file_type.startsWith("image/") ? (
+                                  <img
+                                    src={att.file_url}
+                                    alt={att.file_name}
+                                    className={`w-full h-full object-cover ${mediaAtts.length === 1 ? 'max-h-[300px]' : ''}`}
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  /* Video thumbnail */
+                                  <>
+                                    <video
+                                      src={att.file_url}
+                                      className="w-full h-full object-cover"
+                                      preload="metadata"
+                                      muted
+                                    />
+                                    {/* Play button overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                      <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/20">
+                                        <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                                {/* Hover overlay */}
+                                <div className={`absolute inset-0 bg-black/30 transition-opacity ${message.isSending ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`} />
+                                {/* Uploading overlay */}
+                                {message.isSending && (
+                                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center z-20">
+                                    <Spinner className="w-8 h-8 text-white mb-2" />
+                                    <span className="text-white text-xs font-semibold tracking-wide">Uploading...</span>
+                                  </div>
+                                )}
+                                {/* +N more overlay for grids > 4 */}
+                                {mediaAtts.length > 4 && idx === 3 && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                                    <span className="text-white text-2xl font-bold">+{mediaAtts.length - 4}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }).slice(0, mediaAtts.length > 4 ? 4 : undefined)}
+                        </div>
+                      )}
+
+                      {/* Audio files — WaveformPlayer */}
+                      {audioAtts.map((att) => (
+                        <div key={att.id} className="w-[280px]">
+                          <WaveformPlayer url={att.file_url} />
+                        </div>
+                      ))}
+
+                      {/* PDF attachments — thumbnail with preview */}
+                      {pdfAtts.map((att) => (
+                        <div
+                          key={att.id}
                           onClick={() => onViewMedia?.(att)}
-                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-border dark:border-white/10 relative group cursor-pointer"
+                          className="block rounded-lg overflow-hidden border border-black/10 dark:border-white/10 relative group cursor-pointer max-w-[300px]"
                         >
-                          {att.file_type.startsWith("image/") ? (
-                            <img src={att.file_url} alt={att.file_name} className="max-w-full h-auto object-cover max-h-[300px]" loading="lazy" />
-                          ) : (
-                            <div className="w-full h-[150px] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
-                              <span className="text-zinc-600 dark:text-white text-xs font-medium dark:opacity-70">{att.file_name}</span>
-                            </div>
-                          )}
+                          <div className="w-full h-[150px] bg-zinc-100 dark:bg-zinc-900 flex flex-col items-center justify-center gap-2">
+                            <FileText className="w-10 h-10 text-red-500" />
+                            <span className="text-zinc-600 dark:text-zinc-400 text-xs font-medium truncate max-w-[200px] px-2">{att.file_name}</span>
+                            <span className="text-zinc-400 dark:text-zinc-500 text-[10px]">{formatBytes(att.file_size)} • PDF</span>
+                          </div>
                           <div className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${message.isSending ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}>
                             <Plus className="text-white w-8 h-8" />
                           </div>
@@ -328,15 +397,14 @@ export function ChatBubble({
                             </div>
                           )}
                         </div>
-                      ) : att.file_type.startsWith("audio/") ? (
-                        <div key={att.id} className="mb-1 w-[280px]">
-                          <WaveformPlayer url={att.file_url} />
-                        </div>
-                      ) : (
+                      ))}
+
+                      {/* Other file types — document cards */}
+                      {otherAtts.map((att) => (
                         <div 
                            key={att.id} 
                            onClick={() => onViewMedia?.(att)}
-                           className={`relative flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer overflow-hidden
+                           className={`relative flex items-center gap-3 p-2 rounded-lg border transition-colors cursor-pointer overflow-hidden max-w-[300px]
                             ${isMine ? "bg-primary-foreground/10 border-primary-foreground/20 hover:bg-primary-foreground/20" : "bg-background border-border hover:bg-muted"}
                            `}>
                           <div className={`p-2 rounded ${isMine ? "bg-primary-foreground/20" : "bg-muted"}`}>
@@ -353,10 +421,10 @@ export function ChatBubble({
                             </div>
                           )}
                         </div>
-                      )
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
                 
                 {/* Priority / Silent / Expiry Badges */}
                 {(!message.is_deleted && (message.priority === 'urgent' || message.priority === 'high' || message.is_silent || message.expires_at)) && (
