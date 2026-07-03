@@ -17,6 +17,7 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
+import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 
 interface MessageOptions {
   scheduledFor?: string;
@@ -44,6 +45,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
 
   // New options state
   const [scheduledDate, setScheduledDate] = useState<string>("");
@@ -184,20 +186,20 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       expiresAt: expiresAt || undefined
     };
     
+    // Clear input immediately for optimistic UI
+    setMessage("");
+    setFiles([]);
+    setScheduledDate("");
+    setIsSilent(false);
+    setPriority("normal");
+    setExpiresAt("");
+    clearAudio();
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
+    
     try {
       await onSendMessage(text, finalFiles, options);
-      
-      // Clear input ONLY after successful send
-      setMessage("");
-      setFiles([]);
-      setScheduledDate("");
-      setIsSilent(false);
-      setPriority("normal");
-      setExpiresAt("");
-      clearAudio();
-      if (editorRef.current) {
-        editorRef.current.innerHTML = "";
-      }
     } finally {
       if (onTyping && hasMedia) {
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -336,11 +338,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               return (
                 <div
                   key={i}
-                  className="relative shrink-0 group"
+                  className="relative shrink-0 group cursor-pointer"
+                  onClick={() => setPreviewFile(file)}
                 >
                   {isImage ? (
                     /* Image thumbnail */
-                    <div className="w-20 h-20 rounded-xl border border-border bg-muted overflow-hidden">
+                    <div className="w-20 h-20 rounded-xl border border-border bg-muted overflow-hidden hover:opacity-90 transition-opacity">
                       <img
                         src={URL.createObjectURL(file)}
                         alt={file.name}
@@ -349,7 +352,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     </div>
                   ) : isVideo ? (
                     /* Video thumbnail with play icon */
-                    <div className="w-20 h-20 rounded-xl border border-border bg-black overflow-hidden relative">
+                    <div className="w-20 h-20 rounded-xl border border-border bg-black overflow-hidden relative hover:opacity-90 transition-opacity">
                       <video
                         src={URL.createObjectURL(file)}
                         className="w-full h-full object-cover"
@@ -357,14 +360,14 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                         muted
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center border border-white/20">
+                        <div className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
                           <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-0.5" />
                         </div>
                       </div>
                     </div>
                   ) : (
                     /* Document file card */
-                    <div className={`flex items-center gap-2.5 h-20 px-3 rounded-xl border border-border bg-card min-w-[160px] max-w-[200px]`}>
+                    <div className={`flex items-center gap-2.5 h-20 px-3 rounded-xl border border-border bg-card min-w-[160px] max-w-[200px] hover:bg-accent/50 transition-colors`}>
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getDocStyle().color}`}>
                         <FileText className="w-5 h-5" />
                       </div>
@@ -706,9 +709,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             >
               {scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>
-          </>
-        )}
+          </div>
+        </div>
       </div>
+
+      {previewFile && (
+        <FilePreviewModal
+          file={{ src: previewFile, name: previewFile.name, mimeType: previewFile.type }}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
     </div>
   );
 }
