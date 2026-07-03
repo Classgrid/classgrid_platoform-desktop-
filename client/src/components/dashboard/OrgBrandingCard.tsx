@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Globe, Trash2, Eye, Upload, Plus, X, Palette, Image as ImageIcon, Link as LinkIcon, Building2, Layout, LayoutTemplate, Home, Users, User, ArrowLeft, ArrowRight, RotateCw, Lock, Pencil } from "lucide-react";
+import { Camera, Globe, Trash2, Eye, Upload, Plus, X, Palette, Image as ImageIcon, Link as LinkIcon, Building2, Layout, LayoutTemplate, Home, Users, User, ArrowLeft, ArrowRight, RotateCw, Lock, Pencil, ChevronsUpDown, Search, LayoutGrid, Megaphone, Briefcase } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
@@ -40,8 +40,8 @@ type BrandingData = {
 };
 
 const DEFAULT_BRAND_COLORS = {
-  primary: "#6366f1",
-  secondary: "#4f46e5",
+  primary: "#10b981", // Emerald 500
+  secondary: "#059669", // Emerald 600
 };
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -446,28 +446,51 @@ export function OrgBrandingCard() {
             {/* Sidebar Preview */}
             <div className="border border-border/40 rounded-xl p-5 flex flex-col items-center gap-4 bg-background">
               <span className="text-sm font-bold text-foreground">Sidebar Preview</span>
-              <div className="w-full max-w-[200px] border border-border/40 rounded-xl bg-background p-4 flex flex-col gap-4 h-56 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                <div className="flex items-center gap-3">
+              <div className="w-full max-w-[200px] border border-border/40 rounded-xl bg-background p-3.5 flex flex-col gap-3.5 h-[270px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
+                
+                {/* Org header */}
+                <div className="flex items-center gap-2">
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 text-white shadow-sm"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 text-white shadow-sm"
                     style={{ backgroundColor: brandColors.primary }}
                   >
-                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain p-0.5" /> : <Building2 size={20} />}
+                    {data?.sidebar_logo_url ? <img src={data.sidebar_logo_url} className="w-full h-full object-contain p-0.5" /> : <Building2 size={18} />}
                   </div>
-                  <span className="text-[15px] font-bold truncate text-foreground">{localSidebarName || data?.sidebar_name || "Organization"}</span>
+                  <div className="flex flex-col flex-1 truncate">
+                    <span className="text-[14px] font-bold truncate text-foreground leading-tight">{localSidebarName || data?.sidebar_name || "Organization"}</span>
+                    <span className="text-[11px] text-primary leading-tight mt-0.5">Org Admin</span>
+                  </div>
+                  <ChevronsUpDown size={14} className="text-foreground shrink-0" />
                 </div>
-                <div className="w-full h-[1px] bg-border/30" />
-                <div className="flex flex-col gap-4 mt-1">
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Home size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Dashboard</span>
+                
+                {/* Search */}
+                <div className="flex items-center gap-2 px-2.5 py-1.5 bg-muted/40 border border-border/60 rounded-lg text-muted-foreground mt-0.5">
+                  <Search size={14} />
+                  <span className="text-[12px]">Search...</span>
+                </div>
+
+                {/* Main Nav */}
+                <div className="flex flex-col gap-4 mt-1 px-1">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <LayoutGrid size={16} strokeWidth={2} /> <span className="text-[13px] font-medium">Overview</span>
                   </div>
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Users size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Students</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <User size={16} strokeWidth={2.5} /> <span className="text-[13px] font-semibold">Faculty</span>
+                  <div className="flex items-center gap-3 text-foreground">
+                    <Megaphone size={16} strokeWidth={2} /> <span className="text-[13px] font-medium">Announcements</span>
                   </div>
                 </div>
+
+                <div className="w-full h-[1px] bg-border/40 my-1" />
+
+                {/* Sub Nav */}
+                <div className="flex flex-col gap-4 px-1">
+                  <div className="flex items-center gap-3 text-foreground">
+                    <Users size={16} strokeWidth={2} /> <span className="text-[13px] font-medium">Students</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-foreground">
+                    <Briefcase size={16} strokeWidth={2} /> <span className="text-[13px] font-medium">Faculty</span>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -489,12 +512,15 @@ export function OrgBrandingCard() {
 
                 <div className="relative z-10 mt-auto mb-3 w-[85%] bg-white rounded-xl shadow-xl flex flex-col items-center p-3.5 gap-2.5">
                   <span className="text-[13px] font-bold text-black truncate w-full text-center tracking-tight">{localName || data?.name || "Organization"}</span>
-                  <div 
-                    className="w-full py-1.5 rounded-md text-white text-[11px] font-semibold text-center shadow-sm"
+                  <a 
+                    href="/login"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-1.5 rounded-md text-white text-[11px] font-semibold text-center shadow-sm block hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: brandColors.primary }}
                   >
                     Sign in
-                  </div>
+                  </a>
                 </div>
               </div>
             </div>
@@ -502,27 +528,27 @@ export function OrgBrandingCard() {
             {/* Tab Preview */}
             <div className="border border-border/40 rounded-xl p-5 flex flex-col items-center gap-4 bg-background">
               <span className="text-sm font-bold text-foreground">Browser Tab Preview</span>
-              <div className="w-full max-w-[240px] rounded-xl overflow-hidden h-56 border border-border/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col bg-white">
-                <div className="bg-[#f0f1f4] dark:bg-muted/30 h-10 flex items-end px-2 pt-2 gap-1 relative z-0">
-                  <div className="bg-white h-[28px] rounded-t-lg px-3 flex items-center gap-2 min-w-[130px] shadow-sm relative z-10 border-t border-x border-border/20">
+              <div className="w-full max-w-[240px] rounded-xl overflow-hidden h-56 border border-border/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col bg-background">
+                <div className="bg-muted/50 dark:bg-muted/30 h-10 flex items-end px-2 pt-2 gap-1 relative z-0">
+                  <div className="bg-background h-[28px] rounded-t-lg px-3 flex items-center gap-2 min-w-[130px] shadow-sm relative z-10 border-t border-x border-border/20">
                     <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
                       {data?.favicon_url ? <img src={data.favicon_url} className="w-full h-full object-contain" /> : <Building2 size={12} style={{ color: brandColors.primary }} />}
                     </div>
-                    <span className="text-[11px] font-semibold text-black truncate flex-1">{localSiteTitle || data?.site_title || "Organization"} | Home</span>
-                    <X size={10} className="text-muted-foreground shrink-0 hover:text-black cursor-pointer" />
+                    <span className="text-[11px] font-semibold text-foreground truncate flex-1">{localSiteTitle || data?.site_title || "Organization"} | Home</span>
+                    <X size={10} className="text-muted-foreground shrink-0 hover:text-foreground cursor-pointer" />
                   </div>
                 </div>
-                <div className="bg-white h-10 border-b border-border/40 flex items-center px-2.5 gap-3 relative z-20 shadow-sm">
+                <div className="bg-background h-10 border-b border-border/40 flex items-center px-2.5 gap-3 relative z-20 shadow-sm">
                   <div className="flex items-center gap-2.5 text-muted-foreground">
                     <ArrowLeft size={13} strokeWidth={2.5} />
                     <ArrowRight size={13} strokeWidth={2.5} className="opacity-30" />
                     <RotateCw size={12} strokeWidth={2.5} />
                   </div>
-                  <div className="flex-1 h-6 bg-[#f0f1f4] dark:bg-muted/30 rounded-full flex items-center px-3 gap-2">
+                  <div className="flex-1 h-6 bg-muted/50 dark:bg-muted/30 rounded-full flex items-center px-3 gap-2">
                     <Lock size={10} className="text-muted-foreground" />
                   </div>
                 </div>
-                <div className="flex-1 bg-white" />
+                <div className="flex-1 bg-background" />
               </div>
             </div>
           </div>
