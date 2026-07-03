@@ -434,6 +434,15 @@ export function OrgBrandingCard() {
     }
   };
 
+  const handleDeleteAsset = async (key: string) => {
+    try {
+      await updateBranding.mutateAsync({ [key]: null });
+      toast.success("Asset deleted successfully!");
+    } catch (err) {
+      toast.error("Failed to delete asset");
+    }
+  };
+
   const handleAddSocialLink = async () => {
     if (!platformUrl.trim() || !platformUrl.startsWith("http")) {
       toast.error("Please enter a valid HTTP/HTTPS URL");
@@ -493,9 +502,9 @@ export function OrgBrandingCard() {
   );
 
   const AssetRow = ({ 
-    title, description, imgUrl, onUploadClick, type, fallbackIcon 
+    title, description, imgUrl, onUploadClick, type, fallbackIcon, onDelete 
   }: { 
-    title: string, description: string, imgUrl?: string, onUploadClick: () => void, type: string, fallbackIcon: React.ReactNode 
+    title: string, description: string, imgUrl?: string, onUploadClick: () => void, type: string, fallbackIcon: React.ReactNode, onDelete?: () => void 
   }) => (
     <div className="flex items-center justify-between py-3 group">
       <div className="flex gap-4 items-center">
@@ -511,9 +520,21 @@ export function OrgBrandingCard() {
           <span className="text-xs text-muted-foreground">{description}</span>
         </div>
       </div>
-      <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-accent">
-        Upload
-      </Button>
+      <div className="flex items-center gap-2">
+        {imgUrl && (
+          <>
+            <Button variant="outline" size="sm" onClick={() => window.open(imgUrl, "_blank")} className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
+              Preview
+            </Button>
+            <Button variant="outline" size="sm" onClick={onDelete} disabled={updateBranding.isPending} className="shrink-0 bg-background shadow-sm text-destructive hover:bg-destructive/10 border-destructive/20 h-8 px-3">
+              Delete
+            </Button>
+          </>
+        )}
+        <Button variant="outline" size="sm" onClick={onUploadClick} className="shrink-0 bg-background shadow-sm hover:bg-accent h-8 px-3">
+          {imgUrl ? "Change" : "Upload"}
+        </Button>
+      </div>
     </div>
   );
 
@@ -657,6 +678,7 @@ export function OrgBrandingCard() {
               title="College Logo" description="Displayed on Login Page and Admin Sidebar."
               imgUrl={data?.logo_url} type="logo" fallbackIcon={<Building2 size={24} />}
               onUploadClick={() => fileInputRef.current?.click()}
+              onDelete={() => handleDeleteAsset("logo_url")}
             />
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "logo"); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
 
@@ -664,6 +686,7 @@ export function OrgBrandingCard() {
               title="Sidebar Logo" description="Displayed in the top-left sidebar menu."
               imgUrl={data?.sidebar_logo_url} type="sidebar_logo" fallbackIcon={<Layout size={24} />}
               onUploadClick={() => sidebarLogoInputRef.current?.click()}
+              onDelete={() => handleDeleteAsset("sidebar_logo_url")}
             />
             <input type="file" ref={sidebarLogoInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "sidebar_logo"); if (sidebarLogoInputRef.current) sidebarLogoInputRef.current.value = ""; }} />
 
@@ -671,6 +694,7 @@ export function OrgBrandingCard() {
               title="Custom Favicon" description="Browser tab icon. PNG format (32x32 px)."
               imgUrl={data?.favicon_url} type="favicon" fallbackIcon={<Globe size={24} />}
               onUploadClick={() => faviconInputRef.current?.click()}
+              onDelete={() => handleDeleteAsset("favicon_url")}
             />
             <input type="file" ref={faviconInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "favicon"); if (faviconInputRef.current) faviconInputRef.current.value = ""; }} />
 
@@ -678,6 +702,7 @@ export function OrgBrandingCard() {
               title="Campus Photo" description="Background for login page. Recommended 1350x1800px."
               imgUrl={data?.campus_photo_url} type="campus" fallbackIcon={<ImageIcon size={24} />}
               onUploadClick={() => campusInputRef.current?.click()}
+              onDelete={() => handleDeleteAsset("campus_photo_url")}
             />
             <input type="file" ref={campusInputRef} className="hidden" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) openCropper(f, "campus"); if (campusInputRef.current) campusInputRef.current.value = ""; }} />
           </div>
