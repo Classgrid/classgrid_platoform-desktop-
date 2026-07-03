@@ -219,7 +219,7 @@ export function ResetPasswordPage() {
           </div>
 
           <p
-            className="mt-5 text-[18px] font-semibold text-foreground dark:text-[#ededed]"
+            className="mt-5 text-[18px] font-semibold text-foreground dark:text-white"
             style={{ animation: "fadeIn 0.4s ease 0.5s both" }}
           >
             Password Set
