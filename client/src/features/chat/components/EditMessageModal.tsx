@@ -48,6 +48,7 @@ export function EditMessageModal({ message, onClose, onSave }: EditMessageModalP
               onChange={() => {}}
               onSubmit={handleSave}
               minHeight={150}
+              maxHeight="50vh"
               hideAttachments={true}
             />
           </div>
