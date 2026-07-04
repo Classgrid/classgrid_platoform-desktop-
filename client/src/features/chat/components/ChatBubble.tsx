@@ -213,7 +213,7 @@ export function ChatBubble({
         {/* Message Container */}
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div className={`relative flex flex-col min-w-0 max-w-full ${isMine ? "items-end" : "items-start"}`}>
+            <div className={`relative flex flex-col min-w-0 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] ${isMine ? "items-end" : "items-start"}`}>
           
           {/* Sender Name (for group chats) */}
           {!isMine && showAvatar && (
@@ -304,7 +304,13 @@ export function ChatBubble({
                 }
               }
               
-              const textContent = message.reply_to.is_deleted ? "This message was deleted" : (message.reply_to.message ? String(message.reply_to.message).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "");
+              let textContent = "";
+              if (message.reply_to.is_deleted) {
+                textContent = "This message was deleted";
+              } else if (message.reply_to.message) {
+                const doc = new DOMParser().parseFromString(String(message.reply_to.message), 'text/html');
+                textContent = (doc.body.textContent || "").trim();
+              }
 
               return (
                 <div className="relative bg-black/5 dark:bg-black/20 rounded-lg p-2 mb-1.5 overflow-hidden flex items-stretch gap-2 cursor-pointer hover:bg-black/10 dark:hover:bg-black/30 transition-colors">

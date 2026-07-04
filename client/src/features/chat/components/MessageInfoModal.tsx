@@ -25,7 +25,8 @@ export function MessageInfoModal({ message, onClose }: MessageInfoModalProps) {
       ALLOWED_TAGS: [], 
       ALLOWED_ATTR: [] 
     });
-    plainText = cleanHtml || "📎 Attachment";
+    const doc = new DOMParser().parseFromString(cleanHtml, 'text/html');
+    plainText = doc.body.textContent || "📎 Attachment";
   } else if (message.attachments && message.attachments.length > 0) {
     plainText = "📎 Attachment";
   }

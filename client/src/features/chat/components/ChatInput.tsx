@@ -305,7 +305,13 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           }
         }
         
-        const textContent = replyTo.is_deleted ? "This message was deleted" : (replyTo.message ? String(replyTo.message).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "");
+        let textContent = "";
+        if (replyTo.is_deleted) {
+          textContent = "This message was deleted";
+        } else if (replyTo.message) {
+          const doc = new DOMParser().parseFromString(String(replyTo.message), 'text/html');
+          textContent = (doc.body.textContent || "").trim();
+        }
 
         return (
           <div className="px-3 py-2 bg-transparent">
