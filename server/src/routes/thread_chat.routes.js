@@ -26,7 +26,7 @@ const upload = multer({
 router.get('/cron/unpin-expired', async (req, res) => {
   try {
     const secret = req.query.secret;
-    if (secret !== 'classgrid_cron_secret') {
+    if (secret !== process.env.CRON_SECRET) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -2053,9 +2053,7 @@ router.put('/:id/replies', isAuthenticated, async (req, res) => {
     let isAdmin = false;
     if (thread.group_id) {
       const { data: membership } = await sb.from('chat_thread_members').select('role').eq('thread_id', threadId).eq('user_id', userId).single();
-      const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-      const isSuperAdmin = req.user.role === 'super_admin';
-      isAdmin = (membership?.role === 'admin') || isSuperAdmin;
+      isAdmin = (membership?.role === 'admin');
     }
 
     if (!isAdmin) return res.status(403).json({ error: 'Only admins can change thread settings' });

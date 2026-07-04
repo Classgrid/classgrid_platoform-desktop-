@@ -338,9 +338,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                   const isAdmin = data.myRole === 'admin' || isSuperAdmin;
                   
                   let canAddMember = false;
-                  if (policy === 'org_admin_only') canAddMember = isOrgAdmin;
-                  else if (policy === 'admin_only') canAddMember = isAdmin;
-                  else if (policy === 'admin_faculty') canAddMember = isAdmin || isFaculty;
+                  if (policy === 'all') canAddMember = true;
+                  else if (policy === 'admin_only' || policy === 'org_admin_only' || policy === 'admin_faculty') canAddMember = isAdmin;
 
                   return canAddMember && (
                     <button
@@ -506,8 +505,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                           <SelectItem value="all">Everyone</SelectItem>
-                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="all">Members & Admins</SelectItem>
                            <SelectItem value="admin_only">Only Admins</SelectItem>
                         </SelectContent>
                      </Select>
@@ -525,8 +523,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                           <SelectItem value="all">Everyone</SelectItem>
-                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="all">Members & Admins</SelectItem>
                            <SelectItem value="admin_only">Only Admins</SelectItem>
                         </SelectContent>
                      </Select>
@@ -544,8 +541,7 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                           <SelectItem value="all">Everyone</SelectItem>
-                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                           <SelectItem value="all">Members & Admins</SelectItem>
                            <SelectItem value="admin_only">Only Admins</SelectItem>
                         </SelectContent>
                      </Select>
@@ -563,9 +559,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                           <SelectItem value="all">Members & Admins</SelectItem>
                            <SelectItem value="admin_only">Only Admins</SelectItem>
-                           <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
-                           <SelectItem value="org_admin_only">Only Org Admins</SelectItem>
                         </SelectContent>
                      </Select>
                   </div>
@@ -582,8 +577,8 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                           <SelectItem value="admin_only">Group Admins</SelectItem>
-                           <SelectItem value="org_admin_only">Only Org Admins</SelectItem>
+                           <SelectItem value="all">Members & Admins</SelectItem>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
                         </SelectContent>
                      </Select>
                   </div>
