@@ -261,7 +261,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   // Save draft to localStorage
   useEffect(() => {
     if (draftKey) {
-      if (message.trim()) {
+      const plainText = message.replace(/<[^>]*>?/gm, '').trim();
+      if (plainText) {
         localStorage.setItem(draftKey, message);
       } else {
         localStorage.removeItem(draftKey);
@@ -276,11 +277,20 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       const savedDraft = localStorage.getItem(draftKey);
       if (savedDraft) {
         setMessage(savedDraft);
+        if (editorRef.current) {
+          editorRef.current.innerHTML = savedDraft;
+        }
       } else {
         setMessage("");
+        if (editorRef.current) {
+          editorRef.current.innerHTML = "";
+        }
       }
     } else {
       setMessage("");
+      if (editorRef.current) {
+        editorRef.current.innerHTML = "";
+      }
     }
   }, [draftKey]);
 
@@ -291,8 +301,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
 
   const handleSend = async () => {
+    const plainText = message.replace(/<[^>]*>?/gm, '').trim();
     const text = message.trim();
-    if (!text && files.length === 0 && !audioBlob) return;
+    if (!plainText && files.length === 0 && !audioBlob) return;
     if (isSendingLocal || isSending) return;
 
     if (text.length > 65000) {
@@ -903,7 +914,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     
                     // Same disabled checks as the send button
                     const isInvalidSize = files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024));
-                    const isInvalidState = isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || currentTextLength > 65000 || isInvalidSize;
+                    const isInvalidState = isSending || isSendingLocal || (!message.replace(/<[^>]*>?/gm, '').trim() && files.length === 0 && !audioBlob) || isRecording || currentTextLength > 65000 || isInvalidSize;
                     
                     if (!isInvalidState) {
                       handleSend();
@@ -1057,7 +1068,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             
             <button
               onClick={handleSend}
-              disabled={isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000 || files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024))}
+              disabled={isSending || isSendingLocal || (!message.replace(/<[^>]*>?/gm, '').trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000 || files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024))}
               className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
               title={(isSending || isSendingLocal) ? 'Sending...' : files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024)) ? 'File too large' : scheduledDate ? 'Schedule Message' : 'Send Message'}
             >

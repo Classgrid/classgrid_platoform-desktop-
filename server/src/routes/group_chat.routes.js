@@ -165,7 +165,7 @@ router.post('/', isAuthenticated, async (req, res) => {
         send_message_policy: send_message_policy || 'all',
         admin_roles: admin_roles || [],
         message_ttl: message_ttl || 0,
-        is_official: is_official || false,
+        is_official: isSuperAdmin ? true : (is_official || false),
         edit_info_policy: edit_info_policy || 'admin_only',
         add_member_policy: add_member_policy || 'admin_only',
         create_poll_policy: create_poll_policy || 'all',
