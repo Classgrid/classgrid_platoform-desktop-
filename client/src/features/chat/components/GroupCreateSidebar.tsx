@@ -45,7 +45,11 @@ export function GroupCreateSidebar({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageTtl, setMessageTtl] = useState<number>(0);
   const [groupPermissions, setGroupPermissions] = useState<any>({ 
-    send_message_policy: 'all', 
+    send_message_policy: 'all',
+    add_member_policy: 'all',
+    edit_info_policy: 'all',
+    send_attachments_policy: 'all',
+    create_poll_policy: 'all',
     auto_add_roles: [], 
     admin_roles: [],
     group_type: 'general',
@@ -408,7 +412,14 @@ export function GroupCreateSidebar({
                  <span className="font-medium">Group permissions (Send messages)</span>
                  <Select 
                     value={groupPermissions.send_message_policy}
-                    onValueChange={(value) => setGroupPermissions({ ...groupPermissions, send_message_policy: value })}
+                    onValueChange={(value) => setGroupPermissions({ 
+                      ...groupPermissions, 
+                      send_message_policy: value,
+                      add_member_policy: value,
+                      edit_info_policy: value,
+                      send_attachments_policy: value,
+                      create_poll_policy: value
+                    })}
                  >
                     <SelectTrigger className="w-full bg-transparent border-b border-border rounded-none px-0 py-2 text-sm text-foreground outline-none shadow-none h-auto">
                        <SelectValue />

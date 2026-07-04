@@ -595,6 +595,26 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                      </Select>
                   </div>
 
+                  {/* Disappearing Messages */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Disappearing messages</span>
+                     <Select 
+                        value={String(data.group.message_ttl || 0)}
+                        disabled={isUpdatingPermissions}
+                        onValueChange={(value) => handleUpdatePermissions({ message_ttl: Number(value) })}
+                     >
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="0">Off</SelectItem>
+                           <SelectItem value="86400">24 hours</SelectItem>
+                           <SelectItem value="604800">7 days</SelectItem>
+                           <SelectItem value="7776000">90 days</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
+
                   {/* Group Type */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Group Type</span>
