@@ -31,6 +31,7 @@ export function attachInstitutionProfile({ required = true } = {}) {
 
             const orgId = resolveRequestOrganizationId(req);
             if (!orgId) {
+                if (req.user?.role === 'super_admin') return next();
                 if (!required) return next();
                 return res.status(400).json({
                     message: "Organization context is required.",
