@@ -463,8 +463,9 @@ export function ChatPage() {
       }
       setIsGroupModalOpen(false);
       toast.success("Group created successfully!");
-    } catch (err) {
-      toast.error("Failed to create group");
+    } catch (err: any) {
+      console.error('Group creation failed:', err?.response?.data || err?.message || err);
+      toast.error(err?.response?.data?.error || "Failed to create group");
     }
   };
 
