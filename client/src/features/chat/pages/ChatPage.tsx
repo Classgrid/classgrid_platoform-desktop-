@@ -877,6 +877,8 @@ export function ChatPage() {
                     for (const msgId of Array.from(selectedMessageIds)) {
                       handleStarMessage(msgId);
                     }
+                    setIsSelectionMode(false);
+                    setSelectedMessageIds(new Set());
                   } else if (action === "copy") {
                     const texts = messages.filter(m => selectedMessageIds.has(m.id)).map(m => m.message).filter(Boolean);
                     navigator.clipboard.writeText(texts.join("\n"));

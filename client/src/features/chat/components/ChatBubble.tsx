@@ -560,6 +560,9 @@ export function ChatBubble({
 
             {/* Meta (Time + Checks) */}
             <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 text-[10px] ${isMine ? "text-[#111b21]/70 dark:text-white/60 font-semibold" : "text-muted-foreground"}`}>
+              {message.is_starred && (
+                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              )}
               <span>{timeString}</span>
               {isMine && !message.is_deleted && (
                 message.isSending ? (
@@ -617,9 +620,6 @@ export function ChatBubble({
                 );
               })()}
               
-              {message.is_starred && (
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 absolute -right-4 -bottom-1" />
-              )}
             </div>
           )}
 
@@ -706,7 +706,7 @@ export function ChatBubble({
                   <Star className="w-4 h-4 mr-2" /> Star
                 </ContextMenuItem>
               )}
-              {isMine && (
+              {isMine && (!message.attachments || message.attachments.length === 0) && (
                 <ContextMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                   <Edit2 className="w-4 h-4 mr-2" /> Edit
                 </ContextMenuItem>
