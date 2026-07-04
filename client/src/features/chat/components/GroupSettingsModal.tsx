@@ -596,19 +596,12 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                         </SelectTrigger>
                         <SelectContent>
                            <SelectItem value="general">General</SelectItem>
-                           <SelectItem value="announcement">Announcement</SelectItem>
+                           <SelectItem value="private">Private</SelectItem>
                            <SelectItem value="class">Class</SelectItem>
                            <SelectItem value="department">Department</SelectItem>
                            <SelectItem value="subject">Subject</SelectItem>
-                           <SelectItem value="exam">Exam</SelectItem>
-                           <SelectItem value="fees">Fees</SelectItem>
-                           <SelectItem value="admission">Admission</SelectItem>
-                           <SelectItem value="faculty">Faculty</SelectItem>
-                           <SelectItem value="parent">Parent</SelectItem>
-                           <SelectItem value="transport">Transport</SelectItem>
-                           <SelectItem value="hostel">Hostel</SelectItem>
-                           <SelectItem value="library">Library</SelectItem>
-                           <SelectItem value="event">Event</SelectItem>
+                           <SelectItem value="team_staff">Team / Staff</SelectItem>
+                           <SelectItem value="official_announcement">Official / Announcement</SelectItem>
                         </SelectContent>
                      </Select>
                   </div>

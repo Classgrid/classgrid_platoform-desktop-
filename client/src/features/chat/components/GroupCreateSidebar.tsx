@@ -352,8 +352,7 @@ export function GroupCreateSidebar({
                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                       <SelectItem value="all">Everyone</SelectItem>
-                       <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                       <SelectItem value="all">Members & Admins</SelectItem>
                        <SelectItem value="admin_only">Only Admins</SelectItem>
                     </SelectContent>
                  </Select>

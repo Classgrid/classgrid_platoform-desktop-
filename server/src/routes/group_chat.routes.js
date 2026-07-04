@@ -364,7 +364,7 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     if (Array.isArray(auto_add_roles)) updates.auto_add_roles = auto_add_roles;
     if (Array.isArray(admin_roles)) updates.admin_roles = admin_roles;
     
-    const validGroupTypes = ['general', 'announcement', 'class', 'department', 'subject', 'exam', 'fees', 'admission', 'faculty', 'parent', 'transport', 'hostel', 'library', 'event'];
+    const validGroupTypes = ['general', 'private', 'class', 'department', 'subject', 'team_staff', 'official_announcement'];
     if (validGroupTypes.includes(group_type)) updates.group_type = group_type;
 
     // Fallback for legacy send_messages
