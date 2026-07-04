@@ -498,9 +498,36 @@ export function ChatPage() {
         const isCurrentlyViewing = activeThread?.id === payload.threadId;
         const msg = payload.message as ChatMessage;
 
+        let preview = msg.message || "";
+        if (msg.is_deleted) {
+          preview = "This message was deleted";
+        } else if (msg.message?.startsWith("[POLL]")) {
+          // If the backend sent a poll message, keep it. Wait, the frontend message is actually "Created a poll: ...", but for the preview we want "[POLL] ...".
+          // If the message is a poll, the frontend doesn't have msg.poll. The backend sends message text "Created a poll: question".
+          if (msg.message.startsWith("Created a poll: ")) {
+            preview = "[POLL] " + msg.message.replace("Created a poll: ", "");
+          }
+        } else if (msg.attachments && msg.attachments.length > 0) {
+          if (msg.attachments.length === 1) {
+            const att = msg.attachments[0];
+            const mime = att.file_type || "";
+            let prefix = "[FILE]";
+            let defaultText = att.file_name || "Document";
+            if (mime.startsWith("image/")) { prefix = "[IMAGE]"; defaultText = "Photo"; }
+            else if (mime.startsWith("video/")) { prefix = "[VIDEO]"; defaultText = "Video"; }
+            else if (mime.startsWith("audio/")) { prefix = "[AUDIO]"; defaultText = (mime.includes("webm") || mime.includes("ogg")) ? "Voice message" : "Audio"; }
+            else if (mime === "application/pdf") { prefix = "[PDF]"; }
+            else if (mime.includes("word") || mime.includes("document")) { prefix = "[DOC]"; }
+            
+            preview = msg.message ? `${prefix} ${msg.message.trim()}` : `${prefix} ${defaultText}`;
+          } else {
+            preview = `[FILE] ${msg.attachments.length} files`;
+          }
+        }
+
         const updated = {
           ...existing,
-          lastMessage: msg.message || (msg.attachments?.length ? "📎 Attachment" : ""),
+          lastMessage: preview,
           lastMessageAt: msg.created_at,
           unread: isCurrentlyViewing ? 0 : existing.unread + 1,
         };
@@ -558,9 +585,13 @@ export function ChatPage() {
       });
     },
     onMessageDeleted: ({ messageId }) => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === messageId ? { ...m, is_deleted: true, message: "This message was deleted" } : m))
-      );
+      setMessages((prev) => {
+        const next = prev.map((m) => (m.id === messageId ? { ...m, is_deleted: true, message: "This message was deleted" } : m));
+        if (next.length > 0 && next[next.length - 1].id === messageId && activeThread) {
+          setThreads(tPrev => tPrev.map(t => t.id === activeThread.id ? { ...t, lastMessage: "This message was deleted" } : t));
+        }
+        return next;
+      });
     },
     onReactionUpdate: ({ messageId, reactions }) => {
       setMessages((prev) =>

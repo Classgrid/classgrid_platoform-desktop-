@@ -85,6 +85,51 @@ function getChatFileFolder(mimeType = '') {
   return 'files';
 }
 
+function buildLastMessagePreview(msgText, files, isPoll = false, isDeleted = false) {
+  if (isDeleted) return 'This message was deleted';
+  
+  if (isPoll) {
+    return '[POLL] ' + msgText;
+  }
+
+  // If there are files
+  if (files && files.length > 0) {
+    if (files.length === 1) {
+      const mime = files[0].mimetype || files[0].file_type || '';
+      const originalName = files[0].originalname || files[0].file_name || 'Document';
+      let prefix = '[FILE]';
+      let defaultText = originalName;
+
+      if (mime.startsWith('image/')) {
+        prefix = '[IMAGE]';
+        defaultText = 'Photo';
+      } else if (mime.startsWith('video/')) {
+        prefix = '[VIDEO]';
+        defaultText = 'Video';
+      } else if (mime.startsWith('audio/')) {
+        prefix = '[AUDIO]';
+        defaultText = (mime.includes('webm') || mime.includes('ogg')) ? 'Voice message' : 'Audio';
+      } else if (mime === 'application/pdf') {
+        prefix = '[PDF]';
+      } else if (mime.includes('word') || mime.includes('document')) {
+        prefix = '[DOC]';
+      }
+
+      // If it has a caption, return prefix + caption
+      if (msgText && msgText.trim()) {
+        return `${prefix} ${msgText.trim()}`;
+      }
+      // Without caption
+      return `${prefix} ${defaultText}`;
+    } else {
+      return `[FILE] ${files.length} files`;
+    }
+  }
+
+  // Normal text, reply, forwarded
+  return msgText || '';
+}
+
 function sanitizeStorageFileName(fileName) {
   const fallback = `upload-${Date.now()}`;
   return String(fileName || fallback)
@@ -956,20 +1001,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
     const msgId = insertedMsg.id;
 
     // Calculate last message text for sidebar snippet
-    let lastMsgText = msgText || '';
-    if (!lastMsgText && files && files.length > 0) {
-      if (files.length === 1) {
-        const mime = files[0].mimetype || '';
-        if (mime.startsWith('image/')) lastMsgText = '[IMAGE] Photo';
-        else if (mime.startsWith('video/')) lastMsgText = '[VIDEO] Video';
-        else if (mime.startsWith('audio/')) lastMsgText = '[AUDIO] Audio';
-        else if (mime === 'application/pdf') lastMsgText = '[PDF] Document';
-        else if (mime.includes('word') || mime.includes('document')) lastMsgText = '[DOC] Document';
-        else lastMsgText = '[FILE] Document';
-      } else {
-        lastMsgText = `[FILE] ${files.length} files`;
-      }
-    }
+    const lastMsgText = buildLastMessagePreview(msgText, files, false, false);
 
     // Update thread metadata manually
     sb.from('chat_threads')
@@ -1160,6 +1192,25 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
       .update({ message: 'This message was deleted', is_deleted: true })
       .eq('id', msgId);
     if (error) throw error;
+
+    // Update thread's last_message if needed (fetch the latest message for the thread and recalculate preview)
+    const { data: latestMsg } = await sb.from('chat_messages')
+      .select('message, is_deleted, chat_attachments(file_url, file_name, file_type, file_size), chat_polls(question)')
+      .eq('thread_id', threadId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (latestMsg) {
+      const isPoll = latestMsg.chat_polls && latestMsg.chat_polls.length > 0;
+      const preview = buildLastMessagePreview(
+        isPoll ? latestMsg.chat_polls[0].question : latestMsg.message,
+        latestMsg.chat_attachments,
+        isPoll,
+        latestMsg.is_deleted
+      );
+      await sb.from('chat_threads').update({ last_message: preview }).eq('id', threadId);
+    }
 
     // Broadcast delete event (fire-and-forget)
     broadcastToChannel(`thread:${threadId}`, 'message_deleted', { messageId: msgId });
@@ -2005,10 +2056,14 @@ router.post('/forward', isAuthenticated, async (req, res) => {
     }
 
     // 4. Update last_message metadata for all target threads
+    const lastOriginalMsg = sortedMessages[sortedMessages.length - 1];
+    const lastMsgAtts = originalAttachments?.filter(a => a.message_id === lastOriginalMsg.id) || [];
+    const forwardPreview = buildLastMessagePreview(lastOriginalMsg.message, lastMsgAtts, false, false);
+
     const updatePromises = validThreadIds.map(tid =>
       sb.from('chat_threads')
         .update({
-          last_message: 'Forwarded message',
+          last_message: forwardPreview,
           last_message_at: now
         })
         .eq('id', tid)
