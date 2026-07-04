@@ -812,7 +812,7 @@ export function ChatBubble({
                     <Star className="w-4 h-4 mr-2" /> Star
                   </DropdownMenuItem>
                 )}
-                {isMine && (
+                {isMine && (!message.attachments || message.attachments.length === 0) && (
                   <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                     <Edit2 className="w-4 h-4 mr-2" /> Edit
                   </DropdownMenuItem>
