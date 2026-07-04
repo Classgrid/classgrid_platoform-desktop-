@@ -1052,7 +1052,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
 
     if (thread.type === 'group' && thread.group_id) {
       const { data: group } = await sb.from('chat_groups')
-        .select('name, send_message_policy, send_attachments_policy, require_message_approval, reply_policy')
+        .select('name, send_message_policy, send_attachments_policy, require_message_approval')
         .eq('id', thread.group_id)
         .single();
 
@@ -1070,20 +1070,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
           return res.status(403).json({ error: 'Only admins and faculty can send messages in this group' });
         }
 
-        // Check allow_replies on thread
-        if (thread.allow_replies === false && !isAdmin) {
-          return res.status(403).json({ error: 'Replies are disabled for this thread' });
-        }
 
-        // Check reply_policy
-        if (replyTo && group.reply_policy) {
-          if (group.reply_policy === 'admin_only' && !isAdmin) {
-            return res.status(403).json({ error: 'Only admins can reply to messages in this group' });
-          }
-          if (group.reply_policy === 'admin_faculty' && !isAdmin && !isFaculty) {
-            return res.status(403).json({ error: 'Only admins and faculty can reply to messages in this group' });
-          }
-        }
 
         // Check send_attachments_policy
         if ((files && files.length > 0) || (preuploaded_attachments && preuploaded_attachments.length > 0)) {

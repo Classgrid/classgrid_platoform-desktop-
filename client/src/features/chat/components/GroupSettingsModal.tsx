@@ -527,24 +527,6 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                      </Select>
                   </div>
 
-                  {/* Reply Policy */}
-                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
-                     <span className="text-sm font-medium text-foreground">Who can reply to messages?</span>
-                     <Select 
-                        value={data.group.reply_policy || 'all'}
-                        disabled={isUpdatingPermissions}
-                        onValueChange={(value) => handleUpdatePermissions({ reply_policy: value })}
-                     >
-                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
-                           <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                           <SelectItem value="all">Members & Admins</SelectItem>
-                           <SelectItem value="admin_only">Only Admins</SelectItem>
-                        </SelectContent>
-                     </Select>
-                  </div>
-
                   {/* Send Attachments Policy */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
                      <span className="text-sm font-medium text-foreground">Who can send attachments?</span>

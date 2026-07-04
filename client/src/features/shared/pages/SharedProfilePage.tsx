@@ -131,8 +131,8 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
         lastLoginAt: undefined,
         createdAt: groupData.group.created_at,
         bio: groupData.group.description || "",
-        organization_name: "", // handled below
-        organization_logo: "",
+        organization_name: groupData.group.org_id ? (currentUser?.organization?.name || "Organization Group") : "Classgrid Platform",
+        organization_logo: groupData.group.org_id ? (currentUser?.organization?.logo_url || "") : "",
         metadata: {},
       });
     } else if (publicUser) {
@@ -474,47 +474,64 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                     {!isGroup && form.email && (
                       <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
                     )}
-                    {!isGroup && (
-                      <span className="flex items-center gap-2.5">
-                        {form.role === "super_admin" || form.role === "Super Admin" ? (
-                          <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
-                            <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
-                          </div>
-                        ) : form.organization_logo ? (
-                          <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
-                            <img src={form.organization_logo} alt="Org Logo" className="w-6 h-6 object-contain" />
-                          </div>
-                        ) : (
-                          <Globe size={18} className="text-muted-foreground" />
-                        )}
-                        <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
-                      </span>
-                    )}
+                    <span className="flex items-center gap-2.5">
+                      {form.role === "super_admin" || form.role === "Super Admin" ? (
+                        <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
+                          <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
+                        </div>
+                      ) : form.organization_logo ? (
+                        <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
+                          <img src={form.organization_logo} alt="Org Logo" className="w-6 h-6 object-contain" />
+                        </div>
+                      ) : (
+                        <Globe size={18} className="text-muted-foreground" />
+                      )}
+                      <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
+                    </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4 text-sm">
-                    {!isReadOnly || (targetUserId && onlineUsers.has(targetUserId)) ? (
-                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        <Activity size={14} /> {isReadOnly ? "Online" : "Active"}
-                      </span>
+                  <div className="flex flex-wrap items-center gap-3 text-sm mt-1">
+                    {isGroup ? (
+                      <>
+                        <span className="flex items-center gap-1.5 text-muted-foreground font-medium bg-muted/30 px-3 py-1.5 rounded-full border border-border/40 capitalize">
+                          {groupData?.group?.group_type?.replace(/_/g, ' ') || 'General'}
+                        </span>
+                        <span className="flex items-center gap-1.5 text-muted-foreground font-medium bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
+                          <Users size={15} className="opacity-70" /> {groupData?.members?.length || 0} Members
+                        </span>
+                        {(groupData?.members?.filter((m: any) => onlineUsers?.has(m.userId)).length || 0) > 0 && (
+                          <span className="flex items-center gap-1.5 text-emerald-600 font-medium bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            {groupData?.members?.filter((m: any) => onlineUsers?.has(m.userId)).length} Online
+                          </span>
+                        )}
+                      </>
                     ) : (
-                      <span className="flex items-center gap-1.5 text-muted-foreground bg-muted/20 border border-border/40 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
-                        <Clock size={14} className="opacity-70" /> 
-                        {form.lastLoginAt ? `Last seen ${new Date(form.lastLoginAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : "Offline"}
-                      </span>
-                    )}
-                    {form.forumUsername ? (
-                      <a 
-                        href={`https://forum.classgrid.in/u/${form.forumUsername}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
-                      >
-                        @{form.forumUsername}
-                      </a>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
-                        @{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}
-                      </span>
+                      <>
+                        {!isReadOnly || (targetUserId && onlineUsers.has(targetUserId)) ? (
+                          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                            <Activity size={14} /> {isReadOnly ? "Online" : "Active"}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-muted-foreground bg-muted/20 border border-border/40 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
+                            <Clock size={14} className="opacity-70" /> 
+                            {form.lastLoginAt ? `Last seen ${new Date(form.lastLoginAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}` : "Offline"}
+                          </span>
+                        )}
+                        {form.forumUsername ? (
+                          <a 
+                            href={`https://forum.classgrid.in/u/${form.forumUsername}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                          >
+                            @{form.forumUsername}
+                          </a>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-muted-foreground font-semibold bg-muted/30 px-2.5 py-1 rounded-full border border-border/40">
+                            @{(form.name || "user").toLowerCase().replace(/\s+/g, '_')}
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -697,7 +714,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
           )}
 
           {/* Sticky Save Bar */}
-          {!isReadOnly && isDirty && (
+          {!isReadOnly && isDirty && !isGroup && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[1000px] bg-card border border-primary/50 rounded-2xl p-4 flex items-center justify-between shadow-2xl z-50 animate-in slide-in-from-bottom-12 duration-300">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-bold">Unsaved changes detected</p>
