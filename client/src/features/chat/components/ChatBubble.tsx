@@ -6,7 +6,8 @@ import { marked } from "marked";
 import { MoreHorizontal, CornerUpLeft, Trash2, Edit2, Check, CheckCheck, FileText, Download, Smile, Plus, Clock, BarChart2, Star, Copy, Forward, Pin, CheckSquare, AlertCircle, BellOff, Timer, Shield, Play, Info, Camera, Video } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
 import { MessageInfoModal } from "./MessageInfoModal";
-import { ImageGallery } from "@/features/shared/components/ImageGallery";
+import { ImageGallery, ImageLightbox } from "@/features/shared/components/ImageGallery";
+import { EditMessageModal } from "./EditMessageModal";
 import { PdfAttachment } from "./PdfAttachment";
 import {
   DropdownMenu,
@@ -108,6 +109,7 @@ export function ChatBubble({
   const [showFullPicker, setShowFullPicker] = useState(false);
   const [isTextExpanded, setIsTextExpanded] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [showProfileLightbox, setShowProfileLightbox] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const isLongMessage = message.message && message.message.length > 800;
@@ -135,11 +137,21 @@ export function ChatBubble({
     );
   }
 
-  const handleEditSubmit = () => {
-    if (editValue.trim() && editValue !== message.message) {
-      onEdit(message.id, editValue.trim());
+  const handleEditSubmit = async (newContent: string) => {
+    if (!newContent.trim() || newContent.trim() === message.message) {
+      setIsEditing(false);
+      return;
     }
-    setIsEditing(false);
+    
+    if (onEdit) {
+      try {
+        await onEdit(message.id, newContent.trim());
+        setIsEditing(false);
+        toast.success("Message edited successfully");
+      } catch (error) {
+        toast.error("Failed to edit message");
+      }
+    }
   };
 
   let timeString = "";
@@ -186,7 +198,7 @@ export function ChatBubble({
                 className="w-8 h-8 rounded-full overflow-hidden mt-1 hover:opacity-80 transition-opacity focus:outline-none"
                 onClick={() => {
                   if (message.user_avatar) {
-                    onViewMedia?.({ file_url: message.user_avatar, file_name: (message.sender_name || 'User') + " Profile Photo", file_type: "image/jpeg" });
+                    setShowProfileLightbox(true);
                   } else {
                     onUserClick?.(message.sender_id);
                   }
@@ -340,20 +352,6 @@ export function ChatBubble({
 
             {message.is_deleted ? (
               <span className="text-[15px]">This message was deleted</span>
-            ) : isEditing ? (
-              <div className="flex flex-col gap-2 min-w-[200px]">
-                <textarea
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full bg-background/20 text-current p-2 rounded resize-none outline-none text-sm"
-                  rows={2}
-                  autoFocus
-                />
-                <div className="flex justify-end gap-2">
-                  <button onClick={() => setIsEditing(false)} className="text-xs opacity-70 hover:opacity-100">Cancel</button>
-                  <button onClick={handleEditSubmit} className="text-xs font-bold bg-background/30 px-2 py-1 rounded">Save</button>
-                </div>
-              </div>
             ) : (
               <>
                 {/* Attachments */}
@@ -827,9 +825,22 @@ export function ChatBubble({
           </div>
         )}
 
-      </div>
     </div>
     {infoModalOpen && <MessageInfoModal message={message} onClose={() => setInfoModalOpen(false)} />}
+    {isEditing && (
+      <EditMessageModal 
+        message={message} 
+        onClose={() => setIsEditing(false)} 
+        onSave={handleEditSubmit} 
+      />
+    )}
+    {showProfileLightbox && message.user_avatar && (
+      <ImageLightbox
+        images={[{ id: "avatar", src: message.user_avatar, alt: (message.sender_name || 'User') + " Profile Photo" }]}
+        initialIndex={0}
+        onClose={() => setShowProfileLightbox(false)}
+      />
+    )}
     </div>
   );
 }
