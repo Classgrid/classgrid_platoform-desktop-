@@ -21,6 +21,58 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 }
 });
 
+// CRON: Unpin expired messages
+// Endpoint for cron-job.org to automatically unpin messages that have exceeded their duration
+router.get('/cron/unpin-expired', async (req, res) => {
+  try {
+    const secret = req.query.secret;
+    if (secret !== 'classgrid_cron_secret') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const now = new Date().toISOString();
+    
+    // Find expired pinned messages
+    const { data: expiredMessages, error: fetchError } = await sb
+      .from('chat_messages')
+      .select('id, thread_id')
+      .eq('is_pinned', true)
+      .lt('pinned_until', now);
+      
+    if (fetchError) throw fetchError;
+    if (!expiredMessages || expiredMessages.length === 0) {
+      return res.json({ success: true, message: 'No expired pins found' });
+    }
+    
+    // Update them
+    const expiredIds = expiredMessages.map(m => m.id);
+    const { error: updateError } = await sb
+      .from('chat_messages')
+      .update({ is_pinned: false, pinned_until: null })
+      .in('id', expiredIds);
+      
+    if (updateError) throw updateError;
+    
+    // Broadcast updates for each thread
+    const threadIds = [...new Set(expiredMessages.map(m => m.thread_id))];
+    for (const threadId of threadIds) {
+      const messagesForThread = expiredMessages.filter(m => m.thread_id === threadId);
+      for (const msg of messagesForThread) {
+        broadcastToChannel(threadId, 'message_update', {
+          id: msg.id,
+          is_pinned: false,
+          pinned_until: null
+        });
+      }
+    }
+    
+    res.json({ success: true, count: expiredIds.length });
+  } catch (error) {
+    console.error('Cron unpin error:', error);
+    res.status(500).json({ error: 'Failed to unpin messages' });
+  }
+});
+
 // ──────────────────────────────────────────────
 // RATE LIMITER (in-memory, per user, 30 msg/min)
 // ──────────────────────────────────────────────
@@ -1520,8 +1572,7 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
     if (!msg) return res.status(404).json({ error: 'Message not found' });
     
     if (deleteType === 'everyone') {
-      const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
-      if (msg.sender_id !== userId && !isAdmin) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
+      if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
       
       // Delete attachments from DB
       await sb.from('chat_attachments').delete().eq('message_id', msgId);
