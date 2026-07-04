@@ -71,6 +71,7 @@ export function ChatPage() {
 
   // -- State: Messages (Active Thread) --
   const messageCache = useRef<Record<string, ChatMessage[]>>({});
+  const fetchAbortController = useRef<AbortController | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
@@ -279,9 +280,31 @@ export function ChatPage() {
   }, [messages, activeThread]);
 
   useEffect(() => {
+    // When switching away from a thread, cancel any pending fetch
+    return () => {
+      if (fetchAbortController.current) {
+        fetchAbortController.current.abort();
+        fetchAbortController.current = null;
+      }
+    };
+  }, [activeThread?.id]);
+
+  useEffect(() => {
     if (activeThread) {
       setTypingUsers({});
+      
+      // Instantly show cached messages if we have them, without loading spinner
+      if (messageCache.current[activeThread.id]) {
+        setMessages(messageCache.current[activeThread.id]);
+        setMessagesLoading(false);
+      } else {
+        setMessages([]); // Clear previous chat instantly
+        setMessagesLoading(true);
+      }
+
       loadMessages(activeThread.id);
+      
+      // Fire and forget read receipt
       markThreadRead(activeThread.id).catch(console.error);
       
       // Clear unread count locally immediately
@@ -295,25 +318,39 @@ export function ChatPage() {
   }, [activeThread]);
 
   const loadMessages = async (threadId: string, before?: string) => {
+    // If not paginating, abort any ongoing requests to prevent race conditions
     if (!before) {
-      if (messageCache.current[threadId]) {
-        setMessages(messageCache.current[threadId]);
-      } else {
-        setMessagesLoading(true);
+      if (fetchAbortController.current) {
+        fetchAbortController.current.abort();
       }
+      fetchAbortController.current = new AbortController();
     }
+
     try {
-      const msgs = await fetchMessages(threadId, before);
-      if (before) {
-        setMessages((prev) => [...msgs, ...prev]);
-      } else {
-        setMessages(msgs);
+      const msgs = await fetchMessages(threadId, before, !before ? fetchAbortController.current?.signal : undefined);
+      
+      // Guard: Only update if the user hasn't switched to another thread
+      if (activeThread && activeThread.id === threadId) {
+        if (before) {
+          setMessages((prev) => {
+            const newMsgs = [...msgs, ...prev];
+            messageCache.current[threadId] = newMsgs;
+            return newMsgs;
+          });
+        } else {
+          setMessages(msgs);
+          messageCache.current[threadId] = msgs;
+        }
+        setHasMoreMessages(msgs.length === 50); // Hardcoded limit from backend
       }
-      setHasMoreMessages(msgs.length === 50); // Hardcoded limit from backend
-    } catch (err) {
+    } catch (err: any) {
+      // Ignore abort errors
+      if (err?.name === 'CanceledError' || err?.message === 'canceled') return;
       toast.error("Failed to load messages");
     } finally {
-      if (!before) setMessagesLoading(false);
+      if (!before && activeThread && activeThread.id === threadId) {
+        setMessagesLoading(false);
+      }
     }
   };
 

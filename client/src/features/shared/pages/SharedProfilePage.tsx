@@ -475,7 +475,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                       <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
                     )}
                     <span className="flex items-center gap-2.5">
-                      {form.role === "super_admin" || form.role === "Super Admin" ? (
+                      {form.role === "super_admin" || form.role === "Super Admin" || (isGroup && groupData?.group?.is_official) ? (
                         <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
                           <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
                         </div>
@@ -486,7 +486,12 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                       ) : (
                         <Globe size={18} className="text-muted-foreground" />
                       )}
-                      <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
+                      <span className="text-[15px] font-semibold text-foreground/90 flex items-center gap-1.5">
+                        {form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : (isGroup && groupData?.group?.is_official) ? "Classgrid" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}
+                        {(form.role === "super_admin" || form.role === "Super Admin" || (isGroup && groupData?.group?.is_official)) && (
+                          <BadgeCheck className="w-[18px] h-[18px] text-blue-500 fill-blue-500/10" />
+                        )}
+                      </span>
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-sm mt-1">

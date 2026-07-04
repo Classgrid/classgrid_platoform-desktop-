@@ -142,9 +142,9 @@ export async function findOrCreateDM(userId: string) {
   return res.data;
 }
 
-export async function fetchMessages(threadId: string, before?: string): Promise<ChatMessage[]> {
+export async function fetchMessages(threadId: string, before?: string, signal?: AbortSignal): Promise<ChatMessage[]> {
   const params = before ? { before } : {};
-  const res = await apiClient.get<{ messages: ChatMessage[] }>(`/api/threads/${threadId}/messages`, { params });
+  const res = await apiClient.get<{ messages: ChatMessage[] }>(`/api/threads/${threadId}/messages`, { params, signal });
   return res.data.messages;
 }
 
