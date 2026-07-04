@@ -799,8 +799,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     ))}
                 </div>
               )}
-
-              <div
+                  <div
                 ref={editorRef}
                 contentEditable
                 data-placeholder="Type a message..."
@@ -809,23 +808,13 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   const text = e.currentTarget.textContent || "";
                   setMessage(html);
                   
-                  // Mentions logic
-                  const selection = window.getSelection();
-                  if (selection && selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0);
-                    const preCaretRange = range.cloneRange();
-                    preCaretRange.selectNodeContents(e.currentTarget);
-                    preCaretRange.setEnd(range.endContainer, range.endOffset);
-                    const textBeforeCaret = preCaretRange.toString();
-                    
-                    // Match @ preceded by start of string, space, or non-breaking space
-                    const match = textBeforeCaret.match(/(?:^|[^\w])@([a-zA-Z0-9_]*)$/);
-                    if (match) {
-                      setShowMentions(true);
-                      setMentionQuery(match[1].toLowerCase());
-                    } else {
-                      setShowMentions(false);
-                    }
+                  // Ultra-reliable Mention logic (bypassing browser Selection API bugs)
+                  const match = text.match(/(?:^|\s|\u200B|\u00A0)@([a-zA-Z0-9_]*)$/);
+                  if (match) {
+                    setShowMentions(true);
+                    setMentionQuery(match[1].toLowerCase());
+                  } else {
+                    setShowMentions(false);
                   }
 
                   if (onTyping) {

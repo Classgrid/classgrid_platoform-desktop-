@@ -467,7 +467,20 @@ export function ChatBubble({
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     } : {}}>
-                      <div className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full" dangerouslySetInnerHTML={{ 
+                      <div 
+                        className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full" 
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          const mentionEl = target.closest('[data-mention="true"]');
+                          if (mentionEl) {
+                            e.preventDefault();
+                            const userId = mentionEl.getAttribute('data-user-id');
+                            if (userId && onUserClick) {
+                              onUserClick(userId);
+                            }
+                          }
+                        }}
+                        dangerouslySetInnerHTML={{ 
                         __html: DOMPurify.sanitize(marked.parse(
                           (typeof message.message === 'string' ? message.message : String(message.message || ''))
                             .replace(/<!--StartFragment-->/gi, '')

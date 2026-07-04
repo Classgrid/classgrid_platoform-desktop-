@@ -9,6 +9,10 @@ import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { CreatePollModal } from "./CreatePollModal";
 import { DeleteMessageModal } from "./DeleteMessageModal";
+import { SearchMessagesSidebar } from "./SearchMessagesSidebar";
+import { StarredMessagesView } from "./StarredMessagesView";
+import { ScheduledMessagesView } from "./ScheduledMessagesView";
+import { PinDurationModal } from "./PinDurationModal";
 
 interface ChatWindowProps {
   thread: ChatThread;
@@ -27,6 +31,10 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCreatePollOpen, setIsCreatePollOpen] = useState(false);
+  const [isStarredMessagesOpen, setIsStarredMessagesOpen] = useState(false);
+  const [isScheduledMessagesOpen, setIsScheduledMessagesOpen] = useState(false);
+  const [pinningMessageId, setPinningMessageId] = useState<string | null>(null);
+  const [isPinning, setIsPinning] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<ChatMessage | null>(null);
 
   // Fetch group info to get permissions and role
@@ -431,17 +439,47 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   };
 
   const handlePinMessage = async (msgId: string, isPinned: boolean) => {
+    if (isPinned) {
+      setPinningMessageId(msgId);
+    } else {
+      try {
+        await pinMessage(threadId, msgId, false);
+        queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+          if (!oldData || !oldData.pages) return oldData;
+          const newPages = oldData.pages.map((page: ChatMessage[]) => 
+            page.map(m => m.id === msgId ? { ...m, is_pinned: false, pinned_until: null } : m)
+          );
+          return { ...oldData, pages: newPages };
+        });
+      } catch (error) {
+        console.error("Failed to unpin message", error);
+      }
+    }
+  };
+
+  const submitPin = async (durationHours: number) => {
+    if (!pinningMessageId) return;
+    setIsPinning(true);
     try {
-      await pinMessage(threadId, msgId, isPinned);
+      const expirationDate = new Date();
+      expirationDate.setHours(expirationDate.getHours() + durationHours);
+      
+      await pinMessage(threadId, pinningMessageId, true, durationHours);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
         const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.map(m => m.id === msgId ? { ...m, is_pinned: isPinned } : m)
+          page.map(m => m.id === pinningMessageId 
+            ? { ...m, is_pinned: true, pinned_until: expirationDate.toISOString() } 
+            : { ...m, is_pinned: false, pinned_until: null }
+          )
         );
         return { ...oldData, pages: newPages };
       });
+      setPinningMessageId(null);
     } catch (error) {
       console.error("Failed to pin message", error);
+    } finally {
+      setIsPinning(false);
     }
   };
 
@@ -580,7 +618,12 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       
       {/* Pinned Messages Banner */}
       {(() => {
-        const pinnedMessages = allMessages.filter(m => m.is_pinned && !m.is_deleted);
+        const now = new Date().getTime();
+        const pinnedMessages = allMessages.filter(m => {
+           if (!m.is_pinned || m.is_deleted) return false;
+           if (m.pinned_until && new Date(m.pinned_until).getTime() < now) return false;
+           return true;
+        });
         if (pinnedMessages.length === 0) return null;
         const topPinned = pinnedMessages[pinnedMessages.length - 1]; // most recently pinned or latest message
         return (
@@ -599,11 +642,6 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
                <span className="text-[13px] text-foreground truncate">{topPinned.message || "Attachment"}</span>
             </div>
-            {pinnedMessages.length > 1 && (
-               <div className="text-[10px] font-bold text-muted-foreground bg-accent px-1.5 py-0.5 rounded">
-                  1/{pinnedMessages.length}
-               </div>
-            )}
           </div>
         );
       })()}
@@ -681,7 +719,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
               onApprove={handleApproveMessage}
               onReject={handleRejectMessage}
               onAcknowledge={handleAcknowledgeMessage}
-              isAdmin={groupInfo?.myRole === 'admin'}
+              isAdmin={!groupInfo || groupInfo?.myRole === 'admin'}
             />
           );
         })}
@@ -747,6 +785,13 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
           isOpen={!!messageToDelete}
           onClose={() => setMessageToDelete(null)}
           onDelete={confirmDeleteMessage}
+        />
+      )}
+      {pinningMessageId && (
+        <PinDurationModal
+          onClose={() => setPinningMessageId(null)}
+          onSave={submitPin}
+          isPending={isPinning}
         />
       )}
     </div>

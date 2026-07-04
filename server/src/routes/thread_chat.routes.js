@@ -2466,6 +2466,23 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
       pinned_until = expirationDate.toISOString();
     }
 
+    // If we are pinning a new message, unpin any existing pinned messages in this thread
+    if (is_pinned) {
+      const { data: oldPins } = await sb.from('chat_messages')
+        .update({ is_pinned: false, pinned_until: null, pinned_at: null, pinned_by: null })
+        .eq('thread_id', threadId)
+        .eq('is_pinned', true)
+        .neq('id', messageId)
+        .select();
+
+      // Broadcast unpin event for any messages that were overwritten
+      if (oldPins && oldPins.length > 0) {
+        for (const oldPin of oldPins) {
+          broadcastToChannel(`thread:${threadId}`, 'message_updated', oldPin);
+        }
+      }
+    }
+
     const { data: updated, error } = await sb.from('chat_messages').update({
       is_pinned,
       pinned_by: is_pinned ? userId : null,
