@@ -99,7 +99,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           
           // Overwrite selection with HTML
           let mentionHtml = "";
-          if (userId && userId !== "everyone") {
+          if (userId === "everyone") {
+            mentionHtml = mentionableUsers?.map(u => {
+              const uid = u._id || u.id;
+              return `<a href="/profile/${uid}" class="text-emerald-600 dark:text-emerald-500 hover:underline font-semibold no-underline" data-mention="true" data-user-id="${uid}" contenteditable="false">@${u.name}</a>&nbsp;`;
+            }).join(" ") || "";
+          } else if (userId && userId !== "everyone") {
             mentionHtml = `<a href="/profile/${userId}" class="text-emerald-600 dark:text-emerald-500 hover:underline font-semibold no-underline" data-mention="true" data-user-id="${userId}" contenteditable="false">@${name}</a>&nbsp;`;
           } else {
             mentionHtml = `<a href="#" class="text-emerald-600 dark:text-emerald-500 hover:underline font-semibold no-underline" data-mention="true" contenteditable="false">@${name}</a>&nbsp;`;
