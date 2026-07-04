@@ -62,7 +62,7 @@ const slideVariants = {
  * Mobile: swipe left/right to navigate, pinch to zoom, tap outside to close
  * Desktop: arrow keys, prev/next buttons, keyboard Escape
  */
-export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProps) {
+export function ImageGallery({ images, className, maxDisplay, onRemove }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [direction, setDirection] = useState(0);
   const clickedImageRef = useRef<GalleryImage | null>(null);
