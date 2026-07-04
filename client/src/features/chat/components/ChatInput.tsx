@@ -809,12 +809,18 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   setMessage(html);
                   
                   // Ultra-reliable Mention logic (bypassing browser Selection API bugs)
-                  // contentEditable often adds a trailing <br> which becomes \n in textContent, so we must remove it before matching.
-                  const cleanText = text.replace(/[\r\n]+$/, "");
-                  const match = cleanText.match(/(?:^|\s|\u200B|\u00A0)@([a-zA-Z0-9_]*)$/);
-                  if (match) {
-                    setShowMentions(true);
-                    setMentionQuery(match[1].toLowerCase());
+                  const lastAtIndex = text.lastIndexOf('@');
+                  if (lastAtIndex !== -1) {
+                    const afterAt = text.slice(lastAtIndex + 1).replace(/[\r\n\u200B]+$/, "");
+                    const beforeAt = lastAtIndex === 0 ? "" : text.charAt(lastAtIndex - 1);
+                    
+                    if (/^[a-zA-Z0-9_]*$/.test(afterAt) && 
+                        (lastAtIndex === 0 || beforeAt === ' ' || beforeAt === '\u00A0' || beforeAt === '\n' || beforeAt === '\u200B')) {
+                      setShowMentions(true);
+                      setMentionQuery(afterAt.toLowerCase());
+                    } else {
+                      setShowMentions(false);
+                    }
                   } else {
                     setShowMentions(false);
                   }
