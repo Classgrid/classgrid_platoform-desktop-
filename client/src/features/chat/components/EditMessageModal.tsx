@@ -39,7 +39,7 @@ export function EditMessageModal({ message, onClose, onSave }: EditMessageModalP
         </div>
 
         {/* Body - WhatsApp style background */}
-        <div className="p-4 sm:p-8 flex-1 bg-[#efeae2] dark:bg-[#0b141a] flex flex-col items-center overflow-y-auto relative" style={{ backgroundImage: 'url("https://i.ibb.co/3mTrj1z/chat-bg.png")', backgroundSize: 'cover', backgroundBlendMode: 'overlay', opacity: 0.98 }}>
+        <div className="p-4 sm:p-8 flex-1 bg-[#efeae2] dark:bg-[#0b141a] flex flex-col items-center overflow-y-auto relative">
           
           <div className="w-full max-w-2xl shadow-2xl relative rounded-xl overflow-hidden bg-background">
             <RichReplyEditor 
