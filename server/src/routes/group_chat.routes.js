@@ -304,6 +304,20 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     if (!group) return res.status(404).json({ error: 'Group not found' });
     if (!membership) return res.status(403).json({ error: 'Not a member of this group' });
 
+    let organizationName = null;
+    let organizationLogo = null;
+    if (group.org_id) {
+      const org = await Organization.findById(group.org_id).select('name logo_url').lean();
+      if (org) {
+        organizationName = org.name;
+        organizationLogo = org.logo_url;
+      }
+    }
+    
+    // Attach organization details to the group object for the frontend
+    group.organization_name = organizationName;
+    group.organization_logo = organizationLogo;
+
     // Get all members
     const { data: members } = await sb
       .from('chat_thread_members')

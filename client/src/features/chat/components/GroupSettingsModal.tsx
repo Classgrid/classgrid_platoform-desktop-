@@ -88,7 +88,21 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   // ── Mutation: Upload Group Photo ──
   const { mutateAsync: handleUpload, isPending: isUploading } = useMutation({
     mutationFn: ({ file, type }: { file: File, type: "avatar" | "banner" }) => uploadGroupPhoto(groupId, file, type),
-    onSuccess: () => {
+    onSuccess: (updatedGroup: any) => {
+      // Optimistically update the query cache so avatar shows immediately without refresh
+      if (updatedGroup?.avatar_url || updatedGroup?.banner_url) {
+        queryClient.setQueryData(["group-info", groupId], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            group: {
+              ...old.group,
+              avatar_url: updatedGroup.avatar_url ?? old.group.avatar_url,
+              banner_url: updatedGroup.banner_url ?? old.group.banner_url,
+            }
+          };
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
       queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
       toast.success("Group photo updated!");
