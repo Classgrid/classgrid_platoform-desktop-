@@ -2,19 +2,23 @@ import React from "react";
 import { BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 
-interface VerifiedBadgeProps {
+interface UserBlueMarkProps {
   role?: string;
   className?: string;
   iconClassName?: string;
 }
 
-export function VerifiedBadge({ 
+/**
+ * Solid Blue Tick
+ * Used to verify the authority of a PERSON (Admins, Principals, etc.)
+ */
+export function UserBlueMark({ 
   role = "", 
   className = "ml-1 inline-flex items-center cursor-help", 
   iconClassName = "w-5 h-5" 
-}: VerifiedBadgeProps) {
+}: UserBlueMarkProps) {
   // Roles that get a verified badge
-  const verifiedRoles = ["org_admin", "platform_admin", "super_admin", "admin", "department_admin", "principal", "hod"];
+  const verifiedRoles = ["org_admin", "platform_admin", "super_admin", "admin", "department_admin", "principal", "hod", "Super Admin"];
   const isVerified = verifiedRoles.includes(role.toLowerCase());
   
   if (!isVerified) return null;

@@ -87,11 +87,8 @@ export function NewChatSidebar({
       const query = search.toLowerCase();
       list = list.filter((g) => g.name.toLowerCase().includes(query));
     }
-    if (filterType !== "all") {
-      list = list.filter(g => g.group_type === filterType);
-    }
     return list;
-  }, [exploreData, search, filterType]);
+  }, [exploreData, search]);
 
   return (
     <motion.div

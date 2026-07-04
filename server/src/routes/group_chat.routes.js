@@ -330,6 +330,13 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     group.organization_name = organizationName;
     group.organization_logo = organizationLogo;
 
+    if (group.created_by) {
+      const creator = await User.findById(group.created_by).select('role').lean();
+      if (creator && (creator.role === 'super_admin' || creator.role === 'Super Admin')) {
+        group.is_created_by_super_admin = true;
+      }
+    }
+
     // Get all members
     const { data: members } = await sb
       .from('chat_thread_members')

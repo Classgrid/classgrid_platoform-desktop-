@@ -16,7 +16,8 @@ import { Input } from "@/components/marketing_ui/input";
 import { Switch } from "@/components/marketing_ui/switch";
 import { Badge } from "@/components/marketing_ui/badge";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
-import { VerifiedBadge } from "@/components/marketing_ui/verified-badge";
+import { UserBlueMark } from "@/components/marketing_ui/user-blue-mark";
+import { GroupBlueMark } from "@/components/marketing_ui/group-blue-mark";
 import { toast } from "sonner";
 import { ContextualProfile } from "../components/ContextualProfile";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -466,7 +467,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                     ) : (
                       form.name
                     )}
-                    <VerifiedBadge role={form.role} iconClassName="w-7 h-7" />
+                    <UserBlueMark role={form.role} iconClassName="w-7 h-7" />
                   </h1>
                 </div>
                 <div className="flex flex-col gap-3 mt-2">
@@ -475,7 +476,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                       <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
                     )}
                     <span className="flex items-center gap-2.5">
-                      {form.role === "super_admin" || form.role === "Super Admin" || (isGroup && groupData?.group?.is_official) ? (
+                      {form.role === "super_admin" || form.role === "Super Admin" || (isGroup && (groupData?.group?.is_official || groupData?.group?.is_created_by_super_admin)) ? (
                         <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
                           <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
                         </div>
@@ -487,10 +488,10 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                         <Globe size={18} className="text-muted-foreground" />
                       )}
                       <span className="text-[15px] font-semibold text-foreground/90 flex items-center gap-1.5">
-                        {form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : (isGroup && groupData?.group?.is_official) ? "Classgrid" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}
-                        {(form.role === "super_admin" || form.role === "Super Admin" || (isGroup && groupData?.group?.is_official)) && (
-                          <BadgeCheck className="w-[18px] h-[18px] text-blue-500 fill-blue-500/10" />
-                        )}
+                        {form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : (isGroup && (groupData?.group?.is_official || groupData?.group?.is_created_by_super_admin)) ? "Classgrid" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}
+                        <GroupBlueMark 
+                          isOfficial={form.role === "super_admin" || form.role === "Super Admin" || !!(isGroup && (groupData?.group?.is_official || groupData?.group?.is_created_by_super_admin))} 
+                        />
                       </span>
                     </span>
                   </div>
