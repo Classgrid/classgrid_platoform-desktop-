@@ -474,20 +474,22 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                     {!isGroup && form.email && (
                       <span className="flex items-center gap-2 hover:text-foreground transition-colors"><Mail size={16} /> {form.email}</span>
                     )}
-                    <span className="flex items-center gap-2.5">
-                      {form.role === "super_admin" || form.role === "Super Admin" ? (
-                        <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
-                          <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
-                        </div>
-                      ) : form.organization_logo ? (
-                        <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
-                          <img src={form.organization_logo} alt="Org Logo" className="w-6 h-6 object-contain" />
-                        </div>
-                      ) : (
-                        <Globe size={18} className="text-muted-foreground" />
-                      )}
-                      <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
-                    </span>
+                    {!isGroup && (
+                      <span className="flex items-center gap-2.5">
+                        {form.role === "super_admin" || form.role === "Super Admin" ? (
+                          <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
+                            <img src="/logo.png" alt="Classgrid Logo" className="w-6 h-6 object-contain" />
+                          </div>
+                        ) : form.organization_logo ? (
+                          <div className="bg-white dark:bg-white/90 p-0.5 rounded shadow-sm border border-border/50 overflow-hidden flex items-center justify-center">
+                            <img src={form.organization_logo} alt="Org Logo" className="w-6 h-6 object-contain" />
+                          </div>
+                        ) : (
+                          <Globe size={18} className="text-muted-foreground" />
+                        )}
+                        <span className="text-[15px] font-semibold text-foreground/90">{form.role === "super_admin" || form.role === "Super Admin" ? "Classgrid Team Member" : form.organization_name || currentUser?.organization?.name || "Organization Pending"}</span>
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     {!isReadOnly || (targetUserId && onlineUsers.has(targetUserId)) ? (

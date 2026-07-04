@@ -48,7 +48,8 @@ export function GroupCreateSidebar({
     send_message_policy: 'all', 
     auto_add_roles: [], 
     admin_roles: [],
-    group_type: 'private',
+    group_type: 'general',
+    is_private: true,
     require_join_approval: false
   });
 
@@ -336,17 +337,17 @@ export function GroupCreateSidebar({
                  <span className="font-medium">Group Discovery & Privacy</span>
                  <Select 
                     value={
-                      groupPermissions.group_type === 'private' ? 'private' 
+                      groupPermissions.is_private ? 'private' 
                       : groupPermissions.require_join_approval ? 'approval' 
                       : 'public'
                     }
                     onValueChange={(value) => {
                       if (value === 'private') {
-                        setGroupPermissions({ ...groupPermissions, group_type: 'private', require_join_approval: false });
+                        setGroupPermissions({ ...groupPermissions, is_private: true, require_join_approval: false });
                       } else if (value === 'approval') {
-                        setGroupPermissions({ ...groupPermissions, group_type: 'general', require_join_approval: true });
+                        setGroupPermissions({ ...groupPermissions, is_private: false, require_join_approval: true });
                       } else if (value === 'public') {
-                        setGroupPermissions({ ...groupPermissions, group_type: 'general', require_join_approval: false });
+                        setGroupPermissions({ ...groupPermissions, is_private: false, require_join_approval: false });
                       }
                     }}
                  >
@@ -360,10 +361,30 @@ export function GroupCreateSidebar({
                     </SelectContent>
                  </Select>
                  <span className="text-xs text-muted-foreground mt-1">
-                   {groupPermissions.group_type === 'private' && "Invisible in 'New Chat'. Only admins can add people."}
-                   {groupPermissions.group_type === 'general' && groupPermissions.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
-                   {groupPermissions.group_type === 'general' && !groupPermissions.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
+                   {groupPermissions.is_private && "Invisible in 'New Chat'. Only admins can add people."}
+                   {!groupPermissions.is_private && groupPermissions.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
+                   {!groupPermissions.is_private && !groupPermissions.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
                  </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                 <span className="font-medium">Group Type</span>
+                 <Select 
+                    value={groupPermissions.group_type || 'general'}
+                    onValueChange={(value) => setGroupPermissions({ ...groupPermissions, group_type: value })}
+                 >
+                    <SelectTrigger className="w-full bg-transparent border-b border-border rounded-none px-0 py-2 text-sm text-foreground outline-none shadow-none h-auto">
+                       <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="general">General</SelectItem>
+                       <SelectItem value="class">Class</SelectItem>
+                       <SelectItem value="department">Department</SelectItem>
+                       <SelectItem value="subject">Subject</SelectItem>
+                       <SelectItem value="team_staff">Team / Staff</SelectItem>
+                       <SelectItem value="official_announcement">Official / Announcement</SelectItem>
+                    </SelectContent>
+                 </Select>
               </div>
 
               <div className="flex flex-col gap-2">

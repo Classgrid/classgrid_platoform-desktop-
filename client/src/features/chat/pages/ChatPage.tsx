@@ -736,8 +736,32 @@ export function ChatPage() {
          setActiveThread(prev => prev ? { ...prev, allowReplies: payload.allow_replies } : null);
       }
       if (payload.groupId) {
-         // A group change happened (e.g. member added/removed, info changed)
+         // A group change happened (e.g. member added/removed, info changed, photo updated)
          queryClient.invalidateQueries({ queryKey: ["group-info", String(payload.groupId)] });
+         
+         // Update threads array for sidebar
+         if (payload.name || payload.description || payload.avatar_url || payload.banner_url) {
+           setThreads(prev => prev.map(t => {
+             if (t.groupId === payload.groupId) {
+               return {
+                 ...t,
+                 name: payload.name || t.name,
+                 description: payload.description || t.description,
+                 avatar: payload.avatar_url || t.avatar
+               };
+             }
+             return t;
+           }));
+           
+           // Update active thread
+           setActiveThread(prev => prev && prev.groupId === payload.groupId ? {
+             ...prev,
+             name: payload.name || prev.name,
+             description: payload.description || prev.description,
+             avatar: payload.avatar_url || prev.avatar
+           } : prev);
+         }
+
          if (payload.action === 'member_removed' && payload.removedUserId === currentUserId) {
            setActiveThread(null);
            toast.info("You were removed from this group.");

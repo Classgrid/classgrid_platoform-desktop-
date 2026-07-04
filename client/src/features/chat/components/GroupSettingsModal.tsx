@@ -478,18 +478,18 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                      <span className="text-sm font-medium text-foreground">Group Discovery & Privacy</span>
                      <Select 
                         value={
-                          data.group.group_type === 'private' ? 'private' 
+                          data.group.is_private ? 'private' 
                           : data.group.require_join_approval ? 'approval' 
                           : 'public'
                         }
                         disabled={isUpdatingPermissions}
                         onValueChange={(value) => {
                           if (value === 'private') {
-                            handleUpdatePermissions({ group_type: 'private', require_join_approval: false });
+                            handleUpdatePermissions({ is_private: true, require_join_approval: false });
                           } else if (value === 'approval') {
-                            handleUpdatePermissions({ group_type: 'general', require_join_approval: true });
+                            handleUpdatePermissions({ is_private: false, require_join_approval: true });
                           } else if (value === 'public') {
-                            handleUpdatePermissions({ group_type: 'general', require_join_approval: false });
+                            handleUpdatePermissions({ is_private: false, require_join_approval: false });
                           }
                         }}
                      >
@@ -503,9 +503,9 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                         </SelectContent>
                      </Select>
                      <span className="text-xs text-muted-foreground mt-1">
-                       {data.group.group_type === 'private' && "Invisible in 'New Chat'. Only admins can add people."}
-                       {data.group.group_type === 'general' && data.group.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
-                       {data.group.group_type === 'general' && !data.group.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
+                       {data.group.is_private && "Invisible in 'New Chat'. Only admins can add people."}
+                       {!data.group.is_private && data.group.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
+                       {!data.group.is_private && !data.group.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
                      </span>
                   </div>
 
@@ -612,7 +612,6 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                         </SelectTrigger>
                         <SelectContent>
                            <SelectItem value="general">General</SelectItem>
-                           <SelectItem value="private">Private</SelectItem>
                            <SelectItem value="class">Class</SelectItem>
                            <SelectItem value="department">Department</SelectItem>
                            <SelectItem value="subject">Subject</SelectItem>
@@ -635,23 +634,6 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                       disabled={isUpdatingPermissions}
                       onCheckedChange={(checked) => {
                         handleUpdatePermissions({ is_official: checked });
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Require Join Approval Toggle */}
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">Require Join Approval</span>
-                        <span className="text-xs text-muted-foreground">New members must request to join and be approved by an admin</span>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={data.group.require_join_approval}
-                      disabled={isUpdatingPermissions}
-                      onCheckedChange={(checked) => {
-                        handleUpdatePermissions({ require_join_approval: checked });
                       }}
                     />
                   </div>

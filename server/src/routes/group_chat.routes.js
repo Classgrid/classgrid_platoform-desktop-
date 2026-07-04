@@ -117,6 +117,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       description, 
       memberIds,
       group_type,
+      is_private,
       require_join_approval,
       send_message_policy,
       admin_roles,
@@ -152,6 +153,12 @@ router.post('/', isAuthenticated, async (req, res) => {
         description: description ? description.trim() : null,
         created_by: userId,
         org_id: threadOrgId,
+        group_type: group_type || 'general',
+        is_private: is_private || false,
+        require_join_approval: require_join_approval || false,
+        send_message_policy: send_message_policy || 'all',
+        admin_roles: admin_roles || [],
+        message_ttl: message_ttl || 0
       }])
       .select()
       .single();
@@ -204,7 +211,7 @@ router.get('/explore', isAuthenticated, async (req, res) => {
     const isSuperAdmin = req.user.role === 'super_admin';
     if (!orgId && !isSuperAdmin) return res.status(403).json({ error: 'Must be in an org' });
 
-    let query = sb.from('chat_groups').select('*, creator:created_by (name, email)').neq('group_type', 'private');
+    let query = sb.from('chat_groups').select('*, creator:created_by (name, email)').eq('is_private', false);
     if (!isSuperAdmin) {
       query = query.eq('org_id', orgId);
     }
@@ -444,6 +451,7 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       require_message_approval,
       require_join_approval,
       group_type,
+      is_private,
       is_official,
       auto_add_roles,
       admin_roles
@@ -460,12 +468,13 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     
     if (typeof require_message_approval === 'boolean') updates.require_message_approval = require_message_approval;
     if (typeof require_join_approval === 'boolean') updates.require_join_approval = require_join_approval;
+    if (typeof is_private === 'boolean') updates.is_private = is_private;
     if (typeof is_official === 'boolean') updates.is_official = is_official;
     
     if (Array.isArray(auto_add_roles)) updates.auto_add_roles = auto_add_roles;
     if (Array.isArray(admin_roles)) updates.admin_roles = admin_roles;
     
-    const validGroupTypes = ['general', 'private', 'class', 'department', 'subject', 'team_staff', 'official_announcement'];
+    const validGroupTypes = ['general', 'class', 'department', 'subject', 'team_staff', 'official_announcement'];
     if (validGroupTypes.includes(group_type)) updates.group_type = group_type;
 
     // Fallback for legacy send_messages
@@ -990,6 +999,10 @@ router.post('/:id/join-request', isAuthenticated, async (req, res) => {
        return res.status(403).json({ error: 'You cannot join a group from another organization' });
     }
 
+    if (group.is_private) {
+       return res.status(403).json({ error: 'Cannot request to join a private group' });
+    }
+
     if (!group.require_join_approval) {
        return res.status(400).json({ error: 'Group does not require join approval' });
     }
@@ -1145,7 +1158,7 @@ router.post('/:id/join', isAuthenticated, async (req, res) => {
     const { data: group, error: groupErr } = await sb.from('chat_groups').select('*').eq('id', groupId).single();
     if (groupErr || !group) return res.status(404).json({ error: 'Group not found' });
     
-    if (group.group_type === 'private') {
+    if (group.is_private) {
        return res.status(403).json({ error: 'Cannot join private groups directly' });
     }
     
