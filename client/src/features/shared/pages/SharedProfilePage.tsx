@@ -131,8 +131,8 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
         lastLoginAt: undefined,
         createdAt: groupData.group.created_at,
         bio: groupData.group.description || "",
-        organization_name: groupData.group.org_id ? (currentUser?.organization?.name || "Organization Group") : "Classgrid Platform",
-        organization_logo: groupData.group.org_id ? (currentUser?.organization?.logo_url || "") : "",
+        organization_name: groupData.group.org_id ? (groupData.group.organization_name || currentUser?.organization?.name || "Organization Group") : "Classgrid",
+        organization_logo: groupData.group.org_id ? (groupData.group.organization_logo || currentUser?.organization?.logo_url || "") : "/logo.png",
         metadata: {},
       });
     } else if (publicUser) {
