@@ -1067,7 +1067,11 @@ export function ChatPage() {
                   </div>
                   <div className="flex flex-col flex-1 min-w-0">
                     <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
-                    <span className="text-[13px] text-foreground truncate">{topPinned.message || "Attachment"}</span>
+                    <span className="text-[13px] text-foreground truncate">
+                      {topPinned.message 
+                        ? new DOMParser().parseFromString(String(topPinned.message), 'text/html').body.textContent?.trim() || "Message" 
+                        : "Attachment"}
+                    </span>
                   </div>
                 </div>
               );
