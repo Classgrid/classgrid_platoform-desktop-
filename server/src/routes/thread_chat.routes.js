@@ -1520,7 +1520,8 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
     if (!msg) return res.status(404).json({ error: 'Message not found' });
     
     if (deleteType === 'everyone') {
-      if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
+      const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
+      if (msg.sender_id !== userId && !isAdmin) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
       
       // Delete attachments from DB
       await sb.from('chat_attachments').delete().eq('message_id', msgId);
