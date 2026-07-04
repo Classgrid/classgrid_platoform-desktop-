@@ -469,3 +469,13 @@ export async function processJoinRequest(groupId: string, requestId: string, sta
 export async function deleteGroup(groupId: string) {
   await apiClient.delete(`/api/group-chat/${groupId}`);
 }
+
+export async function fetchUnifiedRequests() {
+  const res = await apiClient.get<{ incoming: JoinRequest[]; outgoing: JoinRequest[] }>('/api/group-chat/join-requests/unified');
+  return res.data;
+}
+
+export async function exploreGroups() {
+  const res = await apiClient.get<{ groups: (ChatGroup & { member_count: number; creator: { name: string; email: string } })[] }>('/api/group-chat/explore');
+  return res.data.groups;
+}

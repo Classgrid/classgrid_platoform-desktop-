@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search, Users, Check, MessageSquarePlus, X } from "lucide-react";
+import { ArrowLeft, Search, Users, Check, MessageSquarePlus, X, Filter, UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Input } from "@/components/marketing_ui/input";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
-import type { OrgUser } from "../services/chatApi";
+import type { OrgUser, ChatGroup } from "../services/chatApi";
+import { exploreGroups } from "../services/chatApi";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/apiClient";
 
 interface NewChatSidebarProps {
   onClose: () => void;
@@ -13,13 +17,6 @@ interface NewChatSidebarProps {
   onSelectUser: (userId: string) => Promise<void>;
   isLoading: boolean;
   onNewGroup: () => void;
-}
-
-function getInitials(name: string) {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export function NewChatSidebar({
@@ -33,10 +30,45 @@ export function NewChatSidebar({
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filterType, setFilterType] = useState<string>("all");
 
-  const filteredAndSortedUsers = useMemo(() => {
+  const { data: exploreData, isLoading: isGroupsLoading } = useQuery({
+    queryKey: ["explore-groups"],
+    queryFn: exploreGroups,
+  });
+
+  const { mutate: requestJoin, isPending: isRequesting } = useMutation({
+    mutationFn: async (groupId: string) => {
+      const res = await apiClient.post(`/api/group-chat/${groupId}/join-request`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Join request sent!");
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || "Failed to send request");
+    }
+  });
+
+  const { mutate: joinPublicGroup, isPending: isJoining } = useMutation({
+    mutationFn: async (groupId: string) => {
+      // Actually we need an endpoint to just join directly if it's public.
+      // Or we can just use the join-request endpoint if the backend auto-approves public groups.
+      // Wait, there is no direct join endpoint right now for public groups. Let's use join-request and the backend will need to handle it or we add a direct join endpoint.
+      const res = await apiClient.post(`/api/group-chat/${groupId}/join`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Joined group successfully!");
+      onClose(); // Ideally navigate to the group
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || "Failed to join group");
+    }
+  });
+
+  const filteredUsers = useMemo(() => {
     let list = users.filter((u) => u._id !== currentUserId);
-
     if (search.trim()) {
       const query = search.toLowerCase();
       list = list.filter(
@@ -46,9 +78,20 @@ export function NewChatSidebar({
           (u.role && u.role.toLowerCase().includes(query))
       );
     }
-
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [users, search, currentUserId]);
+
+  const filteredGroups = useMemo(() => {
+    let list = exploreData || [];
+    if (search.trim()) {
+      const query = search.toLowerCase();
+      list = list.filter((g) => g.name.toLowerCase().includes(query));
+    }
+    if (filterType !== "all") {
+      list = list.filter(g => g.group_type === filterType);
+    }
+    return list;
+  }, [exploreData, search, filterType]);
 
   return (
     <motion.div
@@ -69,23 +112,36 @@ export function NewChatSidebar({
         <h2 className="text-lg font-bold text-foreground">New chat</h2>
       </div>
 
-      {/* Search */}
-      <div className="p-2 border-b border-border bg-white dark:bg-black">
-        <div className="relative">
+      {/* Search & Filter */}
+      <div className="p-2 border-b border-border bg-white dark:bg-black flex gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search by name, email, or role..."
+            placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 h-9 text-sm bg-[#fafafa] dark:bg-[#0f0f0f] border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
+        <select 
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="h-9 px-3 text-sm bg-[#fafafa] dark:bg-[#0f0f0f] border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="all">All Types</option>
+          <option value="general">General</option>
+          <option value="class">Class</option>
+          <option value="department">Department</option>
+          <option value="subject">Subject</option>
+          <option value="team_staff">Team / Staff</option>
+          <option value="official_announcement">Official</option>
+        </select>
       </div>
 
-      {/* User List */}
+      {/* List Content */}
       <div className="flex-1 overflow-y-auto min-h-0 bg-[#fafafa] dark:bg-[#0f0f0f]">
-        {isLoading ? (
+        {isLoading || isGroupsLoading ? (
           <div className="flex justify-center p-8">
             <Spinner className="w-6 h-6 text-primary" />
           </div>
@@ -104,18 +160,66 @@ export function NewChatSidebar({
               </div>
             </button>
 
+            {/* Explore Groups Header */}
+            {filteredGroups.length > 0 && (
+              <>
+                <div className="px-5 py-3 pt-5">
+                  <p className="text-[14px] font-medium text-emerald-600 uppercase tracking-wide">Explore Groups</p>
+                </div>
+                {filteredGroups.map((group, index) => (
+                  <div key={group.id} className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 overflow-hidden">
+                      {group.avatar ? (
+                        <img src={group.avatar} alt={group.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Users className="w-5 h-5 text-primary" />
+                      )}
+                    </div>
+                    <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredGroups.length - 1 ? 'border-b border-border' : ''}`}>
+                      <p className="text-[17px] font-medium text-foreground truncate">{group.name}</p>
+                      <p className="text-[13px] text-muted-foreground mt-0.5">
+                        {group.member_count} members • Admin: {group.creator?.name || 'Unknown'}
+                      </p>
+                      {group.creator?.email && (
+                        <p className="text-[11px] text-muted-foreground/70 truncate">{group.creator.email}</p>
+                      )}
+                    </div>
+                    <div className="shrink-0 pl-2">
+                      {group.require_join_approval ? (
+                        <button 
+                          onClick={() => requestJoin(group.id)}
+                          disabled={isRequesting}
+                          className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground text-xs font-semibold rounded-full transition-colors flex items-center gap-1"
+                        >
+                          <UserPlus className="w-3 h-3" /> Request
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => joinPublicGroup(group.id)}
+                          disabled={isJoining}
+                          className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white text-xs font-semibold rounded-full transition-colors flex items-center gap-1"
+                        >
+                          Join
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
             {/* Contacts Header */}
-            <div className="px-5 py-3 pt-5">
+            <div className="px-5 py-3 pt-5 border-t border-border mt-2">
               <p className="text-[14px] font-medium text-emerald-600 uppercase tracking-wide">Contacts on Classgrid</p>
             </div>
 
             {/* User Items */}
-            {filteredAndSortedUsers.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <div className="text-center p-8 text-muted-foreground text-sm">
                 No contacts found matching "{search}"
               </div>
             ) : (
-              filteredAndSortedUsers.map((user, index) => {
+              filteredUsers.map((user, index) => {
                 const isSelected = selectedId === user._id;
                 return (
                 <button
@@ -143,7 +247,7 @@ export function NewChatSidebar({
                       </div>
                     )}
                   </div>
-                  <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredAndSortedUsers.length - 1 ? 'border-b border-border' : ''}`}>
+                  <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredUsers.length - 1 ? 'border-b border-border' : ''}`}>
                     <p className={`text-[17px] truncate transition-colors duration-200 ${isSelected ? 'text-primary font-medium' : 'text-foreground group-hover:text-foreground/90'}`}>{user.name}</p>
                     <p className="text-[13px] text-muted-foreground truncate mt-0.5">
                       {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ""}

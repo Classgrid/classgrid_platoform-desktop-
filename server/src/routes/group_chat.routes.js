@@ -186,6 +186,97 @@ router.post('/', isAuthenticated, async (req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// GET /explore — Explore public and approval-required groups in org
+// ──────────────────────────────────────────────
+router.get('/explore', isAuthenticated, async (req, res) => {
+  try {
+    const orgId = req.user.organization_id?.toString();
+    const isSuperAdmin = req.user.role === 'super_admin';
+    if (!orgId && !isSuperAdmin) return res.status(403).json({ error: 'Must be in an org' });
+
+    let query = sb.from('chat_groups').select('*, creator:created_by (name, email)').neq('group_type', 'private');
+    if (!isSuperAdmin) {
+      query = query.eq('org_id', orgId);
+    }
+    
+    const { data: groups, error } = await query;
+    if (error) throw error;
+    
+    const groupIds = groups.map(g => g.id);
+    const { data: threads } = await sb.from('chat_threads').select('id, group_id').in('group_id', groupIds);
+    const threadIds = threads ? threads.map(t => t.id) : [];
+    
+    let memberCounts = {};
+    if (threadIds.length > 0) {
+       const { data: members } = await sb.from('chat_thread_members').select('thread_id').in('thread_id', threadIds);
+       if (members) {
+          members.forEach(m => {
+             memberCounts[m.thread_id] = (memberCounts[m.thread_id] || 0) + 1;
+          });
+       }
+    }
+
+    const result = groups.map(g => {
+       const thread = threads?.find(t => t.group_id === g.id);
+       return {
+          ...g,
+          member_count: thread ? (memberCounts[thread.id] || 0) : 0
+       };
+    });
+    
+    res.json({ groups: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// GET /join-requests/unified — Get incoming and outgoing requests
+// ──────────────────────────────────────────────
+router.get('/join-requests/unified', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    
+    const { data: outgoing, error: outErr } = await sb.from('chat_group_join_requests')
+      .select('*, group:chat_groups(name, avatar, description)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+      
+    if (outErr) throw outErr;
+
+    let incoming = [];
+    if (req.user.role !== 'student') {
+       const { data: adminMemberships } = await sb.from('chat_thread_members')
+         .select('thread_id')
+         .eq('user_id', userId)
+         .in('role', ['admin', 'creator']);
+         
+       if (adminMemberships && adminMemberships.length > 0) {
+          const threadIds = adminMemberships.map(m => m.thread_id);
+          const { data: threads } = await sb.from('chat_threads').select('group_id').in('id', threadIds).not('group_id', 'is', null);
+          const groupIds = threads ? threads.map(t => t.group_id) : [];
+          
+          if (groupIds.length > 0) {
+             const { data: inReqs, error: inErr } = await sb.from('chat_group_join_requests')
+               .select('*, group:chat_groups(name, avatar)')
+               .in('group_id', groupIds)
+               .eq('status', 'pending')
+               .order('created_at', { ascending: false });
+               
+             if (inErr) throw inErr;
+             incoming = inReqs || [];
+          }
+       }
+    }
+    
+    res.json({ incoming, outgoing: outgoing || [] });
+  } catch (err) {
+    console.error('Unified requests error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
 // GET /groups/:id — Group info + members
 // ──────────────────────────────────────────────
 router.get('/:id', isAuthenticated, async (req, res) => {
@@ -882,6 +973,13 @@ router.post('/:id/join-request', isAuthenticated, async (req, res) => {
     const { data: group, error: groupErr } = await sb.from('chat_groups').select('*').eq('id', groupId).single();
     if (groupErr || !group) return res.status(404).json({ error: 'Group not found' });
     
+    // Strict org isolation: users can only join groups in their own org
+    const isSuperAdmin = req.user.role === 'super_admin';
+    const myOrgId = req.user.organization_id?.toString();
+    if (group.org_id && group.org_id !== myOrgId && !isSuperAdmin) {
+       return res.status(403).json({ error: 'You cannot join a group from another organization' });
+    }
+
     if (!group.require_join_approval) {
        return res.status(400).json({ error: 'Group does not require join approval' });
     }
@@ -1021,6 +1119,52 @@ router.patch('/:id/join-requests/:requestId', isAuthenticated, async (req, res) 
     res.json({ ok: true, status });
   } catch (err) {
     console.error('Process join request error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /groups/:id/join — User joins a public group directly
+// ──────────────────────────────────────────────
+router.post('/:id/join', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const groupId = req.params.id;
+    
+    // Validate group exists and does not require approval
+    const { data: group, error: groupErr } = await sb.from('chat_groups').select('*').eq('id', groupId).single();
+    if (groupErr || !group) return res.status(404).json({ error: 'Group not found' });
+    
+    if (group.group_type === 'private') {
+       return res.status(403).json({ error: 'Cannot join private groups directly' });
+    }
+    
+    const isSuperAdmin = req.user.role === 'super_admin';
+    const myOrgId = req.user.organization_id?.toString();
+    if (group.org_id && group.org_id !== myOrgId && !isSuperAdmin) {
+       return res.status(403).json({ error: 'Cannot join a group from another organization' });
+    }
+
+    if (group.require_join_approval) {
+       return res.status(400).json({ error: 'Group requires join approval' });
+    }
+    
+    const { data: thread } = await sb.from('chat_threads').select('id').eq('group_id', groupId).single();
+    if (!thread) return res.status(404).json({ error: 'Group thread not found' });
+
+    // Check if already a member
+    const { data: mem } = await sb.from('chat_thread_members').select('user_id').eq('thread_id', thread.id).eq('user_id', userId).maybeSingle();
+    if (mem) return res.status(400).json({ error: 'You are already a member of this group' });
+
+    // Insert user
+    await sb.from('chat_thread_members').insert({
+       thread_id: thread.id,
+       user_id: userId,
+       role: 'member'
+    });
+    
+    res.json({ success: true });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

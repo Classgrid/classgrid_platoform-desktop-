@@ -314,12 +314,12 @@ export function AppRouter() {
           <Route path="/drive" element={<GenericPage title="Google Drive" />} />
           <Route path="/virtual-id" element={<GenericPage title="Virtual ID" />} />
           <Route path="/join-requests/:groupId" element={<JoinRequestPage />} />
-          <Route path="/join-requests" element={<GenericPage title="Join Requests" />} />
+          <Route path="/join-requests" element={<JoinRequestPage />} />
           <Route path="/whats-new" element={<GenericPage title="What's New" />} />
           <Route path="/organization" element={<GenericPage title="Organization" />} />
           <Route path="/platform-feedback" element={<GenericPage title="Platform Feedback" />} />
           <Route path="/marketplace" element={<GenericPage title="Marketplace" />} />
-          <Route path="/my-requests" element={<GenericPage title="My Requests" />} />
+          <Route path="/my-requests" element={<JoinRequestPage />} />
           <Route path="/audit" element={<AuditPage />} />
           <Route path="profile" element={<SharedProfilePage />} />
           <Route path="settings" element={<SharedSettingsPage />} />
