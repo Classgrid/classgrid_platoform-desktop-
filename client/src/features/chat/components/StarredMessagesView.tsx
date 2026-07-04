@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Star, X, ArrowLeft } from "lucide-react";
+import { Star, X, ArrowLeft, Trash2 } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
+import DOMPurify from "dompurify";
 import { apiClient } from "@/lib/apiClient";
 import type { ChatMessage } from "../services/chatApi";
 
@@ -92,9 +93,10 @@ export function StarredMessagesView({ onClose, threadId }: StarredMessagesViewPr
                   <span className="font-bold text-sm text-foreground">{msg.sender_name}</span>
                   <span className="text-xs text-muted-foreground">{format(new Date(msg.created_at), "MMM d, yyyy h:mm a")}</span>
                 </div>
-                <div className="text-sm text-foreground whitespace-pre-wrap">
-                  {msg.message}
-                </div>
+                <div 
+                  className="text-sm text-foreground whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&_p]:m-0 [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.message || '') }}
+                />
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="mt-2 text-xs text-primary font-medium flex items-center gap-1">
                     <span>📎</span> {msg.attachments.length} attachment(s)
@@ -104,10 +106,10 @@ export function StarredMessagesView({ onClose, threadId }: StarredMessagesViewPr
               
               <button 
                 onClick={() => handleUnstar(msg.id)}
-                className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full hover:bg-accent border border-border shadow-sm text-muted-foreground hover:text-foreground"
+                className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full hover:bg-red-500/10 border border-border shadow-sm text-muted-foreground hover:text-red-500"
                 title="Unstar message"
               >
-                <X className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           ))
