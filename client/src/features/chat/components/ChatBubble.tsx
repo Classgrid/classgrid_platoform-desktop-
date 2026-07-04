@@ -653,17 +653,17 @@ export function ChatBubble({
           </ContextMenuTrigger>
           {!message.is_deleted && (
             <ContextMenuContent className="w-56" align={isMine ? "end" : "start"}>
-              {canReply && (
+              {!message.isSending && canReply && (
                 <ContextMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
                   <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
                 </ContextMenuItem>
               )}
-              {isMine && !message.is_deleted && (
+              {!message.isSending && isMine && !message.is_deleted && (
                 <ContextMenuItem onClick={() => setInfoModalOpen(true)} className="cursor-pointer py-2">
                   <Info className="w-4 h-4 mr-2" /> Message Info
                 </ContextMenuItem>
               )}
-              {message.message && (
+              {!message.isSending && message.message && (
                 <ContextMenuItem onClick={async () => {
                   try {
                     const rawStr = typeof message.message === 'string' ? message.message : String(message.message || '');
@@ -697,31 +697,35 @@ export function ChatBubble({
                   <Copy className="w-4 h-4 mr-2" /> Copy
                 </ContextMenuItem>
               )}
-              <ContextMenuItem onClick={() => onForward?.(message.id)} className="cursor-pointer py-2">
-                <Forward className="w-4 h-4 mr-2" /> Forward
-              </ContextMenuItem>
-              {isAdmin && onPin && (
+              {!message.isSending && (
+                <ContextMenuItem onClick={() => onForward?.(message.id)} className="cursor-pointer py-2">
+                  <Forward className="w-4 h-4 mr-2" /> Forward
+                </ContextMenuItem>
+              )}
+              {!message.isSending && isAdmin && onPin && (
                 <ContextMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
                   <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                 </ContextMenuItem>
               )}
-              {onStar && message.message && (
+              {!message.isSending && onStar && message.message && (
                 <ContextMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                   <Star className="w-4 h-4 mr-2" /> Star
                 </ContextMenuItem>
               )}
-              {isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
+              {!message.isSending && isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
                 <ContextMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                   <Edit2 className="w-4 h-4 mr-2" /> Edit
                 </ContextMenuItem>
               )}
-              <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => onToggleSelect?.()} className="cursor-pointer py-2">
-                <CheckSquare className="w-4 h-4 mr-2" /> Select
-              </ContextMenuItem>
+              {!message.isSending && <ContextMenuSeparator />}
+              {!message.isSending && (
+                <ContextMenuItem onClick={() => onToggleSelect?.()} className="cursor-pointer py-2">
+                  <CheckSquare className="w-4 h-4 mr-2" /> Select
+                </ContextMenuItem>
+              )}
               {isMine && (
                 <ContextMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
+                  <Trash2 className="w-4 h-4 mr-2" /> {message.isSending ? "Cancel Upload" : "Delete"}
                 </ContextMenuItem>
               )}
             </ContextMenuContent>
@@ -781,12 +785,12 @@ export function ChatBubble({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align={isMine ? "end" : "start"}>
-                {canReply && (
+                {!message.isSending && canReply && (
                   <DropdownMenuItem onClick={() => onReply(message)} className="cursor-pointer py-2">
                     <CornerUpLeft className="w-4 h-4 mr-2" /> Reply
                   </DropdownMenuItem>
                 )}
-                {message.message && (
+                {!message.isSending && message.message && (
                   <DropdownMenuItem onClick={() => {
                     navigator.clipboard.writeText(message.message);
                     toast.success("Copied to clipboard");
@@ -794,30 +798,34 @@ export function ChatBubble({
                     <Copy className="w-4 h-4 mr-2" /> Copy
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem className="cursor-pointer py-2" disabled>
-                  <Forward className="w-4 h-4 mr-2" /> Forward
-                </DropdownMenuItem>
-                {isAdmin && onPin && (
+                {!message.isSending && (
+                  <DropdownMenuItem className="cursor-pointer py-2" disabled>
+                    <Forward className="w-4 h-4 mr-2" /> Forward
+                  </DropdownMenuItem>
+                )}
+                {!message.isSending && isAdmin && onPin && (
                   <DropdownMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
                     <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                   </DropdownMenuItem>
                 )}
-                {onStar && message.message && (
+                {!message.isSending && onStar && message.message && (
                   <DropdownMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                     <Star className="w-4 h-4 mr-2" /> Star
                   </DropdownMenuItem>
                 )}
-                {isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
+                {!message.isSending && isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
                   <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                     <Edit2 className="w-4 h-4 mr-2" /> Edit
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem className="cursor-pointer py-2" disabled>
-                  <CheckSquare className="w-4 h-4 mr-2" /> Select
-                </DropdownMenuItem>
+                {!message.isSending && (
+                  <DropdownMenuItem className="cursor-pointer py-2" disabled>
+                    <CheckSquare className="w-4 h-4 mr-2" /> Select
+                  </DropdownMenuItem>
+                )}
                 {isMine && (
                   <DropdownMenuItem onClick={() => onDelete(message.id)} className="cursor-pointer py-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950">
-                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    <Trash2 className="w-4 h-4 mr-2" /> {message.isSending ? "Cancel Upload" : "Delete"}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
