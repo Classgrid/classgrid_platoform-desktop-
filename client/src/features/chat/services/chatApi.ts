@@ -154,8 +154,10 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   if (files) {
     files.forEach((f) => formData.append("files", f));
   }
+  const hasFiles = files && files.length > 0;
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
+    timeout: hasFiles ? 900000 : 15000, // 15 minutes for file uploads, 15s for text-only
   });
   return res.data.message;
 }

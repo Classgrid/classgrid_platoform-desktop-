@@ -750,11 +750,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             
             <button
               onClick={handleSend}
-              disabled={(!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
+              disabled={isSending || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
               className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
-              title={scheduledDate ? 'Schedule Message' : 'Send Message'}
+              title={isSending ? 'Sending...' : scheduledDate ? 'Schedule Message' : 'Send Message'}
             >
-              {scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
+              {isSending ? <Spinner className="w-5 h-5" /> : scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>
           </>
         )}
