@@ -65,12 +65,16 @@ export function useRealtimeChannel(
 /**
  * Subscribe to the user's personal channel for sidebar updates (thread list changes).
  */
-export function useUserChannel(userId: string | null, onThreadUpdated: (data: any) => void) {
-  const callbackRef = useRef(onThreadUpdated);
-  callbackRef.current = onThreadUpdated;
-
+export function useUserChannel(
+  userId: string | null,
+  handlers: {
+    onThreadUpdated?: (data: any) => void;
+    onThreadDeleted?: (data: any) => void;
+  }
+) {
   useRealtimeChannel(userId ? `user:${userId}` : null, {
-    thread_updated: (payload: any) => callbackRef.current(payload),
+    thread_updated: (payload: any) => handlers.onThreadUpdated?.(payload),
+    thread_deleted: (payload: any) => handlers.onThreadDeleted?.(payload),
   });
 }
 
@@ -89,6 +93,7 @@ export function useThreadChannel(
     onNewPoll?: (data: { poll: any; messageId: string }) => void;
     onPollVote?: (data: { pollId: string; voteCounts: any; totalVoters: number }) => void;
     onThreadUpdated?: (data: { allow_replies?: boolean; [key: string]: any }) => void;
+    onThreadDeleted?: (data: { threadId: string; [key: string]: any }) => void;
     onMessageUpdated?: (data: any) => void;
     onMessageAcknowledged?: (data: any) => void;
   }
@@ -102,6 +107,7 @@ export function useThreadChannel(
     new_poll: (payload: any) => handlers.onNewPoll?.(payload),
     poll_vote: (payload: any) => handlers.onPollVote?.(payload),
     thread_updated: (payload: any) => handlers.onThreadUpdated?.(payload),
+    thread_deleted: (payload: any) => handlers.onThreadDeleted?.(payload),
     message_updated: (payload: any) => handlers.onMessageUpdated?.(payload),
     message_acknowledged: (payload: any) => handlers.onMessageAcknowledged?.(payload),
   });

@@ -268,6 +268,8 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     // Update thread's updated_at
     await sb.from('chat_threads').update({ updated_at: new Date().toISOString() }).eq('group_id', req.params.id);
 
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: req.params.id, ...updates });
+
     res.json({ group: data });
   } catch (err) {
     console.error('Group update error:', err);
@@ -308,6 +310,8 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
       .select()
       .single();
     if (error) throw error;
+
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: req.params.id, [updateField]: publicUrl });
 
     res.json({ group: data });
   } catch (err) {
@@ -397,6 +401,8 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       console.error('Failed to write audit log:', auditErr);
     }
 
+    broadcastToChannel(`thread:${membership.thread_id}`, 'thread_updated', { groupId: req.params.id, permissions_updated: true });
+
     res.json({ group: data });
   } catch (err) {
     console.error('Permission update error:', err);
@@ -424,6 +430,8 @@ router.put('/:id/admins/:userId', isAuthenticated, async (req, res) => {
       .eq('thread_id', thread.id)
       .eq('user_id', targetId);
     if (error) throw error;
+
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: req.params.id });
 
     res.json({ ok: true, userId: targetId, newRole: role });
   } catch (err) {
@@ -479,7 +487,11 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
     }
 
     // Update thread
-    await sb.from('chat_threads').update({ updated_at: new Date().toISOString() }).eq('id', thread.id);
+    await sb.from('chat_threads').update({ 
+      updated_at: new Date().toISOString(),
+      last_message: `${targetUser.name} joined the group`,
+      last_message_at: new Date().toISOString()
+    }).eq('id', thread.id);
 
     try {
       await sb.from('chat_group_audit_logs').insert({
@@ -491,6 +503,23 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
       });
     } catch (auditErr) {
       console.error('Audit log error:', auditErr);
+    }
+
+    // Insert system message for the chat feed
+    const { data: sysMsg } = await sb.from('chat_messages').insert([{
+      thread_id: thread.id,
+      sender_id: myId,
+      sender_name: 'System',
+      message: JSON.stringify({ type: 'system', text: `${targetUser.name} joined the group` })
+    }]).select().single();
+
+    // Broadcast to the added user so they see the group
+    broadcastToChannel(`user:${userId}`, 'thread_updated', { threadId: thread.id, action: 'new_group', groupId: group.id });
+    // Broadcast to the group so others update their member list
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: group.id, action: 'member_added' });
+    
+    if (sysMsg) {
+      broadcastToChannel(`thread:${thread.id}`, 'new_message', { ...sysMsg, attachments: [], reactions: {} });
     }
 
     res.status(201).json({ ok: true, userId });
@@ -519,7 +548,26 @@ router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
       .eq('user_id', targetId);
     if (error) throw error;
 
-    await sb.from('chat_threads').update({ updated_at: new Date().toISOString() }).eq('id', thread.id);
+    await sb.from('chat_threads').update({ 
+      updated_at: new Date().toISOString(),
+      last_message: `A member was removed from the group`,
+      last_message_at: new Date().toISOString()
+    }).eq('id', thread.id);
+
+    // Insert system message for the chat feed
+    const { data: sysMsg } = await sb.from('chat_messages').insert([{
+      thread_id: thread.id,
+      sender_id: myId,
+      sender_name: 'System',
+      message: JSON.stringify({ type: 'system', text: `A member was removed from the group` })
+    }]).select().single();
+
+    broadcastToChannel(`user:${targetId}`, 'thread_deleted', { threadId: thread.id });
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: group.id, action: 'member_removed' });
+
+    if (sysMsg) {
+      broadcastToChannel(`thread:${thread.id}`, 'new_message', { ...sysMsg, attachments: [], reactions: {} });
+    }
 
     res.json({ ok: true, removedUserId: targetId });
   } catch (err) {
@@ -549,6 +597,27 @@ router.post('/:id/exit', isAuthenticated, async (req, res) => {
       .eq('user_id', myId);
     if (error) throw error;
 
+    await sb.from('chat_threads').update({ 
+      updated_at: new Date().toISOString(),
+      last_message: `${req.user.name} left the group`,
+      last_message_at: new Date().toISOString()
+    }).eq('id', thread.id);
+
+    // Insert system message for the chat feed
+    const { data: sysMsg } = await sb.from('chat_messages').insert([{
+      thread_id: thread.id,
+      sender_id: myId,
+      sender_name: 'System',
+      message: JSON.stringify({ type: 'system', text: `${req.user.name} left the group` })
+    }]).select().single();
+
+    broadcastToChannel(`user:${myId}`, 'thread_deleted', { threadId: thread.id });
+    broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: group.id, action: 'member_removed' });
+
+    if (sysMsg) {
+      broadcastToChannel(`thread:${thread.id}`, 'new_message', { ...sysMsg, attachments: [], reactions: {} });
+    }
+
     res.json({ ok: true, leftGroup: req.params.id });
   } catch (err) {
     console.error('Exit group error:', err);
@@ -571,6 +640,10 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     // CASCADE will handle: thread → members, messages → attachments, polls → votes
     const { error } = await sb.from('chat_groups').delete().eq('id', req.params.id);
     if (error) throw error;
+
+    if (thread) {
+      broadcastToChannel(`thread:${thread.id}`, 'thread_deleted', { threadId: thread.id });
+    }
 
     res.json({ ok: true, deletedGroup: req.params.id });
   } catch (err) {

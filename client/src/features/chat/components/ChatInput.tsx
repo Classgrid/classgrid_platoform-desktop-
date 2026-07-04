@@ -756,19 +756,19 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
               {/* Mentions Dropdown */}
               {showMentions && orgUsers && thread?.type === 'group' && (
-                <div className="absolute bottom-[60px] left-12 bg-card border border-border shadow-lg rounded-xl max-h-64 overflow-y-auto z-50 w-72 p-1.5 custom-scrollbar">
+                <div className="absolute bottom-full mb-3 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[100] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
                   {/* @Everyone / @all Option */}
                   {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
                     <button
-                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-accent flex items-center gap-3 transition-colors"
+                      className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors mb-1"
                       onClick={() => insertMention("Everyone", "everyone")}
                     >
-                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 shadow-sm border border-emerald-500/20">
                         <Users className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold">all</span>
-                        <span className="text-[11px] text-muted-foreground">Mention all members in this chat</span>
+                        <span className="text-[15px] font-semibold tracking-tight">Everyone</span>
+                        <span className="text-[12px] text-muted-foreground/80 leading-tight">Mention all members in this chat</span>
                       </div>
                     </button>
                   )}
@@ -777,17 +777,17 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     .map(u => (
                       <button
                         key={u._id || u.id}
-                        className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-accent flex items-center gap-3 transition-colors"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors"
                         onClick={() => insertMention(u.name, u._id || u.id)}
                       >
                         {u.profilePicture ? (
-                          <img src={u.profilePicture} className="w-9 h-9 rounded-full object-cover shrink-0 bg-accent" alt="" />
+                          <img src={u.profilePicture} className="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm border border-border/50" alt="" />
                         ) : (
-                          <div className="w-9 h-9 rounded-full bg-accent text-foreground flex items-center justify-center shrink-0 text-sm font-bold">
-                            {(u.name || "?").charAt(0).toUpperCase()}
+                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/20 text-sm font-bold uppercase">
+                            {(u.name || "?").charAt(0)}
                           </div>
                         )}
-                        <span className="text-sm font-semibold">{u.name}</span>
+                        <span className="text-[15px] font-semibold tracking-tight">{u.name}</span>
                       </button>
                     ))}
                 </div>
@@ -812,7 +812,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     const caretOffset = preCaretRange.toString().length;
                     
                     const textBeforeCaret = text.slice(0, caretOffset);
-                    const match = textBeforeCaret.match(/(?:^|\s)@([a-zA-Z0-9_]*)$/);
+                    // Match @ preceded by start of string, space, or non-breaking space
+                    const match = textBeforeCaret.match(/(?:^|[\s\xA0])@([a-zA-Z0-9_]*)$/);
                     if (match) {
                       setShowMentions(true);
                       setMentionQuery(match[1].toLowerCase());

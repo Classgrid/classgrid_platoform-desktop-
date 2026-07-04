@@ -818,6 +818,10 @@ router.post('/dm/:userId', isAuthenticated, async (req, res) => {
       ]);
     if (memberErr) throw memberErr;
 
+    // Broadcast to both users so the new DM instantly appears in their sidebars
+    broadcastToChannel(`user:${myId}`, 'thread_updated', { threadId: newThread.id, action: 'new_group' });
+    broadcastToChannel(`user:${otherId}`, 'thread_updated', { threadId: newThread.id, action: 'new_group' });
+
     res.status(201).json({ thread: newThread, isNew: true });
   } catch (err) {
     console.error('DM create error:', err);

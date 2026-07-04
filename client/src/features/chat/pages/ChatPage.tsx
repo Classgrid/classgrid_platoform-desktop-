@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import {
@@ -57,6 +58,7 @@ import { ScheduledMessagesView } from "../components/ScheduledMessagesView";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 
 export function ChatPage() {
+  const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const currentUserId = currentUser?._id;
 
@@ -509,7 +511,7 @@ export function ChatPage() {
   // -- Realtime Handlers --
   
   // 1. Sidebar Updates (via User channel)
-  useUserChannel(currentUserId || null, (payload) => {
+  useUserChannel(currentUserId || null, { onThreadUpdated: (payload) => {
     if (payload.action === 'new_group') {
       loadThreads();
       return;
@@ -571,7 +573,14 @@ export function ChatPage() {
          markThreadRead(payload.threadId).catch(() => {});
       }
     }
-  });
+  },
+  onThreadDeleted: (payload) => {
+    setThreads((prev) => prev.filter(t => t.id !== payload.threadId));
+    if (activeThread?.id === payload.threadId) {
+      setActiveThread(null);
+      toast.info("This chat was deleted or you were removed.");
+    }
+  }});
 
   // 2. Active Thread Updates (via Thread channel)
   const { sendTyping } = useThreadChannel(activeThread?.id || null, currentUserId || null, {
@@ -672,6 +681,32 @@ export function ChatPage() {
         return p;
       }));
     },
+    onThreadUpdated: (payload) => {
+      if (payload.allow_replies !== undefined) {
+         setActiveThread(prev => prev ? { ...prev, allowReplies: payload.allow_replies } : null);
+      }
+      if (payload.groupId) {
+         // A group change happened (e.g. member added/removed, info changed)
+         queryClient.invalidateQueries({ queryKey: ["group-info", payload.groupId] });
+         if (payload.action === 'member_removed' && payload.removedUserId === currentUserId) {
+           setActiveThread(null);
+           toast.info("You were removed from this group.");
+         }
+      }
+    },
+    onThreadDeleted: (payload) => {
+      setThreads(prev => prev.filter(t => t.id !== payload.threadId));
+      if (activeThread?.id === payload.threadId) {
+        setActiveThread(null);
+        toast.info("This chat was deleted.");
+      }
+    },
+    onMessageUpdated: (data) => {
+      setMessages((prev) => prev.map(m => m.id === data.id ? { ...m, ...data } : m));
+    },
+    onMessageAcknowledged: (data) => {
+      setMessages((prev) => prev.map(m => m.id === data.messageId ? { ...m, has_acknowledged: true } : m));
+    }
   });
 
   const handleApprove = async (msgId: string) => {
