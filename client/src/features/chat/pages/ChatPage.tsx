@@ -315,9 +315,7 @@ export function ChatPage() {
       return;
     }
 
-    if (hasMedia) {
-      setIsSending(true);
-    }
+    // No longer block the UI for media uploads
     const tempId = `temp-${Date.now()}`;
     const tempMessage: ChatMessage = {
       id: tempId,
@@ -363,9 +361,7 @@ export function ChatPage() {
         prev.map((m) => (m.id === tempId ? { ...m, isSending: false, isError: true } : m))
       );
     } finally {
-      if (hasMedia) {
-        setIsSending(false);
-      }
+      // No longer reset global isSending for media
     }
   };
 

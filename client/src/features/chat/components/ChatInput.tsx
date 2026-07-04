@@ -77,14 +77,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         stream.getTracks().forEach(track => track.stop());
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(1000);
       setIsRecording(true);
       setRecordingTime(0);
       recordingTimerRef.current = setInterval(() => {
@@ -193,7 +194,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
     const finalFiles = [...files];
     if (audioBlob) {
-      const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: "audio/webm" });
+      const mimeType = audioBlob.type || 'audio/webm';
+      let ext = 'webm';
+      if (mimeType.includes('mp4')) ext = 'mp4';
+      else if (mimeType.includes('mp3')) ext = 'mp3';
+      else if (mimeType.includes('wav')) ext = 'wav';
+      else if (mimeType.includes('ogg')) ext = 'ogg';
+      else if (mimeType.includes('mpeg')) ext = 'mp3';
+
+      const audioFile = new File([audioBlob], `voice_note_${Date.now()}.${ext}`, { type: mimeType });
       finalFiles.push(audioFile);
     }
 
@@ -217,7 +226,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
     
     try {
-      await onSendMessage(text, finalFiles, options);
+      // Fire and forget so we don't block the UI while uploading
+      onSendMessage(text, finalFiles, options).catch(console.error);
     } finally {
       setIsSendingLocal(false);
       if (onTyping && hasMedia) {
