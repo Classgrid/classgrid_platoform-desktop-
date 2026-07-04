@@ -28,6 +28,7 @@ import {
   approveMessage,
   rejectMessage,
   acknowledgeMessage,
+  pinMessage,
   type ChatThread,
   type ChatMessage,
   type OrgUser,
@@ -46,6 +47,7 @@ import { GroupCreateSidebar } from "../components/GroupCreateSidebar";
 import { CreatePollModal } from "../components/CreatePollModal";
 import { DeleteMessageModal } from "../components/DeleteMessageModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
+import { PinDurationModal } from "../components/PinDurationModal";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("../components/GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { ForwardMessageModal } from "../components/ForwardMessageModal";
@@ -74,6 +76,8 @@ export function ChatPage() {
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [pinningMessageId, setPinningMessageId] = useState<string | null>(null);
+  const [isPinning, setIsPinning] = useState(false);
 
   // -- State: Modals & Org Users --
   const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
@@ -487,12 +491,49 @@ export function ChatPage() {
   };
 
   const handleBulkMute = async (threadIds: string[]) => {
+    if (threadIds.length === 0) return;
     try {
       await bulkMuteChats(threadIds);
-      toast.success(`${threadIds.length} chats muted`);
-      // Since muted state isn't locally tracked on threads yet, just toast
+      // Let websocket sync updates
+      setSelectedMessageIds(new Set());
+      setIsSelectionMode(false);
+      toast.success(`${threadIds.length} chat(s) muted`);
     } catch (err) {
       toast.error("Failed to mute chats");
+    }
+  };
+
+  const handlePinMessage = async (msgId: string, isPinned: boolean) => {
+    if (isPinned) {
+      setPinningMessageId(msgId);
+    } else {
+      try {
+        if (!activeThread) return;
+        await pinMessage(activeThread.id, msgId, false);
+        setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_pinned: false, pinned_until: null } : m));
+      } catch (error) {
+        toast.error("Failed to unpin message");
+      }
+    }
+  };
+
+  const submitPin = async (durationHours: number) => {
+    if (!pinningMessageId || !activeThread) return;
+    setIsPinning(true);
+    try {
+      const expirationDate = new Date();
+      expirationDate.setHours(expirationDate.getHours() + durationHours);
+      
+      await pinMessage(activeThread.id, pinningMessageId, true, durationHours);
+      setMessages(prev => prev.map(m => m.id === pinningMessageId 
+        ? { ...m, is_pinned: true, pinned_until: expirationDate.toISOString() } 
+        : { ...m, is_pinned: false, pinned_until: null }
+      ));
+      setPinningMessageId(null);
+    } catch (error) {
+      toast.error("Failed to pin message");
+    } finally {
+      setIsPinning(false);
     }
   };
 
@@ -894,6 +935,37 @@ export function ChatPage() {
               onEnterSelectionMode={() => setIsSelectionMode(true)}
             />
             
+            {/* Pinned Messages Banner */}
+            {(() => {
+              const now = new Date().getTime();
+              const pinnedMessages = messages.filter(m => {
+                if (!m.is_pinned || m.is_deleted) return false;
+                if (m.pinned_until && new Date(m.pinned_until).getTime() < now) return false;
+                return true;
+              });
+              
+              if (pinnedMessages.length === 0) return null;
+              const topPinned = pinnedMessages[pinnedMessages.length - 1]; // most recent
+              
+              return (
+                <div 
+                  onClick={() => {
+                    const el = document.getElementById(`msg-${topPinned.id}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 bg-card border-b border-border/50 cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <div className="text-amber-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
+                    <span className="text-[13px] text-foreground truncate">{topPinned.message || "Attachment"}</span>
+                  </div>
+                </div>
+              );
+            })()}
+
             <ChatConversation
               thread={activeThread}
               messages={messages}
@@ -905,6 +977,7 @@ export function ChatPage() {
               onReply={setReplyTo}
               canReply={!isInputDisabled}
               onStar={handleStarMessage}
+              onPin={handlePinMessage}
               onDelete={(id) => setMessageToDelete(messages.find(m => m.id === id) || null)}
               onEdit={async (id, text) => {
                 try {
@@ -1061,6 +1134,13 @@ export function ChatPage() {
           isOpen={!!messageToDelete}
           onClose={() => setMessageToDelete(null)}
           onDelete={confirmDeleteMessage}
+        />
+      )}
+      {pinningMessageId && (
+        <PinDurationModal
+          onClose={() => setPinningMessageId(null)}
+          onSave={submitPin}
+          isPending={isPinning}
         />
       )}
 

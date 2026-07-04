@@ -34,6 +34,7 @@ interface ChatConversationProps {
   onApprove?: (msgId: string) => void;
   onReject?: (msgId: string) => void;
   onAcknowledge?: (msgId: string) => void;
+  onPin?: (msgId: string, isPinned: boolean) => void;
 }
 
 export function ChatConversation({
@@ -65,6 +66,7 @@ export function ChatConversation({
   onApprove,
   onReject,
   onAcknowledge,
+  onPin,
 }: ChatConversationProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -273,6 +275,7 @@ export function ChatConversation({
                     onApprove={onApprove}
                     onReject={onReject}
                     onAcknowledge={onAcknowledge}
+                    onPin={onPin}
                   />
                 </motion.div>
               );
