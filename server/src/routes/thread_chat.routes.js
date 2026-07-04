@@ -2501,10 +2501,8 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
     const { is_pinned, durationHours } = req.body;
 
     const membership = await validateThreadMembership(userId, threadId);
-    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
-    const isSuperAdmin = req.user.role === 'super_admin';
     // Anyone in the thread can pin messages
-    if (!membership && !isSuperAdmin) return res.status(403).json({ error: 'Not authorized' });
+    if (!membership) return res.status(403).json({ error: 'Not authorized' });
 
     let pinned_until = null;
     if (is_pinned && durationHours) {
@@ -2559,9 +2557,8 @@ router.patch('/:id/messages/:messageId/approve', isAuthenticated, async (req, re
   try {
     const { id: threadId, messageId } = req.params;
     const userId = req.user._id.toString();
-    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const membership = await validateThreadMembership(userId, threadId);
-    if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can approve messages' });
+    if (membership?.role !== 'admin') return res.status(403).json({ error: 'Only admins can approve messages' });
 
     const { data: updated, error } = await sb.from('chat_messages').update({
       status: 'approved', approved_by: userId, approved_at: new Date().toISOString()
@@ -2580,9 +2577,8 @@ router.patch('/:id/messages/:messageId/reject', isAuthenticated, async (req, res
   try {
     const { id: threadId, messageId } = req.params;
     const userId = req.user._id.toString();
-    const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const membership = await validateThreadMembership(userId, threadId);
-    if (membership?.role !== 'admin' && !isOrgAdmin) return res.status(403).json({ error: 'Only admins can reject messages' });
+    if (membership?.role !== 'admin') return res.status(403).json({ error: 'Only admins can reject messages' });
 
     const { data: updated, error } = await sb.from('chat_messages').update({
       status: 'rejected', rejected_by: userId, rejected_at: new Date().toISOString(), rejection_reason: req.body.reason || null
@@ -2625,8 +2621,8 @@ router.get('/:id/messages/scheduled', isAuthenticated, async (req, res) => {
     const membership = await validateThreadMembership(userId, threadId);
 
     // Allow users to see their own scheduled messages, admins to see all
-    const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
-    if (!membership && !isAdmin) return res.status(403).json({ error: 'Not authorized' });
+    const isAdmin = membership?.role === 'admin';
+    if (!membership) return res.status(403).json({ error: 'Not authorized' });
 
     let query = sb.from('chat_scheduled_messages').select('*').eq('thread_id', threadId).eq('status', 'pending');
     if (!isAdmin) {
@@ -2649,7 +2645,7 @@ router.patch('/:id/messages/scheduled/:msgId', isAuthenticated, async (req, res)
     const { message, scheduledFor } = req.body;
 
     const membership = await validateThreadMembership(userId, threadId);
-    const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isAdmin = membership?.role === 'admin';
 
     // Verify ownership or admin
     const { data: existing } = await sb.from('chat_scheduled_messages').select('sender_id, status').eq('id', msgId).single();
@@ -2678,7 +2674,7 @@ router.delete('/:id/messages/scheduled/:msgId', isAuthenticated, async (req, res
     const { id: threadId, msgId } = req.params;
     const userId = req.user._id.toString();
     const membership = await validateThreadMembership(userId, threadId);
-    const isAdmin = membership?.role === 'admin' || req.user.role === 'super_admin' || req.user.role === 'org_admin';
+    const isAdmin = membership?.role === 'admin';
 
     // Verify ownership or admin
     const { data: existing } = await sb.from('chat_scheduled_messages').select('sender_id').eq('id', msgId).single();
