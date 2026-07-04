@@ -39,6 +39,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false, currentUserId }: ChatInputProps) {
+  const [isSendingLocal, setIsSendingLocal] = useState(false);
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -155,19 +156,34 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const handleSend = async () => {
     const text = message.trim();
     if (!text && files.length === 0 && !audioBlob) return;
+    if (isSendingLocal || isSending) return;
 
     if (text.length > 65000) {
       toast.error("Message too long", { description: "The message size exceeds the maximum allowed length. Please shorten it." });
       return;
     }
 
+    // ── Second-pass file size validation (catches any file bypassing processFiles) ──
+    const IMAGE_MAX  = 12  * 1024 * 1024;  // 12 MB
+    const OTHER_MAX  = 100 * 1024 * 1024;  // 100 MB
+    for (const f of files) {
+      const maxAllowed = f.type.startsWith('image/') ? IMAGE_MAX : OTHER_MAX;
+      if (f.size > maxAllowed) {
+        const limitLabel = f.type.startsWith('image/') ? '12 MB' : '100 MB';
+        toast.error('File too large', {
+          description: `"${f.name}" exceeds the ${limitLabel} limit. Please remove it before sending.`,
+        });
+        return;
+      }
+    }
+
+    setIsSendingLocal(true);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     const hasMedia = files.length > 0 || !!audioBlob;
     if (onTyping) {
       if (hasMedia) {
         onTyping(true, 'uploading');
-        // Keep it active for up to 3 mins in case it's a long upload
         typingTimeoutRef.current = setTimeout(() => onTyping(false, 'uploading'), 180000);
       } else {
         onTyping(false, 'typing');
@@ -202,9 +218,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     try {
       await onSendMessage(text, finalFiles, options);
     } finally {
+      setIsSendingLocal(false);
       if (onTyping && hasMedia) {
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        // Force the uploading indicator to stay visible for 8 seconds
         typingTimeoutRef.current = setTimeout(() => {
           onTyping(false, 'uploading');
         }, 8000);
@@ -565,32 +581,25 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 }}
                 onPaste={(e) => {
                   e.preventDefault();
+                  // If clipboard has FILES (e.g. copy-paste an image), process as files
                   if (e.clipboardData.files && e.clipboardData.files.length > 0) {
                     const pastedFiles = Array.from(e.clipboardData.files);
                     setFiles(prev => processFiles(pastedFiles, prev));
                     return;
                   }
                   
-                  let html = e.clipboardData.getData("text/html");
-                  let text = e.clipboardData.getData("text/plain");
-                  
+                  // Always paste as PLAIN TEXT only — prevents web-page HTML
+                  // (e.g. Wikipedia, Google) from injecting broken markup into the chat
+                  const text = e.clipboardData.getData("text/plain");
                   const MAX_CHARS = 65000;
                   const currentTextLength = editorRef.current?.textContent?.length || 0;
-                  const addedLength = text ? text.length : (html ? html.replace(/<[^>]*>?/gm, '').length : 0);
                   
-                  if (currentTextLength + addedLength > MAX_CHARS) {
+                  if (currentTextLength + text.length > MAX_CHARS) {
                     toast.error("Message too long", { description: "The message you're pasting is too long. Try shortening it or sending it in multiple parts." });
                     return;
                   }
 
-                  if (html) {
-                    html = html.replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, '');
-                    const cleanHtml = DOMPurify.sanitize(html, {
-                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'],
-                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class']
-                    });
-                    document.execCommand("insertHTML", false, cleanHtml);
-                  } else if (text) {
+                  if (text) {
                     document.execCommand("insertText", false, text);
                   }
                 }}
@@ -756,11 +765,11 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             
             <button
               onClick={handleSend}
-              disabled={isSending || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
+              disabled={isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
               className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
-              title={isSending ? 'Sending...' : scheduledDate ? 'Schedule Message' : 'Send Message'}
+              title={(isSending || isSendingLocal) ? 'Sending...' : scheduledDate ? 'Schedule Message' : 'Send Message'}
             >
-              {isSending ? <Spinner className="w-5 h-5" /> : scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
+              {(isSending || isSendingLocal) ? <Spinner className="w-5 h-5" /> : scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>
           </>
         )}

@@ -213,7 +213,7 @@ export function ChatBubble({
         {/* Message Container */}
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div className={`relative flex flex-col min-w-0 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[60%] ${isMine ? "items-end" : "items-start"}`}>
+            <div className={`relative flex flex-col min-w-0 max-w-full ${isMine ? "items-end" : "items-start"}`}>
           
           {/* Sender Name (for group chats) */}
           {!isMine && showAvatar && (
@@ -468,9 +468,9 @@ export function ChatBubble({
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     } : {}}>
-                      <span dangerouslySetInnerHTML={{ 
+                      <div className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto" dangerouslySetInnerHTML={{ 
                         __html: DOMPurify.sanitize(marked.parse((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string, { 
-                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
+                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td'], 
                           ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
                         }) 
                       }} />
