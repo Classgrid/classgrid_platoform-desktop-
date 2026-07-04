@@ -211,7 +211,7 @@ router.get('/explore', isAuthenticated, async (req, res) => {
     const isSuperAdmin = req.user.role === 'super_admin';
     if (!orgId && !isSuperAdmin) return res.status(403).json({ error: 'Must be in an org' });
 
-    let query = sb.from('chat_groups').select('*, creator:created_by (name, email)').eq('is_private', false);
+    let query = sb.from('chat_groups').select('*').eq('is_private', false);
     if (!isSuperAdmin) {
       query = query.eq('org_id', orgId);
     }
