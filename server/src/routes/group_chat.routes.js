@@ -112,7 +112,17 @@ router.post('/', isAuthenticated, async (req, res) => {
     const isSuperAdmin = req.user.role === 'super_admin';
     if (!orgId && !isSuperAdmin) return res.status(403).json({ error: 'Must be in an organization' });
 
-    const { name, description, memberIds } = req.body;
+    const { 
+      name, 
+      description, 
+      memberIds,
+      group_type,
+      require_join_approval,
+      send_message_policy,
+      admin_roles,
+      message_ttl
+    } = req.body;
+
     if (!name || !name.trim()) return res.status(400).json({ error: 'Group name is required' });
     if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
       return res.status(400).json({ error: 'At least one member is required' });

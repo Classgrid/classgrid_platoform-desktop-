@@ -473,24 +473,40 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Message Approval */}
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-full text-primary">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">Require Message Approval</span>
-                        <span className="text-xs text-muted-foreground">Student messages must be approved by an admin before others can see them</span>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={data.group.require_message_approval}
-                      disabled={isUpdatingPermissions}
-                      onCheckedChange={(checked) => {
-                        handleUpdatePermissions({ require_message_approval: checked });
-                      }}
-                    />
+                  {/* Group Discovery & Privacy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
+                     <span className="text-sm font-medium text-foreground">Group Discovery & Privacy</span>
+                     <Select 
+                        value={
+                          data.group.group_type === 'private' ? 'private' 
+                          : data.group.require_join_approval ? 'approval' 
+                          : 'public'
+                        }
+                        disabled={isUpdatingPermissions}
+                        onValueChange={(value) => {
+                          if (value === 'private') {
+                            handleUpdatePermissions({ group_type: 'private', require_join_approval: false });
+                          } else if (value === 'approval') {
+                            handleUpdatePermissions({ group_type: 'general', require_join_approval: true });
+                          } else if (value === 'public') {
+                            handleUpdatePermissions({ group_type: 'general', require_join_approval: false });
+                          }
+                        }}
+                     >
+                        <SelectTrigger className="w-full bg-background border border-border text-sm text-foreground">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="private">Private (Hidden, Invite Only)</SelectItem>
+                           <SelectItem value="approval">Approval Required (Visible, Request to Join)</SelectItem>
+                           <SelectItem value="public">Public / Open (Visible, Instant Join)</SelectItem>
+                        </SelectContent>
+                     </Select>
+                     <span className="text-xs text-muted-foreground mt-1">
+                       {data.group.group_type === 'private' && "Invisible in 'New Chat'. Only admins can add people."}
+                       {data.group.group_type === 'general' && data.group.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
+                       {data.group.group_type === 'general' && !data.group.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
+                     </span>
                   </div>
 
                   {/* Send Messages Policy */}

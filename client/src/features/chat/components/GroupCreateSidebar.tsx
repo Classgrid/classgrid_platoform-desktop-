@@ -44,7 +44,13 @@ export function GroupCreateSidebar({
   const [cropperSrc, setCropperSrc] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageTtl, setMessageTtl] = useState<number>(0);
-  const [groupPermissions, setGroupPermissions] = useState<any>({ send_message_policy: 'all', auto_add_roles: [], admin_roles: [] });
+  const [groupPermissions, setGroupPermissions] = useState<any>({ 
+    send_message_policy: 'all', 
+    auto_add_roles: [], 
+    admin_roles: [],
+    group_type: 'private',
+    require_join_approval: false
+  });
 
   const { data: user } = useCurrentUser();
   const { data: dynamicRolesData } = useOrgRoles();
@@ -282,8 +288,9 @@ export function GroupCreateSidebar({
               <h2 className="text-lg font-bold text-foreground">New group</h2>
             </div>
 
-            {/* Group Icon & Name */}
-            <div className="flex flex-col items-center pt-8 px-6 pb-4">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-24">
+              {/* Group Icon & Name */}
+              <div className="flex flex-col items-center pt-8 px-6 pb-4">
               <label className="w-48 h-48 rounded-full bg-accent flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted transition-colors group relative overflow-hidden mb-8">
                 {groupPhotoPreview ? (
                   <img src={groupPhotoPreview} alt="Group" className="w-full h-full object-cover" />
@@ -324,7 +331,41 @@ export function GroupCreateSidebar({
             </div>
 
             {/* Settings toggles */}
-            <div className="mt-4 px-6 flex flex-col gap-6 text-sm pb-24">
+            <div className="mt-4 px-6 flex flex-col gap-6 text-sm">
+              <div className="flex flex-col gap-2">
+                 <span className="font-medium">Group Discovery & Privacy</span>
+                 <Select 
+                    value={
+                      groupPermissions.group_type === 'private' ? 'private' 
+                      : groupPermissions.require_join_approval ? 'approval' 
+                      : 'public'
+                    }
+                    onValueChange={(value) => {
+                      if (value === 'private') {
+                        setGroupPermissions({ ...groupPermissions, group_type: 'private', require_join_approval: false });
+                      } else if (value === 'approval') {
+                        setGroupPermissions({ ...groupPermissions, group_type: 'general', require_join_approval: true });
+                      } else if (value === 'public') {
+                        setGroupPermissions({ ...groupPermissions, group_type: 'general', require_join_approval: false });
+                      }
+                    }}
+                 >
+                    <SelectTrigger className="w-full bg-transparent border-b border-border rounded-none px-0 py-2 text-sm text-foreground outline-none shadow-none h-auto">
+                       <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="private">Private (Hidden, Invite Only)</SelectItem>
+                       <SelectItem value="approval">Approval Required (Visible, Request to Join)</SelectItem>
+                       <SelectItem value="public">Public / Open (Visible, Instant Join)</SelectItem>
+                    </SelectContent>
+                 </Select>
+                 <span className="text-xs text-muted-foreground mt-1">
+                   {groupPermissions.group_type === 'private' && "Invisible in 'New Chat'. Only admins can add people."}
+                   {groupPermissions.group_type === 'general' && groupPermissions.require_join_approval && "Shows in 'New Chat'. Users must request to join."}
+                   {groupPermissions.group_type === 'general' && !groupPermissions.require_join_approval && "Shows in 'New Chat'. Anyone can join instantly."}
+                 </span>
+              </div>
+
               <div className="flex flex-col gap-2">
                  <span className="font-medium">Disappearing messages</span>
                  <Select 
@@ -388,9 +429,9 @@ export function GroupCreateSidebar({
                      );
                    })}
                  </div>
-              </div>
-
+               </div>
             </div>
+          </div>
 
             {/* Floating Create Button */}
             <AnimatePresence>

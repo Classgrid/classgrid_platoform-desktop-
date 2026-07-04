@@ -30,7 +30,7 @@ export function NewChatSidebar({
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [filterType, setFilterType] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("contacts");
 
   const { data: exploreData, isLoading: isGroupsLoading } = useQuery({
     queryKey: ["explore-groups"],
@@ -124,19 +124,24 @@ export function NewChatSidebar({
             className="w-full pl-9 pr-3 py-1.5 h-9 text-sm bg-[#fafafa] dark:bg-[#0f0f0f] border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
-        <select 
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="h-9 px-3 text-sm bg-[#fafafa] dark:bg-[#0f0f0f] border-none rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="all">All Types</option>
-          <option value="general">General</option>
-          <option value="class">Class</option>
-          <option value="department">Department</option>
-          <option value="subject">Subject</option>
-          <option value="team_staff">Team / Staff</option>
-          <option value="official_announcement">Official</option>
-        </select>
+        <div className="flex bg-[#fafafa] dark:bg-[#0f0f0f] rounded-lg p-0.5 border border-border/50 shadow-sm">
+          <button
+            onClick={() => setFilterType("contacts")}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              filterType === "contacts" ? "bg-white dark:bg-black shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Contacts
+          </button>
+          <button
+            onClick={() => setFilterType("groups")}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              filterType === "groups" ? "bg-white dark:bg-black shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Groups
+          </button>
+        </div>
       </div>
 
       {/* List Content */}
@@ -160,8 +165,8 @@ export function NewChatSidebar({
               </div>
             </button>
 
-            {/* Explore Groups Header */}
-            {filteredGroups.length > 0 && (
+            {/* Explore Groups */}
+            {filterType === "groups" && filteredGroups.length > 0 && (
               <>
                 <div className="px-5 py-3 pt-5">
                   <p className="text-[14px] font-medium text-emerald-600 uppercase tracking-wide">Explore Groups</p>
@@ -208,65 +213,68 @@ export function NewChatSidebar({
               </>
             )}
 
-            {/* Contacts Header */}
-            <div className="px-5 py-3 pt-5 border-t border-border mt-2">
-              <p className="text-[14px] font-medium text-emerald-600 uppercase tracking-wide">Contacts on Classgrid</p>
-            </div>
+            {/* Contacts */}
+            {filterType === "contacts" && (
+              <>
+                <div className="px-5 py-3 pt-5 border-t border-border mt-2">
+                  <p className="text-[14px] font-medium text-emerald-600 uppercase tracking-wide">Contacts on Classgrid</p>
+                </div>
 
-            {/* User Items */}
-            {filteredUsers.length === 0 ? (
-              <div className="text-center p-8 text-muted-foreground text-sm">
-                No contacts found matching "{search}"
-              </div>
-            ) : (
-              filteredUsers.map((user, index) => {
-                const isSelected = selectedId === user._id;
-                return (
-                <button
-                  key={user._id}
-                  onClick={() => setSelectedId(isSelected ? null : user._id)}
-                  className={`w-full flex items-center gap-4 px-4 py-2 transition-colors text-left group ${isSelected ? 'bg-primary/5' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
-                >
-                  <div className={`relative w-12 h-12 rounded-full font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'bg-primary/10 text-primary'}`}>
-                    {user.profilePicture ? (
-                      <img
-                        src={user.profilePicture}
-                        alt=""
-                        className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
-                      />
-                    ) : (
-                      <img
-                        src={DEFAULT_USER_AVATAR}
-                        alt=""
-                        className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
-                      />
-                    )}
-                    {isSelected && (
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm z-10">
-                        <Check className="w-3 h-3" />
-                      </div>
-                    )}
+                {filteredUsers.length === 0 ? (
+                  <div className="text-center p-8 text-muted-foreground text-sm">
+                    No contacts found matching "{search}"
                   </div>
-                  <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredUsers.length - 1 ? 'border-b border-border' : ''}`}>
-                    <p className={`text-[17px] truncate transition-colors duration-200 ${isSelected ? 'text-primary font-medium' : 'text-foreground group-hover:text-foreground/90'}`}>{user.name}</p>
-                    <p className="text-[13px] text-muted-foreground truncate mt-0.5">
-                      {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ""}
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <div
-                      className="shrink-0 p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer text-muted-foreground hover:text-foreground -ml-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedId(null);
-                      }}
-                      title="Deselect"
+                ) : (
+                  filteredUsers.map((user, index) => {
+                    const isSelected = selectedId === user._id;
+                    return (
+                    <button
+                      key={user._id}
+                      onClick={() => setSelectedId(isSelected ? null : user._id)}
+                      className={`w-full flex items-center gap-4 px-4 py-2 transition-colors text-left group ${isSelected ? 'bg-primary/5' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
                     >
-                      <X className="w-5 h-5" />
-                    </div>
-                  )}
-                </button>
-              )})
+                      <div className={`relative w-12 h-12 rounded-full font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'bg-primary/10 text-primary'}`}>
+                        {user.profilePicture ? (
+                          <img
+                            src={user.profilePicture}
+                            alt=""
+                            className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
+                          />
+                        ) : (
+                          <img
+                            src={DEFAULT_USER_AVATAR}
+                            alt=""
+                            className="w-full h-full rounded-full object-cover bg-primary/10 border border-border/50"
+                          />
+                        )}
+                        {isSelected && (
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm z-10">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                      <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredUsers.length - 1 ? 'border-b border-border' : ''}`}>
+                        <p className={`text-[17px] truncate transition-colors duration-200 ${isSelected ? 'text-primary font-medium' : 'text-foreground group-hover:text-foreground/90'}`}>{user.name}</p>
+                        <p className="text-[13px] text-muted-foreground truncate mt-0.5">
+                          {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ""}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div
+                          className="shrink-0 p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer text-muted-foreground hover:text-foreground -ml-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedId(null);
+                          }}
+                          title="Deselect"
+                        >
+                          <X className="w-5 h-5" />
+                        </div>
+                      )}
+                    </button>
+                  )})
+                )}
+              </>
             )}
           </div>
         )}

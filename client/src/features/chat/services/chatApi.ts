@@ -321,8 +321,8 @@ export async function toggleReaction(threadId: string, messageId: string, emoji:
   return res.data.reactions;
 }
 
-export async function createGroup(name: string, description: string, memberIds: string[]) {
-  const res = await apiClient.post("/api/group-chat", { name, description, memberIds });
+export async function createGroup(name: string, description: string, memberIds: string[], settings?: any) {
+  const res = await apiClient.post("/api/group-chat", { name, description, memberIds, ...settings });
   return res.data;
 }
 

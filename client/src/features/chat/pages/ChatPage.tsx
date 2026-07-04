@@ -427,9 +427,14 @@ export function ChatPage() {
     }
   };
 
-  const handleCreateGroup = async (name: string, description: string, memberIds: string[], photo?: File | null) => {
+  const handleCreateGroup = async (name: string, description: string, memberIds: string[], photo?: File | null, settings?: { messageTtl?: number; permissions?: any }) => {
     try {
-      const response = await createGroup(name, description, memberIds);
+      // Flatten permissions into settings payload
+      const payload = {
+        ...settings?.permissions,
+        message_ttl: settings?.messageTtl
+      };
+      const response = await createGroup(name, description, memberIds, payload);
       const group = response.group;
       const thread = response.thread;
       
@@ -623,7 +628,7 @@ export function ChatPage() {
     setThreads((prev) => prev.filter(t => t.id !== payload.threadId));
     if (activeThread?.id === payload.threadId) {
       setActiveThread(null);
-      toast.info("This chat was deleted or you were removed.");
+      // The specific message is handled by the thread channel's onThreadDeleted
     }
   }});
 
