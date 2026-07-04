@@ -121,7 +121,13 @@ router.post('/', isAuthenticated, async (req, res) => {
       require_join_approval,
       send_message_policy,
       admin_roles,
-      message_ttl
+      message_ttl,
+      is_official,
+      edit_info_policy,
+      add_member_policy,
+      create_poll_policy,
+      send_attachments_policy,
+      auto_add_roles
     } = req.body;
 
     if (!name || !name.trim()) return res.status(400).json({ error: 'Group name is required' });
@@ -158,7 +164,13 @@ router.post('/', isAuthenticated, async (req, res) => {
         require_join_approval: require_join_approval || false,
         send_message_policy: send_message_policy || 'all',
         admin_roles: admin_roles || [],
-        message_ttl: message_ttl || 0
+        message_ttl: message_ttl || 0,
+        is_official: is_official || false,
+        edit_info_policy: edit_info_policy || 'admin_only',
+        add_member_policy: add_member_policy || 'admin_only',
+        create_poll_policy: create_poll_policy || 'all',
+        send_attachments_policy: send_attachments_policy || 'all',
+        auto_add_roles: auto_add_roles || []
       }])
       .select()
       .single();
