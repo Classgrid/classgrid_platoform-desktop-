@@ -163,6 +163,7 @@ export function ChatBubble({
   }
 
   return (
+    <>
     <div 
       className={`flex w-full items-start group ${isSelectionMode ? "cursor-pointer relative hover:bg-black/5 dark:hover:bg-white/5 py-1 -my-1 transition-colors" : ""} ${isSelected ? "bg-primary/10 hover:bg-primary/10 dark:bg-primary/20 dark:hover:bg-primary/20" : ""}`}
       onClick={(e) => {
@@ -709,7 +710,7 @@ export function ChatBubble({
                   <Star className="w-4 h-4 mr-2" /> Star
                 </ContextMenuItem>
               )}
-              {isMine && (!message.attachments || message.attachments.length === 0) && (
+              {isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
                 <ContextMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                   <Edit2 className="w-4 h-4 mr-2" /> Edit
                 </ContextMenuItem>
@@ -806,7 +807,7 @@ export function ChatBubble({
                     <Star className="w-4 h-4 mr-2" /> Star
                   </DropdownMenuItem>
                 )}
-                {isMine && (!message.attachments || message.attachments.length === 0) && (
+                {isMine && (!message.attachments || message.attachments.length === 0) && !message.isSeen && (
                   <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer py-2">
                     <Edit2 className="w-4 h-4 mr-2" /> Edit
                   </DropdownMenuItem>
@@ -842,5 +843,7 @@ export function ChatBubble({
       />
     )}
     </div>
+    </div>
+    </>
   );
 }

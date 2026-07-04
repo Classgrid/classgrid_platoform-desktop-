@@ -415,6 +415,7 @@ export function ImageLightbox({ images, initialIndex, onClose }: ImageLightboxPr
               Swipe left or right to navigate
             </div>
           </motion.div>
+        )}
       </AnimatePresence>
   );
 }

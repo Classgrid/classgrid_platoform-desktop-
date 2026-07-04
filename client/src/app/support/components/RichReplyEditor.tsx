@@ -63,6 +63,7 @@ interface RichReplyEditorProps {
   placeholder?: string;
   minHeight?: number;
   onSubmit?: () => void;
+  initialHtml?: string;
 }
 
 // ── Link Tooltip ────────────────────────────────────────────────
@@ -76,7 +77,7 @@ interface LinkTooltipState {
 // ── Main Component ──────────────────────────────────────────────
 
 const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
-  ({ onChange, placeholder = "Type your reply here...", minHeight = 120, onSubmit }, ref) => {
+  ({ onChange, placeholder = "Type your reply here...", minHeight = 120, onSubmit, initialHtml }, ref) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -93,6 +94,12 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
     const tooltipTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    React.useEffect(() => {
+      if (initialHtml && editorRef.current && editorRef.current.innerHTML === "") {
+        editorRef.current.innerHTML = initialHtml;
+      }
+    }, [initialHtml]);
 
     // Strip <p> and <div> wrappers from inside <li> elements so all list items are uniform
     const cleanListItems = useCallback(() => {
