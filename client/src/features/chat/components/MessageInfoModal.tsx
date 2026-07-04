@@ -7,6 +7,10 @@ import { marked } from "marked";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import React, { Suspense } from "react";
+import { Check } from "lucide-react";
+
+const ChatBubble = React.lazy(() => import('./ChatBubble').then(m => ({ default: m.ChatBubble })));
 
 interface MessageInfoModalProps {
   message: ChatMessage | null;
@@ -46,17 +50,21 @@ export function MessageInfoModal({ message, onClose }: MessageInfoModalProps) {
         </DialogHeader>
         
         {/* Message Preview */}
-        <div className="p-4 bg-muted/30 border-b border-border flex justify-end shrink-0">
-          <div className="bg-emerald-50 dark:bg-[#005c4b] text-[#111b21] dark:text-white/90 px-3 py-2 rounded-lg rounded-tr-none max-w-[85%] text-sm shadow-sm relative break-words">
-             <span className="line-clamp-3 leading-relaxed whitespace-pre-wrap">{plainText}</span>
-             <div className="flex justify-end items-center mt-1 gap-1">
-               <span className="text-[10px] text-[#111b21]/70 dark:text-white/60 font-semibold">{format(createdTime, "h:mm a")}</span>
-               {message.isSeen ? (
-                  <CheckCheck className="w-4 h-4 text-[#53bdeb]" />
-                ) : (
-                  <CheckCheck className="w-4 h-4 text-[#667781] dark:text-white/50" />
-                )}
-             </div>
+        <div className="p-4 bg-[url('https://i.ibb.co/L5kHQxY/whatsapp-bg.png')] bg-cover border-b border-border flex flex-col items-end shrink-0 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[#efeae2]/90 dark:bg-[#0b141a]/90 backdrop-blur-[2px]" />
+          <div className="relative z-10 w-full pointer-events-none origin-right scale-95 origin-top">
+            <Suspense fallback={<div className="h-16 w-48 bg-muted/50 rounded-xl ml-auto animate-pulse" />}>
+              <ChatBubble
+                message={message}
+                isMine={true}
+                currentUserId={message.sender_id}
+                onReply={() => {}}
+                onDelete={() => {}}
+                onEdit={() => {}}
+                onReact={() => {}}
+                showAvatar={false}
+              />
+            </Suspense>
           </div>
         </div>
 
@@ -70,7 +78,17 @@ export function MessageInfoModal({ message, onClose }: MessageInfoModalProps) {
               Failed to load message info
             </div>
           ) : (
-            <div className="flex flex-col">
+            <div className="flex flex-col pb-4">
+              {/* Sent Section */}
+              <div className="flex items-center gap-3 p-4 bg-background sticky top-0 z-10 border-b border-border">
+                <Check className="w-5 h-5 text-muted-foreground" />
+                <span className="font-semibold text-foreground text-base">Sent</span>
+              </div>
+              <div className="px-4 py-3 flex items-center justify-between border-b border-border/50">
+                <span className="font-medium text-sm text-foreground">You</span>
+                <span className="text-xs text-muted-foreground">{format(createdTime, "MMM d, h:mm a")}</span>
+              </div>
+
               {/* Read By Section */}
               <div className="flex items-center gap-3 p-4 bg-background sticky top-0 z-10 border-b border-border">
                 <CheckCheck className="w-5 h-5 text-[#53bdeb]" />
@@ -107,7 +125,7 @@ export function MessageInfoModal({ message, onClose }: MessageInfoModalProps) {
                         <img src={user.avatar && user.avatar.length > 2 ? user.avatar : DEFAULT_USER_AVATAR} alt="" className="w-10 h-10 rounded-full object-cover shrink-0 bg-primary/10 border border-border" />
                         <span className="font-medium text-sm text-foreground">{user.name}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">---</span>
+                      <span className="text-xs text-muted-foreground">{format(createdTime, "MMM d, h:mm a")}</span>
                     </div>
                   ))
                 )}
