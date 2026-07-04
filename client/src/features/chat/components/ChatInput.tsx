@@ -3,6 +3,8 @@ import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Im
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage, OrgUser, ChatThread } from "../services/chatApi";
+import { fetchGroupInfo } from "../services/chatApi";
+import { useQuery } from "@tanstack/react-query";
 import EmojiPicker from 'emoji-picker-react';
 import DOMPurify from "dompurify";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
@@ -467,10 +469,26 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
   };
 
+  const { data: groupInfo } = useQuery({
+    queryKey: ["group-info", thread?.groupId],
+    queryFn: () => fetchGroupInfo(thread!.groupId!),
+    enabled: thread?.type === "group" && !!thread?.groupId,
+  });
+
+  // Filter org users to only include group members, and exclude current user
+  const mentionableUsers = orgUsers?.filter(u => {
+    const uId = u.id || u._id;
+    if (uId === currentUserId) return false;
+    if (thread?.type === 'group' && groupInfo?.members) {
+      return groupInfo.members.some(m => m.userId === uId);
+    }
+    return true; 
+  });
+
   return (
     <div className="flex flex-col bg-background border-t border-border relative">
       {/* Mentions Dropdown - Moved to root to prevent any CSS clipping */}
-      {showMentions && orgUsers && thread?.type === 'group' && (
+      {showMentions && mentionableUsers && thread?.type === 'group' && (
           <div className="absolute bottom-[100%] mb-2 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[9999] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
             {/* @Everyone / @all Option */}
             {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
@@ -487,7 +505,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
               </div>
             </button>
           )}
-          {orgUsers
+          {mentionableUsers
             .filter(u => u.name?.toLowerCase().includes(mentionQuery))
             .map(u => (
               <button
