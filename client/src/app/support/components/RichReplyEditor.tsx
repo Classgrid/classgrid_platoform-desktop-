@@ -64,6 +64,7 @@ interface RichReplyEditorProps {
   minHeight?: number;
   onSubmit?: () => void;
   initialHtml?: string;
+  hideAttachments?: boolean;
 }
 
 // ── Link Tooltip ────────────────────────────────────────────────
@@ -77,7 +78,7 @@ interface LinkTooltipState {
 // ── Main Component ──────────────────────────────────────────────
 
 const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
-  ({ onChange, placeholder = "Type your reply here...", minHeight = 120, onSubmit, initialHtml }, ref) => {
+  ({ onChange, placeholder = "Type your reply here...", minHeight = 120, onSubmit, initialHtml, hideAttachments }, ref) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -669,7 +670,7 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
         </div>
 
         {/* Attachments UI below toolbar */}
-        {files.length > 0 && (
+        {!hideAttachments && files.length > 0 && (
           <div className="px-4 py-3 bg-muted/5 border-t border-border flex flex-wrap gap-2">
             {files.map((file, idx) => (
               <div key={`${file.name}-${idx}`} className="group flex items-center gap-2 px-3 py-1.5 bg-background border border-border rounded-full shadow-sm text-xs transition-all hover:border-primary/50 hover:shadow">
@@ -700,38 +701,41 @@ const RichReplyEditor = forwardRef<RichReplyEditorRef, RichReplyEditorProps>(
             ))}
           </div>
         )}
-        <div className="px-4 py-3 bg-card border-t border-border flex items-center justify-between rounded-b-xl">
-          <input
-            type="file"
-            multiple
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
-            onChange={(e) => {
-              if (e.target.files) {
-                const arr = Array.from(e.target.files);
-                const valid = arr.filter(f => f.size <= 10 * 1024 * 1024);
-                setFiles(prev => [...prev, ...valid].slice(0, 5));
-              }
-              e.target.value = "";
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="group flex items-center gap-2 px-3 py-1.5 rounded-full border border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all"
-          >
-            <div className="w-6 h-6 rounded-full bg-muted group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-              <Paperclip className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+        
+        {!hideAttachments && (
+          <div className="px-4 py-3 bg-card border-t border-border flex items-center justify-between rounded-b-xl">
+            <input
+              type="file"
+              multiple
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
+              onChange={(e) => {
+                if (e.target.files) {
+                  const arr = Array.from(e.target.files);
+                  const valid = arr.filter(f => f.size <= 10 * 1024 * 1024);
+                  setFiles(prev => [...prev, ...valid].slice(0, 5));
+                }
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="group flex items-center gap-2 px-3 py-1.5 rounded-full border border-dashed border-border hover:border-primary hover:bg-primary/5 transition-all"
+            >
+              <div className="w-6 h-6 rounded-full bg-muted group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <Paperclip className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+              <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                Attach files
+              </span>
+            </button>
+            <div className="text-[10px] text-muted-foreground/60 font-medium tracking-wide uppercase">
+              Max 10MB per file
             </div>
-            <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
-              Attach files
-            </span>
-          </button>
-          <div className="text-[10px] text-muted-foreground/60 font-medium tracking-wide uppercase">
-            Max 10MB per file
           </div>
-        </div>
+        )}
 
         {/* Link Modal */}
         <LinkModal

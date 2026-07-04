@@ -28,7 +28,7 @@ export function EditMessageModal({ message, onClose, onSave }: EditMessageModalP
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-2xl bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border"
+        className="w-full max-w-2xl max-h-[90vh] bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border"
       >
         {/* Header */}
         <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-card z-10">
@@ -39,7 +39,7 @@ export function EditMessageModal({ message, onClose, onSave }: EditMessageModalP
         </div>
 
         {/* Body - WhatsApp style background */}
-        <div className="p-4 sm:p-8 bg-[#efeae2] dark:bg-[#0b141a] flex flex-col items-center relative" style={{ backgroundImage: 'url("https://i.ibb.co/3mTrj1z/chat-bg.png")', backgroundSize: 'cover', backgroundBlendMode: 'overlay', opacity: 0.98 }}>
+        <div className="p-4 sm:p-8 flex-1 bg-[#efeae2] dark:bg-[#0b141a] flex flex-col items-center overflow-y-auto relative" style={{ backgroundImage: 'url("https://i.ibb.co/3mTrj1z/chat-bg.png")', backgroundSize: 'cover', backgroundBlendMode: 'overlay', opacity: 0.98 }}>
           
           <div className="w-full max-w-2xl shadow-2xl relative rounded-xl overflow-hidden bg-background">
             <RichReplyEditor 
@@ -48,6 +48,7 @@ export function EditMessageModal({ message, onClose, onSave }: EditMessageModalP
               onChange={() => {}}
               onSubmit={handleSave}
               minHeight={150}
+              hideAttachments={true}
             />
           </div>
 
