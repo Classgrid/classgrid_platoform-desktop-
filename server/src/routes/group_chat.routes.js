@@ -562,7 +562,7 @@ router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
       message: JSON.stringify({ type: 'system', text: `A member was removed from the group` })
     }]).select().single();
 
-    broadcastToChannel(`user:${targetId}`, 'thread_deleted', { threadId: thread.id });
+    broadcastToChannel(`user:${targetId}`, 'thread_deleted', { threadId: thread.id, action: 'removed_from_group' });
     broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: group.id, action: 'member_removed' });
 
     if (sysMsg) {
@@ -611,7 +611,7 @@ router.post('/:id/exit', isAuthenticated, async (req, res) => {
       message: JSON.stringify({ type: 'system', text: `${req.user.name} left the group` })
     }]).select().single();
 
-    broadcastToChannel(`user:${myId}`, 'thread_deleted', { threadId: thread.id });
+    broadcastToChannel(`user:${myId}`, 'thread_deleted', { threadId: thread.id, action: 'left_group' });
     broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { groupId: group.id, action: 'member_removed' });
 
     if (sysMsg) {

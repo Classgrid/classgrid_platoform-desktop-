@@ -397,30 +397,26 @@ export function ChatPage() {
   const handleSelectUserDM = async (userId: string) => {
     try {
       const { thread } = await findOrCreateDM(userId);
-      let currentThreads = threads;
+      let target = threads.find((t) => t.id === thread.id);
       
-      // Map to UI thread format if new
-      if (!currentThreads.find((t) => t.id === thread.id)) {
-        currentThreads = await loadThreads(); // Refresh full list to get proper names/avatars
-      }
-      
-      // Select it
-      const target = currentThreads.find((t) => t.id === thread.id) || {
-        ...thread,
-        name: "Loading...",
-        unread: 0,
-      };
-      
-      // If target is still fallback, let's try to get name from orgUsers
-      if (target.name === "Loading...") {
+      if (!target) {
+        // Optimistically construct the thread object
         const otherUser = orgUsers.find(u => u._id === userId);
-        if (otherUser) {
-          target.name = otherUser.name;
-          target.avatar = otherUser.profilePicture;
-        }
+        target = {
+          ...thread,
+          name: otherUser?.name || "Loading...",
+          avatar: otherUser?.profilePicture,
+          unread: 0,
+        } as ChatThread;
+        
+        // Add to threads list immediately to bypass the 15+ second loadThreads bottleneck
+        setThreads(prev => {
+          if (prev.some(t => t.id === thread.id)) return prev;
+          return [target, ...prev];
+        });
       }
       
-      setActiveThread(target as ChatThread);
+      setActiveThread(target);
     } catch (err) {
       toast.error("Failed to start chat");
     }
@@ -436,17 +432,19 @@ export function ChatPage() {
         await uploadGroupPhoto(group.id, photo);
       }
 
-      await loadThreads();
+      // Construct new group object optimistically
+      const newGroupThread = {
+        ...thread,
+        name: group.name,
+        groupId: group.id,
+        avatar: photo ? URL.createObjectURL(photo) : undefined,
+        unread: 0,
+      } as unknown as ChatThread;
+
+      setThreads(prev => [newGroupThread, ...prev]);
       
-      // Because state update from loadThreads() won't be available here immediately,
-      // we can set activeThread to the thread object returned by the backend
       if (thread && group) {
-        setActiveThread({
-          ...thread,
-          name: group.name,
-          groupId: group.id,
-          avatar: photo ? URL.createObjectURL(photo) : undefined
-        } as unknown as ChatThread);
+        setActiveThread(newGroupThread);
       }
       setIsGroupModalOpen(false);
       toast.success("Group created successfully!");
@@ -513,7 +511,12 @@ export function ChatPage() {
   // 1. Sidebar Updates (via User channel)
   useUserChannel(currentUserId || null, { onThreadUpdated: (payload) => {
     if (payload.action === 'new_group') {
-      loadThreads();
+      // Only reload threads if we don't already have it
+      setThreads(prev => {
+        if (prev.some(t => t.id === payload.threadId)) return prev;
+        loadThreads();
+        return prev;
+      });
       return;
     }
 
@@ -687,7 +690,7 @@ export function ChatPage() {
       }
       if (payload.groupId) {
          // A group change happened (e.g. member added/removed, info changed)
-         queryClient.invalidateQueries({ queryKey: ["group-info", payload.groupId] });
+         queryClient.invalidateQueries({ queryKey: ["group-info", String(payload.groupId)] });
          if (payload.action === 'member_removed' && payload.removedUserId === currentUserId) {
            setActiveThread(null);
            toast.info("You were removed from this group.");
@@ -698,7 +701,13 @@ export function ChatPage() {
       setThreads(prev => prev.filter(t => t.id !== payload.threadId));
       if (activeThread?.id === payload.threadId) {
         setActiveThread(null);
-        toast.info("This chat was deleted.");
+        if (payload.action === 'left_group') {
+          toast.info("You left the group.");
+        } else if (payload.action === 'removed_from_group') {
+          toast.info("You were removed from this group.");
+        } else {
+          toast.info("This chat was deleted.");
+        }
       }
     },
     onMessageUpdated: (data) => {

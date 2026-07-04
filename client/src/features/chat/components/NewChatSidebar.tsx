@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search, Users, Check, MessageSquarePlus } from "lucide-react";
+import { ArrowLeft, Search, Users, Check, MessageSquarePlus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Input } from "@/components/marketing_ui/input";
@@ -120,7 +120,7 @@ export function NewChatSidebar({
                 return (
                 <button
                   key={user._id}
-                  onClick={() => setSelectedId(user._id)}
+                  onClick={() => setSelectedId(isSelected ? null : user._id)}
                   className={`w-full flex items-center gap-4 px-4 py-2 transition-colors text-left group ${isSelected ? 'bg-primary/5' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
                 >
                   <div className={`relative w-12 h-12 rounded-full font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'bg-primary/10 text-primary'}`}>
@@ -149,6 +149,18 @@ export function NewChatSidebar({
                       {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ""}
                     </p>
                   </div>
+                  {isSelected && (
+                    <div
+                      className="shrink-0 p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer text-muted-foreground hover:text-foreground -ml-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedId(null);
+                      }}
+                      title="Deselect"
+                    >
+                      <X className="w-5 h-5" />
+                    </div>
+                  )}
                 </button>
               )})
             )}

@@ -1169,8 +1169,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       requires_acknowledgement: requires_acknowledgement,
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
-      expires_at: finalExpiresAt,
-      mentioned_users: parsedMentionedUsers
+      expires_at: finalExpiresAt
+      // mentioned_users: parsedMentionedUsers // Temporarily removed to fix 500 error (column missing or schema cache needs reload)
     }).select('id').single();
 
     if (insertErr) {
