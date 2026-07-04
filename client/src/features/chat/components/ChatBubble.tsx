@@ -361,7 +361,7 @@ export function ChatBubble({
                     <div className="flex flex-col gap-2 mb-2 w-full">
                       {/* Media Grid (images + videos) — Interactive Gallery */}
                       {mediaAtts.length > 0 && (
-                        <div className="max-w-[300px]">
+                        <div className="w-[280px] sm:w-[320px]">
                           <ImageGallery 
                             images={mediaAtts.map(att => ({
                               id: att.id,
@@ -370,7 +370,11 @@ export function ChatBubble({
                               type: att.file_type.startsWith("video/") ? "video" : "image"
                             }))} 
                             maxDisplay={4}
-                            className={`gap-1 rounded-lg ${mediaAtts.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+                            className={`gap-1 rounded-lg ${
+                              mediaAtts.length === 1 
+                                ? "grid-cols-1 md:grid-cols-1 lg:grid-cols-1" 
+                                : "grid-cols-2 md:grid-cols-2 lg:grid-cols-2"
+                            }`}
                           />
                         </div>
                       )}
