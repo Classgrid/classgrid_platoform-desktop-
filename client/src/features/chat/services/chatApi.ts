@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import axios from "axios";
 
 // ── Thread Types ──
 export interface ChatThread {
@@ -143,7 +144,44 @@ export async function fetchMessages(threadId: string, before?: string): Promise<
   return res.data.messages;
 }
 
+export async function getPresignedUrls(threadId: string, files: { fileName: string, fileType: string, fileSize: number }[]) {
+  const res = await apiClient.post<{ urls: { fileName: string, fileType: string, fileSize: number, uploadUrl: string, publicUrl: string }[] }>(
+    `/api/threads/${threadId}/presigned-urls`,
+    { files }
+  );
+  return res.data.urls;
+}
+
 export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) {
+  const preuploadedAttachments = [];
+
+  if (files && files.length > 0) {
+    const fileData = files.map(f => ({
+      fileName: f.name || 'upload.file',
+      fileType: f.type || 'application/octet-stream',
+      fileSize: f.size
+    }));
+    const urls = await getPresignedUrls(threadId, fileData);
+
+    // Upload files directly to R2 in parallel
+    const uploadPromises = files.map(async (file, index) => {
+      const urlInfo = urls[index];
+      await axios.put(urlInfo.uploadUrl, file, {
+        headers: { 'Content-Type': urlInfo.fileType },
+        // Cloudflare R2 Presigned URLs must be accessed without custom auth headers
+        transformRequest: [(data) => data]
+      });
+      preuploadedAttachments.push({
+        file_url: urlInfo.publicUrl,
+        file_name: urlInfo.fileName,
+        file_type: urlInfo.fileType,
+        file_size: urlInfo.fileSize
+      });
+    });
+
+    await Promise.all(uploadPromises);
+  }
+
   const formData = new FormData();
   if (message) formData.append("message", message);
   if (replyTo) formData.append("replyTo", JSON.stringify(replyTo));
@@ -151,13 +189,13 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   if (options?.isSilent) formData.append("isSilent", "true");
   if (options?.priority) formData.append("priority", options.priority);
   if (options?.expiresAt) formData.append("expiresAt", options.expiresAt);
-  if (files) {
-    files.forEach((f) => formData.append("files", f));
+  if (preuploadedAttachments.length > 0) {
+    formData.append("preuploaded_attachments", JSON.stringify(preuploadedAttachments));
   }
-  const hasFiles = files && files.length > 0;
+
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
-    timeout: hasFiles ? 900000 : 15000, // 15 minutes for file uploads, 15s for text-only
+    timeout: 15000, // Now it's just sending a JSON string, no large files, so 15s is plenty
   });
   return res.data.message;
 }

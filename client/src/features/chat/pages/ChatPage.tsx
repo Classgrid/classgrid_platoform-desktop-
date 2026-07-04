@@ -46,15 +46,13 @@ import { CreatePollModal } from "../components/CreatePollModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("../components/GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
-import { StarredMessagesModal } from "../components/StarredMessagesModal";
 import { ForwardMessageModal } from "../components/ForwardMessageModal";
 const SharedProfilePage = lazy(() => import("@/features/shared/pages/SharedProfilePage").then(m => ({ default: m.SharedProfilePage })));
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { SelectionActionBar } from "../components/SelectionActionBar";
 import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
-
-
-import { ScheduledMessagesDrawer } from "../components/ScheduledMessagesDrawer";
+import { StarredMessagesView } from "../components/StarredMessagesView";
+import { ScheduledMessagesView } from "../components/ScheduledMessagesView";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -84,9 +82,8 @@ export function ChatPage() {
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [viewVotesPollId, setViewVotesPollId] = useState<string | null>(null);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
-  const [isScheduledDrawerOpen, setIsScheduledDrawerOpen] = useState(false);
+  const [chatSideView, setChatSideView] = useState<'none' | 'starred' | 'scheduled'>('none');
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
-  const [isStarredModalOpen, setIsStarredModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
@@ -790,6 +787,8 @@ export function ChatPage() {
                   exitGroup(activeThread.groupId).then(() => {
                     toast.success("You left the group");
                     setActiveThread(null);
+                    setChatSideView('none');
+                    if (window.innerWidth < 1024) { }
                     loadThreads();
                   }).catch((e: any) => toast.error(e?.response?.data?.error || "Failed to leave group"));
                 }
@@ -798,9 +797,10 @@ export function ChatPage() {
                 setIsAddMemberOpen(true);
                 setIsGroupSettingsOpen(true);
               }}
+              onOpenStarredMessages={() => setChatSideView('starred')}
+              onOpenScheduledMessages={() => setChatSideView('scheduled')}
               onOpenDisappearingModal={() => setIsDisappearingModalOpen(true)}
               onEnterSelectionMode={() => setIsSelectionMode(true)}
-              onOpenScheduledMessages={() => setIsScheduledDrawerOpen(true)}
             />
             
             <ChatConversation
@@ -933,6 +933,20 @@ export function ChatPage() {
                 currentUserId={currentUserId}
               />
             )}
+
+            {/* Side Views (Sliding Over Chat Content) */}
+            <div 
+              className={`absolute inset-0 top-[60px] bg-background z-30 transition-transform duration-300 ease-in-out ${
+                chatSideView !== 'none' ? 'translate-x-0' : '-translate-x-full'
+              }`}
+            >
+              {chatSideView === 'starred' && (
+                <StarredMessagesView onClose={() => setChatSideView('none')} threadId={activeThread.id} />
+              )}
+              {chatSideView === 'scheduled' && (
+                <ScheduledMessagesView onClose={() => setChatSideView('none')} threadId={activeThread.id} />
+              )}
+            </div>
           </>
         ) : (
           <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-center p-8">
@@ -948,15 +962,6 @@ export function ChatPage() {
       </div>
 
       {/* Modals */}
-      
-      {isScheduledDrawerOpen && activeThread && (
-        <ScheduledMessagesDrawer 
-          isOpen={isScheduledDrawerOpen} 
-          onClose={() => setIsScheduledDrawerOpen(false)} 
-          threadId={activeThread.id} 
-        />
-      )}
-
       {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
         <Suspense fallback={null}>
           <GroupSettingsModal 
@@ -993,11 +998,6 @@ export function ChatPage() {
           onClose={() => setIsDisappearingModalOpen(false)}
         />
       )}
-
-      <StarredMessagesModal
-        isOpen={isStarredModalOpen}
-        onClose={() => setIsStarredModalOpen(false)}
-      />
 
       <ForwardMessageModal
         isOpen={isForwardModalOpen}

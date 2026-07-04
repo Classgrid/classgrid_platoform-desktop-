@@ -801,6 +801,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
     const threadId = req.params.id;
     const { message, replyTo, scheduledFor, isSilent, priority, expiresAt } = req.body;
     const files = req.files || [];
+    const preuploaded_attachments = req.body.preuploaded_attachments ? JSON.parse(req.body.preuploaded_attachments) : [];
     const msgText = message?.trim() || '';
 
     // Rate limit
@@ -809,7 +810,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
     }
 
     // Empty guard
-    if (!msgText && files.length === 0) {
+    if (!msgText && files.length === 0 && preuploaded_attachments.length === 0) {
       return res.status(400).json({ error: 'Message cannot be empty' });
     }
 
@@ -875,7 +876,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
         }
 
         // Check send_attachments_policy
-        if (files && files.length > 0) {
+        if ((files && files.length > 0) || (preuploaded_attachments && preuploaded_attachments.length > 0)) {
           if (group.send_attachments_policy === 'admin_only' && !isAdmin) {
              return res.status(403).json({ error: 'Only admins can send attachments in this group' });
           }
@@ -942,6 +943,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       }
 
       const uploadedAttachments = [];
+      // 1) Handle traditional multer memory files (legacy fallback)
       for (const file of files) {
         const storagePath = buildChatAttachmentStoragePath(file, storageContext);
         const publicUrl = await uploadBufferToR2(file.buffer, file.originalname || 'upload.file', file.mimetype || 'application/octet-stream', storagePath);
@@ -950,6 +952,16 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
           file_name: file.originalname,
           file_type: file.mimetype,
           file_size: file.size,
+        });
+      }
+      
+      // 2) Handle pre-uploaded R2 files
+      for (const pre of preuploaded_attachments) {
+        uploadedAttachments.push({
+          file_url: pre.file_url,
+          file_name: pre.file_name,
+          file_type: pre.file_type,
+          file_size: pre.file_size,
         });
       }
 
@@ -1081,7 +1093,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
     }).catch(err => console.error('Failed to broadcast to global channels:', err));
 
     // ── RESPOND IMMEDIATELY for text-only messages ──
-    if (files.length === 0) {
+    if (files.length === 0 && preuploaded_attachments.length === 0) {
       // Fire and forget server broadcast (do not await)
       broadcastToChannel(`thread:${threadId}`, 'new_message', broadcastPayload);
       res.status(201).json({ message: broadcastPayload });
@@ -1096,6 +1108,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       .catch(() => {});
 
     const uploadedAttachments = [];
+    
+    // 1) Handle multer legacy fallback uploads
     for (const file of files) {
       const storagePath = buildChatAttachmentStoragePath(file, storageContext);
 
@@ -1119,6 +1133,24 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
         .single();
       if (!attErr && att) uploadedAttachments.push(att);
     }
+    
+    // 2) Handle pre-uploaded direct R2 attachments
+    for (const pre of preuploaded_attachments) {
+      const attRecord = {
+        message_id: msgId,
+        file_url: pre.file_url,
+        file_name: pre.file_name,
+        file_type: pre.file_type,
+        file_size: pre.file_size,
+      };
+
+      const { data: att, error: attErr } = await sb
+        .from('chat_attachments')
+        .insert([attRecord])
+        .select()
+        .single();
+      if (!attErr && att) uploadedAttachments.push(att);
+    }
 
     broadcastPayload.attachments = uploadedAttachments;
 
@@ -1128,6 +1160,60 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
     res.status(201).json({ message: broadcastPayload });
   } catch (err) {
     console.error('Message send error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /threads/:id/presigned-urls — Get R2 presigned URLs for client-side uploads
+// ──────────────────────────────────────────────
+router.post('/:id/presigned-urls', isAuthenticated, express.json({ limit: '5mb' }), async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const threadId = req.params.id;
+    const { files } = req.body; // Array of { fileName, fileType, fileSize }
+
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ error: 'No files specified' });
+    }
+
+    // Verify membership
+    const membership = await validateThreadMembership(userId, threadId);
+    if (!membership) return res.status(403).json({ error: 'Not a member of this thread' });
+
+    // Build context to determine storage path
+    const { data: thread } = await sb.from('chat_threads').select('*').eq('id', threadId).single();
+    let groupForThread = null;
+    if (thread?.type === 'group' && thread.group_id) {
+      const { data: group } = await sb.from('chat_groups').select('*').eq('id', thread.group_id).single();
+      groupForThread = group;
+    }
+    const storageContext = await getChatStorageContext(thread, threadId, groupForThread);
+
+    const urls = [];
+    for (const f of files) {
+      if (!isAllowedMime(f.fileType)) {
+        return res.status(400).json({ error: `File type not allowed: ${f.fileType}` });
+      }
+
+      // Generate the exact path used in our system
+      // We need a dummy file object to reuse `buildChatAttachmentStoragePath`
+      const mockFile = { originalname: f.fileName, mimetype: f.fileType };
+      const customPath = buildChatAttachmentStoragePath(mockFile, storageContext);
+
+      const urlData = await getPresignedUploadUrl(f.fileName, f.fileType, 3600, customPath);
+      urls.push({
+        fileName: f.fileName,
+        fileType: f.fileType,
+        fileSize: f.fileSize,
+        uploadUrl: urlData.uploadUrl,
+        publicUrl: urlData.publicUrl
+      });
+    }
+
+    res.json({ urls });
+  } catch (err) {
+    console.error('Presigned URL error:', err);
     res.status(500).json({ error: err.message });
   }
 });

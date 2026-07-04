@@ -49,11 +49,10 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     enabled: !!thread.groupId && thread.type === "group",
   });
 
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: string }>>({});
   const [isSending, setIsSending] = useState(false);
-  const typingTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
-
-  const channelRef = useThreadChannel(threadId, {
+  
+  const channelRef = useThreadChannel(threadId, currentUserId, {
     onNewMessage: (payload) => {
       // Instantly append to React Query cache without refetching
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
@@ -88,21 +87,30 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     onTyping: (payload) => {
       if (payload.userId !== currentUserId) {
         setTypingUsers(prev => {
-          const next = new Set(prev);
-          next.add(payload.userId);
+          const next = { ...prev };
+          
+          if (payload.isTyping === false) {
+            if (next[payload.userId]?.timeout) {
+              clearTimeout(next[payload.userId].timeout);
+            }
+            delete next[payload.userId];
+          } else {
+            if (next[payload.userId]?.timeout) {
+              clearTimeout(next[payload.userId].timeout);
+            }
+            const timeout = setTimeout(() => {
+              setTypingUsers(current => {
+                const updated = { ...current };
+                delete updated[payload.userId];
+                return updated;
+              });
+            }, 3000);
+            
+            next[payload.userId] = { timeout, type: payload.activityType || 'typing' };
+          }
+          
           return next;
         });
-        
-        if (typingTimeoutRef.current[payload.userId]) {
-          clearTimeout(typingTimeoutRef.current[payload.userId]);
-        }
-        typingTimeoutRef.current[payload.userId] = setTimeout(() => {
-          setTypingUsers(prev => {
-            const next = new Set(prev);
-            next.delete(payload.userId);
-            return next;
-          });
-        }, 3000);
       }
     },
     onMessageDeleted: (payload) => {
@@ -662,14 +670,19 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
       </div>
 
       {/* Typing Indicator Overlay */}
-      {typingUsers.size > 0 && (
+      {Object.keys(typingUsers).length > 0 && (
         <div className="absolute bottom-[90px] left-4 text-xs font-medium text-muted-foreground bg-background/80 px-3 py-1.5 rounded-full border border-border shadow-sm backdrop-blur-sm z-10 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
           <div className="flex gap-1">
             <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
             <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
             <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
           </div>
-          Someone is typing...
+          {Object.values(typingUsers).some(t => t.type === 'recording') 
+            ? 'Someone is recording...' 
+            : Object.values(typingUsers).some(t => t.type === 'uploading')
+              ? 'Someone is uploading...'
+              : 'Someone is typing...'
+          }
         </div>
       )}
 
@@ -684,12 +697,8 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
           onOpenPollModal={thread.type === 'group' ? () => setIsCreatePollOpen(true) : undefined}
           canSchedule={true}
           currentUserId={currentUserId}
-          onTyping={() => {
-            channelRef.current?.send({
-              type: "broadcast",
-              event: "typing",
-              payload: { userId: currentUserId }
-            });
+          onTyping={(isTyping, type) => {
+            channelRef.sendTyping(isTyping, type);
           }}
         />
       </div>
