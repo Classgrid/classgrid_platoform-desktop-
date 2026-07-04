@@ -33,6 +33,7 @@ interface ChatHeaderProps {
   onAddMember?: () => void;
   isMuted?: boolean;
   onMuteThread?: () => void;
+  onOpenStarredMessages?: () => void;
   onOpenScheduledMessages?: () => void;
   onToggleReplies?: () => void;
 }
@@ -56,7 +57,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenScheduledMessages, onToggleReplies }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenStarredMessages, onOpenScheduledMessages, onToggleReplies }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -244,6 +245,12 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               </DropdownMenuItem>
             )}
             
+            {onOpenStarredMessages && (
+              <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenStarredMessages}>
+                <Star className="w-4 h-4 mr-2" />
+                <span>Starred messages</span>
+              </DropdownMenuItem>
+            )}
             {onOpenScheduledMessages && (
               <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenScheduledMessages}>
                 <Clock className="w-4 h-4 mr-2" />

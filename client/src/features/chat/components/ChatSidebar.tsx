@@ -26,7 +26,6 @@ interface ChatSidebarProps {
   onFilterChange: (filter: string) => void;
   onBulkDelete?: (threadIds: string[]) => void;
   onBulkMute?: (threadIds: string[]) => void;
-  onOpenStarredMessages?: () => void;
 }
 
 function getInitials(name: string) {
@@ -85,7 +84,6 @@ export function ChatSidebar({
   onFilterChange,
   onBulkDelete,
   onBulkMute,
-  onOpenStarredMessages,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -186,10 +184,6 @@ export function ChatSidebar({
                 <DropdownMenuItem onClick={onNewGroup} className="cursor-pointer py-2">
                   <Users className="w-4 h-4 mr-3" />
                   <span>New group</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenStarredMessages}>
-                  <Star className="w-4 h-4 mr-3" />
-                  <span>Starred messages</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSelectionMode(true)}>
                   <CheckSquare className="w-4 h-4 mr-3" />

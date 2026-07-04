@@ -48,6 +48,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioDurationSeconds, setAudioDurationSeconds] = useState<number | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
 
   // New options state
@@ -62,13 +63,29 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
+  const recordingStartedAtRef = useRef<number | null>(null);
+
+  const getSupportedAudioMimeType = () => {
+    if (typeof MediaRecorder === "undefined" || typeof MediaRecorder.isTypeSupported !== "function") {
+      return undefined;
+    }
+
+    return [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/ogg;codecs=opus",
+      "audio/mp4",
+    ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
+  };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const mimeType = getSupportedAudioMimeType();
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+      recordingStartedAtRef.current = Date.now();
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -77,12 +94,28 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       };
 
       mediaRecorder.onstop = () => {
-        const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
-        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        const durationMs = recordingStartedAtRef.current ? Date.now() - recordingStartedAtRef.current : recordingTime * 1000;
+        const recordedMimeType = mediaRecorder.mimeType || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: recordedMimeType });
+
+        mediaRecorderRef.current = null;
+        recordingStartedAtRef.current = null;
+        stream.getTracks().forEach(track => track.stop());
+
+        if (blob.size === 0 || durationMs < 700) {
+          setAudioBlob(null);
+          setAudioUrl(null);
+          setAudioDurationSeconds(null);
+          setRecordingTime(0);
+          toast.error("Voice note too short", { description: "Please record for at least one second before sending." });
+          return;
+        }
+
+        const durationSeconds = Math.max(1, Math.round(durationMs / 1000));
         setAudioBlob(blob);
+        setAudioDurationSeconds(durationSeconds);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
-        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorder.start(1000);
@@ -96,9 +129,15 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       console.error("Error accessing mic", err);
     }
   };
-
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
+      if (mediaRecorderRef.current.state === "recording") {
+        try {
+          mediaRecorderRef.current.requestData();
+        } catch (e) {
+          console.error("Failed to requestData", e);
+        }
+      }
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       if (recordingTimerRef.current) {
@@ -142,7 +181,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   };
   const clearAudio = () => {
     setAudioBlob(null);
+    setAudioDurationSeconds(null);
     setRecordingTime(0);
+    recordingStartedAtRef.current = null;
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
@@ -179,6 +220,12 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       }
     }
 
+    if (audioBlob && audioBlob.size === 0) {
+      toast.error("Voice note is empty", { description: "Please record again before sending." });
+      clearAudio();
+      return;
+    }
+
     setIsSendingLocal(true);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
@@ -202,7 +249,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       else if (mimeType.includes('ogg')) ext = 'ogg';
       else if (mimeType.includes('mpeg')) ext = 'mp3';
 
-      const audioFile = new File([audioBlob], `voice_note_${Date.now()}.${ext}`, { type: mimeType });
+      const durationSeconds = Math.max(1, Math.round(audioDurationSeconds || recordingTime || 1));
+      const audioFile = new File([audioBlob], `voice_note_${Date.now()}_${durationSeconds}s.${ext}`, { type: mimeType });
       finalFiles.push(audioFile);
     }
 
@@ -262,10 +310,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       let maxSize = 100 * 1024 * 1024; // 100 MB default
       if (isImage) maxSize = 12 * 1024 * 1024; // 12 MB for images
 
-      if (file.size > maxSize) {
-        errorMsg = `Some files are too large. Max size: Images 12MB, Videos/PDFs/Others 100MB.`;
-        return; 
-      }
+      // We no longer block by size here, we let it into the UI so the user can see it's too large
+      // and we disable the Send button.
+
 
       if (isImage) {
         if (imgCount >= 30) { errorMsg = "Max 30 images allowed."; return; }
@@ -376,7 +423,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       {/* Audio Preview */}
       {audioUrl && (
         <div className="px-4 py-3 flex items-center justify-between gap-3 border-b border-border bg-muted/30">
-          <WaveformPlayer url={audioUrl} />
+          <WaveformPlayer url={audioUrl} fallbackDurationSeconds={audioDurationSeconds ?? undefined} />
           <button onClick={clearAudio} className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors shrink-0">
             <Trash2 className="w-5 h-5" />
           </button>
@@ -393,12 +440,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           .map((f, i) => ({ file: f, index: i }))
           .filter(({ file }) => !(file.type.startsWith("image/") || file.type.startsWith("video/")));
 
-        const galleryImages = mediaFilesWithIndex.map(({ file, index }) => ({
-          id: index.toString(),
-          src: URL.createObjectURL(file),
-          alt: file.name,
-          type: file.type.startsWith("video/") ? "video" as const : "image" as const,
-        }));
+        const galleryImages = mediaFilesWithIndex.map(({ file, index }) => {
+          const hasError = file.size > (file.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024);
+          return {
+            id: index.toString(),
+            src: URL.createObjectURL(file),
+            alt: file.name,
+            type: file.type.startsWith("video/") ? "video" as const : "image" as const,
+            hasError
+          };
+        });
 
         return (
           <div className="px-4 py-3 border-b border-border space-y-3">
@@ -455,6 +506,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                         <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                           <span className="text-xs font-semibold truncate text-foreground">{file.name}</span>
                           <span className="text-[10px] text-muted-foreground">{getDocStyle().label} • {formatSize(file.size)}</span>
+                          {file.size > (100 * 1024 * 1024) && (
+                            <span className="text-[10px] text-red-500 font-bold leading-none">File too large (&gt;100MB)</span>
+                          )}
                         </div>
                       </div>
                       
@@ -631,7 +685,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    handleSend();
+                    
+                    // Same disabled checks as the send button
+                    const isInvalidSize = files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024));
+                    const isInvalidState = isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || currentTextLength > 65000 || isInvalidSize;
+                    
+                    if (!isInvalidState) {
+                      handleSend();
+                    } else if (isInvalidSize) {
+                      toast.error("File limit reached", { description: "Please remove files that exceed the size limit before sending." });
+                    }
                     return;
                   }
                   if (e.key === " " || e.key === "Enter") {
@@ -779,9 +842,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
             
             <button
               onClick={handleSend}
-              disabled={isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000}
+              disabled={isSending || isSendingLocal || (!message.trim() && files.length === 0 && !audioBlob) || isRecording || message.length > 65000 || files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024))}
               className={`p-3 rounded-full text-primary-foreground transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed mb-0.5 flex items-center justify-center w-11 h-11 ${scheduledDate ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-primary hover:bg-primary/90'}`}
-              title={(isSending || isSendingLocal) ? 'Sending...' : scheduledDate ? 'Schedule Message' : 'Send Message'}
+              title={(isSending || isSendingLocal) ? 'Sending...' : files.some(f => f.size > (f.type.startsWith('image/') ? 12 * 1024 * 1024 : 100 * 1024 * 1024)) ? 'File too large' : scheduledDate ? 'Schedule Message' : 'Send Message'}
             >
               {(isSending || isSendingLocal) ? <Spinner className="w-5 h-5" /> : scheduledDate ? <Clock className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
             </button>

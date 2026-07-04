@@ -387,7 +387,7 @@ export function ChatBubble({
                       {/* Audio files — WaveformPlayer */}
                       {audioAtts.map((att) => (
                         <div key={att.id} className="w-[280px]">
-                          <WaveformPlayer url={att.file_url} />
+                          <WaveformPlayer url={att.file_url} fileName={att.file_name} />
                         </div>
                       ))}
 
