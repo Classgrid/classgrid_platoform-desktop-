@@ -470,17 +470,13 @@ export function ChatBubble({
                     } : {}}>
                       <div className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full" dangerouslySetInnerHTML={{ 
                         __html: DOMPurify.sanitize(marked.parse(
-                          // Strip any HTML tags that were stored in DB (e.g. old pasted Wikipedia HTML)
-                          // so they render as clean text, not as clickable links or tables
                           (typeof message.message === 'string' ? message.message : String(message.message || ''))
                             .replace(/<!--StartFragment-->/gi, '')
-                            .replace(/<!--EndFragment-->/gi, '')
-                            .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1')  // strip <a> tags, keep link text
-                            .replace(/<[^>]+>/g, ''),                  // strip all remaining HTML tags
+                            .replace(/<!--EndFragment-->/gi, ''),
                           { breaks: true, gfm: true }
                         ) as string, { 
-                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
-                          ALLOWED_ATTR: [] 
+                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td'], 
+                          ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
                         }) 
                       }} />
                       {message.is_edited && (
