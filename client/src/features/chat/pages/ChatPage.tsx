@@ -451,7 +451,12 @@ export function ChatPage() {
         unread: 0,
       } as unknown as ChatThread;
 
-      setThreads(prev => [newGroupThread, ...prev]);
+      setThreads(prev => {
+        if (prev.some(t => t.id === thread.id)) {
+          return prev.map(t => t.id === thread.id ? { ...t, ...newGroupThread } : t);
+        }
+        return [newGroupThread, ...prev];
+      });
       
       if (thread && group) {
         setActiveThread(newGroupThread);
