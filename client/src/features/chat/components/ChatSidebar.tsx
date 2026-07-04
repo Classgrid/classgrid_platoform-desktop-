@@ -88,6 +88,13 @@ export function ChatSidebar({
   const [search, setSearch] = useState("");
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedChats, setSelectedChats] = useState<Set<string>>(new Set());
+  const [draftsUpdate, setDraftsUpdate] = useState(0);
+
+  useEffect(() => {
+    const handleDraftUpdate = () => setDraftsUpdate(v => v + 1);
+    window.addEventListener('chat_draft_updated', handleDraftUpdate);
+    return () => window.removeEventListener('chat_draft_updated', handleDraftUpdate);
+  }, []);
 
   const toggleSelection = (threadId: string) => {
     setSelectedChats(prev => {
@@ -120,10 +127,28 @@ export function ChatSidebar({
       return false;
     }
     
+    if (activeFilter === "Archived") {
+      return t.isArchived;
+    }
+    
+    if (t.isArchived) return false;
+
+    if (activeFilter === "Unread" && t.unread === 0) return false;
+    if (activeFilter === "Mentions" && !t.unreadMentions) return false;
+    if (activeFilter === "Groups" && t.type !== "group") return false;
+    if (activeFilter === "Admins" && (t.type !== "dm" || !t.role || t.role.toLowerCase() !== "admin")) return false;
+    if (activeFilter === "Faculty" && (t.type !== "dm" || !t.role || !t.role.toLowerCase().includes("faculty"))) return false;
+    
     return true;
   });
 
-  const filters = ["All", "Unread", "Groups", "Admins", "Faculty"];
+  filtered.sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return 0;
+  });
+
+  const filters = ["All", "Unread", "Mentions", "Groups", "Admins", "Faculty", "Archived"];
 
   return (
     <div className="flex flex-col h-full w-full bg-background min-h-0">
@@ -315,6 +340,9 @@ export function ChatSidebar({
                       {thread.isOfficial && (
                         <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/20 shrink-0" title="Official Group" />
                       )}
+                      {thread.isPinned && (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground ml-1 rotate-45"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+                      )}
                     </span>
                     {thread.lastMessageAt && (
                       <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
@@ -322,11 +350,27 @@ export function ChatSidebar({
                       </span>
                     )}
                   </div>
-                  {thread.lastMessage && (
-                    <p className={`text-xs truncate mt-0.5 ${thread.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                      {renderSnippet(thread.lastMessage)}
-                    </p>
-                  )}
+                  
+                  {(() => {
+                    const draftKey = `chat_draft_${thread.id}`;
+                    const draftContent = localStorage.getItem(draftKey);
+                    
+                    if (draftContent && draftContent.trim() && thread.id !== activeThreadId) {
+                      const doc = new DOMParser().parseFromString(draftContent, 'text/html');
+                      const plainDraft = doc.body.textContent || "";
+                      return (
+                        <p className="text-xs truncate mt-0.5 text-orange-500 dark:text-orange-400 font-medium">
+                          Draft: <span className="text-muted-foreground font-normal">{plainDraft}</span>
+                        </p>
+                      );
+                    }
+                    
+                    return thread.lastMessage ? (
+                      <p className={`text-xs truncate mt-0.5 ${thread.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                        {renderSnippet(thread.lastMessage)}
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </button>
             );

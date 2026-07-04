@@ -364,7 +364,14 @@ export async function getAllTerminology(req, res) {
  */
 export async function getOrgRoles(req, res) {
     try {
+        if (req.user.role === "super_admin") {
+            const roles = getAvailableRoles(null, "super_admin");
+            return res.json({ roles });
+        }
+
         const orgId = req.user.organization_id;
+        if (!orgId) return res.status(404).json({ error: "Organization ID missing." });
+        
         const org = await Organization.findById(orgId).select("org_type").lean();
         if (!org) return res.status(404).json({ error: "Organization not found." });
 

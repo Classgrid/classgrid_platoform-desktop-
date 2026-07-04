@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video } from "lucide-react";
+import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video, Users, BadgeCheck } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
-import type { ChatMessage } from "../services/chatApi";
+import type { ChatMessage, OrgUser, ChatThread } from "../services/chatApi";
 import EmojiPicker from 'emoji-picker-react';
 import DOMPurify from "dompurify";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/marketing_ui/popover";
@@ -37,11 +37,19 @@ interface ChatInputProps {
   onOpenPollModal?: () => void;
   canSchedule?: boolean;
   currentUserId?: string;
+  orgUsers?: OrgUser[];
+  thread?: ChatThread;
 }
 
-export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false, currentUserId }: ChatInputProps) {
+export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, onTyping, disabledReason, onOpenPollModal, canSchedule = false, currentUserId, orgUsers, thread }: ChatInputProps) {
   const [isSendingLocal, setIsSendingLocal] = useState(false);
-  const [message, setMessage] = useState("");
+  const draftKey = thread ? `chat_draft_${thread.id}` : null;
+  const [message, setMessage] = useState(() => {
+    if (draftKey) {
+      return localStorage.getItem(draftKey) || "";
+    }
+    return "";
+  });
   const [files, setFiles] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -58,6 +66,53 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
+  // Mentions State
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionCursorPos, setMentionCursorPos] = useState<number>(0);
+  
+  const insertMention = (name: string, userId?: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      const textNode = range.startContainer;
+      
+      if (textNode.nodeType === Node.TEXT_NODE) {
+        const text = textNode.textContent || "";
+        const offset = range.startOffset;
+        
+        // Find the index of the last '@' before the cursor
+        const lastAtIndex = text.lastIndexOf('@', offset - 1);
+        
+        if (lastAtIndex !== -1) {
+          // Select from '@' to cursor
+          range.setStart(textNode, lastAtIndex);
+          range.setEnd(textNode, offset);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Overwrite selection with HTML
+          let mentionHtml = "";
+          if (userId && userId !== "everyone") {
+            mentionHtml = `<a href="/profile/${userId}" class="text-emerald-600 dark:text-emerald-500 hover:underline font-semibold no-underline" data-mention="true" data-user-id="${userId}" contenteditable="false">@${name}</a>&nbsp;`;
+          } else {
+            mentionHtml = `<a href="#" class="text-emerald-600 dark:text-emerald-500 hover:underline font-semibold no-underline" data-mention="true" contenteditable="false">@${name}</a>&nbsp;`;
+          }
+          document.execCommand("insertHTML", false, mentionHtml);
+          
+          setMessage(editorRef.current.innerHTML);
+        }
+      }
+      
+      setShowMentions(false);
+      setMentionQuery("");
+    }
+  };
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -194,7 +249,39 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   // Auto-resize textarea is not needed for contentEditable with min-height and max-height
   useEffect(() => {
     // Left empty for compatibility if needed elsewhere
+  }, [replyTo]);
+
+  // Save draft to localStorage
+  useEffect(() => {
+    if (draftKey) {
+      if (message.trim()) {
+        localStorage.setItem(draftKey, message);
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+      window.dispatchEvent(new Event('chat_draft_updated'));
+    }
+  }, [message, draftKey]);
+
+  // Load draft when thread changes
+  useEffect(() => {
+    if (draftKey) {
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        setMessage(savedDraft);
+      } else {
+        setMessage("");
+      }
+    } else {
+      setMessage("");
+    }
+  }, [draftKey]);
+
+  useEffect(() => {
+    // Left empty for compatibility if needed elsewhere
   }, [message]);
+
+
 
   const handleSend = async () => {
     const text = message.trim();
@@ -206,9 +293,35 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       return;
     }
 
-    // ── Second-pass file size validation (catches any file bypassing processFiles) ──
-    const IMAGE_MAX  = 12  * 1024 * 1024;  // 12 MB
-    const OTHER_MAX  = 100 * 1024 * 1024;  // 100 MB
+    let mentionedUsers: string[] = [];
+    if (orgUsers && text) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = text;
+      
+      // Extract user IDs from mention <a> tags with data-mention attribute
+      const mentionLinks = tempDiv.querySelectorAll('a[data-mention]');
+      const mentionIds: string[] = [];
+      let hasEveryone = false;
+      
+      mentionLinks.forEach(link => {
+        const userId = link.getAttribute('data-user-id');
+        const mentionText = (link.textContent || '').replace('@', '').trim().toLowerCase();
+        if (mentionText === 'everyone') {
+          hasEveryone = true;
+        } else if (userId) {
+          mentionIds.push(userId);
+        }
+      });
+      
+      if (hasEveryone) {
+        mentionIds.push(...orgUsers.map(u => u._id || u.id));
+      }
+      
+      mentionedUsers = Array.from(new Set(mentionIds)).filter(Boolean) as string[];
+    }
+
+    const IMAGE_MAX  = 12  * 1024 * 1024;
+    const OTHER_MAX  = 100 * 1024 * 1024;
     for (const f of files) {
       const maxAllowed = f.type.startsWith('image/') ? IMAGE_MAX : OTHER_MAX;
       if (f.size > maxAllowed) {
@@ -258,23 +371,28 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       scheduledFor: scheduledDate || undefined,
       isSilent,
       priority,
-      expiresAt: expiresAt || undefined
+      expiresAt: expiresAt || undefined,
+      mentionedUsers: mentionedUsers.length > 0 ? mentionedUsers : undefined
     };
     
-    // Clear input immediately for optimistic UI
     setMessage("");
-    setFiles([]);
+    onCancelReply();
     setScheduledDate("");
-    setIsSilent(false);
-    setPriority("normal");
     setExpiresAt("");
-    clearAudio();
+    setPriority("normal");
+    setIsSilent(false);
+    setMentionQuery("");
+    setShowMentions(false);
+    if (draftKey) {
+      localStorage.removeItem(draftKey);
+      window.dispatchEvent(new Event('chat_draft_updated'));
+    }
+    setFiles([]);
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
     
     try {
-      // Fire and forget so we don't block the UI while uploading
       onSendMessage(text, finalFiles, options).catch(console.error);
     } finally {
       setIsSendingLocal(false);
@@ -514,9 +632,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                       
                       <button
                         onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                        className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
                       >
-                        <X className="w-3 h-3" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   );
@@ -635,12 +753,74 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   />
                 </PopoverContent>
               </Popover>
+
+              {/* Mentions Dropdown */}
+              {showMentions && orgUsers && thread?.type === 'group' && (
+                <div className="absolute bottom-[60px] left-12 bg-card border border-border shadow-lg rounded-xl max-h-64 overflow-y-auto z-50 w-72 p-1.5 custom-scrollbar">
+                  {/* @Everyone / @all Option */}
+                  {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
+                    <button
+                      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-accent flex items-center gap-3 transition-colors"
+                      onClick={() => insertMention("Everyone", "everyone")}
+                    >
+                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold">all</span>
+                        <span className="text-[11px] text-muted-foreground">Mention all members in this chat</span>
+                      </div>
+                    </button>
+                  )}
+                  {orgUsers
+                    .filter(u => u.name?.toLowerCase().includes(mentionQuery))
+                    .map(u => (
+                      <button
+                        key={u._id || u.id}
+                        className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-accent flex items-center gap-3 transition-colors"
+                        onClick={() => insertMention(u.name, u._id || u.id)}
+                      >
+                        {u.profilePicture ? (
+                          <img src={u.profilePicture} className="w-9 h-9 rounded-full object-cover shrink-0 bg-accent" alt="" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-accent text-foreground flex items-center justify-center shrink-0 text-sm font-bold">
+                            {(u.name || "?").charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="text-sm font-semibold">{u.name}</span>
+                      </button>
+                    ))}
+                </div>
+              )}
+
               <div
                 ref={editorRef}
                 contentEditable
                 data-placeholder="Type a message..."
                 onInput={(e) => {
-                  setMessage(e.currentTarget.innerHTML);
+                  const html = e.currentTarget.innerHTML;
+                  const text = e.currentTarget.textContent || "";
+                  setMessage(html);
+                  
+                  // Mentions logic
+                  const selection = window.getSelection();
+                  if (selection && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const preCaretRange = range.cloneRange();
+                    preCaretRange.selectNodeContents(e.currentTarget);
+                    preCaretRange.setEnd(range.endContainer, range.endOffset);
+                    const caretOffset = preCaretRange.toString().length;
+                    
+                    const textBeforeCaret = text.slice(0, caretOffset);
+                    const match = textBeforeCaret.match(/(?:^|\s)@([a-zA-Z0-9_]*)$/);
+                    if (match) {
+                      setShowMentions(true);
+                      setMentionQuery(match[1].toLowerCase());
+                    } else {
+                      setShowMentions(false);
+                    }
+                  }
+
                   if (onTyping) {
                     onTyping(true, 'typing');
                     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);

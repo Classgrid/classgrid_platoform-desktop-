@@ -7,6 +7,7 @@ import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calend
 import DOMPurify from 'dompurify';
 import React, { useRef } from "react";
 import RichReplyEditor, { type RichReplyEditorRef } from "@/app/support/components/RichReplyEditor";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 
 interface ScheduledMessagesViewProps {
   onClose: () => void;
@@ -23,6 +24,15 @@ export function ScheduledMessagesView({ onClose, threadId }: ScheduledMessagesVi
   const [editDate, setEditDate] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const editorRef = useRef<RichReplyEditorRef>(null);
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    warningMessage: string;
+    actionLabel: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: "", description: "", warningMessage: "", actionLabel: "", onConfirm: () => {} });
 
   useEffect(() => {
     loadMessages();
@@ -42,13 +52,21 @@ export function ScheduledMessagesView({ onClose, threadId }: ScheduledMessagesVi
   };
 
   const handleCancel = async (msgId: string) => {
-    if (!window.confirm("Are you sure you want to cancel this scheduled message?")) return;
-    try {
-      await cancelScheduledMessage(threadId, msgId);
-      setMessages(messages.filter(m => m.id !== msgId));
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to cancel message");
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Cancel Message",
+      description: "Are you sure you want to cancel this scheduled message?",
+      warningMessage: "This message will not be sent.",
+      actionLabel: "Cancel Message",
+      onConfirm: async () => {
+        try {
+          await cancelScheduledMessage(threadId, msgId);
+          setMessages(messages.filter(m => m.id !== msgId));
+        } catch (err: any) {
+          alert(err.response?.data?.error || "Failed to cancel message");
+        }
+      }
+    });
   };
 
   const handleEditClick = (msg: ScheduledMessage) => {
@@ -188,6 +206,18 @@ export function ScheduledMessagesView({ onClose, threadId }: ScheduledMessagesVi
           </div>
         )}
       </div>
+      <DangerConfirmDialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, isOpen: open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        warningMessage={confirmDialog.warningMessage}
+        actionLabel={confirmDialog.actionLabel}
+        onConfirm={() => {
+          confirmDialog.onConfirm();
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        }}
+      />
     </div>
   );
 }

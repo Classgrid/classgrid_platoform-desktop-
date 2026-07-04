@@ -49,15 +49,19 @@ async function validateThreadMembership(userId, threadId) {
   return data; // null if not a member
 }
 
-const ALLOWED_MIME_PREFIXES = ['image/', 'audio/', 'video/', 'application/pdf'];
+const ALLOWED_MIME_PREFIXES = ['image/', 'audio/', 'video/', 'application/pdf', 'text/'];
 const ALLOWED_MIME_EXACT = [
   'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/zip', 'application/x-rar-compressed'
+  'application/zip', 'application/x-rar-compressed',
+  'application/octet-stream',
+  'application/json',
+  'application/rtf'
 ];
 
 function isAllowedMime(mimeType) {
+  if (!mimeType) return true; // allow if browser fails to determine
   if (ALLOWED_MIME_PREFIXES.some(p => mimeType.startsWith(p))) return true;
   return ALLOWED_MIME_EXACT.includes(mimeType);
 }
@@ -186,6 +190,66 @@ function buildChatAttachmentStoragePath(file, context) {
 }
 
 // ──────────────────────────────────────────────
+// GET /search — Global Message Search
+// ──────────────────────────────────────────────
+router.get('/search', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const { query, threadId, senderId, hasMedia, dateFrom, dateTo } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
+    // Find all threads the user is a member of
+    let accessibleThreadIds = [];
+    if (threadId) {
+      // Validate membership in the specified thread
+      const membership = await validateThreadMembership(userId, threadId);
+      if (!membership) return res.status(403).json({ error: 'Not a member of this thread' });
+      accessibleThreadIds = [threadId];
+    } else {
+      const { data: myThreads } = await sb.from('chat_thread_members').select('thread_id').eq('user_id', userId);
+      accessibleThreadIds = (myThreads || []).map(t => t.thread_id);
+    }
+
+    if (accessibleThreadIds.length === 0) {
+      return res.json({ results: [] });
+    }
+
+    // Build the query
+    let supabaseQuery = sb.from('chat_messages')
+      .select(`
+        *,
+        chat_threads (id, name, type)
+      `)
+      .in('thread_id', accessibleThreadIds)
+      .ilike('message', `%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (senderId) supabaseQuery = supabaseQuery.eq('sender_id', senderId);
+    if (dateFrom) supabaseQuery = supabaseQuery.gte('created_at', new Date(dateFrom).toISOString());
+    if (dateTo) supabaseQuery = supabaseQuery.lte('created_at', new Date(dateTo).toISOString());
+
+    const { data: messages, error } = await supabaseQuery;
+    if (error) throw error;
+
+    // Filter out messages deleted for this user
+    let results = (messages || []).filter(m => !(m.deleted_for || []).includes(userId) && !m.is_deleted);
+
+    // Filter out expired messages
+    const now = new Date();
+    results = results.filter(m => !m.expires_at || new Date(m.expires_at) > now);
+
+    res.json({ results });
+  } catch (err) {
+    console.error('[Global Search]', err);
+    res.status(500).json({ error: 'Failed to search messages' });
+  }
+});
+
+// ──────────────────────────────────────────────
 // GET /threads — List user's threads (LIMIT 50)
 // ──────────────────────────────────────────────
 router.get('/', isAuthenticated, async (req, res) => {
@@ -240,12 +304,18 @@ router.get('/', isAuthenticated, async (req, res) => {
     // Get thread IDs where user is a member
     const { data: memberships, error: memErr } = await sb
       .from('chat_thread_members')
-      .select('thread_id, role')
+      .select('thread_id, role, is_pinned, is_archived')
       .eq('user_id', userId);
     if (memErr) throw memErr;
 
     const myRoles = {};
-    (memberships || []).forEach(m => { myRoles[m.thread_id] = m.role; });
+    const myPins = {};
+    const myArchives = {};
+    (memberships || []).forEach(m => { 
+      myRoles[m.thread_id] = m.role; 
+      myPins[m.thread_id] = m.is_pinned;
+      myArchives[m.thread_id] = m.is_archived;
+    });
 
     const threadIds = (memberships || []).map(m => m.thread_id);
     if (threadIds.length === 0) return res.json({ threads: [] });
@@ -305,26 +375,34 @@ router.get('/', isAuthenticated, async (req, res) => {
     // Calculate unread counts per thread
     const unreadCountPromises = (threads || []).map(async (thread) => {
       const lastRead = readMap[thread.id];
-      if (!lastRead) {
-        // Never read — count all messages not from me
-        const { count } = await sb
-          .from('chat_messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('thread_id', thread.id)
-          .neq('sender_id', userId);
-        return { threadId: thread.id, unread: count || 0 };
-      }
-      const { count } = await sb
+      let unreadQuery = sb
+        .from('chat_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('thread_id', thread.id)
+        .neq('sender_id', userId);
+      
+      let mentionQuery = sb
         .from('chat_messages')
         .select('id', { count: 'exact', head: true })
         .eq('thread_id', thread.id)
         .neq('sender_id', userId)
-        .gt('created_at', lastRead);
-      return { threadId: thread.id, unread: count || 0 };
+        .contains('mentioned_users', [userId]);
+
+      if (lastRead) {
+        unreadQuery = unreadQuery.gt('created_at', lastRead);
+        mentionQuery = mentionQuery.gt('created_at', lastRead);
+      }
+
+      const [unreadRes, mentionRes] = await Promise.all([unreadQuery, mentionQuery]);
+      return { threadId: thread.id, unread: unreadRes.count || 0, unreadMentions: mentionRes.count || 0 };
     });
     const unreadResults = await Promise.all(unreadCountPromises);
     const unreadMap = {};
-    unreadResults.forEach(r => { unreadMap[r.threadId] = r.unread; });
+    const mentionMap = {};
+    unreadResults.forEach(r => { 
+      unreadMap[r.threadId] = r.unread; 
+      mentionMap[r.threadId] = r.unreadMentions;
+    });
 
     // Build response
     const otherMemberMap = {};
@@ -356,8 +434,11 @@ router.get('/', isAuthenticated, async (req, res) => {
           lastMessage: displayLastMessage,
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
+          unreadMentions: mentionMap[thread.id] || 0,
           createdAt: thread.created_at,
           isMuted: mutedThreads.has(thread.id),
+          isPinned: myPins[thread.id] || false,
+          isArchived: myArchives[thread.id] || false,
           messageTtl: thread.message_ttl || 0,
         };
       } else {
@@ -373,11 +454,14 @@ router.get('/', isAuthenticated, async (req, res) => {
           lastMessage: displayLastMessage,
           lastMessageAt: thread.last_message_at,
           unread: unreadMap[thread.id] || 0,
+          unreadMentions: mentionMap[thread.id] || 0,
           createdAt: thread.created_at,
           sendMessagesPolicy: group.send_message_policy || 'all',
           allowReplies: thread.allow_replies !== false,
           myRole: myRoles[thread.id] || 'member',
           isMuted: mutedThreads.has(thread.id),
+          isPinned: myPins[thread.id] || false,
+          isArchived: myArchives[thread.id] || false,
           isOfficial: group.is_official || false,
           messageTtl: thread.message_ttl || 0,
         };
@@ -397,6 +481,74 @@ router.get('/', isAuthenticated, async (req, res) => {
     res.json({ threads: finalFormatted });
   } catch (err) {
     console.error('Thread list error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /threads/:id/pin — Toggle pin status of a thread
+// ──────────────────────────────────────────────
+router.post('/:id/pin', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const threadId = req.params.id;
+    const { is_pinned } = req.body;
+
+    const { data: membership } = await sb
+      .from('chat_thread_members')
+      .select('id')
+      .eq('thread_id', threadId)
+      .eq('user_id', userId)
+      .single();
+
+    if (!membership) {
+      return res.status(403).json({ error: 'Not a member of this thread' });
+    }
+
+    const { error } = await sb
+      .from('chat_thread_members')
+      .update({ is_pinned: !!is_pinned })
+      .eq('thread_id', threadId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json({ success: true, is_pinned: !!is_pinned });
+  } catch (err) {
+    console.error('Pin thread error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /threads/:id/archive — Toggle archive status of a thread
+// ──────────────────────────────────────────────
+router.post('/:id/archive', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const threadId = req.params.id;
+    const { is_archived } = req.body;
+
+    const { data: membership } = await sb
+      .from('chat_thread_members')
+      .select('id')
+      .eq('thread_id', threadId)
+      .eq('user_id', userId)
+      .single();
+
+    if (!membership) {
+      return res.status(403).json({ error: 'Not a member of this thread' });
+    }
+
+    const { error } = await sb
+      .from('chat_thread_members')
+      .update({ is_archived: !!is_archived })
+      .eq('thread_id', threadId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json({ success: true, is_archived: !!is_archived });
+  } catch (err) {
+    console.error('Archive thread error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -801,7 +953,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
   try {
     const userId = req.user._id.toString();
     const threadId = req.params.id;
-    const { message, replyTo, scheduledFor, isSilent, priority, expiresAt } = req.body;
+    const { message, replyTo, scheduledFor, isSilent, priority, expiresAt, mentionedUsers } = req.body;
     const files = req.files || [];
     const preuploaded_attachments = req.body.preuploaded_attachments ? JSON.parse(req.body.preuploaded_attachments) : [];
     const msgText = message?.trim() || '';
@@ -991,6 +1143,14 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       finalExpiresAt = new Date(Date.now() + thread.message_ttl * 1000).toISOString();
     }
 
+    // Parse mentionedUsers (local, no DB call)
+    let parsedMentionedUsers = [];
+    if (mentionedUsers) {
+      try {
+        parsedMentionedUsers = typeof mentionedUsers === 'string' ? JSON.parse(mentionedUsers) : mentionedUsers;
+      } catch { parsedMentionedUsers = []; }
+    }
+
     // Insert message directly
     const now = new Date().toISOString();
     const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
@@ -1005,7 +1165,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       requires_acknowledgement: requires_acknowledgement,
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
-      expires_at: finalExpiresAt
+      expires_at: finalExpiresAt,
+      mentioned_users: parsedMentionedUsers
     }).select('id').single();
 
     if (insertErr) {
@@ -1041,6 +1202,7 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
       expires_at: finalExpiresAt,
+      mentioned_users: parsedMentionedUsers,
       attachments: [],
     };
 
@@ -1257,6 +1419,88 @@ router.post('/:id/read', isAuthenticated, async (req, res) => {
 // ──────────────────────────────────────────────
 // DELETE /threads/:id/messages/:msgId — Soft delete
 // ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// GET /threads/:id/messages/:msgId/info — Get Message Info (Read by / Delivered to)
+// ──────────────────────────────────────────────
+router.get('/:id/messages/:msgId/info', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const { id: threadId, msgId } = req.params;
+
+    const membership = await validateThreadMembership(userId, threadId);
+    if (!membership) return res.status(403).json({ error: 'Not a member' });
+
+    // 1. Get the message
+    const { data: msg, error: msgErr } = await sb
+      .from('chat_messages')
+      .select('id, created_at, sender_id')
+      .eq('id', msgId)
+      .single();
+    if (msgErr || !msg) return res.status(404).json({ error: 'Message not found' });
+
+    // Only sender can view message info
+    if (msg.sender_id !== userId) {
+      return res.status(403).json({ error: 'Only the sender can view message info' });
+    }
+
+    // 2. Get all thread members except the sender
+    const { data: members, error: memErr } = await sb
+      .from('chat_thread_members')
+      .select('user_id')
+      .eq('thread_id', threadId)
+      .neq('user_id', userId);
+    if (memErr) throw memErr;
+
+    const memberIds = members.map(m => m.user_id);
+    if (memberIds.length === 0) {
+      return res.json({ readBy: [], deliveredTo: [] });
+    }
+
+    // 3. Find who has read it (last_read_at >= message.created_at)
+    const { data: reads, error: readsErr } = await sb
+      .from('thread_reads')
+      .select('user_id, last_read_at')
+      .eq('thread_id', threadId)
+      .in('user_id', memberIds)
+      .gte('last_read_at', msg.created_at);
+    if (readsErr) throw readsErr;
+
+    const readUserIds = new Set(reads.map(r => r.user_id));
+    const readUsersMap = {};
+    reads.forEach(r => { readUsersMap[r.user_id] = r.last_read_at; });
+
+    const deliveredUserIds = memberIds.filter(id => !readUserIds.has(id));
+
+    // 4. Fetch user details from MongoDB
+    const users = await User.find({ _id: { $in: memberIds } }).select('name profilePicture').lean();
+    const userMap = {};
+    users.forEach(u => { userMap[u._id.toString()] = u; });
+
+    const readBy = [];
+    const deliveredTo = [];
+
+    memberIds.forEach(id => {
+      const u = userMap[id];
+      if (!u) return;
+      const userObj = {
+        id: u._id.toString(),
+        name: u.name,
+        avatar: u.profilePicture || (u.name || 'U')[0].toUpperCase(),
+      };
+      if (readUserIds.has(id)) {
+        readBy.push({ ...userObj, readAt: readUsersMap[id] });
+      } else {
+        deliveredTo.push(userObj);
+      }
+    });
+
+    res.json({ readBy, deliveredTo });
+  } catch (err) {
+    console.error('Message Info error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user._id.toString();

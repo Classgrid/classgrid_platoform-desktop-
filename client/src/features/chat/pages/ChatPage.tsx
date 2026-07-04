@@ -54,6 +54,7 @@ import { SelectionActionBar } from "../components/SelectionActionBar";
 import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
 import { StarredMessagesView } from "../components/StarredMessagesView";
 import { ScheduledMessagesView } from "../components/ScheduledMessagesView";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 
 export function ChatPage() {
   const { data: currentUser } = useCurrentUser();
@@ -93,6 +94,21 @@ export function ChatPage() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
   const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    warningMessage: string;
+    actionLabel: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    warningMessage: "",
+    actionLabel: "Confirm",
+    onConfirm: () => {}
+  });
 
   const activeTypingUsers = Object.entries(typingUsers).map(([id, data]) => ({
     id,
@@ -448,17 +464,25 @@ export function ChatPage() {
   };
 
   const handleBulkDelete = async (threadIds: string[]) => {
-    if (!confirm(`Are you sure you want to delete ${threadIds.length} chats?`)) return;
-    try {
-      await bulkDeleteChats(threadIds);
-      setThreads(prev => prev.filter(t => !threadIds.includes(t.id)));
-      if (activeThread && threadIds.includes(activeThread.id)) {
-        setActiveThread(null);
+    setConfirmDialog({
+      isOpen: true,
+      title: "Delete Chats",
+      description: `Are you sure you want to delete ${threadIds.length} chats?`,
+      warningMessage: "This action cannot be undone.",
+      actionLabel: "Delete",
+      onConfirm: async () => {
+        try {
+          await bulkDeleteChats(threadIds);
+          setThreads(prev => prev.filter(t => !threadIds.includes(t.id)));
+          if (activeThread && threadIds.includes(activeThread.id)) {
+            setActiveThread(null);
+          }
+          toast.success(`${threadIds.length} chats deleted`);
+        } catch (err) {
+          toast.error("Failed to delete chats");
+        }
       }
-      toast.success(`${threadIds.length} chats deleted`);
-    } catch (err) {
-      toast.error("Failed to delete chats");
-    }
+    });
   };
 
   const handleBulkMute = async (threadIds: string[]) => {
@@ -796,15 +820,22 @@ export function ChatPage() {
               onDeleteChat={handleDeleteChat}
               onLeaveGroup={() => {
                 if (!activeThread?.groupId) return;
-                if (window.confirm("Are you sure you want to leave this group?")) {
-                  exitGroup(activeThread.groupId).then(() => {
-                    toast.success("You left the group");
-                    setActiveThread(null);
-                    setChatSideView('none');
-                    if (window.innerWidth < 1024) { }
-                    loadThreads();
-                  }).catch((e: any) => toast.error(e?.response?.data?.error || "Failed to leave group"));
-                }
+                setConfirmDialog({
+                  isOpen: true,
+                  title: "Leave Group",
+                  description: "Are you sure you want to leave this group?",
+                  warningMessage: "You will no longer receive messages from this group.",
+                  actionLabel: "Leave",
+                  onConfirm: () => {
+                    exitGroup(activeThread.groupId!).then(() => {
+                      toast.success("You left the group");
+                      setActiveThread(null);
+                      setChatSideView('none');
+                      if (window.innerWidth < 1024) { }
+                      loadThreads();
+                    }).catch((e: any) => toast.error(e?.response?.data?.error || "Failed to leave group"));
+                  }
+                });
               }}
               onAddMember={() => {
                 setIsAddMemberOpen(true);
@@ -1082,6 +1113,19 @@ export function ChatPage() {
           </div>
         );
       })()}
+
+      <DangerConfirmDialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, isOpen: open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        warningMessage={confirmDialog.warningMessage}
+        actionLabel={confirmDialog.actionLabel}
+        onConfirm={() => {
+          confirmDialog.onConfirm();
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        }}
+      />
     </div>
   );
 }

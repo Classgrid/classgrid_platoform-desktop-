@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Download, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface GalleryImage {
@@ -221,7 +221,7 @@ export function ImageGallery({ images, className, maxDisplay, onRemove }: ImageG
                 onClick={(e) => { e.stopPropagation(); onRemove(img.id); }}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 z-30"
               >
-                <X className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
               </button>
             )}
             

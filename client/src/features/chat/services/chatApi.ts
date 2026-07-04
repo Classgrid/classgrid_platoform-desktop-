@@ -22,9 +22,12 @@ export interface ChatThread {
   lastMessage: string | null;
   lastMessageAt: string | null;
   unread: number;
+  unreadMentions?: number;
   createdAt: string;
   isMuted?: boolean;
   isOfficial?: boolean;
+  isPinned?: boolean;
+  isArchived?: boolean;
   messageTtl?: number;
 }
 
@@ -62,6 +65,7 @@ export interface ChatMessage {
   is_silent?: boolean;
   expires_at?: string;
   is_starred?: boolean;
+  mentioned_users?: string[];
 }
 
 export interface OrgUser {
@@ -152,7 +156,7 @@ export async function getPresignedUrls(threadId: string, files: { fileName: stri
   return res.data.urls;
 }
 
-export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) {
+export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string; mentionedUsers?: string[] }) {
   const preuploadedAttachments = [];
 
   if (files && files.length > 0) {
@@ -189,14 +193,27 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   if (options?.isSilent) formData.append("isSilent", "true");
   if (options?.priority) formData.append("priority", options.priority);
   if (options?.expiresAt) formData.append("expiresAt", options.expiresAt);
+  if (options?.mentionedUsers && options.mentionedUsers.length > 0) {
+    formData.append("mentionedUsers", JSON.stringify(options.mentionedUsers));
+  }
   if (preuploadedAttachments.length > 0) {
     formData.append("preuploaded_attachments", JSON.stringify(preuploadedAttachments));
   }
 
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
-    timeout: 15000, // Now it's just sending a JSON string, no large files, so 15s is plenty
+    timeout: 15000,
   });
   return res.data.message;
+}
+
+export async function togglePinThread(threadId: string, isPinned: boolean) {
+  const res = await apiClient.post(`/api/threads/${threadId}/pin`, { is_pinned: isPinned });
+  return res.data;
+}
+
+export async function toggleArchiveThread(threadId: string, isArchived: boolean) {
+  const res = await apiClient.post(`/api/threads/${threadId}/archive`, { is_archived: isArchived });
+  return res.data;
 }
 
 export interface ScheduledMessage {
@@ -238,6 +255,16 @@ export async function forwardMessages(messageIds: string[], targetThreadIds: str
   return res.data;
 }
 
+export interface MessageInfo {
+  readBy: { id: string; name: string; avatar: string; readAt: string }[];
+  deliveredTo: { id: string; name: string; avatar: string }[];
+}
+
+export async function fetchMessageInfo(threadId: string, messageId: string): Promise<MessageInfo> {
+  const res = await apiClient.get<MessageInfo>(`/api/threads/${threadId}/messages/${messageId}/info`);
+  return res.data;
+}
+
 export async function toggleMuteThread(threadId: string) {
   const res = await apiClient.post<{ success: boolean; isMuted: boolean }>(`/api/threads/${threadId}/mute`);
   return res.data;
@@ -249,6 +276,18 @@ export async function markAllRead() {
 
 export async function deleteMessage(threadId: string, messageId: string, type: 'me' | 'everyone' = 'everyone') {
   await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}?type=${type}`, { timeout: 300000 });
+}
+
+export async function searchMessages(query: string, filters?: { threadId?: string, senderId?: string, hasMedia?: boolean, dateFrom?: string, dateTo?: string }): Promise<{ results: (ChatMessage & { chat_threads: { id: string, name: string, type: string } })[] }> {
+  const params = new URLSearchParams({ query });
+  if (filters?.threadId) params.append('threadId', filters.threadId);
+  if (filters?.senderId) params.append('senderId', filters.senderId);
+  if (filters?.hasMedia) params.append('hasMedia', 'true');
+  if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
+  if (filters?.dateTo) params.append('dateTo', filters.dateTo);
+
+  const response = await apiClient.get(`/api/threads/search?${params.toString()}`);
+  return response.data;
 }
 
 export async function clearChat(threadId: string) {

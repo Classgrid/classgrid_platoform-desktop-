@@ -29,6 +29,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { useOnlineUsers } from "../context/PresenceContext";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { useOrgRoles } from "@/features/org/queries/useOrgRoles";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 
 import { Input } from "@/components/marketing_ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
@@ -53,6 +54,14 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   const [addSearch, setAddSearch] = useState("");
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<"settings" | "shared-media">("settings");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    warningMessage: string;
+    actionLabel: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: "", description: "", warningMessage: "", actionLabel: "", onConfirm: () => {} });
 
   // ── Data: Group Info ──
   const { data, isLoading, isError, error } = useQuery({
@@ -192,23 +201,38 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   };
 
   const confirmRemove = (userId: string, name: string) => {
-    if (window.confirm(`Remove ${name} from this group?`)) {
-      handleRemoveMember(userId);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Remove Member",
+      description: `Are you sure you want to remove ${name} from this group?`,
+      warningMessage: "They will lose access to this group chat.",
+      actionLabel: "Remove",
+      onConfirm: () => handleRemoveMember(userId)
+    });
   };
 
   const confirmLeave = () => {
-    if (window.confirm("Are you sure you want to leave this group?")) {
-      handleLeaveGroup();
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: "Leave Group",
+      description: "Are you sure you want to leave this group?",
+      warningMessage: "You will no longer receive messages from this group.",
+      actionLabel: "Leave",
+      onConfirm: () => handleLeaveGroup()
+    });
   };
 
   const confirmToggleAdmin = (userId: string, name: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "member" : "admin";
     const action = newRole === "admin" ? "Promote" : "Demote";
-    if (window.confirm(`${action} ${name} to ${newRole}?`)) {
-      handleToggleAdmin({ userId, role: newRole });
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: `${action} Member`,
+      description: `Are you sure you want to ${action.toLowerCase()} ${name} to ${newRole}?`,
+      warningMessage: newRole === "admin" ? "They will have full admin rights in this group." : "They will lose admin rights.",
+      actionLabel: action,
+      onConfirm: () => handleToggleAdmin({ userId, role: newRole })
+    });
   };
 
   // ── Derived: Available users to add (exclude already-members) ──
@@ -628,41 +652,11 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                     />
                   </div>
 
-                  {/* Auto-Add Roles */}
-                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
-                    <span className="text-sm font-medium text-foreground">Auto-Add Members by Role</span>
-                    <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically added as regular members.</span>
-                    <div className="flex flex-wrap gap-2">
-                      {availableRoles.map(role => {
-                        const currentRoles = data.group.auto_add_roles || [];
-                        const isSelected = currentRoles.includes(role);
-                        return (
-                          <button
-                            key={role}
-                            disabled={isUpdatingPermissions}
-                            onClick={() => {
-                              const newRoles = isSelected
-                                ? currentRoles.filter((r: string) => r !== role)
-                                : [...currentRoles, role];
-                              handleUpdatePermissions({ auto_add_roles: newRoles });
-                            }}
-                            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                              isSelected 
-                                ? 'bg-primary text-primary-foreground border-primary' 
-                                : 'bg-background text-foreground border-border hover:border-primary/50'
-                            }`}
-                          >
-                            {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
 
                   {/* Auto-Grant Admin Roles */}
                   <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border md:col-span-2">
                     <span className="text-sm font-medium text-foreground">Auto-Grant Admin by Role</span>
-                    <span className="text-xs text-muted-foreground mb-2">Users with these roles will be automatically granted Admin access in this group.</span>
+                    <span className="text-xs text-muted-foreground mb-2">Anyone inside this chat group with these roles will automatically be given Group Admin rights.</span>
                     <div className="flex flex-wrap gap-2">
                       {availableRoles.map(role => {
                         const currentRoles = data.group.admin_roles || [];
@@ -742,9 +736,14 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
               {data.myRole === "admin" && (
                 <button
                   onClick={() => {
-                    if (window.confirm("Are you sure you want to permanently delete this group and all its messages? This action cannot be undone.")) {
-                      handleDeleteGroup();
-                    }
+                    setConfirmDialog({
+                      isOpen: true,
+                      title: "Delete Group",
+                      description: "Are you sure you want to permanently delete this group and all its messages?",
+                      warningMessage: "This action cannot be undone.",
+                      actionLabel: "Delete Group",
+                      onConfirm: () => handleDeleteGroup()
+                    });
                   }}
                   disabled={isLeaving || isDeleting}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-white bg-destructive hover:bg-destructive/90 transition-colors disabled:opacity-50 cursor-pointer"
@@ -789,6 +788,18 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
           />
         )}
       </AnimatePresence>
+      <DangerConfirmDialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, isOpen: open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        warningMessage={confirmDialog.warningMessage}
+        actionLabel={confirmDialog.actionLabel}
+        onConfirm={() => {
+          confirmDialog.onConfirm();
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        }}
+      />
     </div>
   );
 }

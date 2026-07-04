@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Star, X, ArrowLeft, Trash2 } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import DOMPurify from "dompurify";
+import { marked } from "marked";
 import { apiClient } from "@/lib/apiClient";
 import type { ChatMessage } from "../services/chatApi";
 
@@ -94,8 +95,19 @@ export function StarredMessagesView({ onClose, threadId }: StarredMessagesViewPr
                   <span className="text-xs text-muted-foreground">{format(new Date(msg.created_at), "MMM d, yyyy h:mm a")}</span>
                 </div>
                 <div 
-                  className="text-sm text-foreground whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&_p]:m-0 [&_pre]:overflow-x-auto [&_pre]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.message || '') }}
+                  className="text-[15px] leading-relaxed max-w-full overflow-hidden prose prose-sm dark:prose-invert [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1"
+                  style={{overflowWrap:'anywhere'}}
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(marked.parse(
+                      (typeof msg.message === 'string' ? msg.message : String(msg.message || ''))
+                        .replace(/<!--StartFragment-->/gi, '')
+                        .replace(/<!--EndFragment-->/gi, ''),
+                      { breaks: true, gfm: true }
+                    ) as string, { 
+                      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td'], 
+                      ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
+                    }) 
+                  }}
                 />
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="mt-2 text-xs text-primary font-medium flex items-center gap-1">

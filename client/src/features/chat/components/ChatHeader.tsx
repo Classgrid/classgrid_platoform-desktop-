@@ -32,10 +32,12 @@ interface ChatHeaderProps {
   onLeaveGroup?: () => void;
   onAddMember?: () => void;
   isMuted?: boolean;
-  onMuteThread?: () => void;
   onOpenStarredMessages?: () => void;
   onOpenScheduledMessages?: () => void;
   onToggleReplies?: () => void;
+  onOpenSearch?: () => void;
+  onPinThread?: () => void;
+  onArchiveThread?: () => void;
 }
 
 function getInitials(name: string) {
@@ -57,27 +59,14 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, searchQuery = "", onSearchChange, onEnterSelectionMode, isMuted, onMuteThread, onOpenStarredMessages, onOpenScheduledMessages, onToggleReplies }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, onEnterSelectionMode, isMuted, onMuteThread, onOpenStarredMessages, onOpenScheduledMessages, onToggleReplies, onOpenSearch, onPinThread, onArchiveThread }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
-  
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const query = onSearchChange ? searchQuery : localSearchQuery;
-  const setQuery = onSearchChange ? onSearchChange : setLocalSearchQuery;
 
   const { data: groupInfo } = useQuery({
     queryKey: ["group-info", thread.groupId],
     queryFn: () => fetchGroupInfo(thread.groupId!),
     enabled: thread.type === "group" && !!thread.groupId,
   });
-
-  useEffect(() => {
-    if (isSearchOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isSearchOpen]);
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background shrink-0 min-h-[60px]">
@@ -162,38 +151,6 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
           )}
         </AnimatePresence>
 
-        <AnimatePresence>
-          {isSearchOpen && (
-            <motion.div
-              key="search"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute inset-0 flex items-center z-10 bg-background"
-            >
-              <div className="relative w-full">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search in conversation..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-full bg-accent/50 border border-border outline-none focus:ring-1 focus:ring-primary rounded-full pl-4 pr-10 py-1.5 text-sm h-9"
-                />
-                <button 
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    setQuery("");
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted-foreground/20 text-muted-foreground transition-colors"
-                >
-                  <XCircle className="w-4 h-4" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Actions */}
@@ -201,13 +158,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
         <button
           className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
           title="Search"
-          onClick={() => {
-            if (isSearchOpen) {
-              // If already open, clicking search icon could trigger a search if you had local search logic
-            } else {
-              setIsSearchOpen(true);
-            }
-          }}
+          onClick={() => onOpenSearch?.()}
         >
           <Search className="w-5 h-5" />
         </button>
@@ -233,7 +184,7 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               </DropdownMenuItem>
             )}
 
-            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSearchOpen(true)}>
+            <DropdownMenuItem className="cursor-pointer py-2" onClick={() => onOpenSearch?.()}>
               <Search className="w-4 h-4 mr-2" />
               <span>Search in chat</span>
             </DropdownMenuItem>
@@ -265,6 +216,18 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <CheckSquare className="w-4 h-4 mr-2" />
               <span>Select messages</span>
             </DropdownMenuItem>
+            {onPinThread && (
+              <DropdownMenuItem className="cursor-pointer py-2" onClick={onPinThread}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 rotate-45"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+                <span>{thread.isPinned ? "Unpin chat" : "Pin chat"}</span>
+              </DropdownMenuItem>
+            )}
+            {onArchiveThread && (
+              <DropdownMenuItem className="cursor-pointer py-2" onClick={onArchiveThread}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                <span>{thread.isArchived ? "Unarchive chat" : "Archive chat"}</span>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem className="cursor-pointer py-2" onClick={onOpenDisappearingModal}>
               <ShieldAlert className="w-4 h-4 mr-2" />
               <span>Disappearing messages</span>

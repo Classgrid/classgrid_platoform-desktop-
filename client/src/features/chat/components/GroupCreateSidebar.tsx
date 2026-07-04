@@ -3,16 +3,19 @@ import { ArrowLeft, ArrowRight, Search, Check, Camera, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import { toast } from "sonner";
 import type { OrgUser } from "../services/chatApi";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { useOrgRoles } from "@/features/org/queries/useOrgRoles";
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 
 interface GroupCreateSidebarProps {
   onClose: () => void;
   onBack: () => void;
   users: OrgUser[];
   currentUserId: string;
-  onCreateGroup: (name: string, description: string, memberIds: string[], photo: File | null) => Promise<void>;
+  onCreateGroup: (name: string, description: string, memberIds: string[], photo: File | null, settings?: { messageTtl?: number; permissions?: any }) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -40,6 +43,16 @@ export function GroupCreateSidebar({
   const [groupPhotoPreview, setGroupPhotoPreview] = useState<string | null>(null);
   const [cropperSrc, setCropperSrc] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messageTtl, setMessageTtl] = useState<number>(0);
+  const [groupPermissions, setGroupPermissions] = useState<any>({ send_message_policy: 'all', auto_add_roles: [], admin_roles: [] });
+
+  const { data: user } = useCurrentUser();
+  const { data: dynamicRolesData } = useOrgRoles();
+  let availableRoles = dynamicRolesData || [];
+
+  if (user?.role === 'super_admin') {
+    availableRoles = availableRoles.filter((r: string) => r !== 'student');
+  }
 
   const filteredAndSortedUsers = useMemo(() => {
     let list = users.filter((u) => u._id !== currentUserId);
@@ -79,7 +92,7 @@ export function GroupCreateSidebar({
     if (!groupName.trim() || selectedIds.size === 0) return;
     setIsSubmitting(true);
     try {
-      await onCreateGroup(groupName.trim(), groupSubject.trim(), Array.from(selectedIds), groupPhoto);
+      await onCreateGroup(groupName.trim(), groupSubject.trim(), Array.from(selectedIds), groupPhoto, { messageTtl, permissions: groupPermissions });
       setGroupName("");
       setGroupSubject("");
       setGroupPhoto(null);
@@ -164,13 +177,13 @@ export function GroupCreateSidebar({
                 </div>
               )}
               <div className="relative">
-                <Search className="absolute left-1 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder={selectedIds.size === 0 ? "Search name or role" : ""}
+                  placeholder="Search by name, email, or role..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-7 pr-3 py-1.5 text-sm bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/70"
+                  className="w-full pl-9 pr-3 py-1.5 h-9 text-sm bg-muted/50 border border-border rounded-lg outline-none text-foreground placeholder:text-muted-foreground/70"
                 />
               </div>
             </div>
@@ -223,7 +236,7 @@ export function GroupCreateSidebar({
                               {user.name}
                             </p>
                             <p className="text-[13px] text-muted-foreground truncate mt-0.5">
-                              {user.role}
+                              {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ''}
                             </p>
                           </div>
                         </button>
@@ -310,16 +323,74 @@ export function GroupCreateSidebar({
               </div>
             </div>
 
-            {/* Settings toggles can go here */}
-            <div className="mt-4 px-6 flex flex-col gap-6 text-sm">
-              <div className="flex items-center justify-between cursor-not-allowed opacity-60">
-                <span className="font-medium">Disappearing messages</span>
-                <span className="text-muted-foreground">Off &gt;</span>
+            {/* Settings toggles */}
+            <div className="mt-4 px-6 flex flex-col gap-6 text-sm pb-24">
+              <div className="flex flex-col gap-2">
+                 <span className="font-medium">Disappearing messages</span>
+                 <Select 
+                    value={String(messageTtl)}
+                    onValueChange={(value) => setMessageTtl(Number(value))}
+                 >
+                    <SelectTrigger className="w-full bg-transparent border-b border-border rounded-none px-0 py-2 text-sm text-foreground outline-none shadow-none h-auto">
+                       <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="0">Off</SelectItem>
+                       <SelectItem value="86400">24 hours</SelectItem>
+                       <SelectItem value="604800">7 days</SelectItem>
+                       <SelectItem value="7776000">90 days</SelectItem>
+                    </SelectContent>
+                 </Select>
               </div>
-              <div className="flex items-center justify-between cursor-not-allowed opacity-60">
-                <span className="font-medium">Group permissions</span>
-                <span className="text-muted-foreground">&gt;</span>
+              <div className="flex flex-col gap-2">
+                 <span className="font-medium">Group permissions (Send messages)</span>
+                 <Select 
+                    value={groupPermissions.send_message_policy}
+                    onValueChange={(value) => setGroupPermissions({ ...groupPermissions, send_message_policy: value })}
+                 >
+                    <SelectTrigger className="w-full bg-transparent border-b border-border rounded-none px-0 py-2 text-sm text-foreground outline-none shadow-none h-auto">
+                       <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="all">Everyone</SelectItem>
+                       <SelectItem value="admin_faculty">Admins & Faculty</SelectItem>
+                       <SelectItem value="admin_only">Only Admins</SelectItem>
+                    </SelectContent>
+                 </Select>
               </div>
+
+
+
+              {/* Auto-Grant Admin Roles */}
+              <div className="flex flex-col gap-2">
+                 <span className="text-sm font-medium text-foreground">Auto-Grant Admin by Role</span>
+                 <span className="text-xs text-muted-foreground mb-1">Anyone inside this chat group with these roles will automatically be given Group Admin rights.</span>
+                 <div className="flex flex-wrap gap-2">
+                   {availableRoles.map((role: string) => {
+                     const currentRoles = groupPermissions.admin_roles || [];
+                     const isSelected = currentRoles.includes(role);
+                     return (
+                       <button
+                         key={role}
+                         onClick={() => {
+                           const newRoles = isSelected
+                             ? currentRoles.filter((r: string) => r !== role)
+                             : [...currentRoles, role];
+                           setGroupPermissions({ ...groupPermissions, admin_roles: newRoles });
+                         }}
+                         className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                           isSelected 
+                             ? 'bg-primary text-primary-foreground border-primary' 
+                             : 'bg-background text-foreground border-border hover:border-primary/50'
+                         }`}
+                       >
+                         {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                       </button>
+                     );
+                   })}
+                 </div>
+              </div>
+
             </div>
 
             {/* Floating Create Button */}

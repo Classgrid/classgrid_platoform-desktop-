@@ -460,7 +460,7 @@ export function ChatBubble({
 
                 {/* Text Message */}
                 {message.message && !poll && (
-                  <div className="relative text-[15px] leading-relaxed max-w-full overflow-hidden prose prose-sm dark:prose-invert [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1" style={{overflowWrap:'anywhere'}}>
+                  <div className="relative text-[15px] leading-relaxed max-w-full overflow-hidden prose prose-sm dark:prose-invert [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a:not([data-mention])]:text-blue-500 [&_a:not([data-mention])]:underline [&_a:not([data-mention])]:hover:text-blue-600 [&_a[data-mention]]:!text-emerald-600 [&_a[data-mention]]:dark:!text-emerald-500 [&_a[data-mention]]:!no-underline [&_a[data-mention]]:font-semibold [&_a[data-mention]]:hover:underline [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1" style={{overflowWrap:'anywhere'}}>
                     <div style={!isTextExpanded && isLongMessage ? {
                       display: '-webkit-box',
                       WebkitLineClamp: 15,
@@ -475,7 +475,7 @@ export function ChatBubble({
                           { breaks: true, gfm: true }
                         ) as string, { 
                           ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td'], 
-                          ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
+                          ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class', 'data-mention', 'data-user-id'] 
                         }) 
                       }} />
                       {message.is_edited && (
