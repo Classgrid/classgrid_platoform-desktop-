@@ -350,12 +350,12 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     
     const updates = {};
     
-    if (['all', 'admin_only', 'admin_faculty'].includes(send_message_policy)) updates.send_message_policy = send_message_policy;
-    if (['all', 'admin_only', 'admin_faculty'].includes(reply_policy)) updates.reply_policy = reply_policy;
-    if (['admin_only', 'org_admin_only'].includes(edit_info_policy)) updates.edit_info_policy = edit_info_policy;
-    if (['admin_only', 'admin_faculty', 'org_admin_only'].includes(add_member_policy)) updates.add_member_policy = add_member_policy;
-    if (['all', 'admin_only', 'admin_faculty'].includes(create_poll_policy)) updates.create_poll_policy = create_poll_policy;
-    if (['all', 'admin_only', 'admin_faculty'].includes(send_attachments_policy)) updates.send_attachments_policy = send_attachments_policy;
+    if (['all', 'admin_only'].includes(send_message_policy)) updates.send_message_policy = send_message_policy;
+    if (['all', 'admin_only'].includes(reply_policy)) updates.reply_policy = reply_policy;
+    if (['all', 'admin_only'].includes(edit_info_policy)) updates.edit_info_policy = edit_info_policy;
+    if (['all', 'admin_only'].includes(add_member_policy)) updates.add_member_policy = add_member_policy;
+    if (['all', 'admin_only'].includes(create_poll_policy)) updates.create_poll_policy = create_poll_policy;
+    if (['all', 'admin_only'].includes(send_attachments_policy)) updates.send_attachments_policy = send_attachments_policy;
     
     if (typeof require_message_approval === 'boolean') updates.require_message_approval = require_message_approval;
     if (typeof require_join_approval === 'boolean') updates.require_join_approval = require_join_approval;
@@ -368,11 +368,11 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
     if (validGroupTypes.includes(group_type)) updates.group_type = group_type;
 
     // Fallback for legacy send_messages
-    if (req.body.send_messages && ['all', 'admin_only', 'admin_faculty'].includes(req.body.send_messages)) {
+    if (req.body.send_messages && ['all', 'admin_only'].includes(req.body.send_messages)) {
       updates.send_message_policy = req.body.send_messages;
     }
     // Fallback for legacy edit_info
-    if (req.body.edit_info && ['admin_only', 'org_admin_only'].includes(req.body.edit_info)) {
+    if (req.body.edit_info && ['all', 'admin_only'].includes(req.body.edit_info)) {
        updates.edit_info_policy = req.body.edit_info;
     }
 
