@@ -153,90 +153,94 @@ export function ChatSidebar({
   return (
     <div className="flex flex-col h-full w-full bg-background min-h-0">
       {/* Header */}
-      <div className="px-4 py-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3 h-9">
-          {isSelectionMode ? (
-            <div className="flex items-center justify-between w-full animate-in fade-in slide-in-from-top-2">
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => { setIsSelectionMode(false); setSelectedChats(new Set()); }}
-                  className="p-1.5 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <span className="font-bold text-foreground">{selectedChats.size} selected</span>
+      <div className="pt-4 border-b border-border flex flex-col gap-3">
+        <div className="px-4">
+          <div className="flex items-center justify-between h-9">
+            {isSelectionMode ? (
+              <div className="flex items-center justify-between w-full animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => { setIsSelectionMode(false); setSelectedChats(new Set()); }}
+                    className="p-1.5 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  <span className="font-bold text-foreground">{selectedChats.size} selected</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={handleBulkMute}
+                    disabled={selectedChats.size === 0}
+                    className="p-2 text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-full transition-colors disabled:opacity-50"
+                    title="Mute selected"
+                  >
+                    <BellOff className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleBulkDelete}
+                    disabled={selectedChats.size === 0}
+                    className="p-2 text-danger hover:bg-danger/10 focus:text-danger rounded-full transition-colors disabled:opacity-50"
+                    title="Delete selected"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={handleBulkMute}
-                  disabled={selectedChats.size === 0}
-                  className="p-2 text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-full transition-colors disabled:opacity-50"
-                  title="Mute selected"
-                >
-                  <BellOff className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={handleBulkDelete}
-                  disabled={selectedChats.size === 0}
-                  className="p-2 text-danger hover:bg-danger/10 focus:text-danger rounded-full transition-colors disabled:opacity-50"
-                  title="Delete selected"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-xl font-bold text-foreground ml-1">Chats</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onNewChat}
-                  className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
-                  title="New Chat"
-                >
-                  <MessageSquarePlus className="w-5 h-5" />
-                </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors outline-none"
-                  title="Menu"
-                >
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={onNewGroup} className="cursor-pointer py-2">
-                  <Users className="w-4 h-4 mr-3" />
-                  <span>New group</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSelectionMode(true)}>
-                  <CheckSquare className="w-4 h-4 mr-3" />
-                  <span>Select chats</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onMarkAllRead} className="cursor-pointer py-2 text-primary">
-                  <CheckCheck className="w-4 h-4 mr-3" />
-                  <span>Mark all as read</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-foreground ml-1">Chats</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={onNewChat}
+                    className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors"
+                    title="New Chat"
+                  >
+                    <MessageSquarePlus className="w-5 h-5" />
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="p-2 text-muted-foreground hover:bg-muted/80 rounded-full transition-colors outline-none"
+                        title="Menu"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={onNewGroup} className="cursor-pointer py-2">
+                        <Users className="w-4 h-4 mr-3" />
+                        <span>New group</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setIsSelectionMode(true)}>
+                        <CheckSquare className="w-4 h-4 mr-3" />
+                        <span>Select chats</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={onMarkAllRead} className="cursor-pointer py-2 text-primary">
+                        <CheckCheck className="w-4 h-4 mr-3" />
+                        <span>Mark all as read</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            )}
           </div>
-          </>
-          )}
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search or start a new chat"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-muted/50 border border-border rounded-lg outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
-          />
+        <div className="px-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search or start a new chat"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm bg-muted/50 border border-border rounded-lg outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
           {filters.map(f => (
             <button
               key={f}

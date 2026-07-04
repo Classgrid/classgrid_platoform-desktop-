@@ -38,6 +38,7 @@ interface ChatHeaderProps {
   onOpenSearch?: () => void;
   onPinThread?: () => void;
   onArchiveThread?: () => void;
+  isSearchOpen?: boolean;
 }
 
 function getInitials(name: string) {
@@ -59,7 +60,7 @@ function getAvatarColor(name: string) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, onEnterSelectionMode, isMuted, onMuteThread, onOpenStarredMessages, onOpenScheduledMessages, onToggleReplies, onOpenSearch, onPinThread, onArchiveThread }: ChatHeaderProps) {
+export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUsers, typingUsers, orgUsers, onClearChat, onDeleteChat, onLeaveGroup, onAddMember, onOpenDisappearingModal, onEnterSelectionMode, isMuted, onMuteThread, onOpenStarredMessages, onOpenScheduledMessages, onToggleReplies, onOpenSearch, onPinThread, onArchiveThread, isSearchOpen }: ChatHeaderProps) {
   const hasAvatar = thread.avatar && typeof thread.avatar === "string" && thread.avatar.startsWith("http");
 
   const { data: groupInfo } = useQuery({
