@@ -719,7 +719,11 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
               onApprove={handleApproveMessage}
               onReject={handleRejectMessage}
               onAcknowledge={handleAcknowledgeMessage}
-              isAdmin={!groupInfo || groupInfo?.myRole === 'admin'}
+              isAdmin={
+                !groupInfo || 
+                groupInfo?.myRole === 'admin' || 
+                orgUsers?.find(u => u._id === currentUserId)?.role === 'super_admin'
+              }
             />
           );
         })}

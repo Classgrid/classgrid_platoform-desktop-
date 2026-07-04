@@ -715,7 +715,7 @@ export function ChatBubble({
                   <Forward className="w-4 h-4 mr-2" /> Forward
                 </ContextMenuItem>
               )}
-              {!message.isSending && isAdmin && onPin && (
+              {!message.isSending && onPin && (
                 <ContextMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
                   <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                 </ContextMenuItem>
@@ -816,7 +816,7 @@ export function ChatBubble({
                     <Forward className="w-4 h-4 mr-2" /> Forward
                   </DropdownMenuItem>
                 )}
-                {!message.isSending && isAdmin && onPin && (
+                {!message.isSending && onPin && (
                   <DropdownMenuItem onClick={() => onPin(message.id, !message.is_pinned)} className="cursor-pointer py-2">
                     <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                   </DropdownMenuItem>

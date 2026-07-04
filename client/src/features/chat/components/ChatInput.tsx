@@ -809,7 +809,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   setMessage(html);
                   
                   // Ultra-reliable Mention logic (bypassing browser Selection API bugs)
-                  const match = text.match(/(?:^|\s|\u200B|\u00A0)@([a-zA-Z0-9_]*)$/);
+                  // contentEditable often adds a trailing <br> which becomes \n in textContent, so we must remove it before matching.
+                  const cleanText = text.replace(/[\r\n]+$/, "");
+                  const match = cleanText.match(/(?:^|\s|\u200B|\u00A0)@([a-zA-Z0-9_]*)$/);
                   if (match) {
                     setShowMentions(true);
                     setMentionQuery(match[1].toLowerCase());

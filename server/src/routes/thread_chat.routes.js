@@ -2451,13 +2451,8 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
     const membership = await validateThreadMembership(userId, threadId);
     const isOrgAdmin = ['super_admin', 'org_admin', 'hod', 'principal', 'vice_principal', 'exam_controller', 'fee_manager', 'admission_head'].includes(req.user.role);
     const isSuperAdmin = req.user.role === 'super_admin';
+    // Anyone in the thread can pin messages
     if (!membership && !isSuperAdmin) return res.status(403).json({ error: 'Not authorized' });
-    
-    // Check if it's a DM to allow pinning for non-admins
-    const { data: thread } = await sb.from('chat_threads').select('type, group_id').eq('id', threadId).single();
-    if (thread?.type !== 'dm' && membership?.role !== 'admin' && !isSuperAdmin) {
-      return res.status(403).json({ error: 'Only admins can pin messages in groups' });
-    }
 
     let pinned_until = null;
     if (is_pinned && durationHours) {
@@ -2493,6 +2488,7 @@ router.patch('/:id/messages/:messageId/pin', isAuthenticated, async (req, res) =
     if (error) throw error;
 
     // Audit Log
+    const { data: thread } = await sb.from('chat_threads').select('group_id').eq('id', threadId).single();
     if (thread?.group_id) {
        await sb.from('chat_group_audit_logs').insert({
          group_id: thread.group_id, actor_id: userId, actor_name: req.user.name || 'Admin', action: is_pinned ? 'message_pinned' : 'message_unpinned'
