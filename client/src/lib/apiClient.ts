@@ -10,7 +10,7 @@ export const API_BASE_URL =
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 600000,
+  timeout: 0,
   adapter: isMockApiEnabled ? mockApiAdapter : undefined,
   withCredentials: true // required for cookie-based Passport sessions
 });
