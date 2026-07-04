@@ -18,6 +18,7 @@ import {
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
+import { ImageGallery } from "@/features/shared/components/ImageGallery";
 
 interface MessageOptions {
   scheduledFor?: string;
@@ -373,103 +374,106 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       )}
 
       {/* File Previews */}
-      {files.length > 0 && (
-        <div className="px-4 py-3 border-b border-border">
-          <div className="flex gap-2.5 overflow-x-auto pb-1 custom-scrollbar">
-            {files.map((file, i) => {
-              const ext = file.name.split(".").pop()?.toLowerCase() || "";
-              const isImage = file.type.startsWith("image/");
-              const isVideo = file.type.startsWith("video/");
-              const isAudio = file.type.startsWith("audio/");
-              const isPdf = file.type === "application/pdf" || ext === "pdf";
-              const isWord = ["doc", "docx"].includes(ext);
-              const isExcel = ["xls", "xlsx", "csv"].includes(ext);
-              const isPpt = ["ppt", "pptx"].includes(ext);
-              const isMd = ext === "md";
+      {files.length > 0 && (() => {
+        const mediaFilesWithIndex = files
+          .map((f, i) => ({ file: f, index: i }))
+          .filter(({ file }) => file.type.startsWith("image/") || file.type.startsWith("video/"));
+          
+        const documentFilesWithIndex = files
+          .map((f, i) => ({ file: f, index: i }))
+          .filter(({ file }) => !(file.type.startsWith("image/") || file.type.startsWith("video/")));
 
-              // Icon color and label for doc types
-              const getDocStyle = () => {
-                if (isPdf) return { color: "text-red-500 bg-red-500/10", label: "PDF" };
-                if (isWord) return { color: "text-blue-500 bg-blue-500/10", label: "DOC" };
-                if (isExcel) return { color: "text-green-500 bg-green-500/10", label: "XLS" };
-                if (isPpt) return { color: "text-orange-500 bg-orange-500/10", label: "PPT" };
-                if (isMd) return { color: "text-purple-500 bg-purple-500/10", label: "MD" };
-                if (isAudio) return { color: "text-violet-500 bg-violet-500/10", label: ext.toUpperCase() };
-                return { color: "text-muted-foreground bg-muted", label: ext.toUpperCase() || "FILE" };
-              };
+        const galleryImages = mediaFilesWithIndex.map(({ file, index }) => ({
+          id: index.toString(),
+          src: URL.createObjectURL(file),
+          alt: file.name,
+          type: file.type.startsWith("video/") ? "video" as const : "image" as const,
+        }));
 
-              const formatSize = (bytes: number) => {
-                if (bytes < 1024) return `${bytes} B`;
-                if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-                return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-              };
+        return (
+          <div className="px-4 py-3 border-b border-border space-y-3">
+            
+            {/* Media Gallery (Images & Videos) */}
+            {galleryImages.length > 0 && (
+              <div className="max-h-[350px] overflow-y-auto rounded-xl custom-scrollbar border border-border/50">
+                <ImageGallery 
+                  images={galleryImages} 
+                  onRemove={(id) => removeFile(parseInt(id))}
+                  className="bg-muted/30 p-2"
+                />
+              </div>
+            )}
 
-              return (
-                <div
-                  key={i}
-                  className="relative shrink-0 group cursor-pointer"
-                  onClick={() => setPreviewFile(file)}
-                >
-                  {isImage ? (
-                    /* Image thumbnail */
-                    <div className="w-20 h-20 rounded-xl border border-border bg-muted overflow-hidden hover:opacity-90 transition-opacity">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : isVideo ? (
-                    /* Video thumbnail with play icon */
-                    <div className="w-20 h-20 rounded-xl border border-border bg-black overflow-hidden relative hover:opacity-90 transition-opacity">
-                      <video
-                        src={URL.createObjectURL(file)}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                        muted
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
-                          <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-0.5" />
+            {/* Document Files (PDFs, Docs, etc) */}
+            {documentFilesWithIndex.length > 0 && (
+              <div className="flex gap-2.5 overflow-x-auto pb-1 custom-scrollbar">
+                {documentFilesWithIndex.map(({ file, index }) => {
+                  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+                  const isAudio = file.type.startsWith("audio/");
+                  const isPdf = file.type === "application/pdf" || ext === "pdf";
+                  const isWord = ["doc", "docx"].includes(ext);
+                  const isExcel = ["xls", "xlsx", "csv"].includes(ext);
+                  const isPpt = ["ppt", "pptx"].includes(ext);
+                  const isMd = ext === "md";
+
+                  const getDocStyle = () => {
+                    if (isPdf) return { color: "text-red-500 bg-red-500/10", label: "PDF" };
+                    if (isWord) return { color: "text-blue-500 bg-blue-500/10", label: "DOC" };
+                    if (isExcel) return { color: "text-green-500 bg-green-500/10", label: "XLS" };
+                    if (isPpt) return { color: "text-orange-500 bg-orange-500/10", label: "PPT" };
+                    if (isMd) return { color: "text-purple-500 bg-purple-500/10", label: "MD" };
+                    if (isAudio) return { color: "text-violet-500 bg-violet-500/10", label: ext.toUpperCase() };
+                    return { color: "text-muted-foreground bg-muted", label: ext.toUpperCase() || "FILE" };
+                  };
+
+                  const formatSize = (bytes: number) => {
+                    if (bytes < 1024) return `${bytes} B`;
+                    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+                    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className="relative shrink-0 group cursor-pointer"
+                      onClick={() => setPreviewFile(file)}
+                    >
+                      <div className={`flex items-center gap-2.5 h-20 px-3 rounded-xl border border-border bg-card min-w-[160px] max-w-[200px] hover:bg-accent/50 transition-colors`}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getDocStyle().color}`}>
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                          <span className="text-xs font-semibold truncate text-foreground">{file.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{getDocStyle().label} • {formatSize(file.size)}</span>
                         </div>
                       </div>
+                      
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </div>
-                  ) : (
-                    /* Document file card */
-                    <div className={`flex items-center gap-2.5 h-20 px-3 rounded-xl border border-border bg-card min-w-[160px] max-w-[200px] hover:bg-accent/50 transition-colors`}>
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getDocStyle().color}`}>
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                        <span className="text-xs font-semibold truncate text-foreground">{file.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{getDocStyle().label} • {formatSize(file.size)}</span>
-                      </div>
-                    </div>
-                  )}
-                  {/* Remove button */}
-                  <button
-                    onClick={() => removeFile(i)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
+
+            {files.length > 1 && (
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                <span className="text-[11px] text-muted-foreground font-medium">{files.length} files selected</span>
+                <button
+                  onClick={() => setFiles([])}
+                  className="text-[11px] text-red-500 hover:text-red-600 font-semibold transition-colors"
+                >
+                  Remove All
+                </button>
+              </div>
+            )}
           </div>
-          {files.length > 1 && (
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
-              <span className="text-[11px] text-muted-foreground font-medium">{files.length} files selected</span>
-              <button
-                onClick={() => setFiles([])}
-                className="text-[11px] text-red-500 hover:text-red-600 font-semibold transition-colors"
-              >
-                Remove All
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* Input Area */}
       <div className="px-4 py-3 flex items-end gap-2">

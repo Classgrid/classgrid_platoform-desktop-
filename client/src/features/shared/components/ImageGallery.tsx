@@ -19,6 +19,13 @@ interface ImageGalleryProps {
   images: GalleryImage[];
   className?: string;
   maxDisplay?: number;
+  onRemove?: (id: string) => void;
+}
+
+export interface ImageLightboxProps {
+  images: GalleryImage[];
+  initialIndex: number;
+  onClose: () => void;
 }
 
 /* ─── slide variants for arrow-key / swipe navigation ─── */
@@ -209,6 +216,15 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
               </div>
             )}
             
+            {onRemove && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onRemove(img.id); }}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 z-30"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            
             {img.caption && !showOverlay && (
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-20 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                 <p className="text-white text-sm font-medium">{img.caption}</p>
@@ -220,7 +236,71 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
       </div>
 
       {/* ──────────── FULL SCREEN LIGHTBOX ──────────── */}
-      <AnimatePresence>
+      {selectedImage && (
+        <ImageLightbox
+          images={images}
+          initialIndex={selectedIndex}
+          onClose={closeImage}
+        />
+      )}
+    </>
+  );
+}
+
+export function ImageLightbox({ images, initialIndex, onClose }: ImageLightboxProps) {
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  const [direction, setDirection] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const selectedImage = images[selectedIndex];
+
+  const goNext = useCallback(() => {
+    setDirection(1);
+    setSelectedIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  const goPrev = useCallback(() => {
+    setDirection(-1);
+    setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
+  }, [images.length]);
+
+  // Lock body scroll
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") { e.preventDefault(); goNext(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); goPrev(); }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, goNext, goPrev]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0) goNext();
+      else goPrev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [goNext, goPrev]);
+
+  return (
+    <AnimatePresence>
         {selectedImage && (
           <motion.div
             key="lightbox-backdrop"
@@ -229,7 +309,7 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-xl"
-            onClick={closeImage}
+            onClick={onClose}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -258,7 +338,7 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
                 </button>
                 <button
                   className="p-3 bg-black/40 hover:bg-black/60 rounded-full text-white backdrop-blur-md transition-all border border-white/10 pointer-events-auto"
-                  onClick={(e) => { e.stopPropagation(); closeImage(); }}
+                  onClick={(e) => { e.stopPropagation(); onClose(); }}
                   aria-label="Close gallery"
                 >
                   <X className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -284,28 +364,8 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
 
               {/* Image container — fills remaining space */}
               <div className="w-full h-full flex items-center justify-center px-4 sm:px-24 py-16">
-                {isOnClickedImage && !hasNavigatedRef.current ? (
-                  selectedImage.type === "video" ? (
-                    <motion.video
-                      layoutId={`gallery-image-${selectedImage.id}`}
-                      src={selectedImage.src}
-                      className="block max-w-full max-h-full w-auto rounded-xl shadow-2xl ring-1 ring-white/10 object-contain"
-                      controls
-                      autoPlay
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <motion.img
-                      layoutId={`gallery-image-${selectedImage.id}`}
-                      src={selectedImage.src}
-                      alt={selectedImage.alt}
-                      className="block max-w-full max-h-full w-auto rounded-xl shadow-2xl ring-1 ring-white/10 object-contain"
-                      style={{ touchAction: "pinch-zoom" }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )
-                ) : (
-                  <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                {/* Removed isOnClickedImage logic, we always use AnimatePresence for standalone lightbox */}
+                <AnimatePresence initial={false} custom={direction} mode="popLayout">
                     {selectedImage.type === "video" ? (
                       <motion.video
                         key={selectedImage.id}
@@ -336,7 +396,6 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
                       />
                     )}
                   </AnimatePresence>
-                )}
               </div>
 
               {/* Next button */}
@@ -356,8 +415,6 @@ export function ImageGallery({ images, className, maxDisplay }: ImageGalleryProp
               Swipe left or right to navigate
             </div>
           </motion.div>
-        )}
       </AnimatePresence>
-    </>
   );
 }
