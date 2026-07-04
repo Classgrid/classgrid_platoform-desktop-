@@ -68,8 +68,10 @@ function renderSnippet(text: string) {
   if (text.startsWith('📎')) {
     return <><Paperclip className="w-3.5 h-3.5 mr-1.5 inline-block opacity-70 -mt-0.5" /> {text.replace('📎', '').trim()}</>;
   }
-  const strippedText = text.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
-  return strippedText;
+
+  // Strip any HTML tags (e.g. from mentions)
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  return doc.body.textContent?.trim() || "";
 }
 
 export function ChatSidebar({

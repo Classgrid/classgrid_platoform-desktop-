@@ -193,7 +193,7 @@ export function ChatPage() {
   const handleVotePoll = async (pollId: string, optionId: string) => {
     if (!activeThread) return;
     try {
-      await voteThreadPoll(activeThread.id, pollId, optionId);
+      // Optimistically update the UI immediately
       setPolls(prev => prev.map(p => {
         if (p.id !== pollId) return p;
         let newMyVotes = [...p.myVotes];
@@ -211,18 +211,30 @@ export function ChatPage() {
           if (newMyVotes.length > 0) {
             const oldVote = newMyVotes[0];
             if (oldVote !== optionId) {
+              // User changed their vote
               newVoteCounts[oldVote] = Math.max(0, (newVoteCounts[oldVote] || 0) - 1);
+              newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+              newMyVotes = [optionId];
+            } else {
+              // User un-voted
+              newVoteCounts[oldVote] = Math.max(0, (newVoteCounts[oldVote] || 0) - 1);
+              newMyVotes = [];
             }
-          }
-          newMyVotes = [optionId];
-          if (!p.myVotes.includes(optionId)) {
-             newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+          } else {
+            // New vote
+            newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+            newMyVotes = [optionId];
           }
         }
-        return { ...p, myVotes: newMyVotes, voteCounts: newVoteCounts };
+        return { ...p, myVotes: newMyVotes, voteCounts: newVoteCounts, totalVotes: Object.values(newVoteCounts).reduce((a, b) => a + b, 0) };
       }));
+
+      // Fire and forget the API call to make it instantly responsive
+      voteThreadPoll(activeThread.id, pollId, optionId).catch(() => {
+        toast.error("Failed to sync vote");
+      });
     } catch (err) {
-      toast.error("Failed to vote");
+      console.error(err);
     }
   };
 

@@ -1208,8 +1208,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       requires_acknowledgement: requires_acknowledgement,
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
-      expires_at: finalExpiresAt
-      // mentioned_users: parsedMentionedUsers // Temporarily removed to fix 500 error (column missing or schema cache needs reload)
+      expires_at: finalExpiresAt,
+      mentioned_users: parsedMentionedUsers
     }).select('id').single();
 
     if (insertErr) {
@@ -2160,15 +2160,29 @@ router.post('/:id/polls/:pollId/vote', isAuthenticated, async (req, res) => {
     const { data: poll } = await sb.from('chat_polls').select('*').eq('id', pollId).single();
     if (!poll) return res.status(404).json({ error: 'Poll not found' });
 
-    if (!poll.allow_multiple) {
+    let didUnvote = false;
+    
+    // Check if they are toggling the EXACT same option
+    const { data: existing } = await sb.from('chat_poll_votes')
+      .select('id')
+      .eq('poll_id', pollId)
+      .eq('user_id', userId)
+      .eq('option_id', optionId)
+      .maybeSingle();
+
+    if (existing) {
+      // They clicked the same option, so we just remove it (un-vote)
+      await sb.from('chat_poll_votes').delete().eq('id', existing.id);
+      didUnvote = true;
+    }
+
+    // If allow_multiple is false, clear all other votes in this poll
+    if (!poll.allow_multiple && !didUnvote) {
       await sb.from('chat_poll_votes').delete().eq('poll_id', pollId).eq('user_id', userId);
     }
 
-    const { data: existing } = await sb.from('chat_poll_votes').select('id').eq('poll_id', pollId).eq('user_id', userId).eq('option_id', optionId).maybeSingle();
-
-    if (existing) {
-      await sb.from('chat_poll_votes').delete().eq('id', existing.id);
-    } else {
+    // Insert the new vote if they didn't just unvote it
+    if (!didUnvote) {
       await sb.from('chat_poll_votes').insert([{ poll_id: pollId, user_id: userId, option_id: optionId }]);
     }
 

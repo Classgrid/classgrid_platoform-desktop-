@@ -26,8 +26,8 @@ export function DeleteMessageModal({ message, isOpen, onClose, onDelete }: Delet
     }
   };
 
-  // The condition: if it hasn't been seen yet, allow deleting for everyone
-  const canDeleteForEveryone = !message.isSeen && !message.is_deleted;
+  // Allow deleting for everyone as long as it's not already deleted (like WhatsApp)
+  const canDeleteForEveryone = !message.is_deleted;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
