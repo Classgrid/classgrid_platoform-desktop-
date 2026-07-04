@@ -150,6 +150,36 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               </p>
             </motion.div>
           )}
+          {isSearchOpen && (
+            <motion.div
+              key="search"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center pr-2"
+            >
+              <div className="relative w-full">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search in chat..."
+                  value={searchQuery || ""}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  className="w-full bg-accent/50 border-none rounded-full pl-9 pr-8 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => onSearchChange?.("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                  >
+                    <XCircle className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
       </div>

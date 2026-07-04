@@ -13,9 +13,10 @@ import { DeleteMessageModal } from "./DeleteMessageModal";
 interface ChatWindowProps {
   thread: ChatThread;
   currentUserId: string;
+  orgUsers?: OrgUser[];
 }
 
-export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
+export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps) {
   const threadId = thread.id;
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,13 +101,15 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
             if (next[payload.userId]?.timeout) {
               clearTimeout(next[payload.userId].timeout);
             }
+            // Give recording 1 hour before auto-clear, uploading 1 minute, typing 3 seconds
+            const duration = payload.activityType === 'recording' ? 3600000 : payload.activityType === 'uploading' ? 60000 : 3000;
             const timeout = setTimeout(() => {
               setTypingUsers(current => {
                 const updated = { ...current };
                 delete updated[payload.userId];
                 return updated;
               });
-            }, 3000);
+            }, duration);
             
             next[payload.userId] = { timeout, type: payload.activityType || 'typing' };
           }
@@ -713,6 +716,8 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
           onOpenPollModal={thread.type === 'group' ? () => setIsCreatePollOpen(true) : undefined}
           canSchedule={true}
           currentUserId={currentUserId}
+          orgUsers={orgUsers}
+          thread={thread}
           onTyping={(isTyping, type) => {
             channelRef.sendTyping(isTyping, type);
           }}

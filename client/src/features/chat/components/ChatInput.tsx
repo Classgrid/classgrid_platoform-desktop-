@@ -388,6 +388,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       window.dispatchEvent(new Event('chat_draft_updated'));
     }
     setFiles([]);
+    clearAudio(); // Clear audio preview after sending
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
@@ -725,10 +726,16 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 <span className="text-base text-foreground w-12 font-mono shrink-0">
                   {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                 </span>
-                <div className="flex-1 flex items-center justify-start gap-1 overflow-hidden opacity-40 px-2">
-                  {[...Array(40)].map((_, i) => (
-                    <div key={i} className="w-1 h-1 bg-foreground rounded-full" />
-                  ))}
+                <div className="flex-1 flex items-center justify-start gap-1 overflow-x-auto no-scrollbar px-2" style={{ scrollbarWidth: 'none' }}>
+                  {[...Array(Math.max(5, recordingTime * 2))].map((_, i) => {
+                     // Generate pseudo-random height based on index to look like a sound wave
+                     const height = 4 + Math.abs(Math.sin(i * 0.5) * 8 + Math.cos(i * 0.2) * 6);
+                     return (
+                       <div key={i} className="w-1 bg-foreground rounded-full shrink-0 opacity-60" style={{ height: `${height}px` }} />
+                     );
+                  })}
+                  {/* Invisible anchor to keep it scrolled to the end */}
+                  <div ref={(el) => el?.scrollIntoView({ behavior: 'smooth' })} />
                 </div>
               </div>
             ) : (
@@ -756,9 +763,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
 
               {/* Mentions Dropdown */}
               {showMentions && orgUsers && thread?.type === 'group' && (
-                <div className="absolute bottom-full mb-3 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[100] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
-                  {/* @Everyone / @all Option */}
-                  {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
+                  <div className="absolute bottom-full mb-3 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[100] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
+                    {/* @Everyone / @all Option */}
+                    {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
                     <button
                       className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors mb-1"
                       onClick={() => insertMention("Everyone", "everyone")}

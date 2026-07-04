@@ -96,6 +96,7 @@ export function ChatPage() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: 'typing'|'recording'|'uploading' }>>({});
   const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -832,6 +833,8 @@ export function ChatPage() {
               orgUsers={orgUsers}
               searchQuery={chatSearchQuery}
               onSearchChange={setChatSearchQuery}
+              isSearchOpen={isSearchOpen}
+              onOpenSearch={() => setIsSearchOpen(!isSearchOpen)}
               onBack={() => setActiveThread(null)}
               onAvatarClick={() => {
                 if (activeThread.avatar) {
@@ -1019,6 +1022,8 @@ export function ChatPage() {
                 onOpenPollModal={() => setIsPollModalOpen(true)}
                 canSchedule={true}
                 currentUserId={currentUserId}
+                orgUsers={orgUsers}
+                thread={activeThread}
               />
             )}
 
