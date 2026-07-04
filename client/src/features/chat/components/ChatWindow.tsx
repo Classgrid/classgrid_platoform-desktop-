@@ -8,6 +8,7 @@ import { useThreadChannel } from "../hooks/useRealtimeChat";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
 import { CreatePollModal } from "./CreatePollModal";
+import { DeleteMessageModal } from "./DeleteMessageModal";
 
 interface ChatWindowProps {
   thread: ChatThread;
@@ -25,6 +26,7 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCreatePollOpen, setIsCreatePollOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<ChatMessage | null>(null);
 
   // Fetch group info to get permissions and role
   const { data: groupInfo } = useQuery({
@@ -309,19 +311,33 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
     }
   };
 
-  const handleDeleteMessage = async (msgId: string) => {
-    if (!window.confirm("Are you sure you want to delete this message?")) return;
+  const handleDeleteMessage = (msgId: string) => {
+    const msg = allMessages.find((m) => m.id === msgId);
+    if (msg) {
+      setMessageToDelete(msg);
+    }
+  };
 
+  const confirmDeleteMessage = async (msgId: string, type: 'me' | 'everyone') => {
     // Optimistic update
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
       if (!oldData || !oldData.pages) return oldData;
       const newPages = oldData.pages.map((page: ChatMessage[]) => 
-        page.map(m => m.id === msgId ? { ...m, is_deleted: true, message: 'This message was deleted' } : m)
+        page.map(m => {
+          if (m.id === msgId) {
+             if (type === 'everyone') {
+                return { ...m, is_deleted: true, message: 'This message was deleted' };
+             } else {
+                return null; // For 'me', we can completely remove it from view
+             }
+          }
+          return m;
+        }).filter(Boolean)
       );
       return { ...oldData, pages: newPages };
     });
     try {
-      await deleteMessage(threadId, msgId);
+      await deleteMessage(threadId, msgId, type);
     } catch (error) {
       console.error("Failed to delete message", error);
     }
@@ -718,6 +734,14 @@ export function ChatWindow({ thread, currentUserId }: ChatWindowProps) {
         <CreatePollModal
           groupId={thread.groupId}
           onClose={() => setIsCreatePollOpen(false)}
+        />
+      )}
+      {messageToDelete && (
+        <DeleteMessageModal
+          message={messageToDelete}
+          isOpen={!!messageToDelete}
+          onClose={() => setMessageToDelete(null)}
+          onDelete={confirmDeleteMessage}
         />
       )}
     </div>

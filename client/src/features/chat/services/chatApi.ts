@@ -247,8 +247,8 @@ export async function markAllRead() {
   await apiClient.post(`/api/threads/read-all`);
 }
 
-export async function deleteMessage(threadId: string, messageId: string) {
-  await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}`, { timeout: 300000 });
+export async function deleteMessage(threadId: string, messageId: string, type: 'me' | 'everyone' = 'everyone') {
+  await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}?type=${type}`, { timeout: 300000 });
 }
 
 export async function clearChat(threadId: string) {

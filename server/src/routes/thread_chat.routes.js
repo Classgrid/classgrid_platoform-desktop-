@@ -709,6 +709,8 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
     const clearedAt = userResult?.cleared_chat_threads?.[threadId];
     const now = new Date();
     const messages = (rawMessages || []).filter(m => {
+      // Check if deleted for me
+      if (m.deleted_for && m.deleted_for.includes(userId)) return false;
       // Check cleared_at
       if (clearedAt && new Date(m.created_at) <= new Date(clearedAt)) return false;
       // Check expires_at
@@ -1263,21 +1265,37 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
     const membership = await validateThreadMembership(userId, threadId);
     if (!membership) return res.status(403).json({ error: 'Not a member' });
 
-    // Verify message exists and belongs to sender
-    const { data: msg } = await sb.from('chat_messages').select('sender_id').eq('id', msgId).single();
+    const deleteType = req.query.type || 'everyone';
+
+    // Verify message exists and belongs to sender (if everyone)
+    const { data: msg } = await sb.from('chat_messages').select('sender_id, deleted_for').eq('id', msgId).single();
     if (!msg) return res.status(404).json({ error: 'Message not found' });
-    if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages' });
+    
+    if (deleteType === 'everyone') {
+      if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
+      
+      // Delete attachments from DB
+      await sb.from('chat_attachments').delete().eq('message_id', msgId);
 
-    // Delete attachments from DB (and optionally from storage)
-    const { data: attachments } = await sb.from('chat_attachments').select('file_url').eq('message_id', msgId);
-    await sb.from('chat_attachments').delete().eq('message_id', msgId);
-
-    // Soft delete the message
-    const { error } = await sb
-      .from('chat_messages')
-      .update({ message: 'This message was deleted', is_deleted: true })
-      .eq('id', msgId);
-    if (error) throw error;
+      // Soft delete the message for everyone
+      const { error } = await sb
+        .from('chat_messages')
+        .update({ message: 'This message was deleted', is_deleted: true })
+        .eq('id', msgId);
+      if (error) throw error;
+    } else if (deleteType === 'me') {
+      // Add userId to deleted_for array
+      const currentDeletedFor = msg.deleted_for || [];
+      if (!currentDeletedFor.includes(userId)) {
+        currentDeletedFor.push(userId);
+        const { error } = await sb
+          .from('chat_messages')
+          .update({ deleted_for: currentDeletedFor })
+          .eq('id', msgId);
+        if (error) throw error;
+      }
+      return res.status(200).json({ success: true, deletedForMe: true });
+    }
 
     // Update thread's last_message if needed (fetch the latest message for the thread and recalculate preview)
     const { data: latestMsg } = await sb.from('chat_messages')

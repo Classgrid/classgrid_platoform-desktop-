@@ -43,6 +43,7 @@ import { ChatInput } from "../components/ChatInput";
 import { NewChatSidebar } from "../components/NewChatSidebar";
 import { GroupCreateSidebar } from "../components/GroupCreateSidebar";
 import { CreatePollModal } from "../components/CreatePollModal";
+import { DeleteMessageModal } from "../components/DeleteMessageModal";
 import { DisappearingMessagesModal } from "../components/DisappearingMessagesModal";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("../components/GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
@@ -86,6 +87,7 @@ export function ChatPage() {
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const [messageToDelete, setMessageToDelete] = useState<ChatMessage | null>(null);
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -105,14 +107,25 @@ export function ChatPage() {
     loadOrgUsers();
   }, [currentUserId]);
 
-  const handleDeleteMessage = async (msgId: string) => {
+  const confirmDeleteMessage = async (msgId: string, type: 'me' | 'everyone') => {
     if (!activeThread) return;
-    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_deleted: true, message: "This message was deleted" } : m));
+    
+    // Optimistic update
+    setMessages(prev => prev.map(m => {
+      if (m.id === msgId) {
+        if (type === 'everyone') {
+          return { ...m, is_deleted: true, message: "This message was deleted" };
+        } else {
+          return null; // hide it for me
+        }
+      }
+      return m;
+    }).filter(Boolean) as ChatMessage[]);
+
     try {
-      await deleteMessage(activeThread.id, msgId);
+      await deleteMessage(activeThread.id, msgId, type);
     } catch (err) {
       toast.error("Failed to delete message");
-      // Revert optimistic update on failure could be handled here
     }
   };
 
@@ -703,7 +716,7 @@ export function ChatPage() {
           onMarkAllRead={handleMarkAllRead}
           onBulkDelete={handleBulkDelete}
           onBulkMute={handleBulkMute}
-          onOpenStarredMessages={() => setIsStarredModalOpen(true)}
+          onOpenStarredMessages={() => setChatSideView('starred')}
           isLoading={threadsLoading}
           onlineUsers={onlineUsers}
           activeFilter={activeFilter}
@@ -814,7 +827,7 @@ export function ChatPage() {
               onReply={setReplyTo}
               canReply={!isInputDisabled}
               onStar={handleStarMessage}
-              onDelete={(id) => deleteMessage(activeThread.id, id).catch(() => toast.error("Failed to delete"))}
+              onDelete={(id) => setMessageToDelete(messages.find(m => m.id === id) || null)}
               onEdit={async (id, text) => {
                 try {
                   await editMessage(activeThread.id, id, text);
@@ -960,6 +973,16 @@ export function ChatPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Message Modal */}
+      {messageToDelete && (
+        <DeleteMessageModal
+          message={messageToDelete}
+          isOpen={!!messageToDelete}
+          onClose={() => setMessageToDelete(null)}
+          onDelete={confirmDeleteMessage}
+        />
+      )}
 
       {/* Modals */}
       {isGroupSettingsOpen && activeThread?.type === "group" && activeThread.groupId && (
