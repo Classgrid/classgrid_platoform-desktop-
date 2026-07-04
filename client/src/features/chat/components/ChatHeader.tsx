@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, Bell, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut, Clock, BadgeCheck } from "lucide-react";
+import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, Bell, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut, Clock, BadgeCheck, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGroupInfo } from "../services/chatApi";
 import type { ChatThread, OrgUser } from "../services/chatApi";
