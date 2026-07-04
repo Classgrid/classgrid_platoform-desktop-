@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown, FileBox, ChevronRight } from "lucide-react";
+import { X, Camera, Users, Shield, Trash2, UserPlus, LogOut, Search, Crown, FileBox, ChevronRight, UserMinus, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
   fetchGroupInfo,
   uploadGroupPhoto,
@@ -432,14 +432,14 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                                         className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer mr-1"
                                         title={member.role === "admin" ? `Demote ${member.name} to member` : `Promote ${member.name} to admin`}
                                       >
-                                        {member.role === "admin" ? <Shield className="w-4 h-4 text-primary opacity-50" /> : <Shield className="w-4 h-4" />}
+                                        {member.role === "admin" ? <ShieldAlert className="w-5 h-5 text-primary/60" /> : <ShieldCheck className="w-5 h-5" />}
                                       </button>
                                       <button
                                         onClick={() => confirmRemove(member.userId, member.name)}
                                         className="p-1.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                                         title={`Remove ${member.name}`}
                                       >
-                                        <Trash2 className="w-4 h-4" />
+                                        <UserMinus className="w-5 h-5" />
                                       </button>
                                     </div>
                                   )}

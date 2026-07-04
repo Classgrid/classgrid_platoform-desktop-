@@ -498,6 +498,11 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
                         <span className="flex items-center gap-1.5 text-muted-foreground font-medium bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
                           <Users size={15} className="opacity-70" /> {groupData?.members?.length || 0} Members
                         </span>
+                        {groupData?.group?.created_at && (
+                          <span className="flex items-center gap-1.5 text-muted-foreground font-medium bg-muted/30 px-3 py-1.5 rounded-full border border-border/40">
+                            <Calendar size={15} className="opacity-70" /> Created {new Date(groupData.group.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        )}
                         {(groupData?.members?.filter((m: any) => onlineUsers?.has(m.userId)).length || 0) > 0 && (
                           <span className="flex items-center gap-1.5 text-emerald-600 font-medium bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
