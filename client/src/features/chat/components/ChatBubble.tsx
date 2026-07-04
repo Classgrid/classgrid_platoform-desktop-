@@ -461,17 +461,26 @@ export function ChatBubble({
 
                 {/* Text Message */}
                 {message.message && !poll && (
-                  <div className="relative text-[15px] whitespace-pre-wrap leading-relaxed break-words break-all [word-break:break-word] prose prose-sm dark:prose-invert max-w-none [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1">
+                  <div className="relative text-[15px] leading-relaxed max-w-full overflow-hidden prose prose-sm dark:prose-invert [&_*]:!bg-transparent [&_*:not(a)]:!text-current [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600 [&_p]:mb-1 [&_p]:last:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1 [&_li]:my-0 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic [&_u]:underline [&_s]:line-through [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-[15px] [&_h3]:font-bold [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1" style={{overflowWrap:'anywhere'}}>
                     <div style={!isTextExpanded && isLongMessage ? {
                       display: '-webkit-box',
                       WebkitLineClamp: 15,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     } : {}}>
-                      <div className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto" dangerouslySetInnerHTML={{ 
-                        __html: DOMPurify.sanitize(marked.parse((typeof message.message === 'string' ? message.message : String(message.message || '')).replace(/<!--StartFragment-->/gi, '').replace(/<!--EndFragment-->/gi, ''), { breaks: true, gfm: true }) as string, { 
-                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'th', 'td'], 
-                          ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class'] 
+                      <div className="[&_pre]:overflow-x-auto [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_img]:max-w-full [&_img]:h-auto max-w-full" dangerouslySetInnerHTML={{ 
+                        __html: DOMPurify.sanitize(marked.parse(
+                          // Strip any HTML tags that were stored in DB (e.g. old pasted Wikipedia HTML)
+                          // so they render as clean text, not as clickable links or tables
+                          (typeof message.message === 'string' ? message.message : String(message.message || ''))
+                            .replace(/<!--StartFragment-->/gi, '')
+                            .replace(/<!--EndFragment-->/gi, '')
+                            .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1')  // strip <a> tags, keep link text
+                            .replace(/<[^>]+>/g, ''),                  // strip all remaining HTML tags
+                          { breaks: true, gfm: true }
+                        ) as string, { 
+                          ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'u', 's', 'blockquote', 'code', 'pre'], 
+                          ALLOWED_ATTR: [] 
                         }) 
                       }} />
                       {message.is_edited && (
