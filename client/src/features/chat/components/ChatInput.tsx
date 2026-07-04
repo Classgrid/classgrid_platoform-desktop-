@@ -300,6 +300,14 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       return;
     }
 
+    if (scheduledDate) {
+      const scheduledTime = new Date(scheduledDate);
+      if (isNaN(scheduledTime.getTime()) || scheduledTime <= new Date()) {
+        toast.error("Invalid schedule time", { description: "Scheduled time must be in the future. Please update the time." });
+        return;
+      }
+    }
+
     let mentionedUsers: string[] = [];
     if (orgUsers && text) {
       const tempDiv = document.createElement("div");

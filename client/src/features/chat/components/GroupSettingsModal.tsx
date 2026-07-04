@@ -185,12 +185,38 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
   // ── Mutation: Update Permissions ──
   const { mutate: handleUpdatePermissions, isPending: isUpdatingPermissions } = useMutation({
     mutationFn: (permissions: any) => updateGroupPermissions(groupId, permissions),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
-      toast.success("Group permissions updated");
+    onMutate: async (newPermissions: any) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ["group-info", groupId] });
+
+      // Snapshot the previous value
+      const previousGroup = queryClient.getQueryData(["group-info", groupId]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(["group-info", groupId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          group: {
+            ...old.group,
+            ...newPermissions
+          }
+        };
+      });
+
+      return { previousGroup };
     },
-    onError: (err: any) => {
+    onError: (err: any, newPermissions, context) => {
+      if (context?.previousGroup) {
+        queryClient.setQueryData(["group-info", groupId], context.previousGroup);
+      }
       toast.error(err?.response?.data?.error || "Failed to update permissions");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["group-info", groupId] });
+    },
+    onSuccess: () => {
+      toast.success("Group permissions updated");
     },
   });
 
