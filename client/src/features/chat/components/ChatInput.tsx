@@ -468,7 +468,46 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   };
 
   return (
-    <div className="flex flex-col bg-background border-t border-border">
+    <div className="flex flex-col bg-background border-t border-border relative">
+      {/* Mentions Dropdown - Moved to root to prevent any CSS clipping */}
+      {showMentions && orgUsers && thread?.type === 'group' && (
+          <div className="absolute bottom-[100%] mb-2 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[9999] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
+            {/* @Everyone / @all Option */}
+            {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
+            <button
+              className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors mb-1"
+              onClick={() => insertMention("Everyone", "everyone")}
+            >
+              <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 shadow-sm border border-emerald-500/20">
+                <Users className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[15px] font-semibold tracking-tight">Everyone</span>
+                <span className="text-[12px] text-muted-foreground/80 leading-tight">Mention all members in this chat</span>
+              </div>
+            </button>
+          )}
+          {orgUsers
+            .filter(u => u.name?.toLowerCase().includes(mentionQuery))
+            .map(u => (
+              <button
+                key={u._id || u.id}
+                className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors"
+                onClick={() => insertMention(u.name, u._id || u.id)}
+              >
+                {u.profilePicture ? (
+                  <img src={u.profilePicture} className="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm border border-border/50" alt="" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/20 text-sm font-bold uppercase">
+                    {(u.name || "?").charAt(0)}
+                  </div>
+                )}
+                <span className="text-[15px] font-semibold tracking-tight">{u.name}</span>
+              </button>
+            ))}
+        </div>
+      )}
+
       {/* Reply Preview */}
       {replyTo && (() => {
         const isMe = replyTo.sender_id === currentUserId;
@@ -761,44 +800,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 </PopoverContent>
               </Popover>
 
-              {/* Mentions Dropdown */}
-              {showMentions && orgUsers && thread?.type === 'group' && (
-                  <div className="absolute bottom-full mb-3 left-4 bg-popover text-popover-foreground border border-border shadow-2xl rounded-[1.25rem] max-h-72 overflow-y-auto z-[100] w-[320px] p-2 custom-scrollbar backdrop-blur-xl bg-opacity-95 dark:bg-[#1f2228] dark:border-[#2f3336]">
-                    {/* @Everyone / @all Option */}
-                    {("everyone".includes(mentionQuery) || "all".includes(mentionQuery)) && (
-                    <button
-                      className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors mb-1"
-                      onClick={() => insertMention("Everyone", "everyone")}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 shadow-sm border border-emerald-500/20">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[15px] font-semibold tracking-tight">Everyone</span>
-                        <span className="text-[12px] text-muted-foreground/80 leading-tight">Mention all members in this chat</span>
-                      </div>
-                    </button>
-                  )}
-                  {orgUsers
-                    .filter(u => u.name?.toLowerCase().includes(mentionQuery))
-                    .map(u => (
-                      <button
-                        key={u._id || u.id}
-                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-accent/80 flex items-center gap-3 transition-colors"
-                        onClick={() => insertMention(u.name, u._id || u.id)}
-                      >
-                        {u.profilePicture ? (
-                          <img src={u.profilePicture} className="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm border border-border/50" alt="" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm border border-primary/20 text-sm font-bold uppercase">
-                            {(u.name || "?").charAt(0)}
-                          </div>
-                        )}
-                        <span className="text-[15px] font-semibold tracking-tight">{u.name}</span>
-                      </button>
-                    ))}
-                </div>
-              )}
+              {/* Mentions dropdown moved to root */}
                   <div
                 ref={editorRef}
                 contentEditable
@@ -812,10 +814,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   const lastAtIndex = text.lastIndexOf('@');
                   if (lastAtIndex !== -1) {
                     const afterAt = text.slice(lastAtIndex + 1).replace(/[\r\n\u200B]+$/, "");
-                    const beforeAt = lastAtIndex === 0 ? "" : text.charAt(lastAtIndex - 1);
-                    
-                    if (/^[a-zA-Z0-9_]*$/.test(afterAt) && 
-                        (lastAtIndex === 0 || beforeAt === ' ' || beforeAt === '\u00A0' || beforeAt === '\n' || beforeAt === '\u200B')) {
+                    // Make the detection extremely lenient. If there is an @, just show the popup.
+                    if (!afterAt.includes(' ') && !afterAt.includes('\u00A0')) {
                       setShowMentions(true);
                       setMentionQuery(afterAt.toLowerCase());
                     } else {

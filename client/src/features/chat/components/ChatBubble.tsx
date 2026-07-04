@@ -165,6 +165,7 @@ export function ChatBubble({
   return (
     <>
     <div 
+      id={`msg-${message.id}`}
       className={`flex w-full items-start group ${isSelectionMode ? "cursor-pointer relative hover:bg-black/5 dark:hover:bg-white/5 py-1 -my-1 transition-colors" : ""} ${isSelected ? "bg-primary/10 hover:bg-primary/10 dark:bg-primary/20 dark:hover:bg-primary/20" : ""}`}
       onClick={(e) => {
         if (isSelectionMode) {

@@ -630,9 +630,14 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
           <div 
             className="flex items-center gap-3 px-4 py-2 bg-background border-b border-border shadow-sm shrink-0 cursor-pointer hover:bg-muted/30 transition-colors"
             onClick={() => {
-              // Note: Ideally scroll to message, but here we just show the text
               const el = document.getElementById(`msg-${topPinned.id}`);
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('bg-amber-500/10', 'dark:bg-amber-500/20', 'transition-colors', 'duration-500', 'rounded-lg');
+                setTimeout(() => {
+                  el.classList.remove('bg-amber-500/10', 'dark:bg-amber-500/20');
+                }, 2000);
+              }
             }}
           >
             <div className="text-amber-500">

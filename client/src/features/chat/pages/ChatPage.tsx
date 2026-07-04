@@ -951,7 +951,13 @@ export function ChatPage() {
                 <div 
                   onClick={() => {
                     const el = document.getElementById(`msg-${topPinned.id}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      el.classList.add('bg-amber-500/10', 'dark:bg-amber-500/20', 'transition-colors', 'duration-500', 'rounded-lg');
+                      setTimeout(() => {
+                        el.classList.remove('bg-amber-500/10', 'dark:bg-amber-500/20');
+                      }, 2000);
+                    }
                   }}
                   className="flex items-center gap-3 px-4 py-2 bg-card border-b border-border/50 cursor-pointer hover:bg-muted/50 transition-colors"
                 >
