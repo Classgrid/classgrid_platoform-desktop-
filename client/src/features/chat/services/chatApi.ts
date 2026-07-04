@@ -194,7 +194,6 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   }
 
   const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
     timeout: 15000, // Now it's just sending a JSON string, no large files, so 15s is plenty
   });
   return res.data.message;
