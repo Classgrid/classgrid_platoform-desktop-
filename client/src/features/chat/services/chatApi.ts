@@ -398,8 +398,8 @@ export async function fetchGroupPolls(groupId: string): Promise<Poll[]> {
   return res.data.polls;
 }
 
-export async function pinMessage(threadId: string, messageId: string, is_pinned: boolean) {
-  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/pin`, { is_pinned });
+export async function pinMessage(threadId: string, messageId: string, is_pinned: boolean, durationHours?: number) {
+  const res = await apiClient.patch(`/api/threads/${threadId}/messages/${messageId}/pin`, { is_pinned, durationHours });
   return res.data;
 }
 

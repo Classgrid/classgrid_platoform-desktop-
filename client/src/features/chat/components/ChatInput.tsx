@@ -816,11 +816,10 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     const preCaretRange = range.cloneRange();
                     preCaretRange.selectNodeContents(e.currentTarget);
                     preCaretRange.setEnd(range.endContainer, range.endOffset);
-                    const caretOffset = preCaretRange.toString().length;
+                    const textBeforeCaret = preCaretRange.toString();
                     
-                    const textBeforeCaret = text.slice(0, caretOffset);
                     // Match @ preceded by start of string, space, or non-breaking space
-                    const match = textBeforeCaret.match(/(?:^|[\s\xA0\u200B])@([a-zA-Z0-9_]*)$/);
+                    const match = textBeforeCaret.match(/(?:^|[^\w])@([a-zA-Z0-9_]*)$/);
                     if (match) {
                       setShowMentions(true);
                       setMentionQuery(match[1].toLowerCase());
