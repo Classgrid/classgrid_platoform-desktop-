@@ -381,7 +381,7 @@ export const healthCheck = async (req, res) => {
         const IORedis = (await import("ioredis")).default;
         const redis = new IORedis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
             maxRetriesPerRequest: 1,
-            connectTimeout: 3000
+            connectTimeout: 30000
         });
         await redis.ping();
         health.services.redis = { status: "UP", ping: "OK" };

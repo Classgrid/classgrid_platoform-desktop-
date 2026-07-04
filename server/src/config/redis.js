@@ -4,7 +4,7 @@ const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const isDev = process.env.NODE_ENV !== "production";
 
 const redis = new IORedis(REDIS_URL, {
-  connectTimeout: 5000,
+  connectTimeout: 50000,
   maxRetriesPerRequest: null, // REQUIRED BY BULLMQ
   enableOfflineQueue: false,
   lazyConnect: isDev, // Don't auto-connect in dev if Redis isn't running

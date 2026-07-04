@@ -30,7 +30,7 @@ export function connectSocket(token: string): Socket {
     reconnection: true,
     reconnectionAttempts: 10,
     reconnectionDelay: 2000,
-    timeout: 10000,
+    timeout: 100000,
   });
 
   socket.on("connect", () => {

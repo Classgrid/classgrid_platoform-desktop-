@@ -670,7 +670,7 @@ router.post("/:examId/run-code", isAuthenticated, requireRole("student"), async 
             language: runtime.language,
             version: runtime.version,
             files: [{ content: code }],
-        }, { timeout: 10000 });
+        }, { timeout: 100000 });
 
         const { run } = response.data;
         res.json({
