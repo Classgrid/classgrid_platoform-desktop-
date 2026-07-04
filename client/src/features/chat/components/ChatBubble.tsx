@@ -705,7 +705,7 @@ export function ChatBubble({
                   <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                 </ContextMenuItem>
               )}
-              {onStar && (
+              {onStar && message.message && (
                 <ContextMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                   <Star className="w-4 h-4 mr-2" /> Star
                 </ContextMenuItem>
@@ -802,7 +802,7 @@ export function ChatBubble({
                     <Pin className="w-4 h-4 mr-2" /> {message.is_pinned ? "Unpin" : "Pin"}
                   </DropdownMenuItem>
                 )}
-                {onStar && (
+                {onStar && message.message && (
                   <DropdownMenuItem onClick={() => onStar(message.id)} className="cursor-pointer py-2 text-amber-500 hover:text-amber-600 focus:text-amber-600 focus:bg-amber-50 dark:focus:bg-amber-950">
                     <Star className="w-4 h-4 mr-2" /> Star
                   </DropdownMenuItem>
