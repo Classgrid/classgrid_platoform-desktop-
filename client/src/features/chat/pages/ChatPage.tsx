@@ -513,6 +513,22 @@ export function ChatPage() {
     }
   };
 
+  const handleBulkClear = async (threadIds: string[]) => {
+    if (threadIds.length === 0) return;
+    try {
+      for (const id of threadIds) {
+        await clearChat(id);
+      }
+      setSelectedMessageIds(new Set());
+      setIsSelectionMode(false);
+      // Let websocket sync updates or manually refresh
+      loadThreads();
+      toast.success(`${threadIds.length} chat(s) cleared`);
+    } catch (err) {
+      toast.error("Failed to clear chats");
+    }
+  };
+
   const handlePinMessage = async (msgId: string, isPinned: boolean) => {
     if (isPinned) {
       setPinningMessageId(msgId);
@@ -860,6 +876,7 @@ export function ChatPage() {
           onMarkAllRead={handleMarkAllRead}
           onBulkDelete={handleBulkDelete}
           onBulkMute={handleBulkMute}
+          onBulkClear={handleBulkClear}
           onOpenStarredMessages={() => setChatSideView('starred')}
           isLoading={threadsLoading}
           onlineUsers={onlineUsers}

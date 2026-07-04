@@ -270,10 +270,18 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
             </DropdownMenuItem>
 
             {thread.type === "group" ? (
-              <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onLeaveGroup || onDeleteChat}>
-                <LogOut className="w-4 h-4 mr-2" />
-                <span>Leave group</span>
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onLeaveGroup || onDeleteChat}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Leave group</span>
+                </DropdownMenuItem>
+                {thread.myRole === 'admin' && (
+                  <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onDeleteChat}>
+                    <Trash className="w-4 h-4 mr-2" />
+                    <span>Delete group</span>
+                  </DropdownMenuItem>
+                )}
+              </>
             ) : (
               <DropdownMenuItem className="cursor-pointer py-2 text-danger focus:text-danger focus:bg-danger/10" onClick={onDeleteChat}>
                 <Trash className="w-4 h-4 mr-2" />

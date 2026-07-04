@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check, Image as ImageIcon, Video, FileText, Mic, BarChart2, Paperclip, BadgeCheck } from "lucide-react";
+import { Search, Plus, Users, MessageSquare, MessageSquarePlus, MoreVertical, Star, CheckSquare, CheckCheck, X, Trash2, BellOff, Check, Image as ImageIcon, Video, FileText, Mic, BarChart2, Paperclip, BadgeCheck, XCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ChatThread } from "../services/chatApi";
 
@@ -26,6 +26,7 @@ interface ChatSidebarProps {
   onFilterChange: (filter: string) => void;
   onBulkDelete?: (threadIds: string[]) => void;
   onBulkMute?: (threadIds: string[]) => void;
+  onBulkClear?: (threadIds: string[]) => void;
 }
 
 function getInitials(name: string) {
@@ -84,6 +85,7 @@ export function ChatSidebar({
   onFilterChange,
   onBulkDelete,
   onBulkMute,
+  onBulkClear,
 }: ChatSidebarProps) {
   const [search, setSearch] = useState("");
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -116,6 +118,14 @@ export function ChatSidebar({
   const handleBulkMute = () => {
     if (onBulkMute && selectedChats.size > 0) {
       onBulkMute(Array.from(selectedChats));
+      setIsSelectionMode(false);
+      setSelectedChats(new Set());
+    }
+  };
+
+  const handleBulkClear = () => {
+    if (onBulkClear && selectedChats.size > 0) {
+      onBulkClear(Array.from(selectedChats));
       setIsSelectionMode(false);
       setSelectedChats(new Set());
     }
@@ -175,6 +185,14 @@ export function ChatSidebar({
                     title="Mute selected"
                   >
                     <BellOff className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleBulkClear}
+                    disabled={selectedChats.size === 0}
+                    className="p-2 text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-full transition-colors disabled:opacity-50"
+                    title="Clear selected"
+                  >
+                    <XCircle className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={handleBulkDelete}
