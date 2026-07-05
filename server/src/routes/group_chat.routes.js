@@ -14,7 +14,7 @@ const sb = primarySupabaseClient;
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB for group photos
+  limits: { fileSize: 25 * 1024 * 1024 } // Increased to 25MB for group photos
 });
 
 function toStorageSlug(value, fallback = 'unknown') {
@@ -147,7 +147,8 @@ router.post('/', isAuthenticated, async (req, res) => {
     } else {
       const invalidUsers = users.filter(u => u.organization_id?.toString() !== orgId);
       if (invalidUsers.length > 0) {
-        return res.status(400).json({ error: 'All members must be from the same organization' });
+        const invalidNames = invalidUsers.map(u => u.name).join(', ');
+        return res.status(400).json({ error: `Cannot create group. The following users are not in your organization: ${invalidNames}` });
       }
     }
 
@@ -246,11 +247,28 @@ router.get('/explore', isAuthenticated, async (req, res) => {
        }
     }
 
+    const creatorIds = [...new Set(groups.map(g => g.created_by).filter(Boolean))];
+    let creatorMap = {};
+    if (creatorIds.length > 0) {
+       const creators = await User.find({ _id: { $in: creatorIds } }).select('name email').lean();
+       creators.forEach(c => { creatorMap[c._id.toString()] = c; });
+    }
+
+    const userId = req.user._id.toString();
+    const { data: myRequests } = await sb.from('chat_group_join_requests')
+       .select('group_id')
+       .eq('user_id', userId)
+       .eq('status', 'pending');
+    
+    const pendingGroupIds = new Set(myRequests?.map(r => r.group_id) || []);
+
     const result = groups.map(g => {
        const thread = threads?.find(t => t.group_id === g.id);
        return {
           ...g,
-          member_count: thread ? (memberCounts[thread.id] || 0) : 0
+          creator: creatorMap[g.created_by] || null,
+          member_count: thread ? (memberCounts[thread.id] || 0) : 0,
+          has_pending_request: pendingGroupIds.has(g.id)
        };
     });
     
@@ -1067,6 +1085,28 @@ router.post('/:id/join-request', isAuthenticated, async (req, res) => {
     }).select().single();
 
     if (reqErr) throw reqErr;
+    
+    // Send Notification to admin(s)
+    if (thread) {
+       const { data: admins } = await sb.from('chat_thread_members')
+         .select('user_id')
+         .eq('thread_id', thread.id)
+         .in('role', ['admin', 'creator']);
+         
+       if (admins && admins.length > 0) {
+          const { dispatchNotification } = await import('../services/notification.service.js');
+          for (const admin of admins) {
+             if (admin.user_id === userId) continue;
+             await dispatchNotification({
+                recipientId: admin.user_id,
+                type: 'group_join',
+                title: 'New Join Request',
+                body: `${req.user.name || 'A user'} wants to join "${group.name}".`,
+                link: `/chat`, // Usually clicking notification takes them to chat where they can review
+             }).catch(console.error); // Catch error so it doesn't block request
+          }
+       }
+    }
     
     res.status(201).json({ request });
   } catch (err) {

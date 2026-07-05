@@ -6,9 +6,10 @@ import { Input } from "@/components/marketing_ui/input";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 import type { OrgUser, ChatGroup } from "../services/chatApi";
 import { exploreGroups } from "../services/chatApi";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/apiClient";
+import { GroupBlueMark } from "@/components/marketing_ui/group-blue-mark";
 
 interface NewChatSidebarProps {
   onClose: () => void;
@@ -37,6 +38,8 @@ export function NewChatSidebar({
     queryFn: exploreGroups,
   });
 
+  const queryClient = useQueryClient();
+
   const { mutate: requestJoin, isPending: isRequesting } = useMutation({
     mutationFn: async (groupId: string) => {
       const res = await apiClient.post(`/api/group-chat/${groupId}/join-request`);
@@ -44,6 +47,7 @@ export function NewChatSidebar({
     },
     onSuccess: () => {
       toast.success("Join request sent!");
+      queryClient.invalidateQueries({ queryKey: ["explore-groups"] });
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.error || "Failed to send request");
@@ -171,14 +175,17 @@ export function NewChatSidebar({
                 {filteredGroups.map((group, index) => (
                   <div key={group.id} className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 overflow-hidden">
-                      {group.avatar ? (
-                        <img src={group.avatar} alt={group.name} className="w-full h-full object-cover" />
+                      {group.avatar_url ? (
+                        <img src={group.avatar_url} alt={group.name} className="w-full h-full object-cover" />
                       ) : (
                         <Users className="w-5 h-5 text-primary" />
                       )}
                     </div>
                     <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredGroups.length - 1 ? 'border-b border-border' : ''}`}>
-                      <p className="text-[17px] font-medium text-foreground truncate">{group.name}</p>
+                      <p className="text-[17px] font-medium text-foreground flex items-center gap-1.5 truncate">
+                        {group.name}
+                        <GroupBlueMark isOfficial={!!(group.is_official || group.is_created_by_super_admin)} className="shrink-0" />
+                      </p>
                       <p className="text-[13px] text-muted-foreground mt-0.5">
                         {group.member_count} members • Admin: {group.creator?.name || 'Unknown'}
                       </p>
@@ -190,10 +197,14 @@ export function NewChatSidebar({
                       {group.require_join_approval ? (
                         <button 
                           onClick={() => requestJoin(group.id)}
-                          disabled={isRequesting}
-                          className="px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground text-xs font-semibold rounded-full transition-colors flex items-center gap-1"
+                          disabled={isRequesting || group.has_pending_request}
+                          className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-colors flex items-center gap-1 ${
+                            group.has_pending_request 
+                              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                              : 'bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground'
+                          }`}
                         >
-                          <UserPlus className="w-3 h-3" /> Request
+                          <UserPlus className="w-3 h-3" /> {group.has_pending_request ? "Requested" : "Request"}
                         </button>
                       ) : (
                         <button 

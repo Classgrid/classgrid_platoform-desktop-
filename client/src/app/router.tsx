@@ -59,6 +59,7 @@ import DateTimePickerSandbox from "@/features/sandbox/pages/DateTimePickerSandbo
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
+import ClassroomDetailPage from "@/features/classrooms/pages/ClassroomDetailPage";
 import { WebsiteCMSPage } from "@/features/website_cms/pages/WebsiteCMSPage";
 import { JoinRequestPage } from "@/features/chat/pages/JoinRequestPage";
 
@@ -304,6 +305,7 @@ export function AppRouter() {
           {/* ── Common pages ── */}
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/classroom" element={<ClassroomsPage />} />
+          <Route path="/classroom/:id" element={<ClassroomDetailPage />} />
           <Route path="/classrooms" element={<ClassroomsPage />} />
           <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
           <Route path="/tools" element={<GenericPage title="Schedule" />} />
