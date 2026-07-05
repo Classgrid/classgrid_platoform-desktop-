@@ -488,7 +488,12 @@ export function ChatPage() {
       const thread = response.thread;
       
       if (group?.id && photo) {
-        await uploadGroupPhoto(group.id, photo);
+        try {
+          await uploadGroupPhoto(group.id, photo);
+        } catch (photoErr: any) {
+          console.error('Photo upload failed:', photoErr);
+          toast.error("Group created, but photo upload failed (might be too large).");
+        }
       }
 
       // Construct new group object optimistically
@@ -514,7 +519,7 @@ export function ChatPage() {
       toast.success("Group created successfully!");
     } catch (err: any) {
       console.error('Group creation failed:', err?.response?.data || err?.message || err);
-      toast.error(err?.response?.data?.error || "Failed to create group");
+      toast.error(err?.response?.data?.error || err?.message || "Failed to create group");
     }
   };
 

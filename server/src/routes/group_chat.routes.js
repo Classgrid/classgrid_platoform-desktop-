@@ -212,7 +212,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     res.status(201).json({ group, thread });
   } catch (err) {
     console.error('Group create error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || err.details || JSON.stringify(err) || 'Unknown error' });
   }
 });
 
