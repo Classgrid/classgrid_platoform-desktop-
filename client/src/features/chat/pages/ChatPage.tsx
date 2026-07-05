@@ -34,7 +34,7 @@ import {
   type OrgUser,
   type Poll,
 } from "../services/chatApi";
-import { useUserChannel, useThreadChannel } from "../hooks/useRealtimeChat";
+import { useUserChannel, useThreadChannel, useOrgChannel } from "../hooks/useRealtimeChat";
 import { useOnlineUsers } from "../context/PresenceContext";
 
 import { ChatSidebar } from "../components/ChatSidebar";
@@ -632,6 +632,13 @@ export function ChatPage() {
 
   // -- Realtime Handlers --
   
+  // 0. Org-wide updates (e.g. new public groups)
+  useOrgChannel(currentUser?.organization_id || null, {
+    onExploreGroupsUpdated: () => {
+      queryClient.invalidateQueries({ queryKey: ["explore-groups"] });
+    }
+  });
+
   // 1. Sidebar Updates (via User channel)
   useUserChannel(currentUserId || null, { onThreadUpdated: (payload) => {
     if (payload.action === 'new_group') {

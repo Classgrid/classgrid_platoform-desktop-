@@ -64,6 +64,7 @@ export function NewChatSidebar({
     },
     onSuccess: () => {
       toast.success("Joined group successfully!");
+      queryClient.invalidateQueries({ queryKey: ["chat-threads"] });
       onClose(); // Ideally navigate to the group
     },
     onError: (err: any) => {

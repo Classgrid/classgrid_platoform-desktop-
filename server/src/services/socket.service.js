@@ -67,6 +67,9 @@ export const initSocket = (server) => {
             redisClient.xgroup("CREATE", orgStreamKey, STREAM_GROUP, "0", "MKSTREAM").catch(() => {});
         }
 
+        // Join global organization room for org-wide broadcasts (e.g. new public groups)
+        socket.join(`org:${orgId}`);
+
         // Join personal room for private direct messages
         socket.join(`${orgId}:${socket.userId}`);
 

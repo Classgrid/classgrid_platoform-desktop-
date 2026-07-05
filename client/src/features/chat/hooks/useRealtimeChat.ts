@@ -30,6 +30,10 @@ export function useRealtimeChannel(
       socket.emit("join_thread", channelId);
     } else if (channelType === "user") {
       socket.emit("join_user_channel", channelId);
+    } else if (channelType === "org") {
+      // Assuming socket.service.js already joined it globally on connect,
+      // or we can emit an explicit join if we wanted. For now, just listen.
+      socket.emit("join_org_channel", channelId);
     }
 
     // Register event listeners for each handler
@@ -75,6 +79,17 @@ export function useUserChannel(
   useRealtimeChannel(userId ? `user:${userId}` : null, {
     thread_updated: (payload: any) => handlers.onThreadUpdated?.(payload),
     thread_deleted: (payload: any) => handlers.onThreadDeleted?.(payload),
+  });
+}
+
+export function useOrgChannel(
+  orgId: string | null,
+  handlers: {
+    onExploreGroupsUpdated?: (data: any) => void;
+  }
+) {
+  useRealtimeChannel(orgId ? `org:${orgId}` : null, {
+    explore_groups_update: (payload: any) => handlers.onExploreGroupsUpdated?.(payload),
   });
 }
 

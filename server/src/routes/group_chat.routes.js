@@ -213,6 +213,10 @@ router.post('/', isAuthenticated, async (req, res) => {
       })
     )).catch(err => console.error('Group broadcast error:', err));
 
+    if (!is_private && threadOrgId) {
+       broadcastToChannel(`org:${threadOrgId}`, 'explore_groups_update', { groupId: group.id }).catch(() => {});
+    }
+
     res.status(201).json({ group, thread });
   } catch (err) {
     console.error('Group create error:', err);
@@ -432,7 +436,22 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     // Update thread's updated_at
     await sb.from('chat_threads').update({ updated_at: new Date().toISOString() }).eq('group_id', req.params.id);
 
+    // Broadcast to active thread chat
     broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { id: thread.id, groupId: req.params.id, ...updates });
+
+    // Broadcast to all members' sidebars
+    const { data: members } = await sb.from('chat_thread_members').select('user_id').eq('thread_id', thread.id);
+    if (members) {
+      Promise.all(members.map(m => 
+        broadcastToChannel(`user:${m.user_id}`, 'thread_updated', { 
+          id: thread.id, 
+          threadId: thread.id, 
+          action: 'group_updated',
+          groupId: req.params.id,
+          ...updates 
+        })
+      )).catch(err => console.error('Group update broadcast error:', err));
+    }
 
     res.json({ group: data });
   } catch (err) {
@@ -476,6 +495,20 @@ router.post('/:id/photo', isAuthenticated, upload.single('photo'), async (req, r
     if (error) throw error;
 
     broadcastToChannel(`thread:${thread.id}`, 'thread_updated', { id: thread.id, groupId: req.params.id, [updateField]: publicUrl });
+
+    // Broadcast to all members' sidebars
+    const { data: members } = await sb.from('chat_thread_members').select('user_id').eq('thread_id', thread.id);
+    if (members) {
+      Promise.all(members.map(m => 
+        broadcastToChannel(`user:${m.user_id}`, 'thread_updated', { 
+          id: thread.id, 
+          threadId: thread.id, 
+          action: 'group_updated',
+          groupId: req.params.id,
+          [updateField]: publicUrl 
+        })
+      )).catch(err => console.error('Group photo update broadcast error:', err));
+    }
 
     res.json({ group: data });
   } catch (err) {
@@ -799,12 +832,29 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
       return res.status(403).json({ error: 'Only admins can delete the group' });
     }
 
+    // Fetch members BEFORE deleting so we can notify them
+    let members = [];
+    if (thread) {
+      const { data } = await sb.from('chat_thread_members').select('user_id').eq('thread_id', thread.id);
+      if (data) members = data;
+    }
+
     // CASCADE will handle: thread → members, messages → attachments, polls → votes
     const { error } = await sb.from('chat_groups').delete().eq('id', req.params.id);
     if (error) throw error;
 
     if (thread) {
       broadcastToChannel(`thread:${thread.id}`, 'thread_deleted', { threadId: thread.id });
+      
+      // Notify all members' sidebars
+      Promise.all(members.map(m => 
+        broadcastToChannel(`user:${m.user_id}`, 'thread_deleted', { threadId: thread.id, action: 'group_deleted' })
+      )).catch(() => {});
+      
+      // Notify org to refresh explore groups tab
+      if (!group.is_private && group.org_id) {
+        broadcastToChannel(`org:${group.org_id}`, 'explore_groups_update', { groupId: group.id }).catch(() => {});
+      }
     }
 
     res.json({ ok: true, deletedGroup: req.params.id });
