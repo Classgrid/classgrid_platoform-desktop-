@@ -39,7 +39,7 @@ export function AddGroupMemberSidebar({
   const existingSet = useMemo(() => new Set(existingMemberIds), [existingMemberIds]);
 
   const filteredAndSortedUsers = useMemo(() => {
-    let list = users.filter((u) => u._id !== currentUserId && !existingSet.has(u._id));
+    let list = users.filter((u) => u._id !== currentUserId && u.role !== 'super_admin' && !existingSet.has(u._id));
 
     if (search.trim()) {
       const query = search.toLowerCase();

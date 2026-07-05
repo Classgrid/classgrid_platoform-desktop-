@@ -66,7 +66,7 @@ export function GroupCreateSidebar({
   }
 
   const filteredAndSortedUsers = useMemo(() => {
-    let list = users.filter((u) => u._id !== currentUserId);
+    let list = users.filter((u) => u._id !== currentUserId && u.role !== 'super_admin');
 
     if (search.trim()) {
       const query = search.toLowerCase();
