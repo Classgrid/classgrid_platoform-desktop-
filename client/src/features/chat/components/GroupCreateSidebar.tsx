@@ -251,11 +251,6 @@ export function GroupCreateSidebar({
                               <p className={`text-[17px] truncate transition-opacity duration-200 ${isSelected ? 'text-muted-foreground' : 'text-foreground'}`}>
                                 {user.name}
                               </p>
-                              {isForbidden && (
-                                <span className="text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-full shrink-0 ml-2">
-                                  Not Allowed
-                                </span>
-                              )}
                             </div>
                             <p className="text-[13px] text-muted-foreground truncate mt-0.5">
                               {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ''}
