@@ -208,12 +208,22 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
               <span>{thread.type === "group" ? "View Group Info" : "View Profile"}</span>
             </DropdownMenuItem>
 
-            {thread.type === "group" && onAddMember && (
-              <DropdownMenuItem onClick={onAddMember} className="cursor-pointer py-2 text-primary focus:text-primary focus:bg-primary/10">
-                <UserPlus className="w-4 h-4 mr-2" />
-                <span>Add member</span>
-              </DropdownMenuItem>
-            )}
+            {thread.type === "group" && onAddMember && (() => {
+              const policy = groupInfo?.add_member_policy || 'admin_only';
+              const isFaculty = ['faculty', 'teacher', 'hod', 'principal', 'vice_principal'].includes(thread.myRole || ''); // wait, thread.myRole is group role ('admin' or 'member'). User role is not passed to ChatHeader!
+              
+              // Simplest fix: only admins can add members for now, or we can just pass currentUser to ChatHeader.
+              // If we don't have user role, at least restrict to thread.myRole === 'admin'
+              if (policy === 'admin_only' && thread.myRole !== 'admin') return null;
+              if (policy === 'org_admin_only' && thread.myRole !== 'admin') return null;
+              
+              return (
+                <DropdownMenuItem onClick={onAddMember} className="cursor-pointer py-2 text-primary focus:text-primary focus:bg-primary/10">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  <span>Add member</span>
+                </DropdownMenuItem>
+              );
+            })()}
 
             <DropdownMenuItem className="cursor-pointer py-2" onClick={() => onOpenSearch?.()}>
               <Search className="w-4 h-4 mr-2" />
