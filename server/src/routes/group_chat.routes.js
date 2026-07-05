@@ -137,7 +137,7 @@ router.post('/', isAuthenticated, async (req, res) => {
 
     // Validate all members are in the same org
     const allIds = [...new Set([userId, ...memberIds])];
-    const users = await User.find({ _id: { $in: allIds } }).select('organization_id name').lean();
+    const users = await User.find({ _id: { $in: allIds } }).select('organization_id name role').lean();
     
     let threadOrgId = orgId || null;
     
@@ -189,12 +189,16 @@ router.post('/', isAuthenticated, async (req, res) => {
       .single();
     if (threadErr) throw threadErr;
 
-    // Add members (creator as admin, rest as members)
-    const memberRecords = allIds.map(id => ({
-      thread_id: thread.id,
-      user_id: id,
-      role: id === userId ? 'admin' : 'member',
-    }));
+    // Add members (creator as admin, rest as members, unless they match auto-grant admin roles)
+    const memberRecords = allIds.map(id => {
+      const u = users.find(user => user._id.toString() === id);
+      const isAutoAdmin = admin_roles && admin_roles.includes(u?.role);
+      return {
+        thread_id: thread.id,
+        user_id: id,
+        role: (id === userId || isAutoAdmin) ? 'admin' : 'member',
+      };
+    });
 
     const { error: memErr } = await sb.from('chat_thread_members').insert(memberRecords);
     if (memErr) throw memErr;

@@ -46,8 +46,8 @@ export function GroupCreateSidebar({
   const [messageTtl, setMessageTtl] = useState<number>(0);
   const [groupPermissions, setGroupPermissions] = useState<any>({ 
     send_message_policy: 'all',
-    add_member_policy: 'all',
-    edit_info_policy: 'all',
+    add_member_policy: 'admin_only',
+    edit_info_policy: 'admin_only',
     send_attachments_policy: 'all',
     create_poll_policy: 'all',
     auto_add_roles: [], 
