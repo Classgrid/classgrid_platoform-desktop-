@@ -585,6 +585,20 @@ router.put('/:id/permissions', isAuthenticated, async (req, res) => {
       .single();
     if (error) throw error;
 
+    // Sync `allow_replies` on the thread if `send_message_policy` was updated
+    if (updates.send_message_policy) {
+      const allowReplies = updates.send_message_policy === 'all';
+      await sb.from('chat_threads')
+        .update({ allow_replies: allowReplies })
+        .eq('group_id', req.params.id);
+        
+      broadcastToChannel(`thread:${membership.thread_id}`, 'thread_updated', { 
+        id: membership.thread_id, 
+        groupId: req.params.id, 
+        allow_replies: allowReplies 
+      });
+    }
+
     // TODO: Write to chat_group_audit_logs once model is ready
     try {
       await sb.from('chat_group_audit_logs').insert({
