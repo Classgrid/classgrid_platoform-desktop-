@@ -85,12 +85,15 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
 
   // Read-only logic:
   // For users, it's read-only if publicUser is passed.
-  // For groups, it's editable only if the current user is the owner (creator).
-  const isReadOnly = mode === "group" 
-    ? (groupData?.group?.created_by !== currentUser?._id)
+  // For groups, it respects the edit_info_policy and the user's role in the group.
+  const isGroup = mode === "group";
+  const myGroupRole = groupData?.myRole || (groupData?.group?.created_by === currentUser?._id ? "admin" : "member");
+  const editInfoPolicy = groupData?.group?.edit_info_policy || "admin_only";
+  
+  const isReadOnly = isGroup 
+    ? (editInfoPolicy === "admin_only" ? myGroupRole !== "admin" : false)
     : !!publicUser;
   
-  const isGroup = mode === "group";
   const onlineUsers = useOnlineUsers();
 
   // Re-usable auth query hook can be used here, but keeping apiClient for direct access for now.
