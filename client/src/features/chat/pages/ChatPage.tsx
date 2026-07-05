@@ -651,6 +651,34 @@ export function ChatPage() {
       return;
     }
 
+    if (payload.action === 'group_updated') {
+      if (payload.groupId) {
+        queryClient.invalidateQueries({ queryKey: ["group-info", String(payload.groupId)] });
+      }
+      setThreads(prev => prev.map(t => {
+        if (t.groupId === payload.groupId) {
+          return {
+            ...t,
+            name: payload.name || t.name,
+            description: payload.description || t.description,
+            avatar: payload.avatar_url || t.avatar
+          };
+        }
+        return t;
+      }));
+      // We don't strictly need to update activeThread here since the thread channel also gets this,
+      // but doing it here guarantees it's updated.
+      if (activeThread?.groupId === payload.groupId) {
+         setActiveThread(prev => prev ? {
+             ...prev,
+             name: payload.name || prev.name,
+             description: payload.description || prev.description,
+             avatar: payload.avatar_url || prev.avatar
+         } : prev);
+      }
+      return;
+    }
+
     if (payload.threadId && payload.message) {
       // Reorder sidebar and update last message
       setThreads((prev) => {
