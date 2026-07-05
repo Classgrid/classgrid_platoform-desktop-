@@ -25,11 +25,9 @@ async function getIO() {
     } catch (err) {
       console.error("[Realtime] Failed to import socket.service.js:", err.message);
       return null;
-    }
   }
-  return _socketModule.io;
+  return _socketModule.getIO();
 }
-
 /**
  * Broadcast an event to a Socket.IO room (replaces Supabase channel broadcast).
  * 
