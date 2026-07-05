@@ -518,9 +518,9 @@ export function ChatPage() {
       setIsGroupModalOpen(false);
       toast.success("Group created successfully!");
     } catch (err: any) {
-      console.error('Group creation failed:', err?.response?.data || err?.message || err);
-      const serverMsg = err?.response?.data?.error || err?.response?.data?.message || (typeof err?.response?.data === 'string' ? err?.response?.data : null);
-      toast.error(serverMsg || err?.message || "Failed to create group");
+      console.error('Group creation failed:', err);
+      const serverMsg = err?.error || err?.message || err?.response?.data?.error || err?.response?.data?.message;
+      toast.error(serverMsg || "Failed to create group");
     }
   };
 
