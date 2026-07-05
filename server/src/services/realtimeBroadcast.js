@@ -25,6 +25,7 @@ async function getIO() {
     } catch (err) {
       console.error("[Realtime] Failed to import socket.service.js:", err.message);
       return null;
+    }
   }
   return _socketModule.getIO();
 }
