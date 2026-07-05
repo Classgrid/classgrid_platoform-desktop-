@@ -57,11 +57,11 @@ export function GroupCreateSidebar({
     require_join_approval: false
   });
 
-  const { data: user } = useCurrentUser();
+  const { data: currentUser } = useCurrentUser();
   const { data: dynamicRolesData } = useOrgRoles();
   let availableRoles = dynamicRolesData || [];
 
-  if (user?.role === 'super_admin') {
+  if (currentUser?.role === 'super_admin') {
     availableRoles = availableRoles.filter((r: string) => r !== 'student');
   }
 
@@ -214,11 +214,15 @@ export function GroupCreateSidebar({
                   ) : (
                     filteredAndSortedUsers.map((user, index) => {
                       const isSelected = selectedIds.has(user._id);
+                      const isForbidden = user.role === 'super_admin' && currentUser?.role !== 'super_admin';
                       return (
                         <button
                           key={user._id}
-                          onClick={() => toggleUser(user._id)}
-                          className="w-full flex items-center gap-4 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left group relative"
+                          onClick={() => {
+                            if (!isForbidden) toggleUser(user._id);
+                          }}
+                          disabled={isForbidden}
+                          className={`w-full flex items-center gap-4 px-4 py-2 transition-colors text-left group relative ${isForbidden ? 'opacity-60 cursor-not-allowed bg-red-50/30 dark:bg-red-900/10' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
                         >
                           <div className={`relative shrink-0 transition-opacity duration-200 ${isSelected ? 'opacity-60' : 'opacity-100'}`}>
                             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center overflow-hidden">
@@ -243,9 +247,16 @@ export function GroupCreateSidebar({
                             )}
                           </div>
                           <div className={`flex-1 min-w-0 pb-3 pt-1 ${index !== filteredAndSortedUsers.length - 1 ? 'border-b border-border' : ''}`}>
-                            <p className={`text-[17px] truncate transition-opacity duration-200 ${isSelected ? 'text-muted-foreground' : 'text-foreground'}`}>
-                              {user.name}
-                            </p>
+                            <div className="flex items-center justify-between">
+                              <p className={`text-[17px] truncate transition-opacity duration-200 ${isSelected ? 'text-muted-foreground' : 'text-foreground'}`}>
+                                {user.name}
+                              </p>
+                              {isForbidden && (
+                                <span className="text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-full shrink-0 ml-2">
+                                  Not Allowed
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[13px] text-muted-foreground truncate mt-0.5">
                               {user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'} {user.email ? `• ${user.email}` : ''}
                             </p>
