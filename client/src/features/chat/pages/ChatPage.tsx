@@ -519,7 +519,8 @@ export function ChatPage() {
       toast.success("Group created successfully!");
     } catch (err: any) {
       console.error('Group creation failed:', err?.response?.data || err?.message || err);
-      toast.error(err?.response?.data?.error || err?.message || "Failed to create group");
+      const serverMsg = err?.response?.data?.error || err?.response?.data?.message || (typeof err?.response?.data === 'string' ? err?.response?.data : null);
+      toast.error(serverMsg || err?.message || "Failed to create group");
     }
   };
 

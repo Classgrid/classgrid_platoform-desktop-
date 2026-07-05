@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, Bell, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut, Clock, BadgeCheck, Star } from "lucide-react";
+import { MoreVertical, Users, ArrowLeft, User, Search, BellOff, Bell, CheckSquare, Trash2, ShieldAlert, XCircle, Trash, UserPlus, LogOut, Clock, BadgeCheck, Star, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGroupInfo } from "../services/chatApi";
 import type { ChatThread, OrgUser } from "../services/chatApi";
@@ -188,10 +188,10 @@ export function ChatHeader({ thread, onBack, onShowInfo, onAvatarClick, onlineUs
       <div className="flex items-center gap-1.5 shrink-0 z-20 bg-background">
         <button
           className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors outline-none"
-          title="Search"
+          title={isSearchOpen ? "Close Search" : "Search"}
           onClick={() => onOpenSearch?.()}
         >
-          <Search className="w-5 h-5" />
+          {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
