@@ -196,18 +196,6 @@ app.use(generalLimiter);
 // Structured Logging via Winston
 app.use(winstonMiddleware);
 
-// Debug Middleware: Log all requests
-app.use((req, res, next) => {
-  if (
-    !req.originalUrl.includes("/api/super-admin/error-logs") &&
-    !req.originalUrl.includes("/api/super-admin/health") &&
-    !req.originalUrl.includes("/api/super-admin/feature-flags")
-  ) {
-    console.log(`➡️  ${req.method} ${req.originalUrl}`);
-  }
-  next();
-});
-
 // API Metrics Middleware (zero-overhead in-memory buffering)
 app.use(metricsMiddleware);
 
