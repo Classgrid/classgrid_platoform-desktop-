@@ -39,7 +39,7 @@ const transports = [
 if (process.env.MONGODB_URI) {
     transports.push(
         new winston.transports.MongoDB({
-            level: "error", // Only store errors in DB to save space
+            // Removed level restriction to store ALL logs (info, warn, error)
             db: process.env.MONGODB_URI,
             collection: "systemlogs",
             options: { useUnifiedTopology: true },

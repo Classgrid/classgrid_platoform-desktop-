@@ -395,33 +395,47 @@ export const healthCheck = async (req, res) => {
 
     // Check MongoDB
     try {
-        health.services.mongodb = mongoose.connection.readyState === 1
-            ? { status: "UP", ping: "OK" }
-            : { status: "DOWN", ping: "FAILED" };
-    } catch {
-        health.services.mongodb = { status: "DOWN", error: "Connection check failed" };
+        const startMongo = performance.now();
+        // A simple query to ensure the db responds, not just the connection state
+        if (mongoose.connection.readyState === 1) {
+            await mongoose.connection.db.admin().ping();
+            const ms = Math.round(performance.now() - startMongo);
+            health.services.mongodb = { status: "UP", ping: `${ms}ms` };
+        } else {
+            health.services.mongodb = { status: "DOWN", error: "Not connected" };
+        }
+    } catch (err) {
+        health.services.mongodb = { status: "DOWN", error: err.message || "Connection check failed" };
     }
 
     // Check Supabase
     try {
-        const { data, error } = await sb.from("device_tokens").select("id").limit(1);
+        const startSupa = performance.now();
+        const { error } = await sb.from("device_tokens").select("id").limit(1);
+        const ms = Math.round(performance.now() - startSupa);
         health.services.supabase = error
             ? { status: "DOWN", error: error.message }
-            : { status: "UP", ping: "OK" };
+            : { status: "UP", ping: `${ms}ms` };
     } catch (err) {
         health.services.supabase = { status: "DOWN", error: err.message };
     }
 
     // Check Redis
     try {
-        const IORedis = (await import("ioredis")).default;
-        const redis = new IORedis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
-            maxRetriesPerRequest: 1,
-            connectTimeout: 30000
-        });
-        await redis.ping();
-        health.services.redis = { status: "UP", ping: "OK" };
-        redis.disconnect();
+        if (process.env.REDIS_URL) {
+            const startRedis = performance.now();
+            const IORedis = (await import("ioredis")).default;
+            const redis = new IORedis(process.env.REDIS_URL, {
+                maxRetriesPerRequest: 1,
+                connectTimeout: 5000
+            });
+            await redis.ping();
+            const ms = Math.round(performance.now() - startRedis);
+            health.services.redis = { status: "UP", ping: `${ms}ms` };
+            redis.disconnect();
+        } else {
+            health.services.redis = { status: "NOT_CONFIGURED" };
+        }
     } catch (err) {
         health.services.redis = { status: "DOWN", error: err.message };
     }
@@ -429,7 +443,7 @@ export const healthCheck = async (req, res) => {
     // Check R2
     try {
         if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
-            // Using basic S3Client HEAD check or just verifying credentials exist
+            const startR2 = performance.now();
             const { S3Client, ListBucketsCommand } = await import("@aws-sdk/client-s3");
             const s3Client = new S3Client({
                 region: "auto",
@@ -438,9 +452,11 @@ export const healthCheck = async (req, res) => {
                     accessKeyId: process.env.R2_ACCESS_KEY_ID,
                     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
                 },
+                maxAttempts: 2
             });
             await s3Client.send(new ListBucketsCommand({}));
-            health.services.r2 = { status: "UP", ping: "OK" };
+            const ms = Math.round(performance.now() - startR2);
+            health.services.r2 = { status: "UP", ping: `${ms}ms` };
         } else {
             health.services.r2 = { status: "NOT_CONFIGURED" };
         }

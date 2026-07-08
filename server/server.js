@@ -3,6 +3,21 @@ import "./env.js";
 
 import app from "./api/index.js";
 import http from "http";
+import util from "util";
+import accessLogger from "./src/config/logger.js";
+
+// ─────────────────────────────────────────────────────────
+// 🎤 Capture ALL console output and send it to the Database
+// ─────────────────────────────────────────────────────────
+const origLog = console.log;
+const origError = console.error;
+const origWarn = console.warn;
+const origInfo = console.info;
+
+console.log = (...args) => accessLogger.info(util.format(...args));
+console.error = (...args) => accessLogger.error(util.format(...args));
+console.warn = (...args) => accessLogger.warn(util.format(...args));
+console.info = (...args) => accessLogger.info(util.format(...args));
 
 // 👷 Start Background Workers
 import "./src/workers/index.js";
