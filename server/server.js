@@ -3,6 +3,7 @@
 //    so that EVERY SINGLE log is captured into the database
 // ─────────────────────────────────────────────────────────
 import util from "util";
+import "./env.js"; // 🔥 Load env first so MONGODB_URI is available
 import accessLogger from "./src/config/logger.js";
 
 const origLog = console.log;
@@ -16,8 +17,7 @@ console.error = (...args) => { const msg = util.format(...args); origError(msg);
 console.warn = (...args) => { const msg = util.format(...args); origWarn(msg); accessLogger.warn(msg); };
 console.info = (...args) => { const msg = util.format(...args); origInfo(msg); accessLogger.info(msg); };
 
-// 🔥 NOW load env (all console.logs inside env.js will be captured)
-import "./env.js";
+// 🔥 ENV is loaded at the top now
 
 import app from "./api/index.js";
 import http from "http";

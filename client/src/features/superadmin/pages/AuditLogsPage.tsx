@@ -24,7 +24,7 @@ function IconButton({ icon: Icon, label, onClick, className = "", isActive = fal
             <Icon size={14} />
           </button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" sideOffset={4} className="bg-popover text-popover-foreground text-xs px-2 py-1 rounded border border-border shadow-lg">
+        <TooltipContent side="bottom" sideOffset={4}>
           {label}
         </TooltipContent>
       </Tooltip>
@@ -190,7 +190,7 @@ export function AuditLogsPage() {
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4} className="bg-popover text-popover-foreground text-xs px-2 py-1 rounded border border-border shadow-lg">
+              <TooltipContent side="bottom" sideOffset={4}>
                 Refresh logs
               </TooltipContent>
             </Tooltip>
