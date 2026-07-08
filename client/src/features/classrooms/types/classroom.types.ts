@@ -12,6 +12,8 @@ export interface Terminology {
   org_label: string;          // "College", "School", "Institute", "Junior College", "Polytechnic", "Organization"
   top_level: string;          // "Degree", "Standard", "Course", "Stream", "Department", "Group"
   course: string;             // "Branch", "Class", "Course", "Stream", "Program"
+  subject: string;            // "Course" (Engineering/Diploma), "Subject" (School/Jr College), "Topic" (Coaching)
+  subject_code: string;       // "Course Code", "Subject Code", "Topic Code"
   year: string | null;        // "Year", "Class", null (Coaching has none)
   period: string | null;      // "Semester", "Term", null (Coaching has none)
   division: string | null;    // "Division", "Section", null (Coaching has none)

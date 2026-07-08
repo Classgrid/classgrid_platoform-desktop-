@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {  Plus, Search, BookOpen, Clock, Users } from "lucide-react";
 
 
 import { useMyClassrooms, MyClassroomRecord } from "../queries/useMyClassrooms";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { CreateClassroomModal } from "../components/CreateClassroomModal";
+import { JoinClassroomModal } from "../components/JoinClassroomModal";
 
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
@@ -14,6 +16,7 @@ export function ClassroomsPage() {
   const { data: user } = useCurrentUser();
   const { data: classroomsData, isLoading } = useMyClassrooms();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const classrooms = classroomsData?.classrooms ?? [];
@@ -61,7 +64,10 @@ export function ClassroomsPage() {
                 className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
               />
             </div>
-            <div onClick={() => isTeacher && setIsCreateModalOpen(true)}>
+            <div 
+              onClick={() => isTeacher ? setIsCreateModalOpen(true) : setIsJoinModalOpen(true)}
+              className="flex items-center cursor-pointer hover:text-primary transition-colors font-medium"
+            >
               <Plus className="mr-2 h-4 w-4" />
               {isTeacher ? "Create Class" : "Join Class"}
             </div>
@@ -89,7 +95,10 @@ export function ClassroomsPage() {
               Create Class
             </Button>
           ) : (
-            <div className="mt-6">
+            <div 
+              className="mt-6 flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
+              onClick={() => setIsJoinModalOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Join Class
             </div>
@@ -98,7 +107,13 @@ export function ClassroomsPage() {
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredClassrooms.map((classroom) => (
-            <ClassroomCard key={classroom._id} classroom={classroom} isTeacher={isTeacher} />
+            <Link 
+              key={classroom._id} 
+              to={`/classroom/${classroom._id}`} 
+              className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+            >
+              <ClassroomCard classroom={classroom} isTeacher={isTeacher} />
+            </Link>
           ))}
         </div>
       )}
@@ -106,6 +121,11 @@ export function ClassroomsPage() {
       <CreateClassroomModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
+      />
+      
+      <JoinClassroomModal 
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
       />
     </div>
   );
@@ -122,7 +142,7 @@ function ClassroomCard({ classroom, isTeacher }: { classroom: MyClassroomRecord;
   const gradient = gradients[classroom.name.length % gradients.length];
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md hover:border-primary/30 cursor-pointer">
+    <div className="group relative flex flex-col h-full overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md hover:border-primary/30 cursor-pointer">
       <div className={`h-24 w-full bg-gradient-to-r ${gradient} relative`}>
         {classroom.coverImage && (
           <img 

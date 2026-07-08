@@ -350,10 +350,46 @@ export const toggleFeatureFlag = async (req, res) => {
 //  5. HEALTH CHECK — Is everything alive?
 // ══════════════════════════════════════════════════════════════
 export const healthCheck = async (req, res) => {
+    const os = await import("os");
+    const checkDiskSpace = (await import("check-disk-space")).default;
+    
+    // Memory
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+    const memUsagePct = (usedMem / totalMem) * 100;
+
+    // Disk
+    let disk = { total: 0, free: 0, used: 0, usagePct: 0 };
+    try {
+        const diskPath = os.platform() === 'win32' ? 'C:' : '/';
+        const diskSpace = await checkDiskSpace(diskPath);
+        disk.total = diskSpace.size;
+        disk.free = diskSpace.free;
+        disk.used = disk.total - disk.free;
+        disk.usagePct = (disk.used / disk.total) * 100;
+    } catch (e) {
+        console.error("Disk check failed:", e);
+    }
+
+    const warnings = [];
+    if (memUsagePct > 90) warnings.push("CRITICAL: RAM Usage > 90%");
+    else if (memUsagePct > 80) warnings.push("WARNING: RAM Usage > 80%");
+    
+    if (disk.usagePct > 90) warnings.push("CRITICAL: Disk Space > 90%");
+    else if (disk.usagePct > 80) warnings.push("WARNING: Disk Space > 80%");
+
     const health = {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage(),
+        osMetrics: {
+            ram: { total: totalMem, free: freeMem, used: usedMem, usagePct: memUsagePct },
+            disk,
+            cpuCount: os.cpus().length,
+            loadAvg: os.loadavg()
+        },
+        warnings,
         services: {}
     };
 
@@ -389,6 +425,28 @@ export const healthCheck = async (req, res) => {
     } catch (err) {
         health.services.redis = { status: "DOWN", error: err.message };
     }
+    
+    // Check R2
+    try {
+        if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
+            // Using basic S3Client HEAD check or just verifying credentials exist
+            const { S3Client, ListBucketsCommand } = await import("@aws-sdk/client-s3");
+            const s3Client = new S3Client({
+                region: "auto",
+                endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+                credentials: {
+                    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+                    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+                },
+            });
+            await s3Client.send(new ListBucketsCommand({}));
+            health.services.r2 = { status: "UP", ping: "OK" };
+        } else {
+            health.services.r2 = { status: "NOT_CONFIGURED" };
+        }
+    } catch (err) {
+        health.services.r2 = { status: "DOWN", error: err.message };
+    }
 
     // Check Agora (just verify env vars exist)
     health.services.agora = {
@@ -397,8 +455,8 @@ export const healthCheck = async (req, res) => {
     };
 
     // Overall status
-    const allUp = Object.values(health.services).every(s => s.status === "UP" || s.status === "CONFIGURED");
-    health.overall = allUp ? "HEALTHY ✅" : "DEGRADED ⚠️";
+    const allUp = Object.values(health.services).every(s => s.status === "UP" || s.status === "CONFIGURED" || s.status === "NOT_CONFIGURED");
+    health.overall = (allUp && warnings.length === 0) ? "HEALTHY" : "DEGRADED";
 
     res.json({ success: true, health });
 };
@@ -487,10 +545,21 @@ export const getErrorLogs = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 50;
         const levelFilter = req.query.level; // optional: ?level=error
+        const search = req.query.search;
         const SystemLog = (await import("../models/SystemLog.js")).default;
         const EmailJob = (await import("../models/EmailJob.js")).default;
 
-        const query = levelFilter ? { level: levelFilter } : {};
+        const query = {};
+        if (levelFilter) {
+            query.level = levelFilter;
+        }
+        if (search) {
+            query.$or = [
+                { message: { $regex: search, $options: "i" } },
+                { context: { $regex: search, $options: "i" } },
+                { "metadata.url": { $regex: search, $options: "i" } }
+            ];
+        }
 
         const [logs, total, emailStatsPending, emailStatsSent, emailStatsFailed] = await Promise.all([
             SystemLog.find(query).sort({ createdAt: -1 }).limit(limit).lean(),

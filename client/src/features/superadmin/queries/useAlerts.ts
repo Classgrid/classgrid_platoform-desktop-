@@ -4,12 +4,12 @@ import { alertsApi } from "../services/superAdminApi";
 export const ERROR_LOGS_KEY = ["super-admin", "error-logs"] as const;
 export const EMAIL_LOGS_KEY = ["super-admin", "email-logs"] as const;
 
-export function useErrorLogs() {
+export function useErrorLogs(intervalMs: number = 60_000, search?: string, level?: string) {
   return useQuery({
-    queryKey: ERROR_LOGS_KEY,
-    queryFn: () => alertsApi.getErrorLogs(),
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    queryKey: [...ERROR_LOGS_KEY, search, level],
+    queryFn: () => alertsApi.getErrorLogs({ search, level }),
+    staleTime: 5_000,
+    refetchInterval: intervalMs > 0 ? intervalMs : false,
   });
 }
 

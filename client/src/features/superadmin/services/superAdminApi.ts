@@ -421,7 +421,7 @@ export const configApi = {
       .get<any>("/api/super-admin/health")
       .then((r) => {
         const raw = r.data;
-        // Backend returns: { success, health: { overall, uptime, services: { mongodb, supabase } } }
+        // Backend returns: { success, health: { overall, uptime, services: { mongodb, supabase, r2 }, osMetrics, warnings } }
         const h = raw?.health ?? raw;
         const mongoStatus = h?.services?.mongodb?.status ?? "UNKNOWN";
         return {
@@ -429,6 +429,8 @@ export const configApi = {
           dbStatus: mongoStatus,
           uptime: h?.uptime ?? 0,
           services: h?.services ?? {},
+          osMetrics: h?.osMetrics ?? null,
+          warnings: h?.warnings ?? [],
         };
       }),
 
@@ -678,9 +680,9 @@ export type EmailLog = {
 };
 
 export const alertsApi = {
-  getErrorLogs: () =>
+  getErrorLogs: (params?: { search?: string; level?: string }) =>
     apiClient
-      .get<any>("/api/super-admin/error-logs")
+      .get<any>("/api/super-admin/error-logs", { params })
       .then((r) => {
         const raw = r.data;
         // Backend returns: { success, errors: [...] }  (not logs)

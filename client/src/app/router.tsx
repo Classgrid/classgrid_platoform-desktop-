@@ -31,7 +31,7 @@ import { GdprPage } from "@/features/superadmin/pages/GdprPage";
 import { BackupPage } from "@/features/superadmin/pages/BackupPage";
 import { CustomDomainsPage } from "@/features/superadmin/pages/CustomDomainsPage";
 import { AnalyticsPage } from "@/features/superadmin/pages/AnalyticsPage";
-import { AlertsPage } from "@/features/superadmin/pages/AlertsPage";
+import { AuditLogsPage } from "@/features/superadmin/pages/AuditLogsPage";
 import { OnboardPage } from "@/features/superadmin/pages/OnboardPage";
 import { DirectOnboardPage } from "@/features/superadmin/pages/DirectOnboardPage";
 import { ClassgridTalkPage } from "@/features/superadmin/pages/ClassgridTalkPage";
@@ -60,6 +60,7 @@ import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
 import ClassroomDetailPage from "@/features/classrooms/pages/ClassroomDetailPage";
+import { DiscoverClassroomsPage } from "@/features/classrooms/pages/DiscoverClassroomsPage";
 import { WebsiteCMSPage } from "@/features/website_cms/pages/WebsiteCMSPage";
 import { JoinRequestPage } from "@/features/chat/pages/JoinRequestPage";
 
@@ -181,7 +182,7 @@ export function AppRouter() {
         <Route element={<SuperAdminLayout />}>
           <Route path="/superadmin/dashboard" element={<DashboardHomePage />} />
           <Route path="/superadmin/analytics" element={<AnalyticsPage />} />
-          <Route path="/superadmin/alerts" element={<AlertsPage />} />
+          <Route path="/superadmin/audit-logs" element={<AuditLogsPage />} />
           <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
           <Route path="/superadmin/orgs/:id" element={<OrgDetailPage />} />
           <Route path="/superadmin/domains" element={<CustomDomainsPage />} />
@@ -195,7 +196,6 @@ export function AppRouter() {
           <Route path="/superadmin/failed-payments" element={<FailedPaymentsPage />} />
           <Route path="/superadmin/users" element={<UsersPage />} />
           <Route path="/superadmin/global-users" element={<GlobalUsersPage />} />
-          <Route path="/superadmin/audit" element={<AuditPage />} />
           <Route path="/superadmin/activity-log" element={<ActivityLogPage />} />
           <Route path="/superadmin/announcements" element={<PlatformAnnouncementsPage />} />
           <Route path="/superadmin/config" element={<ConfigPage />} />
@@ -307,6 +307,7 @@ export function AppRouter() {
           <Route path="/classroom" element={<ClassroomsPage />} />
           <Route path="/classroom/:id" element={<ClassroomDetailPage />} />
           <Route path="/classrooms" element={<ClassroomsPage />} />
+          <Route path="/discover" element={<DiscoverClassroomsPage />} />
           <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
           <Route path="/tools" element={<GenericPage title="Schedule" />} />
           <Route path="/chat" element={<ChatPage />} />

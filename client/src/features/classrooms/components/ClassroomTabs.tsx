@@ -1,18 +1,16 @@
 import React from 'react';
-import { MessageSquare, BookOpen, Users, UserPlus } from 'lucide-react';
+import { MessageSquare, BookOpen, Users, Settings } from 'lucide-react';
 
 interface ClassroomTabsProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   userRole: 'faculty' | 'student';
-  pendingRequestsCount?: number;
 }
 
 export const ClassroomTabs: React.FC<ClassroomTabsProps> = ({ 
   activeTab, 
   onTabChange, 
-  userRole,
-  pendingRequestsCount = 0 
+  userRole 
 }) => {
   const tabs = [
     { id: 'stream', name: 'Stream', icon: MessageSquare },
@@ -20,9 +18,8 @@ export const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
     { id: 'students', name: 'Students', icon: Users },
   ];
 
-  // Faculty get the pending requests tab
   if (userRole === 'faculty') {
-    tabs.push({ id: 'requests', name: 'Requests', icon: UserPlus });
+    tabs.push({ id: 'settings', name: 'Settings', icon: Settings });
   }
 
   return (
@@ -36,7 +33,7 @@ export const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={`
-                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
+                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
                   ${isActive 
                     ? 'border-indigo-500 text-indigo-600' 
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -46,19 +43,12 @@ export const ClassroomTabs: React.FC<ClassroomTabsProps> = ({
               >
                 <tab.icon
                   className={`
-                    -ml-0.5 mr-2 h-4 w-4
+                    -ml-0.5 mr-2 h-4 w-4 transition-colors duration-200
                     ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}
                   `}
                   aria-hidden="true"
                 />
                 <span>{tab.name}</span>
-                
-                {/* Badge for pending requests */}
-                {tab.id === 'requests' && pendingRequestsCount > 0 && (
-                  <span className={`ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-semibold`}>
-                    {pendingRequestsCount}
-                  </span>
-                )}
               </button>
             );
           })}

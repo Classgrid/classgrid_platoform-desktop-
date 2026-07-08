@@ -1,12 +1,17 @@
 import winston from "winston";
 import "winston-daily-rotate-file";
+import "winston-mongodb";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+// Ensure env variables are loaded if used directly
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const { combine, timestamp, printf, colorize, json } = winston.format;
+const { combine, timestamp, printf, colorize, json, metadata } = winston.format;
 
 // Custom log format for readable console
 const consoleFormat = printf(({ level, message, timestamp, ...meta }) => {
@@ -23,15 +28,34 @@ const fileTransport = new winston.transports.DailyRotateFile({
     format: combine(timestamp(), json())
 });
 
+const transports = [
+    fileTransport,
+    new winston.transports.Console({
+        format: combine(colorize(), timestamp(), consoleFormat)
+    })
+];
+
+// Add MongoDB transport if URI is available
+if (process.env.MONGODB_URI) {
+    transports.push(
+        new winston.transports.MongoDB({
+            level: "error", // Only store errors in DB to save space
+            db: process.env.MONGODB_URI,
+            collection: "systemlogs",
+            options: { useUnifiedTopology: true },
+            format: combine(timestamp(), metadata()),
+            expireAfterSeconds: 2592000, // Auto-delete logs after 30 days
+            capped: true,
+            cappedSize: 10485760, // 10MB
+            cappedMax: 10000 // Max 10,000 logs
+        })
+    );
+}
+
 // Configure main logger
 export const accessLogger = winston.createLogger({
     level: "info",
-    transports: [
-        fileTransport,
-        new winston.transports.Console({
-            format: combine(colorize(), timestamp(), consoleFormat)
-        })
-    ]
+    transports: transports
 });
 
 // Express middleware for logging specific route traffic
@@ -52,7 +76,7 @@ export const winstonMiddleware = (req, res, next) => {
         };
 
         if (res.statusCode >= 400) {
-            accessLogger.warn("API Request Failed", logData);
+            accessLogger.error(`API Request Failed: ${req.method} ${req.originalUrl}`, { metadata: logData });
         } else {
             accessLogger.info("API Request Dispatched", logData);
         }

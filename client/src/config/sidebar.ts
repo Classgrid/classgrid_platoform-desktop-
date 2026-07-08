@@ -13,7 +13,7 @@ import {
   Download, FileBarChart, FileText, Flag, Globe, GraduationCap, HelpCircle,
   Home, IndianRupee, LayoutDashboard, LogOut, Mail, MessageSquare, Megaphone,
   Plus, RotateCcw, Search, Settings, Shield, Sparkles, Target, Ticket, Trash2,
-  User, UserPlus, Users, UtensilsCrossed, Activity, Zap, Power
+  User, UserPlus, Users, UtensilsCrossed, Activity, Zap, Power, Compass
 } from "lucide-react";
 
 import type { DashboardConfig, DashboardMenuItem, DashboardRole, SidebarItem } from "@/layouts/types";
@@ -100,7 +100,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "System Health", to: "/superadmin/system-health", icon: Activity },
           { label: "Feature Flags", to: "/superadmin/feature-flags", icon: Zap },
           { label: "Rollback Actions", to: "/superadmin/rollback", icon: RotateCcw },
-          { label: "Audit", to: "/superadmin/activity-logs", icon: Shield },
+          { label: "Audit Logs", to: "/superadmin/audit-logs", icon: Shield },
           { label: "System Config", to: "/superadmin/config", icon: Settings }
         ]
       },
@@ -575,6 +575,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "CORE",
         items: [
           { label: "Home", to: "/classrooms", icon: Home },
+          { label: "Discover", to: "/discover", icon: Compass },
           { label: "Work", to: "/work", icon: BookOpen },
           { label: "Schedule", to: "/tools", icon: Calendar }
         ]
@@ -625,6 +626,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "CORE",
         items: [
           { label: "Home", to: "/classrooms", icon: Home },
+          { label: "Discover", to: "/discover", icon: Compass },
           { label: "Work", to: "/student/work", icon: BookOpen },
           { label: "Schedule", to: "/tools", icon: Calendar }
         ]

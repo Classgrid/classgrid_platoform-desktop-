@@ -8,8 +8,8 @@ export function useSystemHealth() {
   return useQuery({
     queryKey: HEALTH_KEY,
     queryFn: () => configApi.getHealth(),
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 2_000,
+    refetchInterval: 5_000,
   });
 }
 
