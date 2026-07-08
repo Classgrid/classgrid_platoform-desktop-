@@ -44,10 +44,10 @@ if (process.env.MONGODB_URI) {
             collection: "systemlogs",
             options: { useUnifiedTopology: true },
             format: combine(timestamp(), metadata()),
-            expireAfterSeconds: 7776000, // Auto-delete logs after 90 days
+            expireAfterSeconds: 2592000,
             capped: true,
-            cappedSize: 52428800, // 50MB limit
-            cappedMax: 50000 // Max 50,000 logs
+            cappedSize: 10485760, // 10MB
+            cappedMax: 10000 // Max 10,000 logs
         })
     );
 }
