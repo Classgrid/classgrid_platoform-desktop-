@@ -316,7 +316,8 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
         );
         return { ...oldData, pages: newPages };
       });
-      toast.error("Failed to send message", { description: error instanceof Error ? error.message : "An unknown error occurred during upload." });
+      const errorMsg = (error as any)?.error || (error as any)?.message || "An unknown error occurred during upload.";
+      toast.error("Failed to send message", { description: errorMsg });
     } finally {
       if (files.length > 0) {
         setIsSending(false);
