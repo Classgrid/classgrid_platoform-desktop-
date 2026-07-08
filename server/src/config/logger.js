@@ -35,12 +35,14 @@ const transports = [
     })
 ];
 
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
 // Add MongoDB transport if URI is available
-if (process.env.MONGODB_URI) {
+if (mongoUri) {
     transports.push(
         new winston.transports.MongoDB({
             // Store ALL logs (info, warn, error) — no level filter
-            db: process.env.MONGODB_URI,
+            db: mongoUri,
             collection: "systemlogs",
             options: { useUnifiedTopology: true },
             format: combine(timestamp(), metadata()),
