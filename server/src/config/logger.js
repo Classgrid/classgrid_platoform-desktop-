@@ -62,6 +62,15 @@ export const accessLogger = winston.createLogger({
 
 // Express middleware for logging specific route traffic
 export const winstonMiddleware = (req, res, next) => {
+    // Skip logging high-frequency polling routes to prevent log spam
+    if (
+        req.originalUrl.includes("/api/super-admin/error-logs") ||
+        req.originalUrl.includes("/api/super-admin/health") ||
+        req.originalUrl.includes("/api/super-admin/feature-flags")
+    ) {
+        return next();
+    }
+
     const start = Date.now();
     
     // Log once request finishes

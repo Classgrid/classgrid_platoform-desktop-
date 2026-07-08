@@ -666,8 +666,8 @@ export const getErrorLogs = async (req, res) => {
             emailStats = { queued, sent, failed };
         } catch { /* EmailJob model may not exist */ }
 
-        // Map Winston log format → frontend format
         // Winston stores: { timestamp, level, message, meta: { metadata: { method, url, status, ... } } }
+        // OR format.metadata() stores: { timestamp, level, message, metadata: { metadata: { ... } } }
         const mappedLogs = logs.map(e => ({
             _id: e._id,
             id: e._id,
@@ -676,7 +676,7 @@ export const getErrorLogs = async (req, res) => {
             message: e.message || e.meta?.message || "",
             stack: e.meta?.stack || e.stack || "",
             context: e.meta?.context || e.context || "",
-            metadata: e.meta?.metadata || e.metadata || {}
+            metadata: e.metadata?.metadata || e.meta?.metadata || e.metadata || e.meta || {}
         }));
 
         res.json({
