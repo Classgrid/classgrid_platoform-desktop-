@@ -567,6 +567,24 @@ export function GroupSettingsModal({ groupId, onClose, onLeaveGroup, onUserClick
                      </Select>
                   </div>
 
+                  {/* Send Attachments Policy */}
+                  <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                     <span className="text-sm font-medium text-foreground">Who can send attachments (Images, PDFs, etc)?</span>
+                     <Select 
+                        value={data.group.send_attachments_policy || 'all'}
+                        disabled={isUpdatingPermissions}
+                        onValueChange={(value) => handleUpdatePermissions({ send_attachments_policy: value })}
+                     >
+                        <SelectTrigger className="w-full bg-background border border-border rounded-md px-3 text-sm h-9">
+                           <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="all">Members & Admins</SelectItem>
+                           <SelectItem value="admin_only">Only Admins</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
+
 
 
                   {/* Add Member Policy */}
