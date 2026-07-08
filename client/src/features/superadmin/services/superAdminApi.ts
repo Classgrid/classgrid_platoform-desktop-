@@ -431,6 +431,7 @@ export const configApi = {
           services: h?.services ?? {},
           osMetrics: h?.osMetrics ?? null,
           warnings: h?.warnings ?? [],
+          server: h?.server ?? null,
         };
       }),
 
