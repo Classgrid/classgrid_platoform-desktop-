@@ -27,14 +27,14 @@ function buildFlagColumns(
       header: "Module",
       size: 130,
       cell: ({ getValue }) => (
-        <Badge variant="neutral" className="bg-gray-100 text-gray-700 border-gray-200">{getValue<string>()}</Badge>
+        <Badge variant="neutral" className="bg-secondary text-secondary-foreground border-border">{getValue<string>()}</Badge>
       ),
     },
     {
       accessorKey: "description",
       header: "Description",
       size: 250,
-      cell: ({ getValue }) => <span className="text-gray-500 text-sm">{getValue<string>()}</span>,
+      cell: ({ getValue }) => <span className="text-muted-foreground text-sm">{getValue<string>()}</span>,
     },
     {
       accessorKey: "isEnabled",
@@ -43,9 +43,9 @@ function buildFlagColumns(
       cell: ({ getValue }) => {
         const isEnabled = getValue<boolean>();
         return isEnabled ? (
-          <Badge variant="success" dot className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+          <Badge variant="success" dot className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
         ) : (
-          <Badge variant="danger" className="bg-red-50 text-red-700 border-red-200">Disabled</Badge>
+          <Badge variant="danger" className="bg-destructive/10 text-destructive border-destructive/20">Disabled</Badge>
         );
       },
     },
@@ -82,17 +82,17 @@ function MetricProgress({ label, used, total, pct, unit = "GB" }: any) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end text-sm">
-        <span className="text-gray-700 font-medium">{label}</span>
-        <span className="font-mono text-gray-900 text-xs">
-          <span className="text-gray-500">Used:</span> {(used).toFixed(1)} {unit} <span className="text-gray-300 mx-1">|</span>
-          <span className="text-gray-500">Free:</span> {(remaining).toFixed(1)} {unit} <span className="text-gray-300 mx-1">|</span>
-          <span className="text-gray-500">Total:</span> {(total).toFixed(1)} {unit} 
-          <span className={`ml-2 font-bold ${isCritical ? 'text-red-600' : isWarning ? 'text-yellow-600' : 'text-gray-500'}`}>
+        <span className="text-foreground font-medium">{label}</span>
+        <span className="font-mono text-foreground text-xs">
+          <span className="text-muted-foreground">Used:</span> {(used).toFixed(1)} {unit} <span className="text-muted-foreground/30 mx-1">|</span>
+          <span className="text-muted-foreground">Free:</span> {(remaining).toFixed(1)} {unit} <span className="text-muted-foreground/30 mx-1">|</span>
+          <span className="text-muted-foreground">Total:</span> {(total).toFixed(1)} {unit} 
+          <span className={`ml-2 font-bold ${isCritical ? 'text-destructive' : isWarning ? 'text-yellow-500' : 'text-muted-foreground'}`}>
             ({pct.toFixed(1)}%)
           </span>
         </span>
       </div>
-      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden border border-border">
         <div 
           className={`h-full transition-all duration-1000 ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-blue-500'}`}
           style={{ width: `${Math.min(pct, 100)}%` }}
@@ -105,14 +105,14 @@ function MetricProgress({ label, used, total, pct, unit = "GB" }: any) {
 function ServiceStatus({ name, icon: Icon, status, ping }: any) {
   const isUp = status === "UP" || status === "CONFIGURED";
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card shadow-sm">
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-md ${isUp ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+        <div className={`p-2 rounded-md ${isUp ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
           <Icon size={16} />
         </div>
         <div>
-          <h4 className="text-sm font-medium text-gray-900">{name}</h4>
-          <p className="text-xs text-gray-500 font-mono">{ping || status}</p>
+          <h4 className="text-sm font-medium text-foreground">{name}</h4>
+          <p className="text-xs text-muted-foreground font-mono">{ping || status}</p>
         </div>
       </div>
       <div className="flex items-center">
@@ -174,9 +174,9 @@ export function ConfigPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">System Config</h1>
             {healthData?.status === 'HEALTHY' ? (
-              <Badge variant="success" className="bg-green-50 text-green-700 border-green-200">All Systems Operational</Badge>
+              <Badge variant="success" className="bg-green-500/10 text-green-500 border-green-500/20">All Systems Operational</Badge>
             ) : (
-              <Badge variant="danger" className="bg-red-50 text-red-700 border-red-200">Degraded Performance</Badge>
+              <Badge variant="danger" className="bg-destructive/10 text-destructive border-destructive/20">Degraded Performance</Badge>
             )}
           </div>
           <p className="text-muted-foreground mt-1 text-sm">
@@ -187,13 +187,13 @@ export function ConfigPage() {
 
       {/* Warnings Banner */}
       {healthData?.warnings && healthData.warnings.length > 0 && (
-        <div className="p-4 rounded-lg border border-red-200 bg-red-50 flex items-start gap-3 animate-in fade-in">
-          <AlertTriangle className="text-red-600 mt-0.5" size={18} />
+        <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/10 flex items-start gap-3 animate-in fade-in">
+          <AlertTriangle className="text-destructive mt-0.5" size={18} />
           <div>
-            <h4 className="text-red-700 font-semibold text-sm">Critical Server Warnings</h4>
+            <h4 className="text-destructive font-semibold text-sm">Critical Server Warnings</h4>
             <ul className="mt-1 space-y-1">
               {healthData.warnings.map((w: string, i: number) => (
-                <li key={i} className="text-red-600 text-xs font-mono">{w}</li>
+                <li key={i} className="text-destructive/80 text-xs font-mono">{w}</li>
               ))}
             </ul>
           </div>
@@ -262,8 +262,8 @@ export function ConfigPage() {
         {/* Right Col: Infrastructure Matrix */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-2 px-1">
-            <Cloud className="text-gray-500" size={16} />
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Infrastructure</h3>
+            <Cloud className="text-muted-foreground" size={16} />
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Infrastructure</h3>
           </div>
 
           <ServiceStatus 

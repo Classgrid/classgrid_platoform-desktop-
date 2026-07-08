@@ -17,14 +17,14 @@ function IconButton({ icon: Icon, label, onClick, className = "", isActive = fal
             onClick={onClick}
             className={`h-8 w-8 flex items-center justify-center rounded-md border transition-colors ${
               isActive 
-                ? "bg-gray-100 border-gray-300 text-gray-900 shadow-inner" 
-                : "bg-white border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                ? "bg-secondary border-border text-foreground shadow-inner" 
+                : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             } ${className}`}
           >
             <Icon size={14} />
           </button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" sideOffset={4} className="bg-white text-gray-900 text-xs px-2 py-1 rounded border border-gray-200 shadow-lg">
+        <TooltipContent side="bottom" sideOffset={4} className="bg-popover text-popover-foreground text-xs px-2 py-1 rounded border border-border shadow-lg">
           {label}
         </TooltipContent>
       </Tooltip>
@@ -56,8 +56,8 @@ export function AuditLogsPage() {
       header: "Time",
       width: "w-[160px]",
       render: (_: any, log: ErrorLog) => (
-        <div className="text-gray-500 font-mono text-[13px] flex items-center whitespace-nowrap">
-          <span className="text-gray-400 mr-2 text-[10px] uppercase font-sans">
+        <div className="text-muted-foreground font-mono text-[13px] flex items-center whitespace-nowrap">
+          <span className="text-muted-foreground/60 mr-2 text-[10px] uppercase font-sans">
             JUL {format(new Date(log.timestamp || new Date()), "dd")}
           </span>
           {format(new Date(log.timestamp || new Date()), "HH:mm:ss.SS")}
@@ -79,7 +79,7 @@ export function AuditLogsPage() {
       header: "Host",
       width: "w-[140px]",
       render: (_: any, log: ErrorLog) => (
-        <div className="text-gray-500 font-mono text-[13px] truncate">
+        <div className="text-muted-foreground font-mono text-[13px] truncate">
           {log.metadata?.orgId === "none" ? "system" : "classgrid.in"}
         </div>
       ),
@@ -89,16 +89,16 @@ export function AuditLogsPage() {
       header: "Request",
       width: "w-[250px]",
       render: (_: any, log: ErrorLog) => (
-        <div className="text-gray-700 font-mono text-[13px] truncate flex items-center gap-2">
+        <div className="text-foreground font-mono text-[13px] truncate flex items-center gap-2">
           {log.metadata?.url ? (
             <>
-              <span className="border border-gray-200 bg-gray-50 text-gray-500 px-1 rounded text-[10px] uppercase font-sans">
+              <span className="border border-border bg-secondary text-secondary-foreground px-1 rounded text-[10px] uppercase font-sans">
                 {log.metadata.method?.[0] || 'M'}
               </span>
               <span className="truncate">{log.metadata.url}</span>
             </>
           ) : (
-            <span className="text-gray-400">---</span>
+            <span className="text-muted-foreground/50">---</span>
           )}
         </div>
       ),
@@ -107,30 +107,30 @@ export function AuditLogsPage() {
       key: "messages",
       header: "Messages",
       render: (_: any, log: ErrorLog) => (
-        <div className="text-gray-800 break-words font-mono text-[13px] tracking-wide">
-          <span className={log.level === 'error' ? 'text-red-500' : ''}>
+        <div className="text-foreground break-words font-mono text-[13px] tracking-wide">
+          <span className={log.level === 'error' ? 'text-destructive' : ''}>
             {log.message}
           </span>
-          {log.context && <span className="ml-2 text-gray-400 text-xs font-sans">[{log.context}]</span>}
+          {log.context && <span className="ml-2 text-muted-foreground text-xs font-sans">[{log.context}]</span>}
         </div>
       ),
     },
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-7xl mx-auto bg-white p-4 sm:p-6 lg:p-8">
+    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8">
       
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Audit Logs</h1>
-          <p className="text-gray-500 mt-1 text-sm">Real-time system events and application errors.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Audit Logs</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Real-time system events and application errors.</p>
         </div>
       </div>
 
-      <div className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm flex-1 overflow-hidden">
+      <div className="flex flex-col bg-card border border-border rounded-lg shadow-sm flex-1 overflow-hidden">
         
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-3 bg-gray-50/50">
+        <div className="flex items-center justify-between border-b border-border p-3 bg-secondary/20">
           
           {/* Left Side Buttons */}
           <div className="flex items-center gap-2">
@@ -138,11 +138,11 @@ export function AuditLogsPage() {
             <IconButton icon={Expand} label="Expand View" />
             
             <div className="relative w-96 ml-4">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Search logs..." 
-                className="w-full bg-white border border-gray-200 rounded-md py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors h-8 shadow-sm"
+                className="w-full bg-background border border-border rounded-md py-1.5 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-8 shadow-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -157,8 +157,8 @@ export function AuditLogsPage() {
              onClick={toggleLive}
              className={`flex items-center justify-center gap-2 px-3 h-8 rounded-md text-sm transition-colors border ${
                isLive 
-                 ? "bg-blue-50 border-blue-200 text-blue-700 shadow-inner" 
-                 : "bg-white border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 shadow-sm"
+                 ? "bg-blue-500/10 border-blue-500/20 text-blue-500 shadow-inner" 
+                 : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 shadow-sm"
              }`}
           >
              {isLive ? (
@@ -186,11 +186,11 @@ export function AuditLogsPage() {
                     isFetching={isFetching && !isLive} 
                     onClick={() => refetch()} 
                     label={null} 
-                    className="h-8 w-8 p-0 flex items-center justify-center bg-white border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors shadow-sm"
+                    className="h-8 w-8 p-0 flex items-center justify-center bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md transition-colors shadow-sm"
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4} className="bg-white text-gray-900 text-xs px-2 py-1 rounded border border-gray-200 shadow-lg">
+              <TooltipContent side="bottom" sideOffset={4} className="bg-popover text-popover-foreground text-xs px-2 py-1 rounded border border-border shadow-lg">
                 Refresh logs
               </TooltipContent>
             </Tooltip>
@@ -202,7 +202,7 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 overflow-auto p-4 bg-white">
+      <div className="flex-1 overflow-auto p-4 bg-background">
         <DataTable 
           columns={columns} 
           rows={logs} 
@@ -211,6 +211,7 @@ export function AuditLogsPage() {
         />
       </div>
 
+    </div>
     </div>
   );
 }
