@@ -379,10 +379,80 @@ export const healthCheck = async (req, res) => {
     if (disk.usagePct > 90) warnings.push("CRITICAL: Disk Space > 90%");
     else if (disk.usagePct > 80) warnings.push("WARNING: Disk Space > 80%");
 
+    // Server Identity
+    const networkInterfaces = os.networkInterfaces();
+    const privateIp = Object.values(networkInterfaces)
+        .flat()
+        .find(iface => iface && !iface.internal && iface.family === 'IPv4')?.address || 'N/A';
+    const cpuInfo = os.cpus()[0] || {};
+
+    // Fetch AWS EC2 Instance Metadata (IMDSv2)
+    let awsMeta = {};
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2000); // 2s timeout
+
+        // Step 1: Get IMDSv2 token
+        const tokenRes = await fetch("http://169.254.169.254/latest/api/token", {
+            method: "PUT",
+            headers: { "X-aws-ec2-metadata-token-ttl-seconds": "21600" },
+            signal: controller.signal
+        });
+        const token = await tokenRes.text();
+        clearTimeout(timeout);
+
+        // Step 2: Fetch metadata fields in parallel
+        const metaHeaders = { "X-aws-ec2-metadata-token": token };
+        const fetchMeta = async (path) => {
+            try {
+                const r = await fetch(`http://169.254.169.254/latest/meta-data/${path}`, {
+                    headers: metaHeaders,
+                    signal: AbortSignal.timeout(2000)
+                });
+                return r.ok ? await r.text() : null;
+            } catch { return null; }
+        };
+
+        const [instanceType, publicIp, instanceId, az, amiId] = await Promise.all([
+            fetchMeta("instance-type"),
+            fetchMeta("public-ipv4"),
+            fetchMeta("instance-id"),
+            fetchMeta("placement/availability-zone"),
+            fetchMeta("ami-id"),
+        ]);
+
+        awsMeta = {
+            provider: "AWS",
+            instanceType: instanceType || "Unknown",
+            publicIp: publicIp || "N/A",
+            instanceId: instanceId || "N/A",
+            availabilityZone: az || "N/A",
+            region: az ? az.slice(0, -1) : "N/A", // e.g. ap-south-1a → ap-south-1
+            amiId: amiId || "N/A",
+        };
+    } catch {
+        // Not running on AWS or metadata service unavailable
+        awsMeta = { provider: "Non-AWS / Local" };
+    }
+
     const health = {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage(),
+        server: {
+            hostname: os.hostname(),
+            privateIp,
+            platform: os.platform(),
+            osType: os.type(),
+            osRelease: os.release(),
+            arch: os.arch(),
+            nodeVersion: process.version,
+            cpuModel: cpuInfo.model || 'Unknown',
+            cpuSpeed: cpuInfo.speed || 0, // MHz
+            cpuCores: os.cpus().length,
+            env: process.env.NODE_ENV || 'development',
+            ...awsMeta, // Merge AWS metadata into server object
+        },
         osMetrics: {
             ram: { total: totalMem, free: freeMem, used: usedMem, usagePct: memUsagePct },
             disk,
@@ -559,11 +629,13 @@ export const captureError = async (error, context = "") => {
 
 export const getErrorLogs = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 50;
+        const limit = parseInt(req.query.limit) || 100;
         const levelFilter = req.query.level; // optional: ?level=error
         const search = req.query.search;
-        const SystemLog = (await import("../models/SystemLog.js")).default;
-        const EmailJob = (await import("../models/EmailJob.js")).default;
+
+        // Query the raw Winston 'systemlogs' collection directly
+        const db = mongoose.connection.db;
+        const collection = db.collection("systemlogs");
 
         const query = {};
         if (levelFilter) {
@@ -572,42 +644,48 @@ export const getErrorLogs = async (req, res) => {
         if (search) {
             query.$or = [
                 { message: { $regex: search, $options: "i" } },
-                { context: { $regex: search, $options: "i" } },
-                { "metadata.url": { $regex: search, $options: "i" } }
+                { "meta.message": { $regex: search, $options: "i" } },
+                { "meta.metadata.url": { $regex: search, $options: "i" } }
             ];
         }
 
-        const [logs, total, emailStatsPending, emailStatsSent, emailStatsFailed] = await Promise.all([
-            SystemLog.find(query).sort({ createdAt: -1 }).limit(limit).lean(),
-            SystemLog.countDocuments({ level: "error" }),
-            EmailJob.countDocuments({ status: "pending" }),
-            EmailJob.countDocuments({ status: "sent" }),
-            EmailJob.countDocuments({ status: "failed" })
+        const [logs, totalErrors] = await Promise.all([
+            collection.find(query).sort({ timestamp: -1 }).limit(limit).toArray(),
+            collection.countDocuments({ level: "error" }),
         ]);
 
-        // Normalize: include level so the frontend badge can display severity
-        const mappedErrors = logs.map(e => ({
+        // Also get email stats if model exists
+        let emailStats = { queued: 0, sent: 0, failed: 0 };
+        try {
+            const EmailJob = (await import("../models/EmailJob.js")).default;
+            const [queued, sent, failed] = await Promise.all([
+                EmailJob.countDocuments({ status: "pending" }),
+                EmailJob.countDocuments({ status: "sent" }),
+                EmailJob.countDocuments({ status: "failed" }),
+            ]);
+            emailStats = { queued, sent, failed };
+        } catch { /* EmailJob model may not exist */ }
+
+        // Map Winston log format → frontend format
+        // Winston stores: { timestamp, level, message, meta: { metadata: { method, url, status, ... } } }
+        const mappedLogs = logs.map(e => ({
             _id: e._id,
             id: e._id,
-            timestamp: e.createdAt,
-            level: e.level || "error",   // ← was missing before
-            message: e.message,
-            stack: e.stack || "",
-            context: e.context || "",
-            metadata: e.metadata || {}
+            timestamp: e.timestamp || e.createdAt,
+            level: e.level || "info",
+            message: e.message || e.meta?.message || "",
+            stack: e.meta?.stack || e.stack || "",
+            context: e.meta?.context || e.context || "",
+            metadata: e.meta?.metadata || e.metadata || {}
         }));
 
         res.json({
             success: true,
-            total,
-            showing: mappedErrors.length,
-            errors: mappedErrors,
-            logs: mappedErrors, // alias so frontend can use either key
-            emailStats: {
-                queued: emailStatsPending,
-                sent: emailStatsSent,
-                failed: emailStatsFailed
-            }
+            total: totalErrors,
+            showing: mappedLogs.length,
+            errors: mappedLogs,
+            logs: mappedLogs,
+            emailStats
         });
     } catch (err) {
         console.error("[SuperAdmin] getErrorLogs error:", err.message);

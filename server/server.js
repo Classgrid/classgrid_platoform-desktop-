@@ -1,23 +1,26 @@
-// 🔥 LOAD ENV FIRST — DO NOT REMOVE
-import "./env.js";
-
-import app from "./api/index.js";
-import http from "http";
+// ─────────────────────────────────────────────────────────
+// 🎤 STEP 0: Override console BEFORE any imports
+//    so that EVERY SINGLE log is captured into the database
+// ─────────────────────────────────────────────────────────
 import util from "util";
 import accessLogger from "./src/config/logger.js";
 
-// ─────────────────────────────────────────────────────────
-// 🎤 Capture ALL console output and send it to the Database
-// ─────────────────────────────────────────────────────────
 const origLog = console.log;
 const origError = console.error;
 const origWarn = console.warn;
 const origInfo = console.info;
 
-console.log = (...args) => accessLogger.info(util.format(...args));
-console.error = (...args) => accessLogger.error(util.format(...args));
-console.warn = (...args) => accessLogger.warn(util.format(...args));
-console.info = (...args) => accessLogger.info(util.format(...args));
+// Send to BOTH: Winston (→ MongoDB) AND original stdout
+console.log = (...args) => { const msg = util.format(...args); origLog(msg); accessLogger.info(msg); };
+console.error = (...args) => { const msg = util.format(...args); origError(msg); accessLogger.error(msg); };
+console.warn = (...args) => { const msg = util.format(...args); origWarn(msg); accessLogger.warn(msg); };
+console.info = (...args) => { const msg = util.format(...args); origInfo(msg); accessLogger.info(msg); };
+
+// 🔥 NOW load env (all console.logs inside env.js will be captured)
+import "./env.js";
+
+import app from "./api/index.js";
+import http from "http";
 
 // 👷 Start Background Workers
 import "./src/workers/index.js";

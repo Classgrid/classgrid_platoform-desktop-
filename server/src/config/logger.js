@@ -39,15 +39,15 @@ const transports = [
 if (process.env.MONGODB_URI) {
     transports.push(
         new winston.transports.MongoDB({
-            // Removed level restriction to store ALL logs (info, warn, error)
+            // Store ALL logs (info, warn, error) — no level filter
             db: process.env.MONGODB_URI,
             collection: "systemlogs",
             options: { useUnifiedTopology: true },
             format: combine(timestamp(), metadata()),
-            expireAfterSeconds: 2592000, // Auto-delete logs after 30 days
+            expireAfterSeconds: 7776000, // Auto-delete logs after 90 days
             capped: true,
-            cappedSize: 10485760, // 10MB
-            cappedMax: 10000 // Max 10,000 logs
+            cappedSize: 52428800, // 50MB limit
+            cappedMax: 50000 // Max 50,000 logs
         })
     );
 }

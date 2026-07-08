@@ -58,7 +58,7 @@ export function AuditLogsPage() {
       render: (_: any, log: ErrorLog) => (
         <div className="text-muted-foreground font-mono text-[13px] flex items-center whitespace-nowrap">
           <span className="text-muted-foreground/60 mr-2 text-[10px] uppercase font-sans">
-            JUL {format(new Date(log.timestamp || new Date()), "dd")}
+            {format(new Date(log.timestamp || new Date()), "MMM dd")}
           </span>
           {format(new Date(log.timestamp || new Date()), "HH:mm:ss.SS")}
         </div>

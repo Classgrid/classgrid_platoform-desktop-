@@ -129,7 +129,18 @@ function ServiceStatus({ name, icon: Icon, status, ping }: any) {
   );
 }
 
-// ── page ─────────────────────────────────────────────────────────────────────
+function InfoChip({ label, value, highlight, wide }: { label: string; value: string; highlight?: boolean; wide?: boolean }) {
+  return (
+    <div className={`rounded-lg border border-border bg-secondary/30 p-2.5 ${wide ? 'col-span-2 sm:col-span-3' : ''}`}>
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
+      <p className={`text-sm font-mono truncate ${highlight ? 'text-blue-500 font-semibold' : 'text-foreground'}`}>
+        {value || '—'}
+      </p>
+    </div>
+  );
+}
+
+
 
 export function ConfigPage() {
   const { data: healthData, isLoading: healthLoading } = useSystemHealth();
@@ -234,6 +245,42 @@ export function ConfigPage() {
                 pct={healthData?.osMetrics?.disk?.usagePct || 0} 
               />
             </div>
+
+            {/* Server Identity Grid */}
+            {healthData?.server && (
+              <div className="mt-6 pt-5 border-t border-border">
+                <div className="flex items-center gap-2 mb-4">
+                  <Cpu className="text-muted-foreground" size={14} />
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Server Identity</h3>
+                  {healthData.server.provider === 'AWS' && (
+                    <Badge variant="neutral" className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-[10px]">AWS EC2</Badge>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {/* AWS-specific fields */}
+                  {healthData.server.provider === 'AWS' && (
+                    <>
+                      <InfoChip label="Instance Type" value={healthData.server.instanceType} highlight />
+                      <InfoChip label="Public IP" value={healthData.server.publicIp} />
+                      <InfoChip label="Region" value={healthData.server.region} />
+                      <InfoChip label="Instance ID" value={healthData.server.instanceId} />
+                      <InfoChip label="Availability Zone" value={healthData.server.availabilityZone} />
+                      <InfoChip label="AMI ID" value={healthData.server.amiId} />
+                    </>
+                  )}
+                  {/* Common fields */}
+                  <InfoChip label="Hostname" value={healthData.server.hostname} />
+                  <InfoChip label="Private IP" value={healthData.server.privateIp} />
+                  <InfoChip label="Environment" value={healthData.server.env} highlight />
+                  <InfoChip label="OS" value={`${healthData.server.osType} ${healthData.server.osRelease}`} />
+                  <InfoChip label="Architecture" value={healthData.server.arch} />
+                  <InfoChip label="Node.js" value={healthData.server.nodeVersion} />
+                  <InfoChip label="CPU Model" value={healthData.server.cpuModel} wide />
+                  <InfoChip label="CPU Cores" value={`${healthData.server.cpuCores} vCPU`} />
+                  <InfoChip label="CPU Speed" value={`${healthData.server.cpuSpeed} MHz`} />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Feature Flags Table */}
