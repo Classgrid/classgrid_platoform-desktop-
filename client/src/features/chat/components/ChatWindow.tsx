@@ -13,6 +13,7 @@ import { SearchMessagesSidebar } from "./SearchMessagesSidebar";
 import { StarredMessagesView } from "./StarredMessagesView";
 import { ScheduledMessagesView } from "./ScheduledMessagesView";
 import { PinDurationModal } from "./PinDurationModal";
+import { toast } from "sonner";
 
 interface ChatWindowProps {
   thread: ChatThread;
@@ -315,6 +316,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
         );
         return { ...oldData, pages: newPages };
       });
+      toast.error("Failed to send message", { description: error instanceof Error ? error.message : "An unknown error occurred during upload." });
     } finally {
       if (files.length > 0) {
         setIsSending(false);
