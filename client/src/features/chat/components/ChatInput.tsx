@@ -946,8 +946,21 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                       />
                     ) : (
                       <GifPicker 
-                        onSelect={(gifUrl) => {
-                          onSendMessage(gifUrl, []);
+                        onSelect={async (gifUrl) => {
+                          try {
+                            const res = await fetch(gifUrl);
+                            const blob = await res.blob();
+                            const file = new File([blob], "giphy.gif", { type: blob.type || "image/gif" });
+                            setFiles(prev => [...prev, file]);
+                            
+                            // Close the popover by simulating Escape key
+                            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                          } catch (err) {
+                            console.error("Failed to fetch GIF:", err);
+                            toast.error("Failed to load GIF for preview");
+                            // Fallback: send as text URL if fetching fails
+                            onSendMessage(gifUrl, []);
+                          }
                         }} 
                       />
                     )}
