@@ -1822,6 +1822,104 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// POST /threads/:id/messages/bulk-delete — Delete 1000+ messages in ONE query
+// ──────────────────────────────────────────────
+router.post('/:id/messages/bulk-delete', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const { id: threadId } = req.params;
+    const { messageIds, type } = req.body;
+
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res.status(400).json({ error: 'messageIds array is required' });
+    }
+    if (messageIds.length > 5000) {
+      return res.status(400).json({ error: 'Cannot delete more than 5000 messages at once' });
+    }
+
+    const membership = await validateThreadMembership(userId, threadId);
+    if (!membership) return res.status(403).json({ error: 'Not a member' });
+
+    const deleteType = type || 'me';
+
+    if (deleteType === 'everyone') {
+      const { data: msgs } = await sb.from('chat_messages')
+        .select('id, sender_id, created_at')
+        .in('id', messageIds)
+        .eq('thread_id', threadId);
+
+      if (!msgs || msgs.length === 0) return res.status(404).json({ error: 'No messages found' });
+
+      const notMine = msgs.filter(m => m.sender_id !== userId);
+      if (notMine.length > 0) {
+        return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
+      }
+
+      const { data: reads } = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
+      const otherReads = (reads || []).filter(r => r.user_id !== userId && r.last_read_at);
+
+      const unseenIds = [];
+      const seenIds = [];
+      for (const m of msgs) {
+        const isSeen = otherReads.some(r => new Date(m.created_at) <= new Date(r.last_read_at));
+        if (isSeen) seenIds.push(m.id);
+        else unseenIds.push(m.id);
+      }
+
+      if (unseenIds.length > 0) {
+        await sb.from('chat_attachments').delete().in('message_id', unseenIds);
+        await sb.from('chat_messages')
+          .update({ message: 'This message was deleted', is_deleted: true })
+          .in('id', unseenIds);
+        broadcastToChannel(`thread:${threadId}`, 'messages_bulk_deleted', { messageIds: unseenIds });
+      }
+
+      const { data: latestMsg } = await sb.from('chat_messages')
+        .select('message, is_deleted, chat_attachments(file_url, file_name, file_type, file_size), chat_polls(question)')
+        .eq('thread_id', threadId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (latestMsg) {
+        const isPoll = latestMsg.chat_polls && latestMsg.chat_polls.length > 0;
+        const preview = buildLastMessagePreview(
+          isPoll ? latestMsg.chat_polls[0].question : latestMsg.message,
+          latestMsg.chat_attachments,
+          isPoll,
+          latestMsg.is_deleted
+        );
+        await sb.from('chat_threads').update({ last_message: preview }).eq('id', threadId);
+      }
+
+      return res.json({ ok: true, deleted: unseenIds.length, failed: seenIds.length, failedIds: seenIds });
+
+    } else {
+      // "Delete for me" — batch update
+      for (let i = 0; i < messageIds.length; i += 200) {
+        const chunk = messageIds.slice(i, i + 200);
+        const { data: chunkMsgs } = await sb.from('chat_messages')
+          .select('id, deleted_for')
+          .in('id', chunk)
+          .eq('thread_id', threadId);
+
+        if (chunkMsgs && chunkMsgs.length > 0) {
+          const updates = chunkMsgs
+            .filter(m => !(m.deleted_for || []).includes(userId))
+            .map(m => sb.from('chat_messages').update({ deleted_for: [...(m.deleted_for || []), userId] }).eq('id', m.id));
+          await Promise.all(updates);
+        }
+      }
+
+      return res.json({ ok: true, deleted: messageIds.length, deletedForMe: true });
+    }
+  } catch (err) {
+    console.error('Bulk message delete error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
 // POST /threads/:id/messages/:msgId/reactions — Toggle reaction
 // ──────────────────────────────────────────────
 router.post('/:id/messages/:msgId/reactions', isAuthenticated, async (req, res) => {
@@ -2902,6 +3000,86 @@ router.delete('/:id/messages/scheduled/:msgId', isAuthenticated, async (req, res
     if (error) throw error;
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ──────────────────────────────────────────────
+// GET /threads/gifs/search — Search or get trending GIFs via GIPHY API
+// ──────────────────────────────────────────────
+router.get('/gifs/search', isAuthenticated, async (req, res) => {
+  try {
+    const { q, limit = 20, offset = 0 } = req.query;
+    const apiKey = process.env.GIPHY_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'GIPHY_API_KEY is not configured on the server.' });
+    }
+
+    const isTrending = !q || q.trim() === '';
+    const cacheKey = isTrending 
+      ? `giphy:trending:limit${limit}:offset${offset}` 
+      : `giphy:search:${q.trim().toLowerCase()}:limit${limit}:offset${offset}`;
+
+    // Try Redis cache first
+    try {
+      if (global.redis) {
+        const cached = await global.redis.get(cacheKey);
+        if (cached) return res.json(JSON.parse(cached));
+      }
+    } catch (e) {
+      console.warn("Redis cache read error for Giphy:", e.message);
+    }
+
+    // Call GIPHY API
+    let url = '';
+    if (isTrending) {
+      url = `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=${limit}&offset=${offset}&rating=g`;
+    } else {
+      const encodedQ = encodeURIComponent(q.trim());
+      url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodedQ}&limit=${limit}&offset=${offset}&rating=g`;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Giphy API Error:", errText);
+      return res.status(response.status).json({ error: 'Failed to fetch from GIPHY' });
+    }
+
+    const data = await response.json();
+    
+    // Map to a clean, unified format
+    const results = data.data.map((gif) => {
+      // Prefer fixed_width for masonry previews to save bandwidth and improve layout consistency
+      const preview = gif.images.fixed_width;
+      const original = gif.images.original;
+
+      return {
+        id: gif.id,
+        url: original.url, // Full size for sending
+        preview_url: preview.url, // Smaller size for the picker
+        width: parseInt(preview.width),
+        height: parseInt(preview.height),
+        title: gif.title
+      };
+    });
+
+    const responseData = { results, pagination: data.pagination };
+
+    // Cache the result (Trending for 1 hour, Search for 15 mins)
+    try {
+      if (global.redis) {
+        const ttl = isTrending ? 3600 : 900;
+        await global.redis.setex(cacheKey, ttl, JSON.stringify(responseData));
+      }
+    } catch (e) {
+      console.warn("Redis cache write error for Giphy:", e.message);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    console.error('Giphy API route error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

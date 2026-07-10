@@ -287,6 +287,11 @@ export async function deleteMessage(threadId: string, messageId: string, type: '
   await apiClient.delete(`/api/threads/${threadId}/messages/${messageId}?type=${type}`, { timeout: 0 });
 }
 
+export async function bulkDeleteMessages(threadId: string, messageIds: string[], type: 'me' | 'everyone' = 'everyone'): Promise<{ ok: boolean; deleted: number; failed: number; failedIds: string[] }> {
+  const res = await apiClient.post(`/api/threads/${threadId}/messages/bulk-delete`, { messageIds, type }, { timeout: 0 });
+  return res.data;
+}
+
 export async function searchMessages(query: string, filters?: { threadId?: string, senderId?: string, hasMedia?: boolean, dateFrom?: string, dateTo?: string }): Promise<{ results: (ChatMessage & { chat_threads: { id: string, name: string, type: string } })[] }> {
   const params = new URLSearchParams({ query });
   if (filters?.threadId) params.append('threadId', filters.threadId);
@@ -296,6 +301,22 @@ export async function searchMessages(query: string, filters?: { threadId?: strin
   if (filters?.dateTo) params.append('dateTo', filters.dateTo);
 
   const response = await apiClient.get(`/api/threads/search?${params.toString()}`);
+  return response.data;
+}
+
+export interface GifResult {
+  id: string;
+  url: string;
+  preview_url: string;
+  width: number;
+  height: number;
+  title: string;
+}
+
+export async function searchGifs(query: string, offset: number = 0, limit: number = 20): Promise<{ results: GifResult[], pagination: any }> {
+  const params = new URLSearchParams({ limit: limit.toString(), offset: offset.toString() });
+  if (query) params.append('q', query);
+  const response = await apiClient.get(`/api/threads/gifs/search?${params.toString()}`);
   return response.data;
 }
 

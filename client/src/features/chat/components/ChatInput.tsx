@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video, Users, BadgeCheck } from "lucide-react";
+import { Send, Paperclip, X, Smile, Film, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video, Users, BadgeCheck } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
 import type { ChatMessage, OrgUser, ChatThread, LinkPreview } from "../services/chatApi";
@@ -21,6 +21,8 @@ import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calend
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
 import FilePreviewModal from "@/app/support/components/FilePreviewModal";
 import { ImageGallery } from "@/features/shared/components/ImageGallery";
+import { ImageCropperModal } from "@/components/marketing_ui/ImageCropperModal";
+import { GifPicker } from "./GifPicker";
 
 interface MessageOptions {
   scheduledFor?: string;
@@ -64,6 +66,10 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [linkPreview, setLinkPreview] = useState<LinkPreview | null>(null);
   const [isFetchingPreview, setIsFetchingPreview] = useState(false);
   const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cropper State
+  const [editingFileIndex, setEditingFileIndex] = useState<number | null>(null);
+  const [editingFileSrc, setEditingFileSrc] = useState<string | null>(null);
 
   // New options state
   const [scheduledDate, setScheduledDate] = useState<string>("");
@@ -518,6 +524,32 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
   };
 
+  const startEditingImage = (index: number) => {
+    const file = files[index];
+    if (file && file.type.startsWith("image/")) {
+      const src = URL.createObjectURL(file);
+      setEditingFileSrc(src);
+      setEditingFileIndex(index);
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (editingFileIndex === null) return;
+    
+    const originalFile = files[editingFileIndex];
+    // Create a new File from the blob, preserving the name
+    const croppedFile = new File([croppedBlob], originalFile.name, {
+      type: croppedBlob.type,
+      lastModified: Date.now(),
+    });
+
+    setFiles(prev => {
+      const newFiles = [...prev];
+      newFiles[editingFileIndex] = croppedFile;
+      return newFiles;
+    });
+  };
+
   const { data: groupInfo } = useQuery({
     queryKey: ["group-info", thread?.groupId],
     queryFn: () => fetchGroupInfo(thread!.groupId!),
@@ -685,6 +717,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                 <ImageGallery 
                   images={galleryImages} 
                   onRemove={(id) => removeFile(parseInt(id))}
+                  onEdit={(id) => startEditingImage(parseInt(id))}
                   className="bg-muted/30 p-2"
                 />
               </div>
@@ -890,6 +923,27 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     }}
                     theme="auto"
                     previewConfig={{ showPreview: false }}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="p-2 mb-1 text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none rounded-full hover:bg-muted">
+                    <Film className="w-5 h-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2">
+                  <GifPicker 
+                    onSelect={(gifUrl) => {
+                      // Insert markdown image syntax for the GIF
+                      const markdownGif = `![GIF](${gifUrl})`;
+                      if (editorRef.current) {
+                        editorRef.current.focus();
+                        document.execCommand("insertText", false, markdownGif);
+                        setMessage(editorRef.current.innerHTML);
+                      }
+                    }} 
                   />
                 </PopoverContent>
               </Popover>
@@ -1136,6 +1190,19 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           onClose={() => setPreviewFile(null)}
         />
       )}
+      {/* Modals and Overlays */}
+      <ImageCropperModal
+        isOpen={editingFileIndex !== null && editingFileSrc !== null}
+        onClose={() => {
+          if (editingFileSrc) URL.revokeObjectURL(editingFileSrc);
+          setEditingFileIndex(null);
+          setEditingFileSrc(null);
+        }}
+        imageSrc={editingFileSrc || ""}
+        onCropComplete={handleCropComplete}
+        title="Edit Image"
+      />
+
     </div>
   );
 }

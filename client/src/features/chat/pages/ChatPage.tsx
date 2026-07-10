@@ -146,12 +146,37 @@ export function ChatPage() {
       return m;
     }).filter(Boolean) as ChatMessage[]);
 
-    try {
-      for (const msgId of msgIds) {
+    const failedIds: string[] = [];
+    for (const msgId of msgIds) {
+      try {
         await deleteMessage(activeThread.id, msgId, type);
+      } catch (err: any) {
+        failedIds.push(msgId);
       }
-    } catch (err) {
-      toast.error("Failed to delete some messages");
+    }
+
+    if (failedIds.length > 0) {
+      if (type === 'everyone') {
+        // Rollback optimistic update for failed messages — restore them
+        setMessages(prev => prev.map(m => {
+          if (failedIds.includes(m.id)) {
+            return { ...m, is_deleted: false, message: m.message }; 
+          }
+          return m;
+        }));
+        // Refetch to get accurate server state
+        if (activeThread) {
+          try {
+            const { messages: freshMsgs } = await fetchMessages(activeThread.id);
+            setMessages(freshMsgs);
+          } catch { /* ignore refetch error */ }
+        }
+        toast.error(
+          `${failedIds.length} message(s) could not be deleted for everyone (already seen). They remain visible.`
+        );
+      } else {
+        toast.error("Failed to delete some messages");
+      }
     }
   };
 

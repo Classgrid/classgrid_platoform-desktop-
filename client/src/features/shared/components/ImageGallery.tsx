@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Download, Trash2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Download, Trash2, Crop } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface GalleryImage {
@@ -20,6 +20,7 @@ interface ImageGalleryProps {
   className?: string;
   maxDisplay?: number;
   onRemove?: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
 export interface ImageLightboxProps {
@@ -62,7 +63,7 @@ const slideVariants = {
  * Mobile: swipe left/right to navigate, pinch to zoom, tap outside to close
  * Desktop: arrow keys, prev/next buttons, keyboard Escape
  */
-export function ImageGallery({ images, className, maxDisplay, onRemove }: ImageGalleryProps) {
+export function ImageGallery({ images, className, maxDisplay, onRemove, onEdit }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [direction, setDirection] = useState(0);
   const clickedImageRef = useRef<GalleryImage | null>(null);
@@ -220,8 +221,19 @@ export function ImageGallery({ images, className, maxDisplay, onRemove }: ImageG
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(img.id); }}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 z-30"
+                title="Remove image"
               >
                 <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+
+            {onEdit && img.type !== "video" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEdit(img.id); }}
+                className="absolute top-2 right-10 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-500 z-30"
+                title="Crop / Edit image"
+              >
+                <Crop className="w-4 h-4" />
               </button>
             )}
             

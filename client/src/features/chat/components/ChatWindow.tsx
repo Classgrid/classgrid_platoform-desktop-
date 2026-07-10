@@ -3,7 +3,7 @@ import { useQueryClient, useInfiniteQuery, useQuery } from "@tanstack/react-quer
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
-import { fetchMessages, sendMessage, deleteMessage, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, toggleThreadReplies, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
+import { fetchMessages, sendMessage, deleteMessage, bulkDeleteMessages, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, toggleThreadReplies, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
 import { useThreadChannel } from "../hooks/useRealtimeChat";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
@@ -128,10 +128,15 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       }
     },
     onMessageDeleted: (payload) => {
+      // Handle both single delete and bulk delete events
+      const deletedIds: string[] = payload.messageIds || (payload.messageId ? [payload.messageId] : []);
+      if (deletedIds.length === 0) return;
+      
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
+        const idSet = new Set(deletedIds);
         const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.map(m => m.id === payload.messageId ? { ...m, is_deleted: true, message: 'This message was deleted' } : m)
+          page.map(m => idSet.has(m.id) ? { ...m, is_deleted: true, message: 'This message was deleted' } : m)
         );
         return { ...oldData, pages: newPages };
       });
@@ -332,17 +337,17 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     }
   };
 
-  const confirmDeleteMessage = async (msgId: string, type: 'me' | 'everyone') => {
-    // Optimistic update
+  const confirmDeleteMessage = async (msgIds: string[], type: 'me' | 'everyone') => {
+    // Optimistic update — instant UI response
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
       if (!oldData || !oldData.pages) return oldData;
       const newPages = oldData.pages.map((page: ChatMessage[]) => 
         page.map(m => {
-          if (m.id === msgId) {
+          if (msgIds.includes(m.id)) {
              if (type === 'everyone') {
                 return { ...m, is_deleted: true, message: 'This message was deleted' };
              } else {
-                return null; // For 'me', we can completely remove it from view
+                return null;
              }
           }
           return m;
@@ -350,10 +355,23 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       );
       return { ...oldData, pages: newPages };
     });
+
     try {
-      await deleteMessage(threadId, msgId, type);
+      if (msgIds.length === 1) {
+        // Single message — use the original endpoint
+        await deleteMessage(threadId, msgIds[0], type);
+      } else {
+        // Bulk — ONE API call for all messages
+        const result = await bulkDeleteMessages(threadId, msgIds, type);
+        if (result.failed > 0) {
+          queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
+          toast.error(`${result.failed} message(s) could not be deleted for everyone (already seen).`);
+        }
+      }
     } catch (error) {
-      console.error("Failed to delete message", error);
+      console.error("Failed to delete message(s)", error);
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
+      toast.error("Failed to delete messages");
     }
   };
 
@@ -801,6 +819,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
           isOpen={!!messageToDelete}
           onClose={() => setMessageToDelete(null)}
           onDelete={confirmDeleteMessage}
+          currentUserId={currentUserId}
         />
       )}
       {pinningMessageId && (
