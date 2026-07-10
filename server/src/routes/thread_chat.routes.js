@@ -1788,21 +1788,11 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
         .eq('id', msgId);
       if (error) throw error;
     } else if (deleteType === 'me') {
-      // "Delete for me" — add userId to deleted_for array
-      const currentDeletedFor = msg.deleted_for || [];
-      if (!currentDeletedFor.includes(userId)) {
-        currentDeletedFor.push(userId);
-        const { error: updateErr } = await sb
-          .from('chat_messages')
-          .update({ deleted_for: currentDeletedFor })
-          .eq('id', msgId);
-        if (updateErr) {
-          console.error('Error updating deleted_for:', updateErr);
-          // Fallback: if deleted_for column doesn't exist, soft-delete for this user by marking is_deleted
-          // This means "delete for me" acts like "delete for everyone" as a last resort
-          console.warn('Falling back: deleted_for column may not exist. Message will be hidden via is_deleted flag.');
-        }
-      }
+      // "Delete for me" — store in MongoDB (no Supabase column needed)
+      await User.updateOne(
+        { _id: userId },
+        { $addToSet: { hidden_chat_messages: msgId } }
+      );
       return res.status(200).json({ success: true, deletedForMe: true });
     }
 
@@ -1915,40 +1905,13 @@ router.post('/:id/messages/bulk-delete', isAuthenticated, async (req, res) => {
       return res.json({ ok: true, deleted: unseenIds.length, failed: seenIds.length + notMine.length, failedIds: [...seenIds, ...notMine.map(m => m.id)] });
 
     } else {
-      // "Delete for me" — batch update using select('*') for safety
-      let totalUpdated = 0;
-      for (let i = 0; i < messageIds.length; i += 200) {
-        const chunk = messageIds.slice(i, i + 200);
-        const { data: chunkMsgs, error: chunkErr } = await sb.from('chat_messages')
-          .select('*')
-          .in('id', chunk)
-          .eq('thread_id', threadId);
+      // "Delete for me" — store in MongoDB (one atomic operation, no Supabase column needed)
+      await User.updateOne(
+        { _id: userId },
+        { $addToSet: { hidden_chat_messages: { $each: messageIds } } }
+      );
 
-        if (chunkErr) {
-          console.error('Bulk delete-for-me chunk fetch error:', chunkErr);
-          continue; // Skip this chunk but don't fail the whole operation
-        }
-
-        if (chunkMsgs && chunkMsgs.length > 0) {
-          const updates = chunkMsgs
-            .filter(m => !(m.deleted_for || []).includes(userId))
-            .map(m => {
-              return sb.from('chat_messages')
-                .update({ deleted_for: [...(m.deleted_for || []), userId] })
-                .eq('id', m.id)
-                .then(({ error }) => {
-                  if (error) {
-                    console.warn('Failed to update deleted_for for message', m.id, error.message);
-                  } else {
-                    totalUpdated++;
-                  }
-                });
-            });
-          await Promise.all(updates);
-        }
-      }
-
-      return res.json({ ok: true, deleted: totalUpdated, deletedForMe: true });
+      return res.json({ ok: true, deleted: messageIds.length, deletedForMe: true });
     }
   } catch (err) {
     console.error('Bulk message delete error:', err);

@@ -345,6 +345,12 @@ const userSchema = new mongoose.Schema(
       default: []
     },
 
+    // 🗑️ Hidden Chat Messages (Delete for Me)
+    hidden_chat_messages: {
+      type: [String],
+      default: []
+    },
+
     // 🗑️ Cleared Chat Threads (Thread ID -> Cleared At Timestamp)
     cleared_chat_threads: {
         type: Map,
