@@ -77,6 +77,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [priority, setPriority] = useState("normal"); // normal, high, urgent
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [pickerTab, setPickerTab] = useState<'emoji' | 'gif'>('emoji');
 
   // Mentions State
   const [showMentions, setShowMentions] = useState(false);
@@ -912,39 +913,46 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     <Smile className="w-5 h-5" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2">
-                  <EmojiPicker
-                    onEmojiClick={(emojiData) => {
-                      if (editorRef.current) {
-                        editorRef.current.focus();
-                        document.execCommand("insertText", false, emojiData.emoji);
-                        setMessage(editorRef.current.innerHTML);
-                      }
-                    }}
-                    theme="auto"
-                    previewConfig={{ showPreview: false }}
-                  />
-                </PopoverContent>
-              </Popover>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="p-2 mb-1 text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none rounded-full hover:bg-muted">
-                    <Film className="w-5 h-5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2">
-                  <GifPicker 
-                    onSelect={(gifUrl) => {
-                      // Insert markdown image syntax for the GIF
-                      const markdownGif = `![GIF](${gifUrl})`;
-                      if (editorRef.current) {
-                        editorRef.current.focus();
-                        document.execCommand("insertText", false, markdownGif);
-                        setMessage(editorRef.current.innerHTML);
-                      }
-                    }} 
-                  />
+                <PopoverContent side="top" align="start" className="w-auto p-0 border-none mb-2 overflow-hidden bg-background shadow-lg rounded-xl">
+                  <div className="flex items-center justify-around border-b p-1 bg-secondary/30">
+                    <button
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${pickerTab === 'emoji' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      onClick={() => setPickerTab('emoji')}
+                    >
+                      Emoji
+                    </button>
+                    <button
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${pickerTab === 'gif' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                      onClick={() => setPickerTab('gif')}
+                    >
+                      GIFs
+                    </button>
+                  </div>
+                  
+                  {pickerTab === 'emoji' ? (
+                    <EmojiPicker
+                      onEmojiClick={(emojiData) => {
+                        if (editorRef.current) {
+                          editorRef.current.focus();
+                          document.execCommand("insertText", false, emojiData.emoji);
+                          setMessage(editorRef.current.innerHTML);
+                        }
+                      }}
+                      theme="auto"
+                      previewConfig={{ showPreview: false }}
+                    />
+                  ) : (
+                    <GifPicker 
+                      onSelect={(gifUrl) => {
+                        const markdownGif = `![GIF](${gifUrl})`;
+                        if (editorRef.current) {
+                          editorRef.current.focus();
+                          document.execCommand("insertText", false, markdownGif);
+                          setMessage(editorRef.current.innerHTML);
+                        }
+                      }} 
+                    />
+                  )}
                 </PopoverContent>
               </Popover>
 
