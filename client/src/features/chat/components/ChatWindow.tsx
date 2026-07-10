@@ -51,7 +51,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   const amIMember = groupInfo?.myRole === "member";
   const isInputDisabled = (isAnnouncementMode || thread.allowReplies === false) && amIMember;
   let disabledReason = isInputDisabled ? "Only admins can send messages." : undefined;
-  
+
   if (thread.allowReplies === false && amIMember) {
     disabledReason = "Replies are disabled for this thread. Only admins can send messages.";
   }
@@ -65,7 +65,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
 
   const [typingUsers, setTypingUsers] = useState<Record<string, { timeout: NodeJS.Timeout, type: string }>>({});
   const [isSending, setIsSending] = useState(false);
-  
+
   const channelRef = useThreadChannel(threadId, currentUserId, {
     onNewMessage: (payload) => {
       // Instantly append to React Query cache without refetching
@@ -102,7 +102,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       if (payload.userId !== currentUserId) {
         setTypingUsers(prev => {
           const next = { ...prev };
-          
+
           if (payload.isTyping === false) {
             if (next[payload.userId]?.timeout) {
               clearTimeout(next[payload.userId].timeout);
@@ -121,10 +121,10 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
                 return updated;
               });
             }, duration);
-            
+
             next[payload.userId] = { timeout, type: payload.activityType || 'typing' };
           }
-          
+
           return next;
         });
       }
@@ -133,11 +133,11 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       // Handle both single delete and bulk delete events
       const deletedIds: string[] = payload.messageIds || (payload.messageId ? [payload.messageId] : []);
       if (deletedIds.length === 0) return;
-      
+
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
         const idSet = new Set(deletedIds);
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
           page.map(m => idSet.has(m.id) ? { ...m, is_deleted: true, message: 'This message was deleted' } : m)
         );
         return { ...oldData, pages: newPages };
@@ -146,7 +146,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     onReactionUpdate: (payload) => {
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
           page.map(m => m.id === payload.messageId ? { ...m, reactions: payload.reactions } : m)
         );
         return { ...oldData, pages: newPages };
@@ -154,18 +154,18 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     },
     onReadReceipt: (payload) => {
       if (payload.userId !== currentUserId) {
-         queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
-            if (!oldData || !oldData.pages) return oldData;
-            const newPages = oldData.pages.map((page: ChatMessage[]) => 
-              page.map(m => {
-                 if (m.sender_id === currentUserId && !m.isSeen && new Date(m.created_at) <= new Date(payload.lastReadAt)) {
-                    return { ...m, isSeen: true };
-                 }
-                 return m;
-              })
-            );
-            return { ...oldData, pages: newPages };
-         });
+        queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+          if (!oldData || !oldData.pages) return oldData;
+          const newPages = oldData.pages.map((page: ChatMessage[]) =>
+            page.map(m => {
+              if (m.sender_id === currentUserId && !m.isSeen && new Date(m.created_at) <= new Date(payload.lastReadAt)) {
+                return { ...m, isSeen: true };
+              }
+              return m;
+            })
+          );
+          return { ...oldData, pages: newPages };
+        });
       }
     },
     onNewPoll: (payload) => {
@@ -178,9 +178,9 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     onPollVote: (payload) => {
       if (thread.groupId) {
         queryClient.setQueryData(["group-polls", thread.groupId], (oldPolls: Poll[] = []) => {
-          return oldPolls.map(p => 
-            p.id === payload.pollId 
-              ? { ...p, voteCounts: payload.voteCounts, totalVoters: payload.totalVoters } 
+          return oldPolls.map(p =>
+            p.id === payload.pollId
+              ? { ...p, voteCounts: payload.voteCounts, totalVoters: payload.totalVoters }
               : p
           );
         });
@@ -223,7 +223,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    
+
     // Check if near bottom
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     setIsNearBottom(distanceFromBottom < 150); // increased threshold slightly
@@ -240,7 +240,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
 
   const handleSendMessage = async (text: string, files: File[], options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) => {
     if (!text.trim() && files.length === 0) return;
-    
+
     // Scheduled messages: no optimistic UI, just send normally
     if (options?.scheduledFor) {
       if (files.length > 0) setIsSending(true);
@@ -365,7 +365,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     // Optimistic update — INSTANT UI response (no waiting for API)
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
       if (!oldData || !oldData.pages) return oldData;
-      const newPages = oldData.pages.map((page: ChatMessage[]) => 
+      const newPages = oldData.pages.map((page: ChatMessage[]) =>
         page.map(m => {
           if (msgIds.includes(m.id)) {
             // Both "delete for me" and "delete for everyone" show placeholder instantly
@@ -402,7 +402,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     // Optimistic update
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
       if (!oldData || !oldData.pages) return oldData;
-      const newPages = oldData.pages.map((page: ChatMessage[]) => 
+      const newPages = oldData.pages.map((page: ChatMessage[]) =>
         page.map(m => m.id === msgId ? { ...m, message: newText, is_edited: true } : m)
       );
       return { ...oldData, pages: newPages };
@@ -419,7 +419,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       const newReactions = await toggleReaction(threadId, msgId, emoji);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
           page.map(m => m.id === msgId ? { ...m, reactions: newReactions } : m)
         );
         return { ...oldData, pages: newPages };
@@ -435,15 +435,15 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       // The websocket will broadcast the updated vote counts and replace them in the cache.
       // But we call votePoll to register the vote in the DB.
       await votePoll(thread.groupId, pollId, optionId);
-      
+
       // Optimistic update for UI responsiveness
       queryClient.setQueryData(["group-polls", thread.groupId], (oldPolls: Poll[] = []) => {
         return oldPolls.map(p => {
           if (p.id !== pollId) return p;
-          
+
           let newMyVotes = [...p.myVotes];
           const newVoteCounts = { ...p.voteCounts };
-          
+
           if (p.allow_multiple) {
             if (newMyVotes.includes(optionId)) {
               newMyVotes = newMyVotes.filter(id => id !== optionId);
@@ -462,13 +462,13 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
             }
             newMyVotes = [optionId];
             if (!p.myVotes.includes(optionId)) {
-               newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
+              newVoteCounts[optionId] = (newVoteCounts[optionId] || 0) + 1;
             }
           }
-          
+
           // Total voters might be slightly off during optimistic update if it's their first vote ever, 
           // but the websocket will correct it instantly.
-          
+
           return {
             ...p,
             myVotes: newMyVotes,
@@ -476,7 +476,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
           };
         });
       });
-      
+
     } catch (error) {
       console.error("Failed to vote", error);
     }
@@ -490,7 +490,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
         await pinMessage(threadId, msgId, false);
         queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
           if (!oldData || !oldData.pages) return oldData;
-          const newPages = oldData.pages.map((page: ChatMessage[]) => 
+          const newPages = oldData.pages.map((page: ChatMessage[]) =>
             page.map(m => m.id === msgId ? { ...m, is_pinned: false, pinned_until: null } : m)
           );
           return { ...oldData, pages: newPages };
@@ -507,13 +507,13 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     try {
       const expirationDate = new Date();
       expirationDate.setHours(expirationDate.getHours() + durationHours);
-      
+
       await pinMessage(threadId, pinningMessageId, true, durationHours);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.map(m => m.id === pinningMessageId 
-            ? { ...m, is_pinned: true, pinned_until: expirationDate.toISOString() } 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
+          page.map(m => m.id === pinningMessageId
+            ? { ...m, is_pinned: true, pinned_until: expirationDate.toISOString() }
             : { ...m, is_pinned: false, pinned_until: null }
           )
         );
@@ -532,7 +532,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       await approveMessage(threadId, msgId);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
           page.map(m => m.id === msgId ? { ...m, status: 'approved' } : m)
         );
         return { ...oldData, pages: newPages };
@@ -547,7 +547,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       await rejectMessage(threadId, msgId);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
           page.map(m => m.id === msgId ? { ...m, status: 'rejected' } : m)
         );
         return { ...oldData, pages: newPages };
@@ -562,10 +562,10 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       await acknowledgeMessage(threadId, msgId);
       queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
         if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.map(m => m.id === msgId ? { 
-             ...m, 
-             acknowledgements: [...(m.acknowledgements || []), { user_id: currentUserId, user_name: 'You' }] 
+        const newPages = oldData.pages.map((page: ChatMessage[]) =>
+          page.map(m => m.id === msgId ? {
+            ...m,
+            acknowledgements: [...(m.acknowledgements || []), { user_id: currentUserId, user_name: 'You' }]
           } : m)
         );
         return { ...oldData, pages: newPages };
@@ -581,7 +581,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       await toggleThreadReplies(threadId, newAllowReplies);
       queryClient.setQueryData(["chat-threads", "list"], (oldData: any) => {
         if (!oldData || !oldData.threads) return oldData;
-        const newThreads = oldData.threads.map((t: ChatThread) => 
+        const newThreads = oldData.threads.map((t: ChatThread) =>
           t.id === threadId ? { ...t, allowReplies: newAllowReplies } : t
         );
         return { ...oldData, threads: newThreads };
@@ -603,10 +603,10 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     const handleFocus = () => {
       markThreadRead(threadId).catch(console.error);
     };
-    
+
     // Mark read initially when window mounts
     handleFocus();
-    
+
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [threadId]);
@@ -639,7 +639,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   return (
     <div className="flex flex-col h-full w-full relative bg-background">
       {/* Header for GroupSettingsModal Trigger */}
-      <div 
+      <div
         className="flex items-center gap-3 p-4 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={() => {
           if (thread.type === 'group') setIsSettingsOpen(true);
@@ -659,19 +659,19 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
           </p>
         </div>
       </div>
-      
+
       {/* Pinned Messages Banner */}
       {(() => {
         const now = new Date().getTime();
         const pinnedMessages = allMessages.filter(m => {
-           if (!m.is_pinned || m.is_deleted) return false;
-           if (m.pinned_until && new Date(m.pinned_until).getTime() < now) return false;
-           return true;
+          if (!m.is_pinned || m.is_deleted) return false;
+          if (m.pinned_until && new Date(m.pinned_until).getTime() < now) return false;
+          return true;
         });
         if (pinnedMessages.length === 0) return null;
         const topPinned = pinnedMessages[pinnedMessages.length - 1]; // most recently pinned or latest message
         return (
-          <div 
+          <div
             className="flex items-center gap-3 px-4 py-2 bg-background border-b border-border shadow-sm shrink-0 cursor-pointer hover:bg-muted/30 transition-colors"
             onClick={() => {
               const el = document.getElementById(`msg-${topPinned.id}`);
@@ -685,127 +685,127 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
             }}
           >
             <div className="text-amber-500">
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pin"><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pin"><line x1="12" x2="12" y1="17" y2="22" /><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" /></svg>
             </div>
             <div className="flex flex-col flex-1 min-w-0">
-               <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
-               <span className="text-[13px] text-foreground truncate">
-                 {topPinned.message 
-                   ? new DOMParser().parseFromString(String(topPinned.message), 'text/html').body.textContent?.trim() || "Message" 
-                   : "Attachment"}
-               </span>
+              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500">Pinned Message</span>
+              <span className="text-[13px] text-foreground truncate">
+                {topPinned.message
+                  ? new DOMParser().parseFromString(String(topPinned.message), 'text/html').body.textContent?.trim() || "Message"
+                  : "Attachment"}
+              </span>
             </div>
           </div>
         );
       })()}
 
-      <div 
+      <div
         ref={scrollRef}
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-4 bg-muted/20 relative custom-scrollbar flex flex-col"
       >
         {/* Loading indicator at top when fetching older messages */}
-      {isFetchingNextPage && (
-        <div className="flex justify-center py-4">
-          <Spinner className="w-5 h-5 text-muted-foreground" />
-        </div>
-      )}
-      
-      {/* Initial Loading */}
-      {isLoading && (
-        <div className="flex-1 flex items-center justify-center">
-          <Spinner className="w-8 h-8 text-muted-foreground" />
-        </div>
-      )}
-
-      {/* Start of conversation indicator */}
-      {!hasNextPage && allMessages.length > 0 && !isLoading && (
-        <div className="text-center py-6 text-xs text-muted-foreground">
-          This is the start of your conversation
-        </div>
-      )}
-
-      {/* Empty State */}
-      {allMessages.length === 0 && !isLoading && (
-        <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-auto">
-          <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl">👋</span>
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Spinner className="w-5 h-5 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-bold text-foreground">No messages yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">
-            Send a message to start the conversation!
-          </p>
-        </div>
-      )}
+        )}
 
-      {/* Message List */}
-      <div className="mt-auto flex flex-col justify-end">
-        {allMessages.map((msg, i) => {
-          const isMine = msg.sender_id === currentUserId;
-          
-          // Only show avatar if previous message was from someone else, 
-          // or if there's a large time gap (>5 mins)
-          let showAvatar = true;
-          if (i > 0) {
-            const prev = allMessages[i - 1];
-            if (prev.sender_id === msg.sender_id) {
-              const timeDiff = new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime();
-              if (timeDiff < 5 * 60 * 1000) showAvatar = false;
-            }
-          }
+        {/* Initial Loading */}
+        {isLoading && (
+          <div className="flex-1 flex items-center justify-center">
+            <Spinner className="w-8 h-8 text-muted-foreground" />
+          </div>
+        )}
 
-          const msgUpload = threadUploads.find(u => u.tempId === msg.id);
-          const isUploading = !!(msg as any)._uploading && msgUpload && msgUpload.status === 'uploading';
-          const uploadFailed = !!(msg as any)._uploadFailed || (msgUpload && msgUpload.status === 'failed');
-          const uploadProgress = msgUpload?.progress ?? 0;
+        {/* Start of conversation indicator */}
+        {!hasNextPage && allMessages.length > 0 && !isLoading && (
+          <div className="text-center py-6 text-xs text-muted-foreground">
+            This is the start of your conversation
+          </div>
+        )}
 
-          return (
-            <div key={msg.id} className="flex flex-col">
-              <ChatBubble
-                message={msg}
-                isMine={isMine}
-                currentUserId={currentUserId}
-                showAvatar={showAvatar}
-                onReply={(msg) => setReplyTo(msg)}
-                canReply={!isInputDisabled}
-                onDelete={handleDeleteMessage}
-                onEdit={handleEditMessage}
-                onReact={handleReact}
-                poll={polls?.find(p => p.message_id === msg.id)}
-                onVotePoll={handleVotePoll}
-                onPin={handlePinMessage}
-                onApprove={handleApproveMessage}
-                onReject={handleRejectMessage}
-                onAcknowledge={handleAcknowledgeMessage}
-                isAdmin={
-                  !groupInfo || 
-                  groupInfo?.myRole === 'admin' || 
-                  orgUsers?.find(u => u._id === currentUserId)?.role === 'super_admin'
-                }
-              />
-              {/* Upload Progress / Retry — shown below the message bubble */}
-              {isMine && isUploading && (
-                <div className="flex justify-end pr-2 -mt-1 mb-1">
-                  <span className="text-xs text-muted-foreground">
-                    Uploading... {uploadProgress}%
-                  </span>
-                </div>
-              )}
-              {isMine && uploadFailed && (
-                <div className="flex justify-end items-center gap-2 pr-2 -mt-1 mb-1">
-                  <span className="text-xs text-red-500">Upload failed</span>
-                  <button
-                    onClick={() => retryUpload(threadId, msg.id)}
-                    className="flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    <RefreshCw className="w-3 h-3" /> Retry
-                  </button>
-                </div>
-              )}
+        {/* Empty State */}
+        {allMessages.length === 0 && !isLoading && (
+          <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 my-auto">
+            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">👋</span>
             </div>
-          );
-        })}
-      </div>
+            <h3 className="text-lg font-bold text-foreground">No messages yet</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">
+              Send a message to start the conversation!
+            </p>
+          </div>
+        )}
+
+        {/* Message List */}
+        <div className="mt-auto flex flex-col justify-end">
+          {allMessages.map((msg, i) => {
+            const isMine = msg.sender_id === currentUserId;
+
+            // Only show avatar if previous message was from someone else, 
+            // or if there's a large time gap (>5 mins)
+            let showAvatar = true;
+            if (i > 0) {
+              const prev = allMessages[i - 1];
+              if (prev.sender_id === msg.sender_id) {
+                const timeDiff = new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime();
+                if (timeDiff < 5 * 60 * 1000) showAvatar = false;
+              }
+            }
+
+            const msgUpload = threadUploads.find(u => u.tempId === msg.id);
+            const isUploading = !!(msg as any)._uploading && msgUpload && msgUpload.status === 'uploading';
+            const uploadFailed = !!(msg as any)._uploadFailed || (msgUpload && msgUpload.status === 'failed');
+            const uploadProgress = msgUpload?.progress ?? 0;
+
+            return (
+              <div key={msg.id} className="flex flex-col">
+                <ChatBubble
+                  message={msg}
+                  isMine={isMine}
+                  currentUserId={currentUserId}
+                  showAvatar={showAvatar}
+                  onReply={(msg) => setReplyTo(msg)}
+                  canReply={!isInputDisabled}
+                  onDelete={handleDeleteMessage}
+                  onEdit={handleEditMessage}
+                  onReact={handleReact}
+                  poll={polls?.find(p => p.message_id === msg.id)}
+                  onVotePoll={handleVotePoll}
+                  onPin={handlePinMessage}
+                  onApprove={handleApproveMessage}
+                  onReject={handleRejectMessage}
+                  onAcknowledge={handleAcknowledgeMessage}
+                  isAdmin={
+                    !groupInfo ||
+                    groupInfo?.myRole === 'admin' ||
+                    orgUsers?.find(u => u._id === currentUserId)?.role === 'super_admin'
+                  }
+                />
+                {/* Upload Progress / Retry — shown below the message bubble */}
+                {isMine && isUploading && (
+                  <div className="flex justify-end pr-2 -mt-1 mb-1">
+                    <span className="text-xs text-muted-foreground">
+                      Uploading... {uploadProgress}%
+                    </span>
+                  </div>
+                )}
+                {isMine && uploadFailed && (
+                  <div className="flex justify-end items-center gap-2 pr-2 -mt-1 mb-1">
+                    <span className="text-xs text-red-500">Upload failed</span>
+                    <button
+                      onClick={() => retryUpload(threadId, msg.id)}
+                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <RefreshCw className="w-3 h-3" /> Retry
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Typing Indicator Overlay */}
@@ -816,8 +816,8 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
             <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
             <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" ></span>
           </div>
-          {Object.values(typingUsers).some(t => t.type === 'recording') 
-            ? 'Someone is recording...' 
+          {Object.values(typingUsers).some(t => t.type === 'recording')
+            ? 'Someone is recording...'
             : Object.values(typingUsers).some(t => t.type === 'uploading')
               ? 'Someone is uploading...'
               : 'Someone is typing...'
@@ -827,7 +827,7 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
 
       {/* Message Input */}
       <div className="shrink-0 relative z-20 bg-background">
-        <ChatInput 
+        <ChatInput
           onSendMessage={handleSendMessage}
           isSending={isSending}
           replyTo={replyTo}
@@ -847,9 +847,9 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       {/* Modals */}
       {isSettingsOpen && thread.groupId && (
         <Suspense fallback={null}>
-          <GroupSettingsModal 
-            groupId={thread.groupId} 
-            onClose={() => setIsSettingsOpen(false)} 
+          <GroupSettingsModal
+            groupId={thread.groupId}
+            onClose={() => setIsSettingsOpen(false)}
             onLeaveGroup={() => setIsSettingsOpen(false)}
           />
         </Suspense>

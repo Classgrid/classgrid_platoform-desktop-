@@ -19,52 +19,60 @@ export function useRealtimeChannel(
 
   useEffect(() => {
     if (!channelName) return;
-    const socket = getSocket();
-    if (!socket) return;
 
-    // Join the room on the server
-    const channelType = channelName.split(":")[0]; // "thread", "user", "comments", etc.
+    const channelType = channelName.split(":")[0];
     const channelId = channelName.split(":").slice(1).join(":");
-
-    if (channelType === "thread") {
-      socket.emit("join_thread", channelId);
-    } else if (channelType === "user") {
-      socket.emit("join_user_channel", channelId);
-    } else if (channelType === "org") {
-      // Assuming socket.service.js already joined it globally on connect,
-      // or we can emit an explicit join if we wanted. For now, just listen.
-      socket.emit("join_org_channel", channelId);
-    }
-
-    // Register event listeners for each handler
-    // Server emits: "{channelType}:{event}" e.g. "thread:new_message"
-    const eventNames = Object.keys(handlersRef.current).map(
-      (event) => `${channelType}:${event}`
-    );
 
     const listeners: Array<{ event: string; fn: (payload: any) => void }> = [];
 
-    Object.keys(handlersRef.current).forEach((event) => {
-      const fullEvent = `${channelType}:${event}`;
-      const fn = (payload: any) => {
-        handlersRef.current[event]?.(payload);
-      };
-      socket.on(fullEvent, fn);
-      listeners.push({ event: fullEvent, fn });
-    });
+    function setup() {
+      const socket = getSocket();
+      if (!socket) return;
+
+      // Join the room on the server
+      if (channelType === "thread") {
+        socket.emit("join_thread", channelId);
+      } else if (channelType === "user") {
+        socket.emit("join_user_channel", channelId);
+      }
+
+      // Remove old listeners first to avoid duplicates on reconnect
+      listeners.forEach(({ event, fn }) => socket.off(event, fn));
+      listeners.length = 0;
+
+      // Register fresh event listeners
+      Object.keys(handlersRef.current).forEach((event) => {
+        const fullEvent = `${channelType}:${event}`;
+        const fn = (payload: any) => {
+          handlersRef.current[event]?.(payload);
+        };
+        socket.on(fullEvent, fn);
+        listeners.push({ event: fullEvent, fn });
+      });
+    }
+
+    // Setup immediately (socket may already be connected)
+    setup();
+
+    // Also re-setup every time the socket reconnects
+    const socket = getSocket();
+    if (socket) {
+      socket.on("connect", setup);
+    }
 
     return () => {
-      // Clean up: remove listeners and leave room
-      listeners.forEach(({ event, fn }) => {
-        socket.off(event, fn);
-      });
-
-      if (channelType === "thread") {
-        socket.emit("leave_thread", channelId);
+      const socket = getSocket();
+      if (socket) {
+        listeners.forEach(({ event, fn }) => socket.off(event, fn));
+        socket.off("connect", setup);
+        if (channelType === "thread") {
+          socket.emit("leave_thread", channelId);
+        }
       }
     };
   }, [channelName]);
 }
+
 
 /**
  * Subscribe to the user's personal channel for sidebar updates (thread list changes).

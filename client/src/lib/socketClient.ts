@@ -28,9 +28,10 @@ export function connectSocket(token: string): Socket {
     auth: { token },
     transports: ["websocket", "polling"],
     reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 2000,
-    timeout: 100000,
+    reconnectionAttempts: Infinity,   // NEVER give up reconnecting
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
   });
 
   socket.on("connect", () => {

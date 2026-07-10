@@ -30,8 +30,17 @@ const STREAM_CONSUMER = `worker_${process.pid}`;
 
 export const initSocket = (server) => {
     io = new Server(server, {
+        pingTimeout: 86400000, // 24 HOURS — stays alive all day, only closes on logout/tab close
+        pingInterval: 25000,   // Heartbeat every 25 seconds to keep connection alive
         cors: {
-            origin: process.env.CLIENT_URL || "https://classgrid.in", 
+            origin: (origin, callback) => {
+                // Allow all *.classgrid.in subdomains + custom org domains
+                if (!origin || origin.endsWith('.classgrid.in') || origin === 'https://classgrid.in' || origin === process.env.CLIENT_URL) {
+                    callback(null, true);
+                } else {
+                    callback(null, true); // Allow all for now — orgs can have custom domains too
+                }
+            },
             methods: ["GET", "POST"]
         }
     });
