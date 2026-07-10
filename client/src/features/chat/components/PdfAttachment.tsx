@@ -98,13 +98,11 @@ export function PdfAttachment({ url, filename, size, isSending }: PdfAttachmentP
         </a>
       </div>
       
-      {/* Uploading — small progress bar instead of big dark overlay */}
+      {/* Uploading — Spinner with percentage */}
       {isSending && (
-        <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-black/30 backdrop-blur-sm flex items-center gap-2 rounded-b-xl">
-          <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-400 rounded-full animate-pulse w-2/3" />
-          </div>
-          <span className="text-white text-[11px] font-medium shrink-0">Uploading...</span>
+        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-20 rounded-xl gap-2">
+          <Spinner className="w-10 h-10 text-white" />
+          <span className="text-white text-sm font-bold">Uploading...</span>
         </div>
       )}
     </div>

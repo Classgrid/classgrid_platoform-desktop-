@@ -382,14 +382,9 @@ export function ChatBubble({
                                       }`}
                                   />
                                   {message.isSending && (
-                                    <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-black/40 backdrop-blur-sm flex items-center gap-2 z-10">
-                                      <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-                                        <div
-                                          className="h-full bg-emerald-400 transition-all duration-300 ease-out"
-                                          style={{ width: `${message.uploadProgress || 30}%` }}
-                                        />
-                                      </div>
-                                      <span className="text-white text-[11px] font-medium shrink-0">{message.uploadProgress || 0}%</span>
+                                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 gap-2">
+                                      <Spinner className="w-10 h-10 text-white" />
+                                      <span className="text-white text-sm font-bold">{message.uploadProgress || 0}%</span>
                                     </div>
                                   )}
                                 </div>
@@ -433,11 +428,9 @@ export function ChatBubble({
                                     <p className={`text-xs ${isMine ? "text-white/50" : "text-muted-foreground"}`}>{formatBytes(att.file_size)}</p>
                                   </div>
                                   {message.isSending && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
-                                      <div
-                                        className="h-full bg-emerald-400 transition-all duration-300"
-                                        style={{ width: `${message.uploadProgress || 30}%` }}
-                                      />
+                                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 gap-1">
+                                      <Spinner className="w-8 h-8 text-white" />
+                                      <span className="text-white text-xs font-bold">{message.uploadProgress || 0}%</span>
                                     </div>
                                   )}
                                 </div>
