@@ -165,7 +165,7 @@ export async function getPresignedUrls(threadId: string, files: { fileName: stri
   return res.data.urls;
 }
 
-export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string; mentionedUsers?: string[] }) {
+export async function sendMessage(threadId: string, message: string, files?: File[], replyTo?: any, options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string; mentionedUsers?: string[] }, onProgress?: (pct: number) => void) {
   const preuploadedAttachments = [];
 
   if (files && files.length > 0) {
@@ -182,7 +182,13 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
       await axios.put(urlInfo.uploadUrl, file, {
         headers: { 'Content-Type': urlInfo.fileType },
         // Cloudflare R2 Presigned URLs must be accessed without custom auth headers
-        transformRequest: [(data) => data]
+        transformRequest: [(data) => data],
+        onUploadProgress: (evt) => {
+          if (onProgress && evt.total) {
+            const pct = Math.round((evt.loaded * 100) / evt.total);
+            onProgress(pct);
+          }
+        }
       });
       preuploadedAttachments.push({
         file_url: urlInfo.publicUrl,

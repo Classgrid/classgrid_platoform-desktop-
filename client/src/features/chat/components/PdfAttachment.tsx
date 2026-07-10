@@ -102,7 +102,7 @@ export function PdfAttachment({ url, filename, size, isSending }: PdfAttachmentP
       {isSending && (
         <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-20 rounded-xl gap-2">
           <Spinner className="w-10 h-10 text-white" />
-          <span className="text-white text-sm font-bold">Uploading...</span>
+          <span className="text-white text-sm font-bold">{uploadProgress || 0}%</span>
         </div>
       )}
     </div>
