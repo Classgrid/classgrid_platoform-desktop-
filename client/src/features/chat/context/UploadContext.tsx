@@ -95,6 +95,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
             setTaskField(threadId, tempId, { progress: pct });
           },
         });
+        
         return {
           file_url: urlInfo.publicUrl,
           file_name: urlInfo.fileName,
