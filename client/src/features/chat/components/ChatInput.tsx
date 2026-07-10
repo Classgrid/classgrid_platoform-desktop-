@@ -929,26 +929,29 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                     </button>
                   </div>
                   
-                  {pickerTab === 'emoji' ? (
-                    <EmojiPicker
-                      onEmojiClick={(emojiData) => {
-                        if (editorRef.current) {
-                          editorRef.current.focus();
-                          document.execCommand("insertText", false, emojiData.emoji);
-                          setMessage(editorRef.current.innerHTML);
-                        }
-                      }}
-                      theme="auto"
-                      previewConfig={{ showPreview: false }}
-                    />
-                  ) : (
-                    <GifPicker 
-                      onSelect={(gifUrl) => {
-                        // Send the GIF URL directly as a message
-                        onSendMessage(gifUrl, []);
-                      }} 
-                    />
-                  )}
+                  <div style={{ width: '350px', height: '450px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    {pickerTab === 'emoji' ? (
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          if (editorRef.current) {
+                            editorRef.current.focus();
+                            document.execCommand("insertText", false, emojiData.emoji);
+                            setMessage(editorRef.current.innerHTML);
+                          }
+                        }}
+                        theme="auto"
+                        previewConfig={{ showPreview: false }}
+                        width={350}
+                        height={450}
+                      />
+                    ) : (
+                      <GifPicker 
+                        onSelect={(gifUrl) => {
+                          onSendMessage(gifUrl, []);
+                        }} 
+                      />
+                    )}
+                  </div>
                 </PopoverContent>
               </Popover>
 
