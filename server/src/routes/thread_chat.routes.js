@@ -1069,7 +1069,7 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
     // Run membership, messages, and user cleared_at query IN PARALLEL
     const [membershipResult, userResult] = await Promise.all([
       validateThreadMembership(userId, threadId),
-      User.findById(userId).select('cleared_chat_threads').lean()
+      User.findById(userId).select('cleared_chat_threads hidden_chat_messages').lean()
     ]);
 
     const membership = membershipResult;
@@ -1091,10 +1091,11 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
 
     // Filter out messages older than the user's cleared_at timestamp for this thread, and filter out expired messages
     const clearedAt = userResult?.cleared_chat_threads?.[threadId];
+    const hiddenMessages = userResult?.hidden_chat_messages || [];
     const now = new Date();
     const messages = (rawMessages || []).filter(m => {
       // Check if deleted for me
-      if (m.deleted_for && m.deleted_for.includes(userId)) return false;
+      if (hiddenMessages.includes(m.id) || (m.deleted_for && m.deleted_for.includes(userId))) return false;
       // Check cleared_at
       if (clearedAt && new Date(m.created_at) <= new Date(clearedAt)) return false;
       // Check expires_at

@@ -367,7 +367,7 @@ export function ChatBubble({
                     <div className="flex flex-col gap-2 mb-2 w-full">
                       {/* Media Grid (images + videos) — Interactive Gallery */}
                       {mediaAtts.length > 0 && (
-                        <div className="w-[280px] sm:w-[320px]">
+                        <div className="w-[280px] sm:w-[320px] relative rounded-lg overflow-hidden">
                           <ImageGallery 
                             images={mediaAtts.map(att => ({
                               id: att.id,
@@ -376,12 +376,26 @@ export function ChatBubble({
                               type: att.file_type.startsWith("video/") ? "video" : "image"
                             }))} 
                             maxDisplay={4}
-                            className={`gap-1 rounded-lg ${
+                            className={`gap-1 ${
                               mediaAtts.length === 1 
                                 ? "grid-cols-1 md:grid-cols-1 lg:grid-cols-1" 
                                 : "grid-cols-2 md:grid-cols-2 lg:grid-cols-2"
                             }`}
                           />
+                          {message.isSending && (
+                            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10 p-4">
+                              <Spinner className="w-8 h-8 text-white mb-3" />
+                              <div className="w-full max-w-[200px] h-2 bg-white/20 rounded-full overflow-hidden mb-2">
+                                <div 
+                                  className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+                                  style={{ width: `${message.uploadProgress || 0}%` }}
+                                />
+                              </div>
+                              <span className="text-white text-xs font-semibold">
+                                Uploading {message.uploadProgress || 0}%
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -400,6 +414,7 @@ export function ChatBubble({
                             filename={att.file_name} 
                             size={att.file_size} 
                             isSending={message.isSending}
+                            uploadProgress={message.uploadProgress}
                           />
                         </div>
                       ))}
@@ -422,9 +437,11 @@ export function ChatBubble({
                             <p className={`text-xs ${isMine ? "text-white/50" : "text-muted-foreground"}`}>{formatBytes(att.file_size)}</p>
                           </div>
                           {message.isSending && (
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center z-10">
-                              <Spinner className="w-5 h-5 text-white mr-2" />
-                              <span className="text-white text-xs font-semibold">Uploading...</span>
+                            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
+                              <Spinner className="w-5 h-5 text-white mb-1" />
+                              <span className="text-white text-xs font-semibold">
+                                {message.uploadProgress ? `${message.uploadProgress}%` : 'Uploading...'}
+                              </span>
                             </div>
                           )}
                         </div>
