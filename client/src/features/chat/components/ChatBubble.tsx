@@ -382,17 +382,14 @@ export function ChatBubble({
                                       }`}
                                   />
                                   {message.isSending && (
-                                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10 p-4">
-                                      <Spinner className="w-8 h-8 text-white mb-3" />
-                                      <div className="w-full max-w-[200px] h-2 bg-white/20 rounded-full overflow-hidden mb-2">
+                                    <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-black/40 backdrop-blur-sm flex items-center gap-2 z-10">
+                                      <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
                                         <div
-                                          className="h-full bg-emerald-500 transition-all duration-300 ease-out"
-                                          style={{ width: `${message.uploadProgress || 0}%` }}
+                                          className="h-full bg-emerald-400 transition-all duration-300 ease-out"
+                                          style={{ width: `${message.uploadProgress || 30}%` }}
                                         />
                                       </div>
-                                      <span className="text-white text-xs font-semibold">
-                                        Uploading {message.uploadProgress || 0}%
-                                      </span>
+                                      <span className="text-white text-[11px] font-medium shrink-0">{message.uploadProgress || 0}%</span>
                                     </div>
                                   )}
                                 </div>
@@ -436,11 +433,11 @@ export function ChatBubble({
                                     <p className={`text-xs ${isMine ? "text-white/50" : "text-muted-foreground"}`}>{formatBytes(att.file_size)}</p>
                                   </div>
                                   {message.isSending && (
-                                    <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
-                                      <Spinner className="w-5 h-5 text-white mb-1" />
-                                      <span className="text-white text-xs font-semibold">
-                                        {message.uploadProgress ? `${message.uploadProgress}%` : 'Uploading...'}
-                                      </span>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
+                                      <div
+                                        className="h-full bg-emerald-400 transition-all duration-300"
+                                        style={{ width: `${message.uploadProgress || 30}%` }}
+                                      />
                                     </div>
                                   )}
                                 </div>
