@@ -944,12 +944,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
                   ) : (
                     <GifPicker 
                       onSelect={(gifUrl) => {
-                        const markdownGif = `![GIF](${gifUrl})`;
-                        if (editorRef.current) {
-                          editorRef.current.focus();
-                          document.execCommand("insertText", false, markdownGif);
-                          setMessage(editorRef.current.innerHTML);
-                        }
+                        // Send the GIF URL directly as a message
+                        onSendMessage(gifUrl, []);
                       }} 
                     />
                   )}

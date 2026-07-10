@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/marketing_ui/input';
-import { ScrollArea } from '@/components/marketing_ui/scroll-area';
 import { searchGifs, type GifResult } from '../services/chatApi';
 
 interface GifPickerProps {
@@ -14,6 +13,7 @@ export function GifPicker({ onSelect }: GifPickerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
   
   // Debounce search
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -31,7 +31,7 @@ export function GifPicker({ onSelect }: GifPickerProps) {
         setGifs(data.results);
       }
       
-      setHasMore(data.pagination.count === 20); // If we got 20, there might be more
+      setHasMore(data.pagination.count === 20);
     } catch (error) {
       console.error('Failed to fetch GIFs', error);
     } finally {
@@ -58,10 +58,11 @@ export function GifPicker({ onSelect }: GifPickerProps) {
     }, 500);
   };
 
-  // Handle scroll to bottom for pagination
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLDivElement;
-    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 50) {
+  // Handle scroll for infinite loading
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
       if (!isLoading && hasMore) {
         const nextOffset = offset + 20;
         setOffset(nextOffset);
@@ -71,20 +72,22 @@ export function GifPicker({ onSelect }: GifPickerProps) {
   };
 
   return (
-    <div className="w-[300px] h-[400px] flex flex-col bg-background border rounded-lg shadow-md overflow-hidden">
+    <div className="flex flex-col" style={{ width: '100%', height: '350px' }}>
       <div className="p-2 border-b flex items-center relative">
         <Search className="w-4 h-4 absolute left-4 text-muted-foreground" />
         <Input 
           value={query}
           onChange={handleSearchChange}
-          placeholder="Search Tenor (GIPHY)..."
+          placeholder="Search GIFs..."
           className="pl-8 h-9 text-sm w-full bg-secondary/50 border-none focus-visible:ring-1"
         />
       </div>
       
-      <ScrollArea 
-        className="flex-1 p-2" 
-        onScrollCapture={handleScroll}
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 p-2 overflow-y-auto"
+        style={{ overflowY: 'auto' }}
       >
         {gifs.length === 0 && !isLoading && (
           <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
@@ -115,10 +118,6 @@ export function GifPicker({ onSelect }: GifPickerProps) {
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
           </div>
         )}
-      </ScrollArea>
-      
-      <div className="text-[10px] text-center py-1 text-muted-foreground border-t bg-secondary/30">
-        Powered by GIPHY
       </div>
     </div>
   );
