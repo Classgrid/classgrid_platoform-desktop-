@@ -14,36 +14,39 @@ interface DeleteMessageModalProps {
 }
 
 export function DeleteMessageModal({ message, messages, isOpen, onClose, onDelete, currentUserId }: DeleteMessageModalProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingType, setDeletingType] = useState<'me' | 'everyone' | null>(null);
 
   // Get the list of messages to process
   const targetMessages = messages || (message ? [message] : []);
   const count = targetMessages.length;
 
   const handleDelete = async (type: 'me' | 'everyone') => {
-    setIsDeleting(true);
+    setDeletingType(type);
+    
+    // Close modal instantly — optimistic update handles the UI
+    onClose();
+    
     try {
       await onDelete(targetMessages.map(m => m.id), type);
-      onClose();
+      // toast.success is handled inside onDelete/confirmDeleteMessage in ChatWindow
     } catch (error) {
       console.error(error);
     } finally {
-      setIsDeleting(false);
+      setDeletingType(null);
     }
   };
 
-  // Strict Rule: Delete for Everyone is ONLY allowed if:
-  // 1. ALL selected messages are not already deleted
-  // 2. ALL selected messages were sent by YOU
-  // 3. NO ONE has seen ANY of the selected messages (no blue ticks)
-  const canDeleteForEveryone = count > 0 && targetMessages.every(m => 
-    !m.is_deleted && m.sender_id === currentUserId && !m.isSeen
-  );
+  // Delete for Everyone rules (WhatsApp-style):
+  // ALL messages must be: not already deleted + sent by you
+  // Seen status: if seen, still allow delete for everyone — just like WhatsApp
+  // But if ALL messages are from you → show delete for everyone
+  const allMine = count > 0 && targetMessages.every(m => m.sender_id === currentUserId && !m.is_deleted);
+  const canDeleteForEveryone = allMine;
 
   if (count === 0) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogTitle>Delete {count === 1 ? 'message' : `${count} messages`}?</DialogTitle>
         <DialogDescription className="sr-only">Choose how to delete {count === 1 ? 'this message' : 'these messages'}.</DialogDescription>
@@ -54,9 +57,8 @@ export function DeleteMessageModal({ message, messages, isOpen, onClose, onDelet
               variant="outline" 
               className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 justify-center w-full"
               onClick={() => handleDelete('everyone')}
-              disabled={isDeleting}
+              disabled={!!deletingType}
             >
-              {isDeleting ? <Spinner className="w-4 h-4 mr-2" /> : null}
               Delete for everyone
             </Button>
           )}
@@ -65,9 +67,8 @@ export function DeleteMessageModal({ message, messages, isOpen, onClose, onDelet
             variant="outline" 
             className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 justify-center w-full"
             onClick={() => handleDelete('me')}
-            disabled={isDeleting}
+            disabled={!!deletingType}
           >
-            {isDeleting && !canDeleteForEveryone ? <Spinner className="w-4 h-4 mr-2" /> : null}
             Delete for me
           </Button>
 
@@ -75,7 +76,7 @@ export function DeleteMessageModal({ message, messages, isOpen, onClose, onDelet
             variant="ghost" 
             className="justify-center w-full mt-2"
             onClick={onClose}
-            disabled={isDeleting}
+            disabled={!!deletingType}
           >
             Cancel
           </Button>

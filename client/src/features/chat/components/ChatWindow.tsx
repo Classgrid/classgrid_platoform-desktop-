@@ -362,26 +362,25 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
   };
 
   const confirmDeleteMessage = async (msgIds: string[], type: 'me' | 'everyone') => {
-    // Optimistic update — instant UI response
+    // Optimistic update — INSTANT UI response (no waiting for API)
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
       if (!oldData || !oldData.pages) return oldData;
       const newPages = oldData.pages.map((page: ChatMessage[]) => 
         page.map(m => {
           if (msgIds.includes(m.id)) {
-             if (type === 'everyone') {
-                return { ...m, is_deleted: true, message: 'This message was deleted' };
-             } else {
-                return null;
-             }
+            // Both "delete for me" and "delete for everyone" show placeholder instantly
+            return { ...m, is_deleted: true, message: 'This message was deleted', attachments: [] };
           }
           return m;
-        }).filter(Boolean)
+        })
       );
       return { ...oldData, pages: newPages };
     });
 
+    // Show success toast immediately (optimistic)
+    toast.success(msgIds.length === 1 ? "Message deleted" : `${msgIds.length} messages deleted`);
+
     try {
-      // Always use bulk endpoint — works for 1 or 1000 messages
       const result = await bulkDeleteMessages(threadId, msgIds, type);
       if (result.failed > 0 && type === 'everyone') {
         queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
@@ -389,7 +388,6 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       }
     } catch (error: any) {
       const status = error?.response?.status;
-      // 404 = message already gone from DB, not a real error
       if (status === 404) {
         console.warn("Messages already deleted from database");
         return;
