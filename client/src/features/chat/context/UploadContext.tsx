@@ -87,7 +87,6 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         const urlInfo = urls[index];
         await axios.put(urlInfo.uploadUrl, file, {
           headers: { 'Content-Type': urlInfo.fileType },
-          transformRequest: [(data) => data], // No auth headers for R2
           onUploadProgress: (evt) => {
             loadedPerFile[index] = evt.loaded;
             const totalLoaded = loadedPerFile.reduce((a, b) => a + b, 0);
