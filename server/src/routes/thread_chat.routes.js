@@ -1454,19 +1454,20 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
         const notificationsToInsert = [];
 
         members.forEach((m) => {
+          // Broadcast to ALL members including sender so their sidebar also updates instantly
+          broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
+            threadId,
+            messageId: msgId,
+            message: broadcastPayload,
+          });
+
           if (m.user_id !== userId) {
-            // Increment Redis unread counter for this member (fire-and-forget)
+            // Increment Redis unread counter for OTHER members only (not the sender)
             incrUnread(m.user_id, threadId);
             // If this user was mentioned, also increment mention counter
             if (parsedMentionedUsers && parsedMentionedUsers.includes(m.user_id)) {
               incrUnreadMention(m.user_id, threadId);
             }
-
-            broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
-              threadId,
-              messageId: msgId,
-              message: broadcastPayload, // Instantly inject the full message for zero-latency sidebar updates!
-            });
 
             // If not muted and not silent, add an in-app notification
             const mutes = userMutes[m.user_id] || [];
