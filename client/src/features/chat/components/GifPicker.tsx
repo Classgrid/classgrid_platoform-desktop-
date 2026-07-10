@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/marketing_ui/input';
+import { ScrollArea } from '@/components/marketing_ui/scroll-area';
 import { searchGifs, type GifResult } from '../services/chatApi';
 
 interface GifPickerProps {
