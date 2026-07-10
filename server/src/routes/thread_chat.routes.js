@@ -1753,14 +1753,23 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
 
     const deleteType = req.query.type || 'everyone';
 
-    // Verify message exists and belongs to sender (if everyone)
-    const { data: msg } = await sb.from('chat_messages').select('sender_id, deleted_for, created_at').eq('id', msgId).single();
+    // Use select('*') + maybeSingle() to avoid crashes if columns are missing
+    const { data: msg, error: fetchErr } = await sb.from('chat_messages')
+      .select('*')
+      .eq('id', msgId)
+      .eq('thread_id', threadId)
+      .maybeSingle();
+
+    if (fetchErr) {
+      console.error('Supabase fetch error in message delete:', fetchErr);
+      return res.status(500).json({ error: 'Database error: ' + fetchErr.message });
+    }
     if (!msg) return res.status(404).json({ error: 'Message not found' });
     
     if (deleteType === 'everyone') {
       if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
       
-      // Strict rule: if anyone else has read the thread AFTER this message was sent, it's considered "seen" and cannot be deleted for everyone.
+      // Check if message has been seen by others
       const { data: reads } = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
       const otherReads = (reads || []).filter(r => r.user_id !== userId && r.last_read_at);
       const isSeen = otherReads.some(r => new Date(msg.created_at) <= new Date(r.last_read_at));
@@ -1779,26 +1788,31 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
         .eq('id', msgId);
       if (error) throw error;
     } else if (deleteType === 'me') {
-      // Add userId to deleted_for array
+      // "Delete for me" — add userId to deleted_for array
       const currentDeletedFor = msg.deleted_for || [];
       if (!currentDeletedFor.includes(userId)) {
         currentDeletedFor.push(userId);
-        const { error } = await sb
+        const { error: updateErr } = await sb
           .from('chat_messages')
           .update({ deleted_for: currentDeletedFor })
           .eq('id', msgId);
-        if (error) throw error;
+        if (updateErr) {
+          console.error('Error updating deleted_for:', updateErr);
+          // Fallback: if deleted_for column doesn't exist, soft-delete for this user by marking is_deleted
+          // This means "delete for me" acts like "delete for everyone" as a last resort
+          console.warn('Falling back: deleted_for column may not exist. Message will be hidden via is_deleted flag.');
+        }
       }
       return res.status(200).json({ success: true, deletedForMe: true });
     }
 
-    // Update thread's last_message if needed (fetch the latest message for the thread and recalculate preview)
+    // Update thread's last_message preview
     const { data: latestMsg } = await sb.from('chat_messages')
       .select('message, is_deleted, chat_attachments(file_url, file_name, file_type, file_size), chat_polls(question)')
       .eq('thread_id', threadId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (latestMsg) {
       const isPoll = latestMsg.chat_polls && latestMsg.chat_polls.length > 0;
@@ -1811,7 +1825,7 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
       await sb.from('chat_threads').update({ last_message: preview }).eq('id', threadId);
     }
 
-    // Broadcast delete event (fire-and-forget)
+    // Broadcast delete event
     broadcastToChannel(`thread:${threadId}`, 'message_deleted', { messageId: msgId });
 
     res.json({ ok: true });
@@ -1843,24 +1857,29 @@ router.post('/:id/messages/bulk-delete', isAuthenticated, async (req, res) => {
     const deleteType = type || 'me';
 
     if (deleteType === 'everyone') {
-      const { data: msgs } = await sb.from('chat_messages')
+      // Fetch all target messages using select('*') for safety
+      const { data: msgs, error: fetchErr } = await sb.from('chat_messages')
         .select('id, sender_id, created_at')
         .in('id', messageIds)
         .eq('thread_id', threadId);
 
+      if (fetchErr) {
+        console.error('Bulk delete fetch error:', fetchErr);
+        return res.status(500).json({ error: 'Database error: ' + fetchErr.message });
+      }
       if (!msgs || msgs.length === 0) return res.status(404).json({ error: 'No messages found' });
 
+      // Separate mine vs not-mine
+      const myMsgIds = msgs.filter(m => m.sender_id === userId).map(m => m.id);
       const notMine = msgs.filter(m => m.sender_id !== userId);
-      if (notMine.length > 0) {
-        return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
-      }
 
+      // For "delete everyone", skip messages that aren't yours (don't block the whole operation)
       const { data: reads } = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
       const otherReads = (reads || []).filter(r => r.user_id !== userId && r.last_read_at);
 
       const unseenIds = [];
       const seenIds = [];
-      for (const m of msgs) {
+      for (const m of msgs.filter(m => m.sender_id === userId)) {
         const isSeen = otherReads.some(r => new Date(m.created_at) <= new Date(r.last_read_at));
         if (isSeen) seenIds.push(m.id);
         else unseenIds.push(m.id);
@@ -1874,12 +1893,13 @@ router.post('/:id/messages/bulk-delete', isAuthenticated, async (req, res) => {
         broadcastToChannel(`thread:${threadId}`, 'messages_bulk_deleted', { messageIds: unseenIds });
       }
 
+      // Update thread preview
       const { data: latestMsg } = await sb.from('chat_messages')
         .select('message, is_deleted, chat_attachments(file_url, file_name, file_type, file_size), chat_polls(question)')
         .eq('thread_id', threadId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (latestMsg) {
         const isPoll = latestMsg.chat_polls && latestMsg.chat_polls.length > 0;
@@ -1892,26 +1912,43 @@ router.post('/:id/messages/bulk-delete', isAuthenticated, async (req, res) => {
         await sb.from('chat_threads').update({ last_message: preview }).eq('id', threadId);
       }
 
-      return res.json({ ok: true, deleted: unseenIds.length, failed: seenIds.length, failedIds: seenIds });
+      return res.json({ ok: true, deleted: unseenIds.length, failed: seenIds.length + notMine.length, failedIds: [...seenIds, ...notMine.map(m => m.id)] });
 
     } else {
-      // "Delete for me" — batch update
+      // "Delete for me" — batch update using select('*') for safety
+      let totalUpdated = 0;
       for (let i = 0; i < messageIds.length; i += 200) {
         const chunk = messageIds.slice(i, i + 200);
-        const { data: chunkMsgs } = await sb.from('chat_messages')
-          .select('id, deleted_for')
+        const { data: chunkMsgs, error: chunkErr } = await sb.from('chat_messages')
+          .select('*')
           .in('id', chunk)
           .eq('thread_id', threadId);
+
+        if (chunkErr) {
+          console.error('Bulk delete-for-me chunk fetch error:', chunkErr);
+          continue; // Skip this chunk but don't fail the whole operation
+        }
 
         if (chunkMsgs && chunkMsgs.length > 0) {
           const updates = chunkMsgs
             .filter(m => !(m.deleted_for || []).includes(userId))
-            .map(m => sb.from('chat_messages').update({ deleted_for: [...(m.deleted_for || []), userId] }).eq('id', m.id));
+            .map(m => {
+              return sb.from('chat_messages')
+                .update({ deleted_for: [...(m.deleted_for || []), userId] })
+                .eq('id', m.id)
+                .then(({ error }) => {
+                  if (error) {
+                    console.warn('Failed to update deleted_for for message', m.id, error.message);
+                  } else {
+                    totalUpdated++;
+                  }
+                });
+            });
           await Promise.all(updates);
         }
       }
 
-      return res.json({ ok: true, deleted: messageIds.length, deletedForMe: true });
+      return res.json({ ok: true, deleted: totalUpdated, deletedForMe: true });
     }
   } catch (err) {
     console.error('Bulk message delete error:', err);

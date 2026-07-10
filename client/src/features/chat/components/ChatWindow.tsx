@@ -357,21 +357,22 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     });
 
     try {
-      if (msgIds.length === 1) {
-        // Single message — use the original endpoint
-        await deleteMessage(threadId, msgIds[0], type);
-      } else {
-        // Bulk — ONE API call for all messages
-        const result = await bulkDeleteMessages(threadId, msgIds, type);
-        if (result.failed > 0) {
-          queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
-          toast.error(`${result.failed} message(s) could not be deleted for everyone (already seen).`);
-        }
+      // Always use bulk endpoint — works for 1 or 1000 messages
+      const result = await bulkDeleteMessages(threadId, msgIds, type);
+      if (result.failed > 0 && type === 'everyone') {
+        queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
+        toast.error(`${result.failed} message(s) could not be deleted for everyone (already seen).`);
       }
-    } catch (error) {
+    } catch (error: any) {
+      const status = error?.response?.status;
+      // 404 = message already gone from DB, not a real error
+      if (status === 404) {
+        console.warn("Messages already deleted from database");
+        return;
+      }
       console.error("Failed to delete message(s)", error);
       queryClient.invalidateQueries({ queryKey: ["chat-messages", threadId] });
-      toast.error("Failed to delete messages");
+      toast.error("Failed to delete some messages");
     }
   };
 
