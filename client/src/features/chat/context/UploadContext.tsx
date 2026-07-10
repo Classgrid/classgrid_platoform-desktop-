@@ -85,14 +85,26 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
       const uploadPromises = files.map(async (file, index) => {
         const urlInfo = urls[index];
-        await axios.put(urlInfo.uploadUrl, file, {
-          headers: { 'Content-Type': urlInfo.fileType },
-          onUploadProgress: (evt) => {
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", urlInfo.uploadUrl, true);
+          xhr.setRequestHeader("Content-Type", urlInfo.fileType);
+          
+          xhr.upload.onprogress = (evt) => {
             loadedPerFile[index] = evt.loaded;
             const totalLoaded = loadedPerFile.reduce((a, b) => a + b, 0);
+            // Cap at 99% until fully complete
             const pct = Math.min(99, Math.round((totalLoaded / totalSize) * 100));
             setTaskField(threadId, tempId, { progress: pct });
-          },
+          };
+          
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+            else reject(new Error(`Upload failed: ${xhr.status}`));
+          };
+          
+          xhr.onerror = () => reject(new Error("Network error during upload"));
+          xhr.send(file);
         });
         
         return {
