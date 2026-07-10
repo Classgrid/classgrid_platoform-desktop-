@@ -130,9 +130,9 @@ const TERMINOLOGY_MAP = {
         org_label: "Institute",
         top_level: "Course",
         course: "Course",
-        year: null,  // Coaching has no year concept
-        period: null, // Coaching has no semester concept
-        division: null, // Coaching blocks divisions
+        year: "Year",
+        period: "Phase",
+        division: "Batch",
         sub_batch: null,
         student_id: "Enrollment No",
         student_id_long: "Enrollment Number",
@@ -156,7 +156,7 @@ const TERMINOLOGY_MAP = {
         year: "Standard",
         period: "Term",
         division: "Division",
-        sub_batch: null,
+        sub_batch: "Batch",
         student_id: "Roll No",
         student_id_long: "Roll Number",
         teacher: "Lecturer",
@@ -178,7 +178,7 @@ const TERMINOLOGY_MAP = {
         year: "Standard",
         period: "Term",
         division: "Division",
-        sub_batch: null,
+        sub_batch: "Batch",
         student_id: "Roll No",
         student_id_long: "Roll Number",
         teacher: "Lecturer",
@@ -200,7 +200,7 @@ const TERMINOLOGY_MAP = {
         year: "Standard",
         period: "Term",
         division: "Division", // auto-created "Default", hidden in UI
-        sub_batch: null,
+        sub_batch: "Batch",
         student_id: "Roll No",
         student_id_long: "Roll Number",
         teacher: "Lecturer",

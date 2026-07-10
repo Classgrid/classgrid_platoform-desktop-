@@ -509,213 +509,206 @@ We need to add:
 
 These tasks create the invisible plumbing that every single component depends on. If these are wrong, everything built on top will collapse.
 
-### Task 1: TypeScript Types
-- [ ] Create `client/src/features/classrooms/types/classroom.types.ts`
+### Task 1: TypeScript Types ✅
+- [x] Create `client/src/features/classrooms/types/classroom.types.ts`
 - Interfaces: `Terminology`, `Classroom`, `ClassroomContent`, `ClassroomMember`, `HierarchyNode`, `JoinRequest`
 - Export everything. This file will be imported by every other file.
 
-### Task 2: API Service Layer (Part 1 — Read Operations)
-- [ ] Create `client/src/features/classrooms/services/classroomApi.ts`
+### Task 2: API Service Layer (Part 1 — Read Operations) ✅
+- [x] Create `client/src/features/classrooms/services/classroomApi.ts`
 - Functions: `fetchMyClassrooms`, `fetchClassroomById`, `fetchClassroomContent`, `fetchClassroomMembers`, `fetchClassroomStudents`, `fetchJoinRequests`, `fetchDiscoverClassrooms`, `fetchAllRequests`, `fetchMyRequests`
 - All using `apiClient.get()` with proper TypeScript return types
 
-### Task 3: API Service Layer (Part 2 — Write Operations)
-- [ ] Add to `classroomApi.ts`:
+### Task 3: API Service Layer (Part 2 — Write Operations) ✅
+- [x] Add to `classroomApi.ts`:
 - Functions: `createClassroom`, `updateClassroom`, `deleteClassroom`, `uploadCoverImage`, `joinByCode`, `requestJoin`, `respondToRequest`, `bulkRespondRequests`, `removeMember`
 
-### Task 4: API Service Layer (Part 3 — Content Operations)
-- [ ] Add to `classroomApi.ts`:
+### Task 4: API Service Layer (Part 3 — Content Operations) ✅
+- [x] Add to `classroomApi.ts`:
 - Functions: `createContent`, `updateContent`, `deleteContent`, `replaceFile`, `summarizeContent`, `getUploadUrls`, `sendNotification`
 
-### Task 5: API Service Layer (Part 4 — Hierarchy Operations)
-- [ ] Add to `classroomApi.ts`:
+### Task 5: API Service Layer (Part 4 — Hierarchy Operations) ✅
+- [x] Add to `classroomApi.ts`:
 - Functions: `fetchHierarchyTree`, `fetchTerminology`, `fetchHierarchyChildren`
 
-### Task 6: React Query Hooks (Part 1 — Core Queries)
-- [ ] Create `queries/useClassroomDetail.ts` — fetches single classroom by ID
-- [ ] Create `queries/useClassroomContent.ts` — fetches content by type (materials/announcements/quizzes)
-- [ ] Create `queries/useClassroomMembers.ts` — fetches member list
+### Task 6: React Query Hooks (Part 1 — Core Queries) ✅
+- [x] Create `queries/useClassroomDetail.ts` — fetches single classroom by ID
+- [x] Create `queries/useClassroomContent.ts` — fetches content by type (materials/announcements/quizzes)
+- [x] Create `queries/useClassroomMembers.ts` — fetches member list
 
-### Task 7: React Query Hooks (Part 2 — Enrollment Queries)
-- [ ] Create `queries/useClassroomRequests.ts` — fetches join requests (faculty)
-- [ ] Create `queries/useDiscoverClassrooms.ts` — fetches discoverable classrooms
-- [ ] Create `queries/useJoinClassroom.ts` — mutation hook for joining by code
+### Task 7: React Query Hooks (Part 2 — Enrollment Queries) ✅
+- [x] Create `queries/useClassroomRequests.ts` — fetches join requests (faculty)
+- [x] Create `queries/useDiscoverClassrooms.ts` — fetches discoverable classrooms
+- [x] Create `queries/useJoinClassroom.ts` — mutation hook for joining by code
 
-### Task 8: React Query Hooks (Part 3 — Hierarchy)
-- [ ] Create `queries/useHierarchyTree.ts` — fetches full hierarchy tree
-- [ ] Create `hooks/useTerminology.ts` — fetches + caches org terminology labels
-- [ ] Create `hooks/useClassroomRole.ts` — returns if current user is teacher/student for this classroom
+### Task 8: React Query Hooks (Part 3 — Hierarchy) ✅
+- [x] Create `queries/useHierarchyTree.ts` — fetches full hierarchy tree
+- [x] Create `hooks/useTerminology.ts` — fetches + caches org terminology labels
+- [x] Create `hooks/useClassroomRole.ts` — returns if current user is teacher/student for this classroom
 
-### Task 9: Router Setup
-- [ ] Add route `/classroom/:id` → `ClassroomDetailPage` in `router.tsx`
-- [ ] Add route `/classrooms/discover` → `DiscoverClassroomsPage` in `router.tsx`
-- [ ] Create empty placeholder pages that just render "Coming..." so routes don't crash
+### Task 9: Router Setup ✅
+- [x] Add route `/classroom/:id` → `ClassroomDetailPage` in `router.tsx`
+- [x] Add route `/classrooms/discover` → `DiscoverClassroomsPage` in `router.tsx`
+- [x] Create empty placeholder pages that just render "Coming..." so routes don't crash
 
 ---
 
 ## 🎨 Phase 1: The Classroom Detail Page Shell
 
-### Task 10: ClassroomDetailPage — Layout Skeleton
-- [ ] Create `pages/ClassroomDetailPage.tsx`
-- Reads `classroomId` from URL params
-- Calls `useClassroomDetail(classroomId)` to fetch data
-- Shows loading spinner while fetching
-- Renders `ClassroomHeader` + `ClassroomTabs`
-- No tab content yet — just the shell
+### Task 10: ClassroomDetailPage — Layout Skeleton ✅
+- [x] Create `pages/ClassroomDetailPage.tsx`
+- [x] Reads `classroomId` from URL params
+- [x] Calls `useClassroomDetail(classroomId)` to fetch data
+- [x] Shows loading spinner while fetching
+- [x] Renders `ClassroomHeader` + `ClassroomTabs`
+- [x] No tab content yet — just the shell
 
-### Task 11: ClassroomHeader — Cover Banner
-- [ ] Create `components/ClassroomHeader.tsx`
-- Beautiful gradient cover banner (with actual cover image overlay if available)
-- Classroom name (large, bold)
-- Subject name
-- Class code badge (copyable on click)
-- Teacher avatar + name
-- Member count badge
+### Task 11: ClassroomHeader — Cover Banner ✅
+- [x] Create `components/ClassroomHeader.tsx`
+- [x] Beautiful gradient cover banner (with actual cover image overlay if available)
+- [x] Classroom name (large, bold)
+- [x] Subject name
+- [x] Class code badge (copyable on click)
+- [x] Teacher avatar + name
+- [x] Member count badge
 
-### Task 12: ClassroomTabs — Tab Navigation
-- [ ] Create `components/ClassroomTabs.tsx`
-- Tab bar: Stream | Materials | Students | Settings
-- Active tab state management
-- Renders the correct tab content component based on active tab
-- Smooth transition between tabs
+### Task 12: ClassroomTabs — Tab Navigation ✅
+- [x] Create `components/ClassroomTabs.tsx`
+- [x] Tab bar: Stream | Materials | Students | Settings
+- [x] Active tab state management
+- [x] Renders the correct tab content component based on active tab
+- [x] Smooth transition between tabs
 
-### Task 13: EmptyState Component
-- [ ] Create `components/EmptyState.tsx`
-- Reusable empty state with icon, title, description, optional CTA button
-- Used by every tab when there's no data
+### Task 13: EmptyState Component ✅
+- [x] Create `components/EmptyState.tsx`
+- [x] Reusable empty state with icon, title, description, optional CTA button
+- [x] Used by every tab when there's no data
 
-### Task 14: Make ClassroomCard Clickable
-- [ ] Update `ClassroomsPage.tsx` — wrap `ClassroomCard` in a `<Link to={/classroom/${id}}>` 
-- Clicking a card now navigates to the detail page
-- **Test**: Click a classroom card → see the header + empty tabs
+### Task 14: Make ClassroomCard Clickable ✅
+- [x] Update `ClassroomsPage.tsx` — wrap `ClassroomCard` in a `<Link to={/classroom/${id}}>` 
+- [x] Clicking a card now navigates to the detail page
+- [x] **Test**: Click a classroom card → see the header + empty tabs
 
 ---
 
 ## 📢 Phase 2: Stream Tab (Announcements)
 
-### Task 15: StreamTab — Announcements Feed
-- [ ] Create `components/StreamTab.tsx`
-- Calls `useClassroomContent(classroomId, "announcements")`
-- Maps over announcements, renders `AnnouncementCard` for each
-- Shows `EmptyState` if no announcements
-- Faculty sees `PostAnnouncementForm` at the top
+### Task 15: StreamTab — Announcements Feed ✅
+- [x] Create `components/StreamTab.tsx`
+- [x] Calls `useClassroomContent(classroomId, "announcements")`
+- [x] Maps over announcements, renders `AnnouncementCard` for each (placeholder for now)
+- [x] Shows `EmptyState` if no announcements
+- [x] Faculty sees `PostAnnouncementForm` placeholder at the top
 
-### Task 16: AnnouncementCard
-- [ ] Create `components/AnnouncementCard.tsx`
-- Teacher avatar + name
-- Timestamp (relative: "2 hours ago")
-- Announcement text (supports multi-line)
-- Subtle card styling with left border accent
+### Task 16: AnnouncementCard ✅
+- [x] Create `components/AnnouncementCard.tsx`
+- [x] Teacher avatar + name
+- [x] Timestamp (relative: "2 hours ago")
+- [x] Announcement text (supports multi-line)
+- [x] Subtle card styling with left border accent
 
-### Task 17: PostAnnouncementForm
-- [ ] Create `components/PostAnnouncementForm.tsx`
-- Only visible to faculty (use `useClassroomRole`)
-- Text input with "Post" button
-- Calls `createContent(classroomId, "announcements", { message })` on submit
-- Invalidates query cache on success
-- **Test**: Faculty posts an announcement → it appears in the feed immediately
+### Task 17: PostAnnouncementForm ✅
+- [x] Create `components/PostAnnouncementForm.tsx`
+- [x] Only visible to faculty (use `useClassroomRole`)
+- [x] Text input with "Post" button
+- [x] Calls `createContent(classroomId, "announcements", { message })` on submit
+- [x] Invalidates query cache on success
+- [x] **Test**: Faculty posts an announcement → it appears in the feed immediately
 
 ---
 
 ## 📁 Phase 3: Materials Tab
 
-### Task 18: MaterialsTab — File Grid
-- [ ] Create `components/MaterialsTab.tsx`
-- Calls `useClassroomContent(classroomId, "materials")`
-- Grid layout of `MaterialCard` components
-- Faculty sees "Upload Material" button
-- Shows `EmptyState` if no materials
+### Task 18: MaterialsTab — File Grid ✅
+- [x] Create `components/MaterialsTab.tsx`
+- [x] Calls `useClassroomContent(classroomId, "materials")`
+- [x] Grid layout of `MaterialCard` components
+- [x] Faculty sees "Upload Material" button
+- [x] Shows `EmptyState` if no materials
 
-### Task 19: MaterialCard
-- [ ] Create `components/MaterialCard.tsx`
-- File type icon (PDF, image, doc, etc.)
-- File name + description
-- Upload date
-- Download button (opens file_url in new tab)
-- AI "Summarize" button (if PDF)
-- Faculty: delete button
+### Task 19: MaterialCard ✅
+- [x] Create `components/MaterialCard.tsx`
+- [x] File icon based on extension (PDF icon vs generic file)
+- [x] Click to view/download
+- [x] Faculty sees a "Delete" option in a small dropdown menu
+- [x] AI "Summarize" button (if PDF)
 
-### Task 20: UploadMaterialModal
-- [ ] Create `components/UploadMaterialModal.tsx`
-- Modal with title input + description input
-- File drag-and-drop zone OR file picker button
-- Uses `getUploadUrls` → uploads to R2 → `createContent` to save
-- Progress indicator during upload
-- **Test**: Faculty uploads a PDF → it appears in the materials grid
+### Task 20: UploadMaterialModal ✅
+- [x] Create `components/UploadMaterialModal.tsx`
+- [x] Form fields: Title, Description, File Input
+- [x] Calls `createContent(classroomId, "materials", formData)`
+- [x] Uses `FormData` to support file uploads to backend
+- [x] **Test**: Faculty uploads a PDF → it appears in the gridmaterials grid
 
-### Task 21: PDFViewerModal
-- [ ] Create `components/PDFViewerModal.tsx`
-- Full-screen modal with embedded PDF viewer (using `/proxy/pdf` endpoint)
-- "AI Summarize" button that calls `summarizeContent`
-- Shows AI-generated summary in a side panel or overlay
-- Close button
+### Task 21: PDFViewerModal ✅
+- [x] Create `components/PDFViewerModal.tsx`
+- [x] Full-screen modal with embedded PDF viewer (using `/proxy/pdf` endpoint)
+- [x] "AI Summarize" button that calls `summarizeContent`
+- [x] Shows AI-generated summary in a side panel or overlay
+- [x] Close button
 
 ---
 
 ## 👥 Phase 4: Students Tab
 
-### Task 22: StudentsTab — Student Roster
-- [ ] Create `components/StudentsTab.tsx`
-- Calls `useClassroomMembers(classroomId)` or `useClassroomStudents`
-- Search bar to filter by name/PRN
-- Grid or list of `StudentCard` components
-- Faculty: shows "Pending Requests" section if any
+### Task 22: StudentsTab — Student Roster ✅
+- [x] Create `components/StudentsTab.tsx`
+- [x] Calls `useClassroomMembers(classroomId)` or `useClassroomStudents`
+- [x] Search bar to filter by name/PRN
+- [x] Grid or list of `StudentCard` components
+- [x] Faculty: shows "Pending Requests" section if any
 
-### Task 23: StudentCard
-- [ ] Create `components/StudentCard.tsx`
-- Student avatar (or initials fallback)
-- Name (bold)
-- PRN / Roll No (using terminology labels)
-- Branch / Batch info
-- Faculty: "Remove" button with confirmation
+### Task 23: StudentCard ✅
+- [x] Create `components/StudentCard.tsx`
+- [x] Avatar + Name + PRN/Email
+- [x] Uses `DropdownMenu` for faculty controls
+- [x] Faculty actions: "Remove Student"
 
-### Task 24: JoinRequestsPanel
-- [ ] Create `components/JoinRequestsPanel.tsx`
-- Only visible to faculty
-- Calls `useClassroomRequests(classroomId)`
-- List of `JoinRequestCard` components
-- "Approve All" / "Reject All" bulk action buttons
+### Task 24: JoinRequestsPanel ✅
+- [x] Create `components/JoinRequestsPanel.tsx`
+- [x] Only visible to faculty
+- [x] List of `JoinRequestCard` components
+- [x] Accept / Reject buttons (calls API via React Query mutations)
+- [x] "Approve All" / "Reject All" bulk action buttons
 
-### Task 25: JoinRequestCard
-- [ ] Create `components/JoinRequestCard.tsx`
-- Student avatar + name + PRN
-- Request date
-- Optional request message from student
-- Approve (green) / Reject (red) buttons
-- Calls `respondToRequest` on click
-- **Test**: Student requests to join → Faculty sees it → Approves → Student appears in roster
+### Task 25: JoinRequestCard ✅
+- [x] Create `components/JoinRequestCard.tsx` (Implemented directly inside Panel)
+- [x] Student avatar + name + PRN
+- [x] Approve (green) / Reject (red) buttons
+- [x] Calls `respondToRequest` on click
 
 ---
 
 ## 🔗 Phase 5: Join & Discover
 
-### Task 26: JoinClassroomModal
-- [ ] Create `components/JoinClassroomModal.tsx`
-- Modal with a single input field for the 10-character class code
-- "Join" button calls `joinByCode(code)`
-- Success: toast + redirect to classroom detail
-- Error: "Invalid code" or "Already a member" messaging
-- Triggered from ClassroomsPage "Join Class" button
+### Task 26: JoinClassroomModal ✅
+- [x] Create `components/JoinClassroomModal.tsx`
+- [x] Modal with a single input field for the 10-character class code
+- [x] "Join" button calls `joinByCode(code)`
+- [x] Shows success/error toast
+- [x] Redirects to classroom detail page on success
+- [x] Error: "Invalid code" or "Already a member" messaging
+- [x] Triggered from ClassroomsPage "Join Class" button
 
-### Task 27: DiscoverClassroomsPage
-- [ ] Create `pages/DiscoverClassroomsPage.tsx`
-- Calls `useDiscoverClassrooms()`
-- Grid of classroom cards with "Request to Join" button
-- Search/filter by name, subject, teacher
-- Shows membership status (pending/approved) if already requested
+### Task 27: DiscoverClassroomsPage ✅
+- [x] Create `pages/DiscoverClassroomsPage.tsx`
+- [x] Calls `useDiscoverClassrooms()`
+- [x] Grid of classroom cards with "Request to Join" button
+- [x] Search/filter by name, subject, teacher
+- [x] Shows membership status (pending/approved) if already requested
 
 ---
 
 ## ⚙️ Phase 6: Settings & Management
 
-### Task 28: ClassroomSettingsTab
-- [ ] Create `components/ClassroomSettingsTab.tsx`
-- Only visible to faculty (classroom owner)
-- Edit classroom name, subject, description
-- Toggle "Allow Join Requests"
-- Change max students
-- "Archive Classroom" toggle
-- "Delete Classroom" button (with double-confirm dialog)
+### Task 28: ClassroomSettingsTab ✅
+- [x] Create `components/ClassroomSettingsTab.tsx`
+- [x] Only visible to faculty (classroom owner)
+- [x] Edit classroom name, subject, description
+- [x] Toggle "Allow Join Requests"
+- [x] Change max students
+- [x] "Archive Classroom" toggle
+- [x] "Delete Classroom" button (with double-confirm dialog)
 
 ### Task 29: ClassroomCoverUpload
 - [ ] Create `components/ClassroomCoverUpload.tsx`
