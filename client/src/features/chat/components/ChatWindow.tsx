@@ -3,7 +3,7 @@ import { useQueryClient, useInfiniteQuery, useQuery } from "@tanstack/react-quer
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
-import { fetchMessages, sendMessage, deleteMessage, bulkDeleteMessages, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, toggleThreadReplies, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
+import { fetchMessages, sendMessage, sendMessageWithAttachments, deleteMessage, bulkDeleteMessages, editMessage, toggleReaction, markThreadRead, fetchGroupInfo, fetchGroupPolls, votePoll, pinMessage, approveMessage, rejectMessage, acknowledgeMessage, toggleThreadReplies, type ChatMessage, type ChatThread, type Poll } from "../services/chatApi";
 import { useThreadChannel } from "../hooks/useRealtimeChat";
 import { lazy, Suspense } from "react";
 const GroupSettingsModal = lazy(() => import("./GroupSettingsModal").then(module => ({ default: module.GroupSettingsModal })));
@@ -14,6 +14,8 @@ import { StarredMessagesView } from "./StarredMessagesView";
 import { ScheduledMessagesView } from "./ScheduledMessagesView";
 import { PinDurationModal } from "./PinDurationModal";
 import { toast } from "sonner";
+import { useUploadContext } from "../context/UploadContext";
+import { RefreshCw } from "lucide-react";
 
 interface ChatWindowProps {
   thread: ChatThread;
@@ -233,16 +235,18 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
     }
   };
 
+  const { uploads, startUpload, retryUpload, clearUpload } = useUploadContext();
+  const threadUploads = uploads[threadId] || [];
+
   const handleSendMessage = async (text: string, files: File[], options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string }) => {
     if (!text.trim() && files.length === 0) return;
     
-    // If it's a scheduled message, skip optimistic update and just send
+    // Scheduled messages: no optimistic UI, just send normally
     if (options?.scheduledFor) {
       if (files.length > 0) setIsSending(true);
       try {
-        const sentMessage = await sendMessage(threadId, text, files, replyTo, options);
+        await sendMessage(threadId, text, files, replyTo, options);
         setReplyTo(null);
-        // Dispatch a custom event or show a toast in real app, using alert for now
         alert("Message scheduled successfully!");
       } catch (error) {
         console.error("Failed to schedule message", error);
@@ -253,81 +257,101 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
       return;
     }
 
-    // Optimistic UI Update instantly!
+    // Text-only: optimistic update + instant send (no upload manager needed)
+    if (files.length === 0) {
+      const tempId = `temp-${Date.now()}`;
+      const now = new Date().toISOString();
+      const tempMessage: ChatMessage = {
+        id: tempId, thread_id: threadId, sender_id: currentUserId,
+        sender_name: "You", user_avatar: null, message: text,
+        reply_to: replyTo ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message } : null,
+        is_deleted: false, created_at: now, attachments: [], reactions: {}
+      };
+      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        const newPages = [...oldData.pages];
+        if (newPages.length > 0) newPages[0] = [tempMessage, ...newPages[0]];
+        return { ...oldData, pages: newPages };
+      });
+      try {
+        const sentMsg = await sendMessage(threadId, text, [], replyTo, options);
+        setReplyTo(null);
+        queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          return { ...oldData, pages: oldData.pages.map((page: ChatMessage[]) => page.map(m => m.id === tempId ? sentMsg : m)) };
+        });
+        if (scrollRef.current) setTimeout(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, 50);
+      } catch (error) {
+        queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          return { ...oldData, pages: oldData.pages.map((page: ChatMessage[]) => page.filter(m => m.id !== tempId)) };
+        });
+        toast.error("Failed to send message");
+      }
+      return;
+    }
+
+    // File upload: use global UploadContext so upload persists when switching chats!
     const tempId = `temp-${Date.now()}`;
     const now = new Date().toISOString();
-    const tempMessage: ChatMessage = {
-      id: tempId,
-      thread_id: threadId,
-      sender_id: currentUserId,
-      sender_name: "You", // Will be replaced by real data
-      user_avatar: null,
-      message: text,
-      reply_to: replyTo ? { id: replyTo.id, sender_name: replyTo.sender_name, message: replyTo.message } : null,
-      is_deleted: false,
-      created_at: now,
-      attachments: files.map((f, i) => ({
-        id: `temp-att-${i}`,
-        message_id: tempId,
-        file_url: URL.createObjectURL(f),
-        file_name: f.name,
-        file_type: f.type,
-        file_size: f.size
-      })),
-      reactions: {}
-    };
+    const savedReplyTo = replyTo;
+    setReplyTo(null);
 
-    // Inject directly into React Query cache for instant feedback
+    // Optimistic message in chat with local object URLs for instant preview
+    const tempMessage: ChatMessage = {
+      id: tempId, thread_id: threadId, sender_id: currentUserId,
+      sender_name: "You", user_avatar: null, message: text,
+      reply_to: savedReplyTo ? { id: savedReplyTo.id, sender_name: savedReplyTo.sender_name, message: savedReplyTo.message } : null,
+      is_deleted: false, created_at: now,
+      attachments: files.map((f, i) => ({
+        id: `temp-att-${i}`, message_id: tempId,
+        file_url: URL.createObjectURL(f),
+        file_name: f.name, file_type: f.type, file_size: f.size
+      })),
+      reactions: {},
+      _uploading: true, // flag so ChatBubble can show progress
+    } as any;
+
     queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
-      if (!oldData || !oldData.pages) return oldData;
+      if (!oldData?.pages) return oldData;
       const newPages = [...oldData.pages];
-      if (newPages.length > 0) {
-        newPages[0] = [tempMessage, ...newPages[0]];
-      }
+      if (newPages.length > 0) newPages[0] = [tempMessage, ...newPages[0]];
       return { ...oldData, pages: newPages };
     });
 
-    // Only show spinner if we are uploading files, otherwise it should be instant
-    if (files.length > 0) {
-      setIsSending(true);
-    }
-    
-    try {
-      // Send to server in background
-      const sentMsg = await sendMessage(threadId, text, files, replyTo, options);
-      setReplyTo(null);
-      
-      // Replace temporary message with actual server message
-      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
-        if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.map((msg) => msg.id === tempId ? sentMsg : msg)
-        );
-        return { ...oldData, pages: newPages };
-      });
+    if (scrollRef.current) setTimeout(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, 50);
 
-      if (scrollRef.current) {
-        setTimeout(() => {
-          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }, 50);
+    // Hand off to global upload manager — continues even if user switches chats
+    startUpload(
+      threadId, tempId, files, text, savedReplyTo, options,
+      // onDone — called when all files are uploaded
+      async (preuploadedAttachments) => {
+        try {
+          const sentMsg = await sendMessageWithAttachments(threadId, text, preuploadedAttachments, savedReplyTo, options);
+          // Replace temp message with real server message
+          queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+            if (!oldData?.pages) return oldData;
+            return { ...oldData, pages: oldData.pages.map((page: ChatMessage[]) => page.map(m => m.id === tempId ? sentMsg : m)) };
+          });
+          clearUpload(threadId, tempId);
+        } catch (err) {
+          toast.error("Upload succeeded but failed to save message. Please retry.");
+        }
+      },
+      // onFail — called when upload fails
+      (failedTempId, errMsg) => {
+        // Mark the optimistic message as failed (keeps it visible with a Retry button)
+        queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: ChatMessage[]) =>
+              page.map(m => m.id === failedTempId ? { ...m, _uploadFailed: true, _uploading: false } as any : m)
+            )
+          };
+        });
       }
-    } catch (error) {
-      console.error("Failed to send message", error);
-      // Remove temporary message on failure
-      queryClient.setQueryData(["chat-messages", threadId], (oldData: any) => {
-        if (!oldData || !oldData.pages) return oldData;
-        const newPages = oldData.pages.map((page: ChatMessage[]) => 
-          page.filter((msg) => msg.id !== tempId)
-        );
-        return { ...oldData, pages: newPages };
-      });
-      const errorMsg = (error as any)?.error || (error as any)?.message || "An unknown error occurred during upload.";
-      toast.error("Failed to send message", { description: errorMsg });
-    } finally {
-      if (files.length > 0) {
-        setIsSending(false);
-      }
-    }
+    );
   };
 
   const handleDeleteMessage = (msgId: string) => {
@@ -732,30 +756,55 @@ export function ChatWindow({ thread, currentUserId, orgUsers }: ChatWindowProps)
             }
           }
 
+          const msgUpload = threadUploads.find(u => u.tempId === msg.id);
+          const isUploading = !!(msg as any)._uploading && msgUpload && msgUpload.status === 'uploading';
+          const uploadFailed = !!(msg as any)._uploadFailed || (msgUpload && msgUpload.status === 'failed');
+          const uploadProgress = msgUpload?.progress ?? 0;
+
           return (
-            <ChatBubble
-              key={msg.id}
-              message={msg}
-              isMine={isMine}
-              currentUserId={currentUserId}
-              showAvatar={showAvatar}
-              onReply={(msg) => setReplyTo(msg)}
-              canReply={!isInputDisabled}
-              onDelete={handleDeleteMessage}
-              onEdit={handleEditMessage}
-              onReact={handleReact}
-              poll={polls?.find(p => p.message_id === msg.id)}
-              onVotePoll={handleVotePoll}
-              onPin={handlePinMessage}
-              onApprove={handleApproveMessage}
-              onReject={handleRejectMessage}
-              onAcknowledge={handleAcknowledgeMessage}
-              isAdmin={
-                !groupInfo || 
-                groupInfo?.myRole === 'admin' || 
-                orgUsers?.find(u => u._id === currentUserId)?.role === 'super_admin'
-              }
-            />
+            <div key={msg.id} className="flex flex-col">
+              <ChatBubble
+                message={msg}
+                isMine={isMine}
+                currentUserId={currentUserId}
+                showAvatar={showAvatar}
+                onReply={(msg) => setReplyTo(msg)}
+                canReply={!isInputDisabled}
+                onDelete={handleDeleteMessage}
+                onEdit={handleEditMessage}
+                onReact={handleReact}
+                poll={polls?.find(p => p.message_id === msg.id)}
+                onVotePoll={handleVotePoll}
+                onPin={handlePinMessage}
+                onApprove={handleApproveMessage}
+                onReject={handleRejectMessage}
+                onAcknowledge={handleAcknowledgeMessage}
+                isAdmin={
+                  !groupInfo || 
+                  groupInfo?.myRole === 'admin' || 
+                  orgUsers?.find(u => u._id === currentUserId)?.role === 'super_admin'
+                }
+              />
+              {/* Upload Progress / Retry — shown below the message bubble */}
+              {isMine && isUploading && (
+                <div className="flex justify-end pr-2 -mt-1 mb-1">
+                  <span className="text-xs text-muted-foreground">
+                    Uploading... {uploadProgress}%
+                  </span>
+                </div>
+              )}
+              {isMine && uploadFailed && (
+                <div className="flex justify-end items-center gap-2 pr-2 -mt-1 mb-1">
+                  <span className="text-xs text-red-500">Upload failed</span>
+                  <button
+                    onClick={() => retryUpload(threadId, msg.id)}
+                    className="flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    <RefreshCw className="w-3 h-3" /> Retry
+                  </button>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>

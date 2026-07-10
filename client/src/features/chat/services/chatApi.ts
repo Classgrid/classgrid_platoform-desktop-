@@ -215,6 +215,31 @@ export async function sendMessage(threadId: string, message: string, files?: Fil
   return res.data.message;
 }
 
+// Lightweight version: files already uploaded — just POST to server with pre-uploaded attachments
+export async function sendMessageWithAttachments(
+  threadId: string,
+  message: string,
+  preuploadedAttachments: any[],
+  replyTo?: any,
+  options?: { scheduledFor?: string; isSilent?: boolean; priority?: string; expiresAt?: string; mentionedUsers?: string[] }
+) {
+  const formData = new FormData();
+  if (message) formData.append("message", message);
+  if (replyTo) formData.append("replyTo", JSON.stringify(replyTo));
+  if (options?.scheduledFor) formData.append("scheduledFor", options.scheduledFor);
+  if (options?.isSilent) formData.append("isSilent", "true");
+  if (options?.priority) formData.append("priority", options.priority);
+  if (options?.expiresAt) formData.append("expiresAt", options.expiresAt);
+  if (options?.mentionedUsers && options.mentionedUsers.length > 0) {
+    formData.append("mentionedUsers", JSON.stringify(options.mentionedUsers));
+  }
+  if (preuploadedAttachments.length > 0) {
+    formData.append("preuploaded_attachments", JSON.stringify(preuploadedAttachments));
+  }
+  const res = await apiClient.post(`/api/threads/${threadId}/messages`, formData, { timeout: 0 });
+  return res.data.message;
+}
+
 export async function togglePinThread(threadId: string, isPinned: boolean) {
   const res = await apiClient.post(`/api/threads/${threadId}/pin`, { is_pinned: isPinned });
   return res.data;

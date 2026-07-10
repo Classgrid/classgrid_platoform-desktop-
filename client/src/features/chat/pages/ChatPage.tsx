@@ -58,8 +58,9 @@ import { ViewPollVotesModal } from "../components/ViewPollVotesModal";
 import { StarredMessagesView } from "../components/StarredMessagesView";
 import { ScheduledMessagesView } from "../components/ScheduledMessagesView";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
+import { UploadProvider } from "../context/UploadContext";
 
-export function ChatPage() {
+function ChatPageInner() {
   const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const currentUserId = currentUser?._id;
@@ -1437,5 +1438,13 @@ export function ChatPage() {
         }}
       />
     </div>
+  );
+}
+
+export function ChatPage() {
+  return (
+    <UploadProvider>
+      <ChatPageInner />
+    </UploadProvider>
   );
 }

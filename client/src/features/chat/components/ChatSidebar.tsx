@@ -12,6 +12,7 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { DEFAULT_USER_AVATAR, DEFAULT_GROUP_AVATAR } from "@/lib/constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
+import { useUploadContext } from "../context/UploadContext";
 
 interface ChatSidebarProps {
   threads: ChatThread[];
@@ -93,6 +94,9 @@ export function ChatSidebar({
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedChats, setSelectedChats] = useState<Set<string>>(new Set());
   const [draftsUpdate, setDraftsUpdate] = useState(0);
+
+  // Get active uploads from the global UploadContext
+  const { uploads } = useUploadContext();
 
   useEffect(() => {
     const handleDraftUpdate = () => setDraftsUpdate(v => v + 1);
@@ -376,6 +380,26 @@ export function ChatSidebar({
                   </div>
                   
                   {(() => {
+                    // 1. Show upload progress if there's an active upload for this thread
+                    const threadUploads = uploads[thread.id] || [];
+                    const activeUpload = threadUploads.find(u => u.status === 'uploading');
+                    const failedUpload = threadUploads.find(u => u.status === 'failed');
+                    if (activeUpload) {
+                      return (
+                        <p className="text-xs truncate mt-0.5 text-blue-500 font-medium">
+                          ⬆ Uploading... {activeUpload.progress}%
+                        </p>
+                      );
+                    }
+                    if (failedUpload) {
+                      return (
+                        <p className="text-xs truncate mt-0.5 text-red-500 font-medium">
+                          ✕ Upload failed — tap to retry
+                        </p>
+                      );
+                    }
+
+                    // 2. Show draft if exists and thread is not active
                     const draftKey = `chat_draft_${thread.id}`;
                     const draftContent = localStorage.getItem(draftKey);
                     
@@ -389,6 +413,7 @@ export function ChatSidebar({
                       );
                     }
                     
+                    // 3. Show last message
                     return thread.lastMessage ? (
                       <p className={`text-xs truncate mt-0.5 ${thread.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                         {renderSnippet(thread.lastMessage)}
