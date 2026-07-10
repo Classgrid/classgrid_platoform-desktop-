@@ -40,6 +40,14 @@ export interface ChatAttachment {
   file_size: number;
 }
 
+export interface LinkPreview {
+  title: string | null;
+  description: string | null;
+  image: string | null;
+  url: string;
+  domain: string;
+}
+
 export interface ChatMessage {
   id: string;
   thread_id: string;
@@ -58,6 +66,7 @@ export interface ChatMessage {
   isError?: boolean;
   status?: 'approved' | 'pending' | 'rejected';
   is_pinned?: boolean;
+  link_preview?: LinkPreview | null;
   requires_acknowledgement?: boolean;
   acknowledgements?: { user_id: string; user_name: string }[];
   has_acknowledged?: boolean;
@@ -478,4 +487,18 @@ export async function fetchUnifiedRequests() {
 export async function exploreGroups() {
   const res = await apiClient.get<{ groups: (ChatGroup & { member_count: number; creator: { name: string; email: string } })[] }>('/api/group-chat/explore');
   return res.data.groups;
+}
+
+export async function fetchLinkPreview(url: string, signal?: AbortSignal): Promise<LinkPreview | null> {
+  try {
+    const res = await apiClient.get<LinkPreview>('/api/threads/link-preview', {
+      params: { url },
+      signal,
+      timeout: 5000 // Don't hang forever
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Failed to fetch link preview', err);
+    return null;
+  }
 }

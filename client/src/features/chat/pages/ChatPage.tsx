@@ -95,7 +95,7 @@ export function ChatPage() {
   const [isDisappearingModalOpen, setIsDisappearingModalOpen] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
-  const [messageToDelete, setMessageToDelete] = useState<ChatMessage | null>(null);
+  const [messagesToDelete, setMessagesToDelete] = useState<ChatMessage[]>([]);
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -131,12 +131,12 @@ export function ChatPage() {
     loadOrgUsers();
   }, [currentUserId]);
 
-  const confirmDeleteMessage = async (msgId: string, type: 'me' | 'everyone') => {
+  const confirmDeleteMessages = async (msgIds: string[], type: 'me' | 'everyone') => {
     if (!activeThread) return;
     
     // Optimistic update
     setMessages(prev => prev.map(m => {
-      if (m.id === msgId) {
+      if (msgIds.includes(m.id)) {
         if (type === 'everyone') {
           return { ...m, is_deleted: true, message: "This message was deleted" };
         } else {
@@ -147,9 +147,11 @@ export function ChatPage() {
     }).filter(Boolean) as ChatMessage[]);
 
     try {
-      await deleteMessage(activeThread.id, msgId, type);
+      for (const msgId of msgIds) {
+        await deleteMessage(activeThread.id, msgId, type);
+      }
     } catch (err) {
-      toast.error("Failed to delete message");
+      toast.error("Failed to delete some messages");
     }
   };
 
@@ -249,7 +251,9 @@ export function ChatPage() {
 
   useEffect(() => {
     if (activeThread) {
-      loadPolls(activeThread.id);
+      // Defer polls loading so message fetch gets network priority
+      const timer = setTimeout(() => loadPolls(activeThread.id), 200);
+      return () => clearTimeout(timer);
     } else {
       setPolls([]);
     }
@@ -316,8 +320,8 @@ export function ChatPage() {
 
       loadMessages(activeThread.id);
       
-      // Fire and forget read receipt
-      markThreadRead(activeThread.id).catch(console.error);
+      // Defer read receipt so it doesn't compete with message fetch for network bandwidth
+      setTimeout(() => markThreadRead(activeThread.id).catch(console.error), 100);
       
       // Clear unread count locally immediately
       setThreads((prev) =>
@@ -1130,7 +1134,10 @@ export function ChatPage() {
               canReply={!isInputDisabled}
               onStar={handleStarMessage}
               onPin={handlePinMessage}
-              onDelete={(id) => setMessageToDelete(messages.find(m => m.id === id) || null)}
+              onDelete={(id) => {
+                const msg = messages.find(m => m.id === id);
+                if (msg) setMessagesToDelete([msg]);
+              }}
               onEdit={async (id, text) => {
                 try {
                   await editMessage(activeThread.id, id, text);
@@ -1207,15 +1214,11 @@ export function ChatPage() {
                 onAction={async (action) => {
                   if (selectedMessageIds.size === 0) return;
                   if (action === "delete") {
-                    for (const msgId of Array.from(selectedMessageIds)) {
-                      try {
-                        await deleteMessage(activeThread.id, msgId);
-                        setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_deleted: true, message: "This message was deleted" } : m));
-                      } catch (err) {
-                        toast.error("Failed to delete some messages");
-                      }
-                    }
+                    const msgs = messages.filter(m => selectedMessageIds.has(m.id));
+                    setMessagesToDelete(msgs);
+                    // The modal will clear selection on close or confirm
                     setSelectedMessageIds(new Set());
+                    setIsSelectionMode(false);
                   } else if (action === "star") {
                     for (const msgId of Array.from(selectedMessageIds)) {
                       handleStarMessage(msgId);
@@ -1280,12 +1283,13 @@ export function ChatPage() {
       </div>
 
       {/* Delete Message Modal */}
-      {messageToDelete && (
+      {messagesToDelete.length > 0 && (
         <DeleteMessageModal
-          message={messageToDelete}
-          isOpen={!!messageToDelete}
-          onClose={() => setMessageToDelete(null)}
-          onDelete={confirmDeleteMessage}
+          messages={messagesToDelete}
+          isOpen={messagesToDelete.length > 0}
+          onClose={() => setMessagesToDelete([])}
+          onDelete={confirmDeleteMessages}
+          currentUserId={currentUserId!}
         />
       )}
       {pinningMessageId && (

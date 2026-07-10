@@ -3,7 +3,20 @@ import { primarySupabaseClient as sb } from '../config/supabaseClient.js';
 import { broadcastToChannel } from '../services/realtimeBroadcast.js';
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
+import redis from '../config/redis.js';
 
+// Safe Redis unread increment helpers
+async function incrUnreadSafe(userId, threadId) {
+  try {
+    if (redis && redis.status === 'ready') await redis.hincrby(`unread:${userId}`, threadId, 1);
+  } catch (err) {}
+}
+
+async function incrMentionSafe(userId, threadId) {
+  try {
+    if (redis && redis.status === 'ready') await redis.hincrby(`mentions:${userId}`, threadId, 1);
+  } catch (err) {}
+}
 export function initChatSchedulerCron() {
   console.log('⏳ Initializing Chat Scheduler Cron Job');
   
@@ -134,8 +147,16 @@ export function initChatSchedulerCron() {
                   threadId: schedMsg.thread_id, messageId: insertedMsg.id, message: broadcastPayload
                 });
                 
-                // ONLY send actual notifications/dings to other people
+                // ONLY send actual notifications/dings/unread increments to other people
                 if (m.user_id !== schedMsg.sender_id) {
+                  // Increment Redis Unread Counters
+                  incrUnreadSafe(m.user_id, schedMsg.thread_id);
+                  const mentionMatches = schedMsg.message ? [...schedMsg.message.matchAll(/@\[[^\]]+\]\(([a-fA-F0-9]{24})\)/g)] : [];
+                  const mentionIds = mentionMatches.map(match => match[1]);
+                  if (mentionIds.includes(m.user_id)) {
+                    incrMentionSafe(m.user_id, schedMsg.thread_id);
+                  }
+
                   const mutes = userMutes[m.user_id] || [];
                   if (!mutes.includes(schedMsg.thread_id)) {
                     notificationsToInsert.push({

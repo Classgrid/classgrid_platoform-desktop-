@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, X, Smile, FileText, Mic, Square, Trash2, BarChart2, Image as ImageIcon, Clock, SlidersHorizontal, BellOff, Bell, Camera, Video, Users, BadgeCheck } from "lucide-react";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { WaveformPlayer } from "./WaveformPlayer";
-import type { ChatMessage, OrgUser, ChatThread } from "../services/chatApi";
-import { fetchGroupInfo } from "../services/chatApi";
+import type { ChatMessage, OrgUser, ChatThread, LinkPreview } from "../services/chatApi";
+import { fetchGroupInfo, fetchLinkPreview } from "../services/chatApi";
 import { useQuery } from "@tanstack/react-query";
 import EmojiPicker from 'emoji-picker-react';
 import DOMPurify from "dompurify";
@@ -27,6 +27,7 @@ interface MessageOptions {
   isSilent?: boolean;
   priority?: string;
   expiresAt?: string;
+  linkPreview?: LinkPreview | null;
 }
 
 interface ChatInputProps {
@@ -60,6 +61,9 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioDurationSeconds, setAudioDurationSeconds] = useState<number | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [linkPreview, setLinkPreview] = useState<LinkPreview | null>(null);
+  const [isFetchingPreview, setIsFetchingPreview] = useState(false);
+  const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // New options state
   const [scheduledDate, setScheduledDate] = useState<string>("");
@@ -295,7 +299,26 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
   }, [draftKey]);
 
   useEffect(() => {
-    // Left empty for compatibility if needed elsewhere
+    // Detect URLs and fetch link preview
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urls = message.match(urlRegex);
+    if (urls && urls.length > 0) {
+      const firstUrl = urls[0];
+      if (linkPreview?.url !== firstUrl) {
+        if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
+        previewTimeoutRef.current = setTimeout(async () => {
+          setIsFetchingPreview(true);
+          try {
+            const preview = await fetchLinkPreview(firstUrl);
+            setLinkPreview(preview);
+          } finally {
+            setIsFetchingPreview(false);
+          }
+        }, 800); // 800ms debounce
+      }
+    } else {
+      setLinkPreview(null);
+    }
   }, [message]);
 
 
@@ -398,7 +421,8 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
       isSilent,
       priority,
       expiresAt: expiresAt || undefined,
-      mentionedUsers: mentionedUsers.length > 0 ? mentionedUsers : undefined
+      mentionedUsers: mentionedUsers.length > 0 ? mentionedUsers : undefined,
+      linkPreview: linkPreview || undefined
     };
     
     setMessage("");
@@ -415,6 +439,7 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
     }
     setFiles([]);
     clearAudio(); // Clear audio preview after sending
+    setLinkPreview(null);
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
@@ -738,6 +763,33 @@ export function ChatInput({ onSendMessage, isSending, replyTo, onCancelReply, on
           </div>
         );
       })()}
+
+      {/* Link Preview Card */}
+      {linkPreview && (
+        <div className="px-4 py-2 border-b border-border bg-muted/20 relative">
+          <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-3 shadow-sm relative pr-10">
+            {linkPreview.image ? (
+              <img src={linkPreview.image} className="w-16 h-16 object-cover rounded-md shrink-0 bg-muted" alt="" />
+            ) : (
+              <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center shrink-0">
+                <FileText className="w-6 h-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-foreground line-clamp-1">{linkPreview.title || linkPreview.domain}</p>
+              {linkPreview.description && <p className="text-[12px] text-muted-foreground line-clamp-1 mt-0.5">{linkPreview.description}</p>}
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-500 line-clamp-1 mt-0.5 font-medium">{linkPreview.domain}</p>
+            </div>
+            <button
+              onClick={() => setLinkPreview(null)}
+              className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-black/30 text-muted-foreground shrink-0 transition-colors"
+              title="Remove preview"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="px-4 py-3 flex items-end gap-2">

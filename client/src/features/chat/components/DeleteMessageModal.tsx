@@ -5,19 +5,25 @@ import { Spinner } from '@/components/marketing_ui/spinner';
 import type { ChatMessage } from '../services/chatApi';
 
 interface DeleteMessageModalProps {
-  message: ChatMessage;
+  message?: ChatMessage;
+  messages?: ChatMessage[];
   isOpen: boolean;
   onClose: () => void;
-  onDelete: (messageId: string, type: 'me' | 'everyone') => Promise<void>;
+  onDelete: (messageIds: string[], type: 'me' | 'everyone') => Promise<void>;
+  currentUserId: string;
 }
 
-export function DeleteMessageModal({ message, isOpen, onClose, onDelete }: DeleteMessageModalProps) {
+export function DeleteMessageModal({ message, messages, isOpen, onClose, onDelete, currentUserId }: DeleteMessageModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Get the list of messages to process
+  const targetMessages = messages || (message ? [message] : []);
+  const count = targetMessages.length;
 
   const handleDelete = async (type: 'me' | 'everyone') => {
     setIsDeleting(true);
     try {
-      await onDelete(message.id, type);
+      await onDelete(targetMessages.map(m => m.id), type);
       onClose();
     } catch (error) {
       console.error(error);
@@ -26,14 +32,21 @@ export function DeleteMessageModal({ message, isOpen, onClose, onDelete }: Delet
     }
   };
 
-  // Allow deleting for everyone as long as it's not already deleted (like WhatsApp)
-  const canDeleteForEveryone = !message.is_deleted;
+  // Strict Rule: Delete for Everyone is ONLY allowed if:
+  // 1. ALL selected messages are not already deleted
+  // 2. ALL selected messages were sent by YOU
+  // 3. NO ONE has seen ANY of the selected messages (no blue ticks)
+  const canDeleteForEveryone = count > 0 && targetMessages.every(m => 
+    !m.is_deleted && m.sender_id === currentUserId && !m.isSeen
+  );
+
+  if (count === 0) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px]">
-        <DialogTitle>Delete message?</DialogTitle>
-        <DialogDescription className="sr-only">Choose how to delete this message.</DialogDescription>
+        <DialogTitle>Delete {count === 1 ? 'message' : `${count} messages`}?</DialogTitle>
+        <DialogDescription className="sr-only">Choose how to delete {count === 1 ? 'this message' : 'these messages'}.</DialogDescription>
         
         <div className="flex flex-col gap-3 mt-4">
           {canDeleteForEveryone && (

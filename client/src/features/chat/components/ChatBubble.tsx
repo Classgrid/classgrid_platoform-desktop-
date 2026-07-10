@@ -507,6 +507,32 @@ export function ChatBubble({
                   </div>
                 )}
 
+                {/* Link Preview */}
+                {message.link_preview && (
+                  <div className={`mt-2 mb-1 rounded-xl overflow-hidden border transition-colors ${isMine ? "bg-emerald-700/20 border-emerald-600/30 dark:bg-emerald-900/30 dark:border-emerald-700/30" : "bg-muted/40 border-border"} max-w-[320px] sm:max-w-[400px]`}>
+                    <a href={message.link_preview.url} target="_blank" rel="noopener noreferrer" className="flex flex-col sm:flex-row hover:opacity-90 transition-opacity">
+                      {message.link_preview.image && (
+                        <div className="sm:w-[120px] shrink-0 bg-black/10 dark:bg-white/5 flex items-center justify-center overflow-hidden border-b sm:border-b-0 sm:border-r border-black/5 dark:border-white/5">
+                          <img src={message.link_preview.image} alt="" className="w-full h-[140px] sm:h-[100px] object-cover" />
+                        </div>
+                      )}
+                      <div className="p-3 flex flex-col justify-center min-w-0 flex-1">
+                        <span className={`text-[13px] font-bold line-clamp-1 mb-1 ${isMine ? "text-[#111b21] dark:text-white" : "text-foreground"}`}>
+                          {message.link_preview.title || message.link_preview.domain}
+                        </span>
+                        {message.link_preview.description && (
+                          <span className={`text-[12px] leading-snug line-clamp-2 mb-1.5 ${isMine ? "text-[#111b21]/70 dark:text-white/70" : "text-muted-foreground"}`}>
+                            {message.link_preview.description}
+                          </span>
+                        )}
+                        <span className={`text-[11px] font-bold uppercase tracking-wide ${isMine ? "text-emerald-800 dark:text-emerald-400" : "text-emerald-600 dark:text-emerald-500"}`}>
+                          {message.link_preview.domain}
+                        </span>
+                      </div>
+                    </a>
+                  </div>
+                )}
+
                 {/* Poll UI */}
                 {poll && (
                   <div className="flex flex-col min-w-[260px] sm:min-w-[300px] max-w-[340px] pb-1 mt-1">

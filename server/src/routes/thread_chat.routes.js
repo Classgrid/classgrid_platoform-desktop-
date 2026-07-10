@@ -10,10 +10,65 @@ import { studentNotesClient } from '../config/supabaseClient.js';
 import AIAssistantModule from '../services/ai/AIAssistantModule.js';
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
 import Notification from '../models/Notification.js';
+import redis from '../config/redis.js';
 
 
 const router = express.Router();
 const sb = primarySupabaseClient;
+
+// ──────────────────────────────────────────────
+// REDIS UNREAD COUNTER HELPERS
+// Key format: unread:{userId} → Hash { threadId: count }
+// Falls back gracefully if Redis is unavailable (dev mode).
+// ──────────────────────────────────────────────
+const UNREAD_PREFIX = 'unread:';
+const MENTION_PREFIX = 'unread_mentions:';
+
+async function isRedisAvailable() {
+  try {
+    return redis && redis.status === 'ready';
+  } catch { return false; }
+}
+
+async function incrUnread(userId, threadId) {
+  try {
+    if (!await isRedisAvailable()) return;
+    await redis.hincrby(`${UNREAD_PREFIX}${userId}`, threadId, 1);
+  } catch { /* Redis unavailable, unread counts will fall back to SQL */ }
+}
+
+async function incrUnreadMention(userId, threadId) {
+  try {
+    if (!await isRedisAvailable()) return;
+    await redis.hincrby(`${MENTION_PREFIX}${userId}`, threadId, 1);
+  } catch { /* Redis unavailable */ }
+}
+
+async function resetUnread(userId, threadId) {
+  try {
+    if (!await isRedisAvailable()) return;
+    await Promise.all([
+      redis.hdel(`${UNREAD_PREFIX}${userId}`, threadId),
+      redis.hdel(`${MENTION_PREFIX}${userId}`, threadId)
+    ]);
+  } catch { /* Redis unavailable */ }
+}
+
+async function getUnreadCounts(userId) {
+  try {
+    if (!await isRedisAvailable()) return null; // null = fallback to SQL
+    
+    // Cache-aside pattern: check if Redis was populated for this user
+    const isInitialized = await redis.get(`unread_init:${userId}`);
+    if (!isInitialized) return null; // Force SQL fallback to repopulate Redis
+
+    const [unreadHash, mentionHash] = await Promise.all([
+      redis.hgetall(`${UNREAD_PREFIX}${userId}`),
+      redis.hgetall(`${MENTION_PREFIX}${userId}`)
+    ]);
+    return { unread: unreadHash || {}, mentions: mentionHash || {} };
+  } catch { return null; }
+}
 
 // Multi-file upload: max 80 files total, max 100MB each
 const upload = multer({
@@ -242,6 +297,77 @@ function buildChatAttachmentStoragePath(file, context) {
 }
 
 // ──────────────────────────────────────────────
+// GET /link-preview - Fetch OpenGraph metadata
+// ──────────────────────────────────────────────
+router.get('/link-preview', isAuthenticated, async (req, res) => {
+  const targetUrl = req.query.url;
+  if (!targetUrl) return res.status(400).json({ error: 'url is required' });
+
+  try {
+    const urlObj = new URL(targetUrl);
+    
+    // Check cache
+    const cacheKey = `link_preview:${targetUrl}`;
+    if (await isRedisAvailable()) {
+      const cached = await redis.get(cacheKey);
+      if (cached) return res.json(JSON.parse(cached));
+    }
+
+    // Fetch HTML (timeout 3s, max 1MB)
+    const response = await fetch(targetUrl, {
+      signal: AbortSignal.timeout(3000),
+      headers: { 'User-Agent': 'ClassgridBot/1.0 (+https://classgrid.com)' }
+    });
+    
+    if (!response.ok) throw new Error('Failed to fetch');
+    const html = await response.text();
+    
+    // Quick regex parse for OG tags
+    const getMeta = (property) => {
+      const match = html.match(new RegExp(`<meta[^>]*property=["']og:${property}["'][^>]*content=["']([^"']+)["']`, 'i')) || 
+                    html.match(new RegExp(`<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:${property}["']`, 'i'));
+      return match ? match[1] : null;
+    };
+    
+    // Fallbacks
+    const getTitleFallback = () => {
+      const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      return match ? match[1].trim() : urlObj.hostname;
+    };
+
+    const getDescFallback = () => {
+      const match = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i) ||
+                    html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i);
+      return match ? match[1] : null;
+    };
+
+    const previewData = {
+      title: getMeta('title') || getTitleFallback(),
+      description: getMeta('description') || getDescFallback(),
+      image: getMeta('image'),
+      url: targetUrl,
+      domain: urlObj.hostname
+    };
+
+    // Store in cache for 24h
+    if (await isRedisAvailable()) {
+      await redis.set(cacheKey, JSON.stringify(previewData), 'EX', 86400);
+    }
+
+    res.json(previewData);
+  } catch (err) {
+    console.error('[Link Preview Error]', err.message);
+    // Generic fallback for failed fetches
+    try {
+      const urlObj = new URL(targetUrl);
+      res.json({ title: urlObj.hostname, description: null, image: null, url: targetUrl, domain: urlObj.hostname });
+    } catch {
+      res.status(400).json({ error: 'Invalid URL' });
+    }
+  }
+});
+
+// ──────────────────────────────────────────────
 // GET /search — Global Message Search
 // ──────────────────────────────────────────────
 router.get('/search', isAuthenticated, async (req, res) => {
@@ -269,22 +395,48 @@ router.get('/search', isAuthenticated, async (req, res) => {
       return res.json({ results: [] });
     }
 
-    // Build the query
+    // Build the query — use full-text search (GIN indexed) with ILIKE fallback
+    // Convert search terms to tsquery format: "hello world" → "hello & world"
+    const tsQuery = query.trim().split(/\s+/).filter(Boolean).join(' & ');
+
     let supabaseQuery = sb.from('chat_messages')
       .select(`
         *,
         chat_threads (id, name, type)
       `)
       .in('thread_id', accessibleThreadIds)
-      .ilike('message', `%${query}%`)
       .order('created_at', { ascending: false })
       .limit(50);
+
+    // Try full-text search first (requires migration), fall back to ILIKE
+    if (tsQuery) {
+      supabaseQuery = supabaseQuery.textSearch('search_vector', tsQuery, { type: 'plain' });
+    } else {
+      supabaseQuery = supabaseQuery.ilike('message', `%${query}%`);
+    }
 
     if (senderId) supabaseQuery = supabaseQuery.eq('sender_id', senderId);
     if (dateFrom) supabaseQuery = supabaseQuery.gte('created_at', new Date(dateFrom).toISOString());
     if (dateTo) supabaseQuery = supabaseQuery.lte('created_at', new Date(dateTo).toISOString());
 
-    const { data: messages, error } = await supabaseQuery;
+    let { data: messages, error } = await supabaseQuery;
+
+    // Fallback: if search_vector column doesn't exist yet, retry with ILIKE
+    if (error && error.message && error.message.includes('search_vector')) {
+      console.warn('[Search] search_vector column not found, falling back to ILIKE. Run the add_fulltext_search.sql migration.');
+      supabaseQuery = sb.from('chat_messages')
+        .select(`*, chat_threads (id, name, type)`)
+        .in('thread_id', accessibleThreadIds)
+        .ilike('message', `%${query}%`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (senderId) supabaseQuery = supabaseQuery.eq('sender_id', senderId);
+      if (dateFrom) supabaseQuery = supabaseQuery.gte('created_at', new Date(dateFrom).toISOString());
+      if (dateTo) supabaseQuery = supabaseQuery.lte('created_at', new Date(dateTo).toISOString());
+      const fallbackResult = await supabaseQuery;
+      messages = fallbackResult.data;
+      error = fallbackResult.error;
+    }
     if (error) throw error;
 
     // Filter out messages deleted for this user
@@ -424,37 +576,61 @@ router.get('/', isAuthenticated, async (req, res) => {
       users.forEach(u => { userMap[u._id.toString()] = u; });
     }
 
-    // Calculate unread counts per thread
-    const unreadCountPromises = (threads || []).map(async (thread) => {
-      const lastRead = readMap[thread.id];
-      let unreadQuery = sb
-        .from('chat_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('thread_id', thread.id)
-        .neq('sender_id', userId);
-      
-      let mentionQuery = sb
-        .from('chat_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('thread_id', thread.id)
-        .neq('sender_id', userId)
-        .contains('mentioned_users', [userId]);
+    // Calculate unread counts per thread — Redis first, SQL fallback
+    let unreadMap = {};
+    let mentionMap = {};
+    const redisCounts = await getUnreadCounts(userId);
+    if (redisCounts) {
+      // Fast path: Redis has the counts (single HGETALL call instead of ~100 SQL queries)
+      (threads || []).forEach(thread => {
+        unreadMap[thread.id] = parseInt(redisCounts.unread[thread.id] || '0', 10);
+        mentionMap[thread.id] = parseInt(redisCounts.mentions[thread.id] || '0', 10);
+      });
+    } else {
+      // Slow fallback: Redis unavailable (dev mode), use SQL counts
+      const unreadCountPromises = (threads || []).map(async (thread) => {
+        const lastRead = readMap[thread.id];
+        let unreadQuery = sb
+          .from('chat_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('thread_id', thread.id)
+          .neq('sender_id', userId);
+        
+        let mentionQuery = sb
+          .from('chat_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('thread_id', thread.id)
+          .neq('sender_id', userId)
+          .contains('mentioned_users', [userId]);
 
-      if (lastRead) {
-        unreadQuery = unreadQuery.gt('created_at', lastRead);
-        mentionQuery = mentionQuery.gt('created_at', lastRead);
-      }
+        if (lastRead) {
+          unreadQuery = unreadQuery.gt('created_at', lastRead);
+          mentionQuery = mentionQuery.gt('created_at', lastRead);
+        }
 
-      const [unreadRes, mentionRes] = await Promise.all([unreadQuery, mentionQuery]);
-      return { threadId: thread.id, unread: unreadRes.count || 0, unreadMentions: mentionRes.count || 0 };
-    });
-    const unreadResults = await Promise.all(unreadCountPromises);
-    const unreadMap = {};
-    const mentionMap = {};
-    unreadResults.forEach(r => { 
-      unreadMap[r.threadId] = r.unread; 
-      mentionMap[r.threadId] = r.unreadMentions;
-    });
+        const [unreadRes, mentionRes] = await Promise.all([unreadQuery, mentionQuery]);
+        return { threadId: thread.id, unread: unreadRes.count || 0, unreadMentions: mentionRes.count || 0 };
+      });
+      const unreadResults = await Promise.all(unreadCountPromises);
+      unreadResults.forEach(r => { 
+        unreadMap[r.threadId] = r.unread; 
+        mentionMap[r.threadId] = r.unreadMentions;
+      });
+
+      // Repopulate Redis cache (fire-and-forget)
+      isRedisAvailable().then(available => {
+        if (available) {
+          const multi = redis.multi();
+          unreadResults.forEach(r => {
+            if (r.unread > 0) multi.hset(`${UNREAD_PREFIX}${userId}`, r.threadId, r.unread);
+            if (r.unreadMentions > 0) multi.hset(`${MENTION_PREFIX}${userId}`, r.threadId, r.unreadMentions);
+          });
+          // Set init flag so future requests use Redis instead of SQL fallback
+          multi.set(`unread_init:${userId}`, '1', 'EX', 60 * 60 * 24 * 7); // 7 day TTL
+          multi.exec().catch(err => console.error('Failed to repopulate Redis unread:', err));
+        }
+      });
+    }
 
     // Build response
     const otherMemberMap = {};
@@ -926,20 +1102,27 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
       return true;
     });
 
-    // Fetch attachments, reactions, and acknowledgements for these messages
+    // Fetch attachments, reactions, acknowledgements, AND thread reads ALL IN PARALLEL
     const messageIds = (messages || []).map(m => m.id);
     let attachments = [];
     let reactions = [];
     let acknowledgements = [];
+    let reads = [];
     if (messageIds.length > 0) {
-      const [attResult, reactResult, ackResult] = await Promise.all([
+      const [attResult, reactResult, ackResult, readsResult] = await Promise.all([
         sb.from('chat_attachments').select('*').in('message_id', messageIds),
         sb.from('chat_reactions').select('message_id, emoji, user_id').in('message_id', messageIds),
-        sb.from('chat_message_acknowledgements').select('*').in('message_id', messageIds)
+        sb.from('chat_message_acknowledgements').select('*').in('message_id', messageIds),
+        sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId)
       ]);
       attachments = attResult.data || [];
       reactions = reactResult.data || [];
       acknowledgements = ackResult.data || [];
+      reads = readsResult.data || [];
+    } else {
+      // No messages, but still fetch reads for consistency
+      const readsResult = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
+      reads = readsResult.data || [];
     }
 
     // Group attachments by message_id
@@ -963,9 +1146,6 @@ router.get('/:id/messages', isAuthenticated, async (req, res) => {
       if (!ackMap[ack.message_id]) ackMap[ack.message_id] = [];
       ackMap[ack.message_id].push(ack);
     });
-
-    // Fetch thread reads to determine 'isSeen' for sent messages
-    const { data: reads } = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
     // Find the latest read timestamp among OTHER users (for DMs)
     let latestOtherReadAt = null;
     if (reads && reads.length > 0) {
@@ -1194,6 +1374,14 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       } catch { parsedMentionedUsers = []; }
     }
 
+    // Parse linkPreview
+    let parsedLinkPreview = null;
+    if (req.body.linkPreview) {
+      try {
+        parsedLinkPreview = typeof req.body.linkPreview === 'string' ? JSON.parse(req.body.linkPreview) : req.body.linkPreview;
+      } catch { parsedLinkPreview = null; }
+    }
+
     // Insert message directly
     const now = new Date().toISOString();
     const { data: insertedMsg, error: insertErr } = await sb.from('chat_messages').insert({
@@ -1209,7 +1397,8 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
       is_silent: isSilent === 'true' || isSilent === true,
       priority: priority || 'normal',
       expires_at: finalExpiresAt,
-      mentioned_users: parsedMentionedUsers
+      mentioned_users: parsedMentionedUsers,
+      link_preview: parsedLinkPreview
     }).select('id').single();
 
     if (insertErr) {
@@ -1265,6 +1454,13 @@ router.post('/:id/messages', isAuthenticated, upload.array('files', 80), async (
 
         members.forEach((m) => {
           if (m.user_id !== userId) {
+            // Increment Redis unread counter for this member (fire-and-forget)
+            incrUnread(m.user_id, threadId);
+            // If this user was mentioned, also increment mention counter
+            if (parsedMentionedUsers && parsedMentionedUsers.includes(m.user_id)) {
+              incrUnreadMention(m.user_id, threadId);
+            }
+
             broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
               threadId,
               messageId: msgId,
@@ -1446,6 +1642,9 @@ router.post('/:id/read', isAuthenticated, async (req, res) => {
       }, { onConflict: 'thread_id,user_id' });
     if (error) throw error;
 
+    // Reset Redis unread counter for this user+thread (fire-and-forget)
+    resetUnread(userId, threadId);
+
     // Broadcast read receipt (fire-and-forget — don't let Supabase Realtime failures crash this endpoint)
     broadcastToChannel(`thread:${threadId}`, 'read_receipt', {
       userId,
@@ -1555,12 +1754,21 @@ router.delete('/:id/messages/:msgId', isAuthenticated, async (req, res) => {
     const deleteType = req.query.type || 'everyone';
 
     // Verify message exists and belongs to sender (if everyone)
-    const { data: msg } = await sb.from('chat_messages').select('sender_id, deleted_for').eq('id', msgId).single();
+    const { data: msg } = await sb.from('chat_messages').select('sender_id, deleted_for, created_at').eq('id', msgId).single();
     if (!msg) return res.status(404).json({ error: 'Message not found' });
     
     if (deleteType === 'everyone') {
       if (msg.sender_id !== userId) return res.status(403).json({ error: 'Can only delete your own messages for everyone' });
       
+      // Strict rule: if anyone else has read the thread AFTER this message was sent, it's considered "seen" and cannot be deleted for everyone.
+      const { data: reads } = await sb.from('thread_reads').select('user_id, last_read_at').eq('thread_id', threadId);
+      const otherReads = (reads || []).filter(r => r.user_id !== userId && r.last_read_at);
+      const isSeen = otherReads.some(r => new Date(msg.created_at) <= new Date(r.last_read_at));
+      
+      if (isSeen) {
+        return res.status(403).json({ error: 'Cannot delete for everyone because the message has already been seen' });
+      }
+
       // Delete attachments from DB
       await sb.from('chat_attachments').delete().eq('message_id', msgId);
 
@@ -2346,6 +2554,16 @@ router.post('/read-all', isAuthenticated, async (req, res) => {
     }));
 
     await sb.from('thread_reads').upsert(upserts, { onConflict: 'thread_id,user_id' });
+
+    // Reset ALL Redis unread counters for this user (fire-and-forget)
+    try {
+      if (await isRedisAvailable()) {
+        await Promise.all([
+          redis.del(`${UNREAD_PREFIX}${userId}`),
+          redis.del(`${MENTION_PREFIX}${userId}`)
+        ]);
+      }
+    } catch { /* Redis unavailable */ }
 
     res.json({ success: true });
   } catch (err) {

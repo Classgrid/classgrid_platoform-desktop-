@@ -1,8 +1,22 @@
 import express from "express";
 import connectDB from "../../config/db.js";
 import { processDemoExpiryReminders } from "../services/demo-expiry-reminder.service.js";
+import redis from "../config/redis.js";
 
 const router = express.Router();
+
+// Safe Redis unread increment helpers
+async function incrUnreadSafe(userId, threadId) {
+  try {
+    if (redis && redis.status === 'ready') await redis.hincrby(`unread:${userId}`, threadId, 1);
+  } catch (err) {}
+}
+
+async function incrMentionSafe(userId, threadId) {
+  try {
+    if (redis && redis.status === 'ready') await redis.hincrby(`mentions:${userId}`, threadId, 1);
+  } catch (err) {}
+}
 
 /**
  * GET /api/cron/plan-expiry-check
@@ -259,12 +273,21 @@ router.get("/process-scheduled-messages", async (req, res) => {
                 sb.from('chat_thread_members').select('user_id').eq('thread_id', msg.thread_id).then(({ data: members }) => {
                    if (members) {
                        members.forEach(m => {
+                           // ALWAYS broadcast thread update so sender's sidebar refreshes immediately
+                           broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
+                              threadId: msg.thread_id,
+                              messageId: msgId,
+                              message: broadcastPayload
+                           });
+                           
+                           // ONLY increment unread counters for OTHER people
                            if (m.user_id !== msg.sender_id) {
-                               broadcastToChannel(`user:${m.user_id}`, 'thread_updated', {
-                                  threadId: msg.thread_id,
-                                  messageId: msgId,
-                                  message: broadcastPayload
-                               });
+                              incrUnreadSafe(m.user_id, msg.thread_id);
+                              const mentionMatches = msg.message ? [...msg.message.matchAll(/@\[[^\]]+\]\(([a-fA-F0-9]{24})\)/g)] : [];
+                              const mentionIds = mentionMatches.map(match => match[1]);
+                              if (mentionIds.includes(m.user_id)) {
+                                incrMentionSafe(m.user_id, msg.thread_id);
+                              }
                            }
                        });
                    }
