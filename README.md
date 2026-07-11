@@ -42,6 +42,8 @@
     <img alt="Nginx" src="https://img.shields.io/badge/Nginx-Proxy-009639?style=for-the-badge&logo=nginx&logoColor=white" />
     <img alt="PM2" src="https://img.shields.io/badge/PM2-Process_Manager-2B037A?style=for-the-badge" />
     <img alt="Vercel" src="https://img.shields.io/badge/Vercel-Edge-000000?style=for-the-badge&logo=vercel&logoColor=white" />
+    <img alt="Cloudflare R2" src="https://img.shields.io/badge/Cloudflare-R2-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" />
+
   </p>
 </div>
 
