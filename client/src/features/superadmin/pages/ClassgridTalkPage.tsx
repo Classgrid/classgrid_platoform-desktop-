@@ -744,29 +744,35 @@ export function ClassgridTalkPage() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="mb-3 flex items-center flex-wrap gap-y-1">
-                    <span className="font-bold text-sm text-foreground">
-                      {msg.author}
-                    </span>
-                    {(msg as any).authorRole === "super_admin" && (
-                      <span
-                        className="ml-1.5 inline-flex items-center"
-                        title="Verified Admin"
-                      >
-                        <BadgeCheck className="w-4 h-4 text-white fill-[#1DA1F2] dark:text-[#0f0f0f]" />
-                      </span>
-                    )}
-                    {(msg as any).orgName && (
-                      <span className="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/60 border border-border text-[10px] font-medium text-muted-foreground">
-                        {(msg as any).orgLogo && (
-                          <img src={(msg as any).orgLogo} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" />
+                  <div className="mb-3">
+                    <div className="flex items-center flex-wrap gap-y-1 gap-x-3">
+                      <div className="flex items-center">
+                        <span className="font-bold text-sm text-foreground">
+                          {msg.author}
+                        </span>
+                        {(msg as any).authorRole === "super_admin" && (
+                          <span
+                            className="ml-1.5 inline-flex items-center"
+                            title="Verified Admin"
+                          >
+                            <BadgeCheck className="w-4 h-4 text-white fill-[#1DA1F2] dark:text-[#0f0f0f]" />
+                          </span>
                         )}
-                        {(msg as any).orgName}
-                      </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {fmtDateTime(msg.date)}
+                      </p>
+                    </div>
+                    {(msg as any).orgName && (
+                      <div className="mt-1.5">
+                        <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/60 border border-border text-xs font-medium text-muted-foreground">
+                          {(msg as any).orgLogo && (
+                            <img src={(msg as any).orgLogo} alt="" className="w-4 h-4 rounded-sm object-contain" />
+                          )}
+                          {(msg as any).orgName}
+                        </span>
+                      </div>
                     )}
-                    <p className="text-xs text-muted-foreground ml-3">
-                      {fmtDateTime(msg.date)}
-                    </p>
                   </div>
                   <div
                     className="whitespace-pre-wrap text-base text-foreground leading-relaxed [&>p]:mb-4 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>li]:mb-1.5 [&>strong]:font-bold [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-primary/50 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-3 [&_a]:!text-blue-500 [&_a]:!no-underline hover:[&_a]:!text-blue-400 [&_u]:!decoration-emerald-500 [&_u]:underline-offset-4 [&_u]:decoration-2 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_img]:my-4 [&_img]:max-h-[500px] [&_img]:object-contain"
