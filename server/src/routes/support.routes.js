@@ -576,7 +576,6 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
         // Fetch org info for display in support messages
         let authOrgName = "";
         let authOrgLogo = "";
-        const orgId = req.effectiveOrganizationId || req.user.organization_id || null;
         if (orgId) {
             const { default: Organization } = await import("../models/Organization.js");
             const org = await Organization.findById(orgId).select("name logo_url").lean();
