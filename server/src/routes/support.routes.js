@@ -147,11 +147,14 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
         // whereas the Technical Ticket page does not.
         const isGeneralInquiry = !!institution;
 
+        // Try to find if this email belongs to a registered user
+        const fullUser = await User.findOne({ email: email.trim().toLowerCase() })
+            .select("name profilePicture role organization_id")
+            .lean();
+
         let organization_id = null;
         if (!isGeneralInquiry) {
-            // Verify email belongs to a registered platform user
-            const registeredUser = await verifyRegisteredUser(email);
-            if (!registeredUser) {
+            if (!fullUser) {
                 return res.status(403).json({
                     success: false,
                     message: "This email is not registered on Classgrid. Only registered users can raise support tickets."
@@ -159,15 +162,17 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
             }
 
             // Only users linked to a valid organization can raise tickets.
-            // ClassGrid Talk users or bare accounts with no org are not eligible.
-            if (!registeredUser.organization_id) {
+            if (!fullUser.organization_id) {
                 return res.status(403).json({
                     success: false,
                     message: "Support tickets can only be raised by users who belong to a registered institution on Classgrid. Please contact your institution administrator.",
                     code: "NO_ORG"
                 });
             }
-            organization_id = registeredUser.organization_id;
+            organization_id = fullUser.organization_id;
+        } else {
+            // For general inquiries, we optionally attach the org if they have one
+            organization_id = fullUser?.organization_id || null;
         }
 
         // Fetch user profile picture and org info for display in support messages
@@ -176,21 +181,16 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
         let userOrgLogo = "";
         let userRole = (submitterRoleInput || "").trim();
         let userName = (name || "").trim();
-        if (!isGeneralInquiry && registeredUser) {
-            // Re-fetch with profilePicture, name, and populate org
-            const fullUser = await User.findById(registeredUser._id)
-                .select("name profilePicture role")
-                .lean();
-            if (fullUser) {
-                userAvatar = fullUser.profilePicture || "";
-                userRole = fullUser.role || userRole;
-                if (fullUser.name) {
-                    userName = fullUser.name.trim();
-                }
+        
+        if (fullUser) {
+            userAvatar = fullUser.profilePicture || "";
+            userRole = fullUser.role || userRole;
+            if (fullUser.name) {
+                userName = fullUser.name.trim();
             }
-            if (registeredUser.organization_id) {
+            if (fullUser.organization_id) {
                 const { default: Organization } = await import("../models/Organization.js");
-                const org = await Organization.findById(registeredUser.organization_id)
+                const org = await Organization.findById(fullUser.organization_id)
                     .select("name logo_url")
                     .lean();
                 if (org) {
