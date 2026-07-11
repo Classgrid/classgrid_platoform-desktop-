@@ -39,6 +39,9 @@ function normalizeTicketMessage(message) {
         body: message.body || message.message || "",
         footer: message.footer || "",
         avatar: message.avatar || "",
+        orgName: message.orgName || "",
+        orgLogo: message.orgLogo || "",
+        authorRole: message.authorRole || "",
         attachments: message.attachments || []
     };
 }
@@ -167,6 +170,36 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
             organization_id = registeredUser.organization_id;
         }
 
+        // Fetch user profile picture and org info for display in support messages
+        let userAvatar = "";
+        let userOrgName = "";
+        let userOrgLogo = "";
+        let userRole = (submitterRoleInput || "").trim();
+        let userName = (name || "").trim();
+        if (!isGeneralInquiry && registeredUser) {
+            // Re-fetch with profilePicture, name, and populate org
+            const fullUser = await User.findById(registeredUser._id)
+                .select("name profilePicture role")
+                .lean();
+            if (fullUser) {
+                userAvatar = fullUser.profilePicture || "";
+                userRole = fullUser.role || userRole;
+                if (fullUser.name) {
+                    userName = fullUser.name.trim();
+                }
+            }
+            if (registeredUser.organization_id) {
+                const { default: Organization } = await import("../models/Organization.js");
+                const org = await Organization.findById(registeredUser.organization_id)
+                    .select("name logo_url")
+                    .lean();
+                if (org) {
+                    userOrgName = org.name || "";
+                    userOrgLogo = org.logo_url || "";
+                }
+            }
+        }
+
         // Handle File Uploads to Supabase
         const uploadedAttachments = [];
         if (req.files && req.files.length > 0) {
@@ -191,7 +224,7 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
         }
 
         const now = new Date();
-        const submitterName = ((name || "").trim() || "Anonymous").replace(/\b\w/g, c => c.toUpperCase());
+        const submitterName = (userName || "Anonymous").replace(/\b\w/g, c => c.toUpperCase());
         const submitterEmail = email.trim().toLowerCase();
         const ticket = await SupportTicket.create({
             subject: subject.trim(),
@@ -201,7 +234,7 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
             priority: priority || "medium",
             submitterEmail,
             submitterName,
-            submitterRole: (submitterRoleInput || "").trim(),
+            submitterRole: userRole || (submitterRoleInput || "").trim(),
             institution: institution?.trim() || "",
             organization_id,
             messages: [{
@@ -210,7 +243,10 @@ router.post("/public/tickets", multipleUploads("files", 5), async (req, res) => 
                 body: message.trim(),
                 date: now,
                 footer: `Email: ${submitterEmail}`,
-                avatar: "",
+                avatar: userAvatar,
+                orgName: userOrgName,
+                orgLogo: userOrgLogo,
+                authorRole: userRole,
                 attachments: uploadedAttachments
             }],
             lastComment: now,
@@ -398,12 +434,29 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
 
         ensureInitialMessage(ticket);
         const now = new Date();
-        const authorName = (name || ticket.submitterName || "Classgrid User").trim();
 
-        // Dynamically fetch user role to display in activity history
-        const submitterUser = await User.findOne({ email: email.trim().toLowerCase() }).lean();
+        // Dynamically fetch user role, profile picture, name, and org info
+        const submitterUser = await User.findOne({ email: email.trim().toLowerCase() })
+            .select("name role profilePicture organization_id")
+            .lean();
+            
+        const authorName = (submitterUser?.name || name || ticket.submitterName || "Classgrid User").trim();
         const roleRaw = submitterUser ? submitterUser.role : "user";
         const formattedRole = roleRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+        // Fetch org info for display
+        let replyOrgName = "";
+        let replyOrgLogo = "";
+        if (submitterUser?.organization_id) {
+            const { default: Organization } = await import("../models/Organization.js");
+            const org = await Organization.findById(submitterUser.organization_id)
+                .select("name logo_url")
+                .lean();
+            if (org) {
+                replyOrgName = org.name || "";
+                replyOrgLogo = org.logo_url || "";
+            }
+        }
 
         ticket.replies.push({
             authorName,
@@ -419,7 +472,10 @@ router.post("/public/tickets/:id/reply", multipleUploads("files", 5), async (req
             body: message.trim(),
             date: now,
             footer: `Email: ${email.trim().toLowerCase()}`,
-            avatar: "",
+            avatar: submitterUser?.profilePicture || "",
+            orgName: replyOrgName,
+            orgLogo: replyOrgLogo,
+            authorRole: roleRaw,
             attachments: uploadedAttachments
         });
 
@@ -516,6 +572,20 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
         }
 
         const now = new Date();
+
+        // Fetch org info for display in support messages
+        let authOrgName = "";
+        let authOrgLogo = "";
+        const orgId = req.effectiveOrganizationId || req.user.organization_id || null;
+        if (orgId) {
+            const { default: Organization } = await import("../models/Organization.js");
+            const org = await Organization.findById(orgId).select("name logo_url").lean();
+            if (org) {
+                authOrgName = org.name || "";
+                authOrgLogo = org.logo_url || "";
+            }
+        }
+
         const ticket = await SupportTicket.create({
             subject: subject.trim(),
             message: message.trim(),
@@ -525,7 +595,7 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
             submittedBy: req.user._id,
             submitterEmail: req.user.email,
             submitterName: req.user.name,
-            organization_id: req.effectiveOrganizationId || req.user.organization_id || null,
+            organization_id: orgId,
             messages: [{
                 author: req.user.name || req.user.email || "Classgrid User",
                 role: "user",
@@ -533,6 +603,9 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
                 date: now,
                 footer: req.user.email ? `Email: ${req.user.email}` : "",
                 avatar: req.user.profilePicture || "",
+                orgName: authOrgName,
+                orgLogo: authOrgLogo,
+                authorRole: req.user.role || "",
                 attachments: uploadedAttachments
             }],
             lastComment: now,
@@ -702,12 +775,28 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
             createdAt: now
         });
 
+        // Fetch org info for admin/user reply display
+        let replyerOrgName = "";
+        let replyerOrgLogo = "";
+        const replyerOrgId = req.effectiveOrganizationId || req.user.organization_id || null;
+        if (replyerOrgId) {
+            const { default: Organization } = await import("../models/Organization.js");
+            const org = await Organization.findById(replyerOrgId).select("name logo_url").lean();
+            if (org) {
+                replyerOrgName = org.name || "";
+                replyerOrgLogo = org.logo_url || "";
+            }
+        }
+
         ticket.messages.push({
             author: authorName,
             role: messageRole,
             body: message.trim(),
             date: now,
             avatar: req.user.profilePicture || req.user.profilePic || req.user.image || "",
+            orgName: replyerOrgName,
+            orgLogo: replyerOrgLogo,
+            authorRole: req.user.role || "",
             attachments: uploadedAttachments
         });
 

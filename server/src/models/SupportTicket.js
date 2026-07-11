@@ -92,7 +92,10 @@ const supportTicketSchema = new mongoose.Schema({
         date: { type: Date, default: Date.now },
         footer: { type: String, default: "" },
         attachments: [{ type: mongoose.Schema.Types.Mixed }], // Mixed to support legacy and new formats
-        avatar: { type: String, default: "" }
+        avatar: { type: String, default: "" },
+        orgName: { type: String, default: "" },
+        orgLogo: { type: String, default: "" },
+        authorRole: { type: String, default: "" }
     }],
     replies: [{
         author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
