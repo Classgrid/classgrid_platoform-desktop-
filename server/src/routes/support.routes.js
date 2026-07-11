@@ -576,7 +576,10 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
         // Fetch org info for display in support messages
         let authOrgName = "";
         let authOrgLogo = "";
-        if (orgId) {
+        if (req.user.role === "super_admin") {
+            authOrgName = "Classgrid";
+            authOrgLogo = "https://classgrid.in/android-chrome-512x512.png";
+        } else if (orgId) {
             const { default: Organization } = await import("../models/Organization.js");
             const org = await Organization.findById(orgId).select("name logo_url").lean();
             if (org) {
@@ -777,13 +780,18 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         // Fetch org info for admin/user reply display
         let replyerOrgName = "";
         let replyerOrgLogo = "";
-        const replyerOrgId = req.effectiveOrganizationId || req.user.organization_id || null;
-        if (replyerOrgId) {
-            const { default: Organization } = await import("../models/Organization.js");
-            const org = await Organization.findById(replyerOrgId).select("name logo_url").lean();
-            if (org) {
-                replyerOrgName = org.name || "";
-                replyerOrgLogo = org.logo_url || "";
+        if (req.user.role === "super_admin") {
+            replyerOrgName = "Classgrid";
+            replyerOrgLogo = "https://classgrid.in/android-chrome-512x512.png";
+        } else {
+            const replyerOrgId = req.effectiveOrganizationId || req.user.organization_id || null;
+            if (replyerOrgId) {
+                const { default: Organization } = await import("../models/Organization.js");
+                const org = await Organization.findById(replyerOrgId).select("name logo_url").lean();
+                if (org) {
+                    replyerOrgName = org.name || "";
+                    replyerOrgLogo = org.logo_url || "";
+                }
             }
         }
 
