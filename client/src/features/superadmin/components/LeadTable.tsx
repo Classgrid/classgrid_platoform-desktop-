@@ -16,6 +16,7 @@ interface LeadTableProps {
 
 export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assigningId }: LeadTableProps) {
   const columns = useMemo(() => [
+    {
       key: "requester",
       header: "Requester",
       width: "w-[350px]",
