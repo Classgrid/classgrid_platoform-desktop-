@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Badge } from "@/components/marketing_ui/badge";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
@@ -102,6 +103,31 @@ export function LeadDetailsPage() {
           <p className="text-muted-foreground text-sm mt-1">
             Submitted on {formatDate(lead.createdAt, "dd MMM yyyy, hh:mm a")}
           </p>
+          {lead.assignedTo && (
+            <div className="mt-4">
+              <TooltipProvider>
+                <Tooltip delay={200}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 w-max bg-muted/40 border border-border/50 rounded-full pl-1 pr-3 py-1 cursor-default hover:bg-muted/80 transition-colors">
+                      {lead.assignedTo.avatarUrl || lead.assignedTo.picture ? (
+                        <img src={lead.assignedTo.avatarUrl || lead.assignedTo.picture} alt={lead.assignedTo.name} className="h-6 w-6 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {lead.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <span className="text-xs font-medium text-foreground">
+                        Assigned to {lead.assignedTo.name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>Assigned on {formatDate(lead.updatedAt || lead.createdAt, "dd MMM yyyy, hh:mm a")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          )}
         </div>
       </div>
 

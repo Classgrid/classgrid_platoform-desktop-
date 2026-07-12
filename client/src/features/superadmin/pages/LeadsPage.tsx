@@ -147,44 +147,54 @@ export function LeadsPage() {
   const columns = useMemo(() => buildColumns(handleManage, handleAssign, assigningId), [assigningId]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div className="flex justify-end">
-        <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Demo Leads</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage inbound demo requests. Click any row to read details and provision.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Leads" value={isLoading ? "—" : stats.total} icon={<ClipboardList size={16} />} />
         <StatCard title="Unassigned Leads" value={isLoading ? "—" : stats.unassigned} icon={<AlertTriangle size={16} />} />
         <StatCard title="Demos Scheduled" value={isLoading ? "—" : stats.demoScheduled} icon={<CalendarClock size={16} />} />
         <StatCard title="Converted" value={isLoading ? "—" : stats.converted} icon={<CheckCircle size={16} />} />
       </div>
 
-      <SectionPanel title="Lead Pipeline" description='Click "Read" on any lead to view full details.' noPadding>
-        <div className="p-4 pb-0">
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search institution, contact, city…"
-            className="max-w-sm"
-          />
-        </div>
+      {/* Search Filter */}
+      <div className="flex items-center gap-2 mb-4">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search institution, contact, city…"
+          className="flex h-9 w-full sm:w-[300px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        />
+      </div>
+
+      {/* Leads List */}
+      <div className="mt-4">
         {isError ? (
-          <div className="p-6 text-center space-y-3">
-            <p className="text-destructive font-medium">Failed to load leads</p>
-            <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+          <div className="p-8 text-center text-sm text-red-500 border border-border rounded-lg bg-card">
+            Failed to load leads.
           </div>
         ) : (
-          <div className="p-4">
-            <DataTable
-              columns={columns}
-              rows={filtered}
-              isLoading={isLoading}
-              emptyMessage="No leads found."
-              onRowClick={(row) => handleManage(row._id)}
-            />
-          </div>
+          <DataTable
+            columns={columns}
+            rows={filtered}
+            isLoading={isLoading}
+            emptyMessage="No leads found."
+            onRowClick={(row) => handleManage(row._id)}
+          />
         )}
-      </SectionPanel>
+      </div>
     </div>
   );
 }
