@@ -7,7 +7,6 @@ import { initCronJobs } from './cleanup.worker.js';
 import { initAdmissionCronJobs } from './admission-deadline-checker.cron.js';
 import { initPromotionSchedulerCron } from './promotion-scheduler.cron.js';
 import { initScheduledNotificationWorker } from './scheduled-notification.worker.js';
-import { initChatSchedulerCron } from './chat-scheduler.cron.js';
 import { initOrganizationUsageDailyWorker } from './organization-usage-daily.worker.js';
 import { initMonthlyInvoiceWorker } from './monthly-invoice.worker.js';
 
@@ -15,7 +14,6 @@ initCronJobs();
 initAdmissionCronJobs();
 initPromotionSchedulerCron();
 initScheduledNotificationWorker();
-initChatSchedulerCron();
 initOrganizationUsageDailyWorker();
 initMonthlyInvoiceWorker();
 // import './analytics.worker.js';
