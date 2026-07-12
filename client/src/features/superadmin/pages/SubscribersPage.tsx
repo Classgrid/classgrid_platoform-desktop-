@@ -343,20 +343,24 @@ export function SubscribersPage() {
                 {isLoading ? (
                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
                 ) : (
-                    <BarChart
-                        className="h-[300px] mt-4"
-                        data={trend}
-                        index="label"
-                        categories={["subscribed", "unsubscribed"]}
-                        colors={["emerald-500", "red-500"]}
-                        valueFormatter={(number: number) =>
-                          Intl.NumberFormat("us").format(number).toString()
-                        }
-                        yAxisWidth={40}
-                        showLegend={true}
-                        showAnimation={true}
-                        xAxisLabel="Last 15 Days"
-                    />
+                <div className="overflow-x-auto">
+                    <div className="min-w-[600px]">
+                        <BarChart
+                            className="h-[300px] mt-4"
+                            data={trend}
+                            index="label"
+                            categories={["subscribed", "unsubscribed"]}
+                            colors={["blue-500", "emerald-500"]}
+                            valueFormatter={(number: number) =>
+                              Intl.NumberFormat("us").format(number).toString()
+                            }
+                            yAxisWidth={40}
+                            showLegend={true}
+                            showAnimation={true}
+                            xAxisLabel="Last 15 Days"
+                        />
+                    </div>
+                </div>
                 )}
             </CardContent>
         </Card>
