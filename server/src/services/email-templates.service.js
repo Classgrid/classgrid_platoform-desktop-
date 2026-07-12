@@ -2240,6 +2240,11 @@ Please use the updated link above to join the meeting. We look forward to speaki
 
 Best regards,
 ${repName}
+Classgrid Team
+${data.repEmail ? `${data.repEmail}` : ""}
+
+Need help? Raise a ticket through our Support Portal:
+https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
   }
@@ -2252,6 +2257,14 @@ Provider: ${data.provider || "Meeting"}
 Scheduled by: ${data.scheduledByLabel || "Classgrid Team"}
 
 ${data.meetingUrl ? `Join Meeting: ${data.meetingUrl}` : ""}
+
+Warm regards,
+${repName}
+Classgrid Team
+${data.repEmail ? `${data.repEmail}` : ""}
+
+Need help? Raise a ticket through our Support Portal:
+https://classgrid.in/support
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
