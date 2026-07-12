@@ -381,6 +381,7 @@ export function SubscribersPage() {
             rows={subscribers}
             isLoading={isLoading}
             emptyMessage="No subscribers found. Try a different search or status filter."
+            className="max-h-[600px] overflow-auto"
         />
       </div>
     </div>

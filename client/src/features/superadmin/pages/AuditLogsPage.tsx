@@ -246,12 +246,13 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 min-h-0 overflow-auto pb-4">
+      <div className="flex-1 min-h-0 pb-4">
         <DataTable 
           columns={columns} 
           rows={logs} 
           isLoading={isLoading && !isLive} 
           emptyMessage="No more logs to show within selected timeline"
+          className="h-full overflow-auto"
         />
       </div>
 

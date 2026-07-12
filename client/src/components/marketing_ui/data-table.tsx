@@ -10,12 +10,13 @@ type DataTableProps = {
   skeletonLines?: number;
   emptyMessage?: string;
   onRowClick?: (row: any) => void;
+  className?: string;
 };
 
-export function DataTable({ columns, rows, isLoading, skeletonLines = 5, emptyMessage, onRowClick }: DataTableProps) {
+export function DataTable({ columns, rows, isLoading, skeletonLines = 5, emptyMessage, onRowClick, className }: DataTableProps) {
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className={`space-y-3 ${className || ""}`}>
         {Array.from({ length: skeletonLines }).map((_, i) => (
           <Skeleton key={i} className="h-12 w-full" />
         ))}
@@ -25,14 +26,14 @@ export function DataTable({ columns, rows, isLoading, skeletonLines = 5, emptyMe
 
   if (!rows || rows.length === 0) {
     return (
-      <div className="p-8 text-center text-sm text-muted-foreground border border-border rounded-lg bg-card">
+      <div className={`p-8 text-center text-sm text-muted-foreground border border-border rounded-lg bg-card ${className || ""}`}>
         {emptyMessage || "No data available."}
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border bg-card overflow-hidden">
+    <div className={`rounded-md border bg-card ${className || "overflow-hidden"}`}>
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow>
