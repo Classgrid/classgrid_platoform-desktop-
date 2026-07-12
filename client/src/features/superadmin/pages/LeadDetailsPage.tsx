@@ -12,7 +12,7 @@ import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calend
 import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function LeadDetailsPage() {
   const { id } = useParams<{ id: string }>();
