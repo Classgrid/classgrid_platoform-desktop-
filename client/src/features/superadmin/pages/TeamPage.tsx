@@ -88,6 +88,8 @@ export function TeamPage() {
   const [formResult, setFormResult] = useState<{ success: boolean; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState("team-members");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | PlatformRole>("all");
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["superadmin-platform-team"],
@@ -97,8 +99,17 @@ export function TeamPage() {
   });
 
   const team: TeamMember[] = data?.team ?? [];
-  const activeMembers = team.filter((m) => m.status !== "pending");
-  const pendingMembers = team.filter((m) => m.status === "pending");
+  
+  const filteredTeam = useMemo(() => {
+    return team.filter((m) => {
+        const matchesSearch = !searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = roleFilter === "all" || m.role === roleFilter;
+        return matchesSearch && matchesRole;
+    });
+  }, [team, searchQuery, roleFilter]);
+
+  const activeMembers = filteredTeam.filter((m) => m.status !== "pending");
+  const pendingMembers = filteredTeam.filter((m) => m.status === "pending");
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => teamApi.removeMember(id),
@@ -372,22 +383,28 @@ export function TeamPage() {
           <TabsTrigger value="pending-invitations">Pending Invitations</TabsTrigger>
         </TabsList>
         
-        {/* Vercel Filter Bar */}
+        {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row items-center gap-2 mb-4 w-full">
             <div className="relative flex-1 w-full max-w-[400px]">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input className="pl-9 h-10 w-full bg-background" placeholder="Filter" />
+                <Input 
+                    className="pl-9 h-10 w-full bg-background" 
+                    placeholder="Filter by name or email..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 sm:ml-auto">
-                <Button variant="outline" className="h-10 bg-background text-muted-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
-                    All Team Roles <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
-                </Button>
-                <Button variant="outline" className="h-10 bg-background text-muted-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
-                    2FA Status <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
-                </Button>
-                <Button variant="outline" className="h-10 bg-background text-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
-                    Date <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
-                </Button>
+                <ResponsiveSelect
+                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-[180px]"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value as any)}
+                >
+                    <option value="all">All Team Roles</option>
+                    {PLATFORM_ROLES.map(r => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                </ResponsiveSelect>
             </div>
         </div>
 
