@@ -437,7 +437,7 @@ export const healthCheck = async (req, res) => {
 
     const health = {
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
+        uptime: os.uptime(),
         memoryUsage: process.memoryUsage(),
         server: {
             hostname: os.hostname(),

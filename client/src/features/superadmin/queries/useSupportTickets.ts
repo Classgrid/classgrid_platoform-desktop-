@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { TicketStatus, TicketPriority } from "../services/superAdminApi";
 import { supportApi } from "../services/superAdminApi";
+import { toast } from "sonner";
 
 export const TICKETS_KEY = ["super-admin", "support-tickets"] as const;
 
@@ -50,6 +51,12 @@ export function useDeleteTicket() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => supportApi.deleteTicket(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: TICKETS_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: TICKETS_KEY });
+      toast.success("Support ticket deleted successfully");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to delete ticket");
+    }
   });
 }

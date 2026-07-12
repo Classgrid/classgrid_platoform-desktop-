@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 /**
- * FeatureFlag — Kill Switch for any module on the platform.
+ * FeatureFlag â€” Kill Switch for any module on the platform.
  * Super Admin can disable "Go Live", "Canteen", "Quiz" etc. globally 
  * or for specific organizations without deploying new code.
  */
@@ -24,6 +24,19 @@ const featureFlagSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    module: {
+        type: String,
+        trim: true,
+        default: "platform"
+    },
+    routePrefixes: [{
+        type: String,
+        trim: true
+    }],
+    exemptRoutePrefixes: [{
+        type: String,
+        trim: true
+    }],
     // Global ON/OFF switch
     isEnabled: {
         type: Boolean,

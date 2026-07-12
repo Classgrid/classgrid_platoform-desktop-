@@ -168,10 +168,19 @@ export function ConfigPage() {
   );
 
   const formatUptime = (seconds: number) => {
-    if (!seconds) return "0h 0m";
-    const h = Math.floor(seconds / 3600);
+    if (!seconds) return "0s";
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h ${m}m`;
+    const s = Math.floor(seconds % 60);
+    
+    const parts = [];
+    if (d > 0) parts.push(`${d}d`);
+    if (h > 0 || d > 0) parts.push(`${h}h`);
+    if (m > 0 || h > 0 || d > 0) parts.push(`${m}m`);
+    parts.push(`${s}s`);
+    
+    return parts.join(" ");
   };
 
   const bytesToGB = (bytes: number) => bytes / (1024 * 1024 * 1024);

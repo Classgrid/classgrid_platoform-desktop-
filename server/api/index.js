@@ -94,6 +94,7 @@ import { publicTenantRouter, orgWebsiteRouter, superAdminWebsiteRouter } from ".
 import extractSubdomain, { resolveTenant, getPublicTenantInfo } from "../src/middleware/subdomain-router.middleware.js";
 import { sendEmail } from "../src/services/brevo.service.js";
 import { metricsMiddleware, startMetricsFlush } from "../src/middleware/metrics.middleware.js";
+import { enforceFeatureFlags, platformAccessGate } from "../src/middleware/feature-flag.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -235,6 +236,10 @@ const clientDistPath = path.join(__dirname, "../../client/dist");
 if (isProduction) {
   app.use(express.static(clientDistPath));
 }
+
+// 🛡️ Enforce Feature Flags
+app.use(platformAccessGate);
+app.use(enforceFeatureFlags);
 
 /* ---------- API ROUTES ---------- */
 app.use("/api/auth", authRoutes);
