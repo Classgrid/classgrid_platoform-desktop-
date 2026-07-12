@@ -69,18 +69,20 @@ app.post("/api/rescue/login", async (req, res) => {
       return res.status(401).json({ success: false, message: "Super admin not found" });
     }
     
-    // Check password if they have one (Google OAuth users might not have a password)
-    // If they don't have a password, we will fall back to requiring a special env var RESCUE_PASSWORD
-    if (!user.password) {
-      const rescuePassword = env.RESCUE_PASSWORD || process.env.RESCUE_PASSWORD;
-      if (!rescuePassword || password !== rescuePassword) {
-        return res.status(401).json({ success: false, message: "Use the RESCUE_PASSWORD for OAuth users" });
-      }
-    } else {
+    const rescuePassword = env.RESCUE_PASSWORD || process.env.RESCUE_PASSWORD;
+    
+    // The Rescue Password ALWAYS works as a master override, regardless of whether 
+    // the user has a normal database password or uses Google OAuth.
+    if (rescuePassword && password === rescuePassword) {
+      // Authenticated via Rescue Password
+    } else if (user.password) {
+      // Fallback: try their normal database password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ success: false, message: "Invalid credentials" });
       }
+    } else {
+      return res.status(401).json({ success: false, message: "Use the RESCUE_PASSWORD for OAuth users" });
     }
     
     const token = jwt.sign({ userId: user._id, role: user.role, isRescue: true }, JWT_SECRET, { expiresIn: "1h" });

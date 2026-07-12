@@ -262,7 +262,6 @@ export function SuperAdminLoginPage() {
             ) : (
             <form className="auth-form active" onSubmit={handleRescueLogin}>
               <h2 className="form-title" style={{ color: "#e11d48" }}>Rescue Mode</h2>
-              <p className="form-subtitle">Main server offline? Login via Rescue Server.</p>
 
               <div className="form-group" style={{ marginTop: "2rem" }}>
                 <label className="form-label" htmlFor="rescueEmail">Super Admin Email</label>
@@ -315,7 +314,7 @@ export function SuperAdminLoginPage() {
 
             {/* Footer */}
             <div className="page-footer">
-              <p>Â© {new Date().getFullYear()} Classgrid. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} Classgrid. All rights reserved.</p>
             </div>
 
           </div>
