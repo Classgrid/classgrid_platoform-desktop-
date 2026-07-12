@@ -20,7 +20,7 @@ transporter.verify((err) => {
   }
 });
 
-export const sendEmail = async ({ to, subject, html, text, fromName, replyTo }) => {
+export const sendEmail = async ({ to, subject, html, text, fromName, fromEmail, replyTo }) => {
   try {
     console.log("=== EMAIL FUNCTION ENTERED ===");
     console.log("TO:", to);
@@ -28,11 +28,12 @@ export const sendEmail = async ({ to, subject, html, text, fromName, replyTo }) 
     console.log(`[SMTP] Attempting to send email to: ${to}`);
 
     const senderName = fromName || process.env.BREVO_SENDER_NAME || "Classgrid Platform";
+    const senderEmail = fromEmail || process.env.BREVO_SENDER_EMAIL;
 
     console.log("=== CALLING transporter.sendMail ===");
     const info = await transporter.sendMail({
-      from: `"${senderName}" <${process.env.BREVO_SENDER_EMAIL}>`,
-      replyTo: replyTo || process.env.BREVO_SENDER_EMAIL,
+      from: `"${senderName}" <${senderEmail}>`,
+      replyTo: replyTo || senderEmail,
       to,
       subject,
       text, // Ensures deliverability by including plain text version

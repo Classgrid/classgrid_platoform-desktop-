@@ -958,6 +958,8 @@ router.post("/team/invite", async (req, res) => {
 
         await sendEmail({
             to: toEmail,
+            fromEmail: req.user.email,
+            fromName: req.user.name || "Classgrid Admin",
             subject: "Welcome to Classgrid! Your Account Credentials Inside",
             html: emailHtml,
             text: `Welcome to Classgrid, ${name}! Your login email is: ${classgridEmail}. Your temporary password is: ${tempPassword}. Please log in at ${loginUrl} to reset it.`,
