@@ -405,7 +405,16 @@ export function LeadsPage() {
   const columns = useMemo(() => buildColumns(setSelectedLead), []);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-[100%] mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold tracking-tight">Demo Leads</h1>
+          <p className="text-muted-foreground mt-1">Manage inbound demo requests. Click any row to approve, schedule meeting, or contact.</p>
+        </div>
+        <div className="flex gap-2">
+          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Leads" value={isLoading ? "—" : stats.total} icon={<ClipboardList size={16} />} />
@@ -414,12 +423,7 @@ export function LeadsPage() {
         <StatCard title="Demo Scheduled" value={isLoading ? "—" : stats.demoScheduled} icon={<CalendarClock size={16} />} />
       </div>
 
-      <SectionPanel 
-        title="Lead Pipeline" 
-        description='Click "Manage" on any lead to approve, schedule meeting, or contact.' 
-        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
-        noPadding
-      >
+      <SectionPanel title="Lead Pipeline" description='Click "Manage" on any lead to approve, schedule meeting, or contact.' noPadding>
         <div className="p-4 pb-0">
           <Input
             value={search}
