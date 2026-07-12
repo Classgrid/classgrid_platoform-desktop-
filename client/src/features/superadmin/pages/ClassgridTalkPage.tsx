@@ -21,6 +21,7 @@ import { RecentActivityTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { toast } from "sonner";
@@ -311,6 +312,7 @@ export function ClassgridTalkPage() {
   const [replySent, setReplySent] = useState(false);
   const replySentTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [pendingStatus, setPendingStatus] = useState<TicketStatus | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [assigningTicketId, setAssigningTicketId] = useState<string | null>(null);
 
   const { data: currentUser } = useCurrentUser();
@@ -1080,16 +1082,10 @@ export function ClassgridTalkPage() {
 
               <div className="pt-2">
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   className="w-full text-xs"
                   disabled={deleteTicketMutation.isPending}
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to permanently delete this test ticket?")) {
-                      deleteTicketMutation.mutate(selectedTicket._id, {
-                        onSuccess: () => setSelectedTicket(null)
-                      });
-                    }
-                  }}
+                  onClick={() => setShowDeleteConfirm(true)}
                 >
                   {deleteTicketMutation.isPending ? "Deleting..." : "Delete"}
                 </Button>
@@ -1196,10 +1192,43 @@ export function ClassgridTalkPage() {
       </div>
 
       {/* File Preview Modal */}
-      <FilePreviewModal
-        file={previewFile}
-        onClose={() => setPreviewFile(null)}
+      <AnimatePresence>
+        {previewFile && (
+          <FilePreviewModal
+            file={previewFile}
+            onClose={() => setPreviewFile(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <DangerConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Support Ticket"
+        description={<>Permanently delete this test ticket for <strong>{selectedTicket?.userEmail || "Unknown"}</strong>.</>}
+        warningMessage="This action is irreversible. All details associated with this ticket will be permanently lost."
+        confirmationSteps={[
+          {
+            label: "To confirm, type",
+            value: "delete",
+          },
+        ]}
+        actionLabel="Delete Ticket"
+        cancelLabel="Cancel"
+        isLoading={deleteTicketMutation.isPending}
+        onConfirm={() => {
+          if (selectedTicket?._id) {
+            deleteTicketMutation.mutate(selectedTicket._id, {
+              onSuccess: () => {
+                setSelectedTicket(null);
+                setShowDeleteConfirm(false);
+              }
+            });
+          }
+        }}
+        variant="danger"
       />
+
     </div>
   );
 }

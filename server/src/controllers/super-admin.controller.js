@@ -373,11 +373,11 @@ export const healthCheck = async (req, res) => {
     }
 
     const warnings = [];
-    if (memUsagePct > 90) warnings.push("CRITICAL: RAM Usage > 90%");
-    else if (memUsagePct > 80) warnings.push("WARNING: RAM Usage > 80%");
+    if (memUsagePct > 95) warnings.push("CRITICAL: RAM Usage > 95%");
+    else if (memUsagePct > 85) warnings.push("WARNING: RAM Usage > 85%");
     
-    if (disk.usagePct > 90) warnings.push("CRITICAL: Disk Space > 90%");
-    else if (disk.usagePct > 80) warnings.push("WARNING: Disk Space > 80%");
+    if (disk.usagePct > 95) warnings.push("CRITICAL: Disk Space > 95%");
+    else if (disk.usagePct > 85) warnings.push("WARNING: Disk Space > 85%");
 
     // Server Identity
     const networkInterfaces = os.networkInterfaces();

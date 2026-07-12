@@ -8,6 +8,7 @@ import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { useLeads, useApproveLead, useScheduleMeeting, useDeleteLead } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
@@ -28,6 +29,7 @@ export function LeadDetailsPage() {
   const [isEditingMeeting, setIsEditingMeeting] = useState(false);
   const [provisionedData, setProvisionedData] = useState<any>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const lead = data?.leads.find(l => l._id === id);
@@ -525,21 +527,12 @@ export function LeadDetailsPage() {
               )}
             </div>
 
-            {/* DELETE ACTION */}
-            <div className="pt-2">
+            <div className="pt-2 border-red-500/20 border-t mt-4">
               <Button
-                variant="danger"
+                variant="destructive"
                 className="w-full h-12 rounded-xl text-sm font-bold"
                 disabled={deleteMutation.isPending}
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to permanently delete this lead?")) {
-                    if (id) {
-                      deleteMutation.mutate(id, {
-                        onSuccess: () => navigate("/superadmin/leads")
-                      });
-                    }
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
               >
                 {deleteMutation.isPending ? "Deleting..." : "Delete Lead"}
               </Button>
@@ -595,6 +588,31 @@ export function LeadDetailsPage() {
           </div>
         </div>
       )}
+
+      <DangerConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Demo Lead"
+        description={<>Permanently delete the demo lead for <strong>{lead.institutionName}</strong>.</>}
+        warningMessage="This action is irreversible. All details associated with this demo request will be permanently lost."
+        confirmationSteps={[
+          {
+            label: "To confirm, type",
+            value: "delete",
+          },
+        ]}
+        actionLabel="Delete Lead"
+        cancelLabel="Cancel"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (id) {
+            deleteMutation.mutate(id, {
+              onSuccess: () => navigate("/superadmin/leads")
+            });
+          }
+        }}
+        variant="danger"
+      />
 
     </div>
   );
