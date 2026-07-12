@@ -271,22 +271,7 @@ export function SubscribersPage() {
     [isMutating]
   );
 
-  if (!isUserLoading && !isOwner) {
-    return (
-      <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-        <div className="p-4 rounded-md border bg-red-100 text-red-800 border-red-200 flex gap-4">
-          <ShieldAlert size={24} className="shrink-0 mt-1" />
-          <div className="flex flex-col gap-2">
-            <span className="font-semibold">Access restricted</span>
-            <p className="text-sm">
-              Sign in as <strong>{OWNER_EMAIL}</strong> to view or manage
-              marketing subscribers.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
