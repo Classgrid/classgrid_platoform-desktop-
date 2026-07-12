@@ -625,6 +625,8 @@ export async function sendDemoMeetingScheduledNotification({
     demoRequest,
     meetingDetails = {},
     scheduledBy = "system",
+    isReschedule = false,
+    repName = "Classgrid Team",
 }) {
     try {
         if (!demoRequest?._id || !demoRequest?.adminEmail) {
@@ -664,12 +666,14 @@ export async function sendDemoMeetingScheduledNotification({
                 "",
             scheduledByLabel:
                 scheduledByLabelMap[scheduledBy] || "Classgrid Team",
+            isReschedule,
+            repName,
         };
 
         const emailPayloads = [
             {
                 to: demoRequest.adminEmail,
-                subject: `Demo Meeting Scheduled: ${demoRequest.institutionName} | Classgrid`,
+                subject: isReschedule ? `Demo Meeting Rescheduled: ${demoRequest.institutionName} | Classgrid` : `Demo Meeting Scheduled: ${demoRequest.institutionName} | Classgrid`,
                 html: getDemoMeetingScheduledHtml({
                     ...templateData,
                     audience: "lead",

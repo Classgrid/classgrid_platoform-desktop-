@@ -2167,6 +2167,27 @@ ${data.bookingUrl ? `Book Demo Slot: ${data.bookingUrl}` : ""}
 };
 
 export const getDemoMeetingScheduledHtml = (data = {}) => {
+  const isReschedule = data.isReschedule === true;
+  const repName = data.repName || "Classgrid Team";
+  
+  if (isReschedule) {
+    const content = `
+      <h1>Demo Meeting Rescheduled</h1>
+      <p>Hello ${data.adminName || "there"},</p>
+      <p>We’re writing to let you know that the Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been rescheduled.</p>
+      
+      <p>Updated meeting details:</p>
+      <div class="box">
+        <p><strong>Date & Time:</strong> ${data.scheduledAt ? formatDate(data.scheduledAt) : "To be confirmed"}</p>
+        <p><strong>Google Meet Link:</strong> ${data.meetingUrl ? `<a href="${data.meetingUrl}">${data.meetingUrl}</a>` : "Not provided"}</p>
+      </div>
+      
+      <p style="margin-top:20px;">Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.</p>
+      <p style="margin-top:20px;">Best regards,<br/><strong>${repName}</strong></p>
+    `;
+    return baseTemplate({ content, title: "Demo Meeting Rescheduled" });
+  }
+
   const content = `
     <h1>Demo Meeting Scheduled</h1>
     <p>Your Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been scheduled.</p>
@@ -2182,6 +2203,28 @@ export const getDemoMeetingScheduledHtml = (data = {}) => {
 };
 
 export const getDemoMeetingScheduledPlainText = (data = {}) => {
+  const isReschedule = data.isReschedule === true;
+  const repName = data.repName || "Classgrid Team";
+
+  if (isReschedule) {
+    return `Demo Meeting Rescheduled
+
+Hello ${data.adminName || "there"},
+
+We’re writing to let you know that the Classgrid demo meeting for ${data.institutionName || "your institution"} has been rescheduled.
+
+Updated meeting details:
+Date & Time: ${data.scheduledAt ? formatDate(data.scheduledAt) : "To be confirmed"}
+Google Meet Link: ${data.meetingUrl || "Not provided"}
+
+Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.
+
+Best regards,
+${repName}
+
+© ${new Date().getFullYear()} Classgrid. All rights reserved.`;
+  }
+
   return `Demo Meeting Scheduled
 
 Institution: ${data.institutionName || "your institution"}

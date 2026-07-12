@@ -33,9 +33,8 @@ export function LeadDetailsPage() {
   useEffect(() => {
     if (lead) {
       setBreadcrumbs([
-        { label: "Dashboard", href: "/superadmin/dashboard" },
-        { label: "Demo Leads", href: "/superadmin/leads" },
-        { label: lead.institutionName || "Lead Details", href: `/superadmin/leads/${id}` },
+        { label: "Demo Leads", href: "/superadmin/marketing/demo-leads" },
+        { label: lead.institutionName, href: `/superadmin/leads/${id}` }
       ]);
     }
     return () => setBreadcrumbs([]);
@@ -55,6 +54,20 @@ export function LeadDetailsPage() {
   if (!lead) return <div className="p-8 text-center text-rose-500 font-medium">Lead not found</div>;
 
   const isConverted = lead.status === "converted";
+
+  let statusText = "● Pending";
+  let statusClasses = "bg-muted border-border text-foreground";
+  
+  if (lead.status === "converted") {
+    statusText = "● Provisioned";
+    statusClasses = "bg-emerald-100 text-emerald-800 border-emerald-200";
+  } else if (lead.status === "contacted" || lead.meetingStatus === "scheduled") {
+    statusText = "● Contacted";
+    statusClasses = "bg-blue-100 text-blue-800 border-blue-200";
+  } else if (lead.status === "closed") {
+    statusText = "● Closed";
+    statusClasses = "bg-gray-100 text-gray-800 border-gray-200";
+  }
 
   const handleApprove = () => {
     if (!id) return;
@@ -110,8 +123,8 @@ export function LeadDetailsPage() {
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold tracking-tight">{lead.institutionName}</h1>
-            <Badge variant={isConverted ? "success" : "neutral"} className={`text-xs px-2.5 py-0.5 rounded-full ${isConverted ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-muted border-border'}`}>
-              {isConverted ? "● Provisioned" : "● Pending"}
+            <Badge variant={isConverted ? "success" : "neutral"} className={`text-xs px-2.5 py-0.5 rounded-full ${statusClasses}`}>
+              {statusText}
             </Badge>
           </div>
           <p className="text-muted-foreground mt-2 flex items-center gap-2 text-sm">
@@ -121,29 +134,40 @@ export function LeadDetailsPage() {
           </p>
           <p className="text-muted-foreground text-sm mt-1">
             Submitted on {formatDate(lead.createdAt, "dd MMM yyyy, hh:mm a")}
-          </p>
-          {lead.assignedTo && (
             <div className="mt-4">
               <TooltipProvider>
-                <Tooltip delay={200}>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 w-max bg-muted/40 border border-border/50 rounded-full pl-1 pr-3 py-1 cursor-default hover:bg-muted/80 transition-colors">
-                      {lead.assignedTo.avatarUrl || lead.assignedTo.picture ? (
-                        <img src={lead.assignedTo.avatarUrl || lead.assignedTo.picture} alt={lead.assignedTo.name} className="h-6 w-6 rounded-full object-cover shrink-0" />
-                      ) : (
-                        <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold shrink-0">
-                          {lead.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
-                      )}
-                      <span className="text-xs font-medium text-foreground">
-                        Assigned to {lead.assignedTo.name}
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>Assigned on {formatDate(lead.updatedAt || lead.createdAt, "dd MMM yyyy, hh:mm a")}</p>
-                  </TooltipContent>
-                </Tooltip>
+                {!lead.assignedTo ? (
+                  <Tooltip delay={200}>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-center h-8 w-8 bg-muted/40 border border-border/50 rounded-full cursor-default hover:bg-muted/80 transition-colors">
+                        <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Unassigned (Needs Attention)</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip delay={200}>
+                    <TooltipTrigger asChild>
+                      <div className="relative flex items-center justify-center h-8 w-8 rounded-full border border-border/50 cursor-default hover:opacity-80 transition-opacity">
+                        {/* Green Dot Indicator */}
+                        <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-background z-10" />
+                        
+                        {/* Photo or Fallback Initial */}
+                        {(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture ? (
+                          <img src={(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture} alt={lead.assignedTo.name} className="h-full w-full rounded-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
+                            {lead.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Assigned to {lead.assignedTo.name}
+                      {lead.assignedAt && <div className="text-xs text-muted-foreground mt-0.5">on {formatDate(lead.assignedAt, "dd MMM yyyy, hh:mm a")}</div>}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </TooltipProvider>
             </div>
           )}
@@ -286,8 +310,8 @@ export function LeadDetailsPage() {
               <div className="bg-muted/30 px-5 py-4 border-b flex items-center justify-between">
                 <h2 className="font-semibold text-card-foreground">MEETING MANAGEMENT</h2>
                 {(!isEditingMeeting && date) && (
-                  <Button variant="ghost" size="sm" onClick={() => setIsEditingMeeting(true)} className="h-7 text-xs font-medium text-primary">
-                    Edit Details
+                  <Button variant="outline" size="sm" onClick={() => setIsEditingMeeting(true)} className="h-8 text-xs font-semibold px-4 rounded-full border-border hover:bg-accent/50 text-foreground transition-all duration-300">
+                    Change
                   </Button>
                 )}
               </div>
@@ -353,7 +377,6 @@ export function LeadDetailsPage() {
                           value={meetingUrl} 
                           onChange={e => setMeetingUrl(e.target.value)} 
                           placeholder="https://meet.google.com/..." 
-                          className="pr-20"
                         />
                       </div>
                       <div className="flex items-center gap-2 mt-2">

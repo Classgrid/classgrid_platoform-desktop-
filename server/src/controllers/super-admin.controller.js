@@ -1078,6 +1078,9 @@ export const scheduleLeadMeeting = async (req, res) => {
             return res.status(404).json({ success: false, message: "Lead not found" });
         }
 
+        // Determine if this is a reschedule
+        const isReschedule = !!lead.meetingScheduledAt;
+
         lead.meetingStatus = "scheduled";
         lead.meetingProvider = provider;
         lead.meetingScheduledAt = scheduledAt;
@@ -1116,6 +1119,8 @@ export const scheduleLeadMeeting = async (req, res) => {
                 notes,
             },
             scheduledBy: "super_admin",
+            isReschedule,
+            repName: lead.assignedTo?.name || "Classgrid Team",
         });
 
         return res.json({
