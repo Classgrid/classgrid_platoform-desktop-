@@ -145,6 +145,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "OVERVIEW",
         items: [
           { label: "Overview", to: "/org/dashboard", icon: LayoutDashboard },
+          { label: "Billing & Usage", to: "/org/admin/dashboard", icon: CreditCard },
           { label: "Announcements", to: "/org/announcements", icon: Megaphone }
         ]
       },
