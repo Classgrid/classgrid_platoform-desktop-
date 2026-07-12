@@ -293,17 +293,17 @@ export function SubscribersPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           title="Total Subscribers"
-          value={isLoading ? "—" : stats.total}
+          value={isLoading ? <Skeleton className="h-9 w-24" /> : stats.total}
           icon={<Users size={16} />}
         />
         <StatCard
           title="Delivery Ready (Active)"
-          value={isLoading ? "—" : stats.deliveryReady}
+          value={isLoading ? <Skeleton className="h-9 w-24" /> : stats.deliveryReady}
           icon={<UserCheck size={16} />}
         />
         <StatCard
           title="Paused / Unsubscribed"
-          value={isLoading ? "—" : stats.inactive}
+          value={isLoading ? <Skeleton className="h-9 w-24" /> : stats.inactive}
           icon={<UserMinus size={16} />}
         />
       </div>
@@ -318,7 +318,14 @@ export function SubscribersPage() {
             </CardHeader>
             <CardContent>
                 {isLoading ? (
-                     <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
+                     <div className="h-[300px] mt-4 flex items-end gap-2">
+                         {/* Fake bars for a bar chart skeleton */}
+                         {Array.from({ length: 15 }).map((_, i) => (
+                             <div key={i} className="flex-1 flex flex-col justify-end gap-1 h-full">
+                                 <Skeleton className="w-full rounded-sm" style={{ height: `${Math.max(20, Math.random() * 100)}%` }} />
+                             </div>
+                         ))}
+                     </div>
                 ) : (
                 <div className="overflow-x-auto">
                     <div className="min-w-[600px]">

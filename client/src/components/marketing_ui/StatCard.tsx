@@ -6,7 +6,7 @@ type StatCardIcon = React.ReactNode | LucideIcon;
 
 export interface StatCardProps {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   icon?: StatCardIcon;
   trend?: string | { value: string | number; label: string };
   trendDirection?: "up" | "down" | "neutral";
