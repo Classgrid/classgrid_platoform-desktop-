@@ -12,6 +12,7 @@ import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calend
 import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
+import toast from "react-hot-toast";
 
 export function LeadDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -122,8 +123,8 @@ export function LeadDetailsPage() {
 
   const handleSchedule = () => {
     if (!id) return;
-    if (!date) return alert("Please select a date");
-    if (!meetingUrl) return alert("Please enter a meeting link");
+    if (!date) return toast.error("Please select a date");
+    if (!meetingUrl) return toast.error("Please enter a meeting link");
     scheduleMutation.mutate({
       id,
       scheduledAt: date.toISOString(),
@@ -131,16 +132,17 @@ export function LeadDetailsPage() {
       provider: "google_meet"
     }, {
       onSuccess: () => {
-        alert("Meeting updated successfully!");
+        toast.success("Meeting updated successfully!");
         setIsEditingMeeting(false);
       },
-      onError: (err: any) => alert(err?.message || "Failed to update meeting")
+      onError: (err: any) => toast.error(err?.message || "Failed to update meeting")
     });
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(meetingUrl);
     setCopied(true);
+    toast.success("Meeting link copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 
