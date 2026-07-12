@@ -1838,7 +1838,7 @@ router.get("/backup/integrity", async (req, res) => {
     }
 });
 
-router.delete("/test-leads", async (req, res) => {
+router.get("/test-leads", async (req, res) => {
     try {
         const { default: DemoRequest } = await import("../models/DemoRequest.js");
         const emails = [
