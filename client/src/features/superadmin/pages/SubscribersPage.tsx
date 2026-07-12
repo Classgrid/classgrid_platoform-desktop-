@@ -308,30 +308,7 @@ export function SubscribersPage() {
         />
       </div>
 
-       {/* Stats Row 2 */}
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard
-          title="New (15 Days)"
-          value={isLoading ? "—" : stats.newSubscribers15d}
-          icon={<TrendingUp size={16} />}
-          trend={{ value: stats.newSubscribers15d, label: "new subscribers" }}
-          trendDirection="up"
-        />
-        <StatCard
-          title="Unsubscribed (15 Days)"
-          value={isLoading ? "—" : stats.newUnsubscribes15d}
-          icon={<TrendingDown size={16} />}
-          trend={{ value: stats.newUnsubscribes15d, label: "unsubscribes" }}
-          trendDirection="down"
-        />
-        <StatCard
-          title="Net Growth (15 Days)"
-          value={isLoading ? "—" : stats.netGrowth15d}
-          icon={<Mail size={16} />}
-          trend={{ value: stats.netGrowth15d, label: "net growth" }}
-          trendDirection={stats.netGrowth15d > 0 ? "up" : stats.netGrowth15d < 0 ? "down" : "neutral"}
-        />
-      </div>
+
 
         {/* Trend & Health */}
         <Card>

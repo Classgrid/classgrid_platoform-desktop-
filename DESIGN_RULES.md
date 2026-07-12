@@ -37,3 +37,8 @@ When building new components, cards, or pages for this project, the AI MUST stri
 ```
 
 **Rule for AI Agents:** NEVER use `#0f0f0f` for both the wrapper and the inner content, as this creates a flat, borderless "black hole" effect with zero contrast. Always contrast `bg-black` against `bg-[#0f0f0f]`.
+
+## 4. No "Table Inside Table" (Card inside Card)
+- **Rule**: NEVER wrap a `DataTable` or `Table` component inside another `Card` or outer `bg-card border` div if the table itself already renders a border and rounded corners.
+- **Visual Goal**: We want a clean Vercel-like design. Avoid redundant nesting (i.e. double borders). 
+- **Action Bars / Toolbars**: When building an action bar (Search input, Select filters, Live buttons, etc.) that sits above a table, keep the Action Bar completely detached and separate from the table. **DO NOT** enclose both the Action Bar and the Table inside a single outer wrapper card. The Action Bar should float above, and the Table should sit below it with its own single border.

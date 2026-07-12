@@ -136,9 +136,10 @@ export function AuditLogsPage() {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8 pb-12">
       
-      <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Audit Logs
@@ -170,7 +171,7 @@ export function AuditLogsPage() {
           </div>
         </div>
       ) : (
-      <div className="flex flex-col flex-1 overflow-hidden gap-4">
+      <div className="flex flex-col gap-4">
         
         {/* Top Action Bar */}
         <div className="flex items-center justify-between">

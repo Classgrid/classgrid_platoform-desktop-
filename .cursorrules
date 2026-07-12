@@ -7,3 +7,4 @@
 3. No AI assistant (including this one) is allowed to ask the user to run `npm start` or `npm run dev` locally.
 4. Do not assume the user wants to test on their local computer. All testing, verifying, and operations must happen on the live production environment (`ganesha.classgrid.in`).
 5. **Never** advise the user to test anything on `localhost`.
+10. **STRICT DESIGN COMPLIANCE:** You MUST read and follow the `DESIGN_RULES.md` file in the root directory for any UI/Frontend tasks. It contains critical instructions on color contrasting and layout design (like preventing 'table inside table' nesting). ALWAYS separate toolbars from tables as outlined in the rules.
