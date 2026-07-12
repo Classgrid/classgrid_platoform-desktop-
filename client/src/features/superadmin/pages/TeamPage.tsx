@@ -234,7 +234,7 @@ export function TeamPage() {
           <form onSubmit={handleSubmit} className="flex flex-col">
             <div className="p-6 pb-4">
                 {formResult && (
-                    <div className={\`mb-4 p-3 rounded-md text-sm border \${formResult.success ? "bg-success/10 border-success/20 text-success" : "bg-danger/10 border-danger/20 text-danger"}\`}>
+                    <div className={`mb-4 p-3 rounded-md text-sm border ${formResult.success ? "bg-success/10 border-success/20 text-success" : "bg-danger/10 border-danger/20 text-danger"}`}>
                         {formResult.message}
                     </div>
                 )}
