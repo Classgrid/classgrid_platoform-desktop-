@@ -173,8 +173,6 @@ router.post("/notifications", createScheduledNotification);
 // -- 3a. BLOG / CHANGELOG SUBSCRIBERS
 router.get("/subscribers", async (req, res) => {
     try {
-        if (!ensurePrimarySuperAdmin(req, res)) return;
-
         const searchQuery = typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
         const statusFilter = typeof req.query.status === "string" ? req.query.status.trim().toLowerCase() : "all";
 
@@ -267,8 +265,6 @@ router.get("/subscribers", async (req, res) => {
 
 router.patch("/subscribers/:email/pause", async (req, res) => {
     try {
-        if (!ensurePrimarySuperAdmin(req, res)) return;
-
         const subscriberEmail = decodeURIComponent(req.params.email || "").trim();
         if (!subscriberEmail) {
             return res.status(400).json({ success: false, message: "Subscriber email is required." });
@@ -294,8 +290,6 @@ router.patch("/subscribers/:email/pause", async (req, res) => {
 
 router.patch("/subscribers/:email/resume", async (req, res) => {
     try {
-        if (!ensurePrimarySuperAdmin(req, res)) return;
-
         const subscriberEmail = decodeURIComponent(req.params.email || "").trim();
         if (!subscriberEmail) {
             return res.status(400).json({ success: false, message: "Subscriber email is required." });
@@ -321,8 +315,6 @@ router.patch("/subscribers/:email/resume", async (req, res) => {
 
 router.delete("/subscribers/:email", async (req, res) => {
     try {
-        if (!ensurePrimarySuperAdmin(req, res)) return;
-
         const subscriberEmail = decodeURIComponent(req.params.email || "").trim();
         if (!subscriberEmail) {
             return res.status(400).json({ success: false, message: "Subscriber email is required." });
