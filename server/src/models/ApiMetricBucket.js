@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-throw new Error("DELIBERATE CRASH TEST 2");
-
 // ═══════════════════════════════════════════════════════════
 //  ApiMetrics — In-memory aggregated request tracking
 //  Strategy: Buffer in-process, flush to DB every 60s.
