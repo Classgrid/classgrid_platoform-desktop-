@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { 
   Building2, User, MapPin, Globe, MessageSquare, 
@@ -9,7 +9,7 @@ import { Input } from "@/components/marketing_ui/input";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/marketing_ui/tooltip";
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
-import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
+import { useLeads, useApproveLead, useScheduleMeeting, useDeleteLead } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
 import { formatOrgType } from "@/utils/orgHelpers";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
@@ -20,6 +20,8 @@ export function LeadDetailsPage() {
   const { data, isLoading } = useLeads();
   const approveMutation = useApproveLead();
   const scheduleMutation = useScheduleMeeting();
+  const deleteMutation = useDeleteLead();
+  const navigate = useNavigate();
 
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [meetingUrl, setMeetingUrl] = useState("");
@@ -521,6 +523,26 @@ export function LeadDetailsPage() {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* DELETE ACTION */}
+            <div className="pt-2">
+              <Button
+                variant="danger"
+                className="w-full h-12 rounded-xl text-sm font-bold"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to permanently delete this lead?")) {
+                    if (id) {
+                      deleteMutation.mutate(id, {
+                        onSuccess: () => navigate("/superadmin/leads")
+                      });
+                    }
+                  }
+                }}
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Delete Lead"}
+              </Button>
             </div>
 
           </div>

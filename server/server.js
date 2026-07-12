@@ -2,6 +2,9 @@
 // 🎤 STEP 0: Override console BEFORE any imports
 //    so that EVERY SINGLE log is captured into the database
 // ─────────────────────────────────────────────────────────
+process.env.AWS_SUPPRESS_NODE_VERSION_WARNING = "1";
+process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = "1";
+
 import util from "util";
 import "./env.js"; // 🔥 Load env first so MONGODB_URI is available
 import accessLogger from "./src/config/logger.js";

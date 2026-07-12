@@ -429,8 +429,6 @@ const OrgWebsiteContentSchema = new Schema({
 });
 
 // ─── Indexes ─────────────────────────────────────────────────────────────────
-OrgWebsiteContentSchema.index({ organization_id: 1 }, { unique: true });
-OrgWebsiteContentSchema.index({ org_slug: 1 }, { unique: true });
 OrgWebsiteContentSchema.index({ isPublished: 1 });
 
 export default mongoose.model("OrgWebsiteContent", OrgWebsiteContentSchema);

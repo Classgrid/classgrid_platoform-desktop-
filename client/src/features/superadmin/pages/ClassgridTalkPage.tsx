@@ -15,7 +15,6 @@ import {
   Building2,
   Copy,
   ArrowLeft,
-  Trash2,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
@@ -674,33 +673,17 @@ export function ClassgridTalkPage() {
                     </div>
                   ),
                   action: (
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTicket(ticket);
-                          setPendingStatus(null);
-                        }}
-                      >
-                        Read
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        className="px-2"
-                        disabled={deleteTicketMutation.isPending}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm("Are you sure you want to permanently delete this test ticket?")) {
-                            deleteTicketMutation.mutate(ticket._id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTicket(ticket);
+                        setPendingStatus(null);
+                      }}
+                    >
+                      Read
+                    </Button>
                   ),
                 };
               })}
@@ -1093,6 +1076,23 @@ export function ClassgridTalkPage() {
               <div className="text-xs text-muted-foreground pt-2">
                 {selectedMessages.length} message
                 {selectedMessages.length !== 1 ? "s" : ""} in this thread
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  variant="danger"
+                  className="w-full text-xs"
+                  disabled={deleteTicketMutation.isPending}
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to permanently delete this test ticket?")) {
+                      deleteTicketMutation.mutate(selectedTicket._id, {
+                        onSuccess: () => setSelectedTicket(null)
+                      });
+                    }
+                  }}
+                >
+                  {deleteTicketMutation.isPending ? "Deleting..." : "Delete"}
+                </Button>
               </div>
 
               {/* All Attachments (combined from ticket + messages) */}

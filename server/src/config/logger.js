@@ -44,7 +44,6 @@ if (mongoUri) {
             // Store ALL logs (info, warn, error) — no level filter
             db: mongoUri,
             collection: "systemlogs",
-            options: { useUnifiedTopology: true },
             format: combine(timestamp(), metadata()),
             expireAfterSeconds: 2592000,
             capped: true,
