@@ -324,10 +324,10 @@ export function LeadDetailsPage() {
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Website</label>
                 <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
                   {lead.website ? (
-                    <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center gap-1.5 w-max">
-                      <Globe size={14} />
+                    <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-start gap-1.5 break-all">
+                      <Globe size={14} className="shrink-0 mt-0.5" />
                       {lead.website}
-                      <ExternalLink size={12} className="ml-1" />
+                      <ExternalLink size={12} className="ml-1 shrink-0 mt-0.5" />
                     </a>
                   ) : "—"}
                 </div>
