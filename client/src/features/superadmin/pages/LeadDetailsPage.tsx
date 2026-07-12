@@ -42,7 +42,7 @@ export function LeadDetailsPage() {
   }, [setBreadcrumbs, lead, id]);
 
   useEffect(() => {
-    const meetDate = lead?.scheduledAt || lead?.meetingScheduledAt;
+    const meetDate = lead?.meetingScheduledAt || lead?.scheduledAt;
     if (meetDate) {
       setDate(new Date(meetDate));
     }
@@ -430,7 +430,7 @@ export function LeadDetailsPage() {
                         <Button onClick={() => {
                           setIsEditingMeeting(false);
                           // Reset state back to original
-                          const meetDate = lead?.scheduledAt || lead?.meetingScheduledAt;
+                          const meetDate = lead?.meetingScheduledAt || lead?.scheduledAt;
                           if (meetDate) setDate(new Date(meetDate));
                           if (lead?.meetingUrl) setMeetingUrl(lead.meetingUrl);
                         }} variant="outline" className="h-9 flex-1">
