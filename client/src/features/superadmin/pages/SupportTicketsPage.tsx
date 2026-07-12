@@ -1218,6 +1218,9 @@ export function SupportTicketsPage() {
               onSuccess: () => {
                 setSelectedTicket(null);
                 setShowDeleteConfirm(false);
+              },
+              onError: () => {
+                setShowDeleteConfirm(false);
               }
             });
           }

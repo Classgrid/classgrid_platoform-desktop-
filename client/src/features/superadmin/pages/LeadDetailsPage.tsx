@@ -607,7 +607,8 @@ export function LeadDetailsPage() {
         onConfirm={() => {
           if (id) {
             deleteMutation.mutate(id, {
-              onSuccess: () => navigate("/superadmin/leads")
+              onSuccess: () => navigate("/superadmin/leads"),
+              onError: () => setShowDeleteConfirm(false)
             });
           }
         }}

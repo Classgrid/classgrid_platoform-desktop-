@@ -1204,16 +1204,16 @@ export function ClassgridTalkPage() {
       <DangerConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title="Delete Support Ticket"
-        description={<>Permanently delete this test ticket for <strong>{selectedTicket?.userEmail || "Unknown"}</strong>.</>}
-        warningMessage="This action is irreversible. All details associated with this ticket will be permanently lost."
+        title="Delete Enquiry"
+        description={<>Permanently delete this enquiry for <strong>{selectedTicket?.userEmail || "Unknown"}</strong>.</>}
+        warningMessage="This action is irreversible. All details associated with this enquiry will be permanently lost."
         confirmationSteps={[
           {
             label: "To confirm, type",
             value: "delete",
           },
         ]}
-        actionLabel="Delete Ticket"
+        actionLabel="Delete Enquiry"
         cancelLabel="Cancel"
         isLoading={deleteTicketMutation.isPending}
         onConfirm={() => {
@@ -1221,6 +1221,9 @@ export function ClassgridTalkPage() {
             deleteTicketMutation.mutate(selectedTicket._id, {
               onSuccess: () => {
                 setSelectedTicket(null);
+                setShowDeleteConfirm(false);
+              },
+              onError: () => {
                 setShowDeleteConfirm(false);
               }
             });
