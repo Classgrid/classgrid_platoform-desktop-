@@ -9,6 +9,7 @@ import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { Badge } from "@/components/marketing_ui/badge";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { apiClient } from "@/lib/apiClient";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -91,6 +92,7 @@ export function TeamPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | PlatformRole>("all");
+  const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["superadmin-platform-team"],
@@ -267,18 +269,18 @@ export function TeamPage() {
     {
       key: "actions",
       header: "",
-      width: "w-[60px]",
+      width: "w-[100px]",
       render: (_: any, row: TeamMember) => (
         <div className="flex justify-end">
             <Button
               size="sm"
               variant="ghost"
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-2 rounded-md"
-              onClick={() => removeMutation.mutate(row._id)}
-              disabled={removeMutation.isPending}
-              title={isPending ? "Revoke Invite" : "Remove Member"}
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-3 rounded-md flex items-center gap-2"
+              onClick={() => setMemberToDelete(row)}
+              title={row.status === "pending" ? "Revoke Invite" : "Remove Member"}
             >
-              <Trash2 size={16} />
+              <Trash2 size={14} />
+              <span>Delete</span>
             </Button>
         </div>
       )
@@ -498,6 +500,28 @@ export function TeamPage() {
           />
         </TabsContent>
       </Tabs>
+
+      <DangerConfirmDialog
+        open={!!memberToDelete}
+        onOpenChange={(open) => !open && setMemberToDelete(null)}
+        title={memberToDelete?.status === "pending" ? "Revoke Invitation" : "Remove Team Member"}
+        description={
+            <>
+                Are you sure you want to remove <strong className="text-foreground">{memberToDelete?.name}</strong> ({memberToDelete?.email}) from the platform team? 
+                They will lose all administrative access to the Classgrid super admin dashboard.
+            </>
+        }
+        warningMessage="This action cannot be undone."
+        actionLabel={memberToDelete?.status === "pending" ? "Revoke Invitation" : "Remove Member"}
+        isLoading={removeMutation.isPending}
+        onConfirm={() => {
+            if (memberToDelete) {
+                removeMutation.mutate(memberToDelete._id, {
+                    onSuccess: () => setMemberToDelete(null)
+                });
+            }
+        }}
+      />
     </div>
   );
 }
