@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const facultyPayrollSchema = new mongoose.Schema(
     {
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
         organization: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Organization",

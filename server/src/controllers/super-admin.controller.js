@@ -785,7 +785,7 @@ export const updateOrgSubscription = async (req, res) => {
         const {
             plan, expiresAt, maxStudents, maxFaculty, features,
             // ── Billing rates (set by Super Admin per org) ──
-            basePricePerMonth, pricePerStudent, pricePerGB, freeStorageGB
+            basePricePerMonth, pricePerStudent, pricePerGB, pricePerEmail, pricePerSms
         } = req.body;
 
         const OrgSubscription = (await import("../models/OrgSubscription.js")).default;
@@ -817,7 +817,8 @@ export const updateOrgSubscription = async (req, res) => {
             basePricePerMonth: basePricePerMonth !== undefined ? Number(basePricePerMonth) : (existingBilling.basePricePerMonth ?? 0),
             pricePerStudent:   pricePerStudent   !== undefined ? Number(pricePerStudent)   : (existingBilling.pricePerStudent   ?? 0),
             pricePerGB:        pricePerGB        !== undefined ? Number(pricePerGB)        : (existingBilling.pricePerGB        ?? 0),
-            freeStorageGB:     freeStorageGB     !== undefined ? Number(freeStorageGB)     : (existingBilling.freeStorageGB     ?? 0),
+            pricePerEmail:     pricePerEmail     !== undefined ? Number(pricePerEmail)     : (existingBilling.pricePerEmail     ?? 0),
+            pricePerSms:       pricePerSms       !== undefined ? Number(pricePerSms)       : (existingBilling.pricePerSms       ?? 0),
         };
 
         const subscription = await OrgSubscription.findOneAndUpdate(
@@ -889,7 +890,8 @@ export const approveLeadAndProvision = async (req, res) => {
         });
     }
 };
-// =================================================
+
+// =================================================
 // 10. LIST DEMO LEADS
 //     GET /api/super-admin/leads
 // =================================================

@@ -54,10 +54,14 @@ const orgSubscriptionSchema = new mongoose.Schema({
   // ── Billing Rates (set by Super Admin per org) ─────────────────────
   // All values are in INR. Leave at 0 until Super Admin configures them.
   billing: {
-    basePricePerMonth: { type: Number, default: 0 },   // Fixed monthly base fee
-    pricePerStudent:   { type: Number, default: 0 },   // ₹ per student per month
-    pricePerGB:        { type: Number, default: 0 },   // ₹ per GB of storage per month
-    freeStorageGB:     { type: Number, default: 0 },   // GB included free (no charge)
+    basePricePerMonth:   { type: Number, default: 0 },   // Optional fixed monthly platform fee
+    pricePerStudent:     { type: Number, default: 0 },   // ₹ per active student snapshot
+    pricePerGB:          { type: Number, default: 0 },   // ₹ per GB-month; daily ledger stores GB-days
+    pricePerEmail:       { type: Number, default: 0 },   // ₹ per sent email
+    pricePerSms:         { type: Number, default: 0 },   // ₹ per sent SMS segment
+    pricePerApiRequest:  { type: Number, default: 0 },   // ₹ per API request (EC2/Vercel)
+    pricePerAiToken:     { type: Number, default: 0 },   // ₹ per AI token (OpenAI/Groq/Gemini)
+    pricePerAgoraMinute: { type: Number, default: 0 },   // ₹ per Agora video participant-minute
   }
 
 }, { timestamps: true });

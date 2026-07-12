@@ -199,6 +199,10 @@ app.use(winstonMiddleware);
 // API Metrics Middleware (zero-overhead in-memory buffering)
 app.use(metricsMiddleware);
 
+// 📊 API Request Metering (Pay-As-You-Go billing per org)
+import { apiRequestMeter } from "../src/middleware/api-request-meter.middleware.js";
+app.use(apiRequestMeter);
+
 /* ---------- CACHE CONTROL — Prevent bfcache on HTML pages ---------- */
 app.use((req, res, next) => {
   // Only set no-store for HTML page requests (not for JS/CSS/image assets)

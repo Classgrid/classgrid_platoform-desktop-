@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 
 const VivaRecordSchema = new mongoose.Schema({
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
     userId: {
         type: String, // Clerk ID or MongoDB ID string
         required: true,

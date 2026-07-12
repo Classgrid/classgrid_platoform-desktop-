@@ -250,6 +250,33 @@ export interface OrganizationResourceMeterSummary {
   captureError?: string;
 }
 export interface OrganizationLegacyUsage {
+  billingLedger?: {
+    currentMonth?: {
+      totalStorageGbDays?: number;
+      totalEmails?: number;
+      totalSmsSegments?: number;
+      totalApiRequests?: number;
+      totalAiTokens?: number;
+      totalAgoraMinutes?: number;
+      totalAmountInr?: number;
+      lineItems?: Array<{
+        provider: string;
+        resourceLabel: string;
+        totalQuantity: number;
+        unit: string;
+        unitRateInr: number;
+        amountInr: number;
+      }>;
+    };
+    latestInvoice?: {
+      invoiceNumber: string;
+      totalAmountInr: number;
+      status: string;
+      dueDate: string;
+      month: number;
+      year: number;
+    };
+  };
   storage?: {
     bytes?: number;
     mb?: string;
@@ -324,6 +351,37 @@ export interface OrganizationEmailAnalytics {
   dailyChart?: Array<{ date: string; count: number }>;
 }
 
+export interface OrgBillingDashboardResponse {
+  currentMonth: {
+    totalStorageGbDays: number;
+    totalEmails: number;
+    totalSmsSegments: number;
+    totalApiRequests: number;
+    totalAiTokens: number;
+    totalAgoraMinutes: number;
+    totalAmountInr: number;
+  };
+  dailySeries: Array<{
+    date: string;
+    "API Requests": number;
+    "AI Tokens": number;
+    "Storage (GB)": number;
+    "Emails": number;
+    "SMS": number;
+    "Video Mins": number;
+    "Daily Cost (INR)": number;
+  }>;
+  latestInvoice: {
+    id: string;
+    invoiceNumber: string;
+    totalAmountInr: number;
+    status: string;
+    dueDate: string;
+    month: number;
+    year: number;
+  } | null;
+}
+
 export const organizationControlCenterApi = {
   getFullProfile: (orgId: string) =>
     apiClient
@@ -354,5 +412,20 @@ export const organizationControlCenterApi = {
       .get<OrganizationEmailAnalytics>("/api/admin/email-analytics", {
         params: { orgId },
       })
+      .then((response) => response.data),
+
+  getOrgBillingDashboard: (): Promise<OrgBillingDashboardResponse> =>
+    apiClient
+      .get("/api/org-admin/dashboard/billing")
+      .then((response) => response.data),
+
+  createRazorpayOrder: (invoiceId: string) =>
+    apiClient
+      .post("/api/org-admin/dashboard/billing/razorpay-order", { invoiceId })
+      .then((response) => response.data),
+
+  verifyRazorpayPayment: (payload: any) =>
+    apiClient
+      .post("/api/org-admin/dashboard/billing/razorpay-verify", payload)
       .then((response) => response.data),
 };

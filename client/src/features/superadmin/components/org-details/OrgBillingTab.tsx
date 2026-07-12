@@ -6,6 +6,13 @@ import {
   Landmark,
   Receipt,
   Users,
+  Activity,
+  Mail,
+  MessageSquare,
+  Video,
+  BrainCircuit,
+  CheckCircle2,
+  Calendar,
 } from "lucide-react";
 
 import {
@@ -97,51 +104,87 @@ export function OrgBillingTab({
 
   return (
     <div className="space-y-6">
-      <Alert className="border-amber-500/30 bg-amber-500/5 px-4 py-3 text-amber-800 dark:text-amber-200">
-        <AlertTriangle aria-hidden="true" />
-        <AlertTitle>The complete bill is still partial</AlertTitle>
-        <AlertDescription>
-          The backend now returns real subscription rates, user counts, legacy tracked storage, and payment volume. Shared-cloud allocation for R2, Vercel, EC2, Redis, MongoDB bytes, and other provider costs is still not stored per organization, so the subtotal below includes only backed metrics.
-        </AlertDescription>
-      </Alert>
+  const ledger = legacyUsage?.billingLedger?.currentMonth;
+  const latestInvoice = legacyUsage?.billingLedger?.latestInvoice;
 
-      <section aria-label="Known billing statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+  return (
+    <div className="space-y-6">
+      {latestInvoice ? (
+        <Alert className="border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-emerald-800 dark:text-emerald-200">
+          <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <AlertTitle>Monthly Invoice System is Active</AlertTitle>
+          <AlertDescription>
+            The latest invoice <strong>{latestInvoice.invoiceNumber}</strong> for ₹{latestInvoice.totalAmountInr} is marked as {latestInvoice.status}. The current month's live Pay-As-You-Go usage is updating below.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Alert className="border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-emerald-800 dark:text-emerald-200">
+          <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <AlertTitle>Pay-As-You-Go Metering Active</AlertTitle>
+          <AlertDescription>
+            The backend is actively metering live resource usage across all dashboards. The first invoice will generate on the 1st of next month.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <section aria-label="Live Month-to-Date Usage" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <OrgMetricCard
-          title="Base monthly rate"
-          value={formatCurrency(basePrice)}
-          detail="Configured on the organization subscription record."
-          icon={<CreditCard className="h-5 w-5" aria-hidden="true" />}
-          quality={basePrice === undefined ? "unavailable" : "actual"}
+          title="API Requests"
+          value={formatNumber(ledger?.totalApiRequests || 0)}
+          detail="Total authenticated API calls across all Vercel/EC2 instances."
+          icon={<Activity className="h-5 w-5 text-blue-500" aria-hidden="true" />}
+          quality="actual"
         />
         <OrgMetricCard
-          title="Per-student rate"
-          value={formatCurrency(studentRate)}
-          detail="Configured monthly price for each counted student."
-          icon={<GraduationCap className="h-5 w-5" aria-hidden="true" />}
-          quality={studentRate === undefined ? "unavailable" : "actual"}
+          title="AI Tokens"
+          value={formatNumber(ledger?.totalAiTokens || 0)}
+          detail="Total tokens consumed across OpenAI, Groq, and Gemini."
+          icon={<BrainCircuit className="h-5 w-5 text-purple-500" aria-hidden="true" />}
+          quality="actual"
         />
         <OrgMetricCard
-          title="Known student charge"
-          value={formatCurrency(knownStudentCharge)}
-          detail="Live student count multiplied by the configured per-student rate."
-          icon={<Users className="h-5 w-5" aria-hidden="true" />}
-          quality={knownStudentCharge === undefined ? "unavailable" : "actual"}
+          title="Storage (GB-Days)"
+          value={formatNumber(ledger?.totalStorageGbDays || 0)}
+          detail="Total R2 storage usage calculated daily."
+          icon={<HardDrive className="h-5 w-5 text-indigo-500" aria-hidden="true" />}
+          quality="actual"
         />
         <OrgMetricCard
-          title="Known storage charge"
-          value={formatCurrency(knownStorageCharge)}
-          detail="Calculated from the tracked legacy note-storage meter and the configured per-GB rate."
-          icon={<HardDrive className="h-5 w-5" aria-hidden="true" />}
-          quality={knownStorageCharge === undefined ? "unavailable" : "partial"}
+          title="Emails Sent"
+          value={formatNumber(ledger?.totalEmails || 0)}
+          detail="Total SES transactional emails delivered."
+          icon={<Mail className="h-5 w-5 text-amber-500" aria-hidden="true" />}
+          quality="actual"
         />
         <OrgMetricCard
-          title="Known subtotal"
-          value={formatCurrency(knownSubtotal)}
-          detail="Base, student, and legacy tracked-storage charges only."
-          icon={<Receipt className="h-5 w-5" aria-hidden="true" />}
-          quality={knownSubtotal === undefined ? "unavailable" : "partial"}
+          title="SMS Segments"
+          value={formatNumber(ledger?.totalSmsSegments || 0)}
+          detail="Total SMS segments sent via Firebase."
+          icon={<MessageSquare className="h-5 w-5 text-emerald-500" aria-hidden="true" />}
+          quality="actual"
+        />
+        <OrgMetricCard
+          title="Agora Minutes"
+          value={formatNumber(ledger?.totalAgoraMinutes || 0)}
+          detail="Total video participant-minutes across live classes."
+          icon={<Video className="h-5 w-5 text-rose-500" aria-hidden="true" />}
+          quality="actual"
         />
       </section>
+
+      <div className="grid gap-6 xl:grid-cols-3">
+        <OrgSectionCard
+          title="Current Month Subtotal"
+          description="Live accrued charges for the current billing period."
+          icon={<Receipt className="h-5 w-5" aria-hidden="true" />}
+        >
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <span className="text-4xl font-bold tracking-tight text-foreground">
+              {formatCurrency(ledger?.totalAmountInr || 0)}
+            </span>
+            <span className="mt-2 text-sm text-muted-foreground">Excludes 18% GST (Calculated at end of month)</span>
+          </div>
+        </OrgSectionCard>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <OrgSectionCard

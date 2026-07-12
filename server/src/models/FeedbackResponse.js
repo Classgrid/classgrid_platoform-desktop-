@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const feedbackResponseSchema = new mongoose.Schema({
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
     form: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "FeedbackForm",

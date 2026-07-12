@@ -98,6 +98,44 @@ router.get("/process-email-queue", async (req, res) => {
         res.status(500).json({ message: "Server error", error: err.message });
     }
 });
+/**
+ * GET /api/cron/calculate-organization-usage-daily
+ *
+ * Updates the daily Superadmin resource ledger from real internal/provider sources.
+ * Current production metrics:
+ * - Cloudflare R2 storage bytes/object count by organization-mapped object keys
+ * - AWS SES email usage from sent EmailJob documents tagged with organizationId
+ */
+router.get("/calculate-organization-usage-daily", async (req, res) => {
+    const cronStart = Date.now();
+    try {
+        const cronSecret = process.env.CRON_SECRET;
+        const querySecret = req.query.secret;
+        const authHeader = req.headers["authorization"];
+
+        if (cronSecret && querySecret !== cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        await connectDB();
+
+        const { calculateOrganizationUsageDaily } = await import("../services/organization-usage-metering.service.js");
+        const date = req.query.date ? new Date(String(req.query.date)) : new Date();
+        if (Number.isNaN(date.getTime())) {
+            return res.status(400).json({ error: "Invalid date. Use YYYY-MM-DD or an ISO date." });
+        }
+
+        const result = await calculateOrganizationUsageDaily({ date });
+        res.json({
+            message: "Organization daily usage calculated",
+            ...result,
+            cronDurationMs: Date.now() - cronStart,
+        });
+    } catch (err) {
+        console.error("[Cron] Organization usage daily error:", err.message);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+});
 
 /**
  * GET /api/cron/auto-close-tickets

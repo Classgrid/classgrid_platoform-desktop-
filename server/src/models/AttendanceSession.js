@@ -7,6 +7,12 @@ import { v4 as uuidv4 } from "uuid";
  */
 const attendanceSessionSchema = new mongoose.Schema(
     {
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
         classroom: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Classroom",

@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const deviceVerificationSchema = new mongoose.Schema({
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
     email: {
         type: String,
         required: true,

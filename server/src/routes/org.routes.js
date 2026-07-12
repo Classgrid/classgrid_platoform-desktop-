@@ -9,6 +9,7 @@ import { getChatSb } from "../config/supabaseClient.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { buildInstitutionProfile as buildSharedInstitutionProfile } from "../services/institution-profile.service.js";
 import { getOrgDashboardMetrics } from '../controllers/org-dashboard.controller.js';
+import { getOrgAdminBillingDashboard, createSaasInvoiceOrder, verifySaasInvoicePayment } from '../controllers/admin-analytics.controller.js';
 import redis from '../config/redis.js';
 import {
     getAdmissionTrack,
@@ -537,6 +538,14 @@ router.get("/dashboard/overview", isAuthenticated, requireRole("org_admin"), asy
         res.status(500).json({ message: "Server error" });
     }
 });
+
+/**
+ * GET /api/org-admin/dashboard/billing
+ * Returns: Vercel-style Pay-As-You-Go Billing Dashboard with charts
+ */
+router.get("/dashboard/billing", isAuthenticated, requireRole("org_admin"), getOrgAdminBillingDashboard);
+router.post("/dashboard/billing/razorpay-order", isAuthenticated, requireRole("org_admin"), createSaasInvoiceOrder);
+router.post("/dashboard/billing/razorpay-verify", isAuthenticated, requireRole("org_admin"), verifySaasInvoicePayment);
 
 /**
  * GET /api/org-admin/dashboard/analytics

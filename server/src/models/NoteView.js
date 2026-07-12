@@ -3,6 +3,12 @@ import mongoose from "mongoose";
 // Tracks which students viewed which notes
 const noteViewSchema = new mongoose.Schema(
     {
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
         noteId: {
             type: String, // Supabase note ID
             required: true,

@@ -3,6 +3,12 @@ import mongoose from "mongoose";
 // Profile details schema handling the 100+ fields from the 17 stepper sections
 const userProfileSchema = new mongoose.Schema(
   {
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -24,6 +24,10 @@ import NotePackage from "../models/NotePackage.js";
 import PastPaper from "../models/PastPaper.js";
 import Meeting from "../models/Meeting.js";
 import OrgSubscription from "../models/OrgSubscription.js";
+import OrganizationUsageDaily from "../models/OrganizationUsageDaily.js";
+import SaasInvoice from "../models/SaasInvoice.js";
+import { razorpay } from "../config/razorpay.js";
+import crypto from "crypto";
 import { studentNotesClient } from "../config/supabaseClient.js";
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
 import { getOrganizationResourceUsage, recordInternalResourceSnapshot } from "../services/organization-resource-meter.service.js";
@@ -266,7 +270,67 @@ export const getOrgUsage = async (req, res) => {
                 ? Number((billableStorageGb * configuredStorageRate).toFixed(2))
                 : undefined;
 
+        // Fetch Pay-As-You-Go Billing Ledger (Current Month)
+        const dailyRecords = await OrganizationUsageDaily.find({
+            organizationId: orgId,
+            day: { $gte: startOfMonth }
+        }).lean();
+
+        let totalStorageGbDays = 0, totalEmailMeters = 0, totalSmsMeters = 0, totalApiMeters = 0, totalAiMeters = 0, totalAgoraMeters = 0, currentMonthAmount = 0;
+        const lineItemAgg = new Map();
+
+        dailyRecords.forEach(record => {
+            totalStorageGbDays += (record.totals?.storageGbDays || 0);
+            totalEmailMeters += (record.totals?.emails || 0);
+            totalSmsMeters += (record.totals?.sms || 0);
+            totalApiMeters += (record.totals?.apiRequests || 0);
+            totalAiMeters += (record.totals?.aiTokens || 0);
+            totalAgoraMeters += (record.totals?.agoraMinutes || 0);
+            currentMonthAmount += (record.totals?.amountInr || 0);
+
+            (record.lineItems || []).forEach(item => {
+                const existing = lineItemAgg.get(item.resourceKey) || {
+                    provider: item.provider,
+                    resourceLabel: item.resourceLabel,
+                    totalQuantity: 0,
+                    unit: item.unit,
+                    unitRateInr: item.unitRateInr,
+                    amountInr: 0
+                };
+                existing.totalQuantity += item.quantity || 0;
+                existing.amountInr += item.amountInr || 0;
+                lineItemAgg.set(item.resourceKey, existing);
+            });
+        });
+
+        // Fetch latest invoice
+        const latestInvoice = await SaasInvoice.findOne({ organizationId: orgId }).sort({ createdAt: -1 }).lean();
+
         const usagePayload = {
+            billingLedger: {
+                currentMonth: {
+                    totalStorageGbDays,
+                    totalEmails: totalEmailMeters,
+                    totalSmsSegments: totalSmsMeters,
+                    totalApiRequests: totalApiMeters,
+                    totalAiTokens: totalAiMeters,
+                    totalAgoraMinutes: totalAgoraMeters,
+                    totalAmountInr: Number(currentMonthAmount.toFixed(2)),
+                    lineItems: [...lineItemAgg.values()].map(item => ({
+                        ...item,
+                        totalQuantity: Number(item.totalQuantity.toFixed(4)),
+                        amountInr: Number(item.amountInr.toFixed(2))
+                    }))
+                },
+                latestInvoice: latestInvoice ? {
+                    invoiceNumber: latestInvoice.invoiceNumber,
+                    totalAmountInr: latestInvoice.totalAmountInr,
+                    status: latestInvoice.status,
+                    dueDate: latestInvoice.dueDate,
+                    month: latestInvoice.billingPeriod?.month,
+                    year: latestInvoice.billingPeriod?.year
+                } : null
+            },
             storage: {
                 bytes: totalStorageBytes,
                 mb: (totalStorageBytes / (1024 * 1024)).toFixed(2),

@@ -18,6 +18,7 @@ import { CandidatePortalPage } from "@/features/admission-portal/pages/Candidate
 import { ParentTrackerPage } from "@/features/admission-portal/pages/ParentTrackerPage";
 
 import { DashboardHomePage } from "@/features/superadmin/pages/DashboardHomePage";
+import { OrgAdminDashboard } from "@/features/org-admin/components/OrgAdminDashboard";
 import { LeadsPage } from "@/features/superadmin/pages/LeadsPage";
 import { SupportTicketsPage } from "@/features/superadmin/pages/SupportTicketsPage";
 import { ReviewsPage } from "@/features/superadmin/pages/ReviewsPage";
@@ -225,7 +226,7 @@ export function AppRouter() {
           <Route path="/org/admin/chat" element={<ChatPage />} />
           <Route path="/org/website" element={<WebsiteCMSPage />} />
           <Route path="/org/audit" element={<AuditPage />} />
-          <Route path="/org/admin/dashboard" element={<GenericPage title="Org Overview" />} />
+          <Route path="/org/admin/dashboard" element={<OrgAdminDashboard />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
           <Route path="/org/*" element={<ComingSoonPage />} />
           

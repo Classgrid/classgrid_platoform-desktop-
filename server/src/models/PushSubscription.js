@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const pushSubscriptionSchema = new mongoose.Schema({
+    organization_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Organization",
+        required: true,
+        index: true
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
