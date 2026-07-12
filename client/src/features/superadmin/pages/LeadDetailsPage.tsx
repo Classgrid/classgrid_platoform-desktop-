@@ -33,7 +33,7 @@ export function LeadDetailsPage() {
   useEffect(() => {
     if (lead) {
       setBreadcrumbs([
-        { label: "Demo Leads", href: "/superadmin/marketing/demo-leads" },
+        { label: "Demo Leads", href: "/superadmin/leads" },
         { label: lead.institutionName, href: `/superadmin/leads/${id}` }
       ]);
     }
