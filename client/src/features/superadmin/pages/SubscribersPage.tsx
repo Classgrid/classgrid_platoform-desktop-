@@ -8,7 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import { BarChart } from "@tremor/react";
+import { LineChart } from "@tremor/react";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
@@ -310,25 +310,25 @@ export function SubscribersPage() {
        {/* Stats Row 2 */}
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          title="New (14 Days)"
-          value={isLoading ? "—" : stats.newSubscribers14d}
+          title="New (15 Days)"
+          value={isLoading ? "—" : stats.newSubscribers15d}
           icon={<TrendingUp size={16} />}
-          trend={{ value: stats.newSubscribers14d, label: "new subscribers" }}
+          trend={{ value: stats.newSubscribers15d, label: "new subscribers" }}
           trendDirection="up"
         />
         <StatCard
-          title="Unsubscribed (14 Days)"
-          value={isLoading ? "—" : stats.newUnsubscribes14d}
+          title="Unsubscribed (15 Days)"
+          value={isLoading ? "—" : stats.newUnsubscribes15d}
           icon={<TrendingDown size={16} />}
-          trend={{ value: stats.newUnsubscribes14d, label: "unsubscribes" }}
+          trend={{ value: stats.newUnsubscribes15d, label: "unsubscribes" }}
           trendDirection="down"
         />
         <StatCard
-          title="Net Growth (14 Days)"
-          value={isLoading ? "—" : stats.netGrowth14d}
+          title="Net Growth (15 Days)"
+          value={isLoading ? "—" : stats.netGrowth15d}
           icon={<Mail size={16} />}
-          trend={{ value: stats.netGrowth14d, label: "net growth" }}
-          trendDirection={stats.netGrowth14d > 0 ? "up" : stats.netGrowth14d < 0 ? "down" : "neutral"}
+          trend={{ value: stats.netGrowth15d, label: "net growth" }}
+          trendDirection={stats.netGrowth15d > 0 ? "up" : stats.netGrowth15d < 0 ? "down" : "neutral"}
         />
       </div>
 
@@ -337,13 +337,13 @@ export function SubscribersPage() {
         <Card className="lg:col-span-2">
             <CardHeader>
                 <CardTitle>Subscriber Movement</CardTitle>
-                <p className="text-sm text-muted-foreground">Daily new subscribes vs unsubscribes over the last 14 days.</p>
+                <p className="text-sm text-muted-foreground">Daily new subscribes vs unsubscribes over the last 15 days.</p>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
                 ) : (
-                    <BarChart
+                    <LineChart
                         className="h-[300px] mt-4"
                         data={trend}
                         index="label"
@@ -355,7 +355,7 @@ export function SubscribersPage() {
                         yAxisWidth={40}
                         showLegend={true}
                         showAnimation={true}
-                        xAxisLabel="Last 14 Days"
+                        xAxisLabel="Last 15 Days"
                     />
                 )}
             </CardContent>
@@ -377,8 +377,8 @@ export function SubscribersPage() {
                         <span className="font-semibold">{isLoading ? "—" : `${stats.activeRate}%`}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-sm text-muted-foreground">Net growth in 14 days</span>
-                        <span className="font-semibold text-emerald-500">{isLoading ? "—" : `${stats.netGrowth14d >= 0 ? "+" : ""}${stats.netGrowth14d}`}</span>
+                        <span className="text-sm text-muted-foreground">Net growth in 15 days</span>
+                        <span className="font-semibold text-emerald-500">{isLoading ? "—" : `${stats.netGrowth15d >= 0 ? "+" : ""}${stats.netGrowth15d}`}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                         <span className="text-sm text-muted-foreground">Latest signup</span>
