@@ -1002,13 +1002,18 @@ router.delete("/team/:id", async (req, res) => {
             return res.status(400).json({ success: false, message: "You cannot remove yourself." });
         }
         const User = (await import("../models/User.js")).default;
-        const member = await User.findById(req.params.id).select("role email").lean();
+        const member = await User.findById(req.params.id).select("role email name").lean();
         if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
 
-        // Safety: never delete the god-owner
-        const GOD_EMAIL = process.env.SUPER_ADMIN_EMAIL || "support@classgrid.in";
-        if (member.email === GOD_EMAIL) {
-            return res.status(403).json({ success: false, message: "Cannot remove the platform owner account." });
+        // Safety: never delete the god-owner or founder
+        const PROTECTED_EMAILS = [
+            (process.env.SUPER_ADMIN_EMAIL || "support@classgrid.in").toLowerCase(),
+            "nikhil.shinde@classgrid.in"
+        ];
+        if (PROTECTED_EMAILS.includes(member.email.toLowerCase())) {
+            // Log this unauthorized attempt
+            console.warn(`🚨 [SECURITY] Attempted deletion of PROTECTED account "${member.email}" by user ${req.user?.email || "unknown"} (ID: ${req.user?._id || "unknown"})`);
+            return res.status(403).json({ success: false, message: "This is a protected founder account and cannot be removed by anyone." });
         }
 
         await User.findByIdAndDelete(req.params.id);

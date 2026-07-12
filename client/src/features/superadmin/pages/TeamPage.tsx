@@ -266,20 +266,27 @@ export function TeamPage() {
       key: "actions",
       header: "",
       width: "w-[100px]",
-      render: (_: any, row: TeamMember) => (
-        <div className="flex justify-end">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-3 rounded-md flex items-center gap-2"
-              onClick={() => setMemberToDelete(row)}
-              title={row.status === "pending" ? "Revoke Invite" : "Remove Member"}
-            >
-              <Trash2 size={14} />
-              <span>Delete</span>
-            </Button>
-        </div>
-      )
+      render: (_: any, row: TeamMember) => {
+        // Protected founder account — cannot be deleted by anyone
+        const PROTECTED_EMAILS = ["nikhil.shinde@classgrid.in", "support@classgrid.in"];
+        if (PROTECTED_EMAILS.includes(row.email.toLowerCase())) {
+          return <div className="flex justify-end"><span className="text-xs text-muted-foreground italic">Protected</span></div>;
+        }
+        return (
+          <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-3 rounded-md flex items-center gap-2"
+                onClick={() => setMemberToDelete(row)}
+                title={row.status === "pending" ? "Revoke Invite" : "Remove Member"}
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </Button>
+          </div>
+        );
+      }
     }
   ];
 
