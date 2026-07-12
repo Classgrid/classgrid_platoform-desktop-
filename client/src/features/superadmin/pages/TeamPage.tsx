@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Shield, Trash2, Plus, MoreHorizontal, Search, XCircle, X, BadgeCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -116,7 +117,13 @@ export function TeamPage() {
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => teamApi.removeMember(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] })
+    onSuccess: () => {
+      toast.success("Team member removed successfully.");
+      qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Failed to remove member.");
+    }
   });
 
   const roleUpdateMutation = useMutation({
@@ -180,12 +187,14 @@ export function TeamPage() {
             })
         ));
         
+        toast.success("Invitations sent successfully! Welcome emails have been dispatched.");
         setFormResult({ success: true, message: "Invitations sent successfully! Welcome emails have been dispatched." });
         setForms([EMPTY_FORM]);
         setActiveTab("pending-invitations");
         qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
         setTimeout(() => setFormResult(null), 5000);
     } catch (err: any) {
+        toast.error(err?.response?.data?.message || err?.message || "Failed to invite members.");
         setFormResult({ success: false, message: err?.response?.data?.message || err?.message || "Failed to invite members." });
     } finally {
         setIsSubmitting(false);
