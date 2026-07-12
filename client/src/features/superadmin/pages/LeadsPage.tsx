@@ -37,7 +37,6 @@ function buildColumns(onManage: (id: string) => void, onAssign: (id: string) => 
     {
       key: "organization",
       header: "Organization",
-      width: "w-[250px]",
       render: (_val: unknown, row: Lead) => (
         <div className="flex flex-col truncate">
           <span className="font-medium truncate">{row.institutionName}</span>
@@ -65,37 +64,42 @@ function buildColumns(onManage: (id: string) => void, onAssign: (id: string) => 
     {
       key: "assigned",
       header: "Assigned",
-      width: "w-[240px]",
+      width: "w-[140px]",
       render: (_val: unknown, row: Lead) => (
-        <div className="flex items-center justify-between w-full">
-          <div>
-            {row.assignedTo ? (
-              <div className="flex items-center gap-2 border rounded-full px-2 py-1 bg-muted/30">
-                <div className="h-5 w-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold">
-                  {row.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <span className="text-xs font-medium">{row.assignedTo.name}</span>
+        <div className="flex items-center">
+          {row.assignedTo ? (
+            <div className="flex items-center gap-2 border rounded-full px-2 py-1 bg-muted/30 w-fit">
+              <div className="h-5 w-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
+                {row.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
               </div>
-            ) : (
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="h-7 text-xs rounded-full px-3 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50 border-none"
-                onClick={(e) => { e.stopPropagation(); onAssign(row._id); }}
-                disabled={assigningId === row._id}
-              >
-                {assigningId === row._id ? "Assigning..." : "Assign me"}
-              </Button>
-            )}
-          </div>
-          <Button 
-            onClick={(e) => { e.stopPropagation(); onManage(row._id); }} 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white h-8" 
-            size="sm"
-          >
-            Read
-          </Button>
+              <span className="text-xs font-medium truncate max-w-[80px]">{row.assignedTo.name}</span>
+            </div>
+          ) : (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="h-7 text-xs rounded-full px-3 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50 border-none"
+              onClick={(e) => { e.stopPropagation(); onAssign(row._id); }}
+              disabled={assigningId === row._id}
+            >
+              {assigningId === row._id ? "Assigning..." : "Assign me"}
+            </Button>
+          )}
         </div>
+      ),
+    },
+    {
+      key: "action",
+      header: "",
+      width: "w-[90px]",
+      render: (_val: unknown, row: Lead) => (
+        <Button 
+          onClick={(e) => { e.stopPropagation(); onManage(row._id); }} 
+          className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 w-full" 
+          size="sm"
+        >
+          Read
+        </Button>
       ),
     },
   ];
