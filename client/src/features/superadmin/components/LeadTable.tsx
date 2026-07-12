@@ -19,17 +19,17 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
     {
       key: "requester",
       header: "Requester",
-      width: "w-[200px]",
+      width: "w-[300px]",
       render: (_val: unknown, row: Lead) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full min-w-0">
           <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs bg-emerald-500">
               {row.adminName?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
             <span className="font-semibold text-foreground text-sm truncate">{row.adminName}</span>
-            <span className="text-[10px] text-muted-foreground uppercase truncate max-w-[150px]">{row.adminEmail}</span>
+            <span className="text-[10px] text-muted-foreground uppercase truncate">{row.adminEmail}</span>
           </div>
         </div>
       ),
