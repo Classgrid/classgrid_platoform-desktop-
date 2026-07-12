@@ -183,18 +183,21 @@ export function LeadDetailsPage() {
                 ) : (
                   <Tooltip delay={200}>
                     <TooltipTrigger asChild>
-                      <div className="relative flex items-center justify-center h-8 w-8 rounded-full border border-border/50 cursor-default hover:opacity-80 transition-opacity">
-                        {/* Green Dot Indicator */}
-                        <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-background z-10" />
-                        
-                        {/* Photo or Fallback Initial */}
-                        {(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture ? (
-                          <img src={(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture} alt={lead.assignedTo.name} className="h-full w-full rounded-full object-cover" />
-                        ) : (
-                          <div className="h-full w-full rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
-                            {lead.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2 cursor-default hover:opacity-80 transition-opacity">
+                        <div className="relative flex items-center justify-center h-8 w-8 rounded-full border border-border/50">
+                          {/* Green Dot Indicator */}
+                          <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-background z-10" />
+                          
+                          {/* Photo or Fallback Initial */}
+                          {(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture ? (
+                            <img src={(lead.assignedTo as any).avatarUrl || (lead.assignedTo as any).profilePicture || (lead.assignedTo as any).picture} alt={lead.assignedTo.name} className="h-full w-full rounded-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
+                              {lead.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{lead.assignedTo.name}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="flex flex-col items-start gap-0.5 py-2">
