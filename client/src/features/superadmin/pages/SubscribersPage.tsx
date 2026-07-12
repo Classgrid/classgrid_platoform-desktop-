@@ -364,51 +364,47 @@ export function SubscribersPage() {
             </CardContent>
         </Card>
 
-      <div className="mt-6">
-        <div className="flex flex-col bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-            {/* Top Action Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between border-b border-border p-3 bg-secondary/20 gap-4">
-                <div className="flex flex-1 items-center gap-4 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-80">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Search subscriber email..."
-                            className="w-full bg-background border border-border rounded-md py-1.5 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-8 shadow-sm"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <div className="w-[180px]">
-                        <ResponsiveSelect
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="h-8 text-sm"
-                        >
-                            {STATUS_OPTIONS.map(opt => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </ResponsiveSelect>
-                    </div>
+      <div className="mt-6 flex flex-col gap-4">
+        {/* Top Action Bar (Separated from the table) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-1 items-center gap-4 w-full sm:w-auto">
+                <div className="relative w-full sm:w-80">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Search subscriber email..."
+                        className="w-full bg-background border border-border rounded-md py-1.5 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-8 shadow-sm"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
                 </div>
-
-                <div className="flex items-center gap-3">
-                    <div className="text-sm text-muted-foreground whitespace-nowrap">
-                        Showing {subscribers.length} rows
-                    </div>
+                <div className="w-[180px]">
+                    <ResponsiveSelect
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="h-8 text-sm bg-background border-border shadow-sm"
+                    >
+                        {STATUS_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </ResponsiveSelect>
                 </div>
             </div>
 
-            {/* Table Area */}
-            <div className="overflow-auto bg-background p-4">
-                <DataTable
-                    columns={subscriberColumns}
-                    rows={subscribers}
-                    isLoading={isLoading}
-                    emptyMessage="No subscribers found. Try a different search or status filter."
-                />
+            <div className="flex items-center gap-3">
+                <div className="text-sm text-muted-foreground whitespace-nowrap">
+                    Showing {subscribers.length} rows
+                </div>
             </div>
         </div>
+
+        {/* Table Area */}
+        <DataTable
+            columns={subscriberColumns}
+            rows={subscribers}
+            isLoading={isLoading}
+            emptyMessage="No subscribers found. Try a different search or status filter."
+        />
       </div>
     </div>
   );
