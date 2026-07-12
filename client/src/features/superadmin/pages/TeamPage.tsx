@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Shield, Trash2, Plus, MoreHorizontal, Search, XCircle, X } from "lucide-react";
+import { Shield, Trash2, Plus, MoreHorizontal, Search, XCircle, X, BadgeCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -270,7 +270,7 @@ export function TeamPage() {
         // Protected founder account — cannot be deleted by anyone
         const PROTECTED_EMAILS = ["nikhil.shinde@classgrid.in", "support@classgrid.in"];
         if (PROTECTED_EMAILS.includes(row.email.toLowerCase())) {
-          return <div className="flex justify-end"><span className="text-xs text-muted-foreground italic">Protected</span></div>;
+          return <div className="flex justify-end"><BadgeCheck size={20} className="text-blue-500" /></div>;
         }
         return (
           <div className="flex justify-end">
