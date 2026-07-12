@@ -216,11 +216,11 @@ router.get("/subscribers", async (req, res) => {
                 return a.email.localeCompare(b.email);
             })
             .slice(0, 6);
-        const trend = buildSubscriberTrend(subscribers, 14);
-        const newSubscribers14d = countSince(subscribers, 14, (row) => parseTimestamp(row.created_at));
-        const newUnsubscribes14d = countSince(
+        const trend = buildSubscriberTrend(subscribers, 15);
+        const newSubscribers15d = countSince(subscribers, 15, (row) => parseTimestamp(row.created_at));
+        const newUnsubscribes15d = countSince(
             inactiveSubscribers,
-            14,
+            15,
             (row) => parseTimestamp(row.updated_at)
         );
         const activeCount = activeSubscribers.length;
@@ -237,9 +237,9 @@ router.get("/subscribers", async (req, res) => {
                 total: totalCount,
                 active: activeCount,
                 inactive: inactiveSubscribers.length,
-                newSubscribers14d,
-                newUnsubscribes14d,
-                netGrowth14d: newSubscribers14d - newUnsubscribes14d,
+                newSubscribers15d,
+                newUnsubscribes15d,
+                netGrowth15d: newSubscribers15d - newUnsubscribes15d,
                 activeRate,
                 deliveryReady: activeCount,
             },
