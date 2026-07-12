@@ -197,9 +197,17 @@ export const markSuperAdminSupportConversationRead = async (req, res) => {
 
 export const deleteSuperAdminSupportConversation = async (req, res) => {
   try {
-    const conversation = await SupportConversation.findByIdAndDelete(req.params.threadId);
-    if (!conversation) return res.status(404).json({ message: "Conversation not found." });
-    res.json({ success: true, message: "Conversation deleted successfully." });
+    // Try SupportConversation first (Classgrid Talk / Inquiries)
+    let deleted = await SupportConversation.findByIdAndDelete(req.params.threadId);
+    
+    // If not found, try SupportTicket (In-app Support Tickets)
+    if (!deleted) {
+      const SupportTicket = (await import("../models/SupportTicket.js")).default;
+      deleted = await SupportTicket.findByIdAndDelete(req.params.threadId);
+    }
+    
+    if (!deleted) return res.status(404).json({ message: "Ticket not found." });
+    res.json({ success: true, message: "Ticket deleted successfully." });
   } catch (err) {
     console.error("[SuperAdmin Helpdesk Delete] Error:", err.message);
     res.status(500).json({ message: "Server error" });
