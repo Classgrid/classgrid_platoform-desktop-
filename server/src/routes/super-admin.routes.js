@@ -273,7 +273,7 @@ router.patch("/subscribers/:email/pause", async (req, res) => {
         const subscribersSb = getBlogSubscribersSb();
         const { error } = await subscribersSb
             .from("blog_subscribers")
-            .update({ is_active: false })
+            .update({ is_active: false, updated_at: new Date().toISOString() })
             .eq("email", subscriberEmail);
 
         if (error) {
@@ -298,7 +298,7 @@ router.patch("/subscribers/:email/resume", async (req, res) => {
         const subscribersSb = getBlogSubscribersSb();
         const { error } = await subscribersSb
             .from("blog_subscribers")
-            .update({ is_active: true })
+            .update({ is_active: true, updated_at: null })
             .eq("email", subscriberEmail);
 
         if (error) {

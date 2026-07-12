@@ -8,7 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import { BarChart } from "@tremor/react";
+import { BarChart } from "@/components/marketing_ui/BarChart";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
@@ -333,8 +333,7 @@ export function SubscribersPage() {
       </div>
 
         {/* Trend & Health */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
+        <Card>
             <CardHeader>
                 <CardTitle>Subscriber Movement</CardTitle>
                 <p className="text-sm text-muted-foreground">Daily new subscribes vs unsubscribes over the last 15 days.</p>
@@ -350,13 +349,12 @@ export function SubscribersPage() {
                             data={trend}
                             index="label"
                             categories={["subscribed", "unsubscribed"]}
-                            colors={["blue-500", "emerald-500"]}
+                            colors={["blue", "emerald"]}
                             valueFormatter={(number: number) =>
                               Intl.NumberFormat("us").format(number).toString()
                             }
                             yAxisWidth={40}
                             showLegend={true}
-                            showAnimation={true}
                             xAxisLabel="Last 15 Days"
                         />
                     </div>
@@ -364,81 +362,6 @@ export function SubscribersPage() {
                 )}
             </CardContent>
         </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Audience Health</CardTitle>
-                <p className="text-sm text-muted-foreground">A quick read on the email list quality and recent movement.</p>
-            </CardHeader>
-            <CardContent>
-                <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-sm text-muted-foreground">Delivery-ready audience</span>
-                        <span className="font-semibold">{isLoading ? "—" : stats.deliveryReady}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-sm text-muted-foreground">Active rate</span>
-                        <span className="font-semibold">{isLoading ? "—" : `${stats.activeRate}%`}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-sm text-muted-foreground">Net growth in 15 days</span>
-                        <span className="font-semibold text-emerald-500">{isLoading ? "—" : `${stats.netGrowth15d >= 0 ? "+" : ""}${stats.netGrowth15d}`}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                        <span className="text-sm text-muted-foreground">Latest signup</span>
-                        <span className="font-semibold text-sm">{formatSubscriberDate(activity.lastSubscribedAt)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-muted-foreground">Latest unsubscribe</span>
-                        <span className="font-semibold text-sm">{formatSubscriberDate(activity.lastUnsubscribedAt)}</span>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-            <CardHeader>
-                <CardTitle>Recent Signups</CardTitle>
-                <p className="text-sm text-muted-foreground">Latest active subscribers added to the list.</p>
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <div className="text-sm text-muted-foreground">Loading recent signups...</div>
-                ) : recentSubscribers.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">No recent signup activity yet.</div>
-                ) : (
-                    <div className="flex flex-col gap-4">
-                        {recentSubscribers.map((subscriber) => (
-                            <div key={subscriber.id} className="flex justify-between items-center p-3 rounded-lg border border-border bg-muted/30">
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-sm font-medium">{subscriber.email}</span>
-                                    <span className="text-xs text-muted-foreground">Joined {formatFullSubscriberDate(subscriber.created_at)}</span>
-                                </div>
-                                <Badge variant="success" dot>Active</Badge>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Paused</CardTitle>
-                <p className="text-sm text-muted-foreground">People who will not receive the next blog or changelog email.</p>
-            </CardHeader>
-            <div className="p-4 pt-0">
-                <RecentActivityTable
-                    columns={inactiveColumns}
-                    rows={inactiveSubscribers}
-                    isLoading={isLoading}
-                    emptyMessage="No paused subscribers. Everyone is currently active."
-                />
-            </div>
-        </Card>
-      </div>
 
       <div className="mt-6 flex flex-col gap-4">
         <div>
