@@ -1838,29 +1838,4 @@ router.get("/backup/integrity", async (req, res) => {
     }
 });
 
-router.get("/test-leads", async (req, res) => {
-    try {
-        const { default: DemoRequest } = await import("../models/DemoRequest.js");
-        const emails = [
-            'classgrid26@gmail.com',
-            'aakankshmuley@gmail.com',
-            'nikhil.shinde25@pccoepune.org',
-            'nikhil.shinde25@pccoeoune.org',
-            'trinitytimeiseverything@gmail.com',
-            'gouthamcollege2014@gmail.com',
-            'nikhilsubsun321@gmail.com',
-            'modeldemo26@gmail.com',
-            'komalshinde5025@gmail.com',
-            'viewson2333@gmail.com',
-            'nikhil.shinde@classgrid.in',
-            'viewtype01@gmail.com'
-        ];
-        const result = await DemoRequest.deleteMany({ adminEmail: { $in: emails } });
-        res.json({ success: true, deletedCount: result.deletedCount, message: `Deleted ${result.deletedCount} test leads.` });
-    } catch (err) {
-        console.error("Error deleting test leads:", err);
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-
 export default router;
