@@ -2166,12 +2166,12 @@ ${data.bookingUrl ? `Book Demo Slot: ${data.bookingUrl}` : ""}
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
 
-export const getDemoMeetingScheduledHtml = (data = {}) => {
   const isReschedule = data.isReschedule === true;
   const repName = data.repName || "Classgrid Team";
   const title = isReschedule ? "Demo Meeting Rescheduled" : "Demo Meeting Scheduled";
   
   const content = `
+    <h1>${title}</h1>
     <p>Hello ${data.adminName || "there"},</p>
     <p>${isReschedule 
       ? `We’re writing to let you know that the Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been rescheduled.`
