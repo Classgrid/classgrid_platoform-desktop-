@@ -16,10 +16,9 @@ interface LeadTableProps {
 
 export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assigningId }: LeadTableProps) {
   const columns = useMemo(() => [
-    {
       key: "requester",
       header: "Requester",
-      width: "w-[300px]",
+      width: "w-[350px]",
       render: (_val: unknown, row: Lead) => (
         <div className="flex items-center gap-3 w-full min-w-0">
           <div className="relative shrink-0">
@@ -29,7 +28,9 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
           </div>
           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
             <span className="font-semibold text-foreground text-sm truncate">{row.adminName}</span>
-            <span className="text-[10px] text-muted-foreground uppercase truncate">{row.adminEmail}</span>
+            <a href={`mailto:${row.adminEmail}`} className="text-xs text-muted-foreground hover:text-primary hover:underline truncate transition-colors">
+              {row.adminEmail?.toLowerCase()}
+            </a>
           </div>
         </div>
       ),
