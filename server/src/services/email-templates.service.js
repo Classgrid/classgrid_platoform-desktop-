@@ -2167,23 +2167,19 @@ ${data.bookingUrl ? `Book Demo Slot: ${data.bookingUrl}` : ""}
 };
 
 export const getDemoMeetingScheduledHtml = (data = {}) => {
-  const isReschedule = data.isReschedule === true;
-  const repName = data.repName || "Classgrid Team";
-  const title = isReschedule ? "Demo Meeting Rescheduled" : "Demo Meeting Scheduled";
+  const title = "Demo Meeting Rescheduled";
   
   const content = `
     <p>Hello ${data.adminName || "there"},</p>
-    <p>${isReschedule 
-      ? `We’re writing to let you know that the Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been rescheduled.`
-      : `Your Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been successfully scheduled.`}</p>
+    <p>We’re writing to let you know that the Classgrid demo meeting for <strong>${data.institutionName || "your institution"}</strong> has been rescheduled.</p>
     
-    <p>${isReschedule ? "Updated meeting details:" : "Meeting details:"}</p>
+    <p>Updated meeting details:</p>
     <div class="box">
       <p><strong>Date & Time:</strong> ${data.scheduledAt ? formatDate(data.scheduledAt) : "To be confirmed"}</p>
       <p><strong>Google Meet Link:</strong> ${data.meetingUrl ? `<a href="${data.meetingUrl}">${data.meetingUrl}</a>` : "Not provided"}</p>
     </div>
     
-    <p style="margin-top:20px;">Please use the ${isReschedule ? "updated " : ""}link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.</p>
+    <p style="margin-top:20px;">Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.</p>
     
     <div style="margin-top:30px;">
       <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
@@ -2200,25 +2196,22 @@ export const getDemoMeetingScheduledHtml = (data = {}) => {
 };
 
 export const getDemoMeetingScheduledPlainText = (data = {}) => {
-  const isReschedule = data.isReschedule === true;
   const repName = data.repName || "Classgrid Team";
-  const title = isReschedule ? "Demo Meeting Rescheduled" : "Demo Meeting Scheduled";
+  const title = "Demo Meeting Rescheduled";
 
   return `${title}
 
 Hello ${data.adminName || "there"},
 
-${isReschedule 
-  ? `We’re writing to let you know that the Classgrid demo meeting for ${data.institutionName || "your institution"} has been rescheduled.`
-  : `Your Classgrid demo meeting for ${data.institutionName || "your institution"} has been successfully scheduled.`}
+We’re writing to let you know that the Classgrid demo meeting for ${data.institutionName || "your institution"} has been rescheduled.
 
-${isReschedule ? "Updated meeting details:" : "Meeting details:"}
+Updated meeting details:
 
 Date & Time: ${data.scheduledAt ? formatDate(data.scheduledAt) : "To be confirmed"}
 
 Google Meet Link: ${data.meetingUrl || "Not provided"}
 
-Please use the ${isReschedule ? "updated " : ""}link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.
+Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.
 
 Warm regards,
 

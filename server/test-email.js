@@ -7,7 +7,7 @@ import { getDemoMeetingScheduledHtml, getDemoMeetingScheduledPlainText } from ".
 
 
 const data = {
-  isReschedule: false,
+  isReschedule: true,
   adminName: 'Nikhil',
   institutionName: 'Classgrid Internal Demo',
   scheduledAt: new Date(Date.now() + 86400000),
