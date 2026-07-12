@@ -672,4 +672,62 @@ export const getGlobalStorageUsage = async (req, res) => {
     }
 };
 
+// --- Razorpay Payment Handlers for SaaS Invoices ---
 
+export const createSaasInvoiceOrder = async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        const { invoiceId } = req.body;
+        if (!orgId || !invoiceId) return res.status(400).json({ message: "Missing params" });
+
+        const invoice = await SaasInvoice.findOne({ _id: invoiceId, organizationId: orgId });
+        if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+        if (invoice.status === 'paid') return res.status(400).json({ message: "Invoice already paid" });
+
+        const amountInPaise = Math.round(invoice.totalAmountInr * 100);
+
+        const order = await razorpay.orders.create({
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: `rcpt_saas_${invoice._id}`,
+        });
+
+        res.json({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            order_id: order.id,
+            amount: order.amount,
+            currency: order.currency,
+        });
+    } catch (error) {
+        console.error("Razorpay order creation failed:", error);
+        res.status(500).json({ message: "Failed to create payment order" });
+    }
+};
+
+export const verifySaasInvoicePayment = async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, invoiceId } = req.body;
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest("hex");
+
+        if (expectedSignature === razorpay_signature) {
+            await SaasInvoice.findByIdAndUpdate(invoiceId, {
+                status: 'paid',
+                paymentDate: new Date(),
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id
+            });
+            res.json({ success: true, message: "Payment verified successfully" });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+    } catch (error) {
+        console.error("Razorpay verification failed:", error);
+        res.status(500).json({ success: false, message: "Payment verification failed" });
+    }
+};
