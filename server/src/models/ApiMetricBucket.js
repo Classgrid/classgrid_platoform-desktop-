@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+throw new Error("DELIBERATE CRASH TEST 2");
+
 // ═══════════════════════════════════════════════════════════
 //  ApiMetrics — In-memory aggregated request tracking
 //  Strategy: Buffer in-process, flush to DB every 60s.
@@ -32,4 +34,4 @@ const ApiMetricBucketSchema = new mongoose.Schema({
 ApiMetricBucketSchema.index({ route: 1, method: 1, bucket: -1 });
 ApiMetricBucketSchema.index({ bucket: -1 });
 
-export default mongoose.model("ApiMetricBucket", ApiMetricBucketSchema);
+export default mongoose.models.ApiMetricBucket || mongoose.model("ApiMetricBucket", ApiMetricBucketSchema);
