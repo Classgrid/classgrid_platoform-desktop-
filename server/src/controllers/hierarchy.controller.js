@@ -2,7 +2,7 @@ import AcademicHierarchy from "../models/AcademicHierarchy.js";
 import Organization from "../models/Organization.js";
 import { getTerminology } from "../utils/terminology.js";
 import TERMINOLOGY_MAP from "../utils/terminology.js";
-import { getAvailableRoles } from "../utils/roles.js";
+import { getAvailableRoles, getAvailableRolesWithLabels, getAllOrgRolesWithLabels } from "../utils/roles.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
 
@@ -361,22 +361,39 @@ export async function getAllTerminology(req, res) {
 /**
  * GET /api/hierarchy/roles
  * Returns the array of roles allowed for the requesting user's organization type.
+ * 
+ * Query params:
+ *   ?invitable=true  — Only return roles that can be invited from the Members page
+ *                       (excludes student, org_admin, super_admin)
+ *   ?all=true        — Return roles for ALL org types (for comparison views)
+ *   
+ * Response format:
+ *   { roles: [{ value: "hod", label: "Head of Department (HOD)", category: "dept_admin", description: "..." }, ...] }
  */
 export async function getOrgRoles(req, res) {
     try {
+        // ?all=true — return roles for every org type (super admin or settings comparison)
+        if (req.query.all === "true") {
+            const allRoles = getAllOrgRolesWithLabels();
+            return res.json({ allRoles });
+        }
+
+        const invitableOnly = req.query.invitable === "true";
+
         if (req.user.role === "super_admin") {
-            const roles = getAvailableRoles(null, "super_admin");
+            const roles = getAvailableRolesWithLabels(null, "super_admin", { invitableOnly });
             return res.json({ roles });
         }
 
         const orgId = req.user.organization_id;
         if (!orgId) return res.status(404).json({ error: "Organization ID missing." });
         
-        const org = await Organization.findById(orgId).select("org_type").lean();
+        const org = await Organization.findById(orgId).select("org_type structure_type").lean();
         if (!org) return res.status(404).json({ error: "Organization not found." });
 
-        const roles = getAvailableRoles(org.org_type, req.user.role);
-        return res.json({ roles });
+        const orgType = org.org_type || org.structure_type;
+        const roles = getAvailableRolesWithLabels(orgType, req.user.role, { invitableOnly });
+        return res.json({ org_type: org.org_type, structure_type: org.structure_type, roles });
     } catch (err) {
         return res.status(500).json({ error: "Failed to fetch org roles.", details: err.message });
     }

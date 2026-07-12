@@ -73,7 +73,6 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "🏢 ORGANIZATIONS",
         items: [
           { label: "All Organizations", to: "/superadmin/orgs", icon: Building2 },
-          { label: "Onboard New Org", to: "/superadmin/onboard", icon: Plus },
           { label: "Demo Leads", to: "/superadmin/leads", icon: ClipboardList },
         ]
       },
@@ -206,6 +205,13 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Analytics", to: "/org/analytics", icon: FileBarChart },
           { label: "College Website", to: "/org/website", icon: Globe },
           { label: "Certificates", to: "/org/certificates", icon: FileText }
+        ]
+      },
+      {
+        label: "SETTINGS & SETUP",
+        items: [
+          { label: "Members", to: "/org/admin/members", icon: Users },
+          { label: "Academic Setup", to: "/org/admin/academics", icon: Settings }
         ]
       }
     ],

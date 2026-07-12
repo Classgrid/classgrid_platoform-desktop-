@@ -902,6 +902,7 @@ export const getDemoLeads = async (req, res) => {
         if (status) filter.status = status;
 
         const leads = await DemoRequest.find(filter)
+            .populate("assignedTo", "name email")
             .sort({ createdAt: -1 })
             .lean();
 
@@ -912,6 +913,23 @@ export const getDemoLeads = async (req, res) => {
         });
     } catch (err) {
         console.error("[SuperAdmin] getDemoLeads error:", err.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const assignLead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lead = await DemoRequest.findById(id);
+        if (!lead) return res.status(404).json({ success: false, message: "Lead not found" });
+
+        lead.assignedTo = req.user._id;
+        lead.assignedAt = new Date();
+        await lead.save();
+
+        res.json({ success: true, message: "Lead assigned to you" });
+    } catch (err) {
+        console.error("[SuperAdmin] assignLead error:", err.message);
         res.status(500).json({ success: false, message: "Server error" });
     }
 };

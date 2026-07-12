@@ -12,6 +12,9 @@ import { getOrgDashboardMetrics } from '../controllers/org-dashboard.controller.
 import { getMyOrganizationConfig, getOrganizationUsageSummary, getOrganizationBilling } from "../controllers/org-configuration.controller.js";
 import { getOrgAdminBillingDashboard, createSaasInvoiceOrder, verifySaasInvoicePayment } from '../controllers/admin-analytics.controller.js';
 import redis from '../config/redis.js';
+import { getDeptAdminInviteEmailHtml } from '../services/email-templates.service.js';
+import { sendEmail } from '../services/email.service.js';
+
 import {
     getAdmissionTrack,
     getDefaultQuotaByStructureType,
@@ -345,16 +348,184 @@ router.post("/invite-staff", isAuthenticated, requireRole("org_admin"), async (r
             metadata: { role: newUser.role, email: newUser.email },
         });
 
-        // Note: Email sending logic (sendEmail with faculty template) will hook in here in the email service layer
-        
+        // Generate 24-hour activation token and send invitation email
+        const activationToken = crypto.randomBytes(32).toString('hex');
+        const activationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        newUser.activationToken = activationToken;
+        newUser.activationTokenExpiry = activationExpiry;
+        await newUser.save();
+
+        const org = await Organization.findById(orgId).select('name').lean();
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || 'https://classgrid.in';
+        const activationLink = `${frontendUrl}/activate?token=${activationToken}`;
+
+        try {
+            await sendEmail({
+                to: newUser.email,
+                subject: `You've been invited to join ${org?.name || 'your organization'} on Classgrid`,
+                html: getDeptAdminInviteEmailHtml(
+                    newUser.name,
+                    org?.name || 'Your Organization',
+                    newUser.role,
+                    req.user.name || 'Admin',
+                    activationLink
+                ),
+            });
+        } catch (emailErr) {
+            console.warn('[Invite Staff] Email send failed (user created):', emailErr.message);
+        }
+
         res.status(201).json({
-            message: "Staff member invited successfully.",
+            message: "Invitation sent successfully.",
             user: { _id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }
         });
 
     } catch (err) {
         console.error("[Invite Staff Error]:", err.message);
         res.status(500).json({ message: "Server error inviting staff." });
+    }
+});
+
+/**
+ * GET /api/org/members
+ * Returns: All active dept admins and faculty in this org (for Members page)
+ * Roles are fetched dynamically from the org's allowed role list — never hardcoded.
+ */
+router.get("/members", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const org = await Organization.findById(orgId).select("org_type structure_type").lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        // Dynamically get invitable roles for this org type (excludes student/org_admin/super_admin)
+        const { getAvailableRoles: getRoles } = await import("../utils/roles.js");
+        const allRoles = getRoles(org.org_type || org.structure_type, "org_admin");
+        const memberRoles = allRoles.filter(r => !["student", "org_admin", "super_admin"].includes(r));
+
+        const search = req.query.search ? req.query.search.trim() : '';
+        const roleFilter = req.query.role || null;
+
+        const filter = {
+            organization_id: orgId,
+            role: { $in: memberRoles },
+            mustResetPassword: { $ne: true }, // Only activated members
+        };
+        if (roleFilter) filter.role = roleFilter;
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        const members = await User.find(filter)
+            .select('name email role department status createdAt profilePicture')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json({ members, total: members.length });
+    } catch (err) {
+        console.error('[Org Members] Error:', err.message);
+        res.status(500).json({ message: 'Server error fetching members.' });
+    }
+});
+
+/**
+ * GET /api/org/members/pending
+ * Returns: Users invited but who haven't activated yet (mustResetPassword = true)
+ */
+router.get("/members/pending", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+        const org = await Organization.findById(orgId).select("org_type structure_type").lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+
+        const { getAvailableRoles: getRoles } = await import("../utils/roles.js");
+        const allRoles = getRoles(org.org_type || org.structure_type, "org_admin");
+        const memberRoles = allRoles.filter(r => !["student", "org_admin", "super_admin"].includes(r));
+
+        const pending = await User.find({
+            organization_id: orgId,
+            role: { $in: memberRoles },
+            mustResetPassword: true,
+        })
+            .select('name email role department createdAt')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json({ pending, total: pending.length });
+    } catch (err) {
+        console.error('[Org Pending Invites] Error:', err.message);
+        res.status(500).json({ message: 'Server error fetching pending invitations.' });
+    }
+});
+
+/**
+ * DELETE /api/org/members/:userId
+ * Removes a staff member from this org
+ */
+router.delete("/members/:userId", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const user = await User.findOne({ _id: req.params.userId, organization_id: orgId });
+        if (!user) return res.status(404).json({ message: 'Member not found in your organization.' });
+        if (user._id.toString() === req.user._id.toString()) {
+            return res.status(400).json({ message: 'You cannot remove yourself.' });
+        }
+
+        await User.findByIdAndDelete(req.params.userId);
+        logAdminAction(req, 'remove_member', 'user', user._id, user.name, { role: user.role });
+
+        res.json({ message: 'Member removed successfully.' });
+    } catch (err) {
+        console.error('[Remove Member] Error:', err.message);
+        res.status(500).json({ message: 'Server error removing member.' });
+    }
+});
+
+/**
+ * POST /api/org/members/:userId/resend
+ * Resends the invitation email to a pending member
+ */
+router.post("/members/:userId/resend", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const user = await User.findOne({ _id: req.params.userId, organization_id: orgId, mustResetPassword: true });
+        if (!user) return res.status(404).json({ message: 'Pending member not found.' });
+
+        // Regenerate activation token
+        const activationToken = crypto.randomBytes(32).toString('hex');
+        user.activationToken = activationToken;
+        user.activationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await user.save();
+
+        const org = await Organization.findById(orgId).select('name').lean();
+        const frontendUrl = process.env.FRONTEND_URL?.trim() || 'https://classgrid.in';
+        const activationLink = `${frontendUrl}/activate?token=${activationToken}`;
+
+        await sendEmail({
+            to: user.email,
+            subject: `Reminder: You've been invited to join ${org?.name || 'your organization'} on Classgrid`,
+            html: getDeptAdminInviteEmailHtml(
+                user.name,
+                org?.name || 'Your Organization',
+                user.role,
+                req.user.name || 'Admin',
+                activationLink
+            ),
+        });
+
+        res.json({ message: 'Invitation resent successfully.' });
+    } catch (err) {
+        console.error('[Resend Invite] Error:', err.message);
+        res.status(500).json({ message: 'Server error resending invitation.' });
     }
 });
 

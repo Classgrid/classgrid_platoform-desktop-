@@ -35,6 +35,8 @@ export type Lead = {
   meetingScheduledAt: string | null;
   meetingUrl: string;
   meetingNotes: string;
+  assignedTo?: { _id: string; name: string; email: string };
+  assignedAt?: string;
   conversionStatus: "not_started" | "in_progress" | "provisioned" | "failed";
   provisionedOrganizationId: string | null;
   createdAt: string;
@@ -155,6 +157,11 @@ export const leadsApi = {
   scheduleMeeting: (id: string, payload: { scheduledAt: string; notes?: string }) =>
     apiClient
       .post<{ success: boolean }>(`/api/super-admin/leads/${id}/schedule-meeting`, payload)
+      .then((r) => r.data),
+
+  assign: (id: string) =>
+    apiClient
+      .patch<{ success: boolean }>(`/api/super-admin/leads/${id}/assign`)
       .then((r) => r.data),
 
   create: (payload: { institutionName: string; adminName: string; adminEmail: string; adminPhone?: string; city?: string; orgType?: string }) =>

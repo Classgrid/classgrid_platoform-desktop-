@@ -516,6 +516,51 @@ export const getOrgAdminInviteHtml = (adminName, orgName, activationLink) => {
   });
 };
 
+// ------------- DEPT ADMIN INVITE (Members page) -------------
+export const getDeptAdminInviteEmailHtml = (recipientName, orgName, role, invitedByName, activationLink) => {
+  const roleLabels = {
+    admission_head: "Admissions Department Head",
+    fee_manager: "Fees & Accounts Manager",
+    exam_controller: "Examination Controller",
+    library_manager: "Library Manager",
+    hod: "Head of Department (HOD)",
+    tpo_officer: "Training & Placement Officer",
+    transport_manager: "Transport Manager",
+    coordinator: "Academic Coordinator",
+    counselor: "Student Counselor",
+    faculty: "Faculty Member",
+    principal: "Principal",
+    vice_principal: "Vice Principal",
+  };
+  const roleLabel = roleLabels[role] || role;
+  const content = `
+    <h1>You've been invited to join ${orgName}</h1>
+    <p>Hi ${recipientName || "there"},</p>
+    <p>You have been invited by <strong>${invitedByName}</strong> to join <strong>${orgName}</strong> on Classgrid as a <strong>${roleLabel}</strong>.</p>
+
+    <div class="box" style="margin-bottom: 24px;">
+      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">&#x1F511; Activate Your Account</p>
+      <p style="margin-bottom: 8px;">Click the button below to set your password and access your dashboard.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>24 hours</strong>. Do not share it.</p>
+    </div>
+
+    <a href="${activationLink}" class="btn">Activate Account &amp; Set Password</a>
+
+    <div class="box" style="margin-top: 28px; margin-bottom: 24px; border-left: 3px solid #3b82f6;">
+      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">&#x1F4CB; Your Role: ${roleLabel}</p>
+      <p style="margin-bottom: 8px;">After activating your account, you will have access to your dedicated department dashboard where you can manage your responsibilities within ${orgName}.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">You are being managed by the Organization Admin. Contact your admin if you have any questions about your access level.</p>
+    </div>
+
+    <p style="font-size: 13px; color: #9ca3af; margin-bottom: 0;">If you did not expect this invitation, you can safely ignore this email. Need help? Contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
+  `;
+  return baseTemplate({
+    content,
+    title: `Invitation to join ${orgName}`,
+    ignoreText: "If you did not expect this invitation, please ignore this email."
+  });
+};
+
 // ------------- ADMIN: NEW ORG APPLICATION -------------
 export const getAdminOrgApplicationNotificationHtml = (data) => {
   const content = `

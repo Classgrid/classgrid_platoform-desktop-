@@ -31,6 +31,14 @@ export function useScheduleMeeting() {
   });
 }
 
+export function useAssignLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => leadsApi.assign(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: LEADS_KEY }),
+  });
+}
+
 export function useCreateLead() {
   const qc = useQueryClient();
   return useMutation({

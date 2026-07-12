@@ -8,8 +8,41 @@ const demoRequestSchema = new mongoose.Schema(
     adminEmail: { type: String, required: true, trim: true, lowercase: true },
     adminPhone: { type: String, required: true, trim: true },
     state: { type: String, required: true, trim: true },
-    city: { type: String, required: true, trim: true },
+    district: { type: String, default: "", trim: true },
+    taluka: { type: String, default: "", trim: true },
+    cityVillage: { type: String, default: "", trim: true },
+    city: { type: String, default: "", trim: true },
+    role: { type: String, default: "", trim: true },
+    website: { type: String, default: "", trim: true },
     message: { type: String, default: "" },
+    
+    // Marketing Site Scheduled Info
+    meetingUrl: { type: String, default: "", trim: true },
+    provider: { type: String, default: "", trim: true },
+    scheduledAt: { type: Date, default: null },
+    timezone: { type: String, default: "Asia/Kolkata", trim: true },
+    
+    // Verification
+    isEmailVerified: { type: Boolean, default: false },
+    otp: { type: String, default: "" },
+    otpExpiresAt: { type: Date, default: null },
+
+    // Core Backend Status
+    status: {
+      type: String,
+      enum: ["new", "contacted", "demo_scheduled", "pending", "closed", "converted"],
+      default: "new",
+    },
+    
+    // Assignment (Sales/Team Claiming)
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    assignedAt: { type: Date, default: null },
+    
+    // Legacy / Internal fields
     meetingStatus: {
       type: String,
       enum: ["pending", "scheduled", "completed", "cancelled"],
@@ -18,7 +51,6 @@ const demoRequestSchema = new mongoose.Schema(
     meetingProvider: { type: String, default: "", trim: true },
     meetingScheduledAt: { type: Date, default: null },
     meetingTimezone: { type: String, default: "Asia/Kolkata", trim: true },
-    meetingUrl: { type: String, default: "", trim: true },
     meetingId: { type: String, default: "", trim: true },
     meetingNotes: { type: String, default: "" },
     meetingScheduledByUserId: {
@@ -27,11 +59,6 @@ const demoRequestSchema = new mongoose.Schema(
       default: null,
     },
     meetingScheduledBySource: { type: String, default: "", trim: true },
-    status: {
-      type: String,
-      enum: ["new", "contacted", "closed", "converted"],
-      default: "new",
-    },
     lifecycleStage: {
       type: String,
       enum: [
