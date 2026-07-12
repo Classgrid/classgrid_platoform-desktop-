@@ -36,8 +36,26 @@ export function AuditLogsPage() {
   const [isLive, setIsLive] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: errData, isLoading, refetch, isFetching } = useErrorLogs(isLive ? 2000 : 0, search);
+  const { data: errData, isLoading, refetch, isFetching, error } = useErrorLogs(isLive ? 2000 : 0, search);
   const logs = errData?.logs ?? [];
+
+  const [rescuePassword, setRescuePassword] = useState("");
+  const [rescueError, setRescueError] = useState("");
+
+  const handleRescueLogin = async () => {
+    try {
+      setRescueError("");
+      const axios = (await import("axios")).default;
+      const r = await axios.post("/api/rescue/login", { 
+         email: "support@classgrid.in", 
+         password: rescuePassword 
+      });
+      localStorage.setItem("rescue_token", r.data.token);
+      refetch();
+    } catch (err: any) {
+      setRescueError(err.response?.data?.message || "Failed to authenticate with rescue server.");
+    }
+  };
 
   const toggleLive = () => {
     setIsLive(!isLive);
@@ -122,11 +140,36 @@ export function AuditLogsPage() {
       
       <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Audit Logs</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            Audit Logs
+            {errData?.isRescue && <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">RESCUE MODE</span>}
+          </h1>
           <p className="text-muted-foreground mt-1 text-sm">Real-time system events and application errors.</p>
         </div>
       </div>
 
+      {error && error.message === "RESCUE_REQUIRED" ? (
+        <div className="flex flex-col items-center justify-center flex-1 bg-card border border-border rounded-lg shadow-sm p-8 space-y-4">
+          <div className="text-red-500 mb-2">
+            <StopCircle size={48} />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Main Server Offline</h2>
+          <p className="text-muted-foreground">The main application is down. Enter the Rescue Password to securely view crash logs.</p>
+          <div className="flex flex-col w-full max-w-sm space-y-2 mt-4">
+            <input 
+              type="password" 
+              placeholder="Rescue Password" 
+              value={rescuePassword} 
+              onChange={e => setRescuePassword(e.target.value)} 
+              className="bg-background border border-border rounded-md py-2 px-3 text-sm text-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
+            />
+            <button onClick={handleRescueLogin} className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition-colors">
+              Enter Rescue Mode
+            </button>
+            {rescueError && <p className="text-red-500 text-sm text-center">{rescueError}</p>}
+          </div>
+        </div>
+      ) : (
       <div className="flex flex-col bg-card border border-border rounded-lg shadow-sm flex-1 overflow-hidden">
         
         {/* Top Action Bar */}
@@ -211,6 +254,8 @@ export function AuditLogsPage() {
         />
       </div>
 
+      </div>
+      )}
     </div>
     </div>
   );

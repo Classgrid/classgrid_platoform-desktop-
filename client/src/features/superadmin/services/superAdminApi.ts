@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import axios from "axios";
 
 // ─── Lead Types ───────────────────────────────────────────────────────────────
 
@@ -694,14 +695,28 @@ export type EmailLog = {
 };
 
 export const alertsApi = {
-  getErrorLogs: (params?: { search?: string; level?: string }) =>
-    apiClient
-      .get<any>("/api/super-admin/error-logs", { params })
-      .then((r) => {
-        const raw = r.data;
-        // Backend returns: { success, errors: [...] }  (not logs)
-        return { success: true, logs: raw?.errors ?? raw?.logs ?? [] };
-      }),
+  getErrorLogs: async (params?: { search?: string; level?: string }) => {
+    try {
+      const r = await apiClient.get<any>("/api/super-admin/error-logs", { params });
+      const raw = r.data;
+      return { success: true, logs: raw?.errors ?? raw?.logs ?? [] };
+    } catch (err: any) {
+      if (!err.response || err.response.status >= 500) {
+        try {
+          const token = localStorage.getItem("rescue_token");
+          if (!token) throw new Error("RESCUE_REQUIRED");
+          const rescueClient = axios.create({ baseURL: window.location.origin });
+          const r = await rescueClient.get("/api/rescue/error-logs", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          return { success: true, logs: r.data.logs ?? [], isRescue: true };
+        } catch (rescueErr) {
+          throw new Error("RESCUE_REQUIRED");
+        }
+      }
+      throw err;
+    }
+  },
 
   getEmailLogs: () =>
     apiClient

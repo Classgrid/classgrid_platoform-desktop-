@@ -65,6 +65,18 @@ module.exports = {
             merge_logs: true,
             log_date_format: "YYYY-MM-DD HH:mm:ss",
         },
+        {
+            name: "classgrid-rescue",
+            script: "./rescue-server.js",
+            instances: 1,
+            exec_mode: "fork",
+            watch: false,
+            autorestart: true,
+            env: {
+                NODE_ENV: "production",
+                PORT: 4000,
+            },
+        },
     ],
 
     // ── Deploy configuration for CI/CD
