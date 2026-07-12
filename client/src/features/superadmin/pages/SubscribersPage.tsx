@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   Mail,
-  RefreshCw,
-  ShieldAlert,
   TrendingDown,
   TrendingUp,
   UserCheck,
@@ -22,7 +20,6 @@ import { Switch } from "@/components/marketing_ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 
-import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { formatDate } from "@/utils/dateUtils";
 
 import {
@@ -34,8 +31,6 @@ import {
 import type { BlogSubscriber } from "../services/superAdminApi";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
-
-const OWNER_EMAIL = "support@classgrid.in";
 
 const STATUS_OPTIONS = [
   { label: "All Status", value: "all" },
@@ -55,9 +50,6 @@ export function SubscribersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const isOwner = (user?.email || "").trim().toLowerCase() === OWNER_EMAIL;
-
   const {
     data,
     isLoading,
@@ -70,7 +62,7 @@ export function SubscribersPage() {
       q: search || undefined,
       status: statusFilter === "all" ? undefined : statusFilter,
     },
-    isOwner
+    true
   );
 
   const pauseSubscriber = usePauseSubscriber();
