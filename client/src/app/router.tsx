@@ -22,6 +22,7 @@ import { OrgAdminDashboard } from "@/features/org-admin/components/OrgAdminDashb
 import { UsagePage } from "@/features/org-admin/pages/UsagePage";
 import { BillingPage } from "@/features/org-admin/pages/BillingPage";
 import { LeadsPage } from "@/features/superadmin/pages/LeadsPage";
+import { LeadDetailsPage } from "@/features/superadmin/pages/LeadDetailsPage";
 import { SupportTicketsPage } from "@/features/superadmin/pages/SupportTicketsPage";
 import { ReviewsPage } from "@/features/superadmin/pages/ReviewsPage";
 import { ChangelogPage } from "@/features/superadmin/pages/ChangelogPage";
@@ -193,6 +194,7 @@ export function AppRouter() {
           <Route path="/superadmin/onboard" element={<OnboardPage />} />
           <Route path="/superadmin/direct-onboard" element={<DirectOnboardPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />
+          <Route path="/superadmin/leads/:id" element={<LeadDetailsPage />} />
           <Route path="/superadmin/billing" element={<BillingPage />} />
           <Route path="/superadmin/revenue" element={<RevenuePage />} />
           <Route path="/superadmin/transactions" element={<TransactionsPage />} />

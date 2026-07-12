@@ -1,0 +1,417 @@
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { 
+  Building2, User, MapPin, Globe, MessageSquare, 
+  Copy, ExternalLink, AlertTriangle, CheckCircle2 
+} from "lucide-react";
+import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
+import { Badge } from "@/components/marketing_ui/badge";
+import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
+import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
+import { formatDate } from "@/utils/dateUtils";
+
+export function LeadDetailsPage() {
+  const { id } = useParams<{ id: string }>();
+  const { data, isLoading } = useLeads();
+  const approveMutation = useApproveLead();
+  const scheduleMutation = useScheduleMeeting();
+
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [meetingUrl, setMeetingUrl] = useState("");
+  const [provisionedData, setProvisionedData] = useState<any>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const lead = data?.leads.find(l => l._id === id);
+
+  useEffect(() => {
+    if (lead?.meetingScheduledAt) {
+      setDate(new Date(lead.meetingScheduledAt));
+    }
+    if (lead?.meetingUrl) {
+      setMeetingUrl(lead.meetingUrl);
+    }
+  }, [lead]);
+
+  if (isLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading lead details...</div>;
+  if (!lead) return <div className="p-8 text-center text-rose-500 font-medium">Lead not found</div>;
+
+  const isConverted = lead.status === "converted";
+
+  const handleApprove = () => {
+    if (!id) return;
+    approveMutation.mutate(id, {
+      onSuccess: (result: any) => {
+        setProvisionedData({
+          activationLink: result?.activation?.activationLink ?? "",
+          activationCode: result?.activation?.activationCode ?? "",
+          orgName: result?.organization?.name ?? "",
+          adminEmail: result?.admin?.email ?? "",
+        });
+        setShowConfirmModal(false);
+      },
+      onError: (err: any) => {
+        alert(err?.message || "Provisioning failed.");
+        setShowConfirmModal(false);
+      }
+    });
+  };
+
+  const handleSchedule = () => {
+    if (!id) return;
+    if (!date) return alert("Please select a date");
+    if (!meetingUrl) return alert("Please enter a meeting link");
+    scheduleMutation.mutate({
+      id,
+      scheduledAt: date.toISOString(),
+      meetingUrl,
+      provider: "google_meet"
+    }, {
+      onSuccess: () => alert("Meeting updated successfully!"),
+      onError: (err: any) => alert(err?.message || "Failed to update meeting")
+    });
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(meetingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Warning if meeting was in the past
+  const isPastMeeting = date && date < new Date() && !isConverted;
+
+  return (
+    <div className="w-full max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8 pb-12 animate-in fade-in duration-200">
+      
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-6 mb-8">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">{lead.institutionName}</h1>
+            <Badge variant={isConverted ? "success" : "neutral"} className={`text-xs px-2.5 py-0.5 rounded-full ${isConverted ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-muted border-border'}`}>
+              {isConverted ? "● Provisioned" : "● Pending"}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground mt-2 flex items-center gap-2 text-sm">
+            <span>{lead.orgType}</span>
+            <span>&middot;</span>
+            <span>Demo Request #{lead._id.slice(-6).toUpperCase()}</span>
+          </p>
+          <p className="text-muted-foreground text-sm mt-1">
+            Submitted on {formatDate(lead.createdAt, "dd MMM yyyy, hh:mm a")}
+          </p>
+        </div>
+      </div>
+
+      {/* ── 12-COLUMN GRID ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        
+        {/* LEFT CONTENT (col-span-8) */}
+        <div className="xl:col-span-8 space-y-6">
+          
+          {/* INSTITUTION DETAILS */}
+          <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-muted/30 px-5 py-4 border-b">
+              <h2 className="font-semibold text-card-foreground">INSTITUTION DETAILS</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Basic information about the organization</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Institution Name</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm font-medium">
+                  {lead.institutionName}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Organization Type</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.orgType}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CONTACT PERSON */}
+          <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-muted/30 px-5 py-4 border-b">
+              <h2 className="font-semibold text-card-foreground">CONTACT PERSON</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Primary person responsible for this request</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Contact Person Name</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm font-medium flex items-center gap-2">
+                  <User size={14} className="text-muted-foreground" />
+                  {lead.adminName}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Role</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.role || "Administrator"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Email Address</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  <a href={`mailto:${lead.adminEmail}`} className="text-primary hover:underline">{lead.adminEmail}</a>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Phone Number</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.adminPhone || "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* LOCATION */}
+          <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-muted/30 px-5 py-4 border-b">
+              <h2 className="font-semibold text-card-foreground">LOCATION</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Institution's registered location</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">State</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm flex items-center gap-2">
+                  <MapPin size={14} className="text-muted-foreground" />
+                  {lead.state || "—"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">District</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.district || "—"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Taluka</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.taluka || "—"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">City / Village</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.city || "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ADDITIONAL INFORMATION */}
+          <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-muted/30 px-5 py-4 border-b">
+              <h2 className="font-semibold text-card-foreground">ADDITIONAL INFORMATION</h2>
+            </div>
+            <div className="p-5 space-y-6">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Website</label>
+                <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
+                  {lead.website ? (
+                    <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noreferrer" className="text-primary hover:underline flex items-center gap-1.5 w-max">
+                      <Globe size={14} />
+                      {lead.website}
+                      <ExternalLink size={12} className="ml-1" />
+                    </a>
+                  ) : "—"}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Message</label>
+                <div className="border rounded-lg px-3 py-3 bg-background text-sm min-h-[100px] whitespace-pre-wrap leading-relaxed">
+                  {lead.message || "No message provided."}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT SIDEBAR (col-span-4) */}
+        <div className="xl:col-span-4 space-y-6">
+          <div className="sticky top-6 space-y-6">
+            
+            {/* MEETING MANAGEMENT */}
+            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-muted/30 px-5 py-4 border-b">
+                <h2 className="font-semibold text-card-foreground">MEETING MANAGEMENT</h2>
+              </div>
+              <div className="p-5 space-y-5">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Scheduled Date & Time</label>
+                  <NikhilTimeCalendar date={date} setDate={setDate} />
+                  {date && (
+                    <p className="text-[11px] text-muted-foreground mt-2 pl-1">
+                      Asia/Kolkata &middot; IST
+                    </p>
+                  )}
+                  {isPastMeeting && (
+                    <div className="mt-3 flex items-start gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-lg text-xs">
+                      <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                      <span>⚠ This meeting was scheduled for the past.</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Google Meet Link</label>
+                  <div className="relative">
+                    <Input 
+                      value={meetingUrl} 
+                      onChange={e => setMeetingUrl(e.target.value)} 
+                      placeholder="https://meet.google.com/..." 
+                      className="pr-20"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Button variant="outline" size="sm" onClick={copyToClipboard} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
+                      <Copy size={12} className="mr-1.5" />
+                      {copied ? "Copied" : "Copy link"}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => window.open(meetingUrl, "_blank")} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
+                      <ExternalLink size={12} className="mr-1.5" />
+                      Open ↗
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border/50">
+                  <Button onClick={handleSchedule} disabled={scheduleMutation.isPending} variant="secondary" className="w-full h-9">
+                    {scheduleMutation.isPending ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* APPROVAL AREA */}
+            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+              {provisionedData || isConverted ? (
+                <div className="p-5 bg-emerald-50 dark:bg-emerald-950/20">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold mb-3">
+                    <CheckCircle2 size={18} />
+                    Organization Provisioned
+                  </div>
+                  <p className="text-sm text-emerald-800/80 dark:text-emerald-300/80 mb-4">
+                    Provisioned on {formatDate(lead.updatedAt || new Date().toISOString(), "dd MMM yyyy")}
+                  </p>
+                  
+                  {provisionedData && (
+                    <div className="mb-4 space-y-3 bg-white dark:bg-black/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-emerald-700/60 mb-0.5">Activation Link</div>
+                        <code className="text-[11px] block break-all text-emerald-900 dark:text-emerald-200">
+                          {provisionedData.activationLink}
+                        </code>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-emerald-700/60 mb-0.5">6-Digit Code</div>
+                        <code className="text-lg font-mono font-bold tracking-widest text-emerald-700 dark:text-emerald-400">
+                          {provisionedData.activationCode}
+                        </code>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => window.open('/superadmin/orgs', '_blank')}>
+                    Open Organization Dashboard &rarr;
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-5">
+                  <h2 className="font-semibold text-card-foreground mb-2">APPROVAL CHECKLIST</h2>
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 size={14} className="text-emerald-500" />
+                      Contact reviewed
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {date && meetingUrl ? <CheckCircle2 size={14} className="text-emerald-500" /> : <div className="h-3.5 w-3.5 rounded-full border-2 border-muted-foreground/30" />}
+                      Meeting scheduled
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="h-3.5 w-3.5 rounded-full border-2 border-muted-foreground/30" />
+                      Organization checked
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] leading-relaxed text-muted-foreground mb-4">
+                    Provisioning creates the organization and administrator account. This action requires confirmation.
+                  </p>
+                  
+                  <button 
+                    onClick={() => setShowConfirmModal(true)}
+                    className="
+                      min-h-14 w-full rounded-xl
+                      bg-emerald-500 px-5
+                      text-sm font-bold text-emerald-950
+                      shadow-[0_10px_30px_rgba(16,185,129,0.22)]
+                      transition
+                      hover:bg-emerald-400
+                      active:scale-[0.99]
+                    "
+                  >
+                    APPROVE & PROVISION ORGANIZATION
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONFIRMATION MODAL ── */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-background border rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-2">Approve and provision {lead.institutionName}?</h3>
+              <p className="text-sm text-muted-foreground mb-5">This will:</p>
+              <div className="space-y-2.5 mb-8">
+                <div className="flex items-center gap-2.5 text-sm font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  Create the organization
+                </div>
+                <div className="flex items-center gap-2.5 text-sm font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  Create the initial administrator
+                </div>
+                <div className="flex items-center gap-2.5 text-sm font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  Send login and onboarding details
+                </div>
+                <div className="flex items-center gap-2.5 text-sm font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  Mark this lead as provisioned
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 rounded-xl h-12 font-semibold"
+                  onClick={() => setShowConfirmModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 rounded-xl h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                  onClick={handleApprove}
+                  disabled={approveMutation.isPending}
+                >
+                  {approveMutation.isPending ? "Provisioning..." : "Confirm Provisioning"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
