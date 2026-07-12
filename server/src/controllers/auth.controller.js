@@ -1474,7 +1474,8 @@ export const resetPassword = async (req, res) => {
                     password: await bcrypt.hash(password, 10),
                     isEmailVerified: true,
                     mustResetPassword: false,
-                    passwordChangedAt: Date.now()
+                    passwordChangedAt: Date.now(),
+                    status: "active"
                 },
                 $unset: {
                     resetPasswordToken: "",
@@ -1542,7 +1543,8 @@ export const facultyActivate = async (req, res) => {
                     password: await bcrypt.hash(password, 10),
                     isEmailVerified: true,
                     mustResetPassword: false,
-                    passwordChangedAt: Date.now()
+                    passwordChangedAt: Date.now(),
+                    status: "active"
                 },
                 $unset: {
                     resetPasswordToken: "",
