@@ -14,7 +14,7 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
 import { Input } from "@/components/marketing_ui/input";
-import { DataTable } from "@/components/marketing_ui/data-table";
+import { RecentActivityTable } from "@/components/marketing_ui/data-table";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Switch } from "@/components/marketing_ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/marketing_ui/tooltip";
@@ -421,7 +421,7 @@ export function SubscribersPage() {
                 <p className="text-sm text-muted-foreground">People who will not receive the next blog or changelog email.</p>
             </CardHeader>
             <div className="p-4 pt-0">
-                <DataTable
+                <RecentActivityTable
                     columns={inactiveColumns}
                     rows={inactiveSubscribers}
                     isLoading={isLoading}
@@ -431,39 +431,38 @@ export function SubscribersPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-            <CardTitle>All Subscribers</CardTitle>
+      <div className="mt-6 flex flex-col gap-4">
+        <div>
+            <h2 className="text-lg font-bold text-foreground">All Subscribers</h2>
             <p className="text-sm text-muted-foreground">Showing {subscribers.length} matching rows from the marketing email list.</p>
-        </CardHeader>
-        <div className="p-4 pt-0 flex flex-col gap-4">
-            <div className="flex items-center gap-4 flex-wrap">
-                <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search subscriber email..."
-                    className="w-[300px]"
-                />
-                <div className="w-[200px]">
-                     <ResponsiveSelect
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                     >
-                        {STATUS_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                     </ResponsiveSelect>
-                </div>
-            </div>
-
-            <DataTable
-                columns={subscriberColumns}
-                rows={subscribers}
-                isLoading={isLoading}
-                emptyMessage="No subscribers found. Try a different search or status filter."
-            />
         </div>
-      </Card>
+        
+        <div className="flex items-center gap-4 flex-wrap mb-2">
+            <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search subscriber email..."
+                className="w-[300px]"
+            />
+            <div className="w-[200px]">
+                 <ResponsiveSelect
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                 >
+                    {STATUS_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                 </ResponsiveSelect>
+            </div>
+        </div>
+
+        <RecentActivityTable
+            columns={subscriberColumns}
+            rows={subscribers}
+            isLoading={isLoading}
+            emptyMessage="No subscribers found. Try a different search or status filter."
+        />
+      </div>
     </div>
   );
 }
