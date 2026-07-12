@@ -764,7 +764,7 @@ router.get("/team", async (req, res) => {
 
 router.post("/team/invite", async (req, res) => {
     try {
-        const { name, email, role } = req.body;
+        const { name, email, secondaryEmail, role } = req.body;
         if (!name || !email || !role) {
             return res.status(400).json({ success: false, message: "name, email, and role are required" });
         }
@@ -813,8 +813,12 @@ router.post("/team/invite", async (req, res) => {
             </div>
         `;
 
+        const toEmails = secondaryEmail && secondaryEmail.trim() !== "" 
+            ? `${email.toLowerCase().trim()}, ${secondaryEmail.toLowerCase().trim()}` 
+            : email.toLowerCase().trim();
+
         await sendEmail({
-            to: email.toLowerCase().trim(),
+            to: toEmails,
             subject: "You've been invited to the Classgrid Platform Team",
             html: emailHtml,
             text: `Welcome to Classgrid! Your temporary password is: ${tempPassword}. Please log in at ${loginUrl} to reset it.`,

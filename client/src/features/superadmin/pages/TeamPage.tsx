@@ -61,7 +61,7 @@ const teamApi = {
       .get<{ success: boolean; team: TeamMember[] }>("/api/super-admin/team")
       .then((r) => r.data),
 
-  inviteMember: (payload: { name: string; email: string; role: PlatformRole }) =>
+  inviteMember: (payload: { name: string; email: string; secondaryEmail?: string; role: PlatformRole }) =>
     apiClient
       .post<{ success: boolean; message: string; member: TeamMember }>("/api/super-admin/team/invite", payload)
       .then((r) => r.data),
@@ -79,7 +79,7 @@ const teamApi = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const EMPTY_FORM = { email: "", role: "co_super_admin" as PlatformRole };
+const EMPTY_FORM = { email: "", secondaryEmail: "", role: "co_super_admin" as PlatformRole };
 
 export function TeamPage() {
   const qc = useQueryClient();
@@ -120,13 +120,18 @@ export function TeamPage() {
     forms.forEach((f, i) => {
         const err: Partial<typeof EMPTY_FORM> = {};
         if (!f.email.trim()) {
-            err.email = "Email is required.";
+            err.email = "Classgrid Email is required.";
             hasError = true;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
             err.email = "Invalid email format.";
             hasError = true;
         }
-        newErrors[i] = err;
+
+        if (f.secondaryEmail && f.secondaryEmail.trim() !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.secondaryEmail)) {
+            err.secondaryEmail = "Invalid personal email format.";
+            hasError = true;
+        }
+        newErrors[i] = err as any;
     });
 
     if (hasError) {
@@ -268,12 +273,12 @@ export function TeamPage() {
                 )}
                 
                 {forms.map((f, index) => (
-                    <div key={index} className="flex flex-col sm:flex-row items-start gap-4 mb-4">
+                    <div key={index} className="flex flex-col md:flex-row items-start gap-4 mb-4">
                         <div className="flex-1 w-full space-y-1.5">
-                            {index === 0 && <label className="text-sm font-medium text-foreground">Email Address</label>}
+                            {index === 0 && <label className="text-sm font-medium text-foreground">Classgrid Email</label>}
                             <Input
                                 type="email"
-                                placeholder="jane@example.com"
+                                placeholder="jane@classgrid.in"
                                 className={errors[index]?.email ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
                                 value={f.email}
                                 onChange={(e) => {
@@ -288,9 +293,30 @@ export function TeamPage() {
                                     }
                                 }}
                             />
-                            {errors[index]?.email && <span className="text-xs font-medium text-danger">{errors[index]?.email}</span>}
+                            {errors[index]?.email && <span className="text-xs font-medium text-danger">{errors[index]?.email as string}</span>}
                         </div>
-                        <div className="w-full sm:w-[240px] flex items-start gap-2">
+                        <div className="flex-1 w-full space-y-1.5">
+                            {index === 0 && <label className="text-sm font-medium text-foreground">Personal Email (Optional)</label>}
+                            <Input
+                                type="email"
+                                placeholder="jane@gmail.com"
+                                className={(errors[index] as any)?.secondaryEmail ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                value={f.secondaryEmail}
+                                onChange={(e) => {
+                                    const newForms = [...forms];
+                                    newForms[index] = { ...newForms[index], secondaryEmail: e.target.value };
+                                    setForms(newForms);
+                                    
+                                    if ((errors[index] as any)?.secondaryEmail) {
+                                        const newErrors = [...errors];
+                                        newErrors[index] = { ...newErrors[index], secondaryEmail: undefined } as any;
+                                        setErrors(newErrors);
+                                    }
+                                }}
+                            />
+                            {(errors[index] as any)?.secondaryEmail && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.secondaryEmail}</span>}
+                        </div>
+                        <div className="w-full md:w-[180px] flex items-start gap-2">
                             <div className="flex-1 space-y-1.5">
                                 {index === 0 && <label className="text-sm font-medium text-foreground">Role</label>}
                                 <ResponsiveSelect
