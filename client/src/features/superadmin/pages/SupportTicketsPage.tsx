@@ -476,9 +476,9 @@ export function SupportTicketsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             {STATUS_OPTIONS.map((o) => (
-              <option 
-                key={o.value} 
-                value={o.value} 
+              <option
+                key={o.value}
+                value={o.value}
                 data-color={o.value ? statusColor(o.value) : undefined}
               >
                 {o.label}
@@ -496,10 +496,10 @@ export function SupportTicketsPage() {
               else if (o.value === "medium") pColor = "bg-amber-500";
               else if (o.value === "high") pColor = "bg-red-500";
               else if (o.value === "urgent") pColor = "bg-red-600";
-              
+
               return (
-                <option 
-                  key={o.value} 
+                <option
+                  key={o.value}
                   value={o.value}
                   data-color={pColor}
                 >
@@ -584,10 +584,10 @@ export function SupportTicketsPage() {
                       />
                       <span
                         className={`text-xs font-medium ${ticket.status === "open"
-                            ? "text-emerald-500"
-                            : ticket.status === "waiting_on_user"
-                              ? "text-red-500"
-                              : "text-foreground"
+                          ? "text-emerald-500"
+                          : ticket.status === "waiting_on_user"
+                            ? "text-red-500"
+                            : "text-foreground"
                           }`}
                       >
                         {statusLabel(ticket.status)}
@@ -642,11 +642,11 @@ export function SupportTicketsPage() {
                       ) : (
                         currentUser && (
                           <Button
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAssigningTicketId(ticket._id);
-                                updateTicket.mutate(
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAssigningTicketId(ticket._id);
+                              updateTicket.mutate(
                                 { id: ticket._id, assignedTo: currentUser._id },
                                 {
                                   onSuccess: () => {
@@ -715,10 +715,10 @@ export function SupportTicketsPage() {
           {statusLabel(selectedTicket.status)}
         </span>
         <RefreshButton
-            onClick={() => refetch()}
-            isFetching={isFetching}
-            className="ml-auto rounded-full border-none bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-          />
+          onClick={() => refetch()}
+          isFetching={isFetching}
+          className="ml-auto rounded-full border-none bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+        />
       </div>
 
       {/* 2-Column Grid */}
@@ -733,8 +733,8 @@ export function SupportTicketsPage() {
                 <div className="relative shrink-0">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${(msg as any).avatar
-                        ? ""
-                        : `${getAvatarColor(msg.author)} text-white font-bold text-sm`
+                      ? ""
+                      : `${getAvatarColor(msg.author)} text-white font-bold text-sm`
                       }`}
                   >
                     {(msg as any).avatar ? (
@@ -818,11 +818,11 @@ export function SupportTicketsPage() {
                             return (
                               <Button
                                 key={`msg-att-${aIdx}`}
-                                  variant="outline"
-                                  onClick={() =>
-                                    setPreviewFile({ name: fileName, src: fileUrl })
-                                  }
-                                  className="group flex items-center gap-2 px-3 py-1.5 bg-card border border-border hover:border-primary/50 hover:bg-primary/5 rounded-lg text-xs transition-all shadow-sm"
+                                variant="outline"
+                                onClick={() =>
+                                  setPreviewFile({ name: fileName, src: fileUrl })
+                                }
+                                className="group flex items-center gap-2 px-3 py-1.5 bg-card border border-border hover:border-primary/50 hover:bg-primary/5 rounded-lg text-xs transition-all shadow-sm"
                                 title="View attachment"
                               >
                                 <div className="w-6 h-6 rounded-md bg-muted group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
@@ -989,10 +989,10 @@ export function SupportTicketsPage() {
                       <span>Unassigned</span>
                       {currentUser && (
                         <Button
-                            variant="ghost"
-                            onClick={() => {
-                              updateTicket.mutate(
-                                { id: selectedTicket._id, assignedTo: currentUser._id },
+                          variant="ghost"
+                          onClick={() => {
+                            updateTicket.mutate(
+                              { id: selectedTicket._id, assignedTo: currentUser._id },
                               {
                                 onSuccess: (res) => {
                                   toast.success("Ticket assigned to you");
@@ -1160,10 +1160,10 @@ export function SupportTicketsPage() {
                                     : fileName}
                                 </span>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() =>
-                                      setPreviewFile({
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    setPreviewFile({
                                       name: fileName,
                                       src: fileUrl,
                                     })
@@ -1256,13 +1256,13 @@ function MetaRow({
         <span>{value}</span>
         {copyValue && (
           <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                navigator.clipboard.writeText(copyValue);
-                toast.success("Merge URL copied to clipboard");
-              }}
-              className="w-6 h-6 p-0 rounded bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              navigator.clipboard.writeText(copyValue);
+              toast.success("Merge URL copied to clipboard");
+            }}
+            className="w-6 h-6 p-0 rounded bg-muted/50 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
             title="Copy Merge URL"
           >
             <Copy className="w-3 h-3" />
