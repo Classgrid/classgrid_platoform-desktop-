@@ -220,6 +220,7 @@ export function AppRouter() {
           <Route path="/superadmin/profile" element={<SharedProfilePage />} />
           <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
           <Route path="/superadmin/chat" element={<ChatPage />} />
+          <Route path="/superadmin/subscribers" element={<SubscribersPage />} />
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
