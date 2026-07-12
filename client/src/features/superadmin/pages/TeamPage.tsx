@@ -1,28 +1,56 @@
-
-import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
-import { useState, useMemo } from "react";
-import { Users, UserPlus, X,  Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
-import { StatCard } from "@/components/marketing_ui/StatCard";
-import { Badge } from "@/components/marketing_ui/badge";
+import { Shield, Trash2, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
-import { useState, useMemo } from "react";
-import { Users, UserPlus, X,  Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
-import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
-import { Button } from "@/components/marketing_ui/button";
-import { Input } from "@/components/marketing_ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/marketing_ui/dialog";
-import { apiClient } from "@/lib/apiClient";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
-import { Spinner } from "@/components/marketing_ui/spinner";
+import { apiClient } from "@/lib/apiClient";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type PlatformRole = "super_admin" | "co_super_admin";
+
+type TeamMember = {
+  _id: string;
+  name: string;
+  email: string;
+  role: PlatformRole;
+  isEmailVerified: boolean;
+  status: "active" | "suspended" | "pending";
+  createdAt: string;
+  lastLogin?: string;
+};
+
+// ── Role definitions ──────────────────────────────────────────────────────────
+
+const PLATFORM_ROLES: { value: PlatformRole; label: string; description: string; icon: React.ComponentType<any> }[] = [
+  {
+    value: "super_admin",
+    label: "Super Admin",
+    description: "God mode. Unrestricted access to everything.",
+    icon: Shield
+  },
+  {
+    value: "co_super_admin",
+    label: "Co-Super Admin",
+    description: "Full platform access. Can manage everything except God-Owner controls.",
+    icon: Shield
+  },
+];
+
+const ROLE_MAP: Record<PlatformRole, { label: string; variant: "danger" | "success" }> = {
+  super_admin: { label: "Super Admin", variant: "danger" },
+  co_super_admin: { label: "Co-Super Admin", variant: "success" }
+};
+
+function fmtDate(iso?: string) {
   if (!iso) return "Never";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // ── API calls ─────────────────────────────────────────────────────────────────
@@ -46,65 +74,64 @@ const teamApi = {
   removeMember: (id: string) =>
     apiClient
       .delete<{ success: boolean }>(`/api/super-admin/team/${id}`)
-      .then((r) => r.data) };
+      .then((r) => r.data)
+};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const EMPTY_FORM = { name: "", email: "", role: "co_super_admin" as PlatformRole };
+const EMPTY_FORM = { email: "", role: "co_super_admin" as PlatformRole };
 
 export function TeamPage() {
   const qc = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<Partial<typeof EMPTY_FORM>>({});
   const [formResult, setFormResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [activeTab, setActiveTab] = useState("team-members");
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["superadmin-platform-team"],
     queryFn: () => teamApi.getTeam(),
     staleTime: 60_000,
-    retry: 1 });
+    retry: 1
+  });
 
   const team: TeamMember[] = data?.team ?? [];
+  const activeMembers = team.filter((m) => m.status !== "pending");
+  const pendingMembers = team.filter((m) => m.status === "pending");
 
   const inviteMutation = useMutation({
-    mutationFn: (payload: typeof form) => teamApi.inviteMember(payload),
+    mutationFn: (payload: typeof form & { name: string }) => teamApi.inviteMember(payload),
     onSuccess: (res) => {
       setFormResult({ success: true, message: res.message ?? "Invitation sent successfully." });
       setForm(EMPTY_FORM);
+      setActiveTab("pending-invitations");
       qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
+      setTimeout(() => setFormResult(null), 5000);
     },
     onError: (err: any) => {
-      setFormResult({ success: false, message: err?.message ?? "Failed to invite member." });
-    } });
+      setFormResult({ success: false, message: err?.response?.data?.message || err?.message || "Failed to invite member." });
+    }
+  });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => teamApi.removeMember(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }) });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] })
+  });
 
   const roleUpdateMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: PlatformRole }) => teamApi.updateRole(id, role),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] }) });
-
-  const stats = useMemo(() => {
-    const byRole = PLATFORM_ROLES.reduce((acc, r) => {
-      acc[r.value] = team.filter((m) => m.role === r.value).length;
-      return acc;
-    }, {} as Record<string, number>);
-    return { total: team.length, byRole };
-  }, [team]);
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormResult(null);
-    
-    // Custom Validation
+
     const newErrors: Partial<typeof EMPTY_FORM> = {};
-    if (!form.name.trim()) newErrors.name = "Full Name is required.";
     if (!form.email.trim()) {
-      newErrors.email = "Email Address is required.";
+      newErrors.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = "Please enter a valid email address.";
+      newErrors.email = "Invalid email format.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -113,189 +140,173 @@ export function TeamPage() {
     }
 
     setErrors({});
-    inviteMutation.mutate(form);
+    // We auto-generate a name from the email prefix for now since Vercel's UI only asks for Email and Role.
+    const autoName = form.email.split("@")[0] || "New Member";
+    inviteMutation.mutate({ ...form, name: autoName });
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div
-        title="Platform Team"
-        description="Invite co-admins, support agents, sales staff, and analysts to help manage Classgrid. Each role has controlled access."
-        actions={
-          <div className="flex gap-2">
-            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
-            <Button onClick={() => { setShowForm(true); setFormResult(null); }}>
-              <UserPlus size={14} /> Invite Team Member
+  const getColumns = (isPending: boolean) => [
+    {
+      key: "user",
+      header: "User",
+      render: (_: any, row: TeamMember) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-foreground">{row.name}</span>
+          <span className="text-sm text-muted-foreground">{row.email}</span>
+        </div>
+      )
+    },
+    {
+      key: "role",
+      header: "Role",
+      render: (_: any, row: TeamMember) => (
+        <div className="w-[180px]">
+          <ResponsiveSelect
+            className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={row.role}
+            onChange={(e) => roleUpdateMutation.mutate({ id: row._id, role: e.target.value as PlatformRole })}
+            disabled={roleUpdateMutation.isPending}
+          >
+            {PLATFORM_ROLES.map((r) => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+          </ResponsiveSelect>
+        </div>
+      )
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (_: any, row: TeamMember) => (
+        <Badge variant={row.status === "active" ? "success" : row.status === "suspended" ? "danger" : "warning"} dot>
+          {row.status === "pending" ? "Pending" : row.status === "active" ? "Active" : "Suspended"}
+        </Badge>
+      )
+    },
+    {
+      key: "date",
+      header: isPending ? "Invited On" : "Joined",
+      render: (_: any, row: TeamMember) => (
+        <span className="text-sm text-muted-foreground">{fmtDate(row.createdAt)}</span>
+      )
+    },
+    {
+      key: "actions",
+      header: "",
+      render: (_: any, row: TeamMember) => (
+        <div className="flex justify-end pr-4">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-2"
+              onClick={() => removeMutation.mutate(row._id)}
+              disabled={removeMutation.isPending}
+              title={isPending ? "Revoke Invite" : "Remove Member"}
+            >
+              <Trash2 size={16} />
             </Button>
-          </div>
-        }
-      />
+        </div>
+      )
+    }
+  ];
 
-      {/* Role cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {PLATFORM_ROLES.map((r) => {
-          const Icon = r.icon;
-          return (
-            <div key={r.value} className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col gap-2">
-              <div className="flex justify-between items-center text-primary">
-                <Icon size={20} />
-                <span className="text-xl font-bold text-foreground">{stats.byRole[r.value] ?? 0}</span>
-              </div>
-              <div>
-                <div className="font-semibold text-foreground text-sm">{r.label}</div>
-                <div className="text-xs text-muted-foreground mt-1 leading-snug">{r.description}</div>
-              </div>
-            </div>
-          );
-        })}
+  return (
+    <div className="flex flex-col gap-8 w-full max-w-[1000px] mx-auto p-4 sm:p-6 lg:p-8 pb-12">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Members</h1>
+            <p className="text-sm text-muted-foreground mt-1">Manage team members and invitations</p>
+        </div>
+        <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
       </div>
 
-      {/* Invite Modal */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Invite Team Member</DialogTitle>
-            <DialogDescription>
-              An invitation email with a one-time setup link will be sent to this address.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} noValidate className="grid gap-4 py-4">
-            {formResult && (
-              <div className={`p-3 rounded-md text-sm ${formResult.success ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
-                {formResult.message}
-              </div>
-            )}
-            
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Full Name *</label>
-              <Input
-                className={errors.name ? "border-danger focus-visible:ring-danger" : ""}
-                placeholder="e.g. Rahul Sharma"
-                value={form.name}
-                onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setErrors((errs) => ({ ...errs, name: undefined })); }}
-              />
-              {errors.name && <span className="text-xs font-medium text-danger">{errors.name}</span>}
-            </div>
-
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Email Address *</label>
-              <Input
-                type="email"
-                className={errors.email ? "border-danger focus-visible:ring-danger" : ""}
-                placeholder="rahul@classgrid.in"
-                value={form.email}
-                onChange={(e) => { setForm((f) => ({ ...f, email: e.target.value })); setErrors((errs) => ({ ...errs, email: undefined })); }}
-              />
-              {errors.email && <span className="text-xs font-medium text-danger">{errors.email}</span>}
-            </div>
-
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Platform Role *</label>
-              <ResponsiveSelect
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                value={form.role}
-                onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as PlatformRole }))}
-              >
-                {PLATFORM_ROLES.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label} — {r.description}</option>
-                ))}
-              </ResponsiveSelect>
-            </div>
-
-            <DialogFooter className="mt-4">
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" isLoading={inviteMutation.isPending}>
-                <UserPlus size={14} /> Send Invite
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Team Table */}
-      <SectionPanel
-        title={`Team Members (${stats.total})`}
-        description="All platform staff with their assigned roles and access levels."
-      >
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground"><Spinner size={20} className=" mb-2" /> Loading team…</div>
-        ) : isError ? (
-          <div className="bg-danger/10 border border-danger text-danger p-4 rounded-md my-4">
-            <h4 className="font-bold">Failed to load Team</h4>
-            <p className="text-sm mt-1">
-              {error instanceof Error ? error.message : "Unknown error"}
-              {(error as any)?.response?.data?.message ? ` — ${(error as any).response.data.message}` : ""}
-            </p>
-          </div>
-        ) : team.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
-            <Users size={32} className="mb-2 opacity-50" />
-            <p>No team members yet. Invite your first co-admin or support agent above.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs uppercase bg-muted/50 text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Member</th>
-                  <th className="px-4 py-3 font-medium">Role</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Last Login</th>
-                  <th className="px-4 py-3 font-medium">Joined</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {team.map((m) => {
-                  const { label, variant } = ROLE_MAP[m.role] ?? { label: m.role, variant: "neutral" as const };
-                  return (
-                    <tr key={m._id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-semibold text-foreground">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.email}</div>
-                      </td>
-                      <td className="px-4 py-3">
+      {/* Invite Members Card (Vercel Style) */}
+      <Card className="border-border shadow-sm overflow-hidden">
+        <CardHeader className="border-b border-border bg-muted/20 pb-4">
+          <CardTitle className="text-lg">Invite Members</CardTitle>
+          <CardDescription>
+            Add new members to your team by entering their email address and assigning a role
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <form onSubmit={handleSubmit} className="flex flex-col">
+            <div className="p-6 pb-4">
+                {formResult && (
+                    <div className={\`mb-4 p-3 rounded-md text-sm border \${formResult.success ? "bg-success/10 border-success/20 text-success" : "bg-danger/10 border-danger/20 text-danger"}\`}>
+                        {formResult.message}
+                    </div>
+                )}
+                <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
+                    <div className="flex-1 w-full space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Email Address</label>
+                        <Input
+                            type="email"
+                            placeholder="jane@example.com"
+                            className={errors.email ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                            value={form.email}
+                            onChange={(e) => {
+                                setForm((f) => ({ ...f, email: e.target.value }));
+                                setErrors((errs) => ({ ...errs, email: undefined }));
+                            }}
+                        />
+                        {errors.email && <span className="text-xs font-medium text-danger">{errors.email}</span>}
+                    </div>
+                    <div className="w-full sm:w-[240px] space-y-1.5">
+                        <label className="text-sm font-medium text-foreground">Role</label>
                         <ResponsiveSelect
-                          className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                          value={m.role}
-                          onChange={(e) => roleUpdateMutation.mutate({ id: m._id, role: e.target.value as PlatformRole })}
-                          disabled={roleUpdateMutation.isPending}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            value={form.role}
+                            onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as PlatformRole }))}
                         >
-                          {PLATFORM_ROLES.map((r) => (
-                            <option key={r.value} value={r.value}>{r.label}</option>
-                          ))}
+                            {PLATFORM_ROLES.map((r) => (
+                                <option key={r.value} value={r.value}>{r.label}</option>
+                            ))}
                         </ResponsiveSelect>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant={m.status === "active" ? "success" : m.status === "suspended" ? "danger" : "warning"} dot>
-                          {m.status}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(m.lastLogin)}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{fmtDate(m.createdAt)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => removeMutation.mutate(m._id)}
-                          isLoading={removeMutation.isPending}
-                          title="Remove from team"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </SectionPanel>
+                    </div>
+                </div>
+                
+                <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 text-muted-foreground" onClick={() => {}}>
+                    <Plus size={14} /> Add more
+                </Button>
+            </div>
+
+            <div className="bg-muted/30 border-t border-border px-6 py-4 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Invitations will be sent securely via email.</span>
+                <Button type="submit" isLoading={inviteMutation.isPending} className="bg-primary text-primary-foreground">
+                    Send Invite
+                </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Tabs & Data Table */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="team-members">Team Members</TabsTrigger>
+          <TabsTrigger value="pending-invitations">Pending Invitations</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="team-members" className="m-0 border border-border rounded-md overflow-hidden bg-background">
+          <DataTable
+            columns={getColumns(false)}
+            rows={activeMembers}
+            isLoading={isLoading}
+            emptyMessage="No active team members found."
+          />
+        </TabsContent>
+        
+        <TabsContent value="pending-invitations" className="m-0 border border-border rounded-md overflow-hidden bg-background">
+          <DataTable
+            columns={getColumns(true)}
+            rows={pendingMembers}
+            isLoading={isLoading}
+            emptyMessage="No pending invitations."
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
