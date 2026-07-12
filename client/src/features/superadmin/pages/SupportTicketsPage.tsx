@@ -15,6 +15,7 @@ import {
   Building2,
   Copy,
   ArrowLeft,
+  FileText,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
