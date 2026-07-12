@@ -61,7 +61,7 @@ const teamApi = {
       .get<{ success: boolean; team: TeamMember[] }>("/api/super-admin/team")
       .then((r) => r.data),
 
-  inviteMember: (payload: { name: string; email: string; secondaryEmail?: string; role: PlatformRole }) =>
+  inviteMember: (payload: { name: string; email: string; personalEmail?: string; password: string; role: PlatformRole }) =>
     apiClient
       .post<{ success: boolean; message: string; member: TeamMember }>("/api/super-admin/team/invite", payload)
       .then((r) => r.data),
@@ -79,7 +79,7 @@ const teamApi = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const EMPTY_FORM = { email: "", secondaryEmail: "", role: "co_super_admin" as PlatformRole };
+const EMPTY_FORM = { name: "", personalEmail: "", classgridEmail: "", password: "", role: "co_super_admin" as PlatformRole };
 
 export function TeamPage() {
   const qc = useQueryClient();
@@ -130,16 +130,29 @@ export function TeamPage() {
 
     forms.forEach((f, i) => {
         const err: Partial<typeof EMPTY_FORM> = {};
-        if (!f.email.trim()) {
-            err.email = "Classgrid Email is required.";
-            hasError = true;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
-            err.email = "Invalid email format.";
+        if (!f.name.trim()) {
+            err.name = "Name is required.";
             hasError = true;
         }
-
-        if (f.secondaryEmail && f.secondaryEmail.trim() !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.secondaryEmail)) {
-            err.secondaryEmail = "Invalid personal email format.";
+        if (!f.personalEmail.trim()) {
+            err.personalEmail = "Personal email is required.";
+            hasError = true;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.personalEmail)) {
+            err.personalEmail = "Invalid email format.";
+            hasError = true;
+        }
+        if (!f.classgridEmail.trim()) {
+            err.classgridEmail = "Classgrid email is required.";
+            hasError = true;
+        } else if (!/^[^\s@]+@classgrid\.in$/.test(f.classgridEmail)) {
+            err.classgridEmail = "Must be a @classgrid.in email.";
+            hasError = true;
+        }
+        if (!f.password.trim()) {
+            err.password = "Password is required.";
+            hasError = true;
+        } else if (f.password.length < 6) {
+            err.password = "Password must be at least 6 characters.";
             hasError = true;
         }
         newErrors[i] = err as any;
@@ -154,12 +167,17 @@ export function TeamPage() {
     setIsSubmitting(true);
     
     try {
-        await Promise.all(forms.map(f => {
-            const autoName = f.email.split("@")[0] || "New Member";
-            return teamApi.inviteMember({ ...f, name: autoName });
-        }));
+        await Promise.all(forms.map(f => 
+            teamApi.inviteMember({
+                name: f.name,
+                email: f.classgridEmail,
+                personalEmail: f.personalEmail,
+                password: f.password,
+                role: f.role
+            })
+        ));
         
-        setFormResult({ success: true, message: "Invitations sent successfully." });
+        setFormResult({ success: true, message: "Invitations sent successfully! Welcome emails have been dispatched." });
         setForms([EMPTY_FORM]);
         setActiveTab("pending-invitations");
         qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
@@ -288,52 +306,107 @@ export function TeamPage() {
                 )}
                 
                 {forms.map((f, index) => (
-                    <div key={index} className="flex flex-col md:flex-row items-start gap-4 mb-4">
-                        <div className="flex-1 w-full space-y-1.5">
-                            {index === 0 && <label className="text-sm font-medium text-foreground">Classgrid Email</label>}
-                            <Input
-                                type="email"
-                                placeholder="jane@classgrid.in"
-                                className={errors[index]?.email ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
-                                value={f.email}
-                                onChange={(e) => {
-                                    const newForms = [...forms];
-                                    newForms[index] = { ...newForms[index], email: e.target.value };
-                                    setForms(newForms);
-                                    
-                                    if (errors[index]?.email) {
-                                        const newErrors = [...errors];
-                                        newErrors[index] = { ...newErrors[index], email: undefined };
-                                        setErrors(newErrors);
-                                    }
-                                }}
-                            />
-                            {errors[index]?.email && <span className="text-xs font-medium text-danger">{errors[index]?.email as string}</span>}
+                    <div key={index} className="mb-6 last:mb-0">
+                        {index > 0 && <hr className="border-border mb-4" />}
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-muted-foreground">Member {index + 1}</span>
+                            {forms.length > 1 && (
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-danger flex-shrink-0" onClick={() => {
+                                    setForms(forms.filter((_, i) => i !== index));
+                                    setErrors(errors.filter((_, i) => i !== index));
+                                }}>
+                                    <X size={14} />
+                                </Button>
+                            )}
                         </div>
-                        <div className="flex-1 w-full space-y-1.5">
-                            {index === 0 && <label className="text-sm font-medium text-foreground">Personal Email (Optional)</label>}
-                            <Input
-                                type="email"
-                                placeholder="jane@gmail.com"
-                                className={(errors[index] as any)?.secondaryEmail ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
-                                value={f.secondaryEmail}
-                                onChange={(e) => {
-                                    const newForms = [...forms];
-                                    newForms[index] = { ...newForms[index], secondaryEmail: e.target.value };
-                                    setForms(newForms);
-                                    
-                                    if ((errors[index] as any)?.secondaryEmail) {
-                                        const newErrors = [...errors];
-                                        newErrors[index] = { ...newErrors[index], secondaryEmail: undefined } as any;
-                                        setErrors(newErrors);
-                                    }
-                                }}
-                            />
-                            {(errors[index] as any)?.secondaryEmail && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.secondaryEmail}</span>}
-                        </div>
-                        <div className="w-full md:w-[180px] flex items-start gap-2">
-                            <div className="flex-1 space-y-1.5">
-                                {index === 0 && <label className="text-sm font-medium text-foreground">Role</label>}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Name */}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">Team Member Name</label>
+                                <Input
+                                    type="text"
+                                    placeholder="e.g. Jane Doe"
+                                    className={(errors[index] as any)?.name ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                    value={f.name}
+                                    onChange={(e) => {
+                                        const newForms = [...forms];
+                                        newForms[index] = { ...newForms[index], name: e.target.value };
+                                        setForms(newForms);
+                                        if ((errors[index] as any)?.name) {
+                                            const newErrors = [...errors];
+                                            newErrors[index] = { ...newErrors[index], name: undefined } as any;
+                                            setErrors(newErrors);
+                                        }
+                                    }}
+                                />
+                                {(errors[index] as any)?.name && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.name}</span>}
+                            </div>
+                            {/* Personal Email */}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">Personal Email <span className="text-muted-foreground font-normal">(Where to send this email)</span></label>
+                                <Input
+                                    type="email"
+                                    placeholder="e.g. personal@gmail.com"
+                                    className={(errors[index] as any)?.personalEmail ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                    value={f.personalEmail}
+                                    onChange={(e) => {
+                                        const newForms = [...forms];
+                                        newForms[index] = { ...newForms[index], personalEmail: e.target.value };
+                                        setForms(newForms);
+                                        if ((errors[index] as any)?.personalEmail) {
+                                            const newErrors = [...errors];
+                                            newErrors[index] = { ...newErrors[index], personalEmail: undefined } as any;
+                                            setErrors(newErrors);
+                                        }
+                                    }}
+                                />
+                                {(errors[index] as any)?.personalEmail && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.personalEmail}</span>}
+                            </div>
+                            {/* Classgrid Email */}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">New Classgrid Email</label>
+                                <Input
+                                    type="email"
+                                    placeholder="e.g. name@classgrid.in"
+                                    className={(errors[index] as any)?.classgridEmail ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                    value={f.classgridEmail}
+                                    onChange={(e) => {
+                                        const newForms = [...forms];
+                                        newForms[index] = { ...newForms[index], classgridEmail: e.target.value };
+                                        setForms(newForms);
+                                        if ((errors[index] as any)?.classgridEmail) {
+                                            const newErrors = [...errors];
+                                            newErrors[index] = { ...newErrors[index], classgridEmail: undefined } as any;
+                                            setErrors(newErrors);
+                                        }
+                                    }}
+                                />
+                                {(errors[index] as any)?.classgridEmail && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.classgridEmail}</span>}
+                            </div>
+                            {/* Temporary Password */}
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-medium text-foreground">Temporary Password</label>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter a secure temporary password"
+                                    className={(errors[index] as any)?.password ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                    value={f.password}
+                                    onChange={(e) => {
+                                        const newForms = [...forms];
+                                        newForms[index] = { ...newForms[index], password: e.target.value };
+                                        setForms(newForms);
+                                        if ((errors[index] as any)?.password) {
+                                            const newErrors = [...errors];
+                                            newErrors[index] = { ...newErrors[index], password: undefined } as any;
+                                            setErrors(newErrors);
+                                        }
+                                    }}
+                                />
+                                {(errors[index] as any)?.password && <span className="text-xs font-medium text-danger">{(errors[index] as any)?.password}</span>}
+                            </div>
+                            {/* Role */}
+                            <div className="space-y-1.5 md:col-span-2">
+                                <label className="text-sm font-medium text-foreground">Role</label>
                                 <ResponsiveSelect
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     value={f.role}
@@ -348,16 +421,6 @@ export function TeamPage() {
                                     ))}
                                 </ResponsiveSelect>
                             </div>
-                            {forms.length > 1 && (
-                                <div className={index === 0 ? "pt-6" : ""}>
-                                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-danger flex-shrink-0" onClick={() => {
-                                        setForms(forms.filter((_, i) => i !== index));
-                                        setErrors(errors.filter((_, i) => i !== index));
-                                    }}>
-                                        <X size={16} />
-                                    </Button>
-                                </div>
-                            )}
                         </div>
                     </div>
                 ))}
