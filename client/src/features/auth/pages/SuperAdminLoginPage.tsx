@@ -16,6 +16,7 @@ export function SuperAdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isRescueMode, setIsRescueMode] = useState(false);
+  const [rescueEmail, setRescueEmail] = useState("");
   const [rescuePassword, setRescuePassword] = useState("");
 
   // ðŸ” Domain Lock: Super Admin login is EXCLUSIVELY on superadmin.classgrid.in
@@ -108,8 +109,8 @@ export function SuperAdminLoginPage() {
     setIsLoading(true);
     try {
       const axios = (await import("axios")).default;
-      const r = await axios.post("/api/rescue/login", { 
-         email: "support@classgrid.in", 
+      const r = await axios.post(`${import.meta.env.VITE_API_BASE_URL || ""}/api/rescue/login`, { 
+         email: rescueEmail || "support@classgrid.in", 
          password: rescuePassword 
       });
       localStorage.setItem("rescue_token", r.data.token);
@@ -264,6 +265,20 @@ export function SuperAdminLoginPage() {
               <p className="form-subtitle">Main server offline? Login via Rescue Server.</p>
 
               <div className="form-group" style={{ marginTop: "2rem" }}>
+                <label className="form-label" htmlFor="rescueEmail">Super Admin Email</label>
+                <div className="input-group" style={{ marginBottom: "1rem" }}>
+                  <i className="fas fa-envelope input-icon"></i>
+                  <input 
+                    type="email" 
+                    id="rescueEmail" 
+                    className="form-input"
+                    placeholder="Enter your email" 
+                    required 
+                    value={rescueEmail}
+                    onChange={e => setRescueEmail(e.target.value)}
+                  />
+                </div>
+
                 <label className="form-label" htmlFor="rescuePassword">Rescue Password</label>
                 <div className="input-group">
                   <i className="fas fa-lock input-icon"></i>

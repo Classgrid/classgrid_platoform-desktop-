@@ -705,7 +705,7 @@ export const alertsApi = {
         try {
           const token = localStorage.getItem("rescue_token");
           if (!token) throw new Error("RESCUE_REQUIRED");
-          const rescueClient = axios.create({ baseURL: window.location.origin });
+          const rescueClient = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL || "" });
           const r = await rescueClient.get("/api/rescue/error-logs", {
             headers: { Authorization: `Bearer ${token}` }
           });
