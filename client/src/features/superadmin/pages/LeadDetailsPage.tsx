@@ -11,6 +11,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
+import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 export function LeadDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,9 +27,23 @@ export function LeadDetailsPage() {
 
   const lead = data?.leads.find(l => l._id === id);
 
+  const setBreadcrumbs = useBreadcrumbStore((state) => state.setBreadcrumbs);
+
   useEffect(() => {
-    if (lead?.meetingScheduledAt) {
-      setDate(new Date(lead.meetingScheduledAt));
+    if (lead) {
+      setBreadcrumbs([
+        { label: "Dashboard", href: "/superadmin/dashboard" },
+        { label: "Demo Leads", href: "/superadmin/leads" },
+        { label: lead.institutionName || "Lead Details", href: `/superadmin/leads/${id}` },
+      ]);
+    }
+    return () => setBreadcrumbs([]);
+  }, [setBreadcrumbs, lead, id]);
+
+  useEffect(() => {
+    const meetDate = lead?.scheduledAt || lead?.meetingScheduledAt;
+    if (meetDate) {
+      setDate(new Date(meetDate));
     }
     if (lead?.meetingUrl) {
       setMeetingUrl(lead.meetingUrl);
@@ -223,7 +238,7 @@ export function LeadDetailsPage() {
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">City / Village</label>
                 <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
-                  {lead.city || "—"}
+                  {lead.cityVillage || lead.city || "—"}
                 </div>
               </div>
             </div>

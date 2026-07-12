@@ -27,11 +27,17 @@ export type Lead = {
   adminPhone: string;
   city: string;
   state: string;
+  district?: string;
+  taluka?: string;
+  cityVillage?: string;
+  role?: string;
+  website?: string;
   message: string;
   status: LeadStatus;
   lifecycleStage: LeadLifecycle;
   meetingStatus: "pending" | "scheduled" | "completed" | "cancelled";
   meetingProvider: string;
+  scheduledAt?: string | null;
   meetingScheduledAt: string | null;
   meetingUrl: string;
   meetingNotes: string;
