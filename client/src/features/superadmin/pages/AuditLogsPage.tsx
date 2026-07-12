@@ -170,10 +170,10 @@ export function AuditLogsPage() {
           </div>
         </div>
       ) : (
-      <div className="flex flex-col bg-card border border-border rounded-lg shadow-sm flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden gap-4">
         
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between border-b border-border p-3 bg-secondary/20">
+        <div className="flex items-center justify-between">
           
           {/* Left Side Buttons */}
           <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 overflow-auto p-4 bg-background">
+      <div className="flex-1 overflow-auto pb-4">
         <DataTable 
           columns={columns} 
           rows={logs} 
