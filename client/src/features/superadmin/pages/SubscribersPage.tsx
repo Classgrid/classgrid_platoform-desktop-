@@ -8,7 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import { LineChart } from "@tremor/react";
+import { BarChart } from "@tremor/react";
 
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
@@ -343,7 +343,7 @@ export function SubscribersPage() {
                 {isLoading ? (
                      <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
                 ) : (
-                    <LineChart
+                    <BarChart
                         className="h-[300px] mt-4"
                         data={trend}
                         index="label"
