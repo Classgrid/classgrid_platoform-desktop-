@@ -195,9 +195,9 @@ export function LeadDetailsPage() {
                         )}
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      Assigned to {lead.assignedTo.name}
-                      {lead.assignedAt && <div className="text-xs text-muted-foreground mt-0.5">on {formatDate(lead.assignedAt, "dd MMM yyyy, hh:mm a")}</div>}
+                    <TooltipContent className="flex flex-col items-start gap-0.5 py-2">
+                      <span className="font-semibold text-sm">Assigned to {lead.assignedTo.name}</span>
+                      {lead.assignedAt && <span className="text-xs opacity-70">on {formatDate(lead.assignedAt, "dd MMM yyyy, hh:mm a")}</span>}
                     </TooltipContent>
                   </Tooltip>
                 )}
@@ -388,7 +388,7 @@ export function LeadDetailsPage() {
                       <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                         {date ? "Update Date & Time" : "Set Date & Time"}
                       </label>
-                      <NikhilTimeCalendar date={date} setDate={setDate} />
+                      <NikhilTimeCalendar value={date} onChange={setDate} />
                       {date && (
                         <p className="text-[11px] text-muted-foreground mt-2 pl-1">
                           Asia/Kolkata &middot; IST
