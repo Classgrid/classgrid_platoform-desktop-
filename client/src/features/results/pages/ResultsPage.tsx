@@ -185,7 +185,7 @@ function SemesterCard({ result, isCollegeMode }: { result: StudentResult; isColl
             {isCollegeMode && result.earn_credits != null && (
               <StatCard icon={<BookOpen size={20} />} label="Credits Earned" value={`${result.earn_credits} / ${result.total_credits}`} />
             )}
-            <StatCard icon={<Award size={20} />} label="Percentage" value={`${result.percentage.toFixed(2)}%`} />
+            <StatCard icon={<Award size={20} />} label="Percentage" value={`${(result.percentage ?? 0).toFixed(2)}%`} />
             <StatCard icon={<GraduationCap size={20} />} label="Grade" value={result.grade} />
             {!isCollegeMode && (
               <StatCard icon={<BookOpen size={20} />} label="Marks" value={`${result.total_marks} / ${result.max_total_marks}`} />

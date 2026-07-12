@@ -124,7 +124,7 @@ export function UsagePage() {
           <Flex alignItems="start">
             <div>
               <Text>Storage Used</Text>
-              <Metric>{summary.storageUsedGb.toFixed(2)} GB</Metric>
+              <Metric>{(summary.storageUsedGb ?? 0).toFixed(2)} GB</Metric>
             </div>
             <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
               <Database className="w-5 h-5" />

@@ -22,7 +22,7 @@ const columns: ColumnDef<MeritListEntry>[] = [
   {
     accessorKey: "merit_score",
     header: "Merit %",
-    cell: ({ row }) => `${row.original.merit_score.toFixed(2)}%` },
+    cell: ({ row }) => `${(row.original.merit_score ?? 0).toFixed(2)}%` },
   {
     accessorKey: "category",
     header: "Category",
