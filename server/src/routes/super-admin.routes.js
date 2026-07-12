@@ -751,10 +751,24 @@ router.get("/team", async (req, res) => {
     try {
         const User = (await import("../models/User.js")).default;
         const platformRoles = ["super_admin", "co_super_admin"];
-        const team = await User.find({ role: { $in: platformRoles } })
-            .select("name email role status isEmailVerified createdAt lastLogin")
+        const teamDocs = await User.find({ role: { $in: platformRoles } })
+            .select("name email role status isEmailVerified createdAt lastLoginAt profilePicture")
             .sort({ createdAt: -1 })
             .lean();
+        
+        // Map lastLoginAt to lastLogin to match frontend expectations, and include profilePicture
+        const team = teamDocs.map(user => ({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            isEmailVerified: user.isEmailVerified,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLoginAt,
+            profilePicture: user.profilePicture
+        }));
+
         res.json({ success: true, team });
     } catch (err) {
         console.error("[Team] list error:", err.message);

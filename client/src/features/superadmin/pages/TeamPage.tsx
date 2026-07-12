@@ -24,6 +24,7 @@ type TeamMember = {
   status: "active" | "suspended" | "pending";
   createdAt: string;
   lastLogin?: string;
+  profilePicture?: string;
 };
 
 // ── Role definitions ──────────────────────────────────────────────────────────
@@ -199,13 +200,21 @@ export function TeamPage() {
       header: "User",
       width: "w-full min-w-[250px]", // Let user column expand to fill space
       render: (_: any, row: TeamMember) => (
-        <div className="flex items-center gap-3 py-2 pr-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium shrink-0">
-            {row.name.substring(0, 2).toUpperCase()}
-          </div>
-          <div className="flex flex-col truncate">
-            <span className="font-medium text-foreground leading-tight truncate">{row.name}</span>
-            <span className="text-sm text-muted-foreground truncate">{row.email}</span>
+        <div className="flex items-center gap-3 py-2 w-full min-w-[250px]">
+          {row.profilePicture ? (
+            <img 
+                src={row.profilePicture} 
+                alt={row.name} 
+                className="h-8 w-8 rounded-full object-cover border border-border"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-medium text-xs">
+              {row.name.substring(0, 2).toUpperCase()}
+            </div>
+          )}
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium text-sm truncate">{row.name}</span>
+            <span className="text-muted-foreground text-xs truncate">{row.email}</span>
           </div>
         </div>
       )
