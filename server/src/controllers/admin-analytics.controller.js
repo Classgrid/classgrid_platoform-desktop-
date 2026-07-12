@@ -32,6 +32,18 @@ import { studentNotesClient } from "../config/supabaseClient.js";
 import { uploadBufferToR2, deleteFromR2, getPresignedUploadUrl } from "../config/r2Client.js";
 import { getOrganizationResourceUsage, recordInternalResourceSnapshot } from "../services/organization-resource-meter.service.js";
 
+function publicMeterDetails(resourceKey = "", fallbackUnit = "count") {
+    const key = resourceKey.toLowerCase();
+    if (key.includes("storage")) return { label: "Storage", unit: "storage unit" };
+    if (key.includes("email")) return { label: "Emails sent", unit: "email" };
+    if (key.includes("sms")) return { label: "SMS sent", unit: "message" };
+    if (key.includes("ai_")) return { label: "AI usage", unit: "usage unit" };
+    if (key.includes("agora") || key.includes("live")) return { label: "Live class minutes", unit: "minute" };
+    if (key.includes("api") || key.includes("request")) return { label: "Platform activity", unit: "activity" };
+    if (key.includes("student")) return { label: "Active students", unit: "student" };
+    return { label: "Usage", unit: fallbackUnit };
+}
+
 
 async function getStatusCounts(Model, match, field = "status") {
     const rows = await Model.aggregate([
@@ -289,11 +301,11 @@ export const getOrgUsage = async (req, res) => {
             currentMonthAmount += (record.totals?.amountInr || 0);
 
             (record.lineItems || []).forEach(item => {
+                const publicDetails = publicMeterDetails(item.resourceKey, item.unit);
                 const existing = lineItemAgg.get(item.resourceKey) || {
-                    provider: item.provider,
-                    resourceLabel: item.resourceLabel,
+                    resourceLabel: publicDetails.label,
                     totalQuantity: 0,
-                    unit: item.unit,
+                    unit: publicDetails.unit,
                     unitRateInr: item.unitRateInr,
                     amountInr: 0
                 };
@@ -309,12 +321,12 @@ export const getOrgUsage = async (req, res) => {
         const usagePayload = {
             billingLedger: {
                 currentMonth: {
-                    totalStorageGbDays,
-                    totalEmails: totalEmailMeters,
-                    totalSmsSegments: totalSmsMeters,
-                    totalApiRequests: totalApiMeters,
-                    totalAiTokens: totalAiMeters,
-                    totalAgoraMinutes: totalAgoraMeters,
+                    storageUsage: totalStorageGbDays,
+                    emailsSent: totalEmailMeters,
+                    smsSent: totalSmsMeters,
+                    platformActivity: totalApiMeters,
+                    aiUsage: totalAiMeters,
+                    liveClassMinutes: totalAgoraMeters,
                     totalAmountInr: Number(currentMonthAmount.toFixed(2)),
                     lineItems: [...lineItemAgg.values()].map(item => ({
                         ...item,
@@ -341,7 +353,7 @@ export const getOrgUsage = async (req, res) => {
                 configuredRateInr: configuredStorageRate,
                 knownChargeInr: knownStorageChargeInr,
                 coverage: "partial",
-                scope: "Supabase notes-files under student-notes/{orgId}. This excludes Cloudflare R2, Vercel, EC2, MongoDB byte allocation, and shared infrastructure costs."
+                scope: "Organization-scoped document storage. Shared infrastructure costs are not included."
             },
             db: {
                 notesCount: count || 0,
@@ -392,12 +404,22 @@ export const getOrgUsage = async (req, res) => {
             },
             coverage: {
                 providerCostAllocation: "partial",
-                reason: "The backend now stores internal per-organization resource meters and env-backed provider readiness. Vercel, EC2, Redis, MongoDB byte-cost, SMS, AI, Razorpay provider fees, and full R2 allocation still need provider/API syncs or tenant-tagged logs."
+                reason: "Internal organization usage is tracked. Some shared infrastructure and external delivery costs still require organization-level allocation."
             }
         };
 
         try {
-            usagePayload.resourceMeters = await recordInternalResourceSnapshot(orgId, usagePayload);
+            const resourceMeters = await recordInternalResourceSnapshot(orgId, usagePayload);
+            usagePayload.resourceMeters = resourceMeters.map((meter) => ({
+                category: meter.resourceType,
+                label: meter.metricLabel,
+                amount: meter.usageAmount,
+                unit: meter.unit,
+                cost: meter.costAmount,
+                currency: meter.currency,
+                quality: meter.quality,
+                updatedAt: meter.lastSyncedAt || meter.updatedAt,
+            }));
         } catch (meterError) {
             console.error("[AdminAnalytics] resource meter snapshot error:", meterError.message);
             usagePayload.resourceMeters = await getOrganizationResourceUsage(orgId);
@@ -717,11 +739,11 @@ export const getOrgAdminBillingDashboard = async (req, res) => {
             currentMonthAmount += (record.totals?.amountInr || 0);
 
             (record.lineItems || []).forEach(item => {
+                const publicDetails = publicMeterDetails(item.resourceKey, item.unit);
                 const existing = lineItemAgg.get(item.resourceKey) || {
-                    provider: item.provider,
-                    resourceLabel: item.resourceLabel,
+                    resourceLabel: publicDetails.label,
                     totalQuantity: 0,
-                    unit: item.unit,
+                    unit: publicDetails.unit,
                     unitRateInr: item.unitRateInr,
                     amountInr: 0
                 };
@@ -734,12 +756,12 @@ export const getOrgAdminBillingDashboard = async (req, res) => {
         // Time-series chart mapping (for Tremor)
         const dailyUsageSeries = dailyRecords.map(r => ({
             date: r.day.toISOString().split('T')[0], // YYYY-MM-DD
-            storageGbDays: r.totals?.storageGbDays || 0,
+            storageUsage: r.totals?.storageGbDays || 0,
             emails: r.totals?.emails || 0,
             sms: r.totals?.sms || 0,
-            apiRequests: r.totals?.apiRequests || 0,
-            aiTokens: r.totals?.aiTokens || 0,
-            agoraMinutes: r.totals?.agoraMinutes || 0,
+            platformActivity: r.totals?.apiRequests || 0,
+            aiUsage: r.totals?.aiTokens || 0,
+            liveClassMinutes: r.totals?.agoraMinutes || 0,
             amountInr: r.totals?.amountInr || 0
         })).sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -747,12 +769,12 @@ export const getOrgAdminBillingDashboard = async (req, res) => {
 
         res.json({
             currentMonth: {
-                totalStorageGbDays,
-                totalEmails: totalEmailMeters,
-                totalSmsSegments: totalSmsMeters,
-                totalApiRequests: totalApiMeters,
-                totalAiTokens: totalAiMeters,
-                totalAgoraMinutes: totalAgoraMeters,
+                storageUsage: totalStorageGbDays,
+                emailsSent: totalEmailMeters,
+                smsSent: totalSmsMeters,
+                platformActivity: totalApiMeters,
+                aiUsage: totalAiMeters,
+                liveClassMinutes: totalAgoraMeters,
                 totalAmountInr: Number(currentMonthAmount.toFixed(2)),
             },
             dailySeries: dailyUsageSeries,

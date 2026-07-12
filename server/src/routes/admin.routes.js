@@ -43,6 +43,7 @@ import {
 } from "../controllers/admin-analytics.controller.js";
 import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
 import { adminLimiter } from "../middleware/rateLimiter.js";
+import { getOrganizationConfig, updateOrganizationConfig } from "../controllers/org-configuration.controller.js";
 
 const router = express.Router();
 
@@ -83,6 +84,8 @@ router.get("/system-settings", isAuthenticated, requireRole("super_admin"), getS
 router.post("/system-settings", isAuthenticated, requireRole("super_admin"), updateSystemSettings);
 
 router.get("/usage/:orgId", isAuthenticated, requireRole("super_admin"), getOrgUsage);
+router.get("/org/:orgId/config", isAuthenticated, requireRole("super_admin"), getOrganizationConfig);
+router.put("/org/:orgId/config", isAuthenticated, requireRole("super_admin"), updateOrganizationConfig);
 router.get("/email-analytics", isAuthenticated, requireRole("super_admin"), getEmailAnalytics);
 router.get("/dashboard-analytics", isAuthenticated, requireRole("super_admin"), getDashboardAnalytics);
 router.get("/global-storage", isAuthenticated, requireRole("super_admin"), getGlobalStorageUsage);

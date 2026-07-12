@@ -46,8 +46,19 @@ import { isAuthenticated, requireRole } from "../middleware/auth.middleware.js";
 import { validateOrganization as joiValidateOrg, validateApplyOrg, validateFaculty, validateOrgCode, validateVerifyCode } from "../middleware/validation.middleware.js";
 import OrganizationPending from "../models/OrganizationPending.js";
 import rateLimit from "express-rate-limit";
+import {
+    getMyOrganizationConfig,
+    getOrganizationUsageSummary,
+    getOrganizationBilling,
+} from "../controllers/org-configuration.controller.js";
 
 const router = express.Router();
+
+// Self-service organization configuration, usage, and billing.
+// This router is mounted at both /api/organization and /api/org.
+router.get("/my-config", isAuthenticated, requireRole("org_admin"), getMyOrganizationConfig);
+router.get("/usage", isAuthenticated, requireRole("org_admin"), getOrganizationUsageSummary);
+router.get("/billing", isAuthenticated, requireRole("org_admin"), getOrganizationBilling);
 
 // Rate limiter for code verification — 10 attempts per 15 minutes per IP
 const verifyCodeLimiter = rateLimit({

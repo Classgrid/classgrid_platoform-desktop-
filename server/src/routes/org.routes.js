@@ -9,6 +9,7 @@ import { getChatSb } from "../config/supabaseClient.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { buildInstitutionProfile as buildSharedInstitutionProfile } from "../services/institution-profile.service.js";
 import { getOrgDashboardMetrics } from '../controllers/org-dashboard.controller.js';
+import { getMyOrganizationConfig, getOrganizationUsageSummary, getOrganizationBilling } from "../controllers/org-configuration.controller.js";
 import { getOrgAdminBillingDashboard, createSaasInvoiceOrder, verifySaasInvoicePayment } from '../controllers/admin-analytics.controller.js';
 import redis from '../config/redis.js';
 import {
@@ -36,6 +37,10 @@ import {
 } from "../controllers/support-communication.controller.js";
 
 const router = express.Router();
+
+router.get("/my-config", isAuthenticated, requireRole("org_admin"), getMyOrganizationConfig);
+router.get("/usage", isAuthenticated, requireRole("org_admin"), getOrganizationUsageSummary);
+router.get("/billing", isAuthenticated, requireRole("org_admin"), getOrganizationBilling);
 
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 

@@ -19,6 +19,8 @@ import { ParentTrackerPage } from "@/features/admission-portal/pages/ParentTrack
 
 import { DashboardHomePage } from "@/features/superadmin/pages/DashboardHomePage";
 import { OrgAdminDashboard } from "@/features/org-admin/components/OrgAdminDashboard";
+import { UsagePage } from "@/features/org-admin/pages/UsagePage";
+import { BillingPage } from "@/features/org-admin/pages/BillingPage";
 import { LeadsPage } from "@/features/superadmin/pages/LeadsPage";
 import { SupportTicketsPage } from "@/features/superadmin/pages/SupportTicketsPage";
 import { ReviewsPage } from "@/features/superadmin/pages/ReviewsPage";
@@ -227,6 +229,8 @@ export function AppRouter() {
           <Route path="/org/website" element={<WebsiteCMSPage />} />
           <Route path="/org/audit" element={<AuditPage />} />
           <Route path="/org/admin/dashboard" element={<OrgAdminDashboard />} />
+          <Route path="/org/admin/usage" element={<UsagePage />} />
+          <Route path="/org/admin/billing" element={<BillingPage />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
           <Route path="/org/*" element={<ComingSoonPage />} />
           

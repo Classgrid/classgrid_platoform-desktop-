@@ -44,6 +44,7 @@ const orgSubscriptionSchema = new mongoose.Schema({
   metadata: {
     max_students: { type: Number, default: 50 },  // Demo limit
     max_faculty: { type: Number, default: 5 },    // Demo limit
+    max_dept_admins: { type: Number, default: 0 },
     storage_limit_gb: { type: Number, default: 2 }, // S3/Document limit
     demo_review_reminder_sent_at: { type: Date, default: null },
     demo_ending_soon_sent_at: { type: Date, default: null },
@@ -62,6 +63,8 @@ const orgSubscriptionSchema = new mongoose.Schema({
     pricePerApiRequest:  { type: Number, default: 0 },   // ₹ per API request (EC2/Vercel)
     pricePerAiToken:     { type: Number, default: 0 },   // ₹ per AI token (OpenAI/Groq/Gemini)
     pricePerAgoraMinute: { type: Number, default: 0 },   // ₹ per Agora video participant-minute
+    pricePerFaculty:     { type: Number, default: 0 },
+    pricePerDeptAdmin:   { type: Number, default: 0 },
   }
 
 }, { timestamps: true });

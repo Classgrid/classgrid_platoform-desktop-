@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { AlertCircle, CreditCard, Database, Settings2, ShieldCheck } from "lucide-react";
+import { Activity, AlertCircle, CreditCard, Database, Settings2, ShieldCheck } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 import {
@@ -110,8 +110,8 @@ export function OrgDetailsPage() {
                   Overview
                 </TabsTrigger>
                 <TabsTrigger value="resources" className={tabTriggerClassName}>
-                  <Database aria-hidden="true" />
-                  Resources
+                  <Activity aria-hidden="true" />
+                  Usage
                 </TabsTrigger>
                 <TabsTrigger value="billing" className={tabTriggerClassName}>
                   <CreditCard aria-hidden="true" />

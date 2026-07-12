@@ -492,6 +492,22 @@ const organizationSchema = new mongoose.Schema(
             canteen_module: { type: Boolean, default: false },     // Canteen Management
             exam_proctoring: { type: Boolean, default: false },    // AI Proctoring for online exams
             custom_domain_module: { type: Boolean, default: false },
+            fee_module: { type: Boolean, default: false },
+            ai_assistant: { type: Boolean, default: false },
+            analytics_module: { type: Boolean, default: false },
+            website_module: { type: Boolean, default: false },
+            certificates_module: { type: Boolean, default: false },
+            events_module: { type: Boolean, default: false },
+            feedback_module: { type: Boolean, default: false },
+            holiday_module: { type: Boolean, default: false },
+            id_cards_module: { type: Boolean, default: false },
+            dashboard_admission: { type: Boolean, default: false },
+            dashboard_fees: { type: Boolean, default: false },
+            dashboard_exam: { type: Boolean, default: false },
+            dashboard_library: { type: Boolean, default: false },
+            dashboard_attendance: { type: Boolean, default: false },
+            dashboard_hr: { type: Boolean, default: false },
+            dashboard_hostel: { type: Boolean, default: false },
         },
         // 🔄 Academic Promotion Lock — prevents concurrent promotions
         is_promoting: {
