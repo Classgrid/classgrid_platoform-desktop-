@@ -148,7 +148,6 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
       rows={leads}
       isLoading={isLoading}
       emptyMessage="No leads found."
-      onRowClick={(row) => onManage(row._id)}
     />
   );
 }
