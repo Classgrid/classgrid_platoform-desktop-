@@ -168,14 +168,15 @@ export function TeamPage() {
     {
       key: "user",
       header: "User",
+      width: "w-full min-w-[250px]", // Let user column expand to fill space
       render: (_: any, row: TeamMember) => (
-        <div className="flex items-center gap-3 py-2 w-[250px] lg:w-[300px]">
+        <div className="flex items-center gap-3 py-2 pr-4">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium shrink-0">
             {row.name.substring(0, 2).toUpperCase()}
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-foreground leading-tight">{row.name}</span>
-            <span className="text-sm text-muted-foreground">{row.email}</span>
+          <div className="flex flex-col truncate">
+            <span className="font-medium text-foreground leading-tight truncate">{row.name}</span>
+            <span className="text-sm text-muted-foreground truncate">{row.email}</span>
           </div>
         </div>
       )
@@ -183,8 +184,9 @@ export function TeamPage() {
     {
       key: "role",
       header: "Role",
+      width: "w-[180px]",
       render: (_: any, row: TeamMember) => (
-        <div className="w-[160px]">
+        <div className="pr-4">
           <ResponsiveSelect
             className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={row.role}
@@ -201,33 +203,35 @@ export function TeamPage() {
     {
       key: "status",
       header: "Status",
+      width: "w-[120px]",
       render: (_: any, row: TeamMember) => (
-        <div className="w-[100px]">
-          <Badge variant={row.status === "active" ? "success" : row.status === "suspended" ? "danger" : "warning"} dot>
-            {row.status === "pending" ? "Pending" : row.status === "active" ? "Active" : "Suspended"}
-          </Badge>
-        </div>
+        <Badge variant={row.status === "active" ? "success" : row.status === "suspended" ? "danger" : "warning"} dot>
+          {row.status === "pending" ? "Pending" : row.status === "active" ? "Active" : "Suspended"}
+        </Badge>
       )
     },
     {
       key: "lastLogin",
       header: "Last Login",
+      width: "w-[140px]",
       render: (_: any, row: TeamMember) => (
-        <span className="text-sm text-muted-foreground w-[100px] block">{fmtDate(row.lastLogin)}</span>
+        <span className="text-sm text-muted-foreground">{fmtDate(row.lastLogin)}</span>
       )
     },
     {
       key: "date",
       header: isPending ? "Invited On" : "Joined",
+      width: "w-[140px]",
       render: (_: any, row: TeamMember) => (
-        <span className="text-sm text-muted-foreground w-[100px] block">{fmtDate(row.createdAt)}</span>
+        <span className="text-sm text-muted-foreground">{fmtDate(row.createdAt)}</span>
       )
     },
     {
       key: "actions",
       header: "",
+      width: "w-[60px]",
       render: (_: any, row: TeamMember) => (
-        <div className="flex justify-end pr-4">
+        <div className="flex justify-end">
             <Button
               size="sm"
               variant="ghost"
