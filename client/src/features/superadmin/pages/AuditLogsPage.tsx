@@ -136,10 +136,10 @@ export function AuditLogsPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8 pb-12">
+    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8">
       
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
+      <div className="flex-none flex items-center justify-between border-b border-border pb-4 mb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Audit Logs
@@ -150,7 +150,7 @@ export function AuditLogsPage() {
       </div>
 
       {error && error.message === "RESCUE_REQUIRED" ? (
-        <div className="flex flex-col items-center justify-center flex-1 bg-card border border-border rounded-lg shadow-sm p-8 space-y-4">
+        <div className="flex flex-col items-center justify-center flex-1 min-h-0 bg-card border border-border rounded-lg shadow-sm p-8 space-y-4">
           <div className="text-red-500 mb-2">
             <StopCircle size={48} />
           </div>
@@ -171,10 +171,10 @@ export function AuditLogsPage() {
           </div>
         </div>
       ) : (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col flex-1 min-h-0 gap-4">
         
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex-none flex items-center justify-between">
           
           {/* Left Side Buttons */}
           <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 overflow-auto pb-4">
+      <div className="flex-1 min-h-0 overflow-auto pb-4">
         <DataTable 
           columns={columns} 
           rows={logs} 
