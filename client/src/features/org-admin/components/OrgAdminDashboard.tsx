@@ -120,27 +120,27 @@ export function OrgAdminDashboard() {
     ];
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto pb-12 bg-[#000000] text-white min-h-screen p-8">
-            <div className="border-b border-[#333] pb-4">
-                <h1 className="text-3xl font-bold tracking-tight text-white">Usage & Billing Console</h1>
-                <p className="text-gray-400 mt-1 font-mono text-sm">MONITOR_ORG_RESOURCE_CONSUMPTION // PAY_AS_YOU_GO</p>
+        <div className="space-y-8 max-w-7xl mx-auto pb-12">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Usage & Billing</h1>
+                <p className="text-muted-foreground mt-1">Monitor your organization's pay-as-you-go resource consumption.</p>
             </div>
 
-            {/* AGORA STYLE USAGE CHART */}
-            <div className="border border-[#333] bg-[#000000] overflow-hidden rounded-none">
-                <div className="p-4 border-b border-[#333] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#111827]">
+            {/* VERCEL STYLE USAGE CHART */}
+            <div className="rounded-xl border border-border/40 bg-card overflow-hidden">
+                <div className="p-6 border-b border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/20">
                     <div className="flex items-center gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-mono border border-[#333] rounded-none bg-black hover:bg-[#222] transition-colors text-white">
+                                <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium border rounded-md bg-background hover:bg-muted transition-colors">
                                     <selectedMetric.icon className="h-4 w-4" style={{ color: selectedMetric.color }} />
                                     {selectedMetric.label}
                                     <ChevronDown className="h-4 w-4 opacity-50" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-[200px] rounded-none border-[#333] bg-black text-white">
+                            <DropdownMenuContent align="start" className="w-[200px]">
                                 {METRICS.map(m => (
-                                    <DropdownMenuItem key={m.key} onClick={() => setSelectedMetric(m)} className="rounded-none hover:bg-[#333] cursor-pointer">
+                                    <DropdownMenuItem key={m.key} onClick={() => setSelectedMetric(m)}>
                                         <m.icon className="h-4 w-4 mr-2" style={{ color: m.color }} />
                                         {m.label}
                                     </DropdownMenuItem>
@@ -148,14 +148,14 @@ export function OrgAdminDashboard() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    <div className="text-sm text-gray-400 text-right font-mono">
-                        <div>TOTAL_MTD</div>
-                        <div className="font-bold text-white text-lg">
+                    <div className="text-sm text-muted-foreground text-right">
+                        <div>Total this month</div>
+                        <div className="font-semibold text-foreground text-lg">
                             {formatNumber(dailySeries.reduce((acc, curr) => acc + (curr[selectedMetric.key as keyof typeof curr] as number), 0))}
                         </div>
                     </div>
                 </div>
-                <div className="p-6 bg-black">
+                <div className="p-6">
                     <BarChart
                         data={dailySeries}
                         index="date"
@@ -167,21 +167,21 @@ export function OrgAdminDashboard() {
                     />
                 </div>
                 
-                {/* Agora style limit bars */}
-                <div className="border-t border-[#333]">
-                    <div className="p-3 px-6 bg-[#111827]">
-                        <h3 className="text-sm font-mono text-gray-300 font-bold tracking-wider">RESOURCE_METRICS</h3>
+                {/* Vercel style limit bars */}
+                <div className="border-t border-border/40">
+                    <div className="p-4 px-6 bg-muted/10">
+                        <h3 className="text-sm font-medium">Overview</h3>
                     </div>
-                    <div className="divide-y divide-[#333] max-h-[300px] overflow-y-auto bg-black">
+                    <div className="divide-y divide-border/40 max-h-[300px] overflow-y-auto">
                         {usageItems.map((item, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 px-6 hover:bg-[#111] transition-colors">
+                            <div key={i} className="flex items-center justify-between p-4 px-6 hover:bg-muted/5 transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-3 w-3 border border-[#34d399] flex items-center justify-center bg-black">
-                                        <div className="h-1 w-1 bg-[#34d399]" />
+                                    <div className="h-4 w-4 rounded-full border-2 border-primary/20 flex items-center justify-center">
+                                        <div className="h-1.5 w-1.5 bg-primary rounded-full" />
                                     </div>
-                                    <span className="text-sm font-mono text-gray-300">{item.label}</span>
+                                    <span className="text-sm font-medium text-foreground">{item.label}</span>
                                 </div>
-                                <div className="text-sm text-[#34d399] font-mono">
+                                <div className="text-sm text-muted-foreground font-mono">
                                     {formatNumber(item.value)} {item.unit}
                                 </div>
                             </div>
@@ -192,36 +192,36 @@ export function OrgAdminDashboard() {
 
             {/* INVOICE SECTION */}
             <div className="grid gap-6 md:grid-cols-2">
-                <div className="border border-[#333] bg-black p-6 flex flex-col justify-center items-center text-center rounded-none shadow-[0_0_15px_rgba(52,211,153,0.1)]">
-                    <Receipt className="h-10 w-10 text-gray-500 mb-4" />
-                    <h3 className="text-xl font-mono text-gray-200 mb-1">ACCRUED_UNBILLED</h3>
-                    <p className="text-gray-500 text-sm mb-4 font-mono">Current month usage cost (excl. tax)</p>
-                    <div className="text-5xl font-bold tracking-tight text-[#34d399] font-mono">
+                <div className="rounded-xl border border-border/40 bg-card p-6 flex flex-col justify-center items-center text-center">
+                    <Receipt className="h-10 w-10 text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-1">Current Month Accrued</h3>
+                    <p className="text-muted-foreground text-sm mb-4">Pay-As-You-Go charges generated this month (excl. GST).</p>
+                    <div className="text-5xl font-bold tracking-tight">
                         {formatCurrency(currentMonth.totalAmountInr)}
                     </div>
                 </div>
 
-                <div className="border border-[#333] bg-black p-6 rounded-none">
-                    <h3 className="text-lg font-mono text-gray-200 mb-4 border-b border-[#333] pb-2">LATEST_INVOICE</h3>
+                <div className="rounded-xl border border-border/40 bg-card p-6">
+                    <h3 className="text-lg font-semibold mb-4">Latest Invoice</h3>
                     {latestInvoice ? (
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center pb-4 border-b border-[#333]">
+                            <div className="flex justify-between items-center pb-4 border-b border-border/40">
                                 <div>
-                                    <div className="text-xs font-mono text-gray-500">ID</div>
-                                    <div className="font-mono text-gray-200">{latestInvoice.invoiceNumber}</div>
+                                    <div className="text-sm text-muted-foreground">Invoice Number</div>
+                                    <div className="font-medium">{latestInvoice.invoiceNumber}</div>
                                 </div>
-                                <span className={`px-2 py-1 text-xs font-mono border rounded-none ${latestInvoice.status === 'paid' ? 'bg-[#34d399]/10 text-[#34d399] border-[#34d399]/30' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'}`}>
+                                <Badge variant={latestInvoice.status === 'paid' ? 'success' : 'warning'}>
                                     {latestInvoice.status.toUpperCase()}
-                                </span>
+                                </Badge>
                             </div>
-                            <div className="flex justify-between items-center pb-4 border-b border-[#333]">
+                            <div className="flex justify-between items-center pb-4 border-b border-border/40">
                                 <div>
-                                    <div className="text-xs font-mono text-gray-500">TOTAL</div>
-                                    <div className="font-mono text-lg text-white">{formatCurrency(latestInvoice.totalAmountInr)}</div>
+                                    <div className="text-sm text-muted-foreground">Total Amount</div>
+                                    <div className="font-medium text-lg">{formatCurrency(latestInvoice.totalAmountInr)}</div>
                                 </div>
                                 <div>
-                                    <div className="text-xs font-mono text-gray-500 text-right">DUE</div>
-                                    <div className="font-mono text-gray-200">{new Date(latestInvoice.dueDate).toLocaleDateString()}</div>
+                                    <div className="text-sm text-muted-foreground text-right">Due Date</div>
+                                    <div className="font-medium">{new Date(latestInvoice.dueDate).toLocaleDateString()}</div>
                                 </div>
                             </div>
                             
@@ -229,29 +229,27 @@ export function OrgAdminDashboard() {
                                 <button 
                                     onClick={handleRazorpayCheckout}
                                     disabled={isPaying}
-                                    className="w-full inline-flex justify-center items-center gap-2 rounded-none bg-[#34d399] px-4 py-3 text-sm font-mono text-black font-bold hover:bg-[#34d399]/90 mt-2 disabled:opacity-50 transition-colors"
+                                    className="w-full inline-flex justify-center items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 mt-2 disabled:opacity-50"
                                 >
                                     <CreditCard className="h-4 w-4" />
-                                    {isPaying ? "PROCESSING..." : "PAY_NOW_RZP"}
+                                    {isPaying ? "Processing..." : "Pay Now via Razorpay"}
                                 </button>
                             ) : (
-                                <div className="bg-[#34d399]/10 border border-[#34d399]/30 text-[#34d399] p-3 flex items-start gap-3 mt-2 rounded-none">
-                                    <CheckCircle2 className="h-5 w-5 shrink-0" />
-                                    <div>
-                                        <div className="font-mono font-bold text-sm">SETTLED</div>
-                                        <div className="font-mono text-xs opacity-80 mt-1">Invoice has been paid in full.</div>
-                                    </div>
-                                </div>
+                                <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 mt-2">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    <AlertTitle>Fully Paid</AlertTitle>
+                                    <AlertDescription>Thank you! Your latest invoice has been paid.</AlertDescription>
+                                </Alert>
                             )}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <div className="h-12 w-12 border border-[#333] bg-[#111] flex items-center justify-center mb-3 rounded-none">
-                                <Receipt className="h-5 w-5 text-gray-600" />
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                                <Receipt className="h-6 w-6 text-muted-foreground" />
                             </div>
-                            <h4 className="text-sm font-mono text-gray-400">NO_RECORDS</h4>
-                            <p className="text-xs text-gray-600 mt-2 font-mono">
-                                Next generation cycle: 01_NEXT_MONTH
+                            <h4 className="text-sm font-medium">No Invoices Yet</h4>
+                            <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                                Your first invoice will be generated on the 1st of next month.
                             </p>
                         </div>
                     )}
