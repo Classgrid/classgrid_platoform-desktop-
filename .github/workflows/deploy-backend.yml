@@ -40,6 +40,5 @@ jobs:
             cd server
             echo "$PRODUCTION_ENV" > .env
             npm install --omit=dev
-            pm2 restart all
-
+            pm2 startOrReload ecosystem.config.cjs --env production --update-env
 
