@@ -672,6 +672,106 @@ export const getGlobalStorageUsage = async (req, res) => {
     }
 };
 
+// --- Org Admin Pay-As-You-Go Billing ---
+
+export const getOrgAdminBillingDashboard = async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // Fetch Sub/Billing
+        const subscription = await OrgSubscription.findOne({ organizationId: orgId }).lean();
+        const configuredStorageRate = subscription?.metadata?.custom_storage_rate_inr || 0;
+        const includedGb = subscription?.metadata?.included_storage_gb || 0;
+
+        // Determine live legacy storage bytes
+        let currentStorageBytes = 0;
+        const { count } = await studentNotesClient
+            .from('student_notes')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', orgId);
+        
+        currentStorageBytes = (count || 0) * (2.5 * 1024 * 1024);
+        const currentStorageGb = currentStorageBytes / (1024 * 1024 * 1024);
+        const billableStorageGb = Math.max(0, currentStorageGb - includedGb);
+
+        // Fetch Pay-As-You-Go Billing Ledger (Current Month)
+        const dailyRecords = await OrganizationUsageDaily.find({
+            organizationId: orgId,
+            day: { $gte: startOfMonth }
+        }).lean();
+
+        let totalStorageGbDays = 0, totalEmailMeters = 0, totalSmsMeters = 0, totalApiMeters = 0, totalAiMeters = 0, totalAgoraMeters = 0, currentMonthAmount = 0;
+        const lineItemAgg = new Map();
+
+        dailyRecords.forEach(record => {
+            totalStorageGbDays += (record.totals?.storageGbDays || 0);
+            totalEmailMeters += (record.totals?.emails || 0);
+            totalSmsMeters += (record.totals?.sms || 0);
+            totalApiMeters += (record.totals?.apiRequests || 0);
+            totalAiMeters += (record.totals?.aiTokens || 0);
+            totalAgoraMeters += (record.totals?.agoraMinutes || 0);
+            currentMonthAmount += (record.totals?.amountInr || 0);
+
+            (record.lineItems || []).forEach(item => {
+                const existing = lineItemAgg.get(item.resourceKey) || {
+                    provider: item.provider,
+                    resourceLabel: item.resourceLabel,
+                    totalQuantity: 0,
+                    unit: item.unit,
+                    unitRateInr: item.unitRateInr,
+                    amountInr: 0
+                };
+                existing.totalQuantity += item.quantity || 0;
+                existing.amountInr += item.amountInr || 0;
+                lineItemAgg.set(item.resourceKey, existing);
+            });
+        });
+
+        // Time-series chart mapping (for Tremor)
+        const dailyUsageSeries = dailyRecords.map(r => ({
+            date: r.day.toISOString().split('T')[0], // YYYY-MM-DD
+            storageGbDays: r.totals?.storageGbDays || 0,
+            emails: r.totals?.emails || 0,
+            sms: r.totals?.sms || 0,
+            apiRequests: r.totals?.apiRequests || 0,
+            aiTokens: r.totals?.aiTokens || 0,
+            agoraMinutes: r.totals?.agoraMinutes || 0,
+            amountInr: r.totals?.amountInr || 0
+        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const latestInvoice = await SaasInvoice.findOne({ organizationId: orgId }).sort({ "billingPeriod.year": -1, "billingPeriod.month": -1 }).lean();
+
+        res.json({
+            currentMonth: {
+                totalStorageGbDays,
+                totalEmails: totalEmailMeters,
+                totalSmsSegments: totalSmsMeters,
+                totalApiRequests: totalApiMeters,
+                totalAiTokens: totalAiMeters,
+                totalAgoraMinutes: totalAgoraMeters,
+                totalAmountInr: Number(currentMonthAmount.toFixed(2)),
+            },
+            dailySeries: dailyUsageSeries,
+            latestInvoice: latestInvoice ? {
+                id: latestInvoice._id,
+                invoiceNumber: latestInvoice.invoiceNumber,
+                totalAmountInr: latestInvoice.totalAmountInr,
+                status: latestInvoice.status,
+                dueDate: latestInvoice.dueDate,
+                month: latestInvoice.billingPeriod?.month,
+                year: latestInvoice.billingPeriod?.year
+            } : null
+        });
+    } catch (err) {
+        console.error("[Org Admin Billing Error]:", err);
+        res.status(500).json({ message: "Server error fetching billing data" });
+    }
+};
+
 // --- Razorpay Payment Handlers for SaaS Invoices ---
 
 export const createSaasInvoiceOrder = async (req, res) => {
