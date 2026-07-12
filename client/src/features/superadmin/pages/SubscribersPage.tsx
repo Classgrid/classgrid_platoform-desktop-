@@ -349,8 +349,13 @@ export function SubscribersPage() {
                         index="label"
                         categories={["subscribed", "unsubscribed"]}
                         colors={["emerald-500", "red-500"]}
-                        yAxisWidth={48}
+                        valueFormatter={(number: number) =>
+                          Intl.NumberFormat("us").format(number).toString()
+                        }
+                        yAxisWidth={40}
+                        showLegend={true}
                         showAnimation={true}
+                        xAxisLabel="Last 14 Days"
                     />
                 )}
             </CardContent>
