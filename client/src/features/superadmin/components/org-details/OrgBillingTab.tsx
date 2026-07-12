@@ -102,8 +102,6 @@ export function OrgBillingTab({
       ? subtotalParts.reduce((sum, value) => sum + value, 0)
       : undefined;
 
-  return (
-    <div className="space-y-6">
   const ledger = legacyUsage?.billingLedger?.currentMonth;
   const latestInvoice = legacyUsage?.billingLedger?.latestInvoice;
 
@@ -185,6 +183,7 @@ export function OrgBillingTab({
             <span className="mt-2 text-sm text-muted-foreground">Excludes 18% GST (Calculated at end of month)</span>
           </div>
         </OrgSectionCard>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <OrgSectionCard
