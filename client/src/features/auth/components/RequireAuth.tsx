@@ -13,13 +13,16 @@ export function RequireAuth() {
   }
 
   if (!user) {
-    return (
-      <Navigate
-        to={getLoginPathForPath(location.pathname)}
-        replace
-        state={{ from: location }}
-      />
-    );
+    const isRescueAuth = location.pathname === "/superadmin/audit-logs" && localStorage.getItem("rescue_token");
+    if (!isRescueAuth) {
+      return (
+        <Navigate
+          to={getLoginPathForPath(location.pathname)}
+          replace
+          state={{ from: location }}
+        />
+      );
+    }
   }
 
   const path = location.pathname;
@@ -27,15 +30,18 @@ export function RequireAuth() {
   // 🚨 STRICT ROLE GUARDS 🚨
   
   // 1. Super Admin Guard — role check
-  if (path.startsWith("/superadmin") && user.role !== "super_admin") {
-    return <Navigate to={getRedirectPath(user.role)} replace />;
+  if (path.startsWith("/superadmin") && user?.role !== "super_admin") {
+    const isRescueAuth = path === "/superadmin/audit-logs" && localStorage.getItem("rescue_token");
+    if (!isRescueAuth) {
+      return <Navigate to={getRedirectPath(user?.role)} replace />;
+    }
   }
 
   // 🔐 Super Admin Domain Lock
   // /superadmin/* routes are EXCLUSIVELY accessible from superadmin.classgrid.in.
   // If a super_admin tries to reach these routes from any other subdomain
   // (e.g. sunita.classgrid.in/superadmin/dashboard), redirect them to the correct domain.
-  if (path.startsWith("/superadmin") && user.role === "super_admin") {
+  if (path.startsWith("/superadmin") && user?.role === "super_admin") {
     const currentHostname = window.location.hostname;
     const isSuperAdminDomain = currentHostname === "superadmin.classgrid.in" || currentHostname === "localhost" || currentHostname.startsWith("127.0.0.1");
     if (!isSuperAdminDomain) {
@@ -58,13 +64,13 @@ export function RequireAuth() {
   }
 
   // 4. Strict Domain Enforcer (Kill old/invalid subdomains)
-  if (user.organization?.subdomain) {
+  if (user?.organization?.subdomain) {
     const currentHostname = window.location.hostname;
-    const orgSubdomainHost = `${user.organization.subdomain}.classgrid.in`;
-    const orgCustomDomainObj = user.organization.custom_domain as any;
+    const orgSubdomainHost = `${user?.organization?.subdomain}.classgrid.in`;
+    const orgCustomDomainObj = user?.organization?.custom_domain as any;
     const orgCustomDomain = orgCustomDomainObj?.domain;
     
-    const orgErpDomainObj = user.organization.erp_domain as any;
+    const orgErpDomainObj = user?.organization?.erp_domain as any;
     const orgErpDomain = orgErpDomainObj?.domain;
     
     const isClassgridSubdomain = currentHostname.endsWith(".classgrid.in") && currentHostname !== "classgrid.in";
@@ -89,7 +95,7 @@ export function RequireAuth() {
   }
 
   return (
-    <PresenceProvider userId={user._id || null}>
+    <PresenceProvider userId={user?._id || null}>
       <Outlet />
     </PresenceProvider>
   );

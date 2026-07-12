@@ -257,6 +257,5 @@ export function AuditLogsPage() {
       </div>
       )}
     </div>
-    </div>
   );
 }

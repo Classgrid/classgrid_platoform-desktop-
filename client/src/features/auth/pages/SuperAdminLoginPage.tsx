@@ -15,6 +15,8 @@ export function SuperAdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isRescueMode, setIsRescueMode] = useState(false);
+  const [rescuePassword, setRescuePassword] = useState("");
 
   // ðŸ” Domain Lock: Super Admin login is EXCLUSIVELY on superadmin.classgrid.in
   // If someone navigates to /superadmin/login on any other subdomain, hard-redirect them.
@@ -101,6 +103,25 @@ export function SuperAdminLoginPage() {
     }
   };
 
+  const handleRescueLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const axios = (await import("axios")).default;
+      const r = await axios.post("/api/rescue/login", { 
+         email: "support@classgrid.in", 
+         password: rescuePassword 
+      });
+      localStorage.setItem("rescue_token", r.data.token);
+      toast.success("Rescue Mode Activated!");
+      navigate("/superadmin/audit-logs");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to connect to Rescue Server.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="super-admin-wrapper">
 
@@ -134,6 +155,7 @@ export function SuperAdminLoginPage() {
           <div className="auth-container">
             
             {/* LOGIN FORM */}
+            {!isRescueMode ? (
             <form className="auth-form active" onSubmit={handleLogin}>
               <h2 className="form-title">Super Admin Portal</h2>
               <p className="form-subtitle">Secure system access</p>
@@ -231,7 +253,50 @@ export function SuperAdminLoginPage() {
                 <span>{isResetting ? "Sending..." : "Reset Password"}</span>
                 {!isResetting && <i className="fas fa-key"></i>}
               </button>
+              <button type="button" className="reset-password-btn" onClick={() => setIsRescueMode(true)} style={{ marginTop: "1rem", color: "#e11d48" }}>
+                <span>Emergency Rescue Login</span>
+                <i className="fas fa-life-ring"></i>
+              </button>
             </form>
+            ) : (
+            <form className="auth-form active" onSubmit={handleRescueLogin}>
+              <h2 className="form-title" style={{ color: "#e11d48" }}>Rescue Mode</h2>
+              <p className="form-subtitle">Main server offline? Login via Rescue Server.</p>
+
+              <div className="form-group" style={{ marginTop: "2rem" }}>
+                <label className="form-label" htmlFor="rescuePassword">Rescue Password</label>
+                <div className="input-group">
+                  <i className="fas fa-lock input-icon"></i>
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    id="rescuePassword" 
+                    className="form-input"
+                    placeholder="Enter RESCUE_PASSWORD" 
+                    required 
+                    value={rescuePassword}
+                    onChange={e => setRescuePassword(e.target.value)}
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle" 
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" className="submit-btn" style={{ background: "#e11d48" }} disabled={isLoading}>
+                <span>{isLoading ? "Connecting..." : "Enter Rescue Mode"}</span>
+                {!isLoading && <i className="fas fa-bolt"></i>}
+              </button>
+
+              <button type="button" className="reset-password-btn" onClick={() => setIsRescueMode(false)}>
+                <span>Back to Normal Login</span>
+                <i className="fas fa-arrow-left"></i>
+              </button>
+            </form>
+            )}
 
             {/* Footer */}
             <div className="page-footer">
