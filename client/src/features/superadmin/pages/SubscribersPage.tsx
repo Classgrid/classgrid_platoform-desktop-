@@ -225,7 +225,7 @@ export function SubscribersPage() {
     () => [
       {
         key: "email",
-        header: "Unsubscribed Email",
+        header: "Email",
         render: (_val: any, row: BlogSubscriber) => (
             <div className="flex flex-col gap-1">
                 <span className="font-medium text-sm text-foreground">{row.email}</span>
@@ -235,8 +235,8 @@ export function SubscribersPage() {
       },
       {
         key: "updated_at",
-        header: "Paused / Unsubscribed On",
-        width: "w-[200px]",
+        header: "Paused On",
+        width: "w-[150px]",
         render: (_val: any, row: BlogSubscriber) => (
             <span className="text-sm text-muted-foreground">{formatSubscriberDate(row.updated_at)}</span>
         )
@@ -417,7 +417,7 @@ export function SubscribersPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Paused / Unsubscribed List</CardTitle>
+                <CardTitle>Paused</CardTitle>
                 <p className="text-sm text-muted-foreground">People who will not receive the next blog or changelog email.</p>
             </CardHeader>
             <div className="p-4 pt-0">
