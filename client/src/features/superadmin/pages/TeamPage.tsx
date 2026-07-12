@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Shield, Trash2, Plus } from "lucide-react";
+import { Shield, Trash2, Plus, MoreHorizontal, Search, XCircle, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -83,10 +83,11 @@ const EMPTY_FORM = { email: "", role: "co_super_admin" as PlatformRole };
 
 export function TeamPage() {
   const qc = useQueryClient();
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState<Partial<typeof EMPTY_FORM>>({});
+  const [forms, setForms] = useState([EMPTY_FORM]);
+  const [errors, setErrors] = useState<Array<Partial<typeof EMPTY_FORM>>>([]);
   const [formResult, setFormResult] = useState<{ success: boolean; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState("team-members");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["superadmin-platform-team"],
@@ -99,20 +100,6 @@ export function TeamPage() {
   const activeMembers = team.filter((m) => m.status !== "pending");
   const pendingMembers = team.filter((m) => m.status === "pending");
 
-  const inviteMutation = useMutation({
-    mutationFn: (payload: typeof form & { name: string }) => teamApi.inviteMember(payload),
-    onSuccess: (res) => {
-      setFormResult({ success: true, message: res.message ?? "Invitation sent successfully." });
-      setForm(EMPTY_FORM);
-      setActiveTab("pending-invitations");
-      qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
-      setTimeout(() => setFormResult(null), 5000);
-    },
-    onError: (err: any) => {
-      setFormResult({ success: false, message: err?.response?.data?.message || err?.message || "Failed to invite member." });
-    }
-  });
-
   const removeMutation = useMutation({
     mutationFn: (id: string) => teamApi.removeMember(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] })
@@ -123,26 +110,53 @@ export function TeamPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] })
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormResult(null);
 
-    const newErrors: Partial<typeof EMPTY_FORM> = {};
-    if (!form.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = "Invalid email format.";
+    const newErrors: Array<Partial<typeof EMPTY_FORM>> = [];
+    let hasError = false;
+
+    forms.forEach((f, i) => {
+        const err: Partial<typeof EMPTY_FORM> = {};
+        if (!f.email.trim()) {
+            err.email = "Email is required.";
+            hasError = true;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
+            err.email = "Invalid email format.";
+            hasError = true;
+        }
+        newErrors[i] = err;
+    });
+
+    if (hasError) {
+        setErrors(newErrors);
+        return;
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+    setErrors([]);
+    setIsSubmitting(true);
+    
+    try {
+        await Promise.all(forms.map(f => {
+            const autoName = f.email.split("@")[0] || "New Member";
+            return teamApi.inviteMember({ ...f, name: autoName });
+        }));
+        
+        setFormResult({ success: true, message: "Invitations sent successfully." });
+        setForms([EMPTY_FORM]);
+        setActiveTab("pending-invitations");
+        qc.invalidateQueries({ queryKey: ["superadmin-platform-team"] });
+        setTimeout(() => setFormResult(null), 5000);
+    } catch (err: any) {
+        setFormResult({ success: false, message: err?.response?.data?.message || err?.message || "Failed to invite members." });
+    } finally {
+        setIsSubmitting(false);
     }
+  };
 
-    setErrors({});
-    // We auto-generate a name from the email prefix for now since Vercel's UI only asks for Email and Role.
-    const autoName = form.email.split("@")[0] || "New Member";
-    inviteMutation.mutate({ ...form, name: autoName });
+  const handleAddMore = () => {
+    setForms([...forms, EMPTY_FORM]);
   };
 
   const getColumns = (isPending: boolean) => [
@@ -150,9 +164,14 @@ export function TeamPage() {
       key: "user",
       header: "User",
       render: (_: any, row: TeamMember) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-foreground">{row.name}</span>
-          <span className="text-sm text-muted-foreground">{row.email}</span>
+        <div className="flex items-center gap-3 py-2 w-[250px] lg:w-[300px]">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium shrink-0">
+            {row.name.substring(0, 2).toUpperCase()}
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground leading-tight">{row.name}</span>
+            <span className="text-sm text-muted-foreground">{row.email}</span>
+          </div>
         </div>
       )
     },
@@ -160,9 +179,9 @@ export function TeamPage() {
       key: "role",
       header: "Role",
       render: (_: any, row: TeamMember) => (
-        <div className="w-[180px]">
+        <div className="w-[160px]">
           <ResponsiveSelect
-            className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             value={row.role}
             onChange={(e) => roleUpdateMutation.mutate({ id: row._id, role: e.target.value as PlatformRole })}
             disabled={roleUpdateMutation.isPending}
@@ -178,16 +197,25 @@ export function TeamPage() {
       key: "status",
       header: "Status",
       render: (_: any, row: TeamMember) => (
-        <Badge variant={row.status === "active" ? "success" : row.status === "suspended" ? "danger" : "warning"} dot>
-          {row.status === "pending" ? "Pending" : row.status === "active" ? "Active" : "Suspended"}
-        </Badge>
+        <div className="w-[100px]">
+          <Badge variant={row.status === "active" ? "success" : row.status === "suspended" ? "danger" : "warning"} dot>
+            {row.status === "pending" ? "Pending" : row.status === "active" ? "Active" : "Suspended"}
+          </Badge>
+        </div>
+      )
+    },
+    {
+      key: "lastLogin",
+      header: "Last Login",
+      render: (_: any, row: TeamMember) => (
+        <span className="text-sm text-muted-foreground w-[100px] block">{fmtDate(row.lastLogin)}</span>
       )
     },
     {
       key: "date",
       header: isPending ? "Invited On" : "Joined",
       render: (_: any, row: TeamMember) => (
-        <span className="text-sm text-muted-foreground">{fmtDate(row.createdAt)}</span>
+        <span className="text-sm text-muted-foreground w-[100px] block">{fmtDate(row.createdAt)}</span>
       )
     },
     {
@@ -198,7 +226,7 @@ export function TeamPage() {
             <Button
               size="sm"
               variant="ghost"
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-2"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 h-8 px-2 rounded-md"
               onClick={() => removeMutation.mutate(row._id)}
               disabled={removeMutation.isPending}
               title={isPending ? "Revoke Invite" : "Remove Member"}
@@ -238,43 +266,68 @@ export function TeamPage() {
                         {formResult.message}
                     </div>
                 )}
-                <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
-                    <div className="flex-1 w-full space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Email Address</label>
-                        <Input
-                            type="email"
-                            placeholder="jane@example.com"
-                            className={errors.email ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
-                            value={form.email}
-                            onChange={(e) => {
-                                setForm((f) => ({ ...f, email: e.target.value }));
-                                setErrors((errs) => ({ ...errs, email: undefined }));
-                            }}
-                        />
-                        {errors.email && <span className="text-xs font-medium text-danger">{errors.email}</span>}
-                    </div>
-                    <div className="w-full sm:w-[240px] space-y-1.5">
-                        <label className="text-sm font-medium text-foreground">Role</label>
-                        <ResponsiveSelect
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            value={form.role}
-                            onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as PlatformRole }))}
-                        >
-                            {PLATFORM_ROLES.map((r) => (
-                                <option key={r.value} value={r.value}>{r.label}</option>
-                            ))}
-                        </ResponsiveSelect>
-                    </div>
-                </div>
                 
-                <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 text-muted-foreground" onClick={() => {}}>
+                {forms.map((f, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row items-start gap-4 mb-4">
+                        <div className="flex-1 w-full space-y-1.5">
+                            {index === 0 && <label className="text-sm font-medium text-foreground">Email Address</label>}
+                            <Input
+                                type="email"
+                                placeholder="jane@example.com"
+                                className={errors[index]?.email ? "border-danger focus-visible:ring-danger bg-background" : "bg-background"}
+                                value={f.email}
+                                onChange={(e) => {
+                                    const newForms = [...forms];
+                                    newForms[index] = { ...newForms[index], email: e.target.value };
+                                    setForms(newForms);
+                                    
+                                    if (errors[index]?.email) {
+                                        const newErrors = [...errors];
+                                        newErrors[index] = { ...newErrors[index], email: undefined };
+                                        setErrors(newErrors);
+                                    }
+                                }}
+                            />
+                            {errors[index]?.email && <span className="text-xs font-medium text-danger">{errors[index]?.email}</span>}
+                        </div>
+                        <div className="w-full sm:w-[240px] flex items-start gap-2">
+                            <div className="flex-1 space-y-1.5">
+                                {index === 0 && <label className="text-sm font-medium text-foreground">Role</label>}
+                                <ResponsiveSelect
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    value={f.role}
+                                    onChange={(e) => {
+                                        const newForms = [...forms];
+                                        newForms[index] = { ...newForms[index], role: e.target.value as PlatformRole };
+                                        setForms(newForms);
+                                    }}
+                                >
+                                    {PLATFORM_ROLES.map((r) => (
+                                        <option key={r.value} value={r.value}>{r.label}</option>
+                                    ))}
+                                </ResponsiveSelect>
+                            </div>
+                            {forms.length > 1 && (
+                                <div className={index === 0 ? "pt-6" : ""}>
+                                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-danger flex-shrink-0" onClick={() => {
+                                        setForms(forms.filter((_, i) => i !== index));
+                                        setErrors(errors.filter((_, i) => i !== index));
+                                    }}>
+                                        <X size={16} />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+                
+                <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 text-muted-foreground mt-2" onClick={handleAddMore}>
                     <Plus size={14} /> Add more
                 </Button>
             </div>
 
-            <div className="bg-muted/30 border-t border-border px-6 py-4 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Invitations will be sent securely via email.</span>
-                <Button type="submit" isLoading={inviteMutation.isPending} className="bg-primary text-primary-foreground">
+            <div className="bg-muted/30 border-t border-border px-6 py-4 flex items-center justify-end">
+                <Button type="submit" isLoading={isSubmitting} className="bg-primary text-primary-foreground font-medium w-[120px]">
                     Send Invite
                 </Button>
             </div>
@@ -289,6 +342,25 @@ export function TeamPage() {
           <TabsTrigger value="pending-invitations">Pending Invitations</TabsTrigger>
         </TabsList>
         
+        {/* Vercel Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-4 w-full">
+            <div className="relative flex-1 w-full max-w-[400px]">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input className="pl-9 h-10 w-full bg-background" placeholder="Filter" />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 sm:ml-auto">
+                <Button variant="outline" className="h-10 bg-background text-muted-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
+                    All Team Roles <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
+                </Button>
+                <Button variant="outline" className="h-10 bg-background text-muted-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
+                    2FA Status <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
+                </Button>
+                <Button variant="outline" className="h-10 bg-background text-foreground font-normal min-w-max justify-between gap-2" onClick={() => {}}>
+                    Date <div className="ml-2 border-l pl-2 border-border text-[10px]">▼</div>
+                </Button>
+            </div>
+        </div>
+
         <TabsContent value="team-members" className="m-0 border border-border rounded-md overflow-hidden bg-background">
           <DataTable
             columns={getColumns(false)}
