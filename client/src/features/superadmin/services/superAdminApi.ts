@@ -171,10 +171,15 @@ export const leadsApi = {
       .patch<{ success: boolean }>(`/api/super-admin/leads/${id}/assign`)
       .then((r) => r.data),
 
-  create: (payload: { institutionName: string; adminName: string; adminEmail: string; adminPhone?: string; city?: string; orgType?: string }) =>
-    apiClient
-      .post<{ success: boolean; message: string; lead: Lead }>("/api/super-admin/leads", payload)
-      .then((r) => r.data),
+    create: (payload: { institutionName: string; adminName: string; adminEmail: string; adminPhone?: string; city?: string; orgType?: string }) =>
+      apiClient
+        .post<{ success: boolean; message: string; lead: Lead }>("/api/super-admin/leads", payload)
+        .then((r) => r.data),
+
+    delete: (id: string) =>
+      apiClient
+        .delete<{ success: boolean; message: string }>(`/api/super-admin/leads/${id}`)
+        .then((r) => r.data),
 };
 
 export const subscribersApi = {
@@ -249,6 +254,11 @@ export const supportApi = {
       })
       .then((r) => r.data);
   },
+
+  deleteTicket: (id: string) =>
+    apiClient
+      .delete<{ success: boolean; message: string }>(`/api/super-admin/support-tickets/${id}`)
+      .then((r) => r.data),
 };
 
 // ─── Reviews Types ────────────────────────────────────────────────────────────

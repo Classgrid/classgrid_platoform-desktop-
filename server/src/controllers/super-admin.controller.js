@@ -1135,3 +1135,17 @@ export const scheduleLeadMeeting = async (req, res) => {
         return res.status(500).json({ success: false, message: "Failed to schedule meeting" });
     }
 };
+
+export const deleteDemoLead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lead = await DemoRequest.findByIdAndDelete(id);
+        if (!lead) {
+            return res.status(404).json({ success: false, message: "Lead not found" });
+        }
+        return res.json({ success: true, message: "Demo lead deleted successfully" });
+    } catch (err) {
+        console.error("[SuperAdmin] deleteDemoLead error:", err.message);
+        return res.status(500).json({ success: false, message: "Failed to delete demo lead" });
+    }
+};

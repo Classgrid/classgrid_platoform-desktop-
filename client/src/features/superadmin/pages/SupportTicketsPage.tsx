@@ -12,10 +12,10 @@ import {
   BadgeCheck,
   Paperclip,
   Eye,
-  FileText,
   Building2,
   Copy,
   ArrowLeft,
+  Trash2,
 } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { RecentActivityTable } from "@/components/marketing_ui/data-table";
@@ -35,6 +35,7 @@ import {
   useReplyToTicket,
   useSupportTickets,
   useUpdateTicket,
+  useDeleteTicket,
 } from "../queries/useSupportTickets";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import type {
@@ -324,6 +325,7 @@ export function SupportTicketsPage() {
 
   const updateTicket = useUpdateTicket();
   const replyToTicket = useReplyToTicket();
+  const deleteTicketMutation = useDeleteTicket();
 
   const tickets = data?.tickets ?? [];
   const apiStats = data?.stats;
@@ -672,17 +674,33 @@ export function SupportTicketsPage() {
                     </div>
                   ),
                   action: (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedTicket(ticket);
-                        setPendingStatus(null);
-                      }}
-                    >
-                      Read
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTicket(ticket);
+                          setPendingStatus(null);
+                        }}
+                      >
+                        Read
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="px-2"
+                        disabled={deleteTicketMutation.isPending}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm("Are you sure you want to permanently delete this ticket?")) {
+                            deleteTicketMutation.mutate(ticket._id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   ),
                 };
               })}

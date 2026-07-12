@@ -48,6 +48,10 @@ const normalizeOrgType = (value = "") => {
 
   if (!normalized) return "school";
 
+  if (normalized.includes("engineering")) return "engineering";
+  if (normalized.includes("coaching")) return "coaching";
+  if (normalized.includes("diploma")) return "diploma";
+
   const supported = new Set([
     "school",
     "junior_college",

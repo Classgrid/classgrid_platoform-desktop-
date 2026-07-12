@@ -45,3 +45,11 @@ export function useReplyToTicket() {
     onSuccess: () => qc.invalidateQueries({ queryKey: TICKETS_KEY }),
   });
 }
+
+export function useDeleteTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => supportApi.deleteTicket(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: TICKETS_KEY }),
+  });
+}

@@ -1,4 +1,4 @@
-﻿import SupportConversation from "../models/SupportConversation.js";
+import SupportConversation from "../models/SupportConversation.js";
 import Organization from "../models/Organization.js";
 import { addSupportMessage, createSupportConversation, markSupportConversationRead, serializeConversation, sanitizeDepartment, sanitizePriority } from "../services/support-communication.service.js";
 
@@ -191,6 +191,17 @@ export const markSuperAdminSupportConversationRead = async (req, res) => {
     res.json({ conversation: serializeConversation(conversation) });
   } catch (err) {
     console.error("[SuperAdmin Helpdesk Read] Error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteSuperAdminSupportConversation = async (req, res) => {
+  try {
+    const conversation = await SupportConversation.findByIdAndDelete(req.params.threadId);
+    if (!conversation) return res.status(404).json({ message: "Conversation not found." });
+    res.json({ success: true, message: "Conversation deleted successfully." });
+  } catch (err) {
+    console.error("[SuperAdmin Helpdesk Delete] Error:", err.message);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -20,6 +20,7 @@ import {
     approveLeadAndProvision,
     getDemoLeads,
     scheduleLeadMeeting, createDemoLead,
+    deleteDemoLead
 } from "../controllers/super-admin.controller.js";
 import {
     getSuperAdminSupportConversation,
@@ -27,6 +28,7 @@ import {
     markSuperAdminSupportConversationRead,
     sendSuperAdminSupportMessage,
     updateSuperAdminSupportConversation,
+    deleteSuperAdminSupportConversation
 } from "../controllers/support-communication.controller.js";
 
 const router = express.Router();
@@ -1837,5 +1839,9 @@ router.get("/backup/integrity", async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
+
+// Delete endpoints
+router.delete("/leads/:id", deleteDemoLead);
+router.delete("/support-tickets/:threadId", deleteSuperAdminSupportConversation);
 
 export default router;

@@ -11,6 +11,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
 import { useLeads, useApproveLead, useScheduleMeeting } from "../queries/useLeads";
 import { formatDate } from "@/utils/dateUtils";
+import { formatOrgType } from "@/utils/orgHelpers";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 import { toast } from "sonner";
 
@@ -162,7 +163,7 @@ export function LeadDetailsPage() {
             </Badge>
           </div>
           <p className="text-muted-foreground mt-2 flex items-center gap-2 text-sm">
-            <span>{lead.orgType}</span>
+            <span>{formatOrgType(lead.orgType)}</span>
             <span>&middot;</span>
             <span>Demo Request #{lead._id.slice(-6).toUpperCase()}</span>
           </p>
@@ -233,7 +234,7 @@ export function LeadDetailsPage() {
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Organization Type</label>
                 <div className="border rounded-lg px-3 py-2.5 bg-background text-sm">
-                  {lead.orgType}
+                  {formatOrgType(lead.orgType)}
                 </div>
               </div>
             </div>

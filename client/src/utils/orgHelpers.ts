@@ -151,3 +151,17 @@ export function useOrgCapabilities(): OrgCapabilities {
   const structureType = (user as any)?.organization_id?.structure_type as string | undefined;
   return getOrgCapabilities(structureType);
 }
+
+/**
+ * formatOrgType — Maps backend orgType shortcodes to beautiful full names
+ */
+export const formatOrgType = (s?: string | null): string => {
+  if (!s) return "—";
+  const normalized = s.toLowerCase().trim();
+  if (normalized === "engineering" || normalized === "engineering_college") return "Engineering College";
+  if (normalized === "school") return "School";
+  if (normalized === "junior_college") return "Junior College";
+  if (normalized === "coaching" || normalized === "coaching_institute") return "Coaching Institute";
+  if (normalized === "diploma" || normalized === "diploma_institute") return "Diploma Institute";
+  return s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+};

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { formatOrgType } from "@/utils/orgHelpers";
 import { Button } from "@/components/marketing_ui/button";
 import { Badge } from "@/components/marketing_ui/badge";
 import { StatCard } from "@/components/marketing_ui/StatCard";
@@ -45,7 +46,7 @@ export function OrganizationsPage() {
     if (!q) return result;
 
     return result.filter((o) =>
-      [o.name, o.ownerEmail, o.ownerName, o.orgType, o.status, o.plan]
+      [o.name, o.ownerEmail, o.ownerName, formatOrgType(o.orgType), o.status, o.plan]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q))
     );
@@ -73,7 +74,7 @@ export function OrganizationsPage() {
           <div>
             <div className="font-medium text-foreground">{row.original.name}</div>
             <div className="text-xs capitalize text-muted-foreground">
-              {(row.original.orgType || "organization").replace(/_/g, " ")}
+              {formatOrgType(row.original.orgType)}
             </div>
           </div>
         </div>

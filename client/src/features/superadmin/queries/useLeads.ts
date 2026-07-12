@@ -47,3 +47,11 @@ export function useCreateLead() {
     onSuccess: () => qc.invalidateQueries({ queryKey: LEADS_KEY }),
   });
 }
+
+export function useDeleteLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => leadsApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: LEADS_KEY }),
+  });
+}

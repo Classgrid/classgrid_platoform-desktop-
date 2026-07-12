@@ -4,6 +4,9 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 import { Lead } from "../../services/superAdminApi";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
 import { formatDate } from "@/utils/dateUtils";
+import { Trash2 } from "lucide-react";
+import { useDeleteLead } from "../queries/useLeads";
+import { formatOrgType } from "@/utils/orgHelpers";
 
 interface LeadTableProps {
   leads: Lead[];
@@ -15,6 +18,8 @@ interface LeadTableProps {
 }
 
 export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assigningId }: LeadTableProps) {
+  const deleteLeadMutation = useDeleteLead();
+
   const columns = useMemo(() => [
     {
       key: "requester",
@@ -42,7 +47,7 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
       render: (_val: unknown, row: Lead) => (
         <div className="flex flex-col gap-1.5">
           <span className="text-sm text-foreground truncate">{row.institutionName}</span>
-          <span className="text-[10px] text-muted-foreground truncate">{row.orgType}</span>
+          <span className="text-[10px] text-muted-foreground truncate">{formatOrgType(row.orgType)}</span>
         </div>
       ),
     },
@@ -121,18 +126,34 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
     {
       key: "action",
       header: "",
-      width: "w-[90px]",
+      width: "w-[120px]",
       render: (_val: unknown, row: Lead) => (
-        <Button 
-          variant="primary"
-          size="sm"
-          onClick={(e) => { e.stopPropagation(); onManage(row._id); }} 
-        >
-          Read
-        </Button>
+        <div className="flex items-center gap-2 justify-end">
+          <Button 
+            variant="primary"
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); onManage(row._id); }} 
+          >
+            Read
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            className="px-2"
+            disabled={deleteLeadMutation.isPending}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm("Are you sure you want to permanently delete this lead?")) {
+                deleteLeadMutation.mutate(row._id);
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
       ),
     },
-  ], [onManage, onAssign, assigningId]);
+  ], [onManage, onAssign, assigningId, deleteLeadMutation]);
 
   if (isError) {
     return (
