@@ -50,7 +50,39 @@ export function LeadDetailsPage() {
     }
   }, [lead]);
 
-  if (isLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading lead details...</div>;
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto pb-12 w-full animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-6 mb-8">
+          <div className="flex flex-col gap-3">
+            <div className="h-8 w-64 bg-muted rounded-md" />
+            <div className="h-4 w-48 bg-muted rounded-md" />
+            <div className="h-4 w-56 bg-muted rounded-md" />
+            <div className="mt-4 h-8 w-8 bg-muted rounded-full" />
+          </div>
+          <div className="flex gap-3">
+            <div className="h-9 w-24 bg-muted rounded-md" />
+            <div className="h-9 w-24 bg-muted rounded-md" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+          {/* Left Column Skeleton */}
+          <div className="xl:col-span-8 space-y-6">
+            <div className="h-48 bg-card border rounded-xl" />
+            <div className="h-64 bg-card border rounded-xl" />
+            <div className="h-56 bg-card border rounded-xl" />
+          </div>
+          {/* Right Column Skeleton */}
+          <div className="xl:col-span-4 space-y-6">
+            <div className="h-80 bg-card border rounded-xl" />
+            <div className="h-64 bg-card border rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!lead) return <div className="p-8 text-center text-rose-500 font-medium">Lead not found</div>;
 
   const isConverted = lead.status === "converted";
@@ -134,7 +166,8 @@ export function LeadDetailsPage() {
           </p>
           <p className="text-muted-foreground text-sm mt-1">
             Submitted on {formatDate(lead.createdAt, "dd MMM yyyy, hh:mm a")}
-            <div className="mt-4">
+          </p>
+          <div className="mt-4">
               <TooltipProvider>
                 {!lead.assignedTo ? (
                   <Tooltip delay={200}>
@@ -170,7 +203,6 @@ export function LeadDetailsPage() {
                 )}
               </TooltipProvider>
             </div>
-          )}
         </div>
       </div>
 
