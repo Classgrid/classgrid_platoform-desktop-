@@ -689,10 +689,14 @@ router.get("/leads", getDemoLeads);
 router.post("/leads", createDemoLead);
 router.post("/leads/:id/approve", approveLeadAndProvision);
 router.post("/leads/:id/schedule-meeting", scheduleLeadMeeting);
-router.patch("/leads/:id/assign", (async () => {
-    const { assignLead } = await import("../controllers/super-admin.controller.js");
-    return assignLead;
-})().then(handler => async (req, res) => handler(req, res)));
+router.patch("/leads/:id/assign", async (req, res, next) => {
+    try {
+        const { assignLead } = await import("../controllers/super-admin.controller.js");
+        return assignLead(req, res);
+    } catch (err) {
+        next(err);
+    }
+});
 
 // -- 11. DIRECT ORG PROVISIONING (no demo required)
 router.post("/provision-direct", async (req, res) => {

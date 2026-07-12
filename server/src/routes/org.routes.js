@@ -13,7 +13,7 @@ import { getMyOrganizationConfig, getOrganizationUsageSummary, getOrganizationBi
 import { getOrgAdminBillingDashboard, createSaasInvoiceOrder, verifySaasInvoicePayment } from '../controllers/admin-analytics.controller.js';
 import redis from '../config/redis.js';
 import { getDeptAdminInviteEmailHtml } from '../services/email-templates.service.js';
-import { sendEmail } from '../services/email.service.js';
+import { sendEmail } from '../services/brevo.service.js';
 
 import {
     getAdmissionTrack,
