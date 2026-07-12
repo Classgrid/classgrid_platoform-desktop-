@@ -750,7 +750,7 @@ router.patch("/helpdesk/threads/:threadId/read", markSuperAdminSupportConversati
 router.get("/team", async (req, res) => {
     try {
         const User = (await import("../models/User.js")).default;
-        const platformRoles = ["super_admin", "platform_support", "platform_sales", "platform_moderator", "platform_analyst"];
+        const platformRoles = ["super_admin", "co_super_admin"];
         const team = await User.find({ role: { $in: platformRoles } })
             .select("name email role status isEmailVerified createdAt lastLogin")
             .sort({ createdAt: -1 })
@@ -768,7 +768,7 @@ router.post("/team/invite", async (req, res) => {
         if (!name || !email || !role) {
             return res.status(400).json({ success: false, message: "name, email, and role are required" });
         }
-        const allowedRoles = ["super_admin", "platform_support", "platform_sales", "platform_moderator", "platform_analyst"];
+        const allowedRoles = ["super_admin", "co_super_admin"];
         if (!allowedRoles.includes(role)) {
             return res.status(400).json({ success: false, message: "Invalid platform role" });
         }

@@ -8,70 +8,19 @@ import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
+import { useState, useMemo } from "react";
+import { Users, UserPlus, X,  Shield, Headphones, TrendingUp, Settings, RefreshCw, Trash2, CheckCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
+import { StatCard } from "@/components/marketing_ui/StatCard";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
+import { Input } from "@/components/marketing_ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { Spinner } from "@/components/marketing_ui/spinner";
-
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type PlatformRole =
-  | "super_admin"
-  | "platform_support"
-  | "platform_sales"
-  | "platform_moderator"
-  | "platform_analyst";
-
-type TeamMember = {
-  _id: string;
-  name: string;
-  email: string;
-  role: PlatformRole;
-  isEmailVerified: boolean;
-  status: "active" | "suspended" | "pending";
-  createdAt: string;
-  lastLogin?: string;
-};
-
-// ── Role definitions ──────────────────────────────────────────────────────────
-
-const PLATFORM_ROLES: { value: PlatformRole; label: string; description: string; icon: React.ComponentType<any> }[] = [
-  {
-    value: "super_admin",
-    label: "Co-Super Admin",
-    description: "Full platform access. Can manage everything except God-Owner controls.",
-    icon: Shield },
-  {
-    value: "platform_support",
-    label: "Support Agent",
-    description: "Can view and reply to support tickets, manage helpdesk.",
-    icon: Headphones },
-  {
-    value: "platform_sales",
-    label: "Sales / Growth",
-    description: "Can view leads, schedule demos, onboard new orgs.",
-    icon: TrendingUp },
-  {
-    value: "platform_moderator",
-    label: "Content Moderator",
-    description: "Can manage announcements, changelog, and reviews.",
-    icon: Settings },
-  {
-    value: "platform_analyst",
-    label: "Analyst",
-    description: "Read-only access to analytics, audit logs, and usage data.",
-    icon: TrendingUp },
-];
-
-const ROLE_MAP: Record<PlatformRole, { label: string; variant: "success" | "warning" | "info" | "danger" | "neutral" }> = {
-  super_admin:          { label: "Co-Super Admin",    variant: "danger" },
-  platform_support:     { label: "Support Agent",     variant: "info" },
-  platform_sales:       { label: "Sales / Growth",    variant: "success" },
-  platform_moderator:   { label: "Moderator",         variant: "warning" },
-  platform_analyst:     { label: "Analyst",           variant: "neutral" } };
-
-function fmtDate(iso?: string) {
   if (!iso) return "Never";
   return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
@@ -101,7 +50,7 @@ const teamApi = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const EMPTY_FORM = { name: "", email: "", role: "platform_support" as PlatformRole };
+const EMPTY_FORM = { name: "", email: "", role: "co_super_admin" as PlatformRole };
 
 export function TeamPage() {
   const qc = useQueryClient();
