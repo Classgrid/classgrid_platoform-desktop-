@@ -627,6 +627,8 @@ export async function sendDemoMeetingScheduledNotification({
     scheduledBy = "system",
     isReschedule = false,
     repName = "Classgrid Team",
+    repEmail = "",
+    repAvatar = "",
 }) {
     try {
         if (!demoRequest?._id || !demoRequest?.adminEmail) {
@@ -668,6 +670,8 @@ export async function sendDemoMeetingScheduledNotification({
                 scheduledByLabelMap[scheduledBy] || "Classgrid Team",
             isReschedule,
             repName,
+            repEmail,
+            repAvatar,
         };
 
         const emailPayloads = [

@@ -1073,7 +1073,7 @@ export const scheduleLeadMeeting = async (req, res) => {
         const meetingId = String(req.body?.meetingId || "").trim();
         const notes = String(req.body?.notes || "").trim();
 
-        const lead = await DemoRequest.findById(id);
+        const lead = await DemoRequest.findById(id).populate("assignedTo", "name email profilePicture");
         if (!lead) {
             return res.status(404).json({ success: false, message: "Lead not found" });
         }
@@ -1121,6 +1121,8 @@ export const scheduleLeadMeeting = async (req, res) => {
             scheduledBy: "super_admin",
             isReschedule,
             repName: lead.assignedTo?.name || "Classgrid Team",
+            repEmail: lead.assignedTo?.email || "",
+            repAvatar: lead.assignedTo?.profilePicture || "",
         });
 
         return res.json({

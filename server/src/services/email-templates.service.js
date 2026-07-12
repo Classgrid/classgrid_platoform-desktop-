@@ -2183,7 +2183,16 @@ export const getDemoMeetingScheduledHtml = (data = {}) => {
       </div>
       
       <p style="margin-top:20px;">Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.</p>
-      <p style="margin-top:20px;">Best regards,<br/><strong>${repName}</strong></p>
+      
+      <div style="margin-top:30px;">
+        <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
+        <div style="display:inline-block;text-align:left;">
+          ${data.repAvatar ? `<img src="${data.repAvatar}" alt="${data.repName}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
+          <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${data.repName}</strong>
+          ${data.repAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Classgrid Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
+          ${data.repEmail ? `<br><a href="mailto:${data.repEmail}" style="color:#34d399;font-size:13px;text-decoration:none;">${data.repEmail}</a>` : ''}
+        </div>
+      </div>
     `;
     return baseTemplate({ content, title: "Demo Meeting Rescheduled" });
   }
@@ -2196,7 +2205,17 @@ export const getDemoMeetingScheduledHtml = (data = {}) => {
       <p><strong>Provider:</strong> ${data.provider || "Meeting"}</p>
       <p><strong>Scheduled by:</strong> ${data.scheduledByLabel || "Classgrid Team"}</p>
     </div>
-    ${data.meetingUrl ? `<a href="${data.meetingUrl}" class="btn">Join Meeting</a>` : ""}
+    ${data.meetingUrl ? `<div style="margin:20px 0;"><a href="${data.meetingUrl}" class="btn">Join Meeting</a></div>` : ""}
+
+    <div style="margin-top:30px;">
+      <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
+      <div style="display:inline-block;text-align:left;">
+        ${data.repAvatar ? `<img src="${data.repAvatar}" alt="${data.repName}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
+        <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${data.repName}</strong>
+        ${data.repAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Classgrid Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
+        ${data.repEmail ? `<br><a href="mailto:${data.repEmail}" style="color:#34d399;font-size:13px;text-decoration:none;">${data.repEmail}</a>` : ''}
+      </div>
+    </div>
   `;
 
   return baseTemplate({ content, title: "Demo Meeting Scheduled" });
