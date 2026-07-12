@@ -225,20 +225,16 @@ export function TeamPage() {
       key: "role",
       header: "Role",
       width: "w-[180px]",
-      render: (_: any, row: TeamMember) => (
-        <div className="pr-4">
-          <ResponsiveSelect
-            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none"
-            value={row.role}
-            onChange={(e) => roleUpdateMutation.mutate({ id: row._id, role: e.target.value as PlatformRole })}
-            disabled={roleUpdateMutation.isPending}
-          >
-            {PLATFORM_ROLES.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </ResponsiveSelect>
-        </div>
-      )
+      render: (_: any, row: TeamMember) => {
+        const roleInfo = PLATFORM_ROLES.find(r => r.value === row.role);
+        return (
+          <div className="pr-4">
+            <span className="text-sm font-medium text-foreground">
+              {roleInfo?.label || row.role}
+            </span>
+          </div>
+        );
+      }
     },
     {
       key: "status",
