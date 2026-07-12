@@ -902,7 +902,7 @@ export const getDemoLeads = async (req, res) => {
         if (status) filter.status = status;
 
         const leads = await DemoRequest.find(filter)
-            .populate("assignedTo", "name email")
+            .populate("assignedTo", "name email profilePicture")
             .sort({ createdAt: -1 })
             .lean();
 

@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Lead } from "../../services/superAdminApi";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
+import { formatDate } from "@/utils/dateUtils";
 
 interface LeadTableProps {
   leads: Lead[];
@@ -47,12 +49,29 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
       header: "Status",
       width: "w-[110px]",
       render: (_val: unknown, row: Lead) => {
-        const isAssigned = !!row.assignedTo || row.status === "converted";
+        let text = "Pending";
+        let color = "bg-red-500";
+        let textColor = "text-red-500";
+        
+        if (row.status === "converted") {
+          text = "Provisioned";
+          color = "bg-emerald-500";
+          textColor = "text-emerald-500";
+        } else if (row.status === "contacted" || row.meetingStatus === "scheduled") {
+          text = "Contacted";
+          color = "bg-blue-500";
+          textColor = "text-blue-500";
+        } else if (row.status === "closed") {
+          text = "Closed";
+          color = "bg-gray-500";
+          textColor = "text-gray-500";
+        }
+
         return (
           <div className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${isAssigned ? "bg-emerald-500" : "bg-red-500"}`} />
-            <span className={`text-xs font-medium ${isAssigned ? "text-emerald-500" : "text-red-500"}`}>
-              {isAssigned ? (row.status === "converted" ? "Provisioned" : "Assigned") : "Pending"}
+            <span className={`h-2 w-2 rounded-full ${color}`} />
+            <span className={`text-xs font-medium ${textColor}`}>
+              {text}
             </span>
           </div>
         );
@@ -65,12 +84,25 @@ export function LeadTable({ leads, isLoading, isError, onManage, onAssign, assig
       render: (_val: unknown, row: Lead) => (
         <div className="flex items-center">
           {row.assignedTo ? (
-            <div className="flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default hover:border-foreground/20 transition-colors">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border text-white font-bold text-[9px] bg-emerald-500">
-                {row.assignedTo.name?.charAt(0).toUpperCase() || 'U'}
-              </div>
-              <span className="truncate max-w-[80px]">{row.assignedTo.name}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip delay={0}>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-card text-xs font-medium text-foreground w-fit cursor-default hover:border-foreground/20 transition-colors">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-border bg-emerald-500">
+                      {(row.assignedTo as any).avatarUrl || (row.assignedTo as any).profilePicture || (row.assignedTo as any).picture ? (
+                        <img src={(row.assignedTo as any).avatarUrl || (row.assignedTo as any).profilePicture || (row.assignedTo as any).picture} alt={row.assignedTo.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-white font-bold text-[9px]">{row.assignedTo.name?.charAt(0).toUpperCase() || 'U'}</span>
+                      )}
+                    </div>
+                    <span className="truncate max-w-[80px]">{row.assignedTo.name}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Assigned on {row.assignedAt ? formatDate(row.assignedAt, "dd MMM yyyy, hh:mm a") : "Unknown"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             <Button
               variant="ghost"

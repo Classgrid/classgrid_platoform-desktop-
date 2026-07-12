@@ -21,6 +21,7 @@ export function LeadDetailsPage() {
 
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [meetingUrl, setMeetingUrl] = useState("");
+  const [isEditingMeeting, setIsEditingMeeting] = useState(false);
   const [provisionedData, setProvisionedData] = useState<any>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -84,7 +85,10 @@ export function LeadDetailsPage() {
       meetingUrl,
       provider: "google_meet"
     }, {
-      onSuccess: () => alert("Meeting updated successfully!"),
+      onSuccess: () => {
+        alert("Meeting updated successfully!");
+        setIsEditingMeeting(false);
+      },
       onError: (err: any) => alert(err?.message || "Failed to update meeting")
     });
   };
@@ -279,53 +283,109 @@ export function LeadDetailsPage() {
             
             {/* MEETING MANAGEMENT */}
             <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-muted/30 px-5 py-4 border-b">
+              <div className="bg-muted/30 px-5 py-4 border-b flex items-center justify-between">
                 <h2 className="font-semibold text-card-foreground">MEETING MANAGEMENT</h2>
+                {(!isEditingMeeting && date) && (
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditingMeeting(true)} className="h-7 text-xs font-medium text-primary">
+                    Edit Details
+                  </Button>
+                )}
               </div>
               <div className="p-5 space-y-5">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Scheduled Date & Time</label>
-                  <NikhilTimeCalendar date={date} setDate={setDate} />
-                  {date && (
-                    <p className="text-[11px] text-muted-foreground mt-2 pl-1">
-                      Asia/Kolkata &middot; IST
-                    </p>
-                  )}
-                  {isPastMeeting && (
-                    <div className="mt-3 flex items-start gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-lg text-xs">
-                      <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-                      <span>⚠ This meeting was scheduled for the past.</span>
+                {/* View Mode */}
+                {!isEditingMeeting && date ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1">Scheduled Date & Time</label>
+                      <div className="font-medium text-foreground">
+                        {formatDate(date.toISOString(), "dd MMMM yyyy, hh:mm a")}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Asia/Kolkata &middot; IST</p>
                     </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Google Meet Link</label>
-                  <div className="relative">
-                    <Input 
-                      value={meetingUrl} 
-                      onChange={e => setMeetingUrl(e.target.value)} 
-                      placeholder="https://meet.google.com/..." 
-                      className="pr-20"
-                    />
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1">Google Meet Link</label>
+                      <div className="flex items-center justify-between border rounded-lg px-3 py-2 bg-background">
+                        <span className="text-sm truncate mr-2">{meetingUrl || "No link provided"}</span>
+                        {meetingUrl && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button variant="ghost" size="sm" onClick={copyToClipboard} className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
+                              <Copy size={12} />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => window.open(meetingUrl, "_blank")} className="h-6 w-6 p-0 text-primary hover:text-primary/80">
+                              <ExternalLink size={12} />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {isPastMeeting && (
+                      <div className="mt-3 flex items-start gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-lg text-xs">
+                        <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                        <span>⚠ This meeting was scheduled for the past.</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Button variant="outline" size="sm" onClick={copyToClipboard} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
-                      <Copy size={12} className="mr-1.5" />
-                      {copied ? "Copied" : "Copy link"}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => window.open(meetingUrl, "_blank")} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
-                      <ExternalLink size={12} className="mr-1.5" />
-                      Open ↗
-                    </Button>
-                  </div>
-                </div>
+                ) : (
+                  /* Edit Mode */
+                  <div className="space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                        {date ? "Update Date & Time" : "Set Date & Time"}
+                      </label>
+                      <NikhilTimeCalendar date={date} setDate={setDate} />
+                      {date && (
+                        <p className="text-[11px] text-muted-foreground mt-2 pl-1">
+                          Asia/Kolkata &middot; IST
+                        </p>
+                      )}
+                      {isPastMeeting && (
+                        <div className="mt-3 flex items-start gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-lg text-xs">
+                          <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                          <span>⚠ This meeting was scheduled for the past.</span>
+                        </div>
+                      )}
+                    </div>
 
-                <div className="pt-2 border-t border-border/50">
-                  <Button onClick={handleSchedule} disabled={scheduleMutation.isPending} variant="secondary" className="w-full h-9">
-                    {scheduleMutation.isPending ? "Saving..." : "Save Changes"}
-                  </Button>
-                </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Google Meet Link</label>
+                      <div className="relative">
+                        <Input 
+                          value={meetingUrl} 
+                          onChange={e => setMeetingUrl(e.target.value)} 
+                          placeholder="https://meet.google.com/..." 
+                          className="pr-20"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button variant="outline" size="sm" onClick={copyToClipboard} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
+                          <Copy size={12} className="mr-1.5" />
+                          {copied ? "Copied" : "Copy link"}
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => window.open(meetingUrl, "_blank")} className="h-7 text-xs flex-1" disabled={!meetingUrl}>
+                          <ExternalLink size={12} className="mr-1.5" />
+                          Open ↗
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border/50 flex items-center gap-2">
+                      {date && (
+                        <Button onClick={() => {
+                          setIsEditingMeeting(false);
+                          // Reset state back to original
+                          const meetDate = lead?.scheduledAt || lead?.meetingScheduledAt;
+                          if (meetDate) setDate(new Date(meetDate));
+                          if (lead?.meetingUrl) setMeetingUrl(lead.meetingUrl);
+                        }} variant="outline" className="h-9 flex-1">
+                          Cancel
+                        </Button>
+                      )}
+                      <Button onClick={handleSchedule} disabled={scheduleMutation.isPending} variant="secondary" className="w-full h-9 flex-1">
+                        {scheduleMutation.isPending ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
