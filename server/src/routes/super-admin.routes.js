@@ -757,17 +757,21 @@ router.get("/team", async (req, res) => {
             .lean();
         
         // Map lastLoginAt to lastLogin to match frontend expectations, and include profilePicture
-        const team = teamDocs.map(user => ({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            isEmailVerified: user.isEmailVerified,
-            createdAt: user.createdAt,
-            lastLogin: user.lastLoginAt,
-            profilePicture: user.profilePicture
-        }));
+        const team = teamDocs.map(user => {
+            // Extract creation date from ObjectId for legacy accounts missing createdAt
+            const fallbackDate = new Date(parseInt(user._id.toString().substring(0, 8), 16) * 1000);
+            return {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                status: user.status,
+                isEmailVerified: user.isEmailVerified,
+                createdAt: user.createdAt || fallbackDate,
+                lastLogin: user.lastLoginAt,
+                profilePicture: user.profilePicture
+            };
+        });
 
         res.json({ success: true, team });
     } catch (err) {

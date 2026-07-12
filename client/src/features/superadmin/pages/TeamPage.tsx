@@ -199,7 +199,7 @@ export function TeamPage() {
   const getColumns = (isPending: boolean) => [
     {
       key: "user",
-      header: "User",
+      header: "Admin",
       width: "w-full min-w-[250px]", // Let user column expand to fill space
       render: (_: any, row: TeamMember) => (
         <div className="flex items-center gap-3 py-2 w-full min-w-[250px]">
@@ -228,7 +228,7 @@ export function TeamPage() {
       render: (_: any, row: TeamMember) => (
         <div className="pr-4">
           <ResponsiveSelect
-            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none"
             value={row.role}
             onChange={(e) => roleUpdateMutation.mutate({ id: row._id, role: e.target.value as PlatformRole })}
             disabled={roleUpdateMutation.isPending}
@@ -470,7 +470,7 @@ export function TeamPage() {
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 sm:ml-auto">
                 <ResponsiveSelect
-                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-[180px]"
+                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none w-[180px]"
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value as any)}
                 >
