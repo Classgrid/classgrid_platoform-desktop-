@@ -165,58 +165,59 @@ export function AuditLogsPage() {
       ) : (
       <div className="flex flex-col flex-1 min-h-0 bg-background">
         
-        {/* Quick Filters */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border overflow-x-auto bg-card">
-          {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => { setCategory(cat); setTraceId(""); }}
-              className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider transition-colors border whitespace-nowrap ${
-                category === cat 
-                  ? "bg-blue-500/10 border-blue-500/30 text-blue-600" 
-                  : "bg-background border-border text-muted-foreground hover:bg-secondary"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-          {traceId && (
-            <div className="ml-auto flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-full text-xs font-mono font-medium whitespace-nowrap">
-              <span>Trace: {traceId.substring(0, 8)}...</span>
-              <button onClick={() => setTraceId("")} className="ml-2 hover:text-yellow-800">
-                <X size={14} />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Top Action Bar */}
-        <div className="flex-none flex items-center justify-between p-4 bg-background border-b border-border">
+        {/* Unified Toolbar */}
+        <div className="flex-none flex items-center justify-between p-2 px-4 bg-card border-b border-border">
           
-          {/* Left Side Buttons */}
-          <div className="flex items-center gap-2">
-            <IconButton icon={User} label="User Actions" />
-            <IconButton icon={Expand} label="Expand View" />
+          {/* Left Side: Filters and Search */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => { setCategory(cat); setTraceId(""); }}
+                className={`px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wider transition-colors border whitespace-nowrap ${
+                  category === cat 
+                    ? "bg-blue-500/10 border-blue-500/30 text-blue-600" 
+                    : "bg-background border-transparent hover:border-border text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
             
-            <div className="relative w-96 ml-4">
+            {traceId && (
+              <div className="flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-md text-xs font-mono font-medium whitespace-nowrap ml-1">
+                <span>Trace: {traceId.substring(0, 8)}...</span>
+                <button onClick={() => setTraceId("")} className="ml-2 hover:text-yellow-800">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            <div className="w-px h-4 bg-border mx-2"></div>
+            
+            <div className="relative w-64">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Search logs..." 
-                className="w-full bg-background border border-border rounded-md py-1.5 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-8 shadow-sm"
+                className="w-full bg-background border border-border rounded-md py-1 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-7 shadow-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
         
-        {/* Right Side Buttons */}
-        <div className="flex items-center gap-3">
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2 shrink-0 ml-4">
+            <IconButton icon={User} label="User Actions" className="h-7 w-7" />
+            <IconButton icon={Expand} label="Expand View" className="h-7 w-7" />
+            
+            <div className="w-px h-4 bg-border mx-1"></div>
           
           {/* Live Button */}
           <button 
              onClick={toggleLive}
-             className={`flex items-center justify-center gap-2 px-3 h-8 rounded-md text-sm transition-colors border ${
+             className={`flex items-center justify-center gap-2 px-3 h-7 rounded-md text-xs font-medium transition-colors border ${
                isLive 
                  ? "bg-blue-500/10 border-blue-500/20 text-blue-500 shadow-inner" 
                  : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 shadow-sm"
@@ -247,7 +248,7 @@ export function AuditLogsPage() {
                     isFetching={isFetching && !isLive} 
                     onClick={() => refetch()} 
                     label={null} 
-                    className="h-8 w-8 p-0 flex items-center justify-center bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md transition-colors shadow-sm"
+                    className="h-7 w-7 p-0 flex items-center justify-center bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md transition-colors shadow-sm"
                   />
                 </div>
               </TooltipTrigger>
@@ -258,7 +259,7 @@ export function AuditLogsPage() {
           </TooltipProvider>
 
           {/* Share / Export */}
-          <IconButton icon={Upload} label="Share logs" />
+          <IconButton icon={Upload} label="Share logs" className="h-7 w-7" />
         </div>
       </div>
 
