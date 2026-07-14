@@ -661,11 +661,11 @@ export const getErrorLogs = async (req, res) => {
             } else if (cat === "api") {
                 query.$or = [{ "meta.url": { $exists: true } }, { "meta.metadata.url": { $exists: true } }, { "metadata.url": { $exists: true } }];
             } else if (cat === "cron") {
-                query.context = { $regex: /cron/i };
+                query.$or = [{ "context": { $regex: /cron/i } }, { "meta.context": { $regex: /cron/i } }];
             } else if (cat === "socket") {
-                query.context = { $regex: /socket/i };
+                query.$or = [{ "context": { $regex: /socket/i } }, { "meta.context": { $regex: /socket/i } }];
             } else if (cat === "email queue") {
-                query.context = { $regex: /email/i };
+                query.$or = [{ "context": { $regex: /email/i } }, { "meta.context": { $regex: /email/i } }];
             }
         }
 
