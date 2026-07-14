@@ -831,75 +831,57 @@ router.post("/team/invite", async (req, res) => {
           body, html {
             margin: 0; padding: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f0f0f;
+            background-color: #f5f5f5;
             -webkit-font-smoothing: antialiased;
-          }
-          .list {
-            margin: 0 0 24px 0;
-            padding-left: 20px;
-          }
-          .list li {
-            color: #cccccc;
-            font-size: 14px;
-            margin-bottom: 12px;
-            line-height: 1.6;
-          }
-          .list strong {
-            color: #ffffff;
           }
         </style>
       </head>
-      <body style="margin:0;padding:0;background-color:#0f0f0f;">
-        <!-- OUTER WRAPPER TO ENSURE DARK BACKGROUND IN GMAIL -->
-        <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background-color:#0f0f0f;width:100%;">
+      <body style="margin:0;padding:0;background:#f5f5f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
           <tr>
             <td align="center">
-              
-              <!-- INNER CARD WRAPPER -->
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+              <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
                 
-                <!-- HEADER (LOGO) -->
                 <tr>
-                  <td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-                    <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto;border-radius:6px;">
+                  <td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+                    <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+                    <h1 style="color:#111111;margin:0;font-size:22px;">Welcome to the Classgrid team, ${name}!</h1>
                   </td>
                 </tr>
                 
-                <!-- BODY CONTENT -->
                 <tr>
-                  <td style="padding:30px;color:#cccccc;font-size:15px;line-height:1.7;text-align:left;">
-                    <h1 style="color:#ffffff;font-size:26px;margin-top:0;margin-bottom:16px;">Welcome to the Classgrid team, ${name}!</h1>
-                    <p style="margin:0 0 16px 0; font-size:16px; color:#cccccc; line-height:1.6;">We are absolutely thrilled to officially welcome you aboard. The entire team is excited to have you join us. As we continue to scale our platform and expand our community, your expertise and vision will be an invaluable asset to our mission.</p>
-                    <p style="margin:0 0 32px 0; font-size:16px; color:#cccccc; line-height:1.6;">To help you hit the ground running, we've outlined your core focus areas and the initial resources you'll need below.</p>
+                  <td style="padding:30px;color:#374151;font-size:15px;line-height:1.7;text-align:left;">
+                    <p style="margin:0 0 16px 0; color:#374151;">We are absolutely thrilled to officially welcome you aboard. The entire team is excited to have you join us. As we continue to scale our platform and expand our community, your expertise and vision will be an invaluable asset to our mission.</p>
+                    <p style="margin:0 0 32px 0; color:#374151;">To help you hit the ground running, we've outlined your core focus areas and the initial resources you'll need below.</p>
                     
-                    <h3 style="color:#ffffff; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #2a2a2a; padding-bottom:8px;">Your Responsibilities</h3>
-                    <ul style="margin:0 0 32px 0; padding-left:20px; color:#cccccc; font-size:15px; line-height:1.6;">
-                      <li style="margin-bottom:8px;"><strong>Marketing Site:</strong> Maintain the marketing codebase and send PRs. (<a href="https://github.com/Classgrid/Classgrid_marketting" style="color:#ffffff !important;text-decoration:underline;">Repository</a>)</li>
-                      <li style="margin-bottom:8px;"><strong>Main Platform:</strong> Contribute directly to our core desktop platform. (<a href="https://github.com/Classgrid/classgrid_platoform-desktop-" style="color:#ffffff !important;text-decoration:underline;">Repository</a>)</li>
+                    <h3 style="color:#111111; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #eaeaea; padding-bottom:8px;">Your Responsibilities</h3>
+                    <ul style="margin:0 0 32px 0; padding-left:20px; color:#374151;">
+                      <li style="margin-bottom:8px;"><strong>Marketing Site:</strong> Maintain the marketing codebase and send PRs. (<a href="https://github.com/Classgrid/Classgrid_marketting" style="color:#2563eb;text-decoration:underline;">Repository</a>)</li>
+                      <li style="margin-bottom:8px;"><strong>Main Platform:</strong> Contribute directly to our core desktop platform. (<a href="https://github.com/Classgrid/classgrid_platoform-desktop-" style="color:#2563eb;text-decoration:underline;">Repository</a>)</li>
                       <li style="margin-bottom:8px;"><strong>Infrastructure:</strong> Help maintain our CI/CD GitHub Actions and monitor Vercel deployment stability.</li>
-                      <li style="margin-bottom:8px;"><strong>Growth & Analytics:</strong> Oversee user tracking via <a href="https://posthog.com/" style="color:#ffffff !important;text-decoration:underline;">PostHog</a> and lead our Google SEO strategies.</li>
+                      <li style="margin-bottom:8px;"><strong>Growth & Analytics:</strong> Oversee user tracking via <a href="https://posthog.com/" style="color:#2563eb;text-decoration:underline;">PostHog</a> and lead our Google SEO strategies.</li>
                       <li style="margin-bottom:8px;"><strong>Content Management:</strong> Manage new blog posts and changelog updates via our Sanity CMS.</li>
                     </ul>
 
-                    <h3 style="color:#ffffff; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #2a2a2a; padding-bottom:8px;">Official Account Access</h3>
-                    <p style="margin:0 0 20px 0; font-size:16px; color:#cccccc; line-height:1.6;">We use Zoho Mail exclusively for all official Classgrid email communications (we do not use Gmail). Below are your temporary credentials.</p>
+                    <h3 style="color:#111111; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #eaeaea; padding-bottom:8px;">Official Account Access</h3>
+                    <p style="margin:0 0 20px 0; color:#374151;">We use Zoho Mail exclusively for all official Classgrid email communications (we do not use Gmail). Below are your temporary credentials.</p>
                     
                     <!-- CREDENTIALS BOX -->
-                    <div style="background-color:#111111; border:1px solid #333333; border-radius:8px; padding:20px; margin-bottom:24px;">
-                      <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; margin-bottom:8px; font-weight:600;">Email Address</div>
-                      <div style="font-family:monospace; font-size:18px; color:#ffffff; font-weight:bold; background-color:#000000; padding:12px 14px; border-radius:6px; border:1px solid #333333; margin-bottom:16px;"><a href="mailto:${classgridEmail}" style="color:#ffffff !important; text-decoration:none;">${classgridEmail}</a></div>
+                    <div style="background-color:#f9f9f9; border:1px solid #eaeaea; border-radius:8px; padding:20px; margin-bottom:24px;">
+                      <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; margin-bottom:8px; font-weight:600;">Email Address</div>
+                      <div style="font-family:monospace; font-size:18px; color:#111111; font-weight:bold; background-color:#ffffff; padding:12px 14px; border-radius:6px; border:1px solid #eaeaea; margin-bottom:16px;"><a href="mailto:${classgridEmail}" style="color:#111111 !important; text-decoration:none;">${classgridEmail}</a></div>
                       
-                      <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; margin-bottom:8px; font-weight:600;">Temporary Password</div>
-                      <div style="font-family:monospace; font-size:18px; color:#ffffff; font-weight:bold; background-color:#000000; padding:12px 14px; border-radius:6px; border:1px solid #333333;">${tempPassword}</div>
+                      <div style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; margin-bottom:8px; font-weight:600;">Temporary Password</div>
+                      <div style="font-family:monospace; font-size:18px; color:#111111; font-weight:bold; background-color:#ffffff; padding:12px 14px; border-radius:6px; border:1px solid #eaeaea;">${tempPassword}</div>
                     </div>
                     
-                    <p style="margin:0 0 24px 0; font-size:16px; color:#cccccc;">Please log in and <strong style="color:#ffffff;">change your temporary password</strong> immediately.</p>
+                    <p style="margin:0 0 24px 0; color:#374151;">Please log in and <strong>change your temporary password</strong> immediately.</p>
                     
                     <!-- Google Account Setup Instructions -->
-                    <div style="background-color:#1a1a1a; border-left:3px solid #34d399; padding:16px 20px; border-radius:4px; margin-bottom:24px;">
-                      <h4 style="color:#ffffff; margin:0 0 12px 0; font-size:16px;">Setup Your Chrome Profile & Workspace</h4>
-                      <p style="margin:0 0 12px 0;color:#cccccc;font-size:15px;line-height:1.6;">To get the full workspace experience, please register this email as a Google Account. This allows you to create a dedicated Chrome Browser Profile, set your professional profile photo, use "Continue with Google" across our tools, and access Google Services (excluding Gmail). Follow these steps:</p>
-                      <ol style="margin:0; padding-left:20px; color:#cccccc; font-size:15px; line-height:1.6;">
+                    <div style="background-color:#f0fdf4; border-left:3px solid #34d399; padding:16px 20px; border-radius:4px; margin-bottom:24px;">
+                      <h4 style="color:#111111; margin:0 0 12px 0; font-size:16px;">Setup Your Chrome Profile & Workspace</h4>
+                      <p style="margin:0 0 12px 0;color:#374151;font-size:15px;">To get the full workspace experience, please register this email as a Google Account. This allows you to create a dedicated Chrome Browser Profile, set your professional profile photo, use "Continue with Google" across our tools, and access Google Services (excluding Gmail). Follow these steps:</p>
+                      <ol style="margin:0; padding-left:20px; color:#374151;">
                         <li style="margin-bottom:6px;">Click <strong>Setup Google Account</strong> below and enter your name and details.</li>
                         <li style="margin-bottom:6px;">When prompted to create an email, click <strong>"Use your existing email"</strong> instead.</li>
                         <li style="margin-bottom:6px;">Enter your Zoho email address from above. Google will send an OTP to it, so <strong>you must log into your Zoho Mailbox first</strong> to retrieve the code and verify it.</li>
@@ -908,38 +890,40 @@ router.post("/team/invite", async (req, res) => {
                     
                     <!-- BUTTONS -->
                     <div style="margin-top:24px;margin-bottom:32px;">
-                      <a href="https://mail.zoho.in/zm/#mail/views/unread" style="display:inline-block; background-color:#34d399 !important; color:#022c22 !important; padding:12px 28px; text-decoration:none !important; border-radius:6px; font-weight:bold; font-size:14px; margin-right:12px; margin-bottom:12px;">Login to Zoho Mailbox</a>
-                      <a href="https://accounts.google.com/signup" style="display:inline-block; background-color:#2a2a2a !important; color:#ffffff !important; padding:12px 28px; text-decoration:none !important; border-radius:6px; font-weight:bold; font-size:14px; margin-bottom:12px; border:1px solid #333333;">Setup Google Account</a>
+                      <a href="https://mail.zoho.in/zm/#mail/views/unread" style="display:inline-block; background-color:#34d399; color:#000000; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; margin-right:12px; margin-bottom:12px;">Login to Zoho Mailbox</a>
+                      <a href="https://accounts.google.com/signup" style="display:inline-block; background-color:#111111; color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; margin-bottom:12px;">Setup Google Account</a>
                     </div>
 
                     <!-- NEW: SUPER ADMIN DASHBOARD ACCESS -->
-                    <h3 style="color:#ffffff; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #2a2a2a; padding-bottom:8px;">Classgrid Super Admin Dashboard</h3>
-                    <p style="margin:0 0 16px 0; font-size:16px; color:#cccccc; line-height:1.6;">You have been assigned the role of <strong style="color:#ffffff;">${roleName}</strong> on the Classgrid Super Admin Dashboard. This gives you administrative access to manage the entire platform — organizations, users, billing, analytics, and more.</p>
-                    <p style="margin:0 0 20px 0; font-size:16px; color:#cccccc; line-height:1.6;">Use the <strong style="color:#ffffff;">same Classgrid email and password</strong> shown above to log in.</p>
+                    <h3 style="color:#111111; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #eaeaea; padding-bottom:8px;">Classgrid Super Admin Dashboard</h3>
+                    <p style="margin:0 0 16px 0; color:#374151;">You have been assigned the role of <strong>${roleName}</strong> on the Classgrid Super Admin Dashboard. This gives you administrative access to manage the entire platform — organizations, users, billing, analytics, and more.</p>
+                    <p style="margin:0 0 20px 0; color:#374151;">Use the <strong>same Classgrid email and password</strong> shown above to log in.</p>
                     <div style="margin-bottom:32px;">
-                      <a href="https://superadmin.classgrid.in/superadmin/login" style="display:inline-block; background-color:#ffffff !important; color:#000000 !important; padding:12px 28px; text-decoration:none !important; border-radius:6px; font-weight:bold; font-size:14px;">Login to Super Admin Dashboard</a>
+                      <a href="https://superadmin.classgrid.in/superadmin/login" style="display:inline-block; background-color:#f9f9f9; color:#111111; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px; border:1px solid #eaeaea;">Login to Super Admin Dashboard</a>
                     </div>
 
                     <!-- NEW: SANITY STUDIO ACCESS -->
-                    <h3 style="color:#ffffff; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #2a2a2a; padding-bottom:8px;">Classgrid Sanity Studio (CMS)</h3>
-                    <p style="margin:0 0 16px 0; font-size:16px; color:#cccccc; line-height:1.6;">You also have access to our <strong style="color:#ffffff;">Sanity Studio</strong> — the content management system where you can manage blog posts, changelogs, case studies, help articles, and all website content. Use the <strong style="color:#ffffff;">same Classgrid email</strong> to sign in via Google.</p>
+                    <h3 style="color:#111111; margin:0 0 16px 0; text-transform:uppercase; font-size:14px; letter-spacing:1px; border-bottom:1px solid #eaeaea; padding-bottom:8px;">Classgrid Sanity Studio (CMS)</h3>
+                    <p style="margin:0 0 16px 0; color:#374151;">You also have access to our <strong>Sanity Studio</strong> — the content management system where you can manage blog posts, changelogs, case studies, help articles, and all website content. Use the <strong>same Classgrid email</strong> to sign in via Google.</p>
                     <div style="margin-bottom:32px;">
-                      <a href="https://studio.classgrid.in/" style="display:inline-block; background-color:#2a2a2a !important; color:#ffffff !important; padding:12px 28px; text-decoration:none !important; border-radius:6px; font-weight:bold; font-size:14px; border:1px solid #333333;">Open Sanity Studio</a>
+                      <a href="https://studio.classgrid.in/" style="display:inline-block; background-color:#111111; color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px;">Open Sanity Studio</a>
                     </div>
                     
                     <!-- SIGNATURE -->
                     <div style="margin-top:40px;">
-                      <p style="margin:0; color:#ffffff; font-weight:bold; font-size:16px;">Nikhil Shinde</p>
-                      <p style="margin:0; font-size:14px; color:#9ca3af;">Founder, Classgrid</p>
+                      <p style="margin:0; color:#111111; font-weight:bold; font-size:16px;">Nikhil Shinde</p>
+                      <p style="margin:0; font-size:14px; color:#6b7280;">Founder, Classgrid</p>
                     </div>
                   </td>
                 </tr>
                 
                 <!-- FOOTER -->
                 <tr>
-                  <td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px;">
-                    © ${new Date().getFullYear()} Classgrid. All rights reserved.<br>
-                    Secure access message. Do not forward this email.
+                  <td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;background:#f9f9f9;">
+                    <p style="color:#9ca3af;font-size:11px;line-height:1.5;margin:0;">
+                      &copy; ${new Date().getFullYear()} Classgrid. All rights reserved.<br>
+                      Secure access message. Do not forward this email.
+                    </p>
                   </td>
                 </tr>
                 
@@ -958,8 +942,8 @@ router.post("/team/invite", async (req, res) => {
 
         await sendEmail({
             to: toEmail,
-            fromEmail: req.user.email,
-            fromName: req.user.name || "Classgrid Admin",
+            fromEmail: "nikhil.shinde@classgrid.in",
+            fromName: "Nikhil Shinde",
             subject: "Welcome to Classgrid! Your Account Credentials Inside",
             html: emailHtml,
             text: `Welcome to Classgrid, ${name}! Your login email is: ${classgridEmail}. Your temporary password is: ${tempPassword}. Please log in at ${loginUrl} to reset it.`,
