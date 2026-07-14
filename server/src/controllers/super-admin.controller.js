@@ -654,8 +654,12 @@ export const getErrorLogs = async (req, res) => {
 
         if (category && category !== "all" && category !== "All") {
             const cat = category.toLowerCase();
-            if (cat === "api") {
-                query.$or = [{ "meta.metadata.url": { $exists: true } }, { "metadata.url": { $exists: true } }];
+            if (cat === "errors" || cat === "error") {
+                query.level = "error";
+            } else if (cat === "warnings" || cat === "warn") {
+                query.level = "warn";
+            } else if (cat === "api") {
+                query.$or = [{ "meta.url": { $exists: true } }, { "meta.metadata.url": { $exists: true } }, { "metadata.url": { $exists: true } }];
             } else if (cat === "cron") {
                 query.context = { $regex: /cron/i };
             } else if (cat === "socket") {
