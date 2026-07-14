@@ -7,6 +7,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { format } from "date-fns";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/marketing_ui/dropdown-menu";
+import { Download, FileJson, Link } from "lucide-react";
 
 // A small wrapper to use the marketing tooltip cleanly
 function IconButton({ icon: Icon, label, onClick, className = "", isActive = false }: any) {
@@ -50,13 +52,37 @@ export function AuditLogsPage() {
     }
   };
 
-  const handleExport = () => {
+  const handleExportJSON = () => {
     if (!errData?.logs) return;
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(errData.logs, null, 2));
     const a = document.createElement('a');
     a.href = dataStr;
     a.download = `audit-logs-${format(new Date(), "yyyy-MM-dd-HHmm")}.json`;
     a.click();
+  };
+
+  const handleExportCSV = () => {
+    if (!errData?.logs) return;
+    const headers = ["Timestamp", "Level", "Message", "Context", "Trace ID"];
+    const rows = errData.logs.map((log: any) => [
+      format(new Date(log.timestamp), "yyyy-MM-dd HH:mm:ss"),
+      log.level,
+      `"${(log.message || "").replace(/"/g, '""')}"`,
+      log.context || "---",
+      log.metadata?.traceId || "---"
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const a = document.createElement('a');
+    a.href = encodedUri;
+    a.download = `audit-logs-${format(new Date(), "yyyy-MM-dd-HHmm")}.csv`;
+    a.click();
+  };
+
+  const handleCopyVisible = () => {
+    if (!errData?.logs) return;
+    const textData = errData.logs.map((log: any) => `[${format(new Date(log.timestamp), "yyyy-MM-dd HH:mm:ss")}] ${log.level.toUpperCase()} - ${log.message}`).join("\n");
+    navigator.clipboard.writeText(textData);
   };
   const logs = errData?.logs ?? [];
 
@@ -284,8 +310,29 @@ export function AuditLogsPage() {
             </Tooltip>
           </TooltipProvider>
 
-          {/* Share / Export */}
-          <IconButton icon={Upload} label="Export JSON" className="h-7 w-7" onClick={handleExport} />
+          {/* Share / Export Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="h-7 w-7 flex items-center justify-center rounded-md border bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shadow-sm focus:outline-none">
+                <Upload size={14} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleCopyVisible} className="cursor-pointer text-xs">
+                <Copy className="mr-2 h-4 w-4" />
+                <span>Copy visible logs</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer text-xs">
+                <Download className="mr-2 h-4 w-4" />
+                <span>Export to CSV</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJSON} className="cursor-pointer text-xs">
+                <FileJson className="mr-2 h-4 w-4" />
+                <span>Export to JSON</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
