@@ -34,6 +34,7 @@ function IconButton({ icon: Icon, label, onClick, className = "", isActive = fal
 
 export function AuditLogsPage() {
   const [isLive, setIsLive] = useState(false);
+  const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [traceId, setTraceId] = useState("");
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
