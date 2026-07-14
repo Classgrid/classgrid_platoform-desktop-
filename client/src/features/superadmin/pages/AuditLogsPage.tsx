@@ -139,7 +139,7 @@ export function AuditLogsPage() {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-32px)] w-full max-w-full mx-auto bg-background p-4 sm:p-6 lg:p-8">
+    <div className="flex flex-col h-[calc(100vh-80px)] w-full max-w-full mx-auto bg-background p-4 sm:p-6 lg:p-8">
       
       {/* Header */}
       <div className="flex-none flex items-center justify-between border-b border-border pb-4 mb-4">
@@ -274,7 +274,7 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 min-h-0 pb-4 relative overflow-hidden rounded-md">
+      <div className="flex-1 min-h-[500px] h-full pb-4 relative overflow-hidden rounded-md">
         <DataTable 
           columns={columns} 
           rows={logs} 
