@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import mongoose from "mongoose";
 import Organization from "../models/Organization.js";
 import { getChatSb } from "../config/supabaseClient.js";
 
@@ -12,6 +13,10 @@ export const initPromotionSchedulerCron = () => {
     // Runs every 5 minutes for better responsiveness on exact dates
     cron.schedule("*/5 * * * *", async () => {
         try {
+            if (mongoose.connection.readyState !== 1) {
+                console.log("[Promotion Scheduler] Database not connected yet. Skipping this run.");
+                return;
+            }
             const now = new Date();
             // Find organizations that have a pending promotion ready to execute
             const readyOrgs = await Organization.find({
