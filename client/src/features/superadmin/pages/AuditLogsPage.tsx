@@ -132,10 +132,21 @@ export function AuditLogsPage() {
     {
       key: "status",
       header: "Status",
-      width: "w-[100px]",
+      width: "w-[120px]",
       render: (_: any, log: ErrorLog) => (
-        <div className={`font-semibold font-mono text-[13px] ${getStatusColor(log.level, log.metadata?.status)} flex items-center`}>
-          {log.metadata?.method || log.level.toUpperCase()}
+        <div className={`font-semibold font-mono text-[13px] flex items-center gap-2`}>
+          <span className={getStatusColor(log.level, log.metadata?.status)}>
+            {log.metadata?.method || log.level.toUpperCase()}
+          </span>
+          {log.metadata?.status ? (
+            <span className={
+              log.metadata.status >= 500 ? "text-red-500" :
+              log.metadata.status >= 400 ? "text-yellow-500" :
+              "text-green-500"
+            }>{log.metadata.status}</span>
+          ) : log.metadata?.method ? (
+            <span className="text-muted-foreground/50">---</span>
+          ) : null}
         </div>
       ),
     },
