@@ -139,18 +139,7 @@ export function AuditLogsPage() {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] w-full max-w-full mx-auto bg-background p-4 sm:p-6 lg:p-8">
-      
-      {/* Header */}
-      <div className="flex-none flex items-center justify-between border-b border-border pb-4 mb-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            Audit Logs
-            {errData?.isRescue && <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">RESCUE MODE</span>}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Real-time system events and application errors.</p>
-        </div>
-      </div>
+    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-full mx-auto bg-background p-0">
 
       {error && error.message === "RESCUE_REQUIRED" ? (
         <div className="flex flex-col items-center justify-center flex-1 min-h-0 bg-card border border-border rounded-lg shadow-sm p-8 space-y-4">
@@ -174,10 +163,10 @@ export function AuditLogsPage() {
           </div>
         </div>
       ) : (
-      <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <div className="flex flex-col flex-1 min-h-0 bg-background">
         
         {/* Quick Filters */}
-        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border overflow-x-auto bg-card">
           {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
             <button
               key={cat}
@@ -202,7 +191,7 @@ export function AuditLogsPage() {
         </div>
 
         {/* Top Action Bar */}
-        <div className="flex-none flex items-center justify-between mb-2">
+        <div className="flex-none flex items-center justify-between p-4 bg-background border-b border-border">
           
           {/* Left Side Buttons */}
           <div className="flex items-center gap-2">
@@ -280,7 +269,7 @@ export function AuditLogsPage() {
           rows={logs} 
           isLoading={isLoading && !isLive} 
           emptyMessage="No more logs to show within selected timeline"
-          className="h-full overflow-auto shadow-sm border border-border bg-card rounded-md"
+          className="h-full overflow-auto bg-background"
           onRowClick={(row) => setSelectedLog(row)}
         />
         
