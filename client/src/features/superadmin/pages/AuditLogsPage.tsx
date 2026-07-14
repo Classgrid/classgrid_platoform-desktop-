@@ -170,7 +170,7 @@ export function AuditLogsPage() {
         <div className="flex-none flex items-center justify-between p-2 px-4 bg-card border-b border-border">
           
           {/* Left Side: Filters and Search */}
-          <div className="flex items-center gap-2 overflow-x-auto">
+          <div className="flex items-center gap-2 overflow-x-auto p-1 -ml-1">
             <Select 
               value={category} 
               onValueChange={(val) => { setCategory(val); setTraceId(""); }}
