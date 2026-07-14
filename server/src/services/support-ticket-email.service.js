@@ -725,7 +725,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
     <strong>${escapeHtml(specialistName)}</strong>
     ${adminAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
   </p>
-  ${specialistEmail ? `<p style="color:#374151;font-size:14px;margin:0 0 5px;">📧 <a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;text-decoration:none;">${escapeHtml(specialistEmail)}</a></p>` : ''}
+  ${specialistEmail ? `<p style="color:#374151;font-size:14px;margin:0 0 5px;"><a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;text-decoration:none;">${escapeHtml(specialistEmail)}</a></p>` : ''}
 </div>
 
 <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
