@@ -267,7 +267,7 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 min-h-[500px] h-full pb-4 relative overflow-hidden rounded-md">
+      <div className="flex-1 min-h-[500px] h-full pb-4 mt-2 px-2 relative overflow-hidden rounded-md">
         <DataTable 
           columns={columns} 
           rows={logs} 
