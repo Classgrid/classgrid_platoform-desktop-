@@ -92,6 +92,7 @@ export async function sendDailyDigests() {
             emailPayloads.push({
                 userId: user._id,
                 to: user.email,
+                channel: "notification",
                 subject: `Daily Summary: ${notifications.length} update${notifications.length > 1 ? "s" : ""} | Classgrid`,
                 html: getDailyDigestEmailHtml({
                     userName: user.name,
@@ -187,6 +188,7 @@ export async function sendWeeklyDigests() {
             emailPayloads.push({
                 userId: user._id,
                 to: user.email,
+                channel: "notification",
                 subject: `Weekly Summary: ${notifications.length} update${notifications.length > 1 ? "s" : ""} | Classgrid`,
                 html: getDailyDigestEmailHtml({
                     userName: user.name,

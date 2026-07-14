@@ -258,6 +258,7 @@ export async function notifyTicketCreatorOfAdminReply({ ticket, replyMessage, ad
         html: buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, adminName, adminAvatar, adminEmail }),
         text: buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl, adminName, adminEmail }),
         type: "support_ticket_reply",
+        channel: "support",
         userId: ticket.submittedBy || null,
         organizationId: ticket.organization_id || null,
     });
@@ -444,6 +445,7 @@ export async function notifyUserOfTicketCreation({ ticket }) {
         html: buildTicketCreationEmailHtml({ ticket, trackingUrl }),
         text: buildTicketCreationPlainText({ ticket, trackingUrl }),
         type: "support_ticket_new",
+        channel: "support",
         userId: ticket.submittedBy || null,
         organizationId: ticket.organization_id || null,
     });

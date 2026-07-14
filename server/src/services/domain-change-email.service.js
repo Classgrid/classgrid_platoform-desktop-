@@ -197,6 +197,7 @@ export async function notifyDomainChange({ to, orgName, adminName, adminEmail, o
         html: buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }),
         text: buildDomainChangePlainText({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }),
         type: "domain_change",
+        channel: "notification",
         userId: userId || null,
         organizationId: organizationId || null,
     });

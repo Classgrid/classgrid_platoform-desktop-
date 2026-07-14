@@ -110,6 +110,7 @@ export async function processDemoExpiryReminders(now = new Date()) {
                 html,
                 text,
                 type: "demo_expiry_reminder",
+                channel: "billing",
                 organizationId: subscription.organization_id,
             });
 
@@ -121,6 +122,7 @@ export async function processDemoExpiryReminders(now = new Date()) {
             await enqueueEmail({
                 to: superAdminEmail,
                 subject: `Demo reminder queued: ${organization.name} - ${reminder.label}`,
+                channel: "billing",
                 html: `<h2>Demo Reminder Queued</h2>
                     <table style="border-collapse:collapse;width:100%;max-width:500px;">
                     <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Organization</td><td style="padding:8px;border:1px solid #ddd;">${organization.name}</td></tr>

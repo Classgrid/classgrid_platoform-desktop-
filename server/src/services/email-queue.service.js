@@ -24,6 +24,7 @@ export async function enqueueEmail({
     html,
     text = "",
     type = "other",
+    channel = null,
     userId = null,
     classroomId = null,
     organizationId = null,
@@ -35,6 +36,7 @@ export async function enqueueEmail({
             html,
             text,
             type,
+            channel,
             userId,
             classroomId,
             organizationId,
@@ -67,6 +69,7 @@ export async function enqueueBulkEmails(payloads) {
             html: p.html,
             text: p.text || "",
             type: p.type || "other",
+            channel: p.channel || null,
             userId: p.userId || null,
             classroomId: p.classroomId || null,
             organizationId: p.organizationId || null,
@@ -142,6 +145,7 @@ export async function processEmailQueue(batchSize = MAX_BATCH_SIZE) {
                     subject: job.subject,
                     html: job.html,
                     text: job.text,
+                    channel: job.channel || undefined,
                 });
 
                 // ── Mark as sent ─────────────────────────────

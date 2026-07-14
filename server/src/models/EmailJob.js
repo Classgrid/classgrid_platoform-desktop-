@@ -45,6 +45,18 @@ const emailJobSchema = new mongoose.Schema(
         classroomId: { type: mongoose.Schema.Types.ObjectId, ref: "Classroom" },
         organizationId: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
 
+        // ── Sender Channel ──────────────────────────────
+        // Routes email through the correct provider/sender:
+        //   "support"      → Brevo → support@classgrid.in
+        //   "noreply"      → Brevo → noreply@classgrid.in (default)
+        //   "billing"      → Brevo → billing@classgrid.in
+        //   "notification" → Resend → notification@updates.classgrid.in
+        channel: {
+            type: String,
+            enum: ["support", "noreply", "billing", "notification", null],
+            default: null,
+        },
+
         // ── Job State ───────────────────────────────────
         status: {
             type: String,

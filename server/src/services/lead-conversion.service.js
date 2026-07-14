@@ -212,6 +212,7 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
           planDuration: 31,
         }),
         type: "demo_provisioning_onboarding",
+        channel: "notification",
         userId: admin._id,
         organizationId: organization._id,
       });

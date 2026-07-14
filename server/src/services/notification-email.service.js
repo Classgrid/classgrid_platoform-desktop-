@@ -249,6 +249,7 @@ export async function sendJoinRequestEmail({ classroom, student }) {
         await enqueueEmail({
             to: faculty.email,
             subject: `Join Request: ${student.name} → ${classroom.name} | Classgrid`,
+            channel: "notification",
             html,
             text,
             type: "join_request",
@@ -300,6 +301,7 @@ export async function sendJoinApprovedEmail({ classroom, studentId }) {
         await enqueueEmail({
             to: student.email,
             subject: `Joined: ${classroom.name} | Classgrid`,
+            channel: "notification",
             html,
             text,
             type: "join_approved",
@@ -532,6 +534,7 @@ export async function sendNotificationEmail(recipientId, type, title, message, l
         await enqueueEmail({
             to: student.email,
             subject: `${title} | Classgrid`,
+            channel: "support",
             html: getGenericNotificationHtml(title, message, link),
             text: getGenericNotificationPlainText(title, message, link),
             type: "system_notification",

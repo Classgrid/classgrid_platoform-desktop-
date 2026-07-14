@@ -131,6 +131,7 @@ export const approveOrganization = async (req, res) => {
         await sendEmail({
             to: superAdminEmail,
             subject: `[Classgrid] Org Approved (${plan}): ${savedOrg.name}`,
+            channel: "notification",
             html: getAdminOrgApprovalNotificationHtml(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/superadmin/dashboard`),
             text: getAdminOrgApprovalNotificationPlainText(savedOrg.name, pendingOrg.owner_email, organizationCode, honorCode, `${frontendUrl}/superadmin/dashboard`),
         });
@@ -142,6 +143,7 @@ export const approveOrganization = async (req, res) => {
         await sendEmail({
             to: pendingOrg.owner_email,
             subject: consolSubject,
+            channel: "notification",
             html: getConsolidatedApprovalEmailHtml({
                 adminName: pendingOrg.owner_name,
                 orgName: savedOrg.name,
@@ -190,6 +192,7 @@ export const rejectOrganization = async (req, res) => {
         await sendEmail({
             to: pendingOrg.owner_email,
             subject: "Update on your Classgrid Application",
+            channel: "support",
             html: getOrgRejectionEmailHtml(pendingOrg.owner_name, pendingOrg.institute_name, reason),
             text: getOrgRejectionEmailPlainText(pendingOrg.owner_name, pendingOrg.institute_name, reason),
         });
@@ -444,6 +447,7 @@ export const suspendUser = async (req, res) => {
                 await sendEmail({
                     to: targetUser.email,
                     subject: "Account Suspended - Classgrid",
+                    channel: "support",
                     html: getAccountSuspensionEmailHtml(targetUser.name, reason),
                     text: getAccountSuspensionEmailPlainText(targetUser.name, reason),
                 });
@@ -508,6 +512,7 @@ export const deleteUser = async (req, res) => {
                 await sendEmail({
                     to: targetUser.email,
                     subject: "Account Deleted - Classgrid",
+                    channel: "support",
                     html: getAccountDeletionEmailHtml(targetUser.name, reason),
                     text: getAccountDeletionEmailPlainText(targetUser.name, reason),
                 });

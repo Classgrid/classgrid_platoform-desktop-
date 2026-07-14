@@ -321,6 +321,7 @@ const sendWelcomeEmail = async (user, provider = "manual") => {
         await sendEmail({
             to: user.email,
             subject: "🎉 Welcome to Classgrid - Account Created Successfully",
+            channel: "notification",
             html: html,
             text: text,
         });
@@ -338,6 +339,7 @@ const sendLoginNotification = async (user, provider = "manual") => {
         await sendEmail({
             to: user.email,
             subject: "🔐 Classgrid - Account Login Notification",
+            channel: "notification",
             html: getLoginNotificationHtml(user, provider),
             text: getLoginNotificationPlainText(user, provider),
         });
@@ -2131,6 +2133,7 @@ export const deleteAccount = async (req, res) => {
                     sendEmail({
                         to: email,
                         subject: `Account Deleted: ${user.name} (${user.email})`,
+                        channel: "support",
                         html: getAccountDeletedNotificationHtml(user.name, user.email, user.role),
                         text: getAccountDeletedNotificationPlainText(user.name, user.email, user.role),
                     }).catch(console.error);
@@ -2145,6 +2148,7 @@ export const deleteAccount = async (req, res) => {
             sendEmail({
                 to: user.email,
                 subject: "Your Classgrid account has been deleted",
+                channel: "support",
                 html: `<p>Hi ${user.name},</p><p>Your account has been permanently deleted as requested.</p>`,
                 text: `Hi ${user.name},\n\nYour account has been permanently deleted as requested.`,
             }).catch(console.error);

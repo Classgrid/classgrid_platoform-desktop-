@@ -1011,6 +1011,7 @@ async function confirmPaymentInternal(application_id, organization_id, razorpay_
             await sendEmail({
                 to: application.email,
                 subject: `Admission Fee Receipt - ${org.name}`,
+                channel: "billing",
                 html: getAdmissionFeeReceiptHtml({
                     candidate_name: application.full_name,
                     organization_name: org.name,

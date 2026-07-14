@@ -48,6 +48,7 @@ const sendFirstGoogleLoginEmail = async (user) => {
         await sendEmail({
             to: user.email,
             subject: "🎉 Welcome to Classgrid - Account Created Successfully",
+            channel: "notification",
             html: html,
             text: text,
         });
@@ -62,6 +63,7 @@ const sendGoogleLoginNotification = async (user) => {
         await sendEmail({
             to: user.email,
             subject: "🔐 Classgrid - Account Login Notification",
+            channel: "notification",
             html: getLoginNotificationHtml(user, "google"),
             text: getLoginNotificationPlainText(user, "google"),
         });
