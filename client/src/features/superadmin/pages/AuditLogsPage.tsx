@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Play, RefreshCw, Upload, User, Expand, StopCircle } from "lucide-react";
+import { Search, Play, RefreshCw, Upload, User, Expand, StopCircle, X, Filter } from "lucide-react";
 import { useErrorLogs } from "../queries/useAlerts";
 import type { ErrorLog } from "../services/superAdminApi";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -34,9 +34,11 @@ function IconButton({ icon: Icon, label, onClick, className = "", isActive = fal
 
 export function AuditLogsPage() {
   const [isLive, setIsLive] = useState(false);
-  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [traceId, setTraceId] = useState("");
+  const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
 
-  const { data: errData, isLoading, refetch, isFetching, error } = useErrorLogs(isLive ? 2000 : 0, search);
+  const { data: errData, isLoading, refetch, isFetching, error } = useErrorLogs(isLive ? 2000 : 0, search, undefined, category, traceId);
   const logs = errData?.logs ?? [];
 
   const [rescuePassword, setRescuePassword] = useState("");
@@ -173,8 +175,33 @@ export function AuditLogsPage() {
       ) : (
       <div className="flex flex-col flex-1 min-h-0 gap-4">
         
+        {/* Quick Filters */}
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
+          {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setCategory(cat); setTraceId(""); }}
+              className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider transition-colors border whitespace-nowrap ${
+                category === cat 
+                  ? "bg-blue-500/10 border-blue-500/30 text-blue-600" 
+                  : "bg-background border-border text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+          {traceId && (
+            <div className="ml-auto flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-full text-xs font-mono font-medium whitespace-nowrap">
+              <span>Trace: {traceId.substring(0, 8)}...</span>
+              <button onClick={() => setTraceId("")} className="ml-2 hover:text-yellow-800">
+                <X size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Top Action Bar */}
-        <div className="flex-none flex items-center justify-between">
+        <div className="flex-none flex items-center justify-between mb-2">
           
           {/* Left Side Buttons */}
           <div className="flex items-center gap-2">
@@ -246,14 +273,95 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 min-h-0 pb-4">
+      <div className="flex-1 min-h-0 pb-4 relative flex gap-4 overflow-hidden">
         <DataTable 
           columns={columns} 
           rows={logs} 
           isLoading={isLoading && !isLive} 
           emptyMessage="No more logs to show within selected timeline"
-          className="h-full overflow-auto"
+          className="flex-1 h-full overflow-auto shadow-sm border border-border bg-card rounded-md"
+          onRowClick={(row) => setSelectedLog(row)}
         />
+        
+        {/* Detail Panel */}
+        {selectedLog && (
+          <div className="w-[450px] border border-border rounded-md bg-card flex flex-col h-full overflow-hidden shadow-lg flex-shrink-0 animate-in slide-in-from-right-4">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
+              <h3 className="font-semibold text-foreground">Log Details</h3>
+              <button onClick={() => setSelectedLog(null)} className="text-muted-foreground hover:text-foreground">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 space-y-4">
+              {/* Message */}
+              <div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Message</div>
+                <div className="font-mono text-sm break-words bg-secondary/50 p-3 rounded border border-border text-foreground">
+                  {selectedLog.message}
+                </div>
+              </div>
+
+              {/* Trace Action */}
+              {(selectedLog.metadata?.traceId) && (
+                <button 
+                  onClick={() => {
+                    setTraceId(selectedLog.metadata.traceId);
+                    setSelectedLog(null);
+                  }}
+                  className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-colors text-sm shadow-sm"
+                >
+                  <Filter size={14} /> View Full Trace ({selectedLog.metadata.traceId.substring(0, 8)})
+                </button>
+              )}
+              
+              {/* Metadata Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Duration</div>
+                  <div className="font-mono text-sm text-foreground">{selectedLog.metadata?.durationMs ? `${selectedLog.metadata.durationMs}ms` : "N/A"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Status</div>
+                  <div className={`font-mono text-sm font-semibold ${getStatusColor(selectedLog.level, selectedLog.metadata?.status)}`}>
+                    {selectedLog.metadata?.status || "N/A"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Org ID</div>
+                  <div className="font-mono text-sm truncate text-foreground" title={selectedLog.metadata?.orgId}>{selectedLog.metadata?.orgId || "N/A"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">User ID</div>
+                  <div className="font-mono text-sm truncate text-foreground" title={selectedLog.metadata?.userId}>{selectedLog.metadata?.userId || "N/A"}</div>
+                </div>
+                <div className="col-span-2">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">IP Address</div>
+                  <div className="font-mono text-sm text-foreground">{selectedLog.metadata?.ip || "N/A"}</div>
+                </div>
+              </div>
+
+              {/* Request Body */}
+              {selectedLog.metadata?.body && (
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Request Body</div>
+                  <pre className="font-mono text-[11px] bg-secondary/80 text-foreground p-3 rounded border border-border overflow-x-auto whitespace-pre-wrap">
+                    {JSON.stringify(selectedLog.metadata.body, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              {/* Stack Trace */}
+              {selectedLog.stack && (
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Stack Trace</div>
+                  <pre className="font-mono text-[10px] bg-secondary/80 p-3 rounded border border-border text-red-500 overflow-x-auto whitespace-pre-wrap">
+                    {selectedLog.stack}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       </div>

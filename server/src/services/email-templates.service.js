@@ -126,9 +126,7 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
 ${content}
 
 <div style="margin-top:30px;">
-<p style="color:#6b7280;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
-</p>
+
 </div>
 
 </td>
@@ -208,9 +206,7 @@ Go to Dashboard
 </a>
 </div>
 
-<p style="color:#6b7280;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
-</p>
+
 
 </td>
 </tr>
@@ -284,9 +280,7 @@ Join Classroom
 </a>
 </div>
 
-<p style="color:#6b7280;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
-</p>
+
 
 </td>
 </tr>
@@ -1019,7 +1013,7 @@ Your faculty account has been successfully created. You're now ready to manage c
 
 Go to Dashboard: ${dashboardUrl}
 
-Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
+
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -1049,7 +1043,7 @@ Your account has been successfully created. You're now ready to begin your acade
 
 Join Classroom: ${dashboardUrl}
 
-Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
+
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -2004,7 +1998,7 @@ After activation, you can sign in anytime at /admin/login.
 
 If you did not apply for a Classgrid organization, please raise a ticket at https://classgrid.in/support.
 
-Need help? Raise a ticket on our Support Portal: https://classgrid.in/support
+
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
@@ -2219,8 +2213,7 @@ ${repName}
 Classgrid Team
 ${data.repEmail ? `${data.repEmail}` : ""}
 
-Need help? Raise a ticket on our Support Portal:
-https://classgrid.in/support
+
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };

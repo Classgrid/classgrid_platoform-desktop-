@@ -4,6 +4,7 @@ import "winston-mongodb";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import crypto from "crypto";
 
 // Ensure env variables are loaded if used directly
 dotenv.config();
@@ -71,18 +72,41 @@ export const winstonMiddleware = (req, res, next) => {
     }
 
     const start = Date.now();
+    // Inject traceId into request
+    req.traceId = req.traceId || crypto.randomUUID();
     
     // Log once request finishes
     res.on("finish", () => {
         const duration = Date.now() - start;
+        
+        // Safely capture and redact request body
+        let safeBody = undefined;
+        if (req.body && Object.keys(req.body).length > 0) {
+            safeBody = { ...req.body };
+            const sensitiveKeys = ["password", "token", "secret", "key", "authorization", "credit_card"];
+            
+            const redact = (obj) => {
+                for (const key in obj) {
+                    if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        redact(obj[key]);
+                    } else if (sensitiveKeys.some(sk => key.toLowerCase().includes(sk))) {
+                        obj[key] = "[REDACTED]";
+                    }
+                }
+            };
+            redact(safeBody);
+        }
+
         const logData = {
+            traceId: req.traceId,
             method: req.method,
             url: req.originalUrl,
             status: res.statusCode,
             ip: req.ip,
             durationMs: duration,
             orgId: req.organization ? req.organization._id : "none",
-            userId: req.user ? req.user.id : "unauthenticated"
+            userId: req.user ? req.user.id : "unauthenticated",
+            ...(safeBody && { body: safeBody })
         };
 
         if (res.statusCode >= 400) {

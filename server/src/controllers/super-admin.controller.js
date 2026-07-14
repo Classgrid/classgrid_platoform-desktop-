@@ -632,20 +632,46 @@ export const getErrorLogs = async (req, res) => {
         const limit = parseInt(req.query.limit) || 100;
         const levelFilter = req.query.level; // optional: ?level=error
         const search = req.query.search;
+        const category = req.query.category; // optional: API, Socket, Cron, Email Queue
+        const traceId = req.query.traceId;
 
         // Query the raw Winston 'systemlogs' collection directly
         const db = mongoose.connection.db;
         const collection = db.collection("systemlogs");
 
         const query = {};
-        if (levelFilter) {
-            query.level = levelFilter;
+        
+        if (levelFilter && levelFilter !== "all" && levelFilter !== "All") {
+            query.level = levelFilter.toLowerCase();
         }
+        
+        if (traceId) {
+            query.$or = [
+                { "meta.metadata.traceId": traceId },
+                { "metadata.traceId": traceId }
+            ];
+        }
+
+        if (category && category !== "all" && category !== "All") {
+            const cat = category.toLowerCase();
+            if (cat === "api") {
+                query.$or = [{ "meta.metadata.url": { $exists: true } }, { "metadata.url": { $exists: true } }];
+            } else if (cat === "cron") {
+                query.context = { $regex: /cron/i };
+            } else if (cat === "socket") {
+                query.context = { $regex: /socket/i };
+            } else if (cat === "email queue") {
+                query.context = { $regex: /email/i };
+            }
+        }
+
         if (search) {
             query.$or = [
                 { message: { $regex: search, $options: "i" } },
                 { "meta.message": { $regex: search, $options: "i" } },
-                { "meta.metadata.url": { $regex: search, $options: "i" } }
+                { "meta.metadata.url": { $regex: search, $options: "i" } },
+                { "meta.metadata.traceId": { $regex: search, $options: "i" } },
+                { "metadata.traceId": { $regex: search, $options: "i" } }
             ];
         }
 

@@ -693,6 +693,7 @@ export type ErrorLog = {
   timestamp: string;
   level: string;
   context?: string;
+  metadata?: any;
 };
 
 export type EmailLog = {
@@ -705,7 +706,7 @@ export type EmailLog = {
 };
 
 export const alertsApi = {
-  getErrorLogs: async (params?: { search?: string; level?: string }) => {
+  getErrorLogs: async (params?: { search?: string; level?: string; category?: string; traceId?: string }) => {
     try {
       const r = await apiClient.get<any>("/api/super-admin/error-logs", { params });
       const raw = r.data;

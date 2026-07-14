@@ -418,7 +418,7 @@ app.get("*", (req, res) => {
 import { captureError } from "../src/controllers/super-admin.controller.js";
 app.use((err, req, res, next) => {
   console.error("🔥 [Global Error]:", err);
-  captureError(err, `${req.method} ${req.originalUrl}`);
+  captureError(err, `${req.method} ${req.originalUrl}`, req);
 
   // Format consistently, no stack trace
   res.status(err.status || 500).json({
