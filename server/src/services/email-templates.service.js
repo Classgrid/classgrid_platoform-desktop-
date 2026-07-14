@@ -1605,7 +1605,7 @@ export const getDailyDigestEmailHtml = ({ userName, notifications, grouped, tota
       ${notifRows}
     </table>
     <div style="text-align:center; margin:24px 0;">
-      <a href="${frontendUrl}/classroom" style="display:inline-block; padding:12px 28px; background:#2563eb; color:#111111; text-decoration:none; border-radius:8px; font-weight:600; font-size:14px;">Open Dashboard</a>
+      <a href="${frontendUrl}/classroom" style="display:inline-block; padding:12px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:600; font-size:14px;">Open Dashboard</a>
     </div>
     <p style="margin:16px 0 0; color:#94a3b8; font-size:12px; text-align:center;">
       <a href="${settingsUrl}" style="color:#64748b; text-decoration:underline;">Change delivery preferences</a>
