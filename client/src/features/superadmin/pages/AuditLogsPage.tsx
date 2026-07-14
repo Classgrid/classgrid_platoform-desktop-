@@ -274,19 +274,19 @@ export function AuditLogsPage() {
       </div>
 
       {/* Table Area */}
-      <div className="flex-1 min-h-0 pb-4 relative flex gap-4 overflow-hidden">
+      <div className="flex-1 min-h-0 pb-4 relative overflow-hidden rounded-md">
         <DataTable 
           columns={columns} 
           rows={logs} 
           isLoading={isLoading && !isLive} 
           emptyMessage="No more logs to show within selected timeline"
-          className="flex-1 h-full overflow-auto shadow-sm border border-border bg-card rounded-md"
+          className="h-full overflow-auto shadow-sm border border-border bg-card rounded-md"
           onRowClick={(row) => setSelectedLog(row)}
         />
         
-        {/* Detail Panel */}
+        {/* Detail Panel Overlay */}
         {selectedLog && (
-          <div className="w-[600px] border border-border rounded-md bg-card flex flex-col h-full overflow-hidden shadow-lg flex-shrink-0 animate-in slide-in-from-right-4">
+          <div className="absolute top-0 right-0 h-full w-[600px] max-w-full border-l border-border bg-card flex flex-col shadow-2xl z-20 animate-in slide-in-from-right-4 rounded-r-md rounded-l-lg border-y">
             <div className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
               <h3 className="font-semibold text-foreground">Log Details</h3>
               <button onClick={() => setSelectedLog(null)} className="text-muted-foreground hover:text-foreground">
