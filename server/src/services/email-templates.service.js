@@ -774,7 +774,7 @@ Payment confirmed — premium features unlocked
 <tr>
 <td style="padding:30px;">
 
-<p style="font-size:15px;color:#e5e5e5;margin:0 0 18px;">
+<p style="font-size:15px;color:#374151;margin:0 0 18px;">
 Dear <strong>${userName}</strong>,
 </p>
 
@@ -918,7 +918,7 @@ support@classgrid.in
 </a>
 </p>
 
-<p style="font-size:14px;color:#e5e5e5;margin-top:30px;">
+<p style="font-size:14px;color:#374151;margin-top:30px;">
 Best regards,<br>
 <strong>The Classgrid Team</strong>
 </p>
@@ -2182,10 +2182,10 @@ export const getDemoMeetingScheduledHtml = (data = {}) => {
     <p style="margin-top:20px;">Please use the updated link above to join the meeting. We look forward to speaking with you and showing how Classgrid can support your institution.</p>
     
     <div style="margin-top:30px;">
-      <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
+      <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
       <div style="display:inline-block;text-align:left;">
         ${data.repAvatar ? `<img src="${data.repAvatar}" alt="${data.repName}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:8px;border:2px solid #34d399;object-fit:cover;">` : ''}
-        <strong style="color:#e5e5e5;font-size:14px;vertical-align:middle;">${data.repName}</strong>
+        <strong style="color:#374151;font-size:14px;vertical-align:middle;">${data.repName}</strong>
         ${data.repAvatar ? `<span style="display:inline-block;vertical-align:middle;margin-left:4px;width:18px;height:18px;" title="Verified Classgrid Staff"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="12" fill="#1DA1F2"/><path d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5l-9 9z" fill="#ffffff"/></svg></span>` : ''}
         ${data.repEmail ? `<br><a href="mailto:${data.repEmail}" style="color:#34d399;font-size:13px;text-decoration:none;">${data.repEmail}</a>` : ''}
       </div>
