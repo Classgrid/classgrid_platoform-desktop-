@@ -3,6 +3,7 @@ import { Search, Play, RefreshCw, Upload, User, Expand, StopCircle, X, Filter } 
 import { useErrorLogs } from "../queries/useAlerts";
 import type { ErrorLog } from "../services/superAdminApi";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/marketing_ui/select";
 import { format } from "date-fns";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
 import { RefreshButton } from "@/components/marketing_ui/refresh-button";
@@ -170,19 +171,21 @@ export function AuditLogsPage() {
           
           {/* Left Side: Filters and Search */}
           <div className="flex items-center gap-2 overflow-x-auto">
-            {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => { setCategory(cat); setTraceId(""); }}
-                className={`px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wider transition-colors border whitespace-nowrap ${
-                  category === cat 
-                    ? "bg-blue-500/10 border-blue-500/30 text-blue-600" 
-                    : "bg-background border-transparent hover:border-border text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            <Select 
+              value={category} 
+              onValueChange={(val) => { setCategory(val); setTraceId(""); }}
+            >
+              <SelectTrigger className="w-[140px] uppercase text-xs font-medium bg-background border-transparent hover:border-border transition-colors h-7 shadow-sm">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
+                  <SelectItem key={cat} value={cat} className="uppercase text-xs font-medium">
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
             {traceId && (
               <div className="flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-md text-xs font-mono font-medium whitespace-nowrap ml-1">
