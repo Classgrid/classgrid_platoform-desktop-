@@ -7,7 +7,9 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with a fallback string to prevent the entire Node server from 
+// crashing on startup if the environment variable hasn't been set yet.
+const resend = new Resend(process.env.RESEND_API_KEY || "missing_api_key");
 
 const NOTIFICATION_SENDER = "Classgrid Notifications <notification@updates.classgrid.in>";
 const SUPPORT_REPLY_TO = "support@classgrid.in";
