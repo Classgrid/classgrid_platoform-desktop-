@@ -40,7 +40,24 @@ export function AuditLogsPage() {
   const [traceId, setTraceId] = useState("");
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
 
-  const { data: errData, isLoading, refetch, isFetching, error } = useErrorLogs(isLive ? 2000 : 0, search, undefined, category, traceId);
+  const { data: errData, isLoading, refetch, isFetching, error } = useErrorLogs(isLive ? 1000 : 0, search, category, traceId);
+  
+  const handleExpand = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(e => console.error(e));
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
+
+  const handleExport = () => {
+    if (!errData?.logs) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(errData.logs, null, 2));
+    const a = document.createElement('a');
+    a.href = dataStr;
+    a.download = `audit-logs-${format(new Date(), "yyyy-MM-dd-HHmm")}.json`;
+    a.click();
+  };
   const logs = errData?.logs ?? [];
 
   const [rescuePassword, setRescuePassword] = useState("");
@@ -219,8 +236,7 @@ export function AuditLogsPage() {
         
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 shrink-0 ml-4">
-            <IconButton icon={User} label="User Actions" className="h-7 w-7" />
-            <IconButton icon={Expand} label="Expand View" className="h-7 w-7" />
+            <IconButton icon={Expand} label="Expand View" className="h-7 w-7" onClick={handleExpand} />
             
             <div className="w-px h-4 bg-border mx-1"></div>
           
@@ -269,7 +285,7 @@ export function AuditLogsPage() {
           </TooltipProvider>
 
           {/* Share / Export */}
-          <IconButton icon={Upload} label="Share logs" className="h-7 w-7" />
+          <IconButton icon={Upload} label="Export JSON" className="h-7 w-7" onClick={handleExport} />
         </div>
       </div>
 
