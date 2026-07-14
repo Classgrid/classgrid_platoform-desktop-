@@ -110,7 +110,7 @@ export const winstonMiddleware = (req, res, next) => {
         };
 
         if (res.statusCode >= 400) {
-            accessLogger.error(`API Request Failed: ${req.method} ${req.originalUrl}`, { metadata: logData });
+            accessLogger.error(`API Request Failed: ${req.method} ${req.originalUrl}`, logData);
         } else {
             accessLogger.info("API Request Dispatched", logData);
         }
