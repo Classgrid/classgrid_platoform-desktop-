@@ -24,7 +24,7 @@ function base(title, content) {
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%">
 <tr><td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center"><img src="${LOGO}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px"><h1 style="color:#fff;margin:0;font-size:20px">${title}</h1></td></tr>
-<tr><td style="padding:30px;color:#ccc;font-size:14px;line-height:1.7">${content}<div style="margin-top:30px"><p style="color:#9ca3af;font-size:13px;margin:0">Need help? Contact <a href="mailto:support@classgrid.in" style="color:#fff;text-decoration:none">support@classgrid.in</a></p></div></td></tr>
+<tr><td style="padding:30px;color:#ccc;font-size:14px;line-height:1.7">${content}</td></tr>
 <tr><td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px">&copy; 2026 Classgrid. All rights reserved.</td></tr>
 </table></td></tr></table></body></html>`;
 }

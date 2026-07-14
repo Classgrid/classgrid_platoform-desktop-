@@ -88,7 +88,7 @@ ${content}
 
 <div style="margin-top:30px;">
 <p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Contact <a href="mailto:support@classgrid.in" style="color:#ffffff;text-decoration:none;">support@classgrid.in</a>
+
 </p>
 </div>
 

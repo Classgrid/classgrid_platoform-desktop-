@@ -552,7 +552,7 @@ export const getDeptAdminInviteEmailHtml = (recipientName, orgName, role, invite
       <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">You are being managed by the Organization Admin. Contact your admin if you have any questions about your access level.</p>
     </div>
 
-    <p style="font-size: 13px; color: #6b7280; margin-bottom: 0;">If you did not expect this invitation, you can safely ignore this email. Need help? Contact us at <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a></p>
+    
   `;
   return baseTemplate({
     content,
@@ -1686,7 +1686,7 @@ export const getPlanExpiryReminderHtml = (orgName, ownerName, planName, expiryDa
     <a href="${dashboardUrl}" class="btn">${isExpired ? 'Continue With Paid Access' : 'Open Org Admin Dashboard'}</a>
 
     <p style="margin-top: 24px; font-size: 13px; color: #6b7280;">Classgrid pricing is handled separately from this reminder flow. Use the dashboard to continue, or contact support if you need help with the next payment step.</p>
-    <p style="font-size: 13px; color: #6b7280;">Need help? Contact us at <a href="https://classgrid.in/support" style="color:#111111; font-weight:500;">https://classgrid.in/support</a>.</p>
+    
   `;
   return baseTemplate({
     content,
@@ -1731,7 +1731,7 @@ Dashboard: ${dashboardUrl}
 
 Classgrid pricing is handled separately from this reminder flow. Use the dashboard to continue, or contact support if you need help with the next payment step.
 
-Need help? Contact us at support@classgrid.in
+
 
 © ${new Date().getFullYear()} Classgrid. All rights reserved.`;
 };
