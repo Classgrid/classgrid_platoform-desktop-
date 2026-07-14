@@ -78,83 +78,83 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
     body, html {
       margin: 0; padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #f5f5f5;
       -webkit-font-smoothing: antialiased;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
 <tr>
 <td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">New Reply on Your Support Ticket</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Ticket #${escapeHtml(ticketIdShort)}</p>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">New Reply on Your Support Ticket</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">Ticket #${escapeHtml(ticketIdShort)}</p>
 </td>
 </tr>
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
-<p style="color:#cccccc;margin:0 0 30px;">You have received a new reply from the Classgrid Support Team regarding your open ticket. Please review the message below and let us know if you need further assistance.</p>
+<p style="color:#374151;margin:0 0 30px;">You have received a new reply from the Classgrid Support Team regarding your open ticket. Please review the message below and let us know if you need further assistance.</p>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Summary</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Summary</h3>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:10px;border:1px solid #eaeaea;margin:0 0 25px;">
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Ticket ID</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">#${escapeHtml(ticketIdShort)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;width:30%;color:#6b7280;font-size:13px;font-weight:500;">Ticket ID</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">#${escapeHtml(ticketIdShort)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Subject</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(subject)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Subject</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(subject)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Status</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Assigned to</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(assignedToLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Assigned to</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(assignedToLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Priority</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(priorityLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Priority</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(priorityLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Category</td>
-<td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(categoryLabel)}</td>
+<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Category</td>
+<td style="padding:14px 18px;color:#111111;font-size:14px;">${escapeHtml(categoryLabel)}</td>
 </tr>
 </table>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Support Team Reply</h3>
-<div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Support Team Reply</h3>
+<div style="padding:20px;background:#ffffff;border-radius:10px;border:1px solid #eaeaea;margin:0 0 30px;text-align:left;">
   <div style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 
 <li style="margin-bottom:10px;"><strong>Add additional details:</strong> If you have screenshots, logs, or extra context, attach them to your reply.</li>
 <li style="margin-bottom:10px;"><strong>Check ticket status:</strong> Use the button below to view the full conversation history.</li>
 <li style="margin-bottom:10px;"><strong>Close the ticket:</strong> Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.</li>
 </ul>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
+<h3 style="color:#111111;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
 
 <div style="text-align:center;margin:0 0 30px;">
 <a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Quick Tips for a Faster Resolution</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Quick Tips for a Faster Resolution</h3>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
 <li style="margin-bottom:10px;">✅ <strong>Be specific</strong> – include error messages, steps to reproduce, and your device/browser info.</li>
 <li style="margin-bottom:10px;">✅ <strong>Attach screenshots</strong> – they help us visualize the issue clearly.</li>
 <li style="margin-bottom:10px;">✅ <strong>Respond promptly</strong> – if we don't hear back within 48 hours, the ticket may be auto-closed.</li>
 </ul>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
 ${(ticket.events || []).map(ev => {
     const evDate = formatTicketDate(ev.createdAt);
     const evLabel = ev.label || ev.type || "Activity";
@@ -162,12 +162,12 @@ ${(ticket.events || []).map(ev => {
       if (ev.actorName && !evLabel.includes(ev.actorName)) {
           evActor = " by " + escapeHtml(ev.actorName);
       }
-      return '<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>' + escapeHtml(evDate) + '</strong> – ' + escapeHtml(evLabel) + evActor + '</p>';
+      return '<p style="color:#6b7280;font-size:13px;line-height:1.7;margin:0 0 5px;"><strong>' + escapeHtml(evDate) + '</strong> – ' + escapeHtml(evLabel) + evActor + '</p>';
 }).join("\n")}
-<p style="color:#9ca3af;font-size:13px;line-height:1.7;margin:0 0 30px;"><strong>Current Status:</strong> ${escapeHtml(statusLabel)}</p>
+<p style="color:#6b7280;font-size:13px;line-height:1.7;margin:0 0 30px;"><strong>Current Status:</strong> ${escapeHtml(statusLabel)}</p>
 
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We value your feedback! If you're satisfied with our response so far, please consider rating your support experience once the ticket is resolved.</p>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">Thank you for choosing Classgrid. We're here to help!</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">We value your feedback! If you're satisfied with our response so far, please consider rating your support experience once the ticket is resolved.</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">Thank you for choosing Classgrid. We're here to help!</p>
 <div style="margin-top:10px;">
   <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0 0 10px;">Warm regards,</p>
   <div style="display:inline-block;text-align:left;">
@@ -181,13 +181,13 @@ ${(ticket.events || []).map(ev => {
 </td>
 </tr>
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;background:#f9f9f9;">
 <p style="margin:0 0 10px;">
-  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
-  <a href="https://classgrid.in/terms" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
+  <a href="https://classgrid.in" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
+  <a href="https://classgrid.in/privacy" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
+  <a href="https://classgrid.in/terms" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you opened a support ticket on Classgrid. If you did not expect this reply or wish to unsubscribe from ticket notifications, please contact us immediately.</p>
+<p style="color:#9ca3af;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you opened a support ticket on Classgrid. If you did not expect this reply or wish to unsubscribe from ticket notifications, please contact us immediately.</p>
 </td>
 </tr>
 </table>
@@ -286,92 +286,92 @@ function buildTicketCreationEmailHtml({ ticket, trackingUrl }) {
     body, html {
       margin: 0; padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #f5f5f5;
       -webkit-font-smoothing: antialiased;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
 <tr>
 <td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">Support Ticket Confirmation</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Ticket #${escapeHtml(ticketIdShort)}</p>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">Support Ticket Confirmation</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">Ticket #${escapeHtml(ticketIdShort)}</p>
 </td>
 </tr>
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
-<p style="color:#cccccc;margin:0 0 15px;">Thank you for contacting Classgrid Support. We have received your request regarding <strong>"${escapeHtml(subject)}"</strong>, and it has been registered in your support thread.</p>
-<p style="color:#cccccc;margin:0 0 30px;">Our team will review the details you shared and respond with the next step as soon as possible.</p>
+<p style="color:#374151;margin:0 0 15px;">Thank you for contacting Classgrid Support. We have received your request regarding <strong>"${escapeHtml(subject)}"</strong>, and it has been registered in your support thread.</p>
+<p style="color:#374151;margin:0 0 30px;">Our team will review the details you shared and respond with the next step as soon as possible.</p>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Details</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Details</h3>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:10px;border:1px solid #eaeaea;margin:0 0 25px;">
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Ticket ID</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">#${escapeHtml(ticketIdShort)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;width:30%;color:#6b7280;font-size:13px;font-weight:500;">Ticket ID</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">#${escapeHtml(ticketIdShort)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Subject</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(subject)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Subject</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(subject)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Category</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(categoryLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Category</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(categoryLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Priority</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(priorityLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Priority</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(priorityLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
+<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Status</td>
 <td style="padding:14px 18px;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
 </tr>
 </table>
 
-<div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
-  <p style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;font-weight:600;">Your Original Message</p>
+<div style="padding:20px;background:#ffffff;border-radius:10px;border:1px solid #eaeaea;margin:0 0 30px;text-align:left;">
+  <p style="color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;font-weight:600;">Your Original Message</p>
   <div style="color:#e5e5e5;font-size:14px;line-height:1.6;margin:0;">${userMessage}</div>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What Happens Next?</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What Happens Next?</h3>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 <li style="margin-bottom:10px;"><strong>Initial Review:</strong> Our support engineer will analyze your issue and may reach out for additional details.</li>
 <li style="margin-bottom:10px;"><strong>Investigation & Resolution:</strong> We will work on identifying the root cause and implementing a fix.</li>
 <li style="margin-bottom:10px;"><strong>Solution Delivery:</strong> You will be notified via email once the issue is resolved, or sooner if we need more information.</li>
 </ul>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Track Your Ticket</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">To view the full history, add comments, or upload additional files, please use the secure link below. (This link is unique to your request and should not be shared.)</p>
+<h3 style="color:#111111;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">Track Your Ticket</h3>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">To view the full history, add comments, or upload additional files, please use the secure link below. (This link is unique to your request and should not be shared.)</p>
 <div style="text-align:center;margin:0 0 30px;">
 <a href="${escapeHtml(trackingUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Track Your Ticket</a>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Additional Resources</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">While you wait, you may find these self-help resources useful:</p>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Additional Resources</h3>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 15px;">While you wait, you may find these self-help resources useful:</p>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
 <li style="margin-bottom:10px;">📘 <a href="https://classgrid.in/help-center" style="color:#34d399;text-decoration:none;">Classgrid Help Center</a> – Browse FAQs and how-to guides</li>
 </ul>
 
 
 
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We appreciate your patience and trust in Classgrid. Our goal is to make your experience seamless and enjoyable.</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">We appreciate your patience and trust in Classgrid. Our goal is to make your experience seamless and enjoyable.</p>
 <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;background:#f9f9f9;">
 <p style="margin:0 0 10px;">
-  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
-  <a href="https://classgrid.in/terms" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
+  <a href="https://classgrid.in" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
+  <a href="https://classgrid.in/privacy" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
+  <a href="https://classgrid.in/terms" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a support request on Classgrid. If you did not initiate this request, please contact us immediately.</p>
+<p style="color:#9ca3af;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a support request on Classgrid. If you did not initiate this request, please contact us immediately.</p>
 </td>
 </tr>
 </table>
@@ -474,96 +474,96 @@ export function buildTalkRequestCreationEmailHtml({ ticket, trackingUrl }) {
     body, html {
       margin: 0; padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #f5f5f5;
       -webkit-font-smoothing: antialiased;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
 <tr>
 <td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">Your Classgrid Talk Request Has Been Received</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Request #CG-TALK-${escapeHtml(ticketIdShort)}</p>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">Your Classgrid Talk Request Has Been Received</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">Request #CG-TALK-${escapeHtml(ticketIdShort)}</p>
 </td>
 </tr>
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
-<p style="color:#cccccc;margin:0 0 15px;">Thank you for contacting Classgrid.</p>
-<p style="color:#cccccc;margin:0 0 30px;">We have received your inquiry and saved the details below for our team to review.</p>
+<p style="color:#374151;margin:0 0 15px;">Thank you for contacting Classgrid.</p>
+<p style="color:#374151;margin:0 0 30px;">We have received your inquiry and saved the details below for our team to review.</p>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Request Summary</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Request Summary</h3>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:10px;border:1px solid #eaeaea;margin:0 0 30px;">
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Request ID</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">#CG-TALK-${escapeHtml(ticketIdShort)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;width:30%;color:#6b7280;font-size:13px;font-weight:500;">Request ID</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">#CG-TALK-${escapeHtml(ticketIdShort)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Institution</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(institutionLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Institution</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(institutionLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Subject</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(subject)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Subject</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(subject)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Category</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(categoryLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Category</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(categoryLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Priority</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(priorityLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Priority</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(priorityLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Status</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
 </tr>
 
 <tr>
-<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Created</td>
-<td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(createdDate)}</td>
+<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Created</td>
+<td style="padding:14px 18px;color:#111111;font-size:14px;">${escapeHtml(createdDate)}</td>
 </tr>
 </table>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What Happens Next?</h3>
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What Happens Next?</h3>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 30px;">
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;width:40%;">1. Review</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">Our team will review the details saved on this request.</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;width:40%;">1. Review</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#374151;font-size:14px;">Our team will review the details saved on this request.</td>
 </tr>
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">2. Assignment</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">A suitable Classgrid specialist will be assigned based on your needs.</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">2. Assignment</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#374151;font-size:14px;">A suitable Classgrid specialist will be assigned based on your needs.</td>
 </tr>
 <tr>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">3. Resolution</td>
-<td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#cccccc;font-size:14px;">We will work with you to provide the necessary support or information.</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">3. Resolution</td>
+<td style="padding:10px 0;border-bottom:1px solid #eaeaea;color:#374151;font-size:14px;">We will work with you to provide the necessary support or information.</td>
 </tr>
 </table>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">While You Wait</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">Explore how Classgrid empowers institutions like yours:</p>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">While You Wait</h3>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 15px;">Explore how Classgrid empowers institutions like yours:</p>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
 <li style="margin-bottom:10px;">🎥 <a href="https://classgrid.in/#demo" style="color:#34d399;text-decoration:none;">Product Demo</a> – Watch Classgrid in action</li>
 </ul>
 
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
 <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;background:#f9f9f9;">
 <p style="margin:0 0 10px;">
-  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
+  <a href="https://classgrid.in" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
+  <a href="https://classgrid.in/privacy" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a request through Classgrid Talk. If you did not initiate this, please contact us immediately.</p>
+<p style="color:#9ca3af;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you submitted a request through Classgrid Talk. If you did not initiate this, please contact us immediately.</p>
 </td>
 </tr>
 </table>
@@ -644,67 +644,67 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
     body, html {
       margin: 0; padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #f5f5f5;
       -webkit-font-smoothing: antialiased;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
 <tr>
 <td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">New Message from Your Classgrid Talk Specialist</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">Request #CG-TALK-${escapeHtml(ticketIdShort)}</p>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">New Message from Your Classgrid Talk Specialist</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">Request #CG-TALK-${escapeHtml(ticketIdShort)}</p>
 </td>
 </tr>
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 <p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(userName)},</p>
-<p style="color:#cccccc;margin:0 0 30px;">Your Classgrid Talk specialist has responded to your conversation. Please review the message below and continue the discussion at your convenience.</p>
+<p style="color:#374151;margin:0 0 30px;">Your Classgrid Talk specialist has responded to your conversation. Please review the message below and continue the discussion at your convenience.</p>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Conversation Summary</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Conversation Summary</h3>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:10px;border:1px solid #eaeaea;margin:0 0 25px;">
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Request ID</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">#CG-TALK-${escapeHtml(ticketIdShort)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;width:30%;color:#6b7280;font-size:13px;font-weight:500;">Request ID</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;font-weight:600;">#CG-TALK-${escapeHtml(ticketIdShort)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Institution</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(institutionLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Institution</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(institutionLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Subject</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(subject)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Subject</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(subject)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Category</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(categoryLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Category</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(categoryLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Priority</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(priorityLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Priority</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#111111;font-size:14px;">${escapeHtml(priorityLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Status</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Status</td>
+<td style="padding:14px 18px;border-bottom:1px solid #eaeaea;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(statusLabel)}</td>
 </tr>
 <tr>
-<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Specialist</td>
-<td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(specialistName)}</td>
+<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#6b7280;font-size:13px;font-weight:500;">Specialist</td>
+<td style="padding:14px 18px;color:#111111;font-size:14px;">${escapeHtml(specialistName)}</td>
 </tr>
 </table>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Specialist's Message</h3>
-<div style="padding:20px;background:#161616;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:left;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Specialist's Message</h3>
+<div style="padding:20px;background:#ffffff;border-radius:10px;border:1px solid #eaeaea;margin:0 0 30px;text-align:left;">
   <div style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
+<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
+<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 
 <li style="margin-bottom:10px;"><strong>Schedule a call:</strong> Your specialist can share a booking link if you prefer a live conversation.</li>
 <li style="margin-bottom:10px;"><strong>Ask follow-up questions:</strong> No question is too small – we're here to help you evaluate.</li>
@@ -716,8 +716,8 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
 
 </div>
 
-<div style="padding:20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 30px;text-align:center;">
-  <h3 style="color:#ffffff;font-size:15px;margin:0 0 15px;">Your Dedicated Specialist</h3>
+<div style="padding:20px;background:#f9f9f9;border-radius:10px;border:1px solid #eaeaea;margin:0 0 30px;text-align:center;">
+  <h3 style="color:#111111;font-size:15px;margin:0 0 15px;">Your Dedicated Specialist</h3>
   ${adminAvatar ? `<img src="${adminAvatar}" alt="${escapeHtml(specialistName)}" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;border:2px solid #34d399;object-fit:cover;">` : ''}
   <p style="color:#e5e5e5;font-size:16px;margin:0 0 5px;">
     <strong>${escapeHtml(specialistName)}</strong>
@@ -726,18 +726,18 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
   ${specialistEmail ? `<p style="color:#e5e5e5;font-size:14px;margin:0 0 5px;">📧 <a href="mailto:${escapeHtml(specialistEmail)}" style="color:#34d399;text-decoration:none;">${escapeHtml(specialistEmail)}</a></p>` : ''}
 </div>
 
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
+<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 20px;">We look forward to assisting you.</p>
 <p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
 
 </td>
 </tr>
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;background:#f9f9f9;">
 <p style="margin:0 0 10px;">
-  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
+  <a href="https://classgrid.in" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
+  <a href="https://classgrid.in/privacy" style="color:#6b7280;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a>
 </p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk.</p>
+<p style="color:#9ca3af;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because you're in conversation with Classgrid Talk.</p>
 </td>
 </tr>
 </table>

@@ -36,35 +36,35 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
     body, html {
       margin: 0; padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #f5f5f5;
       -webkit-font-smoothing: antialiased;
     }
     h1, h2, h3 { 
-      color: #ffffff; 
+      color: #111111; 
       margin-top: 0; 
       margin-bottom: 16px;
     }
     p { 
       margin: 0 0 20px; 
-      color: #cccccc; 
+      color: #374151; 
       font-size: 14px; 
       line-height: 1.7; 
     }
     ul { 
       margin: 0 0 20px 20px; 
-      color: #cccccc; 
+      color: #374151; 
       font-size: 14px; 
       padding: 0; 
       line-height: 1.7; 
     }
     li { margin-bottom: 8px; }
-    strong { color: #ffffff; }
-    a { color: #ffffff; text-decoration: underline; }
+    strong { color: #111111; }
+    a { color: #111111; text-decoration: underline; }
     
     .btn {
       display: inline-block;
-      background-color: #ffffff;
-      color: #000000 !important;
+      background-color: #111111;
+      color: #ffffff !important;
       text-decoration: none;
       padding: 12px 28px;
       border-radius: 6px;
@@ -78,17 +78,17 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
       color: #ffffff !important;
     }
     .box {
-      background-color: #161616;
-      border: 1px solid #2a2a2a;
+      background-color: #f9f9f9;
+      border: 1px solid #eaeaea;
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 24px;
     }
-    .box p { margin-bottom: 8px; color: #cccccc; }
+    .box p { margin-bottom: 8px; color: #374151; }
     .box p:last-child { margin-bottom: 0; }
     .box .meta {
       font-size: 12px;
-      color: #9ca3af;
+      color: #6b7280;
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -97,7 +97,7 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
     .box .code {
       font-family: monospace;
       font-size: 24px;
-      color: #ffffff;
+      color: #111111;
       letter-spacing: 4px;
       font-weight: bold;
       display: block;
@@ -105,29 +105,29 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
+<body style="margin:0;padding:0;background:#f5f5f5;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;width:100%;">
 <tr>
 <td align="center">
 
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
 
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:20px;">${title}</h1>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:20px;">${title}</h1>
 </td>
 </tr>
 
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 
 ${content}
 
 <div style="margin-top:30px;">
-<p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
+<p style="color:#6b7280;font-size:13px;margin:0;">
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 </div>
 
@@ -135,8 +135,8 @@ Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/s
 </tr>
 
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px;">
-${ignoreText ? `<p style="margin-bottom:12px;color:#7a7a7a;font-size:12px;">${ignoreText}</p>` : ''}
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;color:#9ca3af;font-size:12px;">
+${ignoreText ? `<p style="margin-bottom:12px;color:#9ca3af;font-size:12px;">${ignoreText}</p>` : ''}
 © ${new Date().getFullYear()} Classgrid. All rights reserved.
 </td>
 </tr>
@@ -155,32 +155,32 @@ ${ignoreText ? `<p style="margin-bottom:12px;color:#7a7a7a;font-size:12px;">${ig
 export const getFacultyWelcomeEmailHtml = (userName, orgName, dashboardUrl) => {
   return `<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;">
 <tr>
 <td align="center">
 
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;">
 
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">Welcome to Classgrid</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">
-Organization: <strong style="color:#ffffff;">${orgName}</strong>
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">Welcome to Classgrid</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">
+Organization: <strong style="color:#111111;">${orgName}</strong>
 </p>
 </td>
 </tr>
 
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 
 <p>Hi <strong>${userName}</strong>,</p>
 
 <p>Your faculty account has been successfully created. You're now ready to manage classrooms, deliver structured academic content, and engage students professionally.</p>
 
-<h3 style="color:#ffffff;">Structured Content Delivery</h3>
+<h3 style="color:#111111;">Structured Content Delivery</h3>
 <ul style="padding-left:20px;">
 <li style="margin-bottom:6px;">Upload PDFs, documents, and study material to specific classrooms</li>
 <li style="margin-bottom:6px;">Control student contributions through approval workflows</li>
@@ -188,14 +188,14 @@ Organization: <strong style="color:#ffffff;">${orgName}</strong>
 <li style="margin-bottom:6px;">Files securely stored via Supabase with signed URLs</li>
 </ul>
 
-<h3 style="color:#ffffff;margin-top:25px;">Smart Attendance (Pro Plan)</h3>
+<h3 style="color:#111111;margin-top:25px;">Smart Attendance (Pro Plan)</h3>
 <ul style="padding-left:20px;">
 <li style="margin-bottom:6px;">Start/stop attendance sessions inside classroom</li>
 <li style="margin-bottom:6px;">Daily, weekly, and monthly attendance reports</li>
 <li style="margin-bottom:6px;">Students track their attendance history</li>
 </ul>
 
-<h3 style="color:#ffffff;margin-top:25px;">Real-Time Classroom Chat</h3>
+<h3 style="color:#111111;margin-top:25px;">Real-Time Classroom Chat</h3>
 <ul style="padding-left:20px;">
 <li style="margin-bottom:6px;">Live academic discussions</li>
 <li style="margin-bottom:6px;">Faculty moderation tools</li>
@@ -203,20 +203,20 @@ Organization: <strong style="color:#ffffff;">${orgName}</strong>
 </ul>
 
 <div style="text-align:center;margin:30px 0;">
-<a href="${dashboardUrl}" style="background:#ffffff;color:#000;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
+<a href="${dashboardUrl}" style="background:#000000;color:#ffffff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
 Go to Dashboard
 </a>
 </div>
 
-<p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
+<p style="color:#6b7280;font-size:13px;margin:0;">
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 
 </td>
 </tr>
 
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;color:#9ca3af;font-size:12px;">
 © ${new Date().getFullYear()} Classgrid. All rights reserved.
 </td>
 </tr>
@@ -235,32 +235,32 @@ Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/s
 export const getStudentWelcomeEmailHtml = (userName, dashboardUrl) => {
   return `<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#f5f5f5;">
 <tr>
 <td align="center">
 
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eaeaea;border-radius:12px;overflow:hidden;">
 
 <tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">Welcome to Classgrid</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">
+<td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="color:#111111;margin:0;font-size:22px;">Welcome to Classgrid</h1>
+<p style="color:#6b7280;margin-top:8px;font-size:13px;">
 Ready to start your academic journey
 </p>
 </td>
 </tr>
 
 <tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
+<td style="padding:30px;color:#374151;font-size:14px;line-height:1.7;">
 
 <p>Hi <strong>${userName}</strong>,</p>
 
 <p>Your account has been successfully created. You're now ready to begin your academic journey with Classgrid.</p>
 
-<h3 style="color:#ffffff;">How to Join Your Organization</h3>
+<h3 style="color:#111111;">How to Join Your Organization</h3>
 <ul style="padding-left:20px;">
 <li style="margin-bottom:6px;">Enter your <strong>Honor Code</strong> to join your institution directly.</li>
 <li style="margin-bottom:6px;">Or enter a <strong>Classroom Code</strong> provided by your subject faculty. Joining just one classroom automatically links you to the entire organization.</li>
@@ -268,7 +268,7 @@ Ready to start your academic journey
 <li style="margin-bottom:6px;">You are managed by your organization. You cannot leave, browse, or request to join other organizations.</li>
 </ul>
 
-<h3 style="color:#ffffff;margin-top:25px;">What You Can Do</h3>
+<h3 style="color:#111111;margin-top:25px;">What You Can Do</h3>
 <ul style="padding-left:20px;">
 <li style="margin-bottom:6px;">Access faculty-uploaded notes, classroom announcements, and quizzes (including Google Form links) instantly</li>
 <li style="margin-bottom:6px;">Upload your notes to the dedicated student section and share knowledge across your organization</li>
@@ -279,20 +279,20 @@ Ready to start your academic journey
 </ul>
 
 <div style="text-align:center;margin:30px 0;">
-<a href="${dashboardUrl}" style="background:#ffffff;color:#000;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
+<a href="${dashboardUrl}" style="background:#000000;color:#ffffff;padding:12px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
 Join Classroom
 </a>
 </div>
 
-<p style="color:#9ca3af;font-size:13px;margin:0;">
-Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:underline;">https://classgrid.in/support</a>
+<p style="color:#6b7280;font-size:13px;margin:0;">
+Need help? Raise a ticket on our Support Portal: <a href="https://classgrid.in/support" style="color:#111111;text-decoration:underline;">https://classgrid.in/support</a>
 </p>
 
 </td>
 </tr>
 
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;color:#7a7a7a;font-size:12px;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;color:#9ca3af;font-size:12px;">
 © ${new Date().getFullYear()} Classgrid. All rights reserved.
 </td>
 </tr>
@@ -344,7 +344,7 @@ export const getPasswordResetEmailHtml = (resetLink) => {
     <h1>Reset your password</h1>
     <p>We received a request to reset the password for your Classgrid account. This link expires in <strong>5 minutes</strong>.</p>
     <a href="${resetLink}" class="btn">Reset Password</a>
-    <p style="margin-top:20px;font-size:13px;color:#9ca3af;">If you did not request this password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+    <p style="margin-top:20px;font-size:13px;color:#6b7280;">If you did not request this password reset, you can safely ignore this email. Your password will remain unchanged.</p>
   `;
   return baseTemplate({
     content,
@@ -395,7 +395,7 @@ export const getOrgApprovalEmailHtml = (orgName, ownerName, organizationCode, ho
     <p>Congratulations — your organization has been successfully reviewed and approved. You can now begin onboarding your faculty and students to your official Classgrid workspace.</p>
 
     <div class="box" style="margin-bottom: 24px;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">?? Admin Account Activation</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">?? Admin Account Activation</p>
       <p style="margin-bottom: 12px;">You will receive a separate email containing your secure Admin Account activation link.</p>
       <p style="margin-bottom: 8px;">This activation email will:</p>
       <ul style="margin-top: 0; margin-bottom: 16px;">
@@ -404,36 +404,36 @@ export const getOrgApprovalEmailHtml = (orgName, ownerName, organizationCode, ho
         <li>Allow you to securely set your password</li>
         <li>Automatically log you into your Admin Dashboard after activation</li>
       </ul>
-      <p style="margin-bottom: 8px; font-weight: 600; color: #ffffff;">For security reasons:</p>
+      <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">For security reasons:</p>
       <ul style="margin-top: 0; margin-bottom: 16px;">
         <li>The activation link can only be used once</li>
         <li>It will expire after the validity period</li>
         <li>It must not be shared with anyone</li>
       </ul>
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">If your activation link expires, you can request a new one from the Admin Login page.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">If your activation link expires, you can request a new one from the Admin Login page.</p>
     </div>
 
-    <h3 style="color:#ffffff; margin-top:32px;">?? Your Organization Codes</h3>
+    <h3 style="color:#111111; margin-top:32px;">?? Your Organization Codes</h3>
 
     <div class="box" style="margin-bottom: 16px;">
       <div class="meta">Faculty Organization Code</div>
       <div class="code" style="color: #60a5fa;">${organizationCode}</div>
-      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #ffffff;">Share this only with faculty members.</p>
-      <p style="margin: 0 0 4px; font-size: 14px; color: #9ca3af;">This code is required when a faculty member joins your organization.</p>
+      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #111111;">Share this only with faculty members.</p>
+      <p style="margin: 0 0 4px; font-size: 14px; color: #6b7280;">This code is required when a faculty member joins your organization.</p>
       <p style="margin: 0; font-size: 14px; color: #ef4444;">Do not share this with students.</p>
     </div>
 
     <div class="box" style="margin-bottom: 24px;">
       <div class="meta">Student Honor Code</div>
       <div class="code" style="color: #34d399;">${honorCode}</div>
-      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #ffffff;">Share this with students.</p>
-      <p style="margin: 0 0 4px; font-size: 14px; color: #9ca3af;">This allows students to connect directly to your organization without a classroom code.</p>
-      <p style="margin: 0; font-size: 14px; color: #9ca3af;">This is not a classroom code.</p>
+      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #111111;">Share this with students.</p>
+      <p style="margin: 0 0 4px; font-size: 14px; color: #6b7280;">This allows students to connect directly to your organization without a classroom code.</p>
+      <p style="margin: 0; font-size: 14px; color: #6b7280;">This is not a classroom code.</p>
     </div>
 
-    <h3 style="color:#ffffff; margin-top:32px;">?? Getting Started — Next Steps</h3>
+    <h3 style="color:#111111; margin-top:32px;">?? Getting Started — Next Steps</h3>
     
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">1?? For Faculty</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">1?? For Faculty</p>
     <p style="margin-bottom: 12px;">Send faculty invitations from your Admin Dashboard.</p>
     <p style="margin-bottom: 8px;">Each faculty member will:</p>
     <ul style="margin-bottom: 8px;">
@@ -442,47 +442,47 @@ export const getOrgApprovalEmailHtml = (orgName, ownerName, organizationCode, ho
       <li>Set their password</li>
       <li>Enter the Faculty Organization Code</li>
     </ul>
-    <p style="margin-bottom: 24px; font-size: 13px; color: #9ca3af;">After completion ? redirected to Faculty Dashboard.</p>
+    <p style="margin-bottom: 24px; font-size: 13px; color: #6b7280;">After completion ? redirected to Faculty Dashboard.</p>
 
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">2?? For Students</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">2?? For Students</p>
     <p style="margin-bottom: 8px;">Students can join your organization in two ways:</p>
     <ul style="margin-bottom: 24px;">
-      <li style="margin-bottom: 12px;"><strong>Enter the Student Honor Code</strong><br><span style="color: #9ca3af;">? Directly connect to your organization</span></li>
-      <li><strong>Enter a Classroom Code (created by faculty)</strong><br><span style="color: #9ca3af;">? Join a specific classroom<br>? Automatically linked to your organization</span></li>
+      <li style="margin-bottom: 12px;"><strong>Enter the Student Honor Code</strong><br><span style="color: #6b7280;">? Directly connect to your organization</span></li>
+      <li><strong>Enter a Classroom Code (created by faculty)</strong><br><span style="color: #6b7280;">? Join a specific classroom<br>? Automatically linked to your organization</span></li>
     </ul>
 
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">3?? After Joining</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">3?? After Joining</p>
     <ul style="margin-bottom: 32px;">
       <li><strong>Faculty</strong> ? Redirected to Faculty Dashboard</li>
       <li><strong>Students</strong> ? Redirected to Student Dashboard</li>
     </ul>
 
     <div class="box" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">?? Quick Access Tip</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">?? Quick Access Tip</p>
       <p style="margin-bottom: 16px;">Once your admin account is activated and you log in successfully, we recommend bookmarking your Admin Dashboard link in your browser for faster access.</p>
       <p style="margin-bottom: 12px;">Your Admin Dashboard allows you to manage:</p>
       
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #9ca3af; margin-bottom: 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
         <tr>
           <td valign="top" width="40%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Management</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Management</strong>
             01 — Overview<br>02 — Faculty<br>03 — Students<br>04 — Classrooms<br>05 — Notes<br>06 — Announcements
           </td>
           <td valign="top" width="30%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Insights</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Insights</strong>
             07 — Analytics<br>08 — Attendance<br>09 — Billing
           </td>
           <td valign="top" width="30%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Settings</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Settings</strong>
             10 — Organization<br>11 — Security<br>12 — Role Sandbox
           </td>
         </tr>
       </table>
       
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af; font-style: italic;">Bookmarking ensures you can return directly without navigating through the main portal.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280; font-style: italic;">Bookmarking ensures you can return directly without navigating through the main portal.</p>
     </div>
 
-    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
+    <p style="font-size: 14px; color: #6b7280; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a></p>
   `;
   return baseTemplate({
     content,
@@ -499,15 +499,15 @@ export const getOrgAdminInviteHtml = (adminName, orgName, activationLink) => {
     <p>Your organization <strong>${orgName}</strong> has been approved on Classgrid.</p>
 
     <div class="box" style="margin-bottom: 24px;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">&#x1F511; Set Up Your Account</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">&#x1F511; Set Up Your Account</p>
       <p style="margin-bottom: 8px;">Click the button below to securely activate your admin account and set your password.</p>
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>5 minutes</strong>. Do not share it.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>5 minutes</strong>. Do not share it.</p>
     </div>
 
     <a href="${activationLink}" class="btn">Activate Admin Account</a>
 
-    <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#ffffff;">/admin/login</a>.</p>
-    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>.</p>
+    <p style="margin-top: 28px; font-size: 13px; color: #6b7280;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#111111;">/admin/login</a>.</p>
+    <p style="font-size: 13px; color: #6b7280;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a>.</p>
   `;
   return baseTemplate({
     content,
@@ -539,20 +539,20 @@ export const getDeptAdminInviteEmailHtml = (recipientName, orgName, role, invite
     <p>You have been invited by <strong>${invitedByName}</strong> to join <strong>${orgName}</strong> on Classgrid as a <strong>${roleLabel}</strong>.</p>
 
     <div class="box" style="margin-bottom: 24px;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">&#x1F511; Activate Your Account</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">&#x1F511; Activate Your Account</p>
       <p style="margin-bottom: 8px;">Click the button below to set your password and access your dashboard.</p>
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>24 hours</strong>. Do not share it.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>24 hours</strong>. Do not share it.</p>
     </div>
 
     <a href="${activationLink}" class="btn">Activate Account &amp; Set Password</a>
 
     <div class="box" style="margin-top: 28px; margin-bottom: 24px; border-left: 3px solid #3b82f6;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">&#x1F4CB; Your Role: ${roleLabel}</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">&#x1F4CB; Your Role: ${roleLabel}</p>
       <p style="margin-bottom: 8px;">After activating your account, you will have access to your dedicated department dashboard where you can manage your responsibilities within ${orgName}.</p>
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">You are being managed by the Organization Admin. Contact your admin if you have any questions about your access level.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">You are being managed by the Organization Admin. Contact your admin if you have any questions about your access level.</p>
     </div>
 
-    <p style="font-size: 13px; color: #9ca3af; margin-bottom: 0;">If you did not expect this invitation, you can safely ignore this email. Need help? Contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
+    <p style="font-size: 13px; color: #6b7280; margin-bottom: 0;">If you did not expect this invitation, you can safely ignore this email. Need help? Contact us at <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a></p>
   `;
   return baseTemplate({
     content,
@@ -748,23 +748,23 @@ export const getPlanActivationHtml = (planName, activationDate, expiryDate, stud
 <meta charset="UTF-8">
 <title>Classgrid PRO Activated</title>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f0f;padding:40px 0;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 0;">
 <tr>
 <td align="center">
 
 <!-- Main Container -->
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border-radius:12px;border:1px solid #2a2a2a;overflow:hidden;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;border:1px solid #eaeaea;overflow:hidden;">
 
 <!-- Header -->
 <tr>
-<td style="padding:30px;text-align:center;border-bottom:1px solid #2a2a2a;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;">
-<h1 style="margin:0;font-size:22px;color:#ffffff;font-weight:600;">
+<td style="padding:30px;text-align:center;border-bottom:1px solid #eaeaea;">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<h1 style="margin:0;font-size:22px;color:#111111;font-weight:600;">
 ?? Your PRO Plan is Now Active
 </h1>
-<p style="margin:10px 0 0;font-size:13px;color:#9ca3af;">
+<p style="margin:10px 0 0;font-size:13px;color:#6b7280;">
 Payment confirmed — premium features unlocked
 </p>
 </td>
@@ -780,39 +780,39 @@ Dear <strong>${userName}</strong>,
 
 <p style="font-size:14px;color:#bdbdbd;line-height:1.7;margin:0 0 25px;">
 Great news! Your payment has been <strong style="color:#34d399;">successfully verified</strong> and your 
-<strong style="color:#ffffff;">Classgrid ${planName} Plan</strong> is now active.
+<strong style="color:#111111;">Classgrid ${planName} Plan</strong> is now active.
 All premium features have been unlocked for your organization.
 </p>
 
 <!-- Subscription Details -->
 <table width="100%" cellpadding="0" cellspacing="0" 
-style="background:#111111;border:1px solid #2a2a2a;border-radius:10px;padding:20px;">
+style="background:#f9f9f9;border:1px solid #eaeaea;border-radius:10px;padding:20px;">
 <tr>
 <td>
 
-<h3 style="margin:0 0 15px;font-size:15px;color:#ffffff;">
+<h3 style="margin:0 0 15px;font-size:15px;color:#111111;">
 ?? Subscription Details
 </h3>
 
-<table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#cccccc;">
+<table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#374151;">
 <tr>
-<td><strong style="color:#9ca3af;">Plan Name</strong></td>
+<td><strong style="color:#6b7280;">Plan Name</strong></td>
 <td align="right" style="color:#a855f7;font-weight:600;">${planName}</td>
 </tr>
 <tr>
-<td><strong style="color:#9ca3af;">Activation Date</strong></td>
+<td><strong style="color:#6b7280;">Activation Date</strong></td>
 <td align="right">${formatDate(activationDate)}</td>
 </tr>
 <tr>
-<td><strong style="color:#9ca3af;">Expiry Date</strong></td>
+<td><strong style="color:#6b7280;">Expiry Date</strong></td>
 <td align="right">${formatDate(expiryDate)}</td>
 </tr>
 <tr>
-<td><strong style="color:#9ca3af;">Plan Duration</strong></td>
+<td><strong style="color:#6b7280;">Plan Duration</strong></td>
 <td align="right">${planDuration} Days</td>
 </tr>
 <tr>
-<td><strong style="color:#9ca3af;">Student Capacity</strong></td>
+<td><strong style="color:#6b7280;">Student Capacity</strong></td>
 <td align="right">Up to ${studentLimit} Students</td>
 </tr>
 </table>
@@ -823,32 +823,32 @@ style="background:#111111;border:1px solid #2a2a2a;border-radius:10px;padding:20
 
 <!-- PRO Features Unlocked -->
 <table width="100%" cellpadding="0" cellspacing="0" 
-style="background:#111111;border:1px solid #2a2a2a;border-radius:10px;padding:20px;margin-top:20px;">
+style="background:#f9f9f9;border:1px solid #eaeaea;border-radius:10px;padding:20px;margin-top:20px;">
 <tr>
 <td>
 
-<h3 style="margin:0 0 15px;font-size:15px;color:#ffffff;">
+<h3 style="margin:0 0 15px;font-size:15px;color:#111111;">
 ? PRO Features Now Unlocked
 </h3>
 
-<table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px;color:#cccccc;">
+<table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px;color:#374151;">
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">150 Student Capacity</strong> — Expanded from 60</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">150 Student Capacity</strong> — Expanded from 60</td>
 </tr>
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">Smart Attendance</strong> — Live sessions, daily/weekly/monthly reports</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">Smart Attendance</strong> — Live sessions, daily/weekly/monthly reports</td>
 </tr>
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">Advanced Analytics</strong> — Student performance, engagement trends</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">Advanced Analytics</strong> — Student performance, engagement trends</td>
 </tr>
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">10 Faculty Members</strong> — Expanded from 5</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">10 Faculty Members</strong> — Expanded from 5</td>
 </tr>
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">5 Classrooms per Faculty</strong> — Expanded from 2</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">5 Classrooms per Faculty</strong> — Expanded from 2</td>
 </tr>
 <tr>
-<td style="padding:4px 0;">? <strong style="color:#ffffff;">Priority Support</strong> — Faster response times</td>
+<td style="padding:4px 0;">? <strong style="color:#111111;">Priority Support</strong> — Faster response times</td>
 </tr>
 </table>
 
@@ -862,25 +862,25 @@ style="background:#0d1117;border:1px solid #1a3a5c;border-left:3px solid #3b82f6
 <tr>
 <td>
 
-<h3 style="margin:0 0 15px;font-size:15px;color:#ffffff;">
+<h3 style="margin:0 0 15px;font-size:15px;color:#111111;">
 ?? How to Get Started
 </h3>
 
-<table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px;color:#cccccc;">
+<table width="100%" cellpadding="4" cellspacing="0" style="font-size:13px;color:#374151;">
 <tr>
-<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 1:</strong> Log in to your <strong style="color:#ffffff;">Organization Admin Dashboard</strong></td>
+<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 1:</strong> Log in to your <strong style="color:#111111;">Organization Admin Dashboard</strong></td>
 </tr>
 <tr>
-<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 2:</strong> Go to <strong style="color:#ffffff;">02 — Faculty</strong> section to invite your faculty members</td>
+<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 2:</strong> Go to <strong style="color:#111111;">02 — Faculty</strong> section to invite your faculty members</td>
 </tr>
 <tr>
-<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 3:</strong> Share your <strong style="color:#ffffff;">Student Honor Code</strong> with students (found in Overview)</td>
+<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 3:</strong> Share your <strong style="color:#111111;">Student Honor Code</strong> with students (found in Overview)</td>
 </tr>
 <tr>
 <td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 4:</strong> Faculty creates classrooms ? students join using classroom codes</td>
 </tr>
 <tr>
-<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 5:</strong> Access <strong style="color:#ffffff;">07 — Analytics</strong> and <strong style="color:#ffffff;">08 — Attendance</strong> (PRO features!)</td>
+<td style="padding:6px 0;"><strong style="color:#60a5fa;">Step 5:</strong> Access <strong style="color:#111111;">07 — Analytics</strong> and <strong style="color:#111111;">08 — Attendance</strong> (PRO features!)</td>
 </tr>
 </table>
 
@@ -888,7 +888,7 @@ style="background:#0d1117;border:1px solid #1a3a5c;border-left:3px solid #3b82f6
 </tr>
 </table>
 
-<p style="font-size:13px;color:#9ca3af;margin-top:20px;">
+<p style="font-size:13px;color:#6b7280;margin-top:20px;">
 Your PRO plan remains active for ${planDuration} days from the activation date.  
 Please renew before expiry to maintain uninterrupted access.
 </p>
@@ -903,7 +903,7 @@ Open Admin Dashboard
 
 <div style="text-align:center;margin-bottom:20px;">
 <a href="${getFrontendUrl()}"
-style="background:transparent;color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:500;display:inline-block;border:1px solid #2a2a2a;">
+style="background:transparent;color:#111111;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:500;display:inline-block;border:1px solid #eaeaea;">
 Visit Classgrid
 </a>
 </div>
@@ -913,7 +913,7 @@ Need assistance?
 </p>
 
 <p style="font-size:14px;margin:5px 0 0;">
-<a href="https://classgrid.in/support" style="color:#ffffff;text-decoration:none;">
+<a href="https://classgrid.in/support" style="color:#111111;text-decoration:none;">
 support@classgrid.in
 </a>
 </p>
@@ -928,7 +928,7 @@ Best regards,<br>
 
 <!-- Footer -->
 <tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;font-size:12px;color:#7a7a7a;">
+<td style="padding:20px;text-align:center;border-top:1px solid #eaeaea;font-size:12px;color:#9ca3af;">
 © ${new Date().getFullYear()} Classgrid. All rights reserved.<br>
 support@classgrid.in
 </td>
@@ -1392,7 +1392,7 @@ export const getClassroomActivityEmailHtml = ({ orgName, classroomName, facultyN
     </div>
 
     <a href="${classroomUrl}" class="btn">Open in Classroom</a>
-    <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
+    <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #111111; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
 `;
   return baseTemplate({
     content,
@@ -1427,7 +1427,7 @@ export const getJoinRequestEmailHtml = ({ studentName, classroomName, reviewUrl 
     <p><strong>${studentName}</strong> has requested to join <strong>${classroomName}</strong>.</p>
     <p>You can approve or reject this request from your dashboard.</p>
     <a href="${reviewUrl}" class="btn">Review Request</a>
-    <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
+    <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #111111; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
 `;
   return baseTemplate({
     content,
@@ -1457,7 +1457,7 @@ export const getJoinApprovedEmailHtml = ({ classroomName, classroomUrl }) => {
     <p>Your request to join <strong>${classroomName}</strong> has been approved.</p>
     <p>You can now access all classroom materials, announcements, and quizzes.</p>
     <a href="${classroomUrl}" class="btn">Open Classroom</a>
-    <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
+    <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">To manage email notifications, visit <a href="${getFrontendUrl()}/settings" style="color: #111111; font-weight: 600; text-decoration: underline;">Settings</a>.</p>
 `;
   return baseTemplate({
     content,
@@ -1605,7 +1605,7 @@ export const getDailyDigestEmailHtml = ({ userName, notifications, grouped, tota
       ${notifRows}
     </table>
     <div style="text-align:center; margin:24px 0;">
-      <a href="${frontendUrl}/classroom" style="display:inline-block; padding:12px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:600; font-size:14px;">Open Dashboard</a>
+      <a href="${frontendUrl}/classroom" style="display:inline-block; padding:12px 28px; background:#2563eb; color:#111111; text-decoration:none; border-radius:8px; font-weight:600; font-size:14px;">Open Dashboard</a>
     </div>
     <p style="margin:16px 0 0; color:#94a3b8; font-size:12px; text-align:center;">
       <a href="${settingsUrl}" style="color:#64748b; text-decoration:underline;">Change delivery preferences</a>
@@ -1674,7 +1674,7 @@ export const getPlanExpiryReminderHtml = (orgName, ownerName, planName, expiryDa
     </div>
 
     <div class="box" style="margin-bottom: 24px;">
-      <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">${actionHeading}</p>
+      <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">${actionHeading}</p>
       <p style="margin-bottom: 12px;">${actionBody}</p>
       <ul style="margin-top: 0;">
         <li>Review onboarding completion from your Org Admin Dashboard</li>
@@ -1685,8 +1685,8 @@ export const getPlanExpiryReminderHtml = (orgName, ownerName, planName, expiryDa
 
     <a href="${dashboardUrl}" class="btn">${isExpired ? 'Continue With Paid Access' : 'Open Org Admin Dashboard'}</a>
 
-    <p style="margin-top: 24px; font-size: 13px; color: #9ca3af;">Classgrid pricing is handled separately from this reminder flow. Use the dashboard to continue, or contact support if you need help with the next payment step.</p>
-    <p style="font-size: 13px; color: #9ca3af;">Need help? Contact us at <a href="https://classgrid.in/support" style="color:#ffffff; font-weight:500;">https://classgrid.in/support</a>.</p>
+    <p style="margin-top: 24px; font-size: 13px; color: #6b7280;">Classgrid pricing is handled separately from this reminder flow. Use the dashboard to continue, or contact support if you need help with the next payment step.</p>
+    <p style="font-size: 13px; color: #6b7280;">Need help? Contact us at <a href="https://classgrid.in/support" style="color:#111111; font-weight:500;">https://classgrid.in/support</a>.</p>
   `;
   return baseTemplate({
     content,
@@ -1756,37 +1756,37 @@ export const getConsolidatedApprovalEmailHtml = ({
 
   // PRO: full subscription details table (from getPlanActivationHtml, verbatim)
   const proSubscriptionBlock = isPro ? `
-    <h3 style="color:#ffffff; margin-top:32px;">Subscription Details</h3>
+    <h3 style="color:#111111; margin-top:32px;">Subscription Details</h3>
     <table width="100%" cellpadding="0" cellspacing="0"
-      style="background:#111111;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:20px;">
+      style="background:#f9f9f9;border:1px solid #eaeaea;border-radius:10px;margin-bottom:20px;">
       <tr>
         <td style="padding:20px;">
-          <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#cccccc;">
+          <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#374151;">
             <tr>
-              <td><strong style="color:#9ca3af;">Plan Name</strong></td>
+              <td><strong style="color:#6b7280;">Plan Name</strong></td>
               <td align="right">${plan}</td>
             </tr>
             <tr>
-              <td><strong style="color:#9ca3af;">Activation Date</strong></td>
+              <td><strong style="color:#6b7280;">Activation Date</strong></td>
               <td align="right">${formatDate(activationDate)}</td>
             </tr>
             <tr>
-              <td><strong style="color:#9ca3af;">Expiry Date</strong></td>
+              <td><strong style="color:#6b7280;">Expiry Date</strong></td>
               <td align="right">${formatDate(expiryDate)}</td>
             </tr>
             <tr>
-              <td><strong style="color:#9ca3af;">Plan Duration</strong></td>
+              <td><strong style="color:#6b7280;">Plan Duration</strong></td>
               <td align="right">${planDuration} Days</td>
             </tr>
             <tr>
-              <td><strong style="color:#9ca3af;">Student Capacity</strong></td>
+              <td><strong style="color:#6b7280;">Student Capacity</strong></td>
               <td align="right">Up to ${studentLimit} Students</td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
-    <p style="font-size:13px;color:#9ca3af;margin-bottom:24px;">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:24px;">
       Your PRO plan remains active for ${planDuration} days from the activation date.
       Please renew before expiry to maintain uninterrupted access.
     </p>
@@ -1795,7 +1795,7 @@ export const getConsolidatedApprovalEmailHtml = ({
   // FREE: simple capacity note
   const freeCapacityBlock = !isPro ? `
     <div class="box" style="margin-bottom:24px;">
-      <p style="margin-bottom:8px; font-weight:600; color:#ffffff;">?? Plan</p>
+      <p style="margin-bottom:8px; font-weight:600; color:#111111;">?? Plan</p>
       <p style="margin-bottom:4px;">Plan: <strong>FREE</strong></p>
       <p style="margin-bottom:0;">Student Capacity: <strong>Up to ${studentLimit} Students</strong></p>
     </div>
@@ -1813,27 +1813,27 @@ export const getConsolidatedApprovalEmailHtml = ({
     ${proSubscriptionBlock}
     ${freeCapacityBlock}
 
-    <h3 style="color:#ffffff; margin-top:32px;">?? Your Organization Codes</h3>
+    <h3 style="color:#111111; margin-top:32px;">?? Your Organization Codes</h3>
 
     <div class="box" style="margin-bottom: 16px;">
       <div class="meta">Faculty Organization Code</div>
       <div class="code" style="color: #60a5fa;">${organizationCode}</div>
-      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #ffffff;">Share this only with faculty members.</p>
-      <p style="margin: 0 0 4px; font-size: 14px; color: #9ca3af;">This code is required when a faculty member joins your organization.</p>
+      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #111111;">Share this only with faculty members.</p>
+      <p style="margin: 0 0 4px; font-size: 14px; color: #6b7280;">This code is required when a faculty member joins your organization.</p>
       <p style="margin: 0; font-size: 14px; color: #ef4444;">Do not share this with students.</p>
     </div>
 
     <div class="box" style="margin-bottom: 24px;">
       <div class="meta">Student Honor Code</div>
       <div class="code" style="color: #34d399;">${honorCode}</div>
-      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #ffffff;">Share this with students.</p>
-      <p style="margin: 0 0 4px; font-size: 14px; color: #9ca3af;">This allows students to connect directly to your organization without a classroom code.</p>
-      <p style="margin: 0; font-size: 14px; color: #9ca3af;">This is not a classroom code.</p>
+      <p style="margin: 12px 0 4px; font-weight: 500; font-size: 14px; color: #111111;">Share this with students.</p>
+      <p style="margin: 0 0 4px; font-size: 14px; color: #6b7280;">This allows students to connect directly to your organization without a classroom code.</p>
+      <p style="margin: 0; font-size: 14px; color: #6b7280;">This is not a classroom code.</p>
     </div>
 
-    <h3 style="color:#ffffff; margin-top:32px;">?? Getting Started — Next Steps</h3>
+    <h3 style="color:#111111; margin-top:32px;">?? Getting Started — Next Steps</h3>
 
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">1?? For Faculty</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">1?? For Faculty</p>
     <p style="margin-bottom: 12px;">Send faculty invitations from your Admin Dashboard.</p>
     <p style="margin-bottom: 8px;">Each faculty member will:</p>
     <ul style="margin-bottom: 8px;">
@@ -1842,67 +1842,67 @@ export const getConsolidatedApprovalEmailHtml = ({
       <li>Set their password</li>
       <li>Enter the Faculty Organization Code</li>
     </ul>
-    <p style="margin-bottom: 24px; font-size: 13px; color: #9ca3af;">After completion ? redirected to Faculty Dashboard.</p>
+    <p style="margin-bottom: 24px; font-size: 13px; color: #6b7280;">After completion ? redirected to Faculty Dashboard.</p>
 
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">2?? For Students</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">2?? For Students</p>
     <p style="margin-bottom: 8px;">Students can join your organization in two ways:</p>
     <ul style="margin-bottom: 24px;">
-      <li style="margin-bottom: 12px;"><strong>Enter the Student Honor Code</strong><br><span style="color: #9ca3af;">? Directly connect to your organization</span></li>
-      <li><strong>Enter a Classroom Code (created by faculty)</strong><br><span style="color: #9ca3af;">? Join a specific classroom<br>? Automatically linked to your organization</span></li>
+      <li style="margin-bottom: 12px;"><strong>Enter the Student Honor Code</strong><br><span style="color: #6b7280;">? Directly connect to your organization</span></li>
+      <li><strong>Enter a Classroom Code (created by faculty)</strong><br><span style="color: #6b7280;">? Join a specific classroom<br>? Automatically linked to your organization</span></li>
     </ul>
 
-    <p style="font-weight: 600; color: #ffffff; margin-bottom: 8px;">3?? After Joining</p>
+    <p style="font-weight: 600; color: #111111; margin-bottom: 8px;">3?? After Joining</p>
     <ul style="margin-bottom: 32px;">
       <li><strong>Faculty</strong> ? Redirected to Faculty Dashboard</li>
       <li><strong>Students</strong> ? Redirected to Student Dashboard</li>
     </ul>
 
     <div class="box" style="margin-bottom: 32px; border-left: 3px solid #3b82f6;">
-      <p style="margin-bottom: 12px; font-weight: 600; color: #ffffff;">?? Quick Access Tip</p>
+      <p style="margin-bottom: 12px; font-weight: 600; color: #111111;">?? Quick Access Tip</p>
       <p style="margin-bottom: 16px;">Once your admin account is activated and you log in successfully, we recommend bookmarking your Admin Dashboard link in your browser for faster access.</p>
       <p style="margin-bottom: 12px;">Your Admin Dashboard allows you to manage:</p>
 
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #9ca3af; margin-bottom: 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
         <tr>
           <td valign="top" width="40%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Management</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Management</strong>
             01 — Overview<br>02 — Faculty<br>03 — Students<br>04 — Classrooms<br>05 — Notes<br>06 — Announcements
           </td>
           <td valign="top" width="30%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Insights</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Insights</strong>
             07 — Analytics<br>08 — Attendance<br>09 — Billing
           </td>
           <td valign="top" width="30%">
-            <strong style="color: #ffffff; display: block; margin-bottom: 6px;">Settings</strong>
+            <strong style="color: #111111; display: block; margin-bottom: 6px;">Settings</strong>
             10 — Organization<br>11 — Security<br>12 — Role Sandbox
           </td>
         </tr>
       </table>
 
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af; font-style: italic;">Bookmarking ensures you can return directly without navigating through the main portal.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280; font-style: italic;">Bookmarking ensures you can return directly without navigating through the main portal.</p>
     </div>
 
-    <h3 style="color:#ffffff; margin-top:32px;">&#x1F511; Set Up Your Account</h3>
+    <h3 style="color:#111111; margin-top:32px;">&#x1F511; Set Up Your Account</h3>
 
     <div class="box" style="margin-bottom: 24px;">
       <p style="margin-bottom: 8px;">Click the button below to securely activate your admin account and set your password.</p>
-      <p style="margin-bottom: 0; font-size: 13px; color: #9ca3af;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>5 minutes</strong>. Do not share it.</p>
+      <p style="margin-bottom: 0; font-size: 13px; color: #6b7280;">&#x26A0;&#xFE0F; This link is <strong>single-use</strong> and expires in <strong>5 minutes</strong>. Do not share it.</p>
     </div>
 
     <a href="${activationLink}" class="btn">Activate Admin Account</a>
 
     <div style="text-align:center;margin: 32px 0;">
-      <p style="margin-bottom:12px;font-size:14px;color:#9ca3af;">After activating your account, go directly to your dashboard:</p>
+      <p style="margin-bottom:12px;font-size:14px;color:#6b7280;">After activating your account, go directly to your dashboard:</p>
       <a href="${getFrontendUrl()}/admin/login"
          style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#00d4ff,#7c3aed);color:#000000;font-weight:700;font-size:15px;border-radius:10px;text-decoration:none;letter-spacing:0.3px;box-shadow:0 4px 20px rgba(0,212,255,0.3);"
       >??? Open Org Admin Dashboard</a>
       <p style="margin-top:10px;font-size:12px;color:#6b7280;">Bookmark this page for quick access in the future.</p>
     </div>
 
-    <p style="margin-top: 28px; font-size: 13px; color: #9ca3af;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#ffffff;">/admin/login</a>.</p>
-    <p style="font-size: 13px; color: #9ca3af;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>.</p>
+    <p style="margin-top: 28px; font-size: 13px; color: #6b7280;">After activation, you can sign in anytime at <a href="${getFrontendUrl()}/admin/login" style="color:#111111;">/admin/login</a>.</p>
+    <p style="font-size: 13px; color: #6b7280;">If you did not apply for a Classgrid organization, please contact us at <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a>.</p>
 
-    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a></p>
+    <p style="font-size: 14px; color: #6b7280; margin-bottom: 0;">If you need assistance during setup, our support team is always available at:<br><a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a></p>
   `;
 
   return baseTemplate({
@@ -2026,8 +2026,8 @@ export const getAccountSuspensionEmailHtml = (userName, reason) => {
     <p style="margin-top: 24px;">If you believe this is a mistake or would like to appeal, please contact our support team:</p>
     <a href="https://classgrid.in/support" class="btn" style="background: #f59e0b; color: #000;">Contact Support</a>
 
-    <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">
-      Support: <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>
+    <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">
+      Support: <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a>
     </p>
   `;
   return baseTemplate({ content, title: 'Account Suspended' });
@@ -2067,8 +2067,8 @@ export const getAccountDeletionEmailHtml = (userName, reason) => {
     <p style="margin-top: 24px;">If you believe this was done in error, please contact our support team immediately:</p>
     <a href="https://classgrid.in/support" class="btn" style="background: #ef4444;">Contact Support</a>
 
-    <p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">
-      Support: <a href="https://classgrid.in/support" style="color:#ffffff;">https://classgrid.in/support</a>
+    <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">
+      Support: <a href="https://classgrid.in/support" style="color:#111111;">https://classgrid.in/support</a>
     </p>
   `;
   return baseTemplate({ content, title: 'Account Deleted' });
@@ -2296,13 +2296,13 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
       <p><strong>Time:</strong> ${formatDate(new Date())}</p>
     </div>
 
-    <h3 style="color:#ffffff; margin-top:24px;">Why did this happen?</h3>
+    <h3 style="color:#111111; margin-top:24px;">Why did this happen?</h3>
     <ul style="color:#e5e7eb; padding-left:20px; line-height:1.6; margin-bottom:24px;">
       <li>You may have used a personal email instead of your official institution email.</li>
       <li>Your institution administrator may not have created your account yet.</li>
     </ul>
 
-    <h3 style="color:#ffffff;">Next Steps</h3>
+    <h3 style="color:#111111;">Next Steps</h3>
     <p>If you believe you should have access, please reach out to your institution administrator directly.</p>
   `;
 
@@ -2347,8 +2347,8 @@ export const getNewDeviceOtpHtml = (userName, otp) => {
 
     <div class="box" style="text-align:center; margin: 24px 0;">
       <div class="meta">Your Verification Code</div>
-      <span class="code" style="font-size:32px; letter-spacing:8px; color:#ffffff;">${otp}</span>
-      <p style="margin-top:12px; font-size:13px; color:#9ca3af;">This code expires in <strong style="color:#ffffff;">30 seconds</strong>.</p>
+      <span class="code" style="font-size:32px; letter-spacing:8px; color:#111111;">${otp}</span>
+      <p style="margin-top:12px; font-size:13px; color:#6b7280;">This code expires in <strong style="color:#111111;">30 seconds</strong>.</p>
     </div>
 
     <p>Enter this code on the login page to verify your device. If you did not attempt to log in, please secure your account immediately.</p>
