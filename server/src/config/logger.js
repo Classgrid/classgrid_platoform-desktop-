@@ -46,7 +46,7 @@ if (mongoUri) {
             db: mongoUri,
             collection: "systemlogs",
             format: combine(timestamp(), metadata()),
-            expireAfterSeconds: 2592000,
+            expireAfterSeconds: 432000, // 5 days
             capped: true,
             cappedSize: 10485760, // 10MB
             cappedMax: 10000 // Max 10,000 logs
