@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Play, RefreshCw, Upload, User, Expand, StopCircle, X, Filter } from "lucide-react";
+import { Search, Play, RefreshCw, Upload, User, Expand, StopCircle, X, Filter, Copy } from "lucide-react";
 import { useErrorLogs } from "../queries/useAlerts";
 import type { ErrorLog } from "../services/superAdminApi";
 import { DataTable } from "@/components/marketing_ui/data-table";
@@ -189,8 +189,15 @@ export function AuditLogsPage() {
             
             {traceId && (
               <div className="flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-md text-xs font-mono font-medium whitespace-nowrap ml-1">
-                <span>Trace: {traceId.substring(0, 8)}...</span>
-                <button onClick={() => setTraceId("")} className="ml-2 hover:text-yellow-800">
+                <span title={traceId}>Trace: {traceId.substring(0, 8)}...</span>
+                <button 
+                  onClick={() => navigator.clipboard.writeText(traceId)} 
+                  className="ml-2 hover:text-yellow-800 transition-colors"
+                  title="Copy full Trace ID"
+                >
+                  <Copy size={12} />
+                </button>
+                <button onClick={() => setTraceId("")} className="ml-2 hover:text-yellow-800" title="Clear Trace ID">
                   <X size={14} />
                 </button>
               </div>
