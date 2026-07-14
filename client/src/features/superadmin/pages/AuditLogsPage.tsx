@@ -139,7 +139,7 @@ export function AuditLogsPage() {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] w-full max-w-7xl mx-auto bg-background p-4 sm:p-6 lg:p-8">
+    <div className="flex flex-col h-[calc(100vh-32px)] w-full max-w-full mx-auto bg-background p-4 sm:p-6 lg:p-8">
       
       {/* Header */}
       <div className="flex-none flex items-center justify-between border-b border-border pb-4 mb-4">
@@ -286,7 +286,7 @@ export function AuditLogsPage() {
         
         {/* Detail Panel */}
         {selectedLog && (
-          <div className="w-[450px] border border-border rounded-md bg-card flex flex-col h-full overflow-hidden shadow-lg flex-shrink-0 animate-in slide-in-from-right-4">
+          <div className="w-[600px] border border-border rounded-md bg-card flex flex-col h-full overflow-hidden shadow-lg flex-shrink-0 animate-in slide-in-from-right-4">
             <div className="flex items-center justify-between p-4 border-b border-border bg-secondary/30">
               <h3 className="font-semibold text-foreground">Log Details</h3>
               <button onClick={() => setSelectedLog(null)} className="text-muted-foreground hover:text-foreground">
