@@ -133,13 +133,7 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
   <div style="color:#374151;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
-<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
-<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 
-<li style="margin-bottom:10px;"><strong>Add additional details:</strong> If you have screenshots, logs, or extra context, attach them to your reply.</li>
-<li style="margin-bottom:10px;"><strong>Check ticket status:</strong> Use the button below to view the full conversation history.</li>
-<li style="margin-bottom:10px;"><strong>Close the ticket:</strong> Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.</li>
-</ul>
 
 <h3 style="color:#111111;font-size:16px;margin:0 0 10px;text-transform:uppercase;letter-spacing:0.5px;text-align:center;">View & Reply to Your Ticket</h3>
 
@@ -151,7 +145,6 @@ function buildTicketReplyEmailHtml({ ticket, replyMessage, conversationUrl, admi
 <ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;list-style-type:none;padding:0;">
 <li style="margin-bottom:10px;">✅ <strong>Be specific</strong> – include error messages, steps to reproduce, and your device/browser info.</li>
 <li style="margin-bottom:10px;">✅ <strong>Attach screenshots</strong> – they help us visualize the issue clearly.</li>
-<li style="margin-bottom:10px;">✅ <strong>Respond promptly</strong> – if we don't hear back within 48 hours, the ticket may be auto-closed.</li>
 </ul>
 
 <h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Ticket Activity History</h3>
@@ -223,19 +216,13 @@ function buildTicketReplyPlainText({ ticket, replyMessage, conversationUrl, admi
         "SUPPORT TEAM REPLY",
         stripHtml(replyMessage),
         "",
-        "WHAT YOU CAN DO NEXT",
 
-        "- Add additional details: Attach screenshots or logs to your reply.",
-        "- Check ticket status: View the full conversation online.",
-        "- Close the ticket: Let us know if your issue is resolved. Resolved tickets are automatically closed after 7 days.",
-        "",
         "VIEW & REPLY TO YOUR TICKET",
         `👉 ${conversationUrl}`,
         "",
         "QUICK TIPS FOR A FASTER RESOLUTION",
         "- Be specific – include error messages and context.",
         "- Attach screenshots.",
-        "- Respond promptly – inactive tickets may be auto-closed after 48 hours.",
         "",
         "Warm regards,",
         "The Classgrid Team",
@@ -705,13 +692,7 @@ export function buildTalkRequestReplyEmailHtml({ ticket, replyMessage, conversat
   <div style="color:#374151;font-size:15px;line-height:1.6;margin:0;">${replyMessage}</div>
 </div>
 
-<h3 style="color:#111111;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Can Do Next</h3>
-<ul style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
 
-<li style="margin-bottom:10px;"><strong>Schedule a call:</strong> Your specialist can share a booking link if you prefer a live conversation.</li>
-<li style="margin-bottom:10px;"><strong>Ask follow-up questions:</strong> No question is too small – we're here to help you evaluate.</li>
-<li style="margin-bottom:10px;"><strong>Request materials:</strong> Ask for demos, pricing, case studies, or technical docs.</li>
-</ul>
 
 <div style="text-align:center;margin:0 0 40px;">
 <a href="${escapeHtml(conversationUrl)}" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Reply to Conversation</a>
@@ -779,11 +760,6 @@ export function buildTalkRequestReplyPlainText({ ticket, replyMessage, conversat
         "SPECIALIST'S MESSAGE",
         stripHtml(replyMessage),
         "",
-        "WHAT YOU CAN DO NEXT",
-        "- Schedule a call: Your specialist can share a booking link if you prefer a live conversation.",
-        "- Ask follow-up questions: No question is too small – we're here to help you evaluate.",
-        "- Request materials: Ask for demos, pricing, case studies, or technical docs.",
-        "",
         "VIEW & REPLY TO YOUR TICKET",
         `👉 ${conversationUrl}`,
         "",
@@ -842,5 +818,6 @@ export async function notifyTalkCreatorOfAdminReply({ ticket, replyMessage, admi
 
     return { queued: Boolean(job), jobId: job?._id, conversationUrl };
 }
+
 
 
