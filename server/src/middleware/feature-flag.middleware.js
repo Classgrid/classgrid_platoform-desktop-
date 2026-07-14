@@ -1,7 +1,9 @@
+import mongoose from "mongoose";
 import { findBlockingFeatureFlag, platformAccessGate } from "../services/feature-flag.service.js";
 
 export const enforceFeatureFlags = async (req, res, next) => {
     try {
+        if (mongoose.connection.readyState !== 1) return next();
         const organizationId = req.user?.organizationId || req.org?._id || req.body?.organizationId;
         const organizationType = req.user?.organizationType || req.org?.org_type;
 

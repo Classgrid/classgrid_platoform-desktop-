@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import FeatureFlag from "../models/FeatureFlag.js";
 
 const PLATFORM_RECOVERY_PREFIXES = [
@@ -166,6 +167,7 @@ export async function platformAccessGate(req, res, next) {
     if (!path.startsWith("/api/")) return next();
 
     try {
+        if (mongoose.connection.readyState !== 1) return next();
         const platformFlag = await FeatureFlag.findOne({ key: "platform_access" })
             .select("key name description isEnabled exemptRoutePrefixes")
             .lean()

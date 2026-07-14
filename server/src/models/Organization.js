@@ -554,7 +554,7 @@ const organizationSchema = new mongoose.Schema(
 
 organizationSchema.index({ owner_id: 1 });
 organizationSchema.index({ status: 1 });
-organizationSchema.index({ subdomain: 1 });
+// organizationSchema.index({ subdomain: 1 }); // removed duplicate
 organizationSchema.index({ "custom_domain.domain": 1 }, { sparse: true });
 organizationSchema.index({ org_type: 1 });
 // NOTE: organizationCode and honorCode indexes are created automatically
