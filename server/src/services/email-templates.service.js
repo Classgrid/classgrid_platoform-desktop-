@@ -115,7 +115,7 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
 
 <tr>
 <td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">>
 <h1 style="color:#111111;margin:0;font-size:20px;">${title}</h1>
 </td>
 </tr>
@@ -165,7 +165,7 @@ export const getFacultyWelcomeEmailHtml = (userName, orgName, dashboardUrl) => {
 
 <tr>
 <td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">>
 <h1 style="color:#111111;margin:0;font-size:22px;">Welcome to Classgrid</h1>
 <p style="color:#6b7280;margin-top:8px;font-size:13px;">
 Organization: <strong style="color:#111111;">${orgName}</strong>
@@ -245,7 +245,7 @@ export const getStudentWelcomeEmailHtml = (userName, dashboardUrl) => {
 
 <tr>
 <td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">>
 <h1 style="color:#111111;margin:0;font-size:22px;">Welcome to Classgrid</h1>
 <p style="color:#6b7280;margin-top:8px;font-size:13px;">
 Ready to start your academic journey
@@ -760,7 +760,7 @@ export const getPlanActivationHtml = (planName, activationDate, expiryDate, stud
 <!-- Header -->
 <tr>
 <td style="padding:30px;text-align:center;border-bottom:1px solid #eaeaea;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">>
 <h1 style="margin:0;font-size:22px;color:#111111;font-weight:600;">
 ?? Your PRO Plan is Now Active
 </h1>
