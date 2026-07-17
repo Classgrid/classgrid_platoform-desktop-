@@ -150,6 +150,21 @@ export function AppRouter() {
     );
   }
 
+  if (subdomain === "ai") {
+    return (
+      <div style={{ padding: "2rem", fontFamily: "monospace", backgroundColor: "#fff", color: "#000" }}>
+        <pre>
+{`{
+  "name": "classgrid Ai",
+  "version": "3.0.0",
+  "status": "online",
+  "env": "production"
+}`}
+        </pre>
+      </div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
