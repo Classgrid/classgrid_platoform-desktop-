@@ -135,15 +135,6 @@ export function AppRouter() {
   const subdomain = hostname.split(".")[0];
   const isSuperAdmin = subdomain === "superadmin";
 
-  "version": "3.0.0",
-  "status": "online",
-  "env": "production"
-}`}
-        </pre>
-      </div>
-    );
-  }
-
   return (
     <Routes>
       <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
