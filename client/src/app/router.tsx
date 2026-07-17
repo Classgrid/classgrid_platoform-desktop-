@@ -137,11 +137,15 @@ export function AppRouter() {
 
   if (subdomain === "ai") {
     return (
-      <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#111", color: "#fff", fontFamily: "sans-serif" }}>
-        <div style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Classgrid AI</h2>
-          <p style={{ color: "#888" }}>API Server Endpoint</p>
-        </div>
+      <div style={{ padding: "2rem", fontFamily: "monospace", backgroundColor: "#fff", color: "#000" }}>
+        <pre>
+{`{
+  "name": "classgrid Ai",
+  "version": "3.0.0",
+  "status": "online",
+  "env": "production"
+}`}
+        </pre>
       </div>
     );
   }
