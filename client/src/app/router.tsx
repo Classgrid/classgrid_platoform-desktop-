@@ -135,27 +135,6 @@ export function AppRouter() {
   const subdomain = hostname.split(".")[0];
   const isSuperAdmin = subdomain === "superadmin";
 
-  if (subdomain === "ai") {
-    return (
-      <div style={{ padding: "2rem", fontFamily: "monospace", backgroundColor: "#fff", color: "#000" }}>
-        <pre>
-{`{
-  "name": "classgrid Ai",
-  "version": "3.0.0",
-  "status": "online",
-  "env": "production"
-}`}
-        </pre>
-      </div>
-    );
-  }
-
-  if (subdomain === "ai") {
-    return (
-      <div style={{ padding: "2rem", fontFamily: "monospace", backgroundColor: "#fff", color: "#000" }}>
-        <pre>
-{`{
-  "name": "classgrid Ai",
   "version": "3.0.0",
   "status": "online",
   "env": "production"
