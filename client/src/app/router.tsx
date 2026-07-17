@@ -135,6 +135,17 @@ export function AppRouter() {
   const subdomain = hostname.split(".")[0];
   const isSuperAdmin = subdomain === "superadmin";
 
+  if (subdomain === "ai") {
+    return (
+      <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#111", color: "#fff", fontFamily: "sans-serif" }}>
+        <div style={{ textAlign: "center" }}>
+          <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Classgrid AI</h2>
+          <p style={{ color: "#888" }}>API Server Endpoint</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/test-full-login" element={<TestFullScreenLoginPage />} />
