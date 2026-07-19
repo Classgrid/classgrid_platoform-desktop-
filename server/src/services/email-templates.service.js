@@ -115,7 +115,7 @@ const baseTemplate = ({ content, title = "Notification", ignoreText = null }) =>
 
 <tr>
 <td style="padding:30px;border-bottom:1px solid #eaeaea;text-align:center;">
-<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">>
+<img src="${PLATFORM_LOGO_URL}" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:10px;background:linear-gradient(#0f0f0f,#0f0f0f);padding:6px;box-shadow:0 2px 4px rgba(0,0,0,0.2);">
 <h1 style="color:#111111;margin:0;font-size:20px;">${title}</h1>
 </td>
 </tr>
@@ -2279,7 +2279,6 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
     const orgUrl = location.orgSlug ? `${location.orgSlug}.classgrid.in` : "Classgrid";
     const orgNameText = location.orgSlug ? `<strong>${location.orgSlug.toUpperCase()}</strong> (${orgUrl})` : "your institution";
     const content = `
-    <h1>Login Attempt</h1>
     <p>We received a login attempt for <strong>${email}</strong>, but no account was found for this email in ${orgNameText}. If this was you, please ensure you are using the correct email address provided by your institution.</p>
 
     <div class="box">
@@ -2290,7 +2289,7 @@ export const getNoAccountSignInAttemptHtml = (email, location = {}) => {
     </div>
 
     <h3 style="color:#111111; margin-top:24px;">Why did this happen?</h3>
-    <ul style="color:#e5e7eb; padding-left:20px; line-height:1.6; margin-bottom:24px;">
+    <ul style="color:#374151; padding-left:20px; line-height:1.6; margin-bottom:24px;">
       <li>You may have used a personal email instead of your official institution email.</li>
       <li>Your institution administrator may not have created your account yet.</li>
     </ul>

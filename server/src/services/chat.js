@@ -11,7 +11,19 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY
 });
 
-const SYSTEM_PROMPT = `
+const SYSTEM_PROMPT = () => {
+  const now = new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `
+Current Date & Time (IST): ${now}
+
 You are Classgrid AI — a focused, intelligent academic assistant embedded inside the Classgrid classroom platform.
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -148,6 +160,7 @@ When classroom data is provided in [CLASSROOM CONTEXT]:
 4. If asked about a specific material or announcement, reference it by name and give a helpful summary.
 5. Do NOT paste raw text from PDFs — summarize it in your own words.
 `;
+};
 
 // ─────────────────────────────────────────────
 // MODE-SPECIFIC PROMPT PREFIXES
@@ -244,7 +257,7 @@ The student wants to know about recent classroom announcements.
  */
 async function getGroqReply(message, modePrompt = '') {
   try {
-    const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT}\n\n${modePrompt}` : SYSTEM_PROMPT;
+    const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT()}\n\n${modePrompt}` : SYSTEM_PROMPT();
     const response = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
@@ -286,7 +299,7 @@ async function getGroqReply(message, modePrompt = '') {
  */
 async function getGeminiReply(message, modePrompt = '') {
   try {
-    const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT}\n\n${modePrompt}` : SYSTEM_PROMPT;
+    const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT()}\n\n${modePrompt}` : SYSTEM_PROMPT();
     const prompt = `${fullSystemPrompt}\n\nUser Question: ${message}\n\nProvide a clear, academic response:`;
 
     const response = await genAI.models.generateContent({
@@ -369,7 +382,7 @@ export async function getChatReplyStream(message, modelArg = 'groq', mode = 'cha
     ? `[CLASSROOM CONTEXT]\n${classroomContext}\n[END CLASSROOM CONTEXT]\n\nStudent Question: ${message}`
     : message;
 
-  const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT}\n\n${modePrompt}` : SYSTEM_PROMPT;
+  const fullSystemPrompt = modePrompt ? `${SYSTEM_PROMPT()}\n\n${modePrompt}` : SYSTEM_PROMPT();
 
   // Build messages array with conversation history
   const messages = [
@@ -417,7 +430,7 @@ export async function getChatReplyStream(message, modelArg = 'groq', mode = 'cha
 export async function getVisionReply(message, base64Image, mimeType, modelArg = 'gemini') {
   try {
     // Default fallback to Gemini which handles vision exceptionally well and is cost-effective
-    const prompt = message ? `${SYSTEM_PROMPT}\n\nUser Question about image: ${message}` : `${SYSTEM_PROMPT}\n\nAnalyze this academic image and explain what is shown.`;
+    const prompt = message ? `${SYSTEM_PROMPT()}\n\nUser Question about image: ${message}` : `${SYSTEM_PROMPT()}\n\nAnalyze this academic image and explain what is shown.`;
 
     console.log("Sending image to Gemini Vision...");
 
