@@ -578,7 +578,7 @@ router.post("/tickets", isAuthenticated, multipleUploads("files", 5), async (req
         let authOrgLogo = "";
         if (req.user.role === "super_admin") {
             authOrgName = "Classgrid";
-            authOrgLogo = "https://classgrid.in/android-chrome-512x512.png";
+            authOrgLogo = req.user.platformLogo || "";
         } else if (orgId) {
             const { default: Organization } = await import("../models/Organization.js");
             const org = await Organization.findById(orgId).select("name logo_url").lean();
@@ -782,7 +782,7 @@ router.post("/tickets/:id/reply", isAuthenticated, multipleUploads("files", 5), 
         let replyerOrgLogo = "";
         if (req.user.role === "super_admin") {
             replyerOrgName = "Classgrid";
-            replyerOrgLogo = "https://classgrid.in/android-chrome-512x512.png";
+            replyerOrgLogo = req.user.platformLogo || "";
         } else {
             const replyerOrgId = req.effectiveOrganizationId || req.user.organization_id || null;
             if (replyerOrgId) {
