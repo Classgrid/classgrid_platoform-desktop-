@@ -360,7 +360,7 @@ export function CustomDomainAdminLoginPage() {
                 <form onSubmit={handleLogin} className="flex flex-col">
                   {/* 10. College Header */}
                   {branding.logoUrl && (
-                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[85px] w-auto max-w-[240px] object-contain rounded-[12px]" />
+                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[140px] w-auto max-w-[340px] object-contain rounded-[12px]" />
                   )}
                   <h1 className="mt-4 text-center text-[24px] font-bold text-foreground dark:text-white">
                     {branding.name || titleText}

@@ -350,7 +350,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                 <form onSubmit={handleLogin} className="flex flex-col">
                   {/* 10. College Header */}
                   {branding.logoUrl && (
-                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[85px] w-auto max-w-[240px] object-contain rounded-[12px]" />
+                    <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[140px] w-auto max-w-[340px] object-contain rounded-[12px]" />
                   )}
                   <h1 className="mt-3 text-center text-[20px] font-bold text-foreground dark:text-white">{branding.name}</h1>
                   <p className="mt-2 text-center text-[13px] text-muted-foreground dark:text-white/65">Welcome back!</p>
