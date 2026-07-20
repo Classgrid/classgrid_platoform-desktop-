@@ -245,18 +245,17 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
 
       {/* 2. Outer Floating Container â€” responsive to screen */}
       <div
-        className="relative grid overflow-hidden bg-background dark:bg-[#0f0f0f]"
+        className="relative grid overflow-hidden bg-background dark:bg-[#0f0f0f] grid-cols-1 md:grid-cols-2"
         style={{
           width: "100vw",
           height: "100vh",
-          gridTemplateColumns: "1fr 1fr",
         }}
       >
 
         {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 3. LEFT PANEL                               */}
         {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        <section className="relative flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden px-10">
+        <section className="relative hidden md:flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden px-10">
 
           {/* TOP GREEN EFFECT - left to right direction */}
           <div
@@ -339,7 +338,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
           />
 
           {/* 5. Contact Information */}
-          <div className="relative z-10 mx-auto mt-6 w-full max-w-[360px]">
+          <div className="relative z-10 mx-auto mt-6 w-full max-w-[360px] [@media(max-height:750px)]:hidden">
             <h2 className="text-[22px] font-bold text-foreground dark:text-white">
               Contact Information
             </h2>
@@ -362,7 +361,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
           </div>
 
           {/* 6. Social Media Card */}
-          <div className="relative z-10 mx-auto mt-5 flex h-[90px] w-full max-w-[360px] items-center justify-center gap-7 rounded-[20px] border border-border dark:border-white/[0.14] bg-white/[0.04]">
+          <div className="relative z-10 mx-auto mt-5 flex h-[90px] w-full max-w-[360px] items-center justify-center gap-7 rounded-[20px] border border-border dark:border-white/[0.14] bg-white/[0.04] [@media(max-height:750px)]:hidden">
             {/* Instagram */}
             <a
               href="https://www.instagram.com/classgridedu/"
@@ -404,7 +403,7 @@ export function ClassgridSubdomainUserLoginPage({ preferredRole }: { preferredRo
           <div className="flex-1" />
 
           {/* 7. Support Button */}
-          <div className="relative z-10 pb-6 flex justify-start">
+          <div className="relative z-10 pb-6 flex justify-start [@media(max-height:750px)]:hidden">
             <a
               href="https://classgrid.in/support/ticket"
               target="_blank"
