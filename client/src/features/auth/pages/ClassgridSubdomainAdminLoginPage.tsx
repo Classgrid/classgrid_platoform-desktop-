@@ -250,10 +250,10 @@ export function ClassgridSubdomainAdminLoginPage() {
       {/* Container holding the 2-column grid */}
       <div className="grid h-full w-full grid-cols-1 lg:grid-cols-2 overflow-hidden">
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
         {/* 3. LEFT PANEL                               */}
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        <section className="relative flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden px-10">
+        {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
+        <section className="relative hidden lg:flex flex-col bg-background dark:bg-[#0f0f0f] border-r border-border dark:border-white/[0.15] overflow-hidden px-10">
 
           {/* TOP GREEN EFFECT - left to right direction */}
           <div
