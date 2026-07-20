@@ -223,7 +223,7 @@ export function ClassgridSubdomainAdminLoginPage() {
     document.head.appendChild(script);
 
     return () => {
-      try { document.head.removeChild(script); } catch {}
+      try { document.head.removeChild(script); } catch { }
       document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
     };
   }, [branding, brandingError]);
@@ -426,7 +426,7 @@ export function ClassgridSubdomainAdminLoginPage() {
               <form onSubmit={handleLogin} className="flex flex-col">
                 {/* 10. College Header */}
                 {branding.logoUrl && (
-                  <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[140px] w-auto max-w-[340px] object-contain rounded-[12px]" />
+                  <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[200px] w-auto max-w-[340px] object-contain rounded-[12px]" />
                 )}
                 <h1 className="mt-4 text-center text-[24px] font-bold text-foreground dark:text-white">
                   {branding.name || titleText}
