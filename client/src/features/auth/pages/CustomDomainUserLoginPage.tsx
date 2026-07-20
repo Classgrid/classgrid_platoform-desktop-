@@ -341,10 +341,10 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
         {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {/* 8. RIGHT PANEL                              */}
         {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-        <section className="flex h-full items-center justify-center bg-muted dark:bg-[#111111] px-6 overflow-hidden">
+        <section className="flex h-full flex-col bg-muted dark:bg-[#111111] px-6 overflow-y-auto py-8">
 
             {/* 9. Inner Login Box */}
-            <div className="flex w-full max-w-[500px] flex-col justify-center rounded-[24px] border border-border dark:border-white/[0.15] bg-background dark:bg-[#0f0f0f] px-10 py-8 shadow-xl">
+            <div className="flex w-full max-w-[500px] flex-col justify-center rounded-[24px] border border-border dark:border-white/[0.15] bg-background dark:bg-[#0f0f0f] px-10 py-8 shadow-xl shrink-0 m-auto">
               
               {step === 1 ? (
                 <form onSubmit={handleLogin} className="flex flex-col">
