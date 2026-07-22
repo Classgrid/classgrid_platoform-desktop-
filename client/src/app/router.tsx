@@ -113,6 +113,8 @@ import { TestFullScreenLoginPage } from "@/features/auth/pages/TestFullScreenLog
 
 
 import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
+import { RequiredPasswordResetPage } from "@/features/auth/pages/RequiredPasswordResetPage";
+import { EnterOrganizationCodePage } from "@/features/auth/pages/EnterOrganizationCodePage";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { getRedirectPath, isInstitutionAdminRole } from "@/features/auth/auth-helpers";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
@@ -181,6 +183,8 @@ export function AppRouter() {
 
       {/* ── DASHBOARD ROUTES ── */}
       <Route element={<RequireAuth />}>
+        <Route path="/required-password-reset" element={<RequiredPasswordResetPage />} />
+        <Route path="/enter-org-code" element={<EnterOrganizationCodePage />} />
         
         {/* NEW SUPER ADMIN SHELL */}
         <Route element={<SuperAdminLayout />}>
@@ -316,7 +320,6 @@ export function AppRouter() {
           <Route path="/classroom/:id" element={<ClassroomDetailPage />} />
           <Route path="/classrooms" element={<ClassroomsPage />} />
           <Route path="/discover" element={<DiscoverClassroomsPage />} />
-          <Route path="/enter-org-code" element={<GenericPage title="Enter Organization Code" />} />
           <Route path="/tools" element={<GenericPage title="Schedule" />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/notifications" element={<GenericPage title="Notifications" />} />

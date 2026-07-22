@@ -3,6 +3,7 @@ import type { AuthBranding } from "../types";
 import { ClassgridSubdomainAdminLoginPage } from "./ClassgridSubdomainAdminLoginPage";
 import { CustomDomainAdminLoginPage } from "./CustomDomainAdminLoginPage";
 import { getAuthBranding } from "../api";
+import { redirectToBrandingFallback } from "../auth-helpers";
 
 export function AdminLoginRouter() {
   const [branding, setBranding] = useState<AuthBranding | null>(null);
@@ -46,12 +47,13 @@ export function AdminLoginRouter() {
         setBranding(result);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (redirectToBrandingFallback(error)) return;
         if (isMounted) setIsLoading(false);
       });
 
     return () => { isMounted = false; };
-  }, [hostname]);
+  }, [hostname, isCustomDomain]);
 
   if (isLoading) {
     return <div className="h-screen w-screen bg-[#080808]" />;

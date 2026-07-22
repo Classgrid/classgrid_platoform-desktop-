@@ -27,6 +27,28 @@ export function RequireAuth() {
 
   const path = location.pathname;
 
+  const isPasswordSetupRoute = path === "/required-password-reset";
+  const isOrganizationSetupRoute = path === "/enter-org-code";
+  const needsPasswordReset = user?.mustResetPassword === true;
+  const needsOrganizationCode = ["faculty", "teacher"].includes(user?.role || "")
+    && !user?.organization
+    && !user?.organization_id;
+
+  // Mandatory account setup is enforced centrally, so a copied dashboard URL
+  // cannot bypass the flags returned by the authentication backend.
+  if (needsPasswordReset && !isPasswordSetupRoute) {
+    return <Navigate to="/required-password-reset" replace />;
+  }
+  if (!needsPasswordReset && needsOrganizationCode && !isOrganizationSetupRoute) {
+    return <Navigate to="/enter-org-code" replace />;
+  }
+  if (isPasswordSetupRoute && !needsPasswordReset) {
+    return <Navigate to={needsOrganizationCode ? "/enter-org-code" : getRedirectPath(user?.role)} replace />;
+  }
+  if (isOrganizationSetupRoute && !needsOrganizationCode) {
+    return <Navigate to={needsPasswordReset ? "/required-password-reset" : getRedirectPath(user?.role)} replace />;
+  }
+
   // 🚨 STRICT ROLE GUARDS 🚨
   
   // 1. Super Admin Guard — role check
@@ -100,5 +122,4 @@ export function RequireAuth() {
     </PresenceProvider>
   );
 }
-
 

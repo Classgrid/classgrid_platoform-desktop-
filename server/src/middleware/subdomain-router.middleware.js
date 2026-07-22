@@ -57,19 +57,35 @@ function extractSlugFromHost(host) {
     if (!host) return null;
 
     const cleanHost = host.split(":")[0].toLowerCase(); // Remove port
-    const parts = cleanHost.split(".");
+    let candidate = null;
 
-    // localhost:  slug.localhost → parts = ["slug", "localhost"]
-    // production: slug.classgrid.in → parts = ["slug", "classgrid", "in"]
-
-    if (parts.length >= 2) {
-        const candidate = parts[0];
-        if (!SYSTEM_SUBDOMAINS.has(candidate) && candidate.length > 0) {
-            return candidate;
-        }
+    if (cleanHost.endsWith(".classgrid.in")) {
+        const prefix = cleanHost.slice(0, -".classgrid.in".length);
+        if (prefix && !prefix.includes(".")) candidate = prefix;
+    } else if (cleanHost.endsWith(".localhost")) {
+        const prefix = cleanHost.slice(0, -".localhost".length);
+        if (prefix && !prefix.includes(".")) candidate = prefix;
     }
 
+    if (candidate && !SYSTEM_SUBDOMAINS.has(candidate)) return candidate;
+
     return null;
+}
+
+function isSystemHost(host) {
+    if (!host) return true;
+    return host === "classgrid.in"
+        || host === "localhost"
+        || host === "127.0.0.1"
+        || (SYSTEM_SUBDOMAINS.has(host.split(".")[0]) && host.endsWith(".classgrid.in"));
+}
+
+function activeDomainQuery(field, host) {
+    return {
+        [`${field}.domain`]: host,
+        [`${field}.status`]: { $in: ["verified", "active"] },
+        [`${field}.is_enabled`]: { $ne: false },
+    };
 }
 
 // ─── Phase 1: Extract Subdomain (runs on EVERY request) ─────────────
@@ -88,11 +104,9 @@ export const resolveTenant = async (req, res, next) => {
     try {
         const slug = req.tenantSlug;
         
-        // If no slug is detected, we only proceed if there is a host that could be a custom domain
-        // Avoid doing DB lookups for API/admin system routes.
-        const isSystemHost = req.tenantHost && (req.tenantHost.includes("api.classgrid.in") || req.tenantHost.includes("admin.classgrid.in") || req.tenantHost.includes("superadmin.classgrid.in"));
-
-        if (!slug && (!req.tenantHost || isSystemHost)) {
+        // External domains are resolved by their full hostname. Only Classgrid's
+        // own one-label tenant hostnames are interpreted as organization slugs.
+        if (!slug && isSystemHost(req.tenantHost)) {
             // No subdomain detected and not a valid custom domain candidate
             // Let downstream auth middleware handle org resolution via JWT
             return next();
@@ -106,13 +120,15 @@ export const resolveTenant = async (req, res, next) => {
             return next();
         }
 
-        // 2. DB lookup (match either subdomain or custom domain)
-        const org = await Organization.findOne({
-            $or: [
-                { subdomain: slug },
-                { "custom_domain.domain": req.tenantHost }
-            ]
-        })
+        // 2. DB lookup (match a tenant slug or an active exact external hostname)
+        const query = [];
+        if (slug) query.push({ subdomain: slug });
+        if (req.tenantHost && !isSystemHost(req.tenantHost)) {
+            query.push(activeDomainQuery("custom_domain", req.tenantHost));
+            query.push(activeDomainQuery("erp_domain", req.tenantHost));
+        }
+
+        const org = await Organization.findOne({ $or: query })
             .select("_id name subdomain org_type structure_type admission_config subscription_tier logo_url")
             .lean();
 
@@ -146,7 +162,10 @@ export const getPublicTenantInfo = async (req, res) => {
         if (!org) {
             const query = [];
             if (slug) query.push({ subdomain: slug });
-            if (host) query.push({ "custom_domain.domain": host });
+            if (host && !isSystemHost(host)) {
+                query.push(activeDomainQuery("custom_domain", host));
+                query.push(activeDomainQuery("erp_domain", host));
+            }
 
             if (query.length === 0) {
                 return res.status(400).json({ error: "No subdomain, slug, or host provided." });

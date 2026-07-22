@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { loginWithPassword, getGoogleAuthUrl, requestPasswordReset } from "../api";
-import { saveStoredAuthRole, getRedirectPath } from "../auth-helpers";
+import { clearAuthCallbackError, getAuthCallbackFeedback, getPostLoginPath, saveStoredAuthRole } from "../auth-helpers";
 import "./SuperAdminVanilla.css";
 
 export function SuperAdminLoginPage() {
@@ -27,23 +27,12 @@ export function SuperAdminLoginPage() {
     if (!isSuperAdminDomain) {
       window.location.replace(`https://superadmin.classgrid.in/superadmin/login`);
     }
-  }, []);
 
-  useEffect(() => {
-    // Load Recaptcha script dynamically to show the badge
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js?render=6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
-    script.async = true;
-    document.head.appendChild(script);
-
-    window.RECAPTCHA_SITE_KEY = "6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
-
-    return () => {
-      // Optional: Cleanup if needed when leaving the page
-      document.head.removeChild(script);
-      const badges = document.querySelectorAll(".grecaptcha-badge");
-      badges.forEach(b => b.remove());
-    };
+    const callbackFeedback = getAuthCallbackFeedback(window.location.search);
+    if (callbackFeedback) {
+      toast.error(callbackFeedback.message);
+      clearAuthCallbackError();
+    }
   }, []);
 
   const handleLogin = async (e: FormEvent) => {
@@ -76,7 +65,7 @@ export function SuperAdminLoginPage() {
       
       // Redirect to dashboard based on role
       setTimeout(() => {
-        navigate(result.user?.role === "super_admin" ? "/superadmin/dashboard" : "/");
+        navigate(getPostLoginPath(result), { replace: true });
       }, 500);
 
       toast.success("Login successful!");
@@ -157,7 +146,7 @@ export function SuperAdminLoginPage() {
             
             {/* LOGIN FORM */}
             {!isRescueMode ? (
-            <form className="auth-form active" onSubmit={handleLogin}>
+            <form className="auth-form active" onSubmit={handleLogin} aria-busy={isLoading || isResetting}>
               <h2 className="form-title">Super Admin Portal</h2>
               <p className="form-subtitle">Secure system access</p>
 
@@ -211,6 +200,8 @@ export function SuperAdminLoginPage() {
                   <input 
                     type="email" 
                     id="loginEmail" 
+                    name="email"
+                    autoComplete="email"
                     className="form-input"
                     placeholder="Enter your email address" 
                     required 
@@ -227,6 +218,7 @@ export function SuperAdminLoginPage() {
                   <input 
                     type={showPassword ? "text" : "password"} 
                     id="loginPassword" 
+                    name="password"
                     className="form-input"
                     placeholder="Enter your password" 
                     required 
@@ -237,6 +229,8 @@ export function SuperAdminLoginPage() {
                   <button 
                     type="button" 
                     className="password-toggle" 
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>
@@ -260,7 +254,7 @@ export function SuperAdminLoginPage() {
               </button>
             </form>
             ) : (
-            <form className="auth-form active" onSubmit={handleRescueLogin}>
+            <form className="auth-form active" onSubmit={handleRescueLogin} aria-busy={isLoading}>
               <h2 className="form-title" style={{ color: "#e11d48" }}>Rescue Mode</h2>
 
               <div className="form-group" style={{ marginTop: "2rem" }}>
@@ -270,6 +264,8 @@ export function SuperAdminLoginPage() {
                   <input 
                     type="email" 
                     id="rescueEmail" 
+                    name="rescueEmail"
+                    autoComplete="email"
                     className="form-input"
                     placeholder="Enter your email" 
                     required 
@@ -284,6 +280,8 @@ export function SuperAdminLoginPage() {
                   <input 
                     type={showPassword ? "text" : "password"} 
                     id="rescuePassword" 
+                    name="rescuePassword"
+                    autoComplete="current-password"
                     className="form-input"
                     placeholder="Enter RESCUE_PASSWORD" 
                     required 
@@ -293,6 +291,8 @@ export function SuperAdminLoginPage() {
                   <button 
                     type="button" 
                     className="password-toggle" 
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     <i className={showPassword ? "fas fa-eye" : "fas fa-eye-slash"}></i>

@@ -28,6 +28,7 @@ import {
 } from "../services/email-templates.service.js";
 import { trackOnboardingEvent } from "../services/onboarding-event.service.js";
 import { syncDerivedOnboardingProgress } from "../services/onboarding-progress.service.js";
+import { RecaptchaVerificationError, verifyRecaptchaToken } from "../services/recaptcha.service.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 const getFrontendUrl = () => {
@@ -256,7 +257,7 @@ const generateToken = (user, req = null, rememberMe = false) => {
     }
 
     return jwt.sign(
-        { id: user._id, role: user.role, organizationId: user.organization_id || null },
+        { id: user._id, role: user.role, organizationId: user.organization_id || null, rememberMe: rememberMe === true },
         JWT_SECRET,
         { expiresIn: expiry }
     );
@@ -727,23 +728,88 @@ export const resolveManualActivationLink = async (req, res) => {
 export const login = async (req, res) => {
     try {
         await connectDB();
-        let { email, password, expectedLoginType, loginTab, deviceFingerprint, fingerprint, rememberMe } = req.body;
+        let {
+            email,
+            password,
+            expectedLoginType,
+            loginTab,
+            deviceFingerprint,
+            fingerprint,
+            rememberMe,
+            recaptchaToken,
+            recaptchaAction,
+            portalHost,
+        } = req.body;
+        rememberMe = rememberMe === true;
+
+        if (!isMobileApp(req)) {
+            try {
+                await verifyRecaptchaToken({
+                    token: recaptchaToken,
+                    expectedAction: recaptchaAction || "login",
+                    remoteIp: req.ip || req.headers["x-forwarded-for"]?.split(",")[0]?.trim(),
+                });
+            } catch (error) {
+                if (error instanceof RecaptchaVerificationError) {
+                    return res.status(error.status).json({ message: error.message, code: error.code });
+                }
+                throw error;
+            }
+        }
+
         deviceFingerprint = deviceFingerprint || fingerprint;
 
         // Prioritize stable cookie fingerprint if it exists
         if (req.cookies && req.cookies.client_device_fp) {
             deviceFingerprint = req.cookies.client_device_fp;
         }
+        if (!deviceFingerprint) {
+            deviceFingerprint = getDeviceFingerprint(req).fingerprint;
+        }
 
         if (email) email = email.toLowerCase().trim();
 
-        // 🛡️ Login Law: Subdomain scoping (Day 3)
-        // If we are on a tenant subdomain (e.g. pccoe.classgrid.in), only allow logins for that tenant.
-        const tenantSlug = req.tenantSlug;
+        // Login Law: scope organization portals to the resolved Classgrid or
+        // verified external hostname. Supplying a host can only narrow access;
+        // it never grants membership in an organization.
+        const requestHost = String(portalHost || req.tenantHost || "")
+            .split(":")[0]
+            .trim()
+            .toLowerCase();
+        const classgridHostMatch = requestHost.match(/^([a-z0-9-]+)\.classgrid\.in$/);
+        const localhostHostMatch = requestHost.match(/^([a-z0-9-]+)\.localhost$/);
+        const systemHosts = new Set(["www", "app", "admin", "api", "superadmin"]);
+        const hostSlug = classgridHostMatch?.[1] || localhostHostMatch?.[1] || null;
+        const tenantSlug = hostSlug
+            ? (systemHosts.has(hostSlug) ? null : hostSlug)
+            : (requestHost ? null : req.tenantSlug);
         let tenantOrgId = null;
 
-        if (tenantSlug) {
-            const tenantOrg = await Organization.findOne({ subdomain: tenantSlug.toLowerCase() }).select("_id").lean();
+        const isExternalPortalHost = requestHost
+            && requestHost !== "localhost"
+            && requestHost !== "classgrid.in"
+            && !requestHost.endsWith(".classgrid.in")
+            && !requestHost.endsWith(".localhost")
+            && !requestHost.startsWith("127.0.0.1");
+
+        if (tenantSlug || isExternalPortalHost) {
+            const tenantQuery = isExternalPortalHost
+                ? {
+                    $or: [
+                        {
+                            "erp_domain.domain": requestHost,
+                            "erp_domain.status": { $in: ["verified", "active"] },
+                            "erp_domain.is_enabled": { $ne: false },
+                        },
+                        {
+                            "custom_domain.domain": requestHost,
+                            "custom_domain.status": { $in: ["verified", "active"] },
+                            "custom_domain.is_enabled": { $ne: false },
+                        },
+                    ],
+                }
+                : { subdomain: tenantSlug.toLowerCase() };
+            const tenantOrg = await Organization.findOne(tenantQuery).select("_id").lean();
             if (!tenantOrg) {
                 return res.status(404).json({ message: "Organization session invalid or not found." });
             }
@@ -898,7 +964,9 @@ export const login = async (req, res) => {
                 await DeviceVerification.findOneAndUpdate(
                     { email: user.email },
                     {
+                        organization_id: user.organization_id || null,
                         deviceFingerprint,
+                        rememberMe,
                         otp,
                         isUsed: false,
                         failedAttempts: 0,
@@ -1002,7 +1070,7 @@ export const login = async (req, res) => {
 // Passwordless Login: Request OTP
 export const requestLoginOtp = async (req, res) => {
     try {
-        const { email, deviceFingerprint } = req.body;
+        const { email, deviceFingerprint, rememberMe = false } = req.body;
         
         if (!email || !deviceFingerprint) {
             return res.status(400).json({ message: "Email and device footprint are required." });
@@ -1043,7 +1111,9 @@ export const requestLoginOtp = async (req, res) => {
         await DeviceVerification.findOneAndUpdate(
             { email: normalizedEmail },
             {
+                organization_id: user.organization_id || null,
                 deviceFingerprint,
+                rememberMe: rememberMe === true,
                 otp,
                 isUsed: false,
                 failedAttempts: 0,
@@ -1211,21 +1281,10 @@ export const oauthCallback = async (req, res) => {
         return res.redirect(`${defaultFrontendUrl}/login?error=account_suspended`);
     }
 
-    // Tab enforcement for Google OAuth (state param carries loginTab and host)
-    const stateRaw = req.query.state || null;
-    let loginTab = 'student';
-    let host = '';
-    
-    if (stateRaw) {
-        try {
-            const decoded = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf-8'));
-            loginTab = decoded.t || 'student';
-            host = decoded.h || '';
-        } catch (e) {
-            // Fallback for older plaintext state format
-            loginTab = stateRaw;
-        }
-    }
+    // The route verifies the signed, short-lived OAuth state and allow-listed
+    // return host before Passport reaches this callback.
+    const loginTab = req.oauthState?.loginTab || 'student';
+    const host = req.oauthState?.host || '';
 
     const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
     const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
@@ -1300,7 +1359,9 @@ export const oauthCallback = async (req, res) => {
                 await DeviceVerification.findOneAndUpdate(
                     { email: userEmail },
                     {
+                        organization_id: req.user.organization_id || null,
                         deviceFingerprint: serverFingerprint,
+                        rememberMe: false,
                         otp,
                         isUsed: false,
                         failedAttempts: 0,
@@ -1657,7 +1718,7 @@ export const setupOrgAdmin = async (req, res) => {
             text: getOrgAdminActivatedPlainText(user.name, dashboardLink, adminLoginLink),
         });
 
-        // Generate JWT Token exactly as normal login does
+        // Generate JWT token exactly as a normal non-remembered login does.
         const token = generateToken(user, req);
         setTokenCookie(res, token, req);
 
@@ -1748,7 +1809,7 @@ export const getCurrentUser = async (req, res) => {
             } : null,
             google_access_token: req.user.google_access_token || null,
             zoom_access_token: req.user.zoom_access_token || null,
-            token: generateToken(req.user)
+            token: generateToken(req.user, req, req.authRememberMe === true)
         });
     } catch (err) {
         console.error("GetMe Error:", err);
@@ -1881,7 +1942,9 @@ export const verifyDeviceOtp = async (req, res) => {
             return res.status(400).json({ message: "No pending OTP request found." });
         }
 
-        deviceFingerprint = deviceFingerprint || req.cookies?.client_device_fp || verification.deviceFingerprint;
+        // The pending challenge is authoritative. Do not let the verification
+        // request replace the fingerprint that originally received the OTP.
+        deviceFingerprint = verification.deviceFingerprint;
 
         // Check code
         if (verification.otp !== otp) {
@@ -1937,11 +2000,13 @@ export const verifyDeviceOtp = async (req, res) => {
         user.authProvider = "manual";
         await user.save();
 
+        const rememberMe = updatedVerification.rememberMe === true;
+
         // Clean up verification doc
         await DeviceVerification.deleteOne({ _id: verification._id });
 
-        const token = generateToken(user, req);
-        setTokenCookie(res, token, req);
+        const token = generateToken(user, req, rememberMe);
+        setTokenCookie(res, token, req, rememberMe);
 
         // Store the approved fingerprint in a stable cookie to prevent future mismatch loops
         const isProd = process.env.NODE_ENV === "production";

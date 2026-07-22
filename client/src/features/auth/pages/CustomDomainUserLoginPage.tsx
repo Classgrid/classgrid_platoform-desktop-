@@ -1,15 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Globe, Facebook, Instagram, Linkedin, ArrowLeft } from "lucide-react";
+import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Globe, Github, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, getAuthBranding, requestPasswordReset } from "../api";
-import { getRedirectPath, saveStoredAuthRole } from "../auth-helpers";
+import { clearAuthCallbackError, getAuthCallbackFeedback, getDefaultRoleForAudience, getPostLoginPath, isUserRole, readStoredAuthRole, redirectToBrandingFallback, saveStoredAuthRole } from "../auth-helpers";
 import type { AuthUserRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
 /* â”€â”€ Constants â”€â”€ */
-const RECAPTCHA_SITE_KEY = "6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
-
 const DEFAULT_CAMPUS = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=550&h=720&auto=format&fit=crop";
 
 export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: AuthUserRole }) {
@@ -17,7 +15,10 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const [activeRole, setActiveRole] = useState<AuthUserRole>(preferredRole || "student");
+  const [activeRole, setActiveRole] = useState<AuthUserRole>(() => {
+    const role = getDefaultRoleForAudience("user", readStoredAuthRole(), preferredRole);
+    return isUserRole(role) ? role : "student";
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   // â”€â”€ Branding State â”€â”€
@@ -34,6 +35,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(0);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   useEffect(() => {
     if (preferredRole) setActiveRole(preferredRole);
@@ -54,7 +56,8 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
       .then((result) => {
         if (isMounted) setBranding(result);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (redirectToBrandingFallback(error)) return;
         if (isMounted) setBrandingError(true);
       });
 
@@ -62,12 +65,10 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   }, [location.search]);
 
   useEffect(() => {
-    if (branding?.siteTitle) {
-      document.title = branding.siteTitle;
-      localStorage.setItem("org_title", branding.siteTitle);
-    } else if (branding?.name) {
-      document.title = branding.name;
-      localStorage.setItem("org_title", branding.name);
+    const browserTitle = branding?.siteTitle || branding?.shortName || branding?.name;
+    if (browserTitle) {
+      document.title = browserTitle;
+      localStorage.setItem("org_title", browserTitle);
     }
 
     if (branding?.faviconUrl) {
@@ -85,6 +86,12 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const callbackFeedback = getAuthCallbackFeedback(location.search);
+    if (callbackFeedback) {
+      if (callbackFeedback.suggestedRole) setActiveRole(callbackFeedback.suggestedRole);
+      setFeedback({ message: callbackFeedback.message, tone: "error" });
+      clearAuthCallbackError();
+    }
     if (params.get("device_verify") === "true") {
       const redirectEmail = params.get("email") || "";
       if (redirectEmail) {
@@ -97,7 +104,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
         });
       }
     }
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (step !== "device" || otpCooldownSeconds <= 0) return;
@@ -130,6 +137,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
         password,
         audience: "user",
         role: activeRole,
+        rememberMe,
       });
 
       if (result.needsDeviceOtp) {
@@ -146,7 +154,8 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
 
       rememberLoggedInUser(result);
       saveStoredAuthRole(result.user?.role || activeRole);
-      navigate(getRedirectPath(result.user?.role), { replace: true });
+      if (result.firstLogin) toast.success("Welcome to Classgrid.");
+      navigate(getPostLoginPath(result), { replace: true });
     } catch (error: any) {
       if (error && typeof error === "object" && "needsDeviceOtp" in error) {
         setPassword("");
@@ -177,7 +186,8 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
       const result = await verifyDeviceOtp({ email: email.trim(), otp: otp.trim() });
       rememberLoggedInUser(result);
       saveStoredAuthRole(result.user?.role || activeRole);
-      navigate(getRedirectPath(result.user?.role), { replace: true });
+      if (result.firstLogin) toast.success("Welcome to Classgrid.");
+      navigate(getPostLoginPath(result), { replace: true });
     } catch (error: any) {
       setFeedback({ message: error?.message || "Device verification failed.", tone: "error" });
     } finally {
@@ -221,20 +231,6 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   };
 
   // Load Google reCAPTCHA v3 â€” shows official badge at bottom-right
-  useEffect(() => {
-    if (brandingError || !branding) return;
-
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      try { document.head.removeChild(script); } catch { }
-      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
-    };
-  }, [branding, brandingError]);
-
   if (brandingError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-background dark:bg-[#0f0f0f] text-white text-center">
@@ -249,6 +245,12 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
   if (!branding) {
     return <div className="h-screen w-screen bg-background dark:bg-[#080808]" />;
   }
+
+  const leftPanelImage = branding.leftVariant === "image" && branding.campusImageUrl
+    ? branding.campusImageUrl
+    : DEFAULT_CAMPUS;
+  const websiteUrl = branding.socialLinks?.website_url
+    || (branding.marketingDomain ? `https://${branding.marketingDomain}` : "");
 
 
 
@@ -267,8 +269,8 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
           {/* 1. Full-Bleed Campus Photo */}
           {/* Max Dimensions for this image to fit cut-to-cut on desktop: 550px width by 720px height */}
           <img
-            src={branding.campusImageUrl || DEFAULT_CAMPUS}
-            alt="Campus"
+            src={leftPanelImage}
+            alt={`${branding.name} campus`}
             className="absolute inset-0 h-full w-full object-cover"
             draggable={false}
           />
@@ -291,34 +293,39 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
 
             {/* 4. Real Social Links */}
             <div className="flex items-center gap-4">
-              {branding.socialLinks?.website_url && (
-                <a href={branding.socialLinks.website_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+              {websiteUrl && (
+                <a aria-label="Official website" href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <Globe size={20} />
                 </a>
               )}
               {branding.socialLinks?.facebook_url && (
-                <a href={branding.socialLinks.facebook_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                <a aria-label="Facebook" href={branding.socialLinks.facebook_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/facebook-icon-logo-svgrepo-com.svg" alt="Facebook" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.instagram_url && (
-                <a href={branding.socialLinks.instagram_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                <a aria-label="Instagram" href={branding.socialLinks.instagram_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/instagram-2-1-logo-svgrepo-com.svg" alt="Instagram" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.linkedin_url && (
-                <a href={branding.socialLinks.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                <a aria-label="LinkedIn" href={branding.socialLinks.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/linkedin-svgrepo-com.svg" alt="LinkedIn" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.twitter_url && (
-                <a href={branding.socialLinks.twitter_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                <a aria-label="X" href={branding.socialLinks.twitter_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/Untitled%20folder/new-twitter-x-logo-twitter-icon-x-social-media-icon-free-png.webp" alt="X" className="w-5 h-5 object-contain" />
                 </a>
               )}
               {branding.socialLinks?.youtube_url && (
-                <a href={branding.socialLinks.youtube_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                <a aria-label="YouTube" href={branding.socialLinks.youtube_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
                   <img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/youtube-color-svgrepo-com.svg" alt="YouTube" className="w-5 h-5 object-contain" />
+                </a>
+              )}
+              {branding.socialLinks?.github_url && (
+                <a aria-label="GitHub" href={branding.socialLinks.github_url} target="_blank" rel="noopener noreferrer" className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all duration-200 hover:scale-110 hover:bg-white/30">
+                  <Github size={20} />
                 </a>
               )}
             </div>
@@ -347,22 +354,28 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
           <div className="flex w-full max-w-[500px] flex-col justify-center rounded-[24px] border border-border dark:border-white/[0.15] bg-background dark:bg-[#0f0f0f] px-10 py-8 shadow-xl shrink-0 m-auto">
 
             {step === 1 ? (
-              <form onSubmit={handleLogin} className="flex flex-col">
+              <form onSubmit={handleLogin} className="flex flex-col" aria-busy={isSubmitting}>
                 {/* 10. College Header */}
                 {branding.logoUrl && (
                   <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[200px] w-auto max-w-[340px] object-contain rounded-[12px]" />
                 )}
                 <h1 className="mt-3 text-center text-[20px] font-bold text-foreground dark:text-white">{branding.name}</h1>
+                {branding.shortName && branding.shortName !== branding.name && (
+                  <p className="mt-1 text-center text-[12px] font-medium uppercase tracking-wide text-muted-foreground dark:text-white/60">{branding.shortName}</p>
+                )}
+                {branding.tagline && (
+                  <p className="mt-2 text-center text-[13px] text-muted-foreground dark:text-white/70">{branding.tagline}</p>
+                )}
                 <p className="mt-2 text-center text-[13px] text-muted-foreground dark:text-white/65">Welcome back!</p>
                 <p className="mt-0.5 text-center text-[13px] text-muted-foreground dark:text-white/65">Sign in to continue to your Classgrid portal</p>
 
                 {/* 11. Student / Faculty Toggle */}
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setActiveRole("student")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-foreground dark:text-white transition-colors ${activeRole === "student" ? "border-[#10b981] bg-[#10b981]/10" : "border-border dark:border-white/[0.14] bg-muted dark:bg-[#111111] hover:bg-zinc-200 dark:hover:bg-[#222222]"}`}>
+                  <button type="button" aria-pressed={activeRole === "student"} onClick={() => setActiveRole("student")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-foreground dark:text-white transition-colors ${activeRole === "student" ? "border-[#10b981] bg-[#10b981]/10" : "border-border dark:border-white/[0.14] bg-muted dark:bg-[#111111] hover:bg-zinc-200 dark:hover:bg-[#222222]"}`}>
                     <GraduationCap className="h-[18px] w-[18px] text-[#10b981]" />
                     Student
                   </button>
-                  <button type="button" onClick={() => setActiveRole("teacher")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-foreground dark:text-white transition-colors ${activeRole === "teacher" ? "border-[#f97316] bg-[#f97316]/10" : "border-border dark:border-white/[0.14] bg-muted dark:bg-[#111111] hover:bg-zinc-200 dark:hover:bg-[#222222]"}`}>
+                  <button type="button" aria-pressed={activeRole === "teacher"} onClick={() => setActiveRole("teacher")} className={`flex h-[42px] items-center justify-center gap-2 rounded-[12px] border text-[14px] font-medium text-foreground dark:text-white transition-colors ${activeRole === "teacher" ? "border-[#f97316] bg-[#f97316]/10" : "border-border dark:border-white/[0.14] bg-muted dark:bg-[#111111] hover:bg-zinc-200 dark:hover:bg-[#222222]"}`}>
                     <Users className="h-[18px] w-[18px] text-[#f97316]" />
                     Faculty
                   </button>
@@ -383,24 +396,24 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                 {/* 14. Email Input */}
                 <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Mail className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Email Address" />
+                  <input id="custom-user-email" name="email" type="email" autoComplete="email" aria-label="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Email Address" />
                 </div>
 
                 {/* Password Input */}
                 <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Password" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-muted-foreground dark:text-white/70 transition-colors hover:text-white">
+                  <input id="custom-user-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" aria-label="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Password" />
+                  <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-muted-foreground dark:text-white/70 transition-colors hover:text-white">
                     {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                   </button>
                 </div>
 
                 {/* 15. Remember Me & Forgot Password */}
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
+                  <label className="flex items-center gap-3" htmlFor="custom-user-remember-me">
+                    <input id="custom-user-remember-me" name="rememberMe" type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-4 w-4 accent-[#10b981]" />
                     <span className="text-[13px] text-foreground dark:text-white">Remember me</span>
-                  </div>
+                  </label>
                   {showForgotPassword && (
                     <button type="button" onClick={handleForgotPasswordClick} className="text-[13px] font-medium text-[#10b981] hover:underline">
                       Forgot password?
@@ -409,7 +422,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                 </div>
 
                 {feedback && (
-                  <div className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
+                  <div role={feedback.tone === "error" ? "alert" : "status"} aria-live={feedback.tone === "error" ? "assertive" : "polite"} className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
                     {feedback.message}
                   </div>
                 )}
@@ -425,7 +438,7 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
                 </p>
               </form>
             ) : (
-              <form onSubmit={handleVerifyDevice} className="flex flex-col">
+              <form onSubmit={handleVerifyDevice} className="flex flex-col" aria-busy={isSubmitting || isResendingOtp}>
                 <button type="button" onClick={() => setStep(1)} className="mb-4 inline-flex w-fit items-center gap-2 text-[14px] font-medium text-muted-foreground dark:text-white/60 transition-colors hover:text-emerald-400">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -434,11 +447,11 @@ export function CustomDomainUserLoginPage({ preferredRole }: { preferredRole?: A
 
                 <div className="mt-5 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 tracking-[0.25em] focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="000000" />
+                  <input id="custom-user-device-code" name="deviceCode" type="text" maxLength={6} inputMode="numeric" autoComplete="one-time-code" aria-label="Six-digit device verification code" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 tracking-[0.25em] focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="000000" />
                 </div>
 
                 {feedback && (
-                  <div className={`mt-4 rounded-[12px] border px-3 py-2 text-[13px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
+                  <div role={feedback.tone === "error" ? "alert" : "status"} aria-live={feedback.tone === "error" ? "assertive" : "polite"} className={`mt-4 rounded-[12px] border px-3 py-2 text-[13px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
                     {feedback.message}
                   </div>
                 )}

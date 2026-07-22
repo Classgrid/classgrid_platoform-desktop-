@@ -1,6 +1,8 @@
 import { API_BASE_URL, apiClient } from "@/lib/apiClient";
 
 import { getAuthIntent } from "./auth-helpers";
+import { getClientDeviceFingerprint } from "./device-fingerprint";
+import { executeRecaptcha } from "./recaptcha";
 import type { AuthAudience, AuthBrandingResponse, AuthLoginRole, AuthType, LoginResponse } from "./types";
 
 type BrandingParams = {
@@ -26,11 +28,14 @@ type LoginPayload = {
   password: string;
   audience: AuthAudience;
   role: AuthLoginRole;
+  rememberMe?: boolean;
 };
 
-export async function loginWithPassword({ email, password, audience, role }: LoginPayload) {
+export async function loginWithPassword({ email, password, audience, role, rememberMe = false }: LoginPayload) {
   const loginIntent = getAuthIntent(audience, role);
   const isStandardUser = loginIntent === "student" || loginIntent === "teacher";
+  const recaptchaAction = "login";
+  const recaptchaToken = await executeRecaptcha(recaptchaAction);
 
   const response = await apiClient.post<LoginResponse>("/api/auth/login", {
     email,
@@ -38,6 +43,11 @@ export async function loginWithPassword({ email, password, audience, role }: Log
     expectedLoginType: isStandardUser ? "standard" : loginIntent,
     loginTab: isStandardUser ? loginIntent : loginIntent === "admin" ? "admin" : undefined,
     role: loginIntent,
+    rememberMe,
+    deviceFingerprint: getClientDeviceFingerprint(),
+    recaptchaToken,
+    recaptchaAction,
+    portalHost: window.location.hostname,
   });
 
   if (response.data.token) {
@@ -81,6 +91,7 @@ export async function verifyDeviceOtp({ email, otp }: { email: string; otp: stri
   const response = await apiClient.post<LoginResponse>("/api/auth/verify-device", {
     email,
     otp,
+    deviceFingerprint: getClientDeviceFingerprint(),
   });
 
   if (response.data.token) {

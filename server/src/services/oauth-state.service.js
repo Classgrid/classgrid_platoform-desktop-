@@ -1,0 +1,110 @@
+import crypto from "crypto";
+import Organization from "../models/Organization.js";
+
+export const OAUTH_STATE_COOKIE = "classgrid_oauth_state";
+const STATE_TTL_MS = 10 * 60 * 1000;
+const LOGIN_TABS = new Set(["student", "teacher", "faculty", "admin", "org_admin", "super_admin"]);
+
+function stateSecret() {
+    return process.env.OAUTH_STATE_SECRET || process.env.JWT_SECRET || "dev_secret";
+}
+
+function signatureFor(encodedPayload) {
+    return crypto.createHmac("sha256", stateSecret()).update(encodedPayload).digest("base64url");
+}
+
+function signaturesMatch(actual, expected) {
+    const actualBuffer = Buffer.from(actual || "", "utf8");
+    const expectedBuffer = Buffer.from(expected || "", "utf8");
+    return actualBuffer.length === expectedBuffer.length
+        && crypto.timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
+function normalizeHost(value) {
+    const host = String(value || "").trim().toLowerCase().replace(/\.$/, "");
+    if (!host || host.length > 253 || host.includes("..")) return "";
+    if (!/^[a-z0-9.-]+$/.test(host)) return "";
+    return host;
+}
+
+function isClassgridFrontendHost(host) {
+    return host === "classgrid.in" || /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.classgrid\.in$/.test(host);
+}
+
+async function resolveAllowedHost(value) {
+    const host = normalizeHost(value);
+    if (!host) return "";
+
+    if (isClassgridFrontendHost(host)) return host;
+    if (process.env.NODE_ENV !== "production" && (host === "localhost" || host.endsWith(".localhost") || host === "127.0.0.1")) {
+        return host;
+    }
+
+    const organization = await Organization.findOne({
+        $or: [
+            {
+                "erp_domain.domain": host,
+                "erp_domain.status": { $in: ["verified", "active"] },
+                "erp_domain.is_enabled": { $ne: false },
+            },
+            {
+                "custom_domain.domain": host,
+                "custom_domain.status": { $in: ["verified", "active"] },
+                "custom_domain.is_enabled": { $ne: false },
+            },
+        ],
+    }).select("_id").lean();
+
+    return organization ? host : "";
+}
+
+export function oauthStateCookieOptions({ clear = false } = {}) {
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        path: "/api/auth/google",
+    };
+    if (!clear) options.maxAge = STATE_TTL_MS;
+    return options;
+}
+
+export async function createOAuthState({ loginTab, host }) {
+    const safeLoginTab = LOGIN_TABS.has(loginTab) ? loginTab : "student";
+    const safeHost = await resolveAllowedHost(host);
+    if (host && !safeHost) throw new Error("This login portal host is not registered or active.");
+
+    const nonce = crypto.randomBytes(24).toString("base64url");
+    const payload = {
+        t: safeLoginTab,
+        h: safeHost,
+        n: nonce,
+        exp: Date.now() + STATE_TTL_MS,
+    };
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url");
+    return { state: `${encodedPayload}.${signatureFor(encodedPayload)}`, nonce };
+}
+
+export async function verifyOAuthState(rawState, expectedNonce) {
+    const [encodedPayload, signature, extra] = String(rawState || "").split(".");
+    if (!encodedPayload || !signature || extra || !signaturesMatch(signature, signatureFor(encodedPayload))) {
+        throw new Error("Invalid OAuth state.");
+    }
+
+    let payload;
+    try {
+        payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
+    } catch {
+        throw new Error("Invalid OAuth state.");
+    }
+
+    if (!payload.n || !expectedNonce || payload.n !== expectedNonce || !payload.exp || payload.exp < Date.now()) {
+        throw new Error("Expired or mismatched OAuth state.");
+    }
+    if (!LOGIN_TABS.has(payload.t)) throw new Error("Invalid OAuth login portal.");
+
+    const safeHost = await resolveAllowedHost(payload.h);
+    if (payload.h && !safeHost) throw new Error("The OAuth return portal is no longer active.");
+
+    return { loginTab: payload.t, host: safeHost };
+}

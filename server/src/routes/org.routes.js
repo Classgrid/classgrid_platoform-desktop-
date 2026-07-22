@@ -1897,7 +1897,7 @@ router.get("/subdomain", isAuthenticated, requireRole("org_admin"), async (req, 
 
 /**
  * PATCH /api/org-admin/subdomain
- * Body: { subdomain: "pccoe" }
+ * Body: { subdomain: "example-campus" }
  * Sets or updates the subdomain slug for this organization.
  * 
  * Rules:
@@ -1970,6 +1970,15 @@ router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req
         const currentOrg = await Organization.findById(orgId).select("subdomain").lean();
         const oldSlug = currentOrg?.subdomain;
 
+        if (oldSlug === slug) {
+            return res.json({
+                success: true,
+                message: "Subdomain was already up to date.",
+                subdomain: slug,
+                url: `${slug}.classgrid.in`,
+            });
+        }
+
         // Update
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
@@ -1983,6 +1992,12 @@ router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req
             if (oldSlug) invalidateTenantCache(oldSlug);
             invalidateTenantCache(slug);
         } catch (_) { /* best effort */ }
+
+        try {
+            await redis.del(`org:branding:${orgId}`);
+        } catch (cacheError) {
+            console.warn("[Subdomain PATCH] Branding cache invalidation failed:", cacheError.message);
+        }
 
         // Send email notification to admin
         try {
@@ -2024,7 +2039,7 @@ router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req
 });
 
 /**
- * GET /api/org-admin/subdomain/check?slug=pccoe
+ * GET /api/org-admin/subdomain/check?slug=example-campus
  * Public-ish availability check (still requires auth for rate-limit safety)
  */
 router.get("/subdomain/check", isAuthenticated, requireRole("org_admin"), async (req, res) => {
@@ -2065,11 +2080,135 @@ router.get("/subdomain/check", isAuthenticated, requireRole("org_admin"), async 
 });
 
 // ======================================================
-// CUSTOM DOMAIN MANAGEMENT (e.g. portal.xyzcollege.edu)
+// CUSTOM DOMAIN MANAGEMENT (for example, portal.example.edu)
 // ======================================================
 
 import dns from "dns/promises";
 import crypto from "crypto";
+import { isIP } from "node:net";
+
+const CUSTOM_DOMAIN_TYPES = new Set(["custom_domain", "erp_domain"]);
+const CLASSGRID_APEX_IP = "76.76.21.21";
+
+function parseCustomDomainInput(rawDomain) {
+    if (typeof rawDomain !== "string" || !rawDomain.trim()) {
+        return { error: "Domain is required." };
+    }
+
+    let candidate = rawDomain.trim().toLowerCase();
+    const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(candidate);
+
+    if (hasScheme) {
+        let parsed;
+        try {
+            parsed = new URL(candidate);
+        } catch {
+            return { error: "Enter a valid hostname, such as portal.example.edu." };
+        }
+
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+            return { error: "Only HTTP or HTTPS URLs can be converted to a custom hostname." };
+        }
+        if (parsed.username || parsed.password || parsed.port || parsed.search || parsed.hash || parsed.pathname !== "/") {
+            return { error: "Enter a hostname only. Paths, ports, credentials, queries, and fragments are not supported." };
+        }
+        candidate = parsed.hostname.toLowerCase();
+    } else if (/[\\/?#@:]/.test(candidate)) {
+        return { error: "Enter a hostname only, without a path, port, credentials, query, or fragment." };
+    }
+
+    candidate = candidate.replace(/\.$/, "");
+    if (!candidate || candidate.length > 253 || isIP(candidate)) {
+        return { error: "Enter a valid public hostname, such as portal.example.edu." };
+    }
+
+    const labels = candidate.split(".");
+    const validLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+    if (labels.length < 2 || labels.some((label) => !validLabel.test(label)) || /^\d+$/.test(labels.at(-1))) {
+        return { error: "Enter a valid hostname, such as portal.example.edu." };
+    }
+
+    if (candidate === "classgrid.in" || candidate.endsWith(".classgrid.in")) {
+        return { error: "Platform domains cannot be used as custom domains.", status: 403 };
+    }
+
+    return { domain: candidate };
+}
+
+function isVerifiedDomainConfig(config) {
+    return config?.status === "verified" || config?.status === "active";
+}
+
+function domainAccessSnapshot(config = {}) {
+    return {
+        allow_classgrid_url: config.allow_classgrid_url !== false,
+        is_enabled: config.is_enabled !== false,
+    };
+}
+
+async function invalidateCustomDomainCaches(orgId, ...hosts) {
+    try {
+        await redis.del(`org:branding:${orgId}`);
+    } catch (error) {
+        console.warn("[Custom Domain] Redis cache invalidation failed:", error.message);
+    }
+
+    try {
+        const { invalidateTenantCache } = await import("../middleware/subdomain-router.middleware.js");
+        hosts.filter(Boolean).forEach((host) => invalidateTenantCache(host));
+    } catch (error) {
+        console.warn("[Custom Domain] Tenant cache invalidation failed:", error.message);
+    }
+}
+
+async function queueExternalDomainNotification(req, org, payload) {
+    try {
+        const { notifyExternalDomainChange } = await import("../services/domain-change-email.service.js");
+        const result = await notifyExternalDomainChange({
+            to: req.user.email || org.ownerEmail,
+            orgName: org.name,
+            adminName: req.user.name || "Admin",
+            adminEmail: req.user.email || org.ownerEmail,
+            organizationId: req.user.organization_id,
+            userId: req.user._id || req.user.id,
+            ...payload,
+        });
+        if (!result?.queued) {
+            console.warn("[Custom Domain] Notification email was not queued:", result?.reason || "unknown reason");
+        }
+    } catch (error) {
+        console.error("[Custom Domain] Failed to queue notification email:", error.message);
+    }
+}
+
+function getCustomDomainProjectId(domainType) {
+    return domainType === "erp_domain"
+        ? process.env.VERCEL_PROJECT_ID
+        : process.env.VERCEL_MARKETING_PROJECT_ID;
+}
+
+async function detachCustomDomainFromHosting(domain, domainType) {
+    const projectId = getCustomDomainProjectId(domainType);
+    if (!domain || !process.env.VERCEL_API_TOKEN || !projectId) return;
+
+    const teamQuery = process.env.VERCEL_TEAM_ID
+        ? `?teamId=${encodeURIComponent(process.env.VERCEL_TEAM_ID)}`
+        : "";
+    try {
+        const response = await fetch(
+            `https://api.vercel.com/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(domain)}${teamQuery}`,
+            {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}` },
+            }
+        );
+        if (!response.ok && response.status !== 404) {
+            console.error("[Custom Domain] Hosting detach failed:", await response.text());
+        }
+    } catch (error) {
+        console.error("[Custom Domain] Hosting detach request failed:", error.message);
+    }
+}
 
 /**
  * GET /api/org-admin/custom-domain
@@ -2120,31 +2259,98 @@ router.patch("/custom-domain/settings", isAuthenticated, requireRole("org_admin"
         if (!orgId) return res.status(400).json({ message: "No organization bound." });
 
         const { allow_classgrid_url, is_enabled, domainType = "custom_domain" } = req.body;
-        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+        if (!CUSTOM_DOMAIN_TYPES.has(domainType)) {
             return res.status(400).json({ message: "Invalid domainType" });
         }
-        
-        const updateFields = {};
 
-        if (typeof allow_classgrid_url === "boolean") {
-            updateFields[`${domainType}.allow_classgrid_url`] = allow_classgrid_url;
+        if (typeof allow_classgrid_url !== "boolean" && typeof is_enabled !== "boolean") {
+            return res.status(400).json({ message: "Provide at least one domain setting to update." });
         }
-        if (typeof is_enabled === "boolean") {
-            updateFields[`${domainType}.is_enabled`] = is_enabled;
+        if (domainType !== "erp_domain" && typeof allow_classgrid_url === "boolean") {
+            return res.status(400).json({ message: "The default Classgrid URL setting applies only to the ERP login domain." });
         }
 
-        const org = await Organization.findOneAndUpdate(
-            { _id: orgId },
+        const currentOrg = await Organization.findById(orgId)
+            .select("custom_domain erp_domain feature_flags name ownerEmail")
+            .lean();
+        if (!currentOrg) return res.status(404).json({ message: "Organization not found." });
+        if (!currentOrg.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
+
+        const currentConfig = currentOrg[domainType] || {};
+        if (!currentConfig.domain) {
+            return res.status(400).json({ message: "No custom domain is registered for this domain type." });
+        }
+
+        let nextEnabled = typeof is_enabled === "boolean"
+            ? is_enabled
+            : currentConfig.is_enabled !== false;
+        let nextAllowClassgrid = typeof allow_classgrid_url === "boolean"
+            ? allow_classgrid_url
+            : currentConfig.allow_classgrid_url !== false;
+
+        if (nextEnabled && !isVerifiedDomainConfig(currentConfig)) {
+            return res.status(409).json({ message: "Verify the custom domain before enabling it." });
+        }
+
+        if (domainType === "erp_domain") {
+            // Exactly one normal ERP entrance stays active. The org-admin emergency
+            // route remains available through the Classgrid hostname by design.
+            if (typeof is_enabled === "boolean" && is_enabled) nextAllowClassgrid = false;
+            if (typeof allow_classgrid_url === "boolean" && allow_classgrid_url) nextEnabled = false;
+            if (!nextEnabled && !nextAllowClassgrid) {
+                return res.status(409).json({
+                    message: "At least one ERP entrance must remain enabled. Enable the default Classgrid URL or the verified custom domain.",
+                });
+            }
+        }
+
+        const oldSettings = domainAccessSnapshot(currentConfig);
+        const updateFields = {
+            [`${domainType}.is_enabled`]: nextEnabled,
+        };
+        if (domainType === "erp_domain") {
+            updateFields[`${domainType}.allow_classgrid_url`] = nextAllowClassgrid;
+        }
+
+        const newSettings = {
+            allow_classgrid_url: domainType === "erp_domain" ? nextAllowClassgrid : oldSettings.allow_classgrid_url,
+            is_enabled: nextEnabled,
+        };
+        const settingsChanged = oldSettings.is_enabled !== newSettings.is_enabled
+            || (domainType === "erp_domain" && oldSettings.allow_classgrid_url !== newSettings.allow_classgrid_url);
+
+        if (!settingsChanged) {
+            return res.json({
+                success: true,
+                message: "Custom domain settings were already up to date.",
+                custom_domain: currentOrg.custom_domain,
+                erp_domain: currentOrg.erp_domain,
+            });
+        }
+
+        const org = await Organization.findByIdAndUpdate(
+            orgId,
             { $set: updateFields },
-            { new: true }
-        ).select("custom_domain erp_domain name");
+            { new: true, runValidators: true }
+        ).select("custom_domain erp_domain name ownerEmail");
 
-        if (!org) return res.status(404).json({ message: "Organization not found." });
+        logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, {
+            domainType,
+            oldSettings,
+            newSettings,
+        });
 
-        logAdminAction(req, "update_custom_domain_settings", "organization", orgId, org.name, { domainType, ...updateFields });
-
-        // Invalidate branding cache since settings changed
-        await redis.del(`org:branding:${orgId}`);
+        await invalidateCustomDomainCaches(orgId, currentConfig.domain);
+        await queueExternalDomainNotification(req, org, {
+            action: "settings_updated",
+            domainType,
+            oldDomain: currentConfig.domain,
+            newDomain: currentConfig.domain,
+            oldSettings,
+            newSettings,
+        });
 
         res.json({
             success: true,
@@ -2169,37 +2375,43 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
 
         const { domain, domainType = "custom_domain" } = req.body;
         if (!domain) return res.status(400).json({ message: "Domain is required." });
-        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+        if (!CUSTOM_DOMAIN_TYPES.has(domainType)) {
             return res.status(400).json({ message: "Invalid domainType" });
         }
 
-        const org = await Organization.findById(orgId).select("custom_domain erp_domain feature_flags name").lean();
+        const org = await Organization.findById(orgId).select("custom_domain erp_domain feature_flags name ownerEmail").lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
         if (!org.feature_flags?.custom_domain_module) {
             return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
         }
 
-        const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
-
-        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!domainRegex.test(cleanDomain)) {
-            return res.status(400).json({ message: "Invalid domain format. Example: portal.mycollege.edu" });
+        if (org[domainType]?.domain) {
+            return res.status(409).json({
+                message: "A domain is already registered here. Use Edit Domain to change it without resetting branding, or remove it first.",
+            });
         }
 
-        // CRITICAL SECURITY PRECAUTION: Never allow our own platform domains to be registered/deleted by clients
-        if (cleanDomain === "classgrid.in" || cleanDomain.endsWith(".classgrid.in")) {
-            return res.status(403).json({ message: "Platform domains cannot be used as custom domains." });
+        const parsedDomain = parseCustomDomainInput(domain);
+        if (parsedDomain.error) {
+            return res.status(parsedDomain.status || 400).json({ message: parsedDomain.error });
         }
+        const cleanDomain = parsedDomain.domain;
 
-        // Check if another org is using it
+        // A hostname can belong to only one slot across the entire platform,
+        // including the other domain slot on the same organization.
         const existing = await Organization.findOne({
             $or: [
                 { "custom_domain.domain": cleanDomain },
                 { "erp_domain.domain": cleanDomain }
-            ],
-            _id: { $ne: orgId }
-        }).lean();
+            ]
+        }).select("_id").lean();
         if (existing) {
-            return res.status(409).json({ message: "This domain is already registered to another organization." });
+            const sameOrganization = String(existing._id) === String(orgId);
+            return res.status(409).json({
+                message: sameOrganization
+                    ? "This hostname is already used by another domain slot in your organization."
+                    : "This hostname is already registered to another organization.",
+            });
         }
 
         const verificationToken = crypto.randomBytes(16).toString("hex");
@@ -2215,19 +2427,24 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
             created_at: new Date(),
             verified_at: null,
             allow_classgrid_url: true,
-            is_enabled: true
+            is_enabled: false
         };
 
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
             { $set: updateObj },
             { new: true }
-        ).select("custom_domain erp_domain name");
+        ).select("custom_domain erp_domain name ownerEmail");
 
         logAdminAction(req, "register_custom_domain", "organization", orgId, updatedOrg.name, { domainType, domain: cleanDomain });
         
-        // Invalidate branding cache since domain properties changed
-        await redis.del(`org:branding:${orgId}`);
+        await invalidateCustomDomainCaches(orgId, cleanDomain);
+        await queueExternalDomainNotification(req, updatedOrg, {
+            action: "registered",
+            domainType,
+            newDomain: cleanDomain,
+            newSettings: domainAccessSnapshot(updatedOrg[domainType]),
+        });
 
         res.json({
             success: true,
@@ -2242,18 +2459,132 @@ router.post("/custom-domain", isAuthenticated, requireRole("org_admin"), async (
 });
 
 /**
+ * PATCH /api/org-admin/custom-domain
+ * Changes an existing external hostname without deleting or resetting branding.
+ * DNS ownership and routing must be verified again for the replacement hostname.
+ */
+router.patch("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
+    try {
+        const orgId = req.user.organization_id;
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+
+        const { domain, domainType = "custom_domain" } = req.body;
+        if (!CUSTOM_DOMAIN_TYPES.has(domainType)) {
+            return res.status(400).json({ message: "Invalid domainType" });
+        }
+
+        const org = await Organization.findById(orgId)
+            .select("custom_domain erp_domain feature_flags name ownerEmail")
+            .lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+        if (!org.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
+
+        const currentConfig = org[domainType];
+        if (!currentConfig?.domain) {
+            return res.status(400).json({ message: "No existing domain was found. Add a domain first." });
+        }
+
+        const parsedDomain = parseCustomDomainInput(domain);
+        if (parsedDomain.error) {
+            return res.status(parsedDomain.status || 400).json({ message: parsedDomain.error });
+        }
+        const cleanDomain = parsedDomain.domain;
+        const oldDomain = currentConfig.domain;
+
+        if (cleanDomain === oldDomain) {
+            return res.status(400).json({ message: "Enter a different hostname to make a change." });
+        }
+
+        const existing = await Organization.findOne({
+            $or: [
+                { "custom_domain.domain": cleanDomain },
+                { "erp_domain.domain": cleanDomain },
+            ],
+        }).select("_id").lean();
+        if (existing) {
+            const sameOrganization = String(existing._id) === String(orgId);
+            return res.status(409).json({
+                message: sameOrganization
+                    ? "This hostname is already used by another domain slot in your organization."
+                    : "This hostname is already registered to another organization.",
+            });
+        }
+
+        const verificationToken = crypto.randomBytes(16).toString("hex");
+        const replacementConfig = {
+            domain: cleanDomain,
+            status: "pending_verification",
+            verification_token: verificationToken,
+            txt_verified: false,
+            cname_verified: false,
+            ssl_provisioned: false,
+            created_at: new Date(),
+            verified_at: null,
+            allow_classgrid_url: true,
+            is_enabled: false,
+        };
+
+        const updatedOrg = await Organization.findByIdAndUpdate(
+            orgId,
+            { $set: { [domainType]: replacementConfig } },
+            { new: true, runValidators: true }
+        ).select("custom_domain erp_domain name ownerEmail");
+
+        await detachCustomDomainFromHosting(oldDomain, domainType);
+        await invalidateCustomDomainCaches(orgId, oldDomain, cleanDomain);
+        await queueExternalDomainNotification(req, updatedOrg, {
+            action: "changed",
+            domainType,
+            oldDomain,
+            newDomain: cleanDomain,
+            oldSettings: domainAccessSnapshot(currentConfig),
+            newSettings: domainAccessSnapshot(replacementConfig),
+        });
+
+        logAdminAction(req, "change_custom_domain", "organization", orgId, updatedOrg.name, {
+            domainType,
+            oldDomain,
+            newDomain: cleanDomain,
+            brandingPreserved: true,
+        });
+
+        res.json({
+            success: true,
+            message: "Domain changed. Branding was preserved; configure and verify DNS for the new hostname.",
+            custom_domain: updatedOrg.custom_domain,
+            erp_domain: updatedOrg.erp_domain,
+        });
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(409).json({ message: "This hostname is already in use." });
+        }
+        console.error("[Custom Domain PATCH] Error:", err.message);
+        res.status(500).json({ message: "Server error while changing the custom domain." });
+    }
+});
+
+/**
  * POST /api/org-admin/custom-domain/verify
  * Performs DNS lookup to verify TXT and CNAME records
  */
 router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
         const { domainType = "custom_domain" } = req.body;
-        if (!["custom_domain", "erp_domain"].includes(domainType)) {
+        if (!CUSTOM_DOMAIN_TYPES.has(domainType)) {
             return res.status(400).json({ message: "Invalid domainType" });
         }
 
         const orgId = req.user.organization_id;
-        const org = await Organization.findById(orgId).select("custom_domain erp_domain").lean();
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+        const org = await Organization.findById(orgId)
+            .select("custom_domain erp_domain feature_flags name ownerEmail")
+            .lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+        if (!org.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
 
         const domainConfig = org[domainType];
         if (!domainConfig || !domainConfig.domain || !domainConfig.verification_token) {
@@ -2263,6 +2594,8 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
         const { domain, verification_token } = domainConfig;
         let txtVerified = false;
         let cnameVerified = false;
+        let hasConflicts = false;
+        let conflictingRecords = [];
         
         // Use a custom resolver bypassing local OS cache (hits Cloudflare and Google directly for freshest state)
         const resolver = new dns.Resolver();
@@ -2277,26 +2610,35 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             console.log(`[DNS Verify] TXT lookup failed for ${domain}:`, err.code);
         }
 
-        // 2. Verify CNAME Record (Scenario 1 & 3: point to Vercel/Classgrid)
+        // 2. Verify routing. Subdomains normally use CNAME; apex domains use A.
         try {
             const cnameRecords = await resolver.resolveCname(domain);
-            cnameVerified = cnameRecords.some(r => r.includes("classgrid.in") || r.includes("vercel.app") || r.includes("vercel.com") || r.includes("cname.vercel-dns.com"));
+            const normalizedRecords = cnameRecords.map((record) => record.toLowerCase().replace(/\.$/, ""));
+            const isApprovedCname = (record) =>
+                record === "classgrid.in"
+                || record.endsWith(".classgrid.in")
+                || record === "cname.vercel-dns.com"
+                || record.endsWith(".vercel-dns.com")
+                || record.endsWith(".vercel.app")
+                || record.endsWith(".vercel.com");
+            cnameVerified = normalizedRecords.some(isApprovedCname);
+            conflictingRecords = normalizedRecords.filter((record) => !isApprovedCname(record));
+            hasConflicts = cnameVerified && conflictingRecords.length > 0;
         } catch (err) {
             try {
                 const aRecords = await resolver.resolve4(domain);
-                // Vercel's standard anycast IP for apex domains is 76.76.21.21
-                cnameVerified = aRecords.includes("76.76.21.21");
+                cnameVerified = aRecords.includes(CLASSGRID_APEX_IP);
+                conflictingRecords = aRecords.filter((record) => record !== CLASSGRID_APEX_IP);
+                hasConflicts = cnameVerified && conflictingRecords.length > 0;
             } catch (aErr) {
-                console.log(`[DNS Verify] CNAME/A lookup failed for ${domain}:`, err.code);
+                console.log(`[DNS Verify] CNAME/A lookup failed for ${domain}:`, aErr.code || err.code);
             }
         }
 
-        const isFullyVerified = txtVerified && cnameVerified;
-        const hasConflicts = false;
-        const conflictingRecords = [];
+        const routingAndOwnershipVerified = txtVerified && cnameVerified;
+        const isFullyVerified = routingAndOwnershipVerified && !hasConflicts;
 
-        // If verified but has conflicting records, mark as a special status
-        const resolvedStatus = isFullyVerified
+        const resolvedStatus = routingAndOwnershipVerified
             ? (hasConflicts ? "verified_with_conflicts" : "verified")
             : "pending_verification";
 
@@ -2304,17 +2646,20 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             [`${domainType}.txt_verified`]: txtVerified,
             [`${domainType}.cname_verified`]: cnameVerified,
             [`${domainType}.status`]: resolvedStatus,
-            [`${domainType}.verified_at`]: isFullyVerified ? new Date() : null,
+            [`${domainType}.verified_at`]: isFullyVerified ? (domainConfig.verified_at || new Date()) : null,
         };
         if (isFullyVerified) {
-            updateObj[`${domainType}.allow_classgrid_url`] = false;
+            updateObj[`${domainType}.is_enabled`] = true;
+            if (domainType === "erp_domain") {
+                updateObj[`${domainType}.allow_classgrid_url`] = false;
+            }
         }
 
         const updatedOrg = await Organization.findByIdAndUpdate(
             orgId,
             { $set: updateObj },
-            { new: true }
-        ).select("custom_domain erp_domain");
+            { new: true, runValidators: true }
+        ).select("custom_domain erp_domain name ownerEmail");
 
         if (isFullyVerified) {
             logAdminAction(req, "verify_custom_domain", "organization", orgId, "Custom Domain Verified", { domainType, domain });
@@ -2322,9 +2667,7 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             // ==========================================
             // AUTOMATED VERCEL INTEGRATION
             // ==========================================
-            const targetProjectId = domainType === "erp_domain" 
-                ? process.env.VERCEL_PROJECT_ID 
-                : process.env.VERCEL_MARKETING_PROJECT_ID;
+            const targetProjectId = getCustomDomainProjectId(domainType);
 
             if (process.env.VERCEL_API_TOKEN && targetProjectId) {
                 try {
@@ -2351,14 +2694,25 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
             }
         }
 
-        // Invalidate branding cache since domain verification status changed
-        await redis.del(`org:branding:${orgId}`);
+        await invalidateCustomDomainCaches(orgId, domain);
+
+        const wasAlreadyVerified = isVerifiedDomainConfig(domainConfig);
+        if (isFullyVerified && !wasAlreadyVerified) {
+            await queueExternalDomainNotification(req, updatedOrg, {
+                action: "verified",
+                domainType,
+                oldDomain: domain,
+                newDomain: domain,
+                oldSettings: domainAccessSnapshot(domainConfig),
+                newSettings: domainAccessSnapshot(updatedOrg[domainType]),
+            });
+        }
 
         let message;
-        if (!isFullyVerified) {
-            message = "Verification pending. Please check your DNS records.";
-        } else if (hasConflicts) {
-            message = `Domain records are correct, but we detected ${conflictingRecords.length} conflicting A record(s) (${conflictingRecords.join(", ")}). These are likely parked domain IPs from your DNS provider (e.g. GoDaddy). Please delete all A records for @ except 76.76.21.21, then verify again.`;
+        if (hasConflicts) {
+            message = `Ownership and Classgrid routing were found, but conflicting DNS record(s) remain: ${conflictingRecords.join(", ")}. Remove the conflicting records and verify again.`;
+        } else if (!isFullyVerified) {
+            message = "Verification pending. Check both the ownership TXT record and the routing CNAME or A record.";
         } else {
             message = "Domain verified successfully! SSL provisioning will begin.";
         }
@@ -2387,14 +2741,25 @@ router.post("/custom-domain/verify", isAuthenticated, requireRole("org_admin"), 
 router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
     try {
         const resolvedDomainType = req.body.domainType || req.query.domainType || "custom_domain";
-        if (!["custom_domain", "erp_domain"].includes(resolvedDomainType)) {
+        if (!CUSTOM_DOMAIN_TYPES.has(resolvedDomainType)) {
             return res.status(400).json({ message: "Invalid domainType" });
         }
 
         const orgId = req.user.organization_id;
-        const org = await Organization.findById(orgId).select("custom_domain erp_domain name").lean();
+        if (!orgId) return res.status(400).json({ message: "No organization bound." });
+        const org = await Organization.findById(orgId)
+            .select("custom_domain erp_domain feature_flags name ownerEmail")
+            .lean();
+        if (!org) return res.status(404).json({ message: "Organization not found." });
+        if (!org.feature_flags?.custom_domain_module) {
+            return res.status(403).json({ message: "Custom domain feature is not enabled for this organization." });
+        }
         
         const domainToDelete = org[resolvedDomainType]?.domain;
+        if (!domainToDelete) {
+            return res.status(400).json({ message: "No custom domain is registered for this domain type." });
+        }
+        const oldSettings = domainAccessSnapshot(org[resolvedDomainType]);
 
         // CRITICAL SECURITY PRECAUTION: Never allow the backend to delete our own platform domains from Vercel
         if (domainToDelete === "classgrid.in" || domainToDelete?.endsWith(".classgrid.in")) {
@@ -2451,8 +2816,15 @@ router.delete("/custom-domain", isAuthenticated, requireRole("org_admin"), async
 
         logAdminAction(req, "delete_custom_domain", "organization", orgId, org.name, { domainType: resolvedDomainType, old_domain: domainToDelete });
 
-        // Invalidate branding cache since domain properties changed
-        await redis.del(`org:branding:${orgId}`);
+        await invalidateCustomDomainCaches(orgId, domainToDelete);
+        await queueExternalDomainNotification(req, org, {
+            action: "removed",
+            domainType: resolvedDomainType,
+            oldDomain: domainToDelete,
+            oldSettings,
+            newSettings: { allow_classgrid_url: true, is_enabled: true },
+            brandingReset: true,
+        });
 
         res.json({ success: true, message: "Custom domain removed." });
     } catch (err) {
@@ -2622,47 +2994,5 @@ router.patch("/branding", isAuthenticated, requireRole("org_admin"), async (req,
         res.status(500).json({ message: "Server error updating branding." });
     }
 });
-/**
- * PATH: /api/org/subdomain
- * METHOD: PATCH
- */
-router.patch("/subdomain", isAuthenticated, requireRole("org_admin"), async (req, res) => {
-    try {
-        const { subdomain } = req.body;
-        const orgId = req.user.organization_id?._id || req.user.organization_id;
-        
-        if (!orgId) return res.status(400).json({ message: "No organization bound." });
-        if (!subdomain) return res.status(400).json({ message: "Subdomain is required." });
-
-        // Validate subdomain strictly
-        const subdomainRegex = /^[a-z\-]{2,15}$/;
-        if (!subdomainRegex.test(subdomain)) {
-            return res.status(400).json({ 
-                message: "Subdomain must be 2-15 characters, containing only lowercase letters (a-z) and hyphens (-)." 
-            });
-        }
-
-        // Check if taken by ANOTHER org
-        const existing = await Organization.findOne({ subdomain: subdomain, _id: { $ne: orgId } });
-        if (existing) {
-            return res.status(409).json({ message: "This subdomain is already taken." });
-        }
-
-        const updatedOrg = await Organization.findByIdAndUpdate(
-            orgId,
-            { $set: { subdomain } },
-            { new: true, runValidators: true }
-        );
-
-        logAdminAction(req, "update_subdomain", "organization", orgId, updatedOrg.name, { subdomain });
-        await redis.del(`org:branding:${orgId}`);
-
-        res.json({ message: "Subdomain updated successfully.", subdomain: updatedOrg.subdomain });
-    } catch (err) {
-        console.error("[Org Subdomain Error]:", err.message);
-        res.status(500).json({ message: "Server error updating subdomain." });
-    }
-});
-
 export default router;
 

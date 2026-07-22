@@ -3,6 +3,7 @@ import type { AuthUserRole, AuthBranding } from "../types";
 import { ClassgridSubdomainUserLoginPage } from "./ClassgridSubdomainUserLoginPage";
 import { CustomDomainUserLoginPage } from "./CustomDomainUserLoginPage";
 import { getAuthBranding } from "../api";
+import { redirectToBrandingFallback } from "../auth-helpers";
 
 type UserLoginRouterProps = {
   preferredRole?: AuthUserRole;
@@ -48,12 +49,13 @@ export function UserLoginRouter({ preferredRole }: UserLoginRouterProps) {
         setBranding(result);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (redirectToBrandingFallback(error)) return;
         if (isMounted) setIsLoading(false);
       });
 
     return () => { isMounted = false; };
-  }, [hostname]);
+  }, [hostname, isCustomDomain]);
 
   // While loading, just show a blank screen to prevent flash of wrong branding
   if (isLoading) {

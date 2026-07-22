@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Globe, CheckCircle2, AlertCircle, AlertTriangle, RefreshCw, Copy, Trash2, XCircle, ExternalLink, Monitor, LayoutDashboard } from "lucide-react";
+import { Globe, CheckCircle2, AlertCircle, AlertTriangle, Copy, Trash2, XCircle, ExternalLink, Monitor, LayoutDashboard, Pencil } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
-import { Spinner } from "@/components/marketing_ui/spinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/marketing_ui/select";
-import { useCustomDomain, useRegisterCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings, CustomDomainConfig, CustomDomainsResponse } from "../../queries/useCustomDomainQueries";
+import { useCustomDomain, useRegisterCustomDomain, useChangeCustomDomain, useVerifyCustomDomain, useRemoveCustomDomain, useUpdateCustomDomainSettings, CustomDomainConfig, CustomDomainsResponse } from "../../queries/useCustomDomainQueries";
 import { toast } from "sonner";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { apiClient } from "@/lib/apiClient";
-import { DNS_PROVIDERS, DnsProvider } from "../../../../constants/dnsProviders";
+import { DNS_PROVIDERS } from "../../../../constants/dnsProviders";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/marketing_ui/accordion";
 import { Switch } from "@/components/marketing_ui/switch";
 
@@ -21,7 +20,6 @@ export function CustomDomainCard() {
     const queryClient = useQueryClient();
     const updateSettingsMutation = useUpdateCustomDomainSettings();
 
-    const [isEditingSubdomain, setIsEditingSubdomain] = useState(false);
     const [subdomainInput, setSubdomainInput] = useState("");
     const [showBackdoorWarning, setShowBackdoorWarning] = useState(false);
     const [pendingBackdoorAction, setPendingBackdoorAction] = useState<(() => void) | null>(null);
@@ -34,7 +32,6 @@ export function CustomDomainCard() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["current-user"] });
             toast.success("Subdomain updated successfully!");
-            setIsEditingSubdomain(false);
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.message || "Failed to update subdomain.");
@@ -231,7 +228,7 @@ export function CustomDomainCard() {
                         <Input
                             value={subdomainInput}
                             onChange={(e) => setSubdomainInput(e.target.value)}
-                            placeholder="e.g. aec"
+                            placeholder="e.g. example-campus"
                             className="flex-1"
                         />
                         <span className="text-muted-foreground font-medium bg-muted/30 px-3 h-10 flex items-center rounded-md border border-border shrink-0">.classgrid.in</span>
@@ -241,7 +238,7 @@ export function CustomDomainCard() {
 
             <DomainConfigCard
                 title="ERP Login Portal Domain"
-                description="This domain will be used for students and faculty to login (e.g. erp.myschool.edu)"
+                description="This domain will be used for students and faculty to log in (for example, erp.example.edu)"
                 domainType="erp_domain"
                 domainConfig={domainsData.erp_domain}
                 allDomainsData={domainsData}
@@ -303,7 +300,7 @@ export function CustomDomainCard() {
                     });
                 }}
                 actionLabel="Switch to Classgrid URL"
-                isDestructive={false}
+                variant="warning"
             />
         </div>
     );
@@ -331,12 +328,15 @@ function DomainConfigCard({
     iconColor: "emerald" | "purple"
 }) {
     const registerMutation = useRegisterCustomDomain();
+    const changeMutation = useChangeCustomDomain();
     const verifyMutation = useVerifyCustomDomain();
     const removeMutation = useRemoveCustomDomain();
     const updateSettingsMutation = useUpdateCustomDomainSettings();
     const queryClient = useQueryClient();
 
     const [domainInput, setDomainInput] = useState("");
+    const [editDomainInput, setEditDomainInput] = useState("");
+    const [editDomainOpen, setEditDomainOpen] = useState(false);
     const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState<string>("other");
@@ -395,12 +395,6 @@ function DomainConfigCard({
         const trimmedInput = domainInput.trim();
         if (!trimmedInput) return;
 
-        const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!domainRegex.test(trimmedInput)) {
-            toast.error("Please enter a valid domain name (e.g., portal.mycollege.edu)");
-            return;
-        }
-
         registerMutation.mutate({ domainType, domain: trimmedInput }, {
             onSuccess: () => {
                 toast.success("Domain registered! Please configure your DNS.");
@@ -409,6 +403,27 @@ function DomainConfigCard({
             onError: (err: any) => {
                 toast.error(err.response?.data?.message || "Failed to register domain.");
             }
+        });
+    };
+
+    const handleChangeDomain = (event: React.FormEvent) => {
+        event.preventDefault();
+        const nextDomain = editDomainInput.trim();
+        if (!nextDomain) {
+            toast.error("Enter the replacement hostname.");
+            return;
+        }
+
+        changeMutation.mutate({ domainType, domain: nextDomain }, {
+            onSuccess: () => {
+                toast.success("Domain changed. Configure and verify DNS for the new hostname.");
+                setEditDomainOpen(false);
+                setEditDomainInput("");
+                setIsPolling(false);
+            },
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || err.message || "Failed to change domain.");
+            },
         });
     };
 
@@ -428,6 +443,9 @@ function DomainConfigCard({
                             setTimeout(() => setShowBackdoorWarning(true), 800);
                         }
                     }, 2500);
+                } else if (data.hasConflicts) {
+                    toast.warning(data.message, { duration: 8000 });
+                    setIsPolling(false);
                 } else {
                     toast.info("Checking DNS records. We will keep checking in the background until they propagate.", { duration: 5000 });
                 }
@@ -501,6 +519,8 @@ function DomainConfigCard({
                         }`}>
                             {isVerified ? (
                                 <><CheckCircle2 className="w-3.5 h-3.5" /> Verified</>
+                            ) : hasConflicts ? (
+                                <><AlertTriangle className="w-3.5 h-3.5" /> DNS conflict</>
                             ) : (
                                 <><AlertCircle className="w-3.5 h-3.5" /> Pending Verification</>
                             )}
@@ -514,7 +534,7 @@ function DomainConfigCard({
                     <div className="flex flex-col gap-6">
                         <div className="bg-background rounded-xl p-5 border border-border/50">
                             <h4 className="font-semibold text-base text-foreground mb-1">Enter your custom domain</h4>
-                            <p className="text-sm text-muted-foreground mb-5">You can host your domain as a subdomain or a subpath</p>
+                            <p className="text-sm text-muted-foreground mb-5">Use a complete hostname, such as portal.example.edu, or a root domain such as example.edu. URL paths are not supported.</p>
                             
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-medium text-foreground">Host at</label>
@@ -524,7 +544,7 @@ function DomainConfigCard({
                                             https://
                                         </div>
                                         <Input 
-                                            placeholder="erp.yourdomain.com" 
+                                            placeholder="portal.example.edu" 
                                             className="flex-1 px-3 py-2 bg-transparent text-sm text-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground/50 h-full w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none shadow-none"
                                             value={domainInput}
                                             onChange={(e) => setDomainInput(e.target.value)}
@@ -556,9 +576,28 @@ function DomainConfigCard({
                                     </a>
                                 </span>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setRemoveConfirmOpen(true)} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={`Edit ${title}`}
+                                    onClick={() => {
+                                        setEditDomainInput(domainConfig.domain || "");
+                                        setEditDomainOpen(true);
+                                    }}
+                                >
+                                    <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={`Remove ${title}`}
+                                    onClick={() => setRemoveConfirmOpen(true)}
+                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         {(!isVerified || showVerifiedCelebration) && (
@@ -622,7 +661,7 @@ function DomainConfigCard({
                                         <tbody className="divide-y divide-border/50">
                                             {(() => {
                                                 const parts = domainConfig.domain!.split('.');
-                                                const isLikelyRoot = parts.length === 2 || (parts.length === 3 && parts[1].length <= 3 && parts[2].length <= 3);
+                                                const isLikelyRoot = parts.length === 2 || (parts.length === 3 && (parts[1]?.length ?? 4) <= 3 && (parts[2]?.length ?? 4) <= 3);
                                                 
                                                 let txtName = '_classgrid-verify';
                                                 let cnameName = '@';
@@ -630,7 +669,7 @@ function DomainConfigCard({
                                                 let targetValue = '76.76.21.21'; // Vercel standard IP for Apex domains
                                                 
                                                 if (!isLikelyRoot) {
-                                                    const rootPartsCount = (parts.length > 2 && parts[parts.length-2].length <= 3 && parts[parts.length-1].length <= 3) ? 3 : 2;
+                                                    const rootPartsCount = (parts.length > 2 && (parts[parts.length - 2]?.length ?? 4) <= 3 && (parts[parts.length - 1]?.length ?? 4) <= 3) ? 3 : 2;
                                                     const hostPart = parts.slice(0, parts.length - rootPartsCount).join('.');
                                                     txtName = `_classgrid-verify.${hostPart}`;
                                                     cnameName = hostPart;
@@ -820,7 +859,7 @@ function DomainConfigCard({
                                                 <CheckCircle2 className="w-4 h-4" /> {(() => {
                                                     if (!domainConfig.domain) return "CNAME Record Verified";
                                                     const parts = domainConfig.domain.split('.');
-                                                    const isLikelyRoot = parts.length === 2 || (parts.length === 3 && parts[1].length <= 3 && parts[2].length <= 3);
+                                                    const isLikelyRoot = parts.length === 2 || (parts.length === 3 && (parts[1]?.length ?? 4) <= 3 && (parts[2]?.length ?? 4) <= 3);
                                                     return isLikelyRoot ? "A Record Verified" : "CNAME Record Verified";
                                                 })()}
                                             </div>
@@ -840,13 +879,51 @@ function DomainConfigCard({
             </div>
 
             {/* Remove Domain Confirmation Dialog */}
+            <Dialog open={editDomainOpen} onOpenChange={setEditDomainOpen}>
+                <DialogContent>
+                    <form onSubmit={handleChangeDomain}>
+                        <DialogHeader>
+                            <DialogTitle>Edit {title}</DialogTitle>
+                            <DialogDescription>
+                                Changing the hostname preserves your branding, but resets DNS verification. The new hostname remains disabled until verification succeeds.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-5 space-y-2">
+                            <label htmlFor={`edit-${domainType}`} className="text-sm font-medium text-foreground">
+                                Replacement hostname
+                            </label>
+                            <Input
+                                id={`edit-${domainType}`}
+                                name="customDomain"
+                                autoComplete="url"
+                                value={editDomainInput}
+                                onChange={(event) => setEditDomainInput(event.target.value)}
+                                placeholder="portal.example.edu"
+                                disabled={changeMutation.isPending}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Enter a hostname only. Do not include a URL path, port, query, or fragment.
+                            </p>
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setEditDomainOpen(false)} disabled={changeMutation.isPending}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={!editDomainInput.trim() || changeMutation.isPending} isLoading={changeMutation.isPending}>
+                                Save and reverify
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <DangerConfirmDialog
                 open={removeConfirmOpen}
                 onOpenChange={setRemoveConfirmOpen}
                 title={`Remove ${title}?`}
-                description={<>Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They'll need to use the default Classgrid URL instead.</>}
+                description={<>Members of your institution will no longer be able to access the platform via <strong>{domainConfig?.domain || "your custom domain"}</strong>. They will need to use the default Classgrid URL instead. Removing the domain also resets its custom branding to the Classgrid defaults by product design.</>}
                 confirmationSteps={domainConfig?.domain ? [{ label: "To confirm, type the domain", value: domainConfig.domain }] : []}
-                warningMessage="You can always re-add this domain later. Just enter it again and reconfigure the DNS records."
+                warningMessage="You can re-add this domain later, but you must configure DNS again and reapply any custom branding."
                 actionLabel="Remove Domain"
                 cancelLabel="Cancel"
                 isLoading={removeMutation.isPending}

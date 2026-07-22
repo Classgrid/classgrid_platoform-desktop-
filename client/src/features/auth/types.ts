@@ -41,6 +41,7 @@ export type AuthBranding = {
   subdomain: string;
   siteTitle?: string;
   customDomain?: string | null;
+  marketingDomain?: string | null;
   allowClassgridUrl?: boolean;
   isCustomDomainEnabled?: boolean;
   socialLinks?: {

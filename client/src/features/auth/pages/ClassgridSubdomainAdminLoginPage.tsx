@@ -3,13 +3,11 @@ import { Mail, MapPin, HelpCircle, Lock, Eye, EyeOff, GraduationCap, Users, Arro
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGoogleAuthUrl, loginWithPassword, verifyDeviceOtp, resendDeviceOtp, getAuthBranding, requestPasswordReset } from "../api";
-import { getRedirectPath, saveStoredAuthRole, readStoredAuthRole, getRoleLabel, getPortalLabel, isInstitutionAdminRole } from "../auth-helpers";
+import { clearAuthCallbackError, getAuthCallbackFeedback, getPostLoginPath, redirectToBrandingFallback, saveStoredAuthRole, readStoredAuthRole, getRoleLabel, getPortalLabel, isInstitutionAdminRole } from "../auth-helpers";
 import type { AuthUserRole, AuthLoginRole, AuthBranding } from "../types";
 import { toast } from "sonner";
 
 /* â”€â”€ Constants â”€â”€ */
-const RECAPTCHA_SITE_KEY = "6LdMY0ItAAAAAJ5FixSMY_zlJ17ulMJzkiEQUYQi";
-
 const CLASSGRID_LOGO =
   "https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png";
 
@@ -34,6 +32,7 @@ export function ClassgridSubdomainAdminLoginPage() {
   const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(0);
   const [feedback, setFeedback] = useState<{ message: string; tone: "error" | "info" } | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const [rememberedRole, setRememberedRole] = useState<AuthLoginRole | null>(null);
 
@@ -58,7 +57,8 @@ export function ClassgridSubdomainAdminLoginPage() {
           document.title = "Classgrid ERP";
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        if (redirectToBrandingFallback(error)) return;
         if (isMounted) setBrandingError(true);
       });
 
@@ -68,6 +68,11 @@ export function ClassgridSubdomainAdminLoginPage() {
   useEffect(() => {
     // Handle Google OAuth device verification redirect
     const params = new URLSearchParams(location.search);
+    const callbackFeedback = getAuthCallbackFeedback(location.search);
+    if (callbackFeedback) {
+      setFeedback({ message: callbackFeedback.message, tone: "error" });
+      clearAuthCallbackError();
+    }
     if (params.get("device_verify") === "true") {
       const redirectEmail = params.get("email") || "";
       if (redirectEmail) {
@@ -80,7 +85,7 @@ export function ClassgridSubdomainAdminLoginPage() {
         });
       }
     }
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (step !== "device" || otpCooldownSeconds <= 0) return;
@@ -123,6 +128,7 @@ export function ClassgridSubdomainAdminLoginPage() {
         password,
         audience: "admin",
         role: effectiveRole,
+        rememberMe,
       });
 
       if (result.needsDeviceOtp) {
@@ -139,7 +145,8 @@ export function ClassgridSubdomainAdminLoginPage() {
 
       rememberLoggedInUser(result);
       saveStoredAuthRole(result.user?.role || effectiveRole);
-      navigate(getRedirectPath(result.user?.role), { replace: true });
+      if (result.firstLogin) toast.success("Welcome to Classgrid.");
+      navigate(getPostLoginPath(result), { replace: true });
     } catch (error: any) {
       if (error && typeof error === "object" && "needsDeviceOtp" in error) {
         setPassword("");
@@ -170,7 +177,8 @@ export function ClassgridSubdomainAdminLoginPage() {
       const result = await verifyDeviceOtp({ email: email.trim(), otp: otp.trim() });
       rememberLoggedInUser(result);
       saveStoredAuthRole(result.user?.role || effectiveRole);
-      navigate(getRedirectPath(result.user?.role), { replace: true });
+      if (result.firstLogin) toast.success("Welcome to Classgrid.");
+      navigate(getPostLoginPath(result), { replace: true });
     } catch (error: any) {
       setFeedback({ message: error?.message || "Device verification failed.", tone: "error" });
     } finally {
@@ -214,20 +222,6 @@ export function ClassgridSubdomainAdminLoginPage() {
   };
 
   // Load Google reCAPTCHA v3 â€” shows official badge at bottom-right
-  useEffect(() => {
-    if (brandingError || !branding) return;
-
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      try { document.head.removeChild(script); } catch { }
-      document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
-    };
-  }, [branding, brandingError]);
-
   if (brandingError) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-background dark:bg-[#080808] text-white text-center">
@@ -423,7 +417,7 @@ export function ClassgridSubdomainAdminLoginPage() {
           <div className="flex w-full max-w-[500px] flex-col justify-center rounded-[24px] border border-border dark:border-white/[0.15] bg-background dark:bg-[#0f0f0f] px-10 py-8 shadow-xl shrink-0 m-auto">
 
             {step === 1 ? (
-              <form onSubmit={handleLogin} className="flex flex-col">
+              <form onSubmit={handleLogin} className="flex flex-col" aria-busy={isSubmitting}>
                 {/* 10. College Header */}
                 {branding.logoUrl && (
                   <img src={branding.logoUrl} alt={branding.name} className="mx-auto max-h-[200px] w-auto max-w-[340px] object-contain rounded-[12px]" />
@@ -449,24 +443,24 @@ export function ClassgridSubdomainAdminLoginPage() {
                 {/* 14. Email Input */}
                 <div className="flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Mail className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Email Address" />
+                  <input id="subdomain-admin-email" name="email" type="email" autoComplete="email" aria-label="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Email Address" />
                 </div>
 
                 {/* Password Input */}
                 <div className="mt-3 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Password" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-muted-foreground dark:text-white/70 transition-colors hover:text-white">
+                  <input id="subdomain-admin-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" aria-label="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-transparent text-[14px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="Password" />
+                  <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)} className="shrink-0 text-muted-foreground dark:text-white/70 transition-colors hover:text-white">
                     {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
                   </button>
                 </div>
 
                 {/* 15. Remember Me & Forgot Password */}
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#10b981]" />
+                  <label className="flex items-center gap-3" htmlFor="admin-remember-me">
+                    <input id="admin-remember-me" name="rememberMe" type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-4 w-4 accent-[#10b981]" />
                     <span className="text-[13px] text-foreground dark:text-white">Remember me</span>
-                  </div>
+                  </label>
                   {showForgotPassword && (
                     <button type="button" onClick={handleForgotPasswordClick} className="text-[13px] font-medium text-[#10b981] hover:underline">
                       Forgot password?
@@ -475,7 +469,7 @@ export function ClassgridSubdomainAdminLoginPage() {
                 </div>
 
                 {feedback && (
-                  <div className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
+                  <div role={feedback.tone === "error" ? "alert" : "status"} aria-live={feedback.tone === "error" ? "assertive" : "polite"} className={`mt-4 rounded-[12px] border px-3 py-2 text-[12px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
                     {feedback.message}
                   </div>
                 )}
@@ -491,7 +485,7 @@ export function ClassgridSubdomainAdminLoginPage() {
                 </p>
               </form>
             ) : (
-              <form onSubmit={handleVerifyDevice} className="flex flex-col">
+              <form onSubmit={handleVerifyDevice} className="flex flex-col" aria-busy={isSubmitting || isResendingOtp}>
                 <button type="button" onClick={() => setStep(1)} className="mb-4 inline-flex w-fit items-center gap-2 text-[14px] font-medium text-muted-foreground dark:text-white/60 transition-colors hover:text-emerald-400">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -500,11 +494,11 @@ export function ClassgridSubdomainAdminLoginPage() {
 
                 <div className="mt-5 flex h-[46px] items-center gap-3 rounded-[12px] border border-border dark:border-white/[0.14] bg-background dark:bg-[#141414] px-4 transition-colors focus-within:border-emerald-500/50">
                   <Lock className="h-[18px] w-[18px] shrink-0 text-muted-foreground dark:text-white/70" />
-                  <input type="text" maxLength={6} inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 tracking-[0.25em] focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="000000" />
+                  <input id="subdomain-admin-device-code" name="deviceCode" type="text" maxLength={6} inputMode="numeric" autoComplete="one-time-code" aria-label="Six-digit device verification code" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required className="w-full bg-transparent text-[16px] text-foreground dark:text-white outline-none placeholder:text-muted-foreground dark:placeholder-white/40 tracking-[0.25em] focus:ring-0 border-none focus:border-transparent" style={{ boxShadow: 'none', border: 'none', outline: 'none' }} placeholder="000000" />
                 </div>
 
                 {feedback && (
-                  <div className={`mt-4 rounded-[12px] border px-3 py-2 text-[13px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
+                  <div role={feedback.tone === "error" ? "alert" : "status"} aria-live={feedback.tone === "error" ? "assertive" : "polite"} className={`mt-4 rounded-[12px] border px-3 py-2 text-[13px] leading-5 ${feedback.tone === "error" ? "border-red-500/35 bg-red-500/10 text-red-200" : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200"}`}>
                     {feedback.message}
                   </div>
                 )}

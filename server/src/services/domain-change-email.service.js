@@ -1,10 +1,7 @@
 /**
- * domain-change-email.service.js
- * 
- * Sends a notification email to the Org Admin when their Classgrid subdomain is changed.
- * Uses the exact same dark-theme email design as support-ticket-email.service.js.
- * 
- * Includes: old domain, new domain, admin login backdoor URL, and irreversibility warning.
+ * Security notifications for Classgrid-managed and external domain changes.
+ * Domain operations must not fail just because a notification cannot be queued;
+ * callers log queue failures and continue with the already-authorized change.
  */
 
 import { enqueueEmail } from "./email-queue.service.js";
@@ -19,188 +16,226 @@ function escapeHtml(value = "") {
 }
 
 function formatDate(value) {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
+    const date = value ? new Date(value) : new Date();
+    if (Number.isNaN(date.getTime())) return "Not available";
     return date.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 }
 
-function buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }) {
-    const currentYear = new Date().getFullYear();
-    const formattedDate = formatDate(changedAt);
+function detailRowsHtml(details) {
+    return Object.entries(details)
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([label, value]) => `
+            <tr>
+                <td style="padding:12px 16px;border-bottom:1px solid #2a2a2a;color:#9ca3af;width:34%;">${escapeHtml(label)}</td>
+                <td style="padding:12px 16px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-weight:600;word-break:break-word;">${escapeHtml(value)}</td>
+            </tr>`)
+        .join("");
+}
 
-    return `<!DOCTYPE html>
+function buildNotificationHtml({ title, orgName, adminName, summary, details, actionUrl, actionLabel, note, changedAt }) {
+    const year = new Date().getFullYear();
+    return `<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Domain Changed – ${escapeHtml(orgName)}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body, html {
-      margin: 0; padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0f0f0f;
-      -webkit-font-smoothing: antialiased;
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${escapeHtml(title)}</title>
 </head>
-<body style="margin:0;padding:0;background:#0f0f0f;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;background:#0f0f0f;width:100%;">
-<tr>
-<td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;margin:0 auto;max-width:600px;width:100%;">
-<tr>
-<td style="padding:30px;border-bottom:1px solid #2a2a2a;text-align:center;">
-<img src="https://bumxgscngzjadyozdpce.supabase.co/storage/v1/object/public/LOGO%20AND%20%20SVG/android-chrome-512x512.png" alt="Classgrid" width="48" height="48" style="display:block;margin:0 auto 16px;border-radius:6px;">
-<h1 style="color:#ffffff;margin:0;font-size:22px;">⚠️ Domain Changed Successfully</h1>
-<p style="color:#9ca3af;margin-top:8px;font-size:13px;">${escapeHtml(orgName)}</p>
-</td>
-</tr>
-<tr>
-<td style="padding:30px;color:#cccccc;font-size:14px;line-height:1.7;">
-<p style="color:#e5e5e5;font-size:15px;margin:0 0 15px;">Dear ${escapeHtml(adminName)},</p>
-<p style="color:#cccccc;margin:0 0 15px;">Your Classgrid Organization URL has been successfully changed. This action takes effect <strong style="color:#ffffff;">immediately</strong>.</p>
-<p style="color:#cccccc;margin:0 0 30px;">Please review the details below and update any bookmarks, saved links, or shared URLs for your students and staff.</p>
-
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">Domain Change Details</h3>
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin:0 0 25px;">
-<tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;width:30%;color:#9ca3af;font-size:13px;font-weight:500;">Organization</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;font-weight:600;">${escapeHtml(orgName)}</td>
-</tr>
-<tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Old Domain</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ef4444;font-size:14px;font-weight:600;text-decoration:line-through;">${escapeHtml(oldDomain)}.classgrid.in</td>
-</tr>
-<tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">New Domain</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#34d399;font-size:14px;font-weight:600;">${escapeHtml(newDomain)}.classgrid.in</td>
-</tr>
-<tr>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Admin Email</td>
-<td style="padding:14px 18px;border-bottom:1px solid #2a2a2a;color:#ffffff;font-size:14px;">${escapeHtml(adminEmail)}</td>
-</tr>
-<tr>
-<td style="padding:14px 18px;border-right:1px solid #2a2a2a;color:#9ca3af;font-size:13px;font-weight:500;">Changed At</td>
-<td style="padding:14px 18px;color:#ffffff;font-size:14px;">${escapeHtml(formattedDate)}</td>
-</tr>
-</table>
-
-<div style="padding:20px;background:#1c1007;border-radius:10px;border:1px solid #78350f;margin:0 0 25px;">
-  <p style="color:#fbbf24;font-size:14px;font-weight:700;margin:0 0 10px;">⚠️ IRREVERSIBLE ACTION</p>
-  <p style="color:#fde68a;font-size:13px;line-height:1.7;margin:0;">The old domain <strong style="color:#ef4444;text-decoration:line-through;">${escapeHtml(oldDomain)}.classgrid.in</strong> is now permanently dead. It cannot be recovered or re-assigned. All existing bookmarks, login links, and shared URLs pointing to the old domain will stop working immediately.</p>
-</div>
-
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">🔑 Your New Admin Login URL</h3>
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 15px;">You can now access your dashboard using your new domain:</p>
-<div style="padding:16px 20px;background:#0f2318;border-radius:8px;border:1px solid #14532d;margin:0 0 25px;text-align:center;">
-  <a href="https://${escapeHtml(newDomain)}.classgrid.in/org/login" style="color:#34d399;font-size:16px;font-weight:700;text-decoration:none;word-break:break-all;">https://${escapeHtml(newDomain)}.classgrid.in/org/login</a>
-</div>
-
-<h3 style="color:#ffffff;font-size:16px;margin:0 0 15px;text-transform:uppercase;letter-spacing:0.5px;">What You Should Do Now</h3>
-<ul style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 30px;padding-left:20px;">
-<li style="margin-bottom:10px;"><strong>Update all shared links:</strong> Notify students, faculty, and staff about the new domain URL.</li>
-<li style="margin-bottom:10px;"><strong>Bookmark your new URL:</strong> Save the new admin login link above for quick access.</li>
-<li style="margin-bottom:10px;"><strong>Test the new domain:</strong> Visit your new URL in the browser to verify everything works.</li>
-</ul>
-
-<div style="text-align:center;margin:0 0 30px;">
-<a href="https://${escapeHtml(newDomain)}.classgrid.in/org/login" style="background:#34d399;color:#000;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;display:inline-block;">👉 Login to Admin Dashboard</a>
-</div>
-
-<p style="color:#cccccc;font-size:14px;line-height:1.7;margin:0 0 20px;">If you did not authorize this change, please contact Classgrid support immediately.</p>
-<p style="color:#e5e5e5;font-size:14px;line-height:1.7;margin:0;">Warm regards,<br><strong>The Classgrid Team</strong></p>
-
-</td>
-</tr>
-<tr>
-<td style="padding:20px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;">
-<p style="margin:0 0 10px;">
-  <a href="https://classgrid.in" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Website</a> | 
-  <a href="https://classgrid.in/privacy" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Privacy Policy</a> | 
-  <a href="https://classgrid.in/terms" style="color:#9ca3af;font-size:12px;text-decoration:none;margin:0 8px;">Terms of Service</a>
-</p>
-<p style="color:#7a7a7a;font-size:11px;line-height:1.5;margin:0;">&copy; ${currentYear} Classgrid. All rights reserved.<br>You received this email because a domain change was made to your organization's Classgrid account. If you did not initiate this change, please contact us immediately.</p>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:36px 12px;background:#0f0f0f;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#161616;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;">
+        <tr><td style="padding:28px;border-bottom:1px solid #2a2a2a;text-align:center;">
+          <h1 style="margin:0;color:#ffffff;font-size:22px;">${escapeHtml(title)}</h1>
+          <p style="margin:8px 0 0;color:#9ca3af;font-size:13px;">${escapeHtml(orgName)}</p>
+        </td></tr>
+        <tr><td style="padding:28px;color:#d1d5db;font-size:14px;line-height:1.7;">
+          <p style="margin:0 0 14px;color:#f3f4f6;">Hello ${escapeHtml(adminName || "Admin")},</p>
+          <p style="margin:0 0 22px;">${escapeHtml(summary)}</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:9px;overflow:hidden;">
+            ${detailRowsHtml({ ...details, "Changed at": formatDate(changedAt) })}
+          </table>
+          ${note ? `<div style="margin:0 0 22px;padding:15px;background:#1c1007;border:1px solid #78350f;border-radius:8px;color:#fde68a;">${escapeHtml(note)}</div>` : ""}
+          ${actionUrl ? `<div style="text-align:center;margin:0 0 24px;"><a href="${escapeHtml(actionUrl)}" style="display:inline-block;padding:12px 24px;background:#34d399;color:#07110d;text-decoration:none;border-radius:7px;font-weight:700;">${escapeHtml(actionLabel || "Open Classgrid")}</a></div>` : ""}
+          <p style="margin:0 0 16px;">If you did not authorize this change, contact Classgrid support immediately.</p>
+          <p style="margin:0;color:#f3f4f6;">Regards,<br><strong>The Classgrid Team</strong></p>
+        </td></tr>
+        <tr><td style="padding:18px;text-align:center;border-top:1px solid #2a2a2a;background:#111111;color:#737373;font-size:11px;">
+          &copy; ${year} Classgrid. This security notification was sent because a domain setting changed on your organization account.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 }
 
-function buildDomainChangePlainText({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }) {
-    const formattedDate = formatDate(changedAt);
+function buildNotificationText({ title, orgName, adminName, summary, details, actionUrl, note, changedAt }) {
+    const rows = Object.entries({ ...details, "Changed at": formatDate(changedAt) })
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([label, value]) => `${label}: ${value}`);
+
     return [
-        `⚠️ Domain Changed – ${orgName}`,
+        title,
         "",
-        `Dear ${adminName},`,
+        `Hello ${adminName || "Admin"},`,
         "",
-        "Your Classgrid Organization URL has been successfully changed. This action takes effect IMMEDIATELY.",
+        summary,
         "",
-        "DOMAIN CHANGE DETAILS",
         `Organization: ${orgName}`,
-        `Old Domain: ${oldDomain}.classgrid.in (DEAD - no longer works)`,
-        `New Domain: ${newDomain}.classgrid.in`,
-        `Admin Email: ${adminEmail}`,
-        `Changed At: ${formattedDate}`,
+        ...rows,
+        note ? `\nImportant: ${note}` : "",
+        actionUrl ? `\nOpen Classgrid: ${actionUrl}` : "",
         "",
-        "⚠️ IRREVERSIBLE ACTION",
-        `The old domain ${oldDomain}.classgrid.in is now permanently dead. It cannot be recovered.`,
-        "All existing bookmarks, login links, and shared URLs pointing to the old domain will stop working immediately.",
+        "If you did not authorize this change, contact Classgrid support immediately.",
         "",
-        "🔑 YOUR NEW ADMIN LOGIN URL",
-        "You can now access your dashboard using your new domain:",
-        backdoorUrl,
-        "",
-        "WHAT YOU SHOULD DO NOW",
-        "- Update all shared links: Notify students, faculty, and staff about the new domain URL.",
-        "- Bookmark your new URL: Save the new admin login link for quick access.",
-        "- Test the new domain: Visit your new URL in the browser to verify everything works.",
-        "",
-        "If you did not authorize this change, please contact Classgrid support immediately.",
-        "",
-        "Warm regards,",
+        "Regards,",
         "The Classgrid Team",
-        "",
-        "© " + new Date().getFullYear() + " Classgrid. All rights reserved."
-    ].join("\n");
+    ].filter(Boolean).join("\n");
 }
 
-/**
- * Send domain change notification email to org admin.
- * 
- * @param {Object} params
- * @param {string} params.to - Admin's email address
- * @param {string} params.orgName - Organization name
- * @param {string} params.adminName - Admin's display name
- * @param {string} params.adminEmail - Admin's email (displayed in the email body)
- * @param {string} params.oldDomain - Old subdomain slug (without .classgrid.in)
- * @param {string} params.newDomain - New subdomain slug (without .classgrid.in)
- * @param {string} params.organizationId - Org ID for tracking
- * @param {string} params.userId - Admin user ID for tracking
- */
-export async function notifyDomainChange({ to, orgName, adminName, adminEmail, oldDomain, newDomain, organizationId, userId }) {
+async function queueDomainEmail({ to, subject, template, organizationId, userId }) {
     if (!to) return { queued: false, reason: "missing_admin_email" };
-
-    const backdoorUrl = `https://${newDomain}.classgrid.in/org/login`;
-    const changedAt = new Date();
-
-    const subject = `⚠️ Domain Changed: ${oldDomain}.classgrid.in → ${newDomain}.classgrid.in | ${orgName}`;
 
     const job = await enqueueEmail({
         to,
         subject,
-        html: buildDomainChangeEmailHtml({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }),
-        text: buildDomainChangePlainText({ orgName, adminName, adminEmail, oldDomain, newDomain, backdoorUrl, changedAt }),
+        html: buildNotificationHtml(template),
+        text: buildNotificationText(template),
         type: "domain_change",
         channel: "notification",
         userId: userId || null,
         organizationId: organizationId || null,
     });
 
-    return { queued: Boolean(job), jobId: job?._id, backdoorUrl };
+    return { queued: Boolean(job), jobId: job?._id || null };
+}
+
+/** Notify an administrator after their orgname.classgrid.in slug changes. */
+export async function notifyDomainChange({
+    to,
+    orgName,
+    adminName,
+    adminEmail,
+    oldDomain,
+    newDomain,
+    organizationId,
+    userId,
+}) {
+    const oldHost = oldDomain && oldDomain !== "none" ? `${oldDomain}.classgrid.in` : "Not previously assigned";
+    const newHost = `${newDomain}.classgrid.in`;
+    const actionUrl = `https://${newHost}/org/login`;
+    const template = {
+        title: "Classgrid organization URL changed",
+        orgName,
+        adminName,
+        summary: "Your Classgrid organization URL has changed. The new URL is active immediately.",
+        details: {
+            "Old URL": oldHost,
+            "New URL": newHost,
+            "Administrator": adminEmail,
+        },
+        actionUrl,
+        actionLabel: "Open admin login",
+        note: oldDomain && oldDomain !== "none"
+            ? `The old URL no longer points to this organization. Update bookmarks and shared links. The old name is not described as permanently reserved and may be available under platform rules.`
+            : "Share the new URL only with people who should access this organization.",
+        changedAt: new Date(),
+    };
+
+    return queueDomainEmail({
+        to,
+        subject: `Classgrid organization URL changed to ${newHost}`,
+        template,
+        organizationId,
+        userId,
+    });
+}
+
+const ACTION_COPY = {
+    registered: {
+        title: "External domain registered",
+        summary: "An external domain was added to your Classgrid organization and now requires DNS verification.",
+    },
+    changed: {
+        title: "External domain changed",
+        summary: "Your external domain was changed. The replacement domain must be verified before it becomes active.",
+    },
+    verified: {
+        title: "External domain verified",
+        summary: "Classgrid verified the ownership and routing records for your external domain.",
+    },
+    settings_updated: {
+        title: "External domain access changed",
+        summary: "Access settings for your external domain were changed.",
+    },
+    removed: {
+        title: "External domain removed",
+        summary: "An external domain was removed from your Classgrid organization.",
+    },
+};
+
+/**
+ * Notify an administrator after an external website or ERP hostname changes.
+ * Verification secrets are deliberately never accepted or included here.
+ */
+export async function notifyExternalDomainChange({
+    to,
+    orgName,
+    adminName,
+    adminEmail,
+    action,
+    domainType,
+    oldDomain,
+    newDomain,
+    oldSettings,
+    newSettings,
+    brandingReset = false,
+    organizationId,
+    userId,
+}) {
+    const copy = ACTION_COPY[action] || {
+        title: "External domain updated",
+        summary: "An external domain setting changed on your Classgrid organization.",
+    };
+    const typeLabel = domainType === "erp_domain" ? "ERP login domain" : "Public website domain";
+    const activeDomain = newDomain || oldDomain;
+    const actionUrl = newDomain ? `https://${newDomain}${domainType === "erp_domain" ? "/org/login" : ""}` : "https://classgrid.in";
+    const settingsSummary = (settings) => settings
+        ? `Custom domain ${settings.is_enabled === false ? "disabled" : "enabled"}${domainType === "erp_domain" ? `; default Classgrid URL ${settings.allow_classgrid_url === false ? "disabled" : "enabled"}` : ""}`
+        : undefined;
+    const note = action === "removed" && brandingReset
+        ? "Removing a custom domain also resets its associated custom branding by product design. You can add the domain and configure branding again later."
+        : action === "changed"
+            ? "Existing branding is preserved during an in-place hostname change. DNS ownership and routing must be verified again."
+            : action === "registered"
+                ? "Do not share the hostname as active until both DNS checks pass."
+                : undefined;
+
+    const template = {
+        title: copy.title,
+        orgName,
+        adminName,
+        summary: copy.summary,
+        details: {
+            "Domain type": typeLabel,
+            "Old domain": oldDomain,
+            "New domain": newDomain,
+            "Previous access": settingsSummary(oldSettings),
+            "New access": settingsSummary(newSettings),
+            "Administrator": adminEmail,
+        },
+        actionUrl,
+        actionLabel: activeDomain ? "Review domain" : "Open Classgrid",
+        note,
+        changedAt: new Date(),
+    };
+
+    return queueDomainEmail({
+        to,
+        subject: `${copy.title}: ${activeDomain || typeLabel}`,
+        template,
+        organizationId,
+        userId,
+    });
 }

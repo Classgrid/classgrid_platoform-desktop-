@@ -113,6 +113,7 @@ export const isAuthenticated = async (req, res, next) => {
 
         // Organization ID always sourced from JWT (authoritative)
         req.effectiveOrganizationId = decoded.organizationId || null;
+        req.authRememberMe = decoded.rememberMe === true;
 
         next();
     } catch (err) {

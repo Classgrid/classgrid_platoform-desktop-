@@ -4,6 +4,7 @@ import type {
   AuthLoginRole,
   AuthUserRole,
   InstitutionAdminRole,
+  LoginResponse,
 } from "./types";
 
 const AUTH_STORAGE_KEY = "classgrid:last-auth-role";
@@ -193,6 +194,86 @@ export function getRedirectPath(role: string | null | undefined) {
       return "/org/dashboard";
     default:
       return "/work";
+  }
+}
+
+/** Resolve mandatory first-login steps before the normal role dashboard. */
+export function getPostLoginPath(result: LoginResponse) {
+  if (result.mustResetPassword) return "/required-password-reset";
+  if (result.needsOrgCode) return "/enter-org-code";
+
+  const dashboard = getRedirectPath(result.user?.role);
+  return result.firstLogin ? `${dashboard}?welcome=true` : dashboard;
+}
+
+export type AuthCallbackFeedback = {
+  message: string;
+  suggestedRole?: AuthUserRole;
+};
+
+/** Convert OAuth callback query codes into safe, human-readable feedback. */
+export function getAuthCallbackFeedback(search: string): AuthCallbackFeedback | null {
+  const params = new URLSearchParams(search);
+  const error = params.get("error");
+  if (!error) return null;
+
+  switch (error) {
+    case "account_suspended":
+      return { message: "This account is suspended. Contact your administrator or Classgrid support." };
+    case "wrong_portal":
+      return { message: "This account belongs to a different portal. Open the correct Classgrid sign-in page and try again." };
+    case "wrong_tab": {
+      const tab = params.get("tab");
+      const suggestedRole = tab === "teacher" ? "teacher" : tab === "student" ? "student" : undefined;
+      return {
+        message: suggestedRole
+          ? `This account belongs to the ${suggestedRole === "teacher" ? "Faculty" : "Student"} portal. The correct tab is now selected.`
+          : "This account belongs to a different sign-in tab.",
+        suggestedRole,
+      };
+    }
+    case "maintenance_mode":
+      return { message: "Classgrid is temporarily in maintenance mode. Please try again later." };
+    case "org_suspended":
+      return { message: "This organization portal is suspended. Contact the organization administrator." };
+    case "no_email":
+      return { message: "The sign-in provider did not share an email address. Choose an account with an email address." };
+    case "google_blocked":
+    case "google_error":
+      return { message: "Google sign-in could not be completed. Please try again or use your password." };
+    case "AuthFailed":
+    case "no_user_data":
+    default:
+      return { message: "Sign-in could not be completed. Please try again." };
+  }
+}
+
+export function clearAuthCallbackError() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  ["error", "message", "tab", "provider"].forEach((key) => url.searchParams.delete(key));
+  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+}
+
+/** Redirect a disabled custom hostname to the backend-provided safe hostname. */
+export function redirectToBrandingFallback(error: unknown) {
+  if (typeof window === "undefined" || !error || typeof error !== "object") return false;
+  const fallbackUrl = (error as { fallbackUrl?: unknown }).fallbackUrl;
+  if (typeof fallbackUrl !== "string" || !fallbackUrl) return false;
+
+  try {
+    const target = new URL(fallbackUrl, window.location.origin);
+    if (target.protocol !== "https:" && target.protocol !== "http:") return false;
+    if (target.hostname === window.location.hostname) return false;
+
+    // Keep the exact portal (student, faculty, organization, or department)
+    // while changing only to the backend-authorized fallback hostname.
+    target.pathname = window.location.pathname;
+    target.search = window.location.search;
+    window.location.replace(target.toString());
+    return true;
+  } catch {
+    return false;
   }
 }
 

@@ -4,7 +4,7 @@ const deviceVerificationSchema = new mongoose.Schema({
     organization_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Organization",
-        required: true,
+        default: null,
         index: true
     },
     email: {
@@ -33,6 +33,10 @@ const deviceVerificationSchema = new mongoose.Schema({
         type: Number,
         default: 0,
         max: 10
+    },
+    rememberMe: {
+        type: Boolean,
+        default: false,
     },
     lastResentAt: Date,
     expiresAt: {

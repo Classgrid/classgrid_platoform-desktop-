@@ -53,7 +53,7 @@ const organizationSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        // 🌐 Subdomain slug for multi-tenant DNS routing (e.g. "pccoe" → pccoe.classgrid.in)
+        // Subdomain slug for multi-tenant DNS routing (for example, "example-campus").
         subdomain: {
             type: String,
             unique: true,
@@ -65,7 +65,7 @@ const organizationSchema = new mongoose.Schema(
             domain: { type: String, default: null },
             status: { 
                 type: String, 
-                enum: ["pending_verification", "verified", "active", "failed"], 
+                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"], 
                 default: "pending_verification" 
             },
             verification_token: { type: String, default: null },
@@ -81,7 +81,7 @@ const organizationSchema = new mongoose.Schema(
             domain: { type: String, default: null },
             status: { 
                 type: String, 
-                enum: ["pending_verification", "verified", "active", "failed"], 
+                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"], 
                 default: "pending_verification" 
             },
             verification_token: { type: String, default: null },

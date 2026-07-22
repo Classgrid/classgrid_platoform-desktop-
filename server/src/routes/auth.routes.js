@@ -9,6 +9,12 @@ import {
     resetPasswordLimiter,
     otpSendLimiter
 } from "../middleware/rateLimiter.js";
+import {
+    createOAuthState,
+    oauthStateCookieOptions,
+    OAUTH_STATE_COOKIE,
+    verifyOAuthState,
+} from "../services/oauth-state.service.js";
 
 const router = express.Router();
 
@@ -52,31 +58,38 @@ router.post("/delete-account", isAuthenticated, authController.deleteAccount);
 // Google OAuth
 router.get(
     "/google",
-    (req, res, next) => {
+    async (req, res, next) => {
         const loginTab = req.query.loginTab || req.query.role || 'student';
         const host = req.query.host || '';
-        const stateObj = { t: loginTab, h: host };
-        const stateStr = Buffer.from(JSON.stringify(stateObj)).toString('base64');
-        passport.authenticate("google", {
-            scope: ["profile", "email"],
-            state: stateStr, prompt: 'select_account consent' // survives the round-trip through Google OAuth
-        })(req, res, next);
+        try {
+            const { state, nonce } = await createOAuthState({ loginTab, host });
+            res.cookie(OAUTH_STATE_COOKIE, nonce, oauthStateCookieOptions());
+            passport.authenticate("google", {
+                scope: ["profile", "email"],
+                state,
+                prompt: 'select_account consent'
+            })(req, res, next);
+        } catch (error) {
+            return res.status(400).json({ message: error.message || "Invalid login portal." });
+        }
     }
 );
 router.get(
     "/google/callback",
-    (req, res, next) => {
+    async (req, res, next) => {
         const stateRaw = req.query.state || null;
-        let host = '';
-        let loginTab = '';
-        if (stateRaw) {
-            try {
-                const decoded = JSON.parse(Buffer.from(stateRaw, 'base64').toString('utf-8'));
-                host = decoded.h || '';
-                loginTab = decoded.t || '';
-            } catch (e) {}
-        }
         const defaultFrontendUrl = process.env.FRONTEND_URL?.trim() || (process.env.NODE_ENV === "production" ? "https://classgrid.in" : "https://classgrid.in");
+        let oauthState;
+        try {
+            oauthState = await verifyOAuthState(stateRaw, req.cookies?.[OAUTH_STATE_COOKIE]);
+        } catch (error) {
+            res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions({ clear: true }));
+            return res.redirect(`${defaultFrontendUrl}/login?error=invalid_oauth_state`);
+        }
+        res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions({ clear: true }));
+        req.oauthState = oauthState;
+
+        const { host, loginTab } = oauthState;
         const scheme = process.env.NODE_ENV === "production" ? "https://" : "http://";
         const TARGET_URL = host ? `${scheme}${host}` : defaultFrontendUrl;
         const errorPath = loginTab === 'super_admin' ? '/superadmin/login' : '/login';

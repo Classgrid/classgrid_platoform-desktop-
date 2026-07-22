@@ -72,6 +72,29 @@ export function useRegisterCustomDomain() {
     });
 }
 
+export function useChangeCustomDomain() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ domainType, domain }: { domainType: "custom_domain" | "erp_domain", domain: string }) => {
+            const { data } = await apiClient.patch<{
+                success: boolean;
+                message: string;
+                custom_domain: CustomDomainConfig;
+                erp_domain: CustomDomainConfig;
+            }>("/api/org-admin/custom-domain", { domain, domainType });
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(["org-custom-domain"], (old: CustomDomainsResponse | undefined) => ({
+                ...old,
+                custom_domain: data.custom_domain,
+                erp_domain: data.erp_domain,
+            }));
+            queryClient.invalidateQueries({ queryKey: ["org-branding"] });
+        },
+    });
+}
+
 export function useVerifyCustomDomain() {
     const queryClient = useQueryClient();
     return useMutation({
