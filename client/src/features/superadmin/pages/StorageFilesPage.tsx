@@ -523,67 +523,78 @@ export function StorageFilesPage() {
 
       setUploadingFiles(prev => [...prev, ...newUploads]);
       
-      let successCount = 0;
-      let errorCount = 0;
-      const successfullyUploadedFiles: typeof newUploads = [];
+        let successCount = 0;
+        let errorCount = 0;
+        
+        const MAX_CONCURRENT_UPLOADS = 4;
+        let currentIndex = 0;
 
-      Promise.all(newUploads.map(async (upload) => {
-        try {
-          await storageApi.uploadFile(upload.file, upload.prefix, (progressEvent) => {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
-            }
-          });
-          
-          successCount++;
-          
-          // Instantly inject THIS file into the cache so it shows up without waiting for other files!
-          const newFile = {
-            key: `${upload.prefix}${upload.name}`,
-            name: upload.name,
-            size: upload.file.size,
-            contentType: upload.file.type,
-            lastModified: new Date().toISOString(),
-            cdnUrl: ""
-          };
-          
-          const updateCache = (oldData: any) => {
-            if (!oldData) return oldData;
-            const existingKeys = new Set(oldData.files.map((f: any) => f.key));
-            if (existingKeys.has(newFile.key)) {
+        const processUpload = async (upload: typeof newUploads[0]) => {
+          try {
+            await storageApi.uploadFile(upload.file, upload.prefix, (progressEvent) => {
+              if (progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
+              }
+            });
+            
+            successCount++;
+            
+            // Instantly inject THIS file into the cache so it shows up without waiting for other files!
+            const newFile = {
+              key: `${upload.prefix}${upload.name}`,
+              name: upload.name,
+              size: upload.file.size,
+              contentType: upload.file.type,
+              lastModified: new Date().toISOString(),
+              cdnUrl: ""
+            };
+            
+            const updateCache = (oldData: any) => {
+              if (!oldData) return oldData;
+              const existingKeys = new Set(oldData.files.map((f: any) => f.key));
+              if (existingKeys.has(newFile.key)) {
+                return {
+                  ...oldData,
+                  files: oldData.files.map((f: any) => f.key === newFile.key ? newFile : f)
+                };
+              }
               return {
                 ...oldData,
-                files: oldData.files.map((f: any) => f.key === newFile.key ? newFile : f)
+                files: [...oldData.files, newFile].sort((a: any, b: any) => a.name.localeCompare(b.name))
               };
-            }
-            return {
-              ...oldData,
-              files: [...oldData.files, newFile].sort((a: any, b: any) => a.name.localeCompare(b.name))
             };
-          };
 
-          queryClient.setQueryData(storageKeys.list(upload.prefix), updateCache);
-          if (debouncedSearch) {
-            queryClient.setQueryData(storageKeys.list(upload.prefix, debouncedSearch), updateCache);
+            queryClient.setQueryData(storageKeys.list(upload.prefix), updateCache);
+            if (debouncedSearch) {
+              queryClient.setQueryData(storageKeys.list(upload.prefix, debouncedSearch), updateCache);
+            }
+
+            // Set to completed so it can be filtered out from inline display
+            setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
+            
+            // Remove from tracking completely after 2 seconds
+            setTimeout(() => {
+              setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+            }, 2000);
+          } catch (error) {
+            errorCount++;
+            setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
+            setTimeout(() => {
+              setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+            }, 5000);
           }
+        };
 
-          // Set to completed so it can be filtered out from inline display
-          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
-          
-          // Remove from tracking completely after 2 seconds
-          setTimeout(() => {
-            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-          }, 2000);
-        } catch (error) {
-          errorCount++;
-          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
-          setTimeout(() => {
-            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-          }, 5000);
-        }
-      })).then(() => {
-        // Globally invalidate so ALL columns refresh in the background
+        const workers = Array.from({ length: Math.min(MAX_CONCURRENT_UPLOADS, newUploads.length) }).map(async () => {
+          while (currentIndex < newUploads.length) {
+            const upload = newUploads[currentIndex++];
+            await processUpload(upload);
+          }
+        });
+
+        Promise.all(workers).then(() => {
+          // Globally invalidate so ALL columns refresh in the background
         queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
         queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
         
@@ -684,17 +695,19 @@ export function StorageFilesPage() {
     }
   };
 
-  const handleRenameFile = () => {
+  const handleRenameFile = (overrideName?: string) => {
     if (renameObjectMutation.isPending) return;
-    if (!fileToRename || !newFileName.trim()) {
-      if (!newFileName.trim()) setFileToRename(null);
+    const nameToUse = overrideName !== undefined ? overrideName : newFileName;
+    
+    if (!fileToRename || !nameToUse.trim()) {
+      if (!nameToUse.trim()) setFileToRename(null);
       return;
     }
 
     const isFolder = fileToRename.key.endsWith('/');
     const lastDotIndex = !isFolder && fileToRename.name.lastIndexOf('.') > 0 ? fileToRename.name.lastIndexOf('.') : -1;
     const extension = lastDotIndex > 0 ? fileToRename.name.substring(lastDotIndex) : "";
-    const finalName = newFileName.trim() + extension;
+    const finalName = nameToUse.trim() + extension;
 
     if (fileToRename.name === finalName) {
       setFileToRename(null);
@@ -710,8 +723,8 @@ export function StorageFilesPage() {
           setActiveFile({
             ...activeFile,
             key: newKey,
-            name: newFileName.trim(),
-            cdnUrl: activeFile.cdnUrl ? activeFile.cdnUrl.replace(encodeURIComponent(fileToRename.name), encodeURIComponent(newFileName.trim())) : activeFile.cdnUrl
+            name: finalName,
+            cdnUrl: activeFile.cdnUrl ? activeFile.cdnUrl.replace(encodeURIComponent(fileToRename.name), encodeURIComponent(finalName)) : activeFile.cdnUrl
           });
         }
       }
