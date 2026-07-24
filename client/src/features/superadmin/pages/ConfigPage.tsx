@@ -1,9 +1,9 @@
 import { apiClient } from "@/lib/apiClient";
 import { Input } from "@/components/marketing_ui/input";
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
-import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network } from "lucide-react";
-import { useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
@@ -166,6 +166,7 @@ function InfoChip({ label, value, highlight, wide }: { label: string; value: str
 
 
 export function ConfigPage() {
+  const queryClient = useQueryClient();
   const { data: healthData, isLoading: healthLoading } = useSystemHealth();
   const { data: flagData, isLoading: flagsLoading } = useFeatureFlags();
   const toggleMutation = useToggleFeatureFlag();
@@ -216,6 +217,8 @@ export function ConfigPage() {
     try {
       await apiClient.post("/api/super-admin/clean-logs");
       toast.success("Logs cleaned successfully!");
+      // Force refresh disk usage metrics
+      queryClient.invalidateQueries({ queryKey: ["super-admin", "health"] });
     } catch (err) {
       toast.error("Error cleaning logs");
     } finally {
@@ -277,7 +280,7 @@ export function ConfigPage() {
               
               <div className="ml-4">
                 <Button variant="outline" size="sm" onClick={handleCleanLogs} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
-                  <Trash2 size={12} />
+                  {cleaningLogs ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                   {cleaningLogs ? "Cleaning..." : "Clean Logs"}
                 </Button>
               </div>
