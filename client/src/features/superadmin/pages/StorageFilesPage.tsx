@@ -203,39 +203,10 @@ export function StorageFilesPage() {
   const prefixParts = prefix.split("/").filter(Boolean);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-65px)] bg-background p-4 w-full gap-4 max-w-[1600px] mx-auto">
+    <div className="flex flex-col h-full bg-background w-full p-4">
       
-      {/* 1. Breadcrumbs (Outside the box) */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
-        <span>Files</span>
-        <ChevronRight size={14} />
-        <span>Buckets</span>
-        <ChevronRight size={14} />
-        <span className="text-foreground font-medium flex items-center gap-2">
-          classgrid-storage
-          <Badge variant="outline" className="border-amber-500/50 text-amber-500 bg-amber-500/10 text-[10px] uppercase tracking-wider py-0 rounded">
-            Public
-          </Badge>
-        </span>
-        
-        {prefixParts.map((part, index) => (
-          <React.Fragment key={index}>
-            <ChevronRight size={14} />
-            <span 
-              className={`cursor-pointer hover:text-foreground ${index === prefixParts.length - 1 ? "text-foreground font-medium" : ""}`}
-              onClick={() => {
-                const newParts = prefixParts.slice(0, index + 1);
-                handleFolderClick(newParts.join("/") + "/");
-              }}
-            >
-              {part}
-            </span>
-          </React.Fragment>
-        ))}
-      </div>
-
       {/* 2. Main Container (The bordered box) */}
-      <div className="flex flex-col flex-1 border border-border rounded-lg overflow-hidden bg-card shadow-sm">
+      <div className="flex flex-col h-[85vh] min-h-[600px] w-full border border-border rounded-lg overflow-hidden bg-card shadow-sm">
         
         {/* Top Toolbar (Inside box) */}
         <div className="flex items-center justify-between p-3 border-b border-border bg-muted/20">
