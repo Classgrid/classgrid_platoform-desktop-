@@ -69,7 +69,7 @@ export interface UploadingFile {
   xhr?: XMLHttpRequest; // For cancellation, although fetch/axios cancellation is usually AbortController. We'll just fake cancellation for UI purposes if needed, or implement it if API supports it.
 }
 
-const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, onClose: () => void, onDelete: () => void }) => {
+const FilePreviewPane = ({ activeFile, onClose, onDelete, onRename }: { activeFile: any, onClose: () => void, onDelete: () => void, onRename?: () => void }) => {
   if (!activeFile) return null;
   return (
     <div className="w-[320px] sm:w-[350px] shrink-0 border-l border-border bg-card flex flex-col h-full animate-in slide-in-from-right-2">
@@ -111,7 +111,7 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
             <p className="text-sm">{activeFile.lastModified ? new Date(activeFile.lastModified).toLocaleString() : "-"}</p>
           </div>
           
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <Button variant="outline" className="text-xs h-9 px-4" onClick={async () => {
               try {
                 toast.loading("Starting download...", { id: "downloading" });
@@ -136,6 +136,11 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
             }}>
               <LinkIcon className="mr-2 h-3.5 w-3.5" /> Get URL
             </Button>
+            {onRename && (
+              <Button variant="outline" className="text-xs h-9 px-4" onClick={onRename}>
+                <Edit2 className="mr-2 h-3.5 w-3.5" /> Rename
+              </Button>
+            )}
           </div>
           
           <div className="h-px bg-border w-full my-4" />
@@ -318,6 +323,12 @@ const StorageColumn = ({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => {
+                        const event = new CustomEvent('rename-file', { detail: { key: item.key, name: item.name } });
+                        window.dispatchEvent(event);
+                      }}>
+                        <Edit2 className="mr-2 h-4 w-4" /> Rename
+                      </DropdownMenuItem>
                       {!item.isFolder && (
                         <>
                           <DropdownMenuItem onClick={() => {
@@ -326,9 +337,9 @@ const StorageColumn = ({
                           }}>
                             <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
                         </>
                       )}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => {
                         const event = new CustomEvent('delete-file', { detail: item.key });
                         window.dispatchEvent(event);
@@ -393,7 +404,24 @@ export function StorageFilesPage() {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchInput);
     }, 500);
-    return () => clearTimeout(handler);
+
+    const handleRenameFileEvent = (e: any) => {
+      setFileToRename({ key: e.detail.key, name: e.detail.name });
+      setNewFileName(e.detail.name);
+    };
+
+    const handleDeleteFileEvent = (e: any) => {
+      setFileToDelete(e.detail);
+    };
+
+    window.addEventListener('rename-file', handleRenameFileEvent);
+    window.addEventListener('delete-file', handleDeleteFileEvent);
+
+    return () => {
+      clearTimeout(handler);
+      window.removeEventListener('rename-file', handleRenameFileEvent);
+      window.removeEventListener('delete-file', handleDeleteFileEvent);
+    };
   }, [searchInput]);
 
   const handleUploadClick = (prefix: string) => {
@@ -765,7 +793,15 @@ export function StorageFilesPage() {
 
               {/* RIGHT SIDE PREVIEW PANE OR EMPTY SPACE */}
               <div className="flex-1 bg-background flex relative">
-                <FilePreviewPane activeFile={activeFile} onClose={() => setActiveFile(null)} onDelete={() => setFileToDelete(activeFile?.key)} />
+                <FilePreviewPane 
+                  activeFile={activeFile} 
+                  onClose={() => setActiveFile(null)} 
+                  onDelete={() => setFileToDelete(activeFile?.key)}
+                  onRename={() => {
+                    setFileToRename({ key: activeFile.key, name: activeFile.name });
+                    setNewFileName(activeFile.name);
+                  }}
+                />
               </div>
             </>
           ) : (
