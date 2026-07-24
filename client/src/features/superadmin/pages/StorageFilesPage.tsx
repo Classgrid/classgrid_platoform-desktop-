@@ -25,7 +25,7 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
-import { Spinner } from "@/components/marketing_ui/spinner";
+import { Loader2 } from "lucide-react";
 
 import {
   useStorageObjects,
@@ -241,7 +241,7 @@ const StorageColumn = ({
                   <span className="truncate">{u.name}</span>
                 </div>
                 <div className="shrink-0 flex items-center justify-center">
-                  <Spinner className="text-muted-foreground" />
+                  <Loader2 className="text-muted-foreground animate-spin h-4 w-4" />
                 </div>
               </div>
             ))}
@@ -549,15 +549,6 @@ export function StorageFilesPage() {
             >
               <Edit2 size={16} />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-9 w-9 bg-background shadow-sm"
-              title="Navigate to folder"
-              onClick={() => setIsNavigateModalOpen(true)}
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
             <Button
               variant="outline"
               size="icon"
@@ -857,7 +848,7 @@ export function StorageFilesPage() {
         <div className="absolute top-4 right-4 z-50 w-[380px] bg-card border border-border shadow-xl rounded-md overflow-hidden animate-in fade-in slide-in-from-top-4">
           <div className="p-4 flex items-center justify-between border-b border-border/50">
             <div className="flex items-center gap-3 text-sm font-medium">
-              <Spinner className="text-muted-foreground" />
+              <Loader2 className="text-muted-foreground animate-spin h-4 w-4" />
               Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}...
             </div>
             <div className="text-xs text-muted-foreground font-medium">
