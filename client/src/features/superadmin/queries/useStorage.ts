@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { storageApi, type AnalyticsFileQuery } from "../services/storageApi";
+import {
+  storageApi,
+  type AnalyticsFileQuery,
+  type StorageUploadProgressHandler,
+} from "../services/storageApi";
 import { toast } from "sonner";
 
 function storageErrorMessage(error: unknown, fallback: string) {
@@ -30,7 +34,11 @@ export function useStorageObjects(prefix: string, search?: string) {
 export function useUploadFile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ file, prefix, onUploadProgress }: { file: File; prefix: string; onUploadProgress?: (progressEvent: any) => void }) =>
+    mutationFn: ({ file, prefix, onUploadProgress }: {
+      file: File;
+      prefix: string;
+      onUploadProgress?: StorageUploadProgressHandler;
+    }) =>
       storageApi.uploadFile(file, prefix, onUploadProgress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });

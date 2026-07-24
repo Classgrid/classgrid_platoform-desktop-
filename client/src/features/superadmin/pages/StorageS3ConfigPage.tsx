@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+export { StorageS3ConfigurationDashboard as StorageS3ConfigPage } from "../components/storage/StorageS3ConfigurationDashboard";
 import { useStorageConfiguration, useTestStorageConnection } from "../queries/useStorage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { Button } from "@/components/marketing_ui/button";
@@ -17,7 +18,7 @@ function formatBytes(bytes: number) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
-export function StorageS3ConfigPage() {
+function StorageS3ConfigPageLegacy() {
   const { data: config, isLoading: isConfigLoading, refetch: refetchConfig } = useStorageConfiguration();
   const testConnectionMutation = useTestStorageConnection();
   

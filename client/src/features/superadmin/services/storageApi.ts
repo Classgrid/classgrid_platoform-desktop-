@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import type { AxiosProgressEvent } from "axios";
 
 export type StorageAnalyticsType =
   | "image"
@@ -139,6 +140,8 @@ export interface AnalyticsFileQuery {
   refresh?: boolean;
 }
 
+export type StorageUploadProgressHandler = (progressEvent: AxiosProgressEvent) => void;
+
 export const storageApi = {
   listObjects: async (prefix = "", limit = 100, cursor?: string, search?: string) => {
     const params = new URLSearchParams();
@@ -151,7 +154,7 @@ export const storageApi = {
     return response.data.data;
   },
 
-  uploadFile: async (file: File, prefix = "", onUploadProgress?: (progressEvent: any) => void) => {
+  uploadFile: async (file: File, prefix = "", onUploadProgress?: StorageUploadProgressHandler) => {
     const formData = new FormData();
     formData.append("file", file);
 

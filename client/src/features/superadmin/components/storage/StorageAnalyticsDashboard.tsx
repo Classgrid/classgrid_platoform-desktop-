@@ -71,6 +71,7 @@ import {
   SheetTrigger,
 } from "@/components/marketing_ui/sheet";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
+import { Label } from "@/components/marketing_ui/label";
 import { cn } from "@/lib/utils";
 import {
   storageApi,
@@ -194,12 +195,13 @@ function StorageBar({
       <div
         className={cn(
           "h-full min-w-0 rounded-sm transition-[width] duration-500",
+          "w-[var(--storage-progress)]",
           safeValue > 0 && "min-w-[2px]",
           tone === "emerald" && "bg-emerald-500",
           tone === "amber" && "bg-amber-500",
           tone === "neutral" && "bg-foreground/70",
         )}
-        style={{ width: `${safeValue}%` }}
+        style={{ "--storage-progress": `${safeValue}%` } as React.CSSProperties}
       />
     </div>
   );
@@ -254,13 +256,13 @@ function Panel({ title, children, className, action }: PanelProps) {
 function BreakdownSkeleton() {
   return (
     <div className="space-y-5 p-5">
-      {[74, 52, 39, 28, 16].map((width) => (
-        <div key={width} className="space-y-2">
+      {["w-3/4", "w-1/2", "w-2/5", "w-1/4", "w-1/6"].map((widthClass) => (
+        <div key={widthClass} className="space-y-2">
           <div className="flex justify-between">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-16" />
           </div>
-          <Skeleton className="h-2.5 w-full" style={{ width: `${width}%` }} />
+          <Skeleton className={cn("h-2.5", widthClass)} />
         </div>
       ))}
     </div>
@@ -304,7 +306,7 @@ function AnalyticsFilters({
 }: AnalyticsFiltersProps) {
   return (
     <div className="grid gap-3 xl:grid-cols-[minmax(220px,1fr)_170px_190px_170px_120px]">
-      <label className="relative block">
+      <Label className="relative block">
         <span className="sr-only">Search files</span>
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -313,7 +315,7 @@ function AnalyticsFilters({
           placeholder="Search files..."
           className="h-10 pl-9"
         />
-      </label>
+      </Label>
 
       <Select value={type} onValueChange={(value) => value && onTypeChange(value)}>
         <SelectTrigger className="h-10 w-full" aria-label="Filter by file type">
@@ -866,7 +868,7 @@ export function StorageAnalyticsDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2 md:hidden">
-                  <label className="relative flex-1">
+                  <Label className="relative flex-1">
                     <span className="sr-only">Search files</span>
                     <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -875,7 +877,7 @@ export function StorageAnalyticsDashboard() {
                       placeholder="Search files..."
                       className="h-10 pl-9"
                     />
-                  </label>
+                  </Label>
                   <Sheet>
                     <SheetTrigger
                       render={
@@ -925,13 +927,16 @@ export function StorageAnalyticsDashboard() {
                     {zeroOnly && (
                       <Badge variant="warning" className="gap-1">
                         Zero-byte only
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-4 min-h-0 p-0 hover:bg-transparent"
                           onClick={() => changeFilter(() => setZeroOnly(false))}
                           aria-label="Clear zero-byte-only filter"
                         >
                           <X className="size-3" />
-                        </button>
+                        </Button>
                       </Badge>
                     )}
                     <Button variant="ghost" size="sm" className="h-7" onClick={handleClearFilters}>
@@ -1134,13 +1139,14 @@ export function StorageAnalyticsDashboard() {
               ) : breakdown?.byFolder.length ? (
                 <div className="space-y-5 p-5">
                   {breakdown.byFolder.slice(0, 10).map((item) => (
-                    <button
+                    <Button
                       key={item.prefix || "root"}
                       type="button"
+                      variant="ghost"
                       onClick={() =>
                         changeFilter(() => setFolder(item.prefix ? item.prefix : "root"))
                       }
-                      className="block w-full rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="h-auto w-full justify-start whitespace-normal rounded-sm p-0 text-left font-normal hover:bg-transparent"
                     >
                       <div className="mb-2 flex items-center justify-between gap-4 text-sm">
                         <span className="truncate" title={item.name || "Root"}>
@@ -1157,7 +1163,7 @@ export function StorageAnalyticsDashboard() {
                         value={item.percentage}
                         label={`${item.name || "Root"}: ${formatPercentage(item.percentage)} of storage`}
                       />
-                    </button>
+                    </Button>
                   ))}
                 </div>
               ) : (
