@@ -466,8 +466,8 @@ export function StorageFilesPage() {
     // Instantly hide the input
     setIsCreatingFolder(false);
 
-    // Optimistically update the cache to show the folder instantly
-    queryClient.setQueryData(storageKeys.list(currentPrefix, debouncedSearch), (oldData: any) => {
+    // Optimistically update the cache for the Miller columns view (no search term)
+    queryClient.setQueryData(storageKeys.list(currentPrefix), (oldData: any) => {
       if (!oldData) return oldData;
       return {
         ...oldData,
@@ -477,6 +477,20 @@ export function StorageFilesPage() {
         ].sort((a: any, b: any) => a.name.localeCompare(b.name))
       };
     });
+
+    // Also update the search view cache if the user is currently searching
+    if (debouncedSearch) {
+      queryClient.setQueryData(storageKeys.list(currentPrefix, debouncedSearch), (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          folders: [
+            ...oldData.folders,
+            { name: newFolderName, prefix: newPrefix }
+          ].sort((a: any, b: any) => a.name.localeCompare(b.name))
+        };
+      });
+    }
 
     createFolderMutation.mutate({ folderName: newFolderName, prefix: currentPrefix }, {
       onSuccess: () => {
