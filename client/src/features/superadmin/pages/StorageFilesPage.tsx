@@ -617,12 +617,19 @@ export function StorageFilesPage() {
       return;
     }
 
-    const newKey = currentPrefix + newFileName.trim();
+    const newKey = fileToRename.key.substring(0, fileToRename.key.lastIndexOf('/') + 1) + newFileName.trim();
     renameObjectMutation.mutate({ sourceKey: fileToRename.key, destinationKey: newKey }, {
       onSuccess: () => {
         setFileToRename(null);
         setNewFileName("");
-        if (activeFile?.key === fileToRename.key) setActiveFile(null);
+        if (activeFile?.key === fileToRename.key) {
+          setActiveFile({
+            ...activeFile,
+            key: newKey,
+            name: newFileName.trim(),
+            cdnUrl: activeFile.cdnUrl ? activeFile.cdnUrl.replace(encodeURIComponent(fileToRename.name), encodeURIComponent(newFileName.trim())) : activeFile.cdnUrl
+          });
+        }
       }
     });
   };
@@ -991,6 +998,7 @@ export function StorageFilesPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setFileToRename(null)}>Cancel</Button>
             <Button onClick={handleRenameFile} disabled={renameObjectMutation.isPending || !newFileName.trim() || newFileName === fileToRename?.name}>
+              {renameObjectMutation.isPending && <Spinner className="mr-2" />}
               {renameObjectMutation.isPending ? "Renaming..." : "Rename"}
             </Button>
           </DialogFooter>
