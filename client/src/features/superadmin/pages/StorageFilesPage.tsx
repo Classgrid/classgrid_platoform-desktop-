@@ -159,8 +159,8 @@ const StorageColumn = ({
   toggleSelection,
   onSelectFolder,
   onSelectFile,
-  isCreatingFolder,
-  setIsCreatingFolder,
+  creatingFolderIn,
+  setCreatingFolderIn,
   isCreatingFolderPending,
   handleCreateFolder,
   uploadingFiles,
@@ -191,9 +191,24 @@ const StorageColumn = ({
   ];
   
   return (
-    <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-border flex flex-col bg-background/50 h-full">
+    <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-border flex flex-col bg-background/50 h-full group relative">
+      {/* Sticky Column Header with Hover Actions */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-2 flex items-center justify-between border-b border-border shadow-sm">
+        <span className="text-xs font-semibold text-muted-foreground truncate px-1">
+          {prefix === "" ? "Root" : prefix.split('/').slice(-2, -1)[0]}
+        </span>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground" onClick={() => setCreatingFolderIn(prefix)} title="New Folder">
+            <FolderPlus className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground" onClick={() => handleUploadClick(prefix)} title="Upload Files">
+            <UploadCloud className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
-        {isLastColumn && isCreatingFolder && (
+        {creatingFolderIn === prefix && (
           <div className="flex items-center gap-3 p-2 px-3 border-b border-border bg-primary/5">
             <div className="shrink-0 w-4 h-4" />
             <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
@@ -206,17 +221,17 @@ const StorageColumn = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  handleCreateFolder(e.currentTarget.value);
+                  handleCreateFolder(e.currentTarget.value, prefix);
                 } else if (e.key === 'Escape') {
                   e.preventDefault();
-                  setIsCreatingFolder(false);
+                  setCreatingFolderIn(null);
                 }
               }}
               onBlur={(e) => {
                 if (e.target.value.trim() && e.target.value !== "Untitled folder") {
-                  handleCreateFolder(e.target.value);
+                  handleCreateFolder(e.target.value, prefix);
                 } else {
-                  setIsCreatingFolder(false);
+                  setCreatingFolderIn(null);
                 }
               }}
             />
@@ -239,11 +254,11 @@ const StorageColumn = ({
 
         {isLoading ? (
           <div className="p-4 text-sm text-muted-foreground text-center">Loading...</div>
-        ) : items.length === 0 && (!isLastColumn || !isCreatingFolder) && uploadingFiles.filter((u: any) => u.prefix === prefix).length === 0 ? (
+        ) : items.length === 0 && (creatingFolderIn !== prefix) && uploadingFiles.filter((u: any) => u.prefix === prefix).length === 0 ? (
           <div className="p-8 text-center text-muted-foreground flex flex-col items-center gap-3">
             <Folder className="h-10 w-10 opacity-20" />
             <span className="text-sm">This folder is empty.</span>
-            <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={handleUploadClick}>
+            <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => handleUploadClick(prefix)}>
               <UploadCloud className="mr-2 h-3.5 w-3.5" /> Upload files
             </Button>
           </div>
@@ -345,7 +360,8 @@ export function StorageFilesPage() {
   const [viewMode, setViewMode] = useState<'columns' | 'list'>('columns');
   const [activeFile, setActiveFile] = useState<any | null>(null);
 
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [creatingFolderIn, setCreatingFolderIn] = useState<string | null>(null);
+  const [activeUploadPrefix, setActiveUploadPrefix] = useState<string>("");
 
   const [fileToRename, setFileToRename] = useState<{ key: string, name: string } | null>(null);
   const [newFileName, setNewFileName] = useState("");
@@ -380,7 +396,8 @@ export function StorageFilesPage() {
     return () => clearTimeout(handler);
   }, [searchInput]);
 
-  const handleUploadClick = () => {
+  const handleUploadClick = (prefix: string) => {
+    setActiveUploadPrefix(prefix);
     fileInputRef.current?.click();
   };
 
@@ -393,7 +410,7 @@ export function StorageFilesPage() {
       id: Math.random().toString(36).substring(7),
       file,
       name: file.name,
-      prefix: currentPrefix,
+      prefix: activeUploadPrefix,
       progress: 0,
       status: 'uploading' as const
     }));
@@ -453,21 +470,21 @@ export function StorageFilesPage() {
     setNavigatePath("");
   };
 
-  const handleCreateFolder = (folderName: string) => {
+  const handleCreateFolder = (folderName: string, targetPrefix: string) => {
     if (createFolderMutation.isPending) return;
     const newFolderName = folderName.trim();
     if (!newFolderName) {
-      setIsCreatingFolder(false);
+      setCreatingFolderIn(null);
       return;
     }
 
-    const newPrefix = `${currentPrefix}${newFolderName}/`;
+    const newPrefix = `${targetPrefix}${newFolderName}/`;
 
     // Instantly hide the input
-    setIsCreatingFolder(false);
+    setCreatingFolderIn(null);
 
     // Optimistically update the cache for the Miller columns view (no search term)
-    queryClient.setQueryData(storageKeys.list(currentPrefix), (oldData: any) => {
+    queryClient.setQueryData(storageKeys.list(targetPrefix), (oldData: any) => {
       if (!oldData) return oldData;
       return {
         ...oldData,
@@ -480,7 +497,7 @@ export function StorageFilesPage() {
 
     // Also update the search view cache if the user is currently searching
     if (debouncedSearch) {
-      queryClient.setQueryData(storageKeys.list(currentPrefix, debouncedSearch), (oldData: any) => {
+      queryClient.setQueryData(storageKeys.list(targetPrefix, debouncedSearch), (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
@@ -492,7 +509,7 @@ export function StorageFilesPage() {
       });
     }
 
-    createFolderMutation.mutate({ folderName: newFolderName, prefix: currentPrefix }, {
+    createFolderMutation.mutate({ folderName: newFolderName, prefix: targetPrefix }, {
       onSuccess: () => {
         refetch();
         toast.success("Folder created");
@@ -651,13 +668,13 @@ export function StorageFilesPage() {
             <Button
               variant="outline"
               className="h-9 bg-background shadow-sm text-sm font-medium"
-              onClick={() => setIsCreatingFolder(true)}
+              onClick={() => setCreatingFolderIn(currentPrefix)}
             >
               <FolderPlus className="mr-2 h-4 w-4" /> Create folder
             </Button>
             <Button
               className="h-9 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border-0 text-sm font-medium ml-0.5"
-              onClick={handleUploadClick}
+              onClick={() => handleUploadClick(currentPrefix)}
             >
               <UploadCloud className="mr-2 h-4 w-4" />
               Upload files
@@ -686,8 +703,8 @@ export function StorageFilesPage() {
                   toggleSelection={toggleSelection}
                   onSelectFolder={(key: string) => setOpenFolders([...openFolders.slice(0, i + 1), key])}
                   onSelectFile={(file: any) => setActiveFile(file)}
-                  isCreatingFolder={isCreatingFolder}
-                  setIsCreatingFolder={setIsCreatingFolder}
+                  creatingFolderIn={creatingFolderIn}
+                  setCreatingFolderIn={setCreatingFolderIn}
                   isCreatingFolderPending={createFolderMutation.isPending}
                   handleCreateFolder={handleCreateFolder}
                   uploadingFiles={uploadingFiles}
