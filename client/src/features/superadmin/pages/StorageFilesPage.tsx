@@ -511,6 +511,12 @@ export function StorageFilesPage() {
       if (!e.target.files || e.target.files.length === 0) return;
       
       const files = Array.from(e.target.files);
+
+      if (files.length > 7000) {
+        toast.error("You can only upload a maximum of 7000 files at once.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
       
       const newUploads = files.map(file => ({
         id: Math.random().toString(36).substring(7),
