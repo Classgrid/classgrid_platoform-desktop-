@@ -29,8 +29,7 @@ const configuredProtectedPrefixes = (process.env.AWS_S3_PROTECTED_PREFIXES || ""
     .filter(Boolean);
 
 export const PROTECTED_PREFIXES = Object.freeze([
-    "Homepage.png",
-    ...configuredProtectedPrefixes.filter((prefix) => prefix !== "Homepage.png"),
+    ...configuredProtectedPrefixes,
 ]);
 
 const standardAccessKeyId = process.env.AWS_ACCESS_KEY_ID?.trim();
