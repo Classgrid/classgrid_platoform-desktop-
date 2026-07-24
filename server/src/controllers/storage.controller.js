@@ -117,6 +117,21 @@ function setPrivateNoStore(res) {
     }
 }
 
+function buildStorageErrorResponse(req, message) {
+    const traceId = typeof req?.traceId === "string"
+        ? req.traceId.trim()
+        : "";
+    const requestId = /^[A-Za-z0-9._:-]{1,128}$/.test(traceId)
+        ? traceId
+        : "";
+
+    return {
+        success: false,
+        message,
+        ...(requestId ? { requestId } : {}),
+    };
+}
+
 function getUserId(req) {
     return String(req.user?._id || req.user?.id || "unknown");
 }
@@ -134,31 +149,22 @@ function handleControllerError(req, res, operation, error, affectedKeys = []) {
     }
 
     if (error instanceof StorageRequestError) {
-        return res.status(error.statusCode).json({
-            success: false,
-            message: error.message,
-        });
+        return res.status(error.statusCode).json(buildStorageErrorResponse(req, error.message));
     }
 
     if (error?.name === "NoSuchKey" || error?.name === "NotFound" || error?.$metadata?.httpStatusCode === 404) {
-        return res.status(404).json({
-            success: false,
-            message: "The requested S3 object was not found.",
-        });
+        return res.status(404).json(buildStorageErrorResponse(req, "The requested S3 object was not found."));
     }
 
     if (error?.name === "AccessDenied" || error?.name === "Forbidden" || error?.$metadata?.httpStatusCode === 403) {
-        return res.status(502).json({
-            success: false,
-            message: "AWS denied the requested storage operation.",
-        });
+        return res.status(502).json(buildStorageErrorResponse(req, "AWS denied the requested storage operation."));
     }
 
     console.error(`[Storage] ${operation} failed:`, error);
-    return res.status(500).json({
-        success: false,
-        message: `Failed to ${operation.replaceAll("-", " ")}.`,
-    });
+    return res.status(500).json(buildStorageErrorResponse(
+        req,
+        `Failed to ${operation.replaceAll("-", " ")}.`,
+    ));
 }
 
 function normalizeSegments(value, fieldName, { allowEmpty = false } = {}) {
@@ -284,10 +290,12 @@ function buildAnalyticsQuerySignature({
     prefix,
     search,
     nonZero,
+    zeroOnly,
+    rootOnly,
     snapshotId,
 }) {
     return JSON.stringify({
-        sort, type, prefix, search, nonZero, snapshotId,
+        sort, type, prefix, search, nonZero, zeroOnly, rootOnly, snapshotId,
     });
 }
 
@@ -704,10 +712,10 @@ export async function deleteObjects(req, res) {
             invalidateStorageAnalyticsCache();
             auditStorageAction(req, "bulk-delete", keys, "partial");
             console.error("[Storage] bulk-delete returned S3 errors:", result.Errors);
-            return res.status(502).json({
-                success: false,
-                message: "S3 could not delete every requested object.",
-            });
+            return res.status(502).json(buildStorageErrorResponse(
+                req,
+                "S3 could not delete every requested object.",
+            ));
         }
 
         const deletedCount = result.Deleted?.length ?? keys.length;
@@ -888,6 +896,13 @@ export async function getStorageAnalyticsFiles(req, res) {
         const query = req.query || {};
         const forceRefresh = parseBooleanQuery(query.refresh, "refresh");
         const nonZero = parseBooleanQuery(query.nonZero, "nonZero");
+        const zeroOnly = parseBooleanQuery(query.zeroOnly, "zeroOnly");
+        const rootOnly = parseBooleanQuery(query.rootOnly, "rootOnly");
+
+        if (nonZero && zeroOnly) {
+            throw new StorageRequestError(400, "nonZero and zeroOnly cannot both be true.");
+        }
+
         const sort = (parseOptionalQueryString(query.sort, "sort") || "size_desc").toLowerCase();
         const requestedType = parseOptionalQueryString(query.type, "type").toLowerCase();
         const type = requestedType === "all" ? "" : requestedType;
@@ -915,6 +930,8 @@ export async function getStorageAnalyticsFiles(req, res) {
             prefix,
             search,
             nonZero,
+            zeroOnly,
+            rootOnly,
             snapshotId: snapshot.generatedAt,
         });
         const offset = decodeAnalyticsCursor(query.cursor, signature);
@@ -923,6 +940,8 @@ export async function getStorageAnalyticsFiles(req, res) {
             .filter((file) => !prefix || file.key.startsWith(prefix))
             .filter((file) => !search || file.name.toLowerCase().includes(search))
             .filter((file) => !nonZero || file.size > 0)
+            .filter((file) => !zeroOnly || file.size === 0)
+            .filter((file) => !rootOnly || !file.folder)
             .sort((first, second) => compareAnalyticsFiles(first, second, sort));
 
         if (offset > matchingFiles.length) {

@@ -82,7 +82,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
   const location = useLocation();
-  const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website");
+  const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website") || location.pathname.includes("/storage");
   const { items, showBreadcrumbs } = useBreadcrumbStore();
   const dashboardRole = normalizeDashboardRole(role, location.pathname);
   const { data: currentUser } = useCurrentUser();

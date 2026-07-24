@@ -23,6 +23,7 @@ const CONNECTION_CHECK_TIMEOUT_MS = 5000;
 const S3_PAGE_SIZE = 1000;
 const ONE_MEGABYTE = 1024 * 1024;
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
 const CONTENT_TYPES_BY_EXTENSION = {
     ".7z": "application/x-7z-compressed",
@@ -452,6 +453,7 @@ async function buildAnalyticsSnapshot() {
             || first.key.localeCompare(second.key),
     );
     const generatedAt = new Date().toISOString();
+    const oneYearCutoff = Date.parse(generatedAt) - ONE_YEAR_MS;
 
     return {
         files,
@@ -465,6 +467,10 @@ async function buildAnalyticsSnapshot() {
             zeroByteFiles: files.filter((file) => file.size === 0).length,
             unknownContentTypeFiles: files.filter((file) => file.type === "unknown").length,
             filesAboveOneGb: files.filter((file) => file.size > ONE_GIGABYTE).length,
+            filesOlderThanOneYear: files.filter((file) => {
+                const lastModified = Date.parse(file.lastModified);
+                return Number.isFinite(lastModified) && lastModified < oneYearCutoff;
+            }).length,
             metadataLookupFailures,
         },
         breakdown: {

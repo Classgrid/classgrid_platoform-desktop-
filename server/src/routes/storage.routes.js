@@ -28,6 +28,21 @@ const rateLimitValidation = {
     xForwardedForHeader: false,
 };
 
+function buildStorageErrorResponse(req, message) {
+    const traceId = typeof req?.traceId === "string"
+        ? req.traceId.trim()
+        : "";
+    const requestId = /^[A-Za-z0-9._:-]{1,128}$/.test(traceId)
+        ? traceId
+        : "";
+
+    return {
+        success: false,
+        message,
+        ...(requestId ? { requestId } : {}),
+    };
+}
+
 function storageUserKey(req) {
     return String(req.user?._id || req.user?.id || req.user?.email || "authenticated-super-admin");
 }
@@ -50,10 +65,10 @@ const uploadRateLimiter = rateLimit({
         console.warn(
             `[Storage] userId=${String(req.user?._id || "unknown")} action=upload status=rate-limited`,
         );
-        return res.status(429).json({
-            success: false,
-            message: "Upload rate limit exceeded. Maximum 30 uploads per minute.",
-        });
+        return res.status(429).json(buildStorageErrorResponse(
+            req,
+            "Upload rate limit exceeded. Maximum 30 uploads per minute.",
+        ));
     },
 });
 
@@ -64,10 +79,10 @@ const connectionTestRateLimiter = rateLimit({
     validate: rateLimitValidation,
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => res.status(429).json({
-        success: false,
-        message: "Connection test rate limit exceeded. Maximum 10 tests per minute.",
-    }),
+    handler: (req, res) => res.status(429).json(buildStorageErrorResponse(
+        req,
+        "Connection test rate limit exceeded. Maximum 10 tests per minute.",
+    )),
 });
 
 const analyticsRefreshRateLimiter = rateLimit({
@@ -78,18 +93,18 @@ const analyticsRefreshRateLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => !["true", "1"].includes(String(req.query?.refresh || "").toLowerCase()),
-    handler: (req, res) => res.status(429).json({
-        success: false,
-        message: "Analytics refresh rate limit exceeded. Maximum 6 refreshes per minute.",
-    }),
+    handler: (req, res) => res.status(429).json(buildStorageErrorResponse(
+        req,
+        "Analytics refresh rate limit exceeded. Maximum 6 refreshes per minute.",
+    )),
 });
 
 function isSuperAdmin(req, res, next) {
     if (req.user?.role !== "super_admin") {
-        return res.status(403).json({
-            success: false,
-            message: "Super admin access is required.",
-        });
+        return res.status(403).json(buildStorageErrorResponse(
+            req,
+            "Super admin access is required.",
+        ));
     }
 
     return next();
@@ -106,16 +121,16 @@ function singleStorageUpload(req, res, next) {
         );
 
         if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
-            return res.status(413).json({
-                success: false,
-                message: "File size exceeds the 2 GB limit.",
-            });
+            return res.status(413).json(buildStorageErrorResponse(
+                req,
+                "File size exceeds the 2 GB limit.",
+            ));
         }
 
-        return res.status(400).json({
-            success: false,
-            message: "Invalid multipart file upload.",
-        });
+        return res.status(400).json(buildStorageErrorResponse(
+            req,
+            "Invalid multipart file upload.",
+        ));
     });
 }
 

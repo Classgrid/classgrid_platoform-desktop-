@@ -557,7 +557,7 @@ Important limitation:
 
 ---
 
-## 8. Analytics Backend Still Required
+## 8. Analytics Backend Implemented
 
 ### A. Summary
 
@@ -595,6 +595,7 @@ Suggested response:
     "zeroByteFiles": 18,
     "unknownContentTypeFiles": 27,
     "filesAboveOneGb": 14,
+    "filesOlderThanOneYear": 391,
     "generatedAt": "2026-07-24T16:10:00.000Z",
     "cacheAgeSeconds": 42
   }
@@ -611,9 +612,13 @@ Query parameters:
 
 ```text
 sort=size_desc | size_asc | modified_desc | modified_asc | name_asc | name_desc
-type=image | video | audio | pdf | document | archive | other | unknown
+type=image | video | audio | pdf | document | archive | text | other | unknown
 prefix=folder/path/
 search=filename
+nonZero=true | false
+zeroOnly=true | false
+rootOnly=true | false
+refresh=true | false
 limit=25
 cursor=opaque-pagination-cursor
 ```
@@ -647,6 +652,10 @@ Suggested response:
   }
 }
 ```
+
+`nonZero=true` and `zeroOnly=true` are mutually exclusive. `rootOnly=true` returns only files
+stored directly at the bucket root. Pagination cursors are bound to every active filter and
+the analytics snapshot, so a cursor cannot be reused with different filters or refreshed data.
 
 ### C. Breakdowns
 
