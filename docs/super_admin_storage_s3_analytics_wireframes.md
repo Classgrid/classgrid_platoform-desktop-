@@ -1,3 +1,73 @@
+# S3 Storage Frontend Wireframe
+
+This document outlines the visual structure and layout of the new S3 Storage page for the Super Admin dashboard.
+
+## Page Layout & Grid
+
+The page will follow the standard `SuperAdminLayout` spacing.
+
+```text
++---------------------------------------------------------------------------------------+
+| Sidebar        |               |  Page Header                                         |
+| (Navigation)   |  - Files      |  [Title: Storage Management]                         |
+|                |  - Analytics  |  [Subtitle: Manage AWS S3 Bucket Files & Assets]     |
+|                |  - S3         |                                                      |
+|                |               |  +------------------------------------------------+  |
+|                |               |  | Action Bar                                     |  |
+|                |               |  | [Breadcrumbs] root / support-attachments /     |  |
+|                |               |  |                                                |  |
+|                |               |  | [Search Input]           [+ Create Folder]     |  |
+|                |               |  |                          [+ Upload File]       |  |
+|                |               |  +------------------------------------------------+  |
+|                |               |                                                      |
+|                |               |  +------------------------------------------------+  |
+|                |               |  | Data Table                                     |  |
+|                |               |  | [ ] Name            | Size | Type | L.Mod | Act|  |
+|                |               |  |------------------------------------------------|  |
+|                |               |  | [ ] 📁 2026/        |  -   | Dir  |  -    | ...|  |
+|                |               |  | [ ] 📄 invoice.pdf  | 2 MB | PDF  | 2h    | ...|  |
+|                |               |  | [ ] 🖼️ avatar.png   | 5 KB | PNG  | 1d    | ...|  |
+|                |               |  +------------------------------------------------+  |
+|                |               |                                                      |
+|                |               |  (If items are selected, a sticky bottom bar)        |
+|                |               |  +------------------------------------------------+  |
+|                |               |  | 2 items selected             [Delete Selected] |  |
+|                |               |  +------------------------------------------------+  |
++---------------------------------------------------------------------------------------+
+```
+
+## Detailed Component Breakdown
+
+### 1. Header Section
+- **Title**: "Storage Management"
+- **Subtitle**: "Direct access to AWS S3 bucket for Super Admins."
+
+### 2. Toolbar & Navigation
+- **Breadcrumbs**: Built dynamically from the `prefix` state. Clicking a breadcrumb segment navigates "up" a folder.
+- **Search Bar**: A text input to filter the files displayed in the current table view (client-side filtering).
+- **Create Folder Button**: Opens a Dialog modal prompting for a folder name.
+- **Upload Button**: Opens a file picker. Shows upload progress in a toast or modal.
+
+### 3. File Table (The `DataTable`)
+- **Checkbox Column**: To allow bulk selection for the `deleteObjects` endpoint.
+- **Name Column**: Displays an icon based on file type (e.g., Lucide `Folder`, `Image`, `FileText`). Folders are clickable and update the `prefix` state to navigate into them.
+- **Actions Column (Drop-down Menu)**:
+  - **Copy Link**: Copies the `cdnUrl` to the clipboard.
+  - **Download**: Fetches the presigned URL from the backend and triggers a download.
+  - **Rename**: Opens a Dialog to rename the file.
+  - **Delete**: Triggers the `DangerConfirmDialog`.
+
+### 4. Modals & Alerts
+- **Rename Modal**: Simple input field pre-filled with the current file name.
+- **Delete Confirm**: Uses `DangerConfirmDialog` requiring the user to type "delete" for single files, or "bulk delete" for multiple files.
+- **Upload Progress**: If the file is large, a progress bar using `ProgressOverlay.tsx` or a custom toast to show upload % via Axios.
+
+## Responsive Design
+- On mobile/small screens, the "Type" and "Last Mod" columns will be hidden.
+- The Action Bar will stack vertically if the screen width is too narrow.
+
+---
+
 # Super Admin Storage: S3 Configuration and Analytics Wireframes
 
 ## 1. Scope
@@ -10,10 +80,6 @@ This document defines two separate Super Admin storage pages:
 The existing **Files** page is intentionally not repeated here.
 
 The information hierarchy is inspired by the supplied Supabase Storage screenshots, while the styling and security rules remain specific to Classgrid.
-
-**Implementation status (2026-07-24):** the S3 Configuration and current-state
-Storage Analytics backend APIs described below are implemented and verified.
-The two frontend pages are still to be built from these wireframes.
 
 ### Suggested navigation
 
@@ -185,9 +251,9 @@ Do not add:
 
 AWS credentials must remain managed through secure server or deployment configuration.
 
-### Backend implemented for this page
+### Backend required for this page
 
-These safe configuration endpoints are implemented:
+These safe configuration endpoints still need to be added:
 
 ```text
 GET  /api/super-admin/storage/configuration
@@ -459,9 +525,9 @@ Request ID: safe-request-id
 
 ---
 
-## 7. Backend Implemented
+## 7. Backend Already Available
 
-The backend supports the existing Files page through:
+The current backend already supports the Files page through:
 
 ```text
 GET    /api/super-admin/storage/objects
@@ -473,20 +539,6 @@ POST   /api/super-admin/storage/presigned-url
 GET    /api/super-admin/storage/metadata
 POST   /api/super-admin/storage/rename
 ```
-
-The backend also supports the separate S3 Configuration and Analytics pages through:
-
-```text
-GET  /api/super-admin/storage/configuration
-GET  /api/super-admin/storage/health
-POST /api/super-admin/storage/test-connection
-
-GET  /api/super-admin/storage/analytics/summary
-GET  /api/super-admin/storage/analytics/files
-GET  /api/super-admin/storage/analytics/breakdown
-```
-
-All storage routes require a strict `super_admin` role. Operational responses use `Cache-Control: private, no-store`, and no endpoint returns AWS credentials or raw AWS error objects.
 
 Existing object listing fields:
 
@@ -505,9 +557,7 @@ Important limitation:
 
 ---
 
-## 8. Analytics Backend Implemented
-
-The three endpoints below use one complete-bucket snapshot, so summary totals, file rankings, and breakdown totals are calculated from the same object set.
+## 8. Analytics Backend Still Required
 
 ### A. Summary
 
@@ -515,7 +565,7 @@ The three endpoints below use one complete-bucket snapshot, so summary totals, f
 GET /api/super-admin/storage/analytics/summary
 ```
 
-Implemented response shape:
+Suggested response:
 
 ```json
 {
@@ -561,18 +611,14 @@ Query parameters:
 
 ```text
 sort=size_desc | size_asc | modified_desc | modified_asc | name_asc | name_desc
-type=image | video | audio | pdf | document | archive | text | other | unknown
+type=image | video | audio | pdf | document | archive | other | unknown
 prefix=folder/path/
 search=filename
 limit=25
 cursor=opaque-pagination-cursor
-nonZero=true | false
-refresh=true | false
 ```
 
-Use `sort=size_asc&nonZero=true` for the Smallest Files panel. Sorting alone never removes zero-byte files; `nonZero` is an explicit filter.
-
-Implemented response shape:
+Suggested response:
 
 ```json
 {
@@ -608,7 +654,7 @@ Implemented response shape:
 GET /api/super-admin/storage/analytics/breakdown
 ```
 
-Implemented response shape:
+Suggested response:
 
 ```json
 {
@@ -649,9 +695,9 @@ Implemented response shape:
 
 ---
 
-## 9. Analytics Calculation Rules Implemented
+## 9. Analytics Calculation Requirements
 
-The backend now:
+The backend must:
 
 1. Scan all S3 objects recursively, not only the root page.
 2. Follow every S3 continuation token.
@@ -670,9 +716,7 @@ The backend now:
 
 `ListObjectsV2` does not return `ContentType`. Accurate type analytics may require `HeadObject` requests. Use bounded concurrency and caching to avoid making hundreds or thousands of simultaneous S3 calls.
 
-The current five-minute cache and single-flight refresh are held in server memory. This is fully functional for one running server instance. In a multi-instance or serverless deployment, use a shared cache or persisted snapshot so every instance serves the same cached result.
-
-For very large buckets, move the scan to a background analytics refresh job and serve the last completed shared snapshot.
+For very large buckets, move the scan to a background analytics refresh job and serve the last completed cached snapshot.
 
 ### Historical growth limitation
 
@@ -730,8 +774,6 @@ Mobile ranking example:
 ---
 
 ## 12. Acceptance Checklist
-
-The backend contract is complete. Keep the items below unchecked until the two frontend pages are built and visually verified.
 
 ### S3 Configuration
 
