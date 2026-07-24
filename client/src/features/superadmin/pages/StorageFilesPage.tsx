@@ -108,7 +108,25 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
           </div>
           
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="text-xs h-9 px-4" onClick={() => window.open(activeFile.cdnUrl, '_blank')}>
+            <Button variant="outline" className="text-xs h-9 px-4" onClick={async () => {
+              try {
+                toast.loading("Starting download...", { id: "downloading" });
+                const response = await fetch(activeFile.cdnUrl);
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = activeFile.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+                toast.success("Download complete", { id: "downloading" });
+              } catch (e) {
+                toast.dismiss("downloading");
+                window.open(activeFile.cdnUrl, '_blank'); // fallback if blocked by CORS
+              }
+            }}>
               <Download className="mr-2 h-3.5 w-3.5" /> Download
             </Button>
             <Button variant="outline" className="text-xs h-9 px-4" onClick={() => {
@@ -283,6 +301,9 @@ export function StorageFilesPage() {
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   
+  const [isNavigateModalOpen, setIsNavigateModalOpen] = useState(false);
+  const [navigatePath, setNavigatePath] = useState("");
+  
   // Custom upload state
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -357,6 +378,27 @@ export function StorageFilesPage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleNavigateToFolder = () => {
+    if (!navigatePath) {
+      setIsNavigateModalOpen(false);
+      return;
+    }
+    
+    // Convert a path like "assignments/math" into openFolders ["", "assignments/", "assignments/math/"]
+    const parts = navigatePath.split("/").filter(Boolean);
+    const newOpenFolders = [""];
+    let current = "";
+    
+    parts.forEach(part => {
+      current += part + "/";
+      newOpenFolders.push(current);
+    });
+    
+    setOpenFolders(newOpenFolders);
+    setIsNavigateModalOpen(false);
+    setNavigatePath("");
   };
 
   const handleCreateFolder = (folderName: string) => {
@@ -481,6 +523,15 @@ export function StorageFilesPage() {
             >
               <Edit2 size={16} />
             </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-9 w-9 bg-background shadow-sm"
+              title="Navigate to folder"
+              onClick={() => setIsNavigateModalOpen(true)}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
             <Button
               variant="outline"
               size="icon"
@@ -574,18 +625,16 @@ export function StorageFilesPage() {
                   {
                     key: "select",
                     header: "",
-                    width: "w-10",
+                    width: "40px",
                     render: (_: any, row: any) => {
-                      if (row.isFolder || row.isUpDir) return null;
+                      if (row.isUpDir) return null;
                       return (
-                        <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-border bg-background"
-                            checked={selectedKeys.has(row.key)}
-                            onChange={(e) => toggleSelection(e as any, row.key)}
-                          />
-                        </div>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-border bg-background"
+                          checked={selectedKeys.has(row.key)}
+                          onChange={(e) => toggleSelection(e as any, row.key)}
+                        />
                       );
                     }
                   },
@@ -598,24 +647,23 @@ export function StorageFilesPage() {
                         className={`flex items-center gap-3 ${row.isFolder || row.isUpDir ? "cursor-pointer hover:underline font-medium" : ""}`}
                         onClick={() => {
                           if (row.isUpDir) {
-                            const parts = currentPrefix.split("/").filter(Boolean);
-                            parts.pop();
-                            const newKey = parts.length > 0 ? parts.join("/") + "/" : "";
-                            setOpenFolders([newKey]);
+                            // legacy list view up dir
                           } else if (row.isFolder) {
                             setOpenFolders([row.key]);
+                          } else {
+                            setActiveFile(row);
                           }
                         }}
                       >
-                        {row.isFolder || row.isUpDir ? <Folder size={18} className="text-yellow-500 fill-yellow-500/20" /> : getFileIcon(row.type)}
-                        <span className="truncate max-w-[200px] sm:max-w-[400px]">{row.name}</span>
+                        {getFileIcon(row.type)}
+                        <span>{row.name}</span>
                       </div>
                     )
                   },
                   {
                     key: "size",
                     header: "Size",
-                    render: (size: number | null) => size !== null ? formatBytes(size) : "-"
+                    render: (size: number) => size ? formatBytes(size) : "-"
                   },
                   {
                     key: "type",
@@ -632,36 +680,37 @@ export function StorageFilesPage() {
                   {
                     key: "lastModified",
                     header: "Last Modified",
-                    render: (date: string | null) => date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : "-"
+                    render: (date: string) => date ? format(new Date(date), "MMM d, yyyy h:mm a") : "-"
                   },
                   {
                     key: "actions",
                     header: "",
-                    width: "w-10",
+                    width: "50px",
                     render: (_: any, row: any) => {
-                      if (row.isFolder || row.isUpDir) return null;
+                      if (row.isUpDir) return null;
                       return (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md">
-                                <MoreHorizontal size={16} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
-                                <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {}}>
-                                <Download className="mr-2 h-4 w-4" /> Download
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setFileToDelete(row.key)}>
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
+                              <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {}}>
+                              <Download className="mr-2 h-4 w-4" /> Download
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => { setFileToRename({ key: row.key, name: row.name }); setNewFileName(row.name); }}>
+                              <Edit2 className="mr-2 h-4 w-4" /> Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setFileToDelete(row.key)}>
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       );
                     }
                   }
@@ -670,27 +719,56 @@ export function StorageFilesPage() {
                 isLoading={isLoading}
                 emptyMessage="This folder is empty."
               />
-
-              {/* Sticky Bulk Action Bar for List View */}
-              {selectedKeys.size > 0 && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card border border-border shadow-lg rounded-full px-6 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-5">
-                  <span className="text-sm font-medium">
-                    <span className="text-primary mr-1">{selectedKeys.size}</span> items selected
-                  </span>
-                  <div className="h-4 w-px bg-border"></div>
-                  <Button size="sm" variant="ghost" onClick={() => setSelectedKeys(new Set())}>Cancel</Button>
-                  <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteModalOpen(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
-                  </Button>
-                </div>
-              )}
             </div>
           )}
+            
+            {/* Sticky Bulk Action Bar for both views */}
+            {selectedKeys.size > 0 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card border border-border shadow-lg rounded-full px-6 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-5">
+                <span className="text-sm font-medium">
+                  <span className="text-primary mr-1">{selectedKeys.size}</span> items selected
+                </span>
+                <div className="h-4 w-px bg-border"></div>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedKeys(new Set())}>Cancel</Button>
+                <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteModalOpen(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
+                </Button>
+              </div>
+            )}
 
+          </div>
         </div>
-      </div>
 
-      {/* Modals */}
+        {/* Modals */}
+        <Dialog open={isNavigateModalOpen} onOpenChange={setIsNavigateModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Navigate to folder</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Path</label>
+                <Input
+                  placeholder="e.g. assignments/math"
+                  value={navigatePath}
+                  onChange={(e) => setNavigatePath(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleNavigateToFolder();
+                    }
+                  }}
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">Enter a folder path within this bucket.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNavigateModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleNavigateToFolder} className="bg-emerald-600 hover:bg-emerald-700 text-white">Navigate</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       <Dialog open={!!fileToRename} onOpenChange={(open) => !open && setFileToRename(null)}>
         <DialogContent>
           <DialogHeader>
