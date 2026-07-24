@@ -518,7 +518,20 @@ export function StorageFilesPage() {
         return;
       }
       
-      const newUploads = files.map(file => ({
+      const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB
+      const validFiles = files.filter(f => f.size <= MAX_FILE_SIZE);
+      const invalidFiles = files.filter(f => f.size > MAX_FILE_SIZE);
+
+      if (invalidFiles.length > 0) {
+        toast.error(`Skipped ${invalidFiles.length} file(s) that exceed the 2 GB limit.`);
+      }
+
+      if (validFiles.length === 0) {
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      
+      const newUploads = validFiles.map(file => ({
         id: Math.random().toString(36).substring(7),
         file,
         name: file.name,
