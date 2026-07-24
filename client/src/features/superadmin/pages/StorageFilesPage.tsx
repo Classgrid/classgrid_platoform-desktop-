@@ -25,7 +25,8 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 import {
   useStorageObjects,
@@ -241,7 +242,7 @@ const StorageColumn = ({
                   <span className="truncate">{u.name}</span>
                 </div>
                 <div className="shrink-0 flex items-center justify-center">
-                  <Loader2 className="text-muted-foreground animate-spin h-4 w-4" />
+                  <Spinner className="text-muted-foreground" />
                 </div>
               </div>
             ))}
@@ -340,7 +341,7 @@ export function StorageFilesPage() {
   // The effective prefix is the last opened folder
   const currentPrefix = openFolders[openFolders.length - 1];
 
-  const { data, isLoading, refetch } = useStorageObjects(currentPrefix, debouncedSearch);
+  const { data, isLoading, isFetching, refetch } = useStorageObjects(currentPrefix, debouncedSearch);
   const createFolderMutation = useCreateFolder();
   const deleteObjectMutation = useDeleteObject();
   const deleteObjectsMutation = useDeleteObjects();
@@ -549,15 +550,14 @@ export function StorageFilesPage() {
             >
               <Edit2 size={16} />
             </Button>
-            <Button
-              variant="outline"
+            <RefreshButton
+              isFetching={isFetching || isLoading}
+              onClick={() => refetch()}
+              label={null}
               size="icon"
               className="h-9 w-9 bg-background shadow-sm"
-              onClick={() => refetch()}
               title="Refresh"
-            >
-              <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
-            </Button>
+            />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -848,7 +848,7 @@ export function StorageFilesPage() {
         <div className="absolute top-4 right-4 z-50 w-[380px] bg-card border border-border shadow-xl rounded-md overflow-hidden animate-in fade-in slide-in-from-top-4">
           <div className="p-4 flex items-center justify-between border-b border-border/50">
             <div className="flex items-center gap-3 text-sm font-medium">
-              <Loader2 className="text-muted-foreground animate-spin h-4 w-4" />
+              <Spinner className="text-muted-foreground" />
               Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}...
             </div>
             <div className="text-xs text-muted-foreground font-medium">
