@@ -604,7 +604,7 @@ export async function listObjects(req, res) {
             }),
         );
 
-        return sendSuccess(res, "Storage objects retrieved successfully.", {
+        return sendSuccess(res, "Files and folders retrieved successfully.", {
             folders,
             files,
             nextCursor: result.IsTruncated ? (result.NextContinuationToken || null) : null,
@@ -711,7 +711,7 @@ export async function deleteObject(req, res) {
 
         invalidateStorageAnalyticsCache();
         auditStorageAction(req, "delete", key);
-        return sendSuccess(res, "Storage object deleted successfully.", {
+        return sendSuccess(res, "File or folder deleted successfully.", {
             deletedKey: key,
         });
     } catch (error) {
@@ -769,7 +769,7 @@ export async function deleteObjects(req, res) {
         const deletedCount = (result.Deleted?.length ?? fileKeys.length) + folderKeys.length;
         invalidateStorageAnalyticsCache();
         auditStorageAction(req, "bulk-delete", keys);
-        return sendSuccess(res, "Storage objects deleted successfully.", {
+        return sendSuccess(res, "Files or folders deleted successfully.", {
             deletedCount,
         });
     } catch (error) {
@@ -836,7 +836,7 @@ export async function getObjectMetadata(req, res) {
             Key: key,
         }));
 
-        return sendSuccess(res, "Storage object metadata retrieved successfully.", {
+        return sendSuccess(res, "File or folder metadata retrieved successfully.", {
             key,
             size: metadata.ContentLength || 0,
             contentType: metadata.ContentType || inferContentType(key),
@@ -875,7 +875,7 @@ export async function renameObject(req, res) {
         }));
 
         auditStorageAction(req, "rename", [sourceKey, destinationKey]);
-        return sendSuccess(res, "Storage object renamed successfully.", {
+        return sendSuccess(res, "File or folder renamed successfully.", {
             newKey: destinationKey,
             cdnUrl: buildCdnUrl(destinationKey),
         });
