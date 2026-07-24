@@ -4,13 +4,20 @@ import multer from "multer";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import {
     MAX_STORAGE_UPLOAD_SIZE_BYTES,
+    STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
     createFolder,
     deleteObject,
     deleteObjects,
     getObjectMetadata,
     getPresignedUrl,
+    getStorageAnalyticsBreakdown,
+    getStorageAnalyticsFiles,
+    getStorageAnalyticsSummary,
+    getStorageConfiguration,
+    getStorageHealth,
     listObjects,
     renameObject,
+    testStorageConnection,
     uploadFile,
 } from "../controllers/storage.controller.js";
 
@@ -25,7 +32,7 @@ const storageUpload = multer({
 
 const uploadRateLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 30,
+    max: STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
     keyGenerator: (req) => String(req.user._id),
     validate: {
         ip: false,
@@ -80,6 +87,13 @@ function singleStorageUpload(req, res, next) {
 }
 
 router.use(isAuthenticated, isSuperAdmin);
+
+router.get("/configuration", getStorageConfiguration);
+router.get("/health", getStorageHealth);
+router.post("/test-connection", testStorageConnection);
+router.get("/analytics/summary", getStorageAnalyticsSummary);
+router.get("/analytics/files", getStorageAnalyticsFiles);
+router.get("/analytics/breakdown", getStorageAnalyticsBreakdown);
 
 router.get("/objects", listObjects);
 router.post("/upload", uploadRateLimiter, singleStorageUpload, uploadFile);

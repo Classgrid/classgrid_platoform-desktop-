@@ -100,6 +100,7 @@ export const dashboardConfigs: DashboardConfig[] = [
           { label: "Feature Flags", to: "/superadmin/feature-flags", icon: Zap },
           { label: "Rollback Actions", to: "/superadmin/rollback", icon: RotateCcw },
           { label: "Audit Logs", to: "/superadmin/audit-logs", icon: Shield },
+          { label: "Storage", to: "/superadmin/storage/files", icon: Database },
           { label: "System Config", to: "/superadmin/config", icon: Settings }
         ]
       },

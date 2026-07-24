@@ -19,15 +19,47 @@ import {
     PROTECTED_PREFIXES,
     s3Client,
 } from "../config/s3Client.js";
+import {
+    MAX_STORAGE_UPLOAD_SIZE_BYTES,
+    MULTIPART_THRESHOLD_BYTES,
+    STORAGE_PRESIGNED_URL_EXPIRY_SECONDS,
+    STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
+    checkStorageConnection,
+    getSafeStorageConfiguration,
+    getStorageAnalyticsSnapshot,
+    invalidateStorageAnalyticsCache,
+} from "../services/storage-management.service.js";
 
-export const MAX_STORAGE_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024 * 1024;
-
-const MULTIPART_THRESHOLD_BYTES = 100 * 1024 * 1024;
+export {
+    MAX_STORAGE_UPLOAD_SIZE_BYTES,
+    STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
+};
 const MULTIPART_PART_SIZE_BYTES = 16 * 1024 * 1024;
 const MULTIPART_CONCURRENCY = 4;
 const MAX_LIST_LIMIT = 1000;
 const MAX_BULK_DELETE_KEYS = 1000;
 const METADATA_CONCURRENCY = 10;
+const DEFAULT_ANALYTICS_LIMIT = 25;
+const MAX_ANALYTICS_LIMIT = 100;
+const ANALYTICS_SORT_OPTIONS = new Set([
+    "size_desc",
+    "size_asc",
+    "modified_desc",
+    "modified_asc",
+    "name_asc",
+    "name_desc",
+]);
+const ANALYTICS_TYPE_OPTIONS = new Set([
+    "image",
+    "video",
+    "audio",
+    "pdf",
+    "document",
+    "archive",
+    "text",
+    "other",
+    "unknown",
+]);
 
 class StorageRequestError extends Error {
     constructor(statusCode, message) {
@@ -109,10 +141,17 @@ function handleControllerError(req, res, operation, error, affectedKeys = []) {
         });
     }
 
+    if (error?.name === "AccessDenied" || error?.name === "Forbidden" || error?.$metadata?.httpStatusCode === 403) {
+        return res.status(502).json({
+            success: false,
+            message: "AWS denied the requested storage operation.",
+        });
+    }
+
     console.error(`[Storage] ${operation} failed:`, error);
     return res.status(500).json({
         success: false,
-        message: `Failed to ${operation.replaceAll("-", " ")} storage object.`,
+        message: `Failed to ${operation.replaceAll("-", " ")}.`,
     });
 }
 
@@ -200,8 +239,156 @@ function parseListLimit(value) {
     return Math.min(limit, MAX_LIST_LIMIT);
 }
 
+function parseAnalyticsLimit(value) {
+    if (value === undefined || value === "") return DEFAULT_ANALYTICS_LIMIT;
+
+    const limit = Number(value);
+    if (!Number.isInteger(limit) || limit < 1 || limit > MAX_ANALYTICS_LIMIT) {
+        throw new StorageRequestError(
+            400,
+            `limit must be an integer between 1 and ${MAX_ANALYTICS_LIMIT}.`,
+        );
+    }
+    return limit;
+}
+
+function parseBooleanQuery(value, fieldName) {
+    if (value === undefined || value === "") return false;
+    if (value === true || value === "true" || value === "1") return true;
+    if (value === false || value === "false" || value === "0") return false;
+    throw new StorageRequestError(400, `${fieldName} must be true or false.`);
+}
+
+function parseOptionalQueryString(value, fieldName) {
+    if (value === undefined || value === null) return "";
+    if (typeof value !== "string") {
+        throw new StorageRequestError(400, `${fieldName} must be a string.`);
+    }
+    return value.trim();
+}
+
+function roundAnalyticsPercentage(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.round(value * 100) / 100;
+}
+
+function buildAnalyticsQuerySignature({ sort, type, prefix, search }) {
+    return JSON.stringify({ sort, type, prefix, search });
+}
+
+function encodeAnalyticsCursor(offset, signature) {
+    return Buffer.from(
+        JSON.stringify({
+            version: 1,
+            offset,
+            signature,
+        }),
+        "utf8",
+    ).toString("base64url");
+}
+
+function decodeAnalyticsCursor(value, expectedSignature) {
+    if (value === undefined || value === "") return 0;
+    if (typeof value !== "string") {
+        throw new StorageRequestError(400, "cursor must be a string.");
+    }
+
+    try {
+        const decoded = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+        if (
+            decoded?.version !== 1
+            || !Number.isInteger(decoded.offset)
+            || decoded.offset < 0
+            || decoded.signature !== expectedSignature
+        ) {
+            throw new Error("Invalid cursor payload");
+        }
+        return decoded.offset;
+    } catch {
+        throw new StorageRequestError(
+            400,
+            "cursor is invalid or does not match the active analytics filters.",
+        );
+    }
+}
+
+function compareAnalyticsModifiedDates(first, second, direction) {
+    const firstTime = first.lastModified ? Date.parse(first.lastModified) : Number.NaN;
+    const secondTime = second.lastModified ? Date.parse(second.lastModified) : Number.NaN;
+    const firstValid = Number.isFinite(firstTime);
+    const secondValid = Number.isFinite(secondTime);
+
+    if (!firstValid && !secondValid) return 0;
+    if (!firstValid) return 1;
+    if (!secondValid) return -1;
+    return direction === "asc" ? firstTime - secondTime : secondTime - firstTime;
+}
+
+function compareAnalyticsFiles(first, second, sort) {
+    let comparison = 0;
+
+    switch (sort) {
+        case "size_asc":
+            comparison = first.size - second.size;
+            break;
+        case "modified_desc":
+            comparison = compareAnalyticsModifiedDates(first, second, "desc");
+            break;
+        case "modified_asc":
+            comparison = compareAnalyticsModifiedDates(first, second, "asc");
+            break;
+        case "name_asc":
+            comparison = first.name.localeCompare(second.name);
+            break;
+        case "name_desc":
+            comparison = second.name.localeCompare(first.name);
+            break;
+        case "size_desc":
+        default:
+            comparison = second.size - first.size;
+            break;
+    }
+
+    return comparison || first.key.localeCompare(second.key);
+}
+
+function toRankedAnalyticsFile(file, rank, largestFileSize, totalStorageSize) {
+    return {
+        rank,
+        key: file.key,
+        name: file.name,
+        folder: file.folder,
+        size: file.size,
+        contentType: file.contentType,
+        type: file.type,
+        lastModified: file.lastModified,
+        cdnUrl: file.cdnUrl,
+        relativeToLargestPercentage: largestFileSize > 0
+            ? roundAnalyticsPercentage((file.size / largestFileSize) * 100)
+            : 0,
+        percentageOfTotal: totalStorageSize > 0
+            ? roundAnalyticsPercentage((file.size / totalStorageSize) * 100)
+            : 0,
+    };
+}
+
+function analyticsSnapshotMetadata(snapshot) {
+    return {
+        generatedAt: snapshot.generatedAt,
+        cacheAgeSeconds: snapshot.cacheAgeSeconds,
+        cacheStatus: snapshot.cacheStatus,
+        ...(snapshot.refreshWarning
+            ? { refreshWarning: snapshot.refreshWarning }
+            : {}),
+    };
+}
+
 function buildCdnUrl(key) {
-    return `${CDN_BASE_URL}/${key}`;
+    const encodedKey = key
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+    return `${CDN_BASE_URL}/${encodedKey}`;
 }
 
 function inferContentType(key) {
@@ -436,6 +623,7 @@ export async function uploadFile(req, res) {
             }));
         }
 
+        invalidateStorageAnalyticsCache();
         auditStorageAction(req, "upload", key);
         return sendSuccess(res, "File uploaded successfully.", {
             key,
@@ -460,6 +648,7 @@ export async function deleteObject(req, res) {
             Key: key,
         }));
 
+        invalidateStorageAnalyticsCache();
         auditStorageAction(req, "delete", key);
         return sendSuccess(res, "Storage object deleted successfully.", {
             deletedKey: key,
@@ -497,6 +686,7 @@ export async function deleteObjects(req, res) {
         }));
 
         if (result.Errors?.length) {
+            invalidateStorageAnalyticsCache();
             auditStorageAction(req, "bulk-delete", keys, "partial");
             console.error("[Storage] bulk-delete returned S3 errors:", result.Errors);
             return res.status(502).json({
@@ -506,6 +696,7 @@ export async function deleteObjects(req, res) {
         }
 
         const deletedCount = result.Deleted?.length ?? keys.length;
+        invalidateStorageAnalyticsCache();
         auditStorageAction(req, "bulk-delete", keys);
         return sendSuccess(res, "Storage objects deleted successfully.", {
             deletedCount,
@@ -531,6 +722,7 @@ export async function createFolder(req, res) {
             ContentType: "application/x-directory",
         }));
 
+        invalidateStorageAnalyticsCache();
         return sendSuccess(res, "Folder created successfully.", {
             folderKey,
         });
@@ -550,7 +742,7 @@ export async function getPresignedUrl(req, res) {
                 Bucket: BUCKET_NAME,
                 Key: key,
             }),
-            { expiresIn: 60 * 60 },
+            { expiresIn: STORAGE_PRESIGNED_URL_EXPIRY_SECONDS },
         );
 
         return sendSuccess(res, "Temporary download URL generated successfully.", {
@@ -609,6 +801,7 @@ export async function renameObject(req, res) {
             Key: sourceKey,
         }));
 
+        invalidateStorageAnalyticsCache();
         auditStorageAction(req, "rename", [sourceKey, destinationKey]);
         return sendSuccess(res, "Storage object renamed successfully.", {
             newKey: destinationKey,
@@ -622,5 +815,133 @@ export async function renameObject(req, res) {
             error,
             [sourceKey, destinationKey].filter(Boolean),
         );
+    }
+}
+
+export async function getStorageConfiguration(req, res) {
+    try {
+        const configuration = await getSafeStorageConfiguration();
+        return sendSuccess(
+            res,
+            "Storage configuration retrieved successfully.",
+            configuration,
+        );
+    } catch (error) {
+        return handleControllerError(req, res, "retrieve storage configuration", error);
+    }
+}
+
+export async function getStorageHealth(req, res) {
+    try {
+        const health = await checkStorageConnection();
+        return sendSuccess(res, "Storage health check completed.", health);
+    } catch (error) {
+        return handleControllerError(req, res, "check storage health", error);
+    }
+}
+
+export async function testStorageConnection(req, res) {
+    try {
+        const connection = await checkStorageConnection();
+        return sendSuccess(res, "Storage connection test completed.", connection);
+    } catch (error) {
+        return handleControllerError(req, res, "test storage connection", error);
+    }
+}
+
+export async function getStorageAnalyticsSummary(req, res) {
+    try {
+        const forceRefresh = parseBooleanQuery(req.query?.refresh, "refresh");
+        const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
+
+        return sendSuccess(res, "Storage analytics summary retrieved successfully.", {
+            ...snapshot.summary,
+            ...analyticsSnapshotMetadata(snapshot),
+        });
+    } catch (error) {
+        return handleControllerError(req, res, "calculate storage analytics summary", error);
+    }
+}
+
+export async function getStorageAnalyticsFiles(req, res) {
+    try {
+        const query = req.query || {};
+        const forceRefresh = parseBooleanQuery(query.refresh, "refresh");
+        const sort = (parseOptionalQueryString(query.sort, "sort") || "size_desc").toLowerCase();
+        const requestedType = parseOptionalQueryString(query.type, "type").toLowerCase();
+        const type = requestedType === "all" ? "" : requestedType;
+        const prefix = query.prefix ? normalizePrefix(query.prefix) : "";
+        const search = parseOptionalQueryString(query.search, "search").toLowerCase();
+        const limit = parseAnalyticsLimit(query.limit);
+
+        if (!ANALYTICS_SORT_OPTIONS.has(sort)) {
+            throw new StorageRequestError(
+                400,
+                `sort must be one of: ${[...ANALYTICS_SORT_OPTIONS].join(", ")}.`,
+            );
+        }
+        if (type && !ANALYTICS_TYPE_OPTIONS.has(type)) {
+            throw new StorageRequestError(
+                400,
+                `type must be one of: ${[...ANALYTICS_TYPE_OPTIONS].join(", ")}.`,
+            );
+        }
+
+        const signature = buildAnalyticsQuerySignature({
+            sort,
+            type,
+            prefix,
+            search,
+        });
+        const offset = decodeAnalyticsCursor(query.cursor, signature);
+        const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
+        const matchingFiles = snapshot.files
+            .filter((file) => !type || file.type === type)
+            .filter((file) => !prefix || file.key.startsWith(prefix))
+            .filter((file) => !search || file.name.toLowerCase().includes(search))
+            .sort((first, second) => compareAnalyticsFiles(first, second, sort));
+
+        if (offset > matchingFiles.length) {
+            throw new StorageRequestError(400, "cursor points beyond the available results.");
+        }
+
+        const endOffset = Math.min(offset + limit, matchingFiles.length);
+        const largestFileSize = snapshot.summary.largestFile?.size || 0;
+        const totalStorageSize = snapshot.summary.totalSize;
+        const files = matchingFiles
+            .slice(offset, endOffset)
+            .map((file, index) => toRankedAnalyticsFile(
+                file,
+                offset + index + 1,
+                largestFileSize,
+                totalStorageSize,
+            ));
+
+        return sendSuccess(res, "Storage file analytics retrieved successfully.", {
+            files,
+            nextCursor: endOffset < matchingFiles.length
+                ? encodeAnalyticsCursor(endOffset, signature)
+                : null,
+            totalMatchingFiles: matchingFiles.length,
+            largestFileSize,
+            totalStorageSize,
+            ...analyticsSnapshotMetadata(snapshot),
+        });
+    } catch (error) {
+        return handleControllerError(req, res, "list storage analytics files", error);
+    }
+}
+
+export async function getStorageAnalyticsBreakdown(req, res) {
+    try {
+        const forceRefresh = parseBooleanQuery(req.query?.refresh, "refresh");
+        const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
+
+        return sendSuccess(res, "Storage breakdown retrieved successfully.", {
+            ...snapshot.breakdown,
+            ...analyticsSnapshotMetadata(snapshot),
+        });
+    } catch (error) {
+        return handleControllerError(req, res, "calculate storage analytics breakdown", error);
     }
 }

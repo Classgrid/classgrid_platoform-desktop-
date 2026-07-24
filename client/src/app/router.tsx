@@ -61,6 +61,10 @@ import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import SandboxProfilePage from "@/features/shared/pages/SandboxProfilePage";
 import DateTimePickerSandbox from "@/features/sandbox/pages/DateTimePickerSandbox";
 import { SandboxPage } from "@/features/superadmin/pages/SandboxPage";
+import { StorageLayout } from "@/components/layout/StorageLayout";
+import { StorageFilesPage } from "@/features/superadmin/pages/StorageFilesPage";
+import { StorageAnalyticsPage } from "@/features/superadmin/pages/StorageAnalyticsPage";
+import { StorageS3ConfigPage } from "@/features/superadmin/pages/StorageS3ConfigPage";
 import { SharedSettingsPage } from "@/features/shared/pages/SharedSettingsPage";
 import { ClassroomsPage } from "@/features/classrooms/pages/ClassroomsPage";
 import ClassroomDetailPage from "@/features/classrooms/pages/ClassroomDetailPage";
@@ -225,6 +229,15 @@ export function AppRouter() {
           <Route path="/superadmin/settings" element={<SharedSettingsPage />} />
           <Route path="/superadmin/chat" element={<ChatPage />} />
           <Route path="/superadmin/subscribers" element={<SubscribersPage />} />
+          
+          {/* Storage Section with Nested Layout */}
+          <Route path="/superadmin/storage" element={<StorageLayout />}>
+            <Route index element={<Navigate to="files" replace />} />
+            <Route path="files" element={<StorageFilesPage />} />
+            <Route path="analytics" element={<StorageAnalyticsPage />} />
+            <Route path="s3" element={<StorageS3ConfigPage />} />
+          </Route>
+
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
         </Route>
 
