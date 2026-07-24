@@ -9,6 +9,7 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 import { DataTable } from "@/components/marketing_ui/data-table";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { useSystemHealth, useFeatureFlags, useToggleFeatureFlag } from "../queries/useConfig";
 import type { FeatureFlag } from "../services/superAdminApi";
 
@@ -173,6 +174,7 @@ export function ConfigPage() {
 
   const [search, setSearch] = useState("");
   const [cleaningLogs, setCleaningLogs] = useState(false);
+  const [isCleanLogsDialogOpen, setIsCleanLogsDialogOpen] = useState(false);
   const secondsSinceCheck = useTimeSince(healthData?.timestamp);
 
   const flags = flagData?.data ?? [];
@@ -212,7 +214,6 @@ export function ConfigPage() {
   const bytesToGB = (bytes: number) => bytes / (1024 * 1024 * 1024);
 
   const handleCleanLogs = async () => {
-    if (!window.confirm("Are you sure you want to clean the server logs? This will delete PM2 logs and old system journals.")) return;
     setCleaningLogs(true);
     try {
       await apiClient.post("/api/super-admin/clean-logs");
@@ -223,6 +224,7 @@ export function ConfigPage() {
       toast.error("Error cleaning logs");
     } finally {
       setCleaningLogs(false);
+      setIsCleanLogsDialogOpen(false);
     }
   };
 
@@ -279,7 +281,7 @@ export function ConfigPage() {
               <h2 className="text-lg font-semibold text-foreground">EC2 Hardware Metrics</h2>
               
               <div className="ml-4">
-                <Button variant="outline" size="sm" onClick={handleCleanLogs} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
+                <Button variant="outline" size="sm" onClick={() => setIsCleanLogsDialogOpen(true)} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
                   {cleaningLogs ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                   {cleaningLogs ? "Cleaning..." : "Clean Logs"}
                 </Button>
@@ -432,6 +434,24 @@ export function ConfigPage() {
         </div>
       </div>
 
+    </div>
+    
+      <DangerConfirmDialog
+        open={isCleanLogsDialogOpen}
+        onOpenChange={setIsCleanLogsDialogOpen}
+        title="Clean Server Logs"
+        description="Are you sure you want to clean the server logs? This will execute a PM2 flush and delete old system journals to free up disk space."
+        warningMessage="This action will permanently delete historical server logs. Proceed with caution."
+        actionLabel="Clean Logs"
+        isLoading={cleaningLogs}
+        onConfirm={handleCleanLogs}
+        confirmationSteps={[
+          {
+            label: "To confirm, type",
+            value: "clean logs"
+          }
+        ]}
+      />
     </div>
   );
 }
