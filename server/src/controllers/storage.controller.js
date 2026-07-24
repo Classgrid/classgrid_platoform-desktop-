@@ -201,7 +201,9 @@ function normalizePrefix(value) {
 }
 
 function normalizeObjectKey(value, fieldName = "key") {
-    return normalizeSegments(value, fieldName).join("/");
+    const isFolder = typeof value === "string" && value.trim().replaceAll("\\", "/").endsWith("/");
+    const normalized = normalizeSegments(value, fieldName).join("/");
+    return isFolder ? `${normalized}/` : normalized;
 }
 
 function normalizeFolderName(value) {
@@ -659,6 +661,38 @@ export async function uploadFile(req, res) {
     }
 }
 
+async function recursiveDeletePrefix(prefix) {
+    let isTruncated = true;
+    let continuationToken = undefined;
+
+    while (isTruncated) {
+        const listResponse = await s3Client.send(new ListObjectsV2Command({
+            Bucket: BUCKET_NAME,
+            Prefix: prefix,
+            ContinuationToken: continuationToken
+        }));
+
+        if (listResponse.Contents && listResponse.Contents.length > 0) {
+            const keysToDelete = listResponse.Contents.map(obj => ({ Key: obj.Key }));
+            
+            // Delete in batches of 1000
+            for (let i = 0; i < keysToDelete.length; i += 1000) {
+                const batch = keysToDelete.slice(i, i + 1000);
+                await s3Client.send(new DeleteObjectsCommand({
+                    Bucket: BUCKET_NAME,
+                    Delete: {
+                        Objects: batch,
+                        Quiet: true
+                    }
+                }));
+            }
+        }
+
+        isTruncated = listResponse.IsTruncated;
+        continuationToken = listResponse.NextContinuationToken;
+    }
+}
+
 export async function deleteObject(req, res) {
     let key = "";
 
@@ -666,10 +700,14 @@ export async function deleteObject(req, res) {
         key = normalizeObjectKey(req.body?.key);
         assertDeletable(key);
 
-        await s3Client.send(new DeleteObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: key,
-        }));
+        if (key.endsWith("/")) {
+            await recursiveDeletePrefix(key);
+        } else {
+            await s3Client.send(new DeleteObjectCommand({
+                Bucket: BUCKET_NAME,
+                Key: key,
+            }));
+        }
 
         invalidateStorageAnalyticsCache();
         auditStorageAction(req, "delete", key);
@@ -700,13 +738,23 @@ export async function deleteObjects(req, res) {
         )];
         keys.forEach(assertDeletable);
 
-        const result = await s3Client.send(new DeleteObjectsCommand({
-            Bucket: BUCKET_NAME,
-            Delete: {
-                Objects: keys.map((key) => ({ Key: key })),
-                Quiet: false,
-            },
-        }));
+        const folderKeys = keys.filter(k => k.endsWith("/"));
+        const fileKeys = keys.filter(k => !k.endsWith("/"));
+
+        for (const folderKey of folderKeys) {
+            await recursiveDeletePrefix(folderKey);
+        }
+
+        let result = {};
+        if (fileKeys.length > 0) {
+            result = await s3Client.send(new DeleteObjectsCommand({
+                Bucket: BUCKET_NAME,
+                Delete: {
+                    Objects: fileKeys.map((k) => ({ Key: k })),
+                    Quiet: false,
+                },
+            }));
+        }
 
         if (result.Errors?.length) {
             invalidateStorageAnalyticsCache();
@@ -718,7 +766,7 @@ export async function deleteObjects(req, res) {
             ));
         }
 
-        const deletedCount = result.Deleted?.length ?? keys.length;
+        const deletedCount = (result.Deleted?.length ?? fileKeys.length) + folderKeys.length;
         invalidateStorageAnalyticsCache();
         auditStorageAction(req, "bulk-delete", keys);
         return sendSuccess(res, "Storage objects deleted successfully.", {
