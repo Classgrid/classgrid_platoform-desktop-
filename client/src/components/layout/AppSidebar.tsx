@@ -42,6 +42,19 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   // Defaults to true if we load directly into a storage route.
   const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
 
+  // Scroll active item into view when sliding back to the main menu
+  useEffect(() => {
+    if (!showStorageMenu) {
+      // Slight delay to ensure it runs during/after the slide transition starts
+      setTimeout(() => {
+        const activeEl = document.getElementById("active-main-menu-item");
+        if (activeEl) {
+          activeEl.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [showStorageMenu]);
+
   // Auto-open storage menu if navigating to a storage route from outside
   useEffect(() => {
     if (location.pathname.startsWith("/superadmin/storage")) {
@@ -127,6 +140,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                       return (
                         <SidebarMenuItem key={item.label}>
                           <SidebarMenuButton
+                            id={isActive ? "active-main-menu-item" : undefined}
                             isActive={isActive}
                             tooltip={item.label}
                             className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
