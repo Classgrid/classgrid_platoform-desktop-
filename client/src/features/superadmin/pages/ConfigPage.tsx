@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/apiClient";
 import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
 import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network } from "lucide-react";
@@ -212,17 +213,8 @@ export function ConfigPage() {
     if (!confirm("Are you sure you want to clean the server logs? This will delete PM2 logs and old system journals.")) return;
     setCleaningLogs(true);
     try {
-      // Direct API call since we just added the endpoint
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/super-admin/clean-logs`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        alert("Logs cleaned successfully!");
-      } else {
-        alert("Failed to clean logs");
-      }
+      await apiClient.post("/api/super-admin/clean-logs");
+      alert("Logs cleaned successfully!");
     } catch (err) {
       alert("Error cleaning logs");
     } finally {
