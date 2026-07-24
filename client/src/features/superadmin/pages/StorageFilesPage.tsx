@@ -351,13 +351,25 @@ const StorageColumn = ({
                       }}>
                         <Edit2 className="mr-2 h-4 w-4" /> Rename
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        const event = new CustomEvent('move-file', { detail: { key: item.key, name: item.name } });
+                        window.dispatchEvent(event);
+                      }}>
+                        <FolderPlus className="mr-2 h-4 w-4" /> Move
+                      </DropdownMenuItem>
                       {!item.isFolder && (
                         <>
                           <DropdownMenuItem onClick={() => {
                             navigator.clipboard.writeText(item.cdnUrl);
-                            toast.success("CDN Link copied to clipboard");
+                            toast.success("URL copied to clipboard");
                           }}>
-                            <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
+                            <LinkIcon className="mr-2 h-4 w-4" /> Get URL
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            const event = new CustomEvent('download-file', { detail: { key: item.key, name: item.name, cdnUrl: item.cdnUrl } });
+                            window.dispatchEvent(event);
+                          }}>
+                            <Download className="mr-2 h-4 w-4" /> Download
                           </DropdownMenuItem>
                         </>
                       )}
@@ -398,6 +410,9 @@ export function StorageFilesPage() {
 
   const [fileToRename, setFileToRename] = useState<{ key: string, name: string } | null>(null);
   const [newFileName, setNewFileName] = useState("");
+  
+  const [fileToMove, setFileToMove] = useState<{ key: string, name: string } | null>(null);
+  const [moveDestinationPrefix, setMoveDestinationPrefix] = useState("");
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   
@@ -428,12 +443,31 @@ export function StorageFilesPage() {
     }, 500);
 
     const handleRenameFileEvent = (e: any) => {
-      const { key, name } = e.detail;
-      const isFolder = key.endsWith('/');
-      const lastDotIndex = !isFolder && name.lastIndexOf('.') > 0 ? name.lastIndexOf('.') : -1;
-      const baseName = lastDotIndex > 0 ? name.substring(0, lastDotIndex) : name;
-      setFileToRename({ key, name });
-      setNewFileName(baseName);
+      setFileToRename({ key: e.detail.key, name: e.detail.name });
+      setNewFileName(e.detail.name);
+    };
+
+    const handleMoveFileEvent = (e: any) => {
+      setFileToMove({ key: e.detail.key, name: e.detail.name });
+      setMoveDestinationPrefix(e.detail.key.substring(0, e.detail.key.lastIndexOf('/') + 1));
+    };
+
+    const handleDownloadFileEvent = async (e: any) => {
+      const { key, name, cdnUrl } = e.detail;
+      try {
+        toast.loading("Starting download...", { id: "downloading" });
+        const data = await storageApi.getPresignedUrl(key);
+        const link = document.createElement('a');
+        link.href = data.downloadUrl;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download complete", { id: "downloading" });
+      } catch (error) {
+        toast.dismiss("downloading");
+        if (cdnUrl) window.open(cdnUrl, '_blank');
+      }
     };
 
     const handleDeleteFileEvent = (e: any) => {
@@ -441,11 +475,15 @@ export function StorageFilesPage() {
     };
 
     window.addEventListener('rename-file', handleRenameFileEvent);
+    window.addEventListener('move-file', handleMoveFileEvent);
+    window.addEventListener('download-file', handleDownloadFileEvent);
     window.addEventListener('delete-file', handleDeleteFileEvent);
 
     return () => {
       clearTimeout(handler);
       window.removeEventListener('rename-file', handleRenameFileEvent);
+      window.removeEventListener('move-file', handleMoveFileEvent);
+      window.removeEventListener('download-file', handleDownloadFileEvent);
       window.removeEventListener('delete-file', handleDeleteFileEvent);
     };
   }, [searchInput]);
@@ -666,6 +704,34 @@ export function StorageFilesPage() {
             cdnUrl: activeFile.cdnUrl ? activeFile.cdnUrl.replace(encodeURIComponent(fileToRename.name), encodeURIComponent(newFileName.trim())) : activeFile.cdnUrl
           });
         }
+      }
+    });
+  };
+
+  const handleMoveFile = () => {
+    if (!fileToMove) return;
+    
+    let destPrefix = moveDestinationPrefix.trim();
+    if (destPrefix && !destPrefix.endsWith('/')) {
+      destPrefix += '/';
+    }
+    
+    const newKey = destPrefix + fileToMove.name;
+    
+    if (fileToMove.key === newKey) {
+      setFileToMove(null);
+      return;
+    }
+
+    renameObjectMutation.mutate({ sourceKey: fileToMove.key, destinationKey: newKey }, {
+      onSuccess: () => {
+        setFileToMove(null);
+        setMoveDestinationPrefix("");
+        if (activeFile?.key === fileToMove.key) {
+          setActiveFile(null); 
+        }
+        refetch();
+        toast.success("Moved successfully");
       }
     });
   };
@@ -958,34 +1024,38 @@ export function StorageFilesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
-                              <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={async () => {
-                              try {
-                                toast.loading("Starting download...", { id: "downloading" });
-                                const data = await storageApi.getPresignedUrl(row.key);
-                                const link = document.createElement('a');
-                                link.href = data.downloadUrl;
-                                link.download = row.name;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                toast.success("Download complete", { id: "downloading" });
-                              } catch (e) {
-                                toast.dismiss("downloading");
-                                window.open(row.cdnUrl, '_blank');
-                              }
-                            }}>
-                              <Download className="mr-2 h-4 w-4" /> Download
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => { setFileToRename({ key: row.key, name: row.name }); setNewFileName(row.name); }}>
-                              <Edit2 className="mr-2 h-4 w-4" /> Rename
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setFileToDelete(row.key)}>
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                                const event = new CustomEvent('rename-file', { detail: { key: row.key, name: row.name } });
+                                window.dispatchEvent(event);
+                              }}>
+                                <Edit2 className="mr-2 h-4 w-4" /> Rename
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                const event = new CustomEvent('move-file', { detail: { key: row.key, name: row.name } });
+                                window.dispatchEvent(event);
+                              }}>
+                                <FolderPlus className="mr-2 h-4 w-4" /> Move
+                              </DropdownMenuItem>
+                              {!row.isFolder && (
+                                <>
+                                  <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "URL")}>
+                                    <LinkIcon className="mr-2 h-4 w-4" /> Get URL
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    const event = new CustomEvent('download-file', { detail: { key: row.key, name: row.name, cdnUrl: row.cdnUrl } });
+                                    window.dispatchEvent(event);
+                                  }}>
+                                    <Download className="mr-2 h-4 w-4" /> Download
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => {
+                                const event = new CustomEvent('delete-file', { detail: row.key });
+                                window.dispatchEvent(event);
+                              }}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       );
@@ -1046,7 +1116,60 @@ export function StorageFilesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      
       {/* Rename Dialog Removed - Using Inline Editing */}
+      <Dialog open={!!fileToRename} onOpenChange={(open) => !open && setFileToRename(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rename {fileToRename?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">New Name</p>
+              <Input
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFileToRename(null)}>Cancel</Button>
+            <Button onClick={handleRenameFile} disabled={renameObjectMutation.isPending || !newFileName.trim() || newFileName === fileToRename?.name}>
+              {renameObjectMutation.isPending && <Spinner className="mr-2" />}
+              {renameObjectMutation.isPending ? "Renaming..." : "Rename"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Move File Modal */}
+      <Dialog open={!!fileToMove} onOpenChange={(open) => !open && setFileToMove(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Move {fileToMove?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Destination Folder Path</p>
+              <Input
+                value={moveDestinationPrefix}
+                onChange={(e) => setMoveDestinationPrefix(e.target.value)}
+                placeholder="e.g., folder1/folder2/"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">Current path: {fileToMove?.key.substring(0, fileToMove?.key.lastIndexOf('/') + 1) || "Root"}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFileToMove(null)}>Cancel</Button>
+            <Button onClick={handleMoveFile} disabled={renameObjectMutation.isPending}>
+              {renameObjectMutation.isPending && <Spinner className="mr-2" />}
+              {renameObjectMutation.isPending ? "Moving..." : "Move"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DangerConfirmDialog
         open={!!fileToDelete}
