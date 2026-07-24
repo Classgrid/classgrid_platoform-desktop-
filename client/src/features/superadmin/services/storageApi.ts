@@ -1,5 +1,16 @@
 import { apiClient } from "@/lib/apiClient";
 
+export type StorageAnalyticsType =
+  | "image"
+  | "video"
+  | "audio"
+  | "pdf"
+  | "document"
+  | "archive"
+  | "text"
+  | "other"
+  | "unknown";
+
 export interface StorageObject {
   key: string;
   name: string;
@@ -7,6 +18,15 @@ export interface StorageObject {
   lastModified: string | null;
   contentType: string;
   cdnUrl: string;
+  folder?: string;
+  type?: StorageAnalyticsType;
+}
+
+export interface AnalyticsSnapshotMetadata {
+  generatedAt: string;
+  cacheAgeSeconds: number;
+  cacheStatus: "refreshed" | "cached" | "stale";
+  refreshWarning?: string;
 }
 
 export interface StorageFolder {
@@ -28,7 +48,7 @@ export interface UploadFileResponse {
   contentType: string;
 }
 
-export interface AnalyticsSummaryResponse {
+export interface AnalyticsSummaryResponse extends AnalyticsSnapshotMetadata {
   totalFiles: number;
   totalFolders: number;
   totalSize: number;
@@ -38,36 +58,45 @@ export interface AnalyticsSummaryResponse {
   zeroByteFiles: number;
   unknownContentTypeFiles: number;
   filesAboveOneGb: number;
-  generatedAt: string;
-  cacheAgeSeconds: number;
+  filesOlderThanOneYear: number;
+  metadataLookupFailures: number;
 }
 
-export interface AnalyticsFilesResponse {
-  files: (StorageObject & { 
-    rank: number; 
-    folder: string; 
-    relativeToLargestPercentage: number; 
-    percentageOfTotal: number; 
-  })[];
+export interface AnalyticsRankedFile extends StorageObject {
+  rank: number;
+  folder: string;
+  type: StorageAnalyticsType;
+  relativeToLargestPercentage: number;
+  percentageOfTotal: number;
+}
+
+export interface AnalyticsFilesResponse extends AnalyticsSnapshotMetadata {
+  files: AnalyticsRankedFile[];
   nextCursor: string | null;
   totalMatchingFiles: number;
   largestFileSize: number;
   totalStorageSize: number;
-  generatedAt: string;
 }
 
-export interface AnalyticsBreakdownResponse {
-  byType: { type: string; fileCount: number; size: number; percentage: number }[];
+export interface AnalyticsBreakdownResponse extends AnalyticsSnapshotMetadata {
+  byType: { type: StorageAnalyticsType; label: string; fileCount: number; size: number; percentage: number }[];
   byFolder: { prefix: string; name: string; fileCount: number; size: number; percentage: number }[];
   bySizeRange: { range: string; label: string; fileCount: number; size: number }[];
   recentFiles: StorageObject[];
   oldestFiles: StorageObject[];
-  generatedAt: string;
 }
 
-export interface StorageConfiguration {
-  provider: string;
+export interface StorageConnectionStatus {
   connected: boolean;
+  status: "connected" | "disconnected";
+  message: string;
+  checkedAt: string;
+  latencyMs: number;
+  errorCode?: string;
+}
+
+export interface StorageConfiguration extends StorageConnectionStatus {
+  provider: string;
   endpoint: string;
   bucket: string;
   region: string;
@@ -77,17 +106,37 @@ export interface StorageConfiguration {
   presignedUrlExpirySeconds: number;
   uploadRateLimitPerMinute: number;
   credentialsConfigured: boolean;
+  credentialSource: string;
   auditLoggingEnabled: boolean;
   protectedPrefixes: string[];
-  checkedAt: string;
-  latencyMs: number;
+  authentication: string;
+  configurationSource: string;
+  publicDelivery: string;
+  metadataSource: string;
 }
 
-export interface StorageConnectionTestResult {
-  connected: boolean;
-  message?: string;
-  checkedAt: string;
-  latencyMs: number;
+export type StorageConnectionTestResult = StorageConnectionStatus;
+
+export interface StorageObjectMetadata {
+  key: string;
+  size: number;
+  contentType: string;
+  lastModified: string | null;
+  cdnUrl: string;
+  etag: string | null;
+}
+
+export interface AnalyticsFileQuery {
+  sort?: "size_desc" | "size_asc" | "modified_desc" | "modified_asc" | "name_asc" | "name_desc" | string;
+  type?: StorageAnalyticsType | string;
+  prefix?: string;
+  search?: string;
+  limit?: number;
+  cursor?: string;
+  nonZero?: boolean;
+  zeroOnly?: boolean;
+  rootOnly?: boolean;
+  refresh?: boolean;
 }
 
 export const storageApi = {
@@ -151,7 +200,7 @@ export const storageApi = {
     return response.data.data;
   },
 
-  getAnalyticsFiles: async (params?: { sort?: string; type?: string; prefix?: string; search?: string; limit?: number; cursor?: string }) => {
+  getAnalyticsFiles: async (params?: AnalyticsFileQuery) => {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -164,8 +213,9 @@ export const storageApi = {
     return response.data.data;
   },
 
-  getAnalyticsBreakdown: async () => {
-    const response = await apiClient.get<{ data: AnalyticsBreakdownResponse }>("/api/super-admin/storage/analytics/breakdown");
+  getAnalyticsBreakdown: async (forceRefresh?: boolean) => {
+    const params = forceRefresh ? "?refresh=true" : "";
+    const response = await apiClient.get<{ data: AnalyticsBreakdownResponse }>(`/api/super-admin/storage/analytics/breakdown${params}`);
     return response.data.data;
   },
 
@@ -175,12 +225,18 @@ export const storageApi = {
   },
 
   getHealth: async () => {
-    const response = await apiClient.get<{ data: StorageConfiguration }>("/api/super-admin/storage/health");
+    const response = await apiClient.get<{ data: StorageConnectionStatus }>("/api/super-admin/storage/health");
     return response.data.data;
   },
 
   testConnection: async () => {
     const response = await apiClient.post<{ data: StorageConnectionTestResult }>("/api/super-admin/storage/test-connection");
+    return response.data.data;
+  },
+
+  getMetadata: async (key: string) => {
+    const params = new URLSearchParams({ key });
+    const response = await apiClient.get<{ data: StorageObjectMetadata }>(`/api/super-admin/storage/metadata?${params.toString()}`);
     return response.data.data;
   },
 };

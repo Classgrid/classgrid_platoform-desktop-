@@ -1,13 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { storageApi } from "../services/storageApi";
+import { storageApi, type AnalyticsFileQuery } from "../services/storageApi";
 import { toast } from "sonner";
+
+function storageErrorMessage(error: unknown, fallback: string) {
+  return error && typeof error === "object" && "message" in error && typeof error.message === "string"
+    ? error.message
+    : fallback;
+}
 
 export const storageKeys = {
   all: ["storage"] as const,
   lists: () => [...storageKeys.all, "list"] as const,
   list: (prefix: string, search?: string) => [...storageKeys.lists(), prefix, search] as const,
+  analytics: () => [...storageKeys.all, "analytics"] as const,
   analyticsSummary: () => [...storageKeys.all, "analytics", "summary"] as const,
-  analyticsFiles: (params?: any) => [...storageKeys.all, "analytics", "files", params] as const,
+  analyticsFiles: (params?: AnalyticsFileQuery) => [...storageKeys.all, "analytics", "files", params] as const,
   analyticsBreakdown: () => [...storageKeys.all, "analytics", "breakdown"] as const,
   configuration: () => [...storageKeys.all, "configuration"] as const,
 };
@@ -27,10 +34,11 @@ export function useUploadFile() {
       storageApi.uploadFile(file, prefix, onUploadProgress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
       toast.success("File uploaded successfully.");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to upload file.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Failed to upload file."));
     },
   });
 }
@@ -42,10 +50,11 @@ export function useCreateFolder() {
       storageApi.createFolder(folderName, prefix),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
       toast.success("Folder created successfully.");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to create folder.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Failed to create folder."));
     },
   });
 }
@@ -56,10 +65,11 @@ export function useDeleteObject() {
     mutationFn: (key: string) => storageApi.deleteObject(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
       toast.success("Object deleted successfully.");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to delete object.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Failed to delete object."));
     },
   });
 }
@@ -70,10 +80,11 @@ export function useDeleteObjects() {
     mutationFn: (keys: string[]) => storageApi.deleteObjects(keys),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
       toast.success("Objects deleted successfully.");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to delete objects.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Failed to delete objects."));
     },
   });
 }
@@ -85,23 +96,24 @@ export function useRenameObject() {
       storageApi.renameObject(sourceKey, destinationKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
       toast.success("Object renamed successfully.");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to rename object.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Failed to rename object."));
     },
   });
 }
 
-export function useAnalyticsSummary(forceRefresh?: boolean) {
+export function useAnalyticsSummary() {
   return useQuery({
-    queryKey: [...storageKeys.analyticsSummary(), forceRefresh],
-    queryFn: () => storageApi.getAnalyticsSummary(forceRefresh),
+    queryKey: storageKeys.analyticsSummary(),
+    queryFn: () => storageApi.getAnalyticsSummary(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
-export function useAnalyticsFiles(params?: { sort?: string; type?: string; prefix?: string; search?: string; limit?: number; cursor?: string }) {
+export function useAnalyticsFiles(params?: AnalyticsFileQuery) {
   return useQuery({
     queryKey: storageKeys.analyticsFiles(params),
     queryFn: () => storageApi.getAnalyticsFiles(params),
@@ -129,12 +141,16 @@ export function useTestStorageConnection() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => storageApi.testConnection(),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: storageKeys.configuration() });
-      toast.success("Connection test completed.");
+      if (result.connected) {
+        toast.success(`S3 connection healthy (${result.latencyMs} ms).`);
+      } else {
+        toast.warning(result.message || "S3 connection test failed.");
+      }
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Connection test failed.");
+    onError: (error: unknown) => {
+      toast.error(storageErrorMessage(error, "Connection test failed."));
     },
   });
 }
