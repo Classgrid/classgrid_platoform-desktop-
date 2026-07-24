@@ -140,7 +140,28 @@ const StorageColumn = ({
   handleCreateFolder,
   uploadingFiles,
 }: any) => {
-  const { data: items = [], isLoading } = useStorageObjects(prefix);
+  const { data, isLoading } = useStorageObjects(prefix);
+  
+  const items = [
+    ...(data?.folders || []).map((folder: any) => ({
+      isFolder: true,
+      key: folder.prefix,
+      name: folder.name || folder.prefix.split("/").filter(Boolean).pop(),
+      type: "Folder",
+      size: null,
+      lastModified: null,
+      cdnUrl: ""
+    })),
+    ...(data?.files || []).map((file: any) => ({
+      isFolder: false,
+      key: file.Key,
+      name: file.Key.split("/").pop() || "",
+      type: file.ContentType,
+      size: file.Size,
+      lastModified: file.LastModified,
+      cdnUrl: file.cdnUrl
+    }))
+  ];
   
   return (
     <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-border flex flex-col bg-background/50 h-full">
