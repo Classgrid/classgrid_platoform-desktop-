@@ -11,7 +11,7 @@ export function StorageLayout() {
     <DashboardLayout 
       role="super_admin" 
       user={user || { name: "Super Admin" }}
-      sidebarOverride={<StorageSidebar />}
+      sidebarOverride={<StorageSidebar role="super_admin" user={user || { name: "Super Admin" }} />}
     >
       <Outlet />
     </DashboardLayout>

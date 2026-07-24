@@ -19,6 +19,7 @@ export type SidebarItem = {
   icon?: LucideIcon;
   badge?: number;
   restrictedToEmail?: string;
+  hasNestedNav?: boolean;
 };
 
 export type SidebarSection = {

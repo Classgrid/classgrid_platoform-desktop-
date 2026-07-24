@@ -508,34 +508,49 @@ export async function getStorageAnalyticsSnapshot({ forceRefresh = false } = {})
         return decorateSnapshot(analyticsCache.snapshot, "cached");
     }
 
-    if (analyticsRefreshPromise) {
-        const snapshot = await analyticsRefreshPromise;
-        return decorateSnapshot(snapshot, "refreshed");
-    }
+    if (analyticsRefreshPromise) return analyticsRefreshPromise;
 
-    analyticsRefreshPromise = buildAnalyticsSnapshot();
+    analyticsRefreshPromise = (async () => {
+        try {
+            const snapshot = await buildAnalyticsSnapshot();
+            analyticsCache = {
+                snapshot,
+                expiresAt: Date.now() + STORAGE_ANALYTICS_CACHE_TTL_MS,
+            };
+            return decorateSnapshot(snapshot, "refreshed");
+        } catch (error) {
+            if (analyticsCache.snapshot) {
+                console.error(
+                    `[Storage Analytics] refresh failed; serving stale snapshot (${error?.name || "UnknownError"}).`,
+                );
+                return decorateSnapshot(
+                    analyticsCache.snapshot,
+                    "stale",
+                    "Analytics refresh failed. The last completed snapshot is being shown.",
+                );
+            }
+            throw error;
+        }
+    })();
 
     try {
-        const snapshot = await analyticsRefreshPromise;
-        analyticsCache = {
-            snapshot,
-            expiresAt: Date.now() + STORAGE_ANALYTICS_CACHE_TTL_MS,
-        };
-        return decorateSnapshot(snapshot, "refreshed");
-    } catch (error) {
-        if (analyticsCache.snapshot) {
-            console.error(
-                `[Storage Analytics] refresh failed; serving stale snapshot (${error?.name || "UnknownError"}).`,
-            );
-            return decorateSnapshot(
-                analyticsCache.snapshot,
-                "stale",
-                "Analytics refresh failed. The last completed snapshot is being shown.",
-            );
-        }
-        throw error;
+        return await analyticsRefreshPromise;
     } finally {
         analyticsRefreshPromise = null;
+    }
+}
+
+async function areStorageCredentialsConfigured() {
+    if (explicitCredentialsConfigured) return true;
+
+    try {
+        const credentialsProvider = s3Client.config.credentials;
+        const credentials = typeof credentialsProvider === "function"
+            ? await credentialsProvider()
+            : credentialsProvider;
+        return Boolean(credentials?.accessKeyId && credentials?.secretAccessKey);
+    } catch {
+        return false;
     }
 }
 
@@ -614,7 +629,10 @@ export async function checkStorageConnection() {
 }
 
 export async function getSafeStorageConfiguration() {
-    const connection = await checkStorageConnection();
+    const [connection, credentialsConfigured] = await Promise.all([
+        checkStorageConnection(),
+        areStorageCredentialsConfigured(),
+    ]);
 
     return {
         provider: "AWS S3",
@@ -626,10 +644,14 @@ export async function getSafeStorageConfiguration() {
         multipartThresholdBytes: MULTIPART_THRESHOLD_BYTES,
         presignedUrlExpirySeconds: STORAGE_PRESIGNED_URL_EXPIRY_SECONDS,
         uploadRateLimitPerMinute: STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
-        credentialsConfigured: explicitCredentialsConfigured || connection.connected,
+        credentialsConfigured,
         credentialSource: explicitCredentialsConfigured
             ? "server environment"
-            : "AWS default provider chain",
+            : (
+                credentialsConfigured
+                    ? "AWS default provider chain"
+                    : "not resolved"
+            ),
         auditLoggingEnabled: true,
         protectedPrefixes: [...PROTECTED_PREFIXES],
         authentication: "super_admin",

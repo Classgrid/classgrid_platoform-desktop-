@@ -566,8 +566,11 @@ prefix=folder/path/
 search=filename
 limit=25
 cursor=opaque-pagination-cursor
+nonZero=true | false
 refresh=true | false
 ```
+
+Use `sort=size_asc&nonZero=true` for the Smallest Files panel. Sorting alone never removes zero-byte files; `nonZero` is an explicit filter.
 
 Implemented response shape:
 

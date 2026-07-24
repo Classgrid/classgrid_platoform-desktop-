@@ -283,9 +283,12 @@ function buildAnalyticsQuerySignature({
     type,
     prefix,
     search,
+    nonZero,
     snapshotId,
 }) {
-    return JSON.stringify({ sort, type, prefix, search, snapshotId });
+    return JSON.stringify({
+        sort, type, prefix, search, nonZero, snapshotId,
+    });
 }
 
 function encodeAnalyticsCursor(offset, signature) {
@@ -884,6 +887,7 @@ export async function getStorageAnalyticsFiles(req, res) {
         setPrivateNoStore(res);
         const query = req.query || {};
         const forceRefresh = parseBooleanQuery(query.refresh, "refresh");
+        const nonZero = parseBooleanQuery(query.nonZero, "nonZero");
         const sort = (parseOptionalQueryString(query.sort, "sort") || "size_desc").toLowerCase();
         const requestedType = parseOptionalQueryString(query.type, "type").toLowerCase();
         const type = requestedType === "all" ? "" : requestedType;
@@ -910,6 +914,7 @@ export async function getStorageAnalyticsFiles(req, res) {
             type,
             prefix,
             search,
+            nonZero,
             snapshotId: snapshot.generatedAt,
         });
         const offset = decodeAnalyticsCursor(query.cursor, signature);
@@ -917,7 +922,7 @@ export async function getStorageAnalyticsFiles(req, res) {
             .filter((file) => !type || file.type === type)
             .filter((file) => !prefix || file.key.startsWith(prefix))
             .filter((file) => !search || file.name.toLowerCase().includes(search))
-            .filter((file) => sort !== "size_asc" || file.size > 0)
+            .filter((file) => !nonZero || file.size > 0)
             .sort((first, second) => compareAnalyticsFiles(first, second, sort));
 
         if (offset > matchingFiles.length) {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Icons from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 import {
   Sidebar,
@@ -122,11 +123,16 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                           {item.icon && <item.icon size={20} />}
                           <span className="truncate">{item.label}</span>
                         </div>
-                        {item.badge && (
-                          <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
-                            {item.badge}
-                          </span>
-                        )}
+                        <div className="flex items-center ml-auto gap-2">
+                          {item.badge && (
+                            <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
+                              {item.badge}
+                            </span>
+                          )}
+                          {item.hasNestedNav && (
+                            <ChevronRight size={16} className="text-muted-foreground" />
+                          )}
+                        </div>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
