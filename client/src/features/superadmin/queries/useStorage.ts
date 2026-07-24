@@ -74,10 +74,10 @@ export function useDeleteObject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("Object deleted successfully.");
+      toast.success("File or folder deleted successfully.");
     },
     onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to delete object."));
+      toast.error(storageErrorMessage(error, "Failed to delete file or folder."));
     },
   });
 }
@@ -89,10 +89,10 @@ export function useDeleteObjects() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("Objects deleted successfully.");
+      toast.success("Files or folders deleted successfully.");
     },
     onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to delete objects."));
+      toast.error(storageErrorMessage(error, "Failed to delete files or folders."));
     },
   });
 }
@@ -105,10 +105,10 @@ export function useRenameObject() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("Object renamed successfully.");
+      toast.success("File or folder renamed successfully.");
     },
     onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to rename object."));
+      toast.error(storageErrorMessage(error, "Failed to rename file or folder."));
     },
   });
 }
