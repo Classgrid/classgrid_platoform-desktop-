@@ -71,13 +71,15 @@ export function useDeleteObject() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (key: string) => storageApi.deleteObject(key),
-    onSuccess: () => {
+    onSuccess: (_, key) => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("File or folder deleted successfully.");
+      const isFolder = key.endsWith('/');
+      toast.success(isFolder ? "Folder deleted successfully." : "File deleted successfully.");
     },
-    onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to delete file or folder."));
+    onError: (error: unknown, key) => {
+      const isFolder = key.endsWith('/');
+      toast.error(storageErrorMessage(error, isFolder ? "Failed to delete folder." : "Failed to delete file."));
     },
   });
 }
@@ -86,13 +88,19 @@ export function useDeleteObjects() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (keys: string[]) => storageApi.deleteObjects(keys),
-    onSuccess: () => {
+    onSuccess: (_, keys) => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("Files or folders deleted successfully.");
+      const hasFiles = keys.some(k => !k.endsWith('/'));
+      const hasFolders = keys.some(k => k.endsWith('/'));
+      const count = keys.length;
+      let msg = `${count} items deleted successfully.`;
+      if (hasFiles && !hasFolders) msg = `${count} file${count !== 1 ? 's' : ''} deleted successfully.`;
+      else if (!hasFiles && hasFolders) msg = `${count} folder${count !== 1 ? 's' : ''} deleted successfully.`;
+      toast.success(msg);
     },
     onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to delete files or folders."));
+      toast.error(storageErrorMessage(error, "Failed to delete items."));
     },
   });
 }
@@ -102,13 +110,15 @@ export function useRenameObject() {
   return useMutation({
     mutationFn: ({ sourceKey, destinationKey }: { sourceKey: string; destinationKey: string }) =>
       storageApi.renameObject(sourceKey, destinationKey),
-    onSuccess: () => {
+    onSuccess: (_, { sourceKey }) => {
       queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
       queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
-      toast.success("File or folder renamed successfully.");
+      const isFolder = sourceKey.endsWith('/');
+      toast.success(isFolder ? "Folder renamed successfully." : "File renamed successfully.");
     },
-    onError: (error: unknown) => {
-      toast.error(storageErrorMessage(error, "Failed to rename file or folder."));
+    onError: (error: unknown, { sourceKey }) => {
+      const isFolder = sourceKey.endsWith('/');
+      toast.error(storageErrorMessage(error, isFolder ? "Failed to rename folder." : "Failed to rename file."));
     },
   });
 }
