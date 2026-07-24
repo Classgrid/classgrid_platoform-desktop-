@@ -208,10 +208,10 @@ export function StorageFilesPage() {
   const prefixParts = prefix.split("/").filter(Boolean);
 
   return (
-    <div className="flex flex-col h-full bg-background w-full p-4">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       
-      {/* 2. Main Container (The bordered box) */}
-      <div className="flex flex-col h-[85vh] min-h-[600px] w-full border border-border rounded-lg overflow-hidden bg-card shadow-sm">
+      {/* Main Container */}
+      <div className="flex flex-col flex-1 w-full border-t border-border overflow-hidden bg-card">
         
         {/* Top Toolbar (Inside box) */}
         <div className="flex items-center justify-between p-3 border-b border-border bg-muted/20">
