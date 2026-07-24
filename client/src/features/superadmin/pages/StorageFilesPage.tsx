@@ -401,53 +401,103 @@ export function StorageFilesPage() {
     fileInputRef.current?.click();
   };
 
-  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    
-    const files = Array.from(e.target.files);
-    
-    const newUploads = files.map(file => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      name: file.name,
-      prefix: activeUploadPrefix,
-      progress: 0,
-      status: 'uploading' as const
-    }));
+    const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files || e.target.files.length === 0) return;
+      
+      const files = Array.from(e.target.files);
+      
+      const newUploads = files.map(file => ({
+        id: Math.random().toString(36).substring(7),
+        file,
+        name: file.name,
+        prefix: activeUploadPrefix,
+        progress: 0,
+        status: 'uploading' as const
+      }));
 
-    setUploadingFiles(prev => [...prev, ...newUploads]);
-    
-    newUploads.forEach(async (upload) => {
-      try {
-        await uploadFileMutation.mutateAsync({
-          file: upload.file,
-          prefix: upload.prefix,
-          onUploadProgress: (progressEvent) => {
+      setUploadingFiles(prev => [...prev, ...newUploads]);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      const successfullyUploadedFiles: typeof newUploads = [];
+
+      Promise.all(newUploads.map(async (upload) => {
+        try {
+          await storageApi.uploadFile(upload.file, upload.prefix, (progressEvent) => {
             if (progressEvent.total) {
               const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
               setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
             }
+          });
+          
+          successCount++;
+          successfullyUploadedFiles.push(upload);
+          // Set to completed so it can be filtered out from inline display
+          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
+          
+          // Remove from tracking completely after 2 seconds
+          setTimeout(() => {
+            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+          }, 2000);
+        } catch (error) {
+          errorCount++;
+          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
+          setTimeout(() => {
+            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+          }, 5000);
+        }
+      })).then(() => {
+        // Optimistically insert the uploaded files into the query cache so they show instantly
+        if (successfullyUploadedFiles.length > 0) {
+          const updateCache = (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            const newFiles = successfullyUploadedFiles.map(u => ({
+              key: `${u.prefix}${u.name}`,
+              name: u.name,
+              size: u.file.size,
+              contentType: u.file.type,
+              lastModified: new Date().toISOString(),
+              cdnUrl: ""
+            }));
+
+            const existingKeys = new Set(oldData.files.map((f: any) => f.key));
+            const uniqueNewFiles = newFiles.filter(f => !existingKeys.has(f.key));
+            
+            const updatedOldFiles = oldData.files.map((f: any) => {
+              const newFile = newFiles.find(nf => nf.key === f.key);
+              return newFile ? newFile : f;
+            });
+
+            return {
+              ...oldData,
+              files: [...updatedOldFiles, ...uniqueNewFiles].sort((a: any, b: any) => a.name.localeCompare(b.name))
+            };
+          };
+
+          queryClient.setQueryData(storageKeys.list(activeUploadPrefix), updateCache);
+          if (debouncedSearch) {
+            queryClient.setQueryData(storageKeys.list(activeUploadPrefix, debouncedSearch), updateCache);
           }
-        });
+        }
+
+        // Globally invalidate so ALL columns refresh in the background
+        queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
         
-        // onSuccess
-        setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
-        setTimeout(() => {
-          setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-        }, 2000);
-        refetch();
-      } catch (error) {
-        // onError
-        setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
-        setTimeout(() => {
-          setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-        }, 5000);
-      }
-    });
-    
-    // Clear input
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+        // Single unified toast notification
+        if (successCount > 0 && errorCount === 0) {
+          toast.success(`Successfully uploaded ${successCount} file${successCount > 1 ? 's' : ''}.`);
+        } else if (successCount > 0 && errorCount > 0) {
+          toast.warning(`Uploaded ${successCount} file(s), but ${errorCount} failed.`);
+        } else if (errorCount > 0) {
+          toast.error(`Failed to upload ${errorCount} file(s).`);
+        }
+      });
+      
+      // Clear input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
   const handleNavigateToFolder = () => {
     if (!navigatePath) {
