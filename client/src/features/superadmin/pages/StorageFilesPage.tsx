@@ -885,7 +885,8 @@ export function StorageFilesPage() {
         onOpenChange={(open) => !open && setFileToDelete(null)}
         title="Delete File"
         description="Are you sure you want to delete this file? This action cannot be undone."
-        confirmText="delete"
+        warningMessage="This file will be permanently deleted from the servers."
+        actionLabel="Delete"
         onConfirm={handleDeleteFile}
         isLoading={deleteObjectMutation.isPending}
       />
@@ -895,7 +896,8 @@ export function StorageFilesPage() {
         onOpenChange={setIsBulkDeleteModalOpen}
         title={`Delete ${selectedKeys.size} Files`}
         description={`Are you sure you want to permanently delete these ${selectedKeys.size} items? This action cannot be undone.`}
-        confirmText="bulk delete"
+        warningMessage="These files will be permanently deleted from the servers."
+        actionLabel="Bulk Delete"
         onConfirm={handleBulkDelete}
         isLoading={deleteObjectsMutation.isPending}
       />
