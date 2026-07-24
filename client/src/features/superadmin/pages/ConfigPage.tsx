@@ -277,16 +277,18 @@ export function ConfigPage() {
           <div className={`rounded-xl border p-5 transition-colors duration-500 relative overflow-hidden ${hardwareCardStyle}`}>
             {/* Glass decoration removed per user request */}
             
-            <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-6">
               <Server className={isDiskCritical || isRamCritical ? "text-destructive" : "text-blue-500"} size={18} />
               <h2 className="text-lg font-semibold text-foreground">EC2 Hardware Metrics</h2>
               
-              <div className="ml-4">
-                <Button variant="outline" size="sm" onClick={() => setIsCleanLogsDialogOpen(true)} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
-                  {cleaningLogs ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                  {cleaningLogs ? "Cleaning..." : "Clean Logs"}
-                </Button>
-              </div>
+              {isDiskCritical && (
+                <div className="ml-4">
+                  <Button variant="outline" size="sm" onClick={() => setIsCleanLogsDialogOpen(true)} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
+                    {cleaningLogs ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                    {cleaningLogs ? "Cleaning..." : "Clean Logs & Cache"}
+                  </Button>
+                </div>
+              )}
 
               <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground font-mono">
                 <Activity size={12} />
