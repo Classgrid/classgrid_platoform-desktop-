@@ -537,7 +537,37 @@ export function StorageFilesPage() {
           });
           
           successCount++;
-          successfullyUploadedFiles.push(upload);
+          
+          // Instantly inject THIS file into the cache so it shows up without waiting for other files!
+          const newFile = {
+            key: `${upload.prefix}${upload.name}`,
+            name: upload.name,
+            size: upload.file.size,
+            contentType: upload.file.type,
+            lastModified: new Date().toISOString(),
+            cdnUrl: ""
+          };
+          
+          const updateCache = (oldData: any) => {
+            if (!oldData) return oldData;
+            const existingKeys = new Set(oldData.files.map((f: any) => f.key));
+            if (existingKeys.has(newFile.key)) {
+              return {
+                ...oldData,
+                files: oldData.files.map((f: any) => f.key === newFile.key ? newFile : f)
+              };
+            }
+            return {
+              ...oldData,
+              files: [...oldData.files, newFile].sort((a: any, b: any) => a.name.localeCompare(b.name))
+            };
+          };
+
+          queryClient.setQueryData(storageKeys.list(upload.prefix), updateCache);
+          if (debouncedSearch) {
+            queryClient.setQueryData(storageKeys.list(upload.prefix, debouncedSearch), updateCache);
+          }
+
           // Set to completed so it can be filtered out from inline display
           setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
           
@@ -553,40 +583,6 @@ export function StorageFilesPage() {
           }, 5000);
         }
       })).then(() => {
-        // Optimistically insert the uploaded files into the query cache so they show instantly
-        if (successfullyUploadedFiles.length > 0) {
-          const updateCache = (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            const newFiles = successfullyUploadedFiles.map(u => ({
-              key: `${u.prefix}${u.name}`,
-              name: u.name,
-              size: u.file.size,
-              contentType: u.file.type,
-              lastModified: new Date().toISOString(),
-              cdnUrl: ""
-            }));
-
-            const existingKeys = new Set(oldData.files.map((f: any) => f.key));
-            const uniqueNewFiles = newFiles.filter(f => !existingKeys.has(f.key));
-            
-            const updatedOldFiles = oldData.files.map((f: any) => {
-              const newFile = newFiles.find(nf => nf.key === f.key);
-              return newFile ? newFile : f;
-            });
-
-            return {
-              ...oldData,
-              files: [...updatedOldFiles, ...uniqueNewFiles].sort((a: any, b: any) => a.name.localeCompare(b.name))
-            };
-          };
-
-          queryClient.setQueryData(storageKeys.list(activeUploadPrefix), updateCache);
-          if (debouncedSearch) {
-            queryClient.setQueryData(storageKeys.list(activeUploadPrefix, debouncedSearch), updateCache);
-          }
-        }
-
         // Globally invalidate so ALL columns refresh in the background
         queryClient.invalidateQueries({ queryKey: storageKeys.lists() });
         queryClient.invalidateQueries({ queryKey: storageKeys.analytics() });
