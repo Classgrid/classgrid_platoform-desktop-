@@ -46,24 +46,26 @@ export function StorageSidebar({ role, user }: StorageSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
-      <SidebarHeader>
+      <SidebarHeader className="gap-1 p-2 pb-0">
         <div className="flex items-center w-full group-data-[collapsible=icon]:justify-center">
           <SidebarSwitcher user={user ?? null} />
         </div>
-        <div className="group-data-[collapsible=icon]:hidden">
+        <div className="group-data-[collapsible=icon]:hidden mb-1">
           <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
+        
+        <div className="group-data-[collapsible=icon]:hidden -mx-1">
+          <SidebarMenuButton asChild className="h-9 text-muted-foreground hover:text-foreground cursor-pointer rounded-md">
+            <a onClick={(e) => { e.preventDefault(); navigate(-1); }} className="flex items-center w-full font-medium text-[15px]">
+              <ChevronLeft size={16} className="mr-2" />
+              <span>Storage</span>
+            </a>
+          </SidebarMenuButton>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10 gap-0">
-        <SidebarGroup className="pt-0">
-          <div className="px-2 pb-1 group-data-[collapsible=icon]:hidden">
-            <a onClick={(e) => { e.preventDefault(); navigate(-1); }} className="flex items-center w-full h-9 text-muted-foreground hover:text-foreground cursor-pointer rounded-md">
-              <ChevronLeft size={16} className="mr-2" />
-              <span className="font-medium text-[15px] ml-1">Storage</span>
-            </a>
-          </div>
-
+      <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10 pt-0">
+        <SidebarGroup className="pt-1">
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
