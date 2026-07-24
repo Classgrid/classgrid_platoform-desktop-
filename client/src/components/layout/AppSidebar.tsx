@@ -144,7 +144,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   const loginPath = getLoginPathForPath(location.pathname);
-                                  navigate(\`/logout?redirectTo=\${encodeURIComponent(loginPath)}\`);
+                                  navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
                                 }}
                                 className="flex items-center gap-3 w-full justify-between cursor-pointer"
                               >
