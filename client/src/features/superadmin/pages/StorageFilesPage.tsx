@@ -556,8 +556,8 @@ export function StorageFilesPage() {
               ))}
 
               {/* RIGHT SIDE PREVIEW PANE OR EMPTY SPACE */}
-              <div className="flex-1 bg-background flex">
-                <FilePreviewPane activeFile={activeFile} onClose={() => setActiveFile(null)} onDelete={() => setFileToDelete(activeFile.key)} />
+              <div className="flex-1 bg-background flex justify-end relative">
+                <FilePreviewPane activeFile={activeFile} onClose={() => setActiveFile(null)} onDelete={() => setFileToDelete(activeFile?.key)} />
               </div>
             </>
           ) : (
