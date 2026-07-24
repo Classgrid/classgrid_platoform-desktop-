@@ -878,48 +878,50 @@ export function StorageAnalyticsDashboard() {
                       className="h-10 pl-9"
                     />
                   </Label>
-                  <Sheet>
-                    <SheetTrigger
-                      render={
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="size-10 shrink-0"
-                          aria-label="Open analytics filters"
-                        />
-                      }
-                    >
-                      <Filter className="size-4" />
-                    </SheetTrigger>
-                    <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-xl">
-                      <SheetHeader>
-                        <SheetTitle>Ranking filters</SheetTitle>
-                        <SheetDescription>
-                          Filter and sort the complete S3 file ranking.
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="space-y-4 px-4 pb-6">
-                        <AnalyticsFilters
-                          search={search}
-                          type={type}
-                          folder={folder}
-                          sort={sort}
-                          limit={limit}
-                          folders={breakdown?.byFolder || []}
-                          onSearchChange={(value) => changeFilter(() => setSearch(value))}
-                          onTypeChange={(value) => changeFilter(() => setType(value))}
-                          onFolderChange={(value) => changeFilter(() => setFolder(value))}
-                          onSortChange={(value) => changeFilter(() => setSort(value))}
-                          onLimitChange={(value) => changeFilter(() => setLimit(value))}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                  {activeFilterCount > 0 && (
-                    <Badge variant="info" className="absolute -mt-9 ml-[calc(100%-2.25rem)]">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
+                  <div className="relative shrink-0">
+                    <Sheet>
+                      <SheetTrigger
+                        render={
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="size-10 shrink-0"
+                            aria-label="Open analytics filters"
+                          />
+                        }
+                      >
+                        <Filter className="size-4" />
+                      </SheetTrigger>
+                      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-xl">
+                        <SheetHeader>
+                          <SheetTitle>Ranking filters</SheetTitle>
+                          <SheetDescription>
+                            Filter and sort the complete S3 file ranking.
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="space-y-4 px-4 pb-6">
+                          <AnalyticsFilters
+                            search={search}
+                            type={type}
+                            folder={folder}
+                            sort={sort}
+                            limit={limit}
+                            folders={breakdown?.byFolder || []}
+                            onSearchChange={(value) => changeFilter(() => setSearch(value))}
+                            onTypeChange={(value) => changeFilter(() => setType(value))}
+                            onFolderChange={(value) => changeFilter(() => setFolder(value))}
+                            onSortChange={(value) => changeFilter(() => setSort(value))}
+                            onLimitChange={(value) => changeFilter(() => setLimit(value))}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                    {activeFilterCount > 0 && (
+                      <Badge variant="info" className="pointer-events-none absolute -right-2 -top-2 min-w-5 justify-center px-1">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 {(hasActiveFilters || zeroOnly) && (
@@ -1148,21 +1150,23 @@ export function StorageAnalyticsDashboard() {
                       }
                       className="h-auto w-full justify-start whitespace-normal rounded-sm p-0 text-left font-normal hover:bg-transparent"
                     >
-                      <div className="mb-2 flex items-center justify-between gap-4 text-sm">
-                        <span className="truncate" title={item.name || "Root"}>
-                          {item.name || "Root"}
-                        </span>
-                        <span className="shrink-0 tabular-nums">
-                          {formatBytes(item.size)}
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {formatPercentage(item.percentage)}
+                      <div className="w-full">
+                        <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+                          <span className="truncate" title={item.name || "Root"}>
+                            {item.name || "Root"}
                           </span>
-                        </span>
+                          <span className="shrink-0 tabular-nums">
+                            {formatBytes(item.size)}
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              {formatPercentage(item.percentage)}
+                            </span>
+                          </span>
+                        </div>
+                        <StorageBar
+                          value={item.percentage}
+                          label={`${item.name || "Root"}: ${formatPercentage(item.percentage)} of storage`}
+                        />
                       </div>
-                      <StorageBar
-                        value={item.percentage}
-                        label={`${item.name || "Root"}: ${formatPercentage(item.percentage)} of storage`}
-                      />
                     </Button>
                   ))}
                 </div>

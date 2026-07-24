@@ -461,7 +461,7 @@ export function StorageS3ConfigurationDashboard() {
   const [latestTest, setLatestTest] = useState<StorageConnectionStatus | null>(null);
   const [copiedField, setCopiedField] = useState<CopyField | null>(null);
   const [protectedPathsOpen, setProtectedPathsOpen] = useState(false);
-  const copyResetTimer = useRef<number | undefined>();
+  const copyResetTimer = useRef<number | undefined>(undefined);
 
   const config = configurationQuery.data;
   const connection = latestTest ?? config;
