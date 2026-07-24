@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, Database, HardDrive, FileBarChart, Settings } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +29,7 @@ interface StorageSidebarProps {
 
 export function StorageSidebar({ role, user }: StorageSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
   const navItems = [
@@ -51,11 +52,11 @@ export function StorageSidebar({ role, user }: StorageSidebarProps) {
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
         <SidebarGroup>
           <div className="px-2 py-2 group-data-[collapsible=icon]:hidden">
-            <SidebarMenuButton asChild className="h-9 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md">
-              <Link to="/superadmin/dashboard" className="flex items-center gap-2 w-full font-medium text-[15px]">
+            <SidebarMenuButton asChild className="h-9 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md cursor-pointer">
+              <a onClick={(e) => { e.preventDefault(); navigate(-1); }} className="flex items-center gap-2 w-full font-medium text-[15px]">
                 <ChevronLeft size={16} />
                 <span>Storage</span>
-              </Link>
+              </a>
             </SidebarMenuButton>
           </div>
 

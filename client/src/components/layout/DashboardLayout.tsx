@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/marketing_ui/sidebar";
 import { TooltipProvider } from "@/components/marketing_ui/tooltip";
@@ -92,7 +93,18 @@ export function DashboardLayout({ children, role, sidebarOverride, user }: Dashb
   return (
     <TooltipProvider>
       <SidebarProvider>
-        {sidebarOverride ? sidebarOverride : <AppSidebar role={dashboardRole} user={sidebarUser} />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={sidebarOverride ? "override" : "default"}
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -20, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex-shrink-0"
+          >
+            {sidebarOverride ? sidebarOverride : <AppSidebar role={dashboardRole} user={sidebarUser} />}
+          </motion.div>
+        </AnimatePresence>
         {/* Make the inset background match the sidebar so it's a seamless black canvas */}
         <SidebarInset className="bg-background m-0 p-0 flex flex-col h-screen overflow-hidden">
           {/* This is the actual flush right pane */}
