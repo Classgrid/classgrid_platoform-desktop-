@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, HardDrive, FileBarChart, Settings } from "lucide-react";
+import { ChevronRight, HardDrive, FileBarChart, Settings } from "lucide-react";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ import type { DashboardRole } from "./DashboardLayout";
 import { SidebarFooterUser } from "./SidebarFooterUser";
 import { SidebarSwitcher } from "./SidebarSwitcher";
 import { SidebarSearch } from "./SidebarSearch";
+import { SlidingSidebar } from "./SlidingSidebar";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 
@@ -41,19 +42,6 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   // Local state to track if we are showing the storage menu pane.
   // Defaults to true if we load directly into a storage route.
   const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
-
-  // Scroll active item into view when sliding back to the main menu
-  useEffect(() => {
-    if (!showStorageMenu) {
-      // Run on next frame
-      requestAnimationFrame(() => {
-        const activeEl = document.getElementById("active-main-menu-item");
-        if (activeEl) {
-          activeEl.scrollIntoView({ block: "center", behavior: "auto" });
-        }
-      });
-    }
-  }, [showStorageMenu]);
 
   // Auto-open storage menu if navigating to a storage route from outside
   useEffect(() => {
@@ -113,116 +101,91 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-hidden relative p-0">
-        {/* Sliding Carousel Container */}
-        <div 
-          className="absolute inset-0 flex transition-transform duration-300 ease-in-out"
-          style={{ transform: showStorageMenu ? 'translateX(-100%)' : 'translateX(0)' }}
-        >
-          {/* ==========================================
-              PANE 1: MAIN MENU
-              ========================================== */}
-          <div className="w-full h-full shrink-0 overflow-y-auto pb-10 no-scrollbar">
-            {sectionsWithBadges.map((section, index) => (
-              <SidebarGroup key={section.label || index}>
-                {index > 0 && (
-                  <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
-                )}
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {section.items.map((item) => {
-                      // Make sure "Storage" highlights actively if we are anywhere in /superadmin/storage
-                      const isActive =
-                        location.pathname === item.to ||
-                        (item.to !== "/" && location.pathname.startsWith(item.to + "/")) ||
-                        (item.label === "Storage" && location.pathname.startsWith("/superadmin/storage"));
+      <SidebarContent className="p-0">
+        <SlidingSidebar
+          showNested={showStorageMenu}
+          onBack={() => setShowStorageMenu(false)}
+          nestedTitle="Storage"
+          mainMenu={
+            <>
+              {sectionsWithBadges.map((section, index) => (
+                <SidebarGroup key={section.label || index}>
+                  {index > 0 && (
+                    <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
+                  )}
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {section.items.map((item) => {
+                        // Make sure "Storage" highlights actively if we are anywhere in /superadmin/storage
+                        const isActive =
+                          location.pathname === item.to ||
+                          (item.to !== "/" && location.pathname.startsWith(item.to + "/")) ||
+                          (item.label === "Storage" && location.pathname.startsWith("/superadmin/storage"));
 
-                      return (
-                        <SidebarMenuItem key={item.label}>
-                          <SidebarMenuButton
-                            id={isActive ? "active-main-menu-item" : undefined}
-                            isActive={isActive}
-                            tooltip={item.label}
-                            className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
-                            onClick={() => {
-                              if (item.label === "Storage") {
-                                setShowStorageMenu(true);
-                              }
-                            }}
-                            asChild
-                          >
-                            {item.label === "Log out" ? (
-                              <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  const loginPath = getLoginPathForPath(location.pathname);
-                                  navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
-                                }}
-                                className="flex items-center gap-3 w-full justify-between cursor-pointer"
-                              >
-                                <div className="flex items-center gap-3">
-                                  {item.icon && <item.icon size={20} />}
-                                  <span className="truncate">{item.label}</span>
+                        return (
+                          <SidebarMenuItem key={item.label}>
+                            <SidebarMenuButton
+                              id={isActive ? "active-main-menu-item" : undefined}
+                              isActive={isActive}
+                              tooltip={item.label}
+                              className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
+                              onClick={() => {
+                                if (item.label === "Storage") {
+                                  setShowStorageMenu(true);
+                                }
+                              }}
+                              asChild
+                            >
+                              {item.label === "Log out" ? (
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const loginPath = getLoginPathForPath(location.pathname);
+                                    navigate(`/logout?redirectTo=${encodeURIComponent(loginPath)}`);
+                                  }}
+                                  className="flex items-center gap-3 w-full justify-between cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {item.icon && <item.icon size={20} />}
+                                    <span className="truncate">{item.label}</span>
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between">
-                                <div className="flex items-center gap-3">
-                                  {item.icon && <item.icon size={20} />}
-                                  <span className="truncate">{item.label}</span>
-                                </div>
-                                <div className="flex items-center ml-auto gap-2">
-                                  {item.badge && (
-                                    <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
-                                      {item.badge}
-                                    </span>
-                                  )}
-                                  {item.hasNestedNav && (
-                                    <ChevronRight size={16} className="text-muted-foreground" />
-                                  )}
-                                </div>
-                              </Link>
-                            )}
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
-            {sectionsWithBadges.length === 0 && (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                No matching items found.
-              </div>
-            )}
-          </div>
-
-          {/* ==========================================
-              PANE 2: STORAGE MENU
-              ========================================== */}
-          <div className="w-full h-full shrink-0 overflow-y-auto pb-10 pt-0 no-scrollbar">
-            <div className="group-data-[collapsible=icon]:hidden px-1 pb-1 -mt-1 mx-1">
-              <SidebarMenuButton 
-                asChild 
-                className="h-9 text-muted-foreground hover:text-foreground cursor-pointer rounded-md"
-              >
-                <a 
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    setShowStorageMenu(false); 
-                    // We DO NOT navigate away. We just slide back to main menu.
-                  }} 
-                  className="flex items-center w-full font-medium text-[15px]"
-                >
-                  <ChevronLeft size={16} className="mr-2" />
-                  <span>Storage</span>
-                </a>
-              </SidebarMenuButton>
-            </div>
-
+                              ) : (
+                                <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between">
+                                  <div className="flex items-center gap-3">
+                                    {item.icon && <item.icon size={20} />}
+                                    <span className="truncate">{item.label}</span>
+                                  </div>
+                                  <div className="flex items-center ml-auto gap-2">
+                                    {item.badge && (
+                                      <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
+                                        {item.badge}
+                                      </span>
+                                    )}
+                                    {item.hasNestedNav && (
+                                      <ChevronRight size={16} className="text-muted-foreground" />
+                                    )}
+                                  </div>
+                                </Link>
+                              )}
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              ))}
+              {sectionsWithBadges.length === 0 && (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  No matching items found.
+                </div>
+              )}
+            </>
+          }
+          nestedMenu={
             <SidebarGroup className="pt-1">
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -252,9 +215,8 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-          </div>
-
-        </div>
+          }
+        />
       </SidebarContent>
 
       {user && <SidebarFooterUser role={role} user={user} />}
