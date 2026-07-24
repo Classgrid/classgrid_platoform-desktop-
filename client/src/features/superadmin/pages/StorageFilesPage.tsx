@@ -146,19 +146,19 @@ const StorageColumn = ({
     ...(data?.folders || []).map((folder: any) => ({
       isFolder: true,
       key: folder.prefix,
-      name: folder.name || folder.prefix.split("/").filter(Boolean).pop(),
-      type: "Folder",
+      name: folder.name,
       size: null,
+      type: "Folder",
       lastModified: null,
       cdnUrl: ""
     })),
     ...(data?.files || []).map((file: any) => ({
       isFolder: false,
-      key: file.Key,
-      name: file.Key.split("/").pop() || "",
-      type: file.ContentType,
-      size: file.Size,
-      lastModified: file.LastModified,
+      key: file.key,
+      name: file.name,
+      size: file.size,
+      type: file.contentType,
+      lastModified: file.lastModified,
       cdnUrl: file.cdnUrl
     }))
   ];
