@@ -158,8 +158,6 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete, onRename }: { activeFi
 
 const StorageColumn = ({
   prefix,
-  items,
-  isLoading,
   isLastColumn,
   selectedChildKey,
   selectedKeys,
@@ -170,9 +168,19 @@ const StorageColumn = ({
   setCreatingFolderIn,
   isCreatingFolderPending,
   handleCreateFolder,
-  uploadingFiles,
   handleUploadClick,
   setFileToDelete,
+  fileToRename,
+  setFileToRename,
+  newFileName,
+  setNewFileName,
+  handleRenameFile,
+  isRenamingPending,
+}: any) => {
+  const { data, isLoading } = useStorageObjects(prefix);
+  
+  const items = [
+    ...(data?.folders || []).map((folder: any) => ({
       isFolder: true,
       key: folder.prefix,
       name: folder.name,
@@ -191,6 +199,7 @@ const StorageColumn = ({
       cdnUrl: file.cdnUrl
     }))
   ];
+
   
   return (
     <div className="w-[280px] sm:w-[320px] shrink-0 border-r border-border flex flex-col bg-background/50 h-full group relative">
