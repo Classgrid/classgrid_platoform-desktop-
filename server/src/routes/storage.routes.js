@@ -23,6 +23,15 @@ import {
 
 const router = express.Router();
 
+const rateLimitValidation = {
+    ip: false,
+    xForwardedForHeader: false,
+};
+
+function storageUserKey(req) {
+    return String(req.user?._id || req.user?.id || req.user?.email || "authenticated-super-admin");
+}
+
 const storageUpload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -33,11 +42,8 @@ const storageUpload = multer({
 const uploadRateLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE,
-    keyGenerator: (req) => String(req.user._id),
-    validate: {
-        ip: false,
-        xForwardedForHeader: false,
-    },
+    keyGenerator: storageUserKey,
+    validate: rateLimitValidation,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -49,6 +55,33 @@ const uploadRateLimiter = rateLimit({
             message: "Upload rate limit exceeded. Maximum 30 uploads per minute.",
         });
     },
+});
+
+const connectionTestRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    keyGenerator: storageUserKey,
+    validate: rateLimitValidation,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({
+        success: false,
+        message: "Connection test rate limit exceeded. Maximum 10 tests per minute.",
+    }),
+});
+
+const analyticsRefreshRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 6,
+    keyGenerator: storageUserKey,
+    validate: rateLimitValidation,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => !["true", "1"].includes(String(req.query?.refresh || "").toLowerCase()),
+    handler: (req, res) => res.status(429).json({
+        success: false,
+        message: "Analytics refresh rate limit exceeded. Maximum 6 refreshes per minute.",
+    }),
 });
 
 function isSuperAdmin(req, res, next) {
@@ -90,10 +123,26 @@ router.use(isAuthenticated, isSuperAdmin);
 
 router.get("/configuration", getStorageConfiguration);
 router.get("/health", getStorageHealth);
-router.post("/test-connection", testStorageConnection);
-router.get("/analytics/summary", getStorageAnalyticsSummary);
-router.get("/analytics/files", getStorageAnalyticsFiles);
-router.get("/analytics/breakdown", getStorageAnalyticsBreakdown);
+router.post(
+    "/test-connection",
+    connectionTestRateLimiter,
+    testStorageConnection,
+);
+router.get(
+    "/analytics/summary",
+    analyticsRefreshRateLimiter,
+    getStorageAnalyticsSummary,
+);
+router.get(
+    "/analytics/files",
+    analyticsRefreshRateLimiter,
+    getStorageAnalyticsFiles,
+);
+router.get(
+    "/analytics/breakdown",
+    analyticsRefreshRateLimiter,
+    getStorageAnalyticsBreakdown,
+);
 
 router.get("/objects", listObjects);
 router.post("/upload", uploadRateLimiter, singleStorageUpload, uploadFile);

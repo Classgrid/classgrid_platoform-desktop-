@@ -19,6 +19,7 @@ export const STORAGE_UPLOAD_RATE_LIMIT_PER_MINUTE = 30;
 export const STORAGE_ANALYTICS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const ANALYTICS_METADATA_CONCURRENCY = 10;
+const CONNECTION_CHECK_TIMEOUT_MS = 5000;
 const S3_PAGE_SIZE = 1000;
 const ONE_MEGABYTE = 1024 * 1024;
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
@@ -119,12 +120,12 @@ const SIZE_RANGE_DEFINITIONS = [
         range: "100_mb_to_1_gb",
         label: "100 MB–1 GB",
         minimum: 100 * ONE_MEGABYTE,
-        maximum: ONE_GIGABYTE,
+        maximum: ONE_GIGABYTE + 1,
     },
     {
         range: "above_1_gb",
         label: "Above 1 GB",
-        minimum: ONE_GIGABYTE,
+        minimum: ONE_GIGABYTE + 1,
         maximum: Number.POSITIVE_INFINITY,
     },
 ];
@@ -548,19 +549,18 @@ function getSafeConnectionError(error) {
             message: "AWS credentials are missing or invalid.",
         };
     }
-    if (name === "AccessDenied" || name === "Forbidden" || statusCode === 403) {
+    if (
+        name === "AccessDenied"
+        || name === "Forbidden"
+        || name === "NoSuchBucket"
+        || [400, 403, 404].includes(statusCode)
+    ) {
         return {
-            code: "BUCKET_ACCESS_DENIED",
-            message: "AWS denied access to the configured storage bucket.",
+            code: "S3_ACCESS_CHECK_FAILED",
+            message: "The S3 connection or bucket access check failed.",
         };
     }
-    if (name === "NoSuchBucket" || statusCode === 404) {
-        return {
-            code: "BUCKET_NOT_FOUND",
-            message: "The configured storage bucket was not found.",
-        };
-    }
-    if (name === "TimeoutError" || name === "RequestTimeout") {
+    if (name === "AbortError" || name === "TimeoutError" || name === "RequestTimeout") {
         return {
             code: "CONNECTION_TIMEOUT",
             message: "The S3 connection check timed out.",
@@ -574,18 +574,24 @@ function getSafeConnectionError(error) {
 
 export async function checkStorageConnection() {
     const startedAt = Date.now();
-    const checkedAt = new Date().toISOString();
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(
+        () => abortController.abort(),
+        CONNECTION_CHECK_TIMEOUT_MS,
+    );
 
     try {
         await s3Client.send(new HeadBucketCommand({
             Bucket: BUCKET_NAME,
-        }));
+        }), {
+            abortSignal: abortController.signal,
+        });
 
         return {
             connected: true,
             status: "connected",
             latencyMs: Date.now() - startedAt,
-            checkedAt,
+            checkedAt: new Date().toISOString(),
             message: "AWS S3 is responding normally.",
         };
     } catch (error) {
@@ -598,10 +604,12 @@ export async function checkStorageConnection() {
             connected: false,
             status: "disconnected",
             latencyMs: Date.now() - startedAt,
-            checkedAt,
+            checkedAt: new Date().toISOString(),
             errorCode: safeError.code,
             message: safeError.message,
         };
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 

@@ -11,6 +11,10 @@ The existing **Files** page is intentionally not repeated here.
 
 The information hierarchy is inspired by the supplied Supabase Storage screenshots, while the styling and security rules remain specific to Classgrid.
 
+**Implementation status (2026-07-24):** the S3 Configuration and current-state
+Storage Analytics backend APIs described below are implemented and verified.
+The two frontend pages are still to be built from these wireframes.
+
 ### Suggested navigation
 
 ```text
@@ -181,9 +185,9 @@ Do not add:
 
 AWS credentials must remain managed through secure server or deployment configuration.
 
-### Backend required for this page
+### Backend implemented for this page
 
-These safe configuration endpoints still need to be added:
+These safe configuration endpoints are implemented:
 
 ```text
 GET  /api/super-admin/storage/configuration
@@ -455,9 +459,9 @@ Request ID: safe-request-id
 
 ---
 
-## 7. Backend Already Available
+## 7. Backend Implemented
 
-The current backend already supports the Files page through:
+The backend supports the existing Files page through:
 
 ```text
 GET    /api/super-admin/storage/objects
@@ -469,6 +473,20 @@ POST   /api/super-admin/storage/presigned-url
 GET    /api/super-admin/storage/metadata
 POST   /api/super-admin/storage/rename
 ```
+
+The backend also supports the separate S3 Configuration and Analytics pages through:
+
+```text
+GET  /api/super-admin/storage/configuration
+GET  /api/super-admin/storage/health
+POST /api/super-admin/storage/test-connection
+
+GET  /api/super-admin/storage/analytics/summary
+GET  /api/super-admin/storage/analytics/files
+GET  /api/super-admin/storage/analytics/breakdown
+```
+
+All storage routes require a strict `super_admin` role. Operational responses use `Cache-Control: private, no-store`, and no endpoint returns AWS credentials or raw AWS error objects.
 
 Existing object listing fields:
 
@@ -487,7 +505,9 @@ Important limitation:
 
 ---
 
-## 8. Analytics Backend Still Required
+## 8. Analytics Backend Implemented
+
+The three endpoints below use one complete-bucket snapshot, so summary totals, file rankings, and breakdown totals are calculated from the same object set.
 
 ### A. Summary
 
@@ -495,7 +515,7 @@ Important limitation:
 GET /api/super-admin/storage/analytics/summary
 ```
 
-Suggested response:
+Implemented response shape:
 
 ```json
 {
@@ -541,14 +561,15 @@ Query parameters:
 
 ```text
 sort=size_desc | size_asc | modified_desc | modified_asc | name_asc | name_desc
-type=image | video | audio | pdf | document | archive | other | unknown
+type=image | video | audio | pdf | document | archive | text | other | unknown
 prefix=folder/path/
 search=filename
 limit=25
 cursor=opaque-pagination-cursor
+refresh=true | false
 ```
 
-Suggested response:
+Implemented response shape:
 
 ```json
 {
@@ -584,7 +605,7 @@ Suggested response:
 GET /api/super-admin/storage/analytics/breakdown
 ```
 
-Suggested response:
+Implemented response shape:
 
 ```json
 {
@@ -625,9 +646,9 @@ Suggested response:
 
 ---
 
-## 9. Analytics Calculation Requirements
+## 9. Analytics Calculation Rules Implemented
 
-The backend must:
+The backend now:
 
 1. Scan all S3 objects recursively, not only the root page.
 2. Follow every S3 continuation token.
@@ -646,7 +667,9 @@ The backend must:
 
 `ListObjectsV2` does not return `ContentType`. Accurate type analytics may require `HeadObject` requests. Use bounded concurrency and caching to avoid making hundreds or thousands of simultaneous S3 calls.
 
-For very large buckets, move the scan to a background analytics refresh job and serve the last completed cached snapshot.
+The current five-minute cache and single-flight refresh are held in server memory. This is fully functional for one running server instance. In a multi-instance or serverless deployment, use a shared cache or persisted snapshot so every instance serves the same cached result.
+
+For very large buckets, move the scan to a background analytics refresh job and serve the last completed shared snapshot.
 
 ### Historical growth limitation
 
@@ -704,6 +727,8 @@ Mobile ranking example:
 ---
 
 ## 12. Acceptance Checklist
+
+The backend contract is complete. Keep the items below unchecked until the two frontend pages are built and visually verified.
 
 ### S3 Configuration
 

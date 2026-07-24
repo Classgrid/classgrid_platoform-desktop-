@@ -111,6 +111,12 @@ function sendSuccess(res, message, data) {
     });
 }
 
+function setPrivateNoStore(res) {
+    if (typeof res.setHeader === "function") {
+        res.setHeader("Cache-Control", "private, no-store");
+    }
+}
+
 function getUserId(req) {
     return String(req.user?._id || req.user?.id || "unknown");
 }
@@ -272,8 +278,14 @@ function roundAnalyticsPercentage(value) {
     return Math.round(value * 100) / 100;
 }
 
-function buildAnalyticsQuerySignature({ sort, type, prefix, search }) {
-    return JSON.stringify({ sort, type, prefix, search });
+function buildAnalyticsQuerySignature({
+    sort,
+    type,
+    prefix,
+    search,
+    snapshotId,
+}) {
+    return JSON.stringify({ sort, type, prefix, search, snapshotId });
 }
 
 function encodeAnalyticsCursor(offset, signature) {
@@ -795,13 +807,13 @@ export async function renameObject(req, res) {
             CopySource: encodeCopySource(sourceKey),
             Key: destinationKey,
         }));
+        invalidateStorageAnalyticsCache();
 
         await s3Client.send(new DeleteObjectCommand({
             Bucket: BUCKET_NAME,
             Key: sourceKey,
         }));
 
-        invalidateStorageAnalyticsCache();
         auditStorageAction(req, "rename", [sourceKey, destinationKey]);
         return sendSuccess(res, "Storage object renamed successfully.", {
             newKey: destinationKey,
@@ -820,6 +832,7 @@ export async function renameObject(req, res) {
 
 export async function getStorageConfiguration(req, res) {
     try {
+        setPrivateNoStore(res);
         const configuration = await getSafeStorageConfiguration();
         return sendSuccess(
             res,
@@ -833,6 +846,7 @@ export async function getStorageConfiguration(req, res) {
 
 export async function getStorageHealth(req, res) {
     try {
+        setPrivateNoStore(res);
         const health = await checkStorageConnection();
         return sendSuccess(res, "Storage health check completed.", health);
     } catch (error) {
@@ -842,6 +856,7 @@ export async function getStorageHealth(req, res) {
 
 export async function testStorageConnection(req, res) {
     try {
+        setPrivateNoStore(res);
         const connection = await checkStorageConnection();
         return sendSuccess(res, "Storage connection test completed.", connection);
     } catch (error) {
@@ -851,6 +866,7 @@ export async function testStorageConnection(req, res) {
 
 export async function getStorageAnalyticsSummary(req, res) {
     try {
+        setPrivateNoStore(res);
         const forceRefresh = parseBooleanQuery(req.query?.refresh, "refresh");
         const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
 
@@ -865,6 +881,7 @@ export async function getStorageAnalyticsSummary(req, res) {
 
 export async function getStorageAnalyticsFiles(req, res) {
     try {
+        setPrivateNoStore(res);
         const query = req.query || {};
         const forceRefresh = parseBooleanQuery(query.refresh, "refresh");
         const sort = (parseOptionalQueryString(query.sort, "sort") || "size_desc").toLowerCase();
@@ -887,18 +904,20 @@ export async function getStorageAnalyticsFiles(req, res) {
             );
         }
 
+        const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
         const signature = buildAnalyticsQuerySignature({
             sort,
             type,
             prefix,
             search,
+            snapshotId: snapshot.generatedAt,
         });
         const offset = decodeAnalyticsCursor(query.cursor, signature);
-        const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
         const matchingFiles = snapshot.files
             .filter((file) => !type || file.type === type)
             .filter((file) => !prefix || file.key.startsWith(prefix))
             .filter((file) => !search || file.name.toLowerCase().includes(search))
+            .filter((file) => sort !== "size_asc" || file.size > 0)
             .sort((first, second) => compareAnalyticsFiles(first, second, sort));
 
         if (offset > matchingFiles.length) {
@@ -934,6 +953,7 @@ export async function getStorageAnalyticsFiles(req, res) {
 
 export async function getStorageAnalyticsBreakdown(req, res) {
     try {
+        setPrivateNoStore(res);
         const forceRefresh = parseBooleanQuery(req.query?.refresh, "refresh");
         const snapshot = await getStorageAnalyticsSnapshot({ forceRefresh });
 

@@ -230,15 +230,16 @@ export function AppRouter() {
           <Route path="/superadmin/chat" element={<ChatPage />} />
           <Route path="/superadmin/subscribers" element={<SubscribersPage />} />
           
-          {/* Storage Section with Nested Layout */}
-          <Route path="/superadmin/storage" element={<StorageLayout />}>
-            <Route index element={<Navigate to="files" replace />} />
-            <Route path="files" element={<StorageFilesPage />} />
-            <Route path="analytics" element={<StorageAnalyticsPage />} />
-            <Route path="s3" element={<StorageS3ConfigPage />} />
-          </Route>
 
           <Route path="/superadmin/*" element={<ComingSoonPage />} />
+        </Route>
+
+        {/* VERCEL STYLE SUPER ADMIN STORAGE SHELL */}
+        <Route path="/superadmin/storage" element={<StorageLayout />}>
+          <Route index element={<Navigate to="files" replace />} />
+          <Route path="files" element={<StorageFilesPage />} />
+          <Route path="analytics" element={<StorageAnalyticsPage />} />
+          <Route path="s3" element={<StorageS3ConfigPage />} />
         </Route>
 
         {/* NEW ORG ADMIN SHELL */}
