@@ -3,7 +3,7 @@ import {
   Folder, FileText, Image as ImageIcon, Video, FileArchive, 
   File, UploadCloud, FolderPlus, MoreHorizontal, Download, 
   Trash2, Edit2, Link as LinkIcon, Search, RefreshCw, Columns, X,
-  ChevronRight
+  ChevronRight, List, Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
@@ -11,12 +11,17 @@ import { formatDistanceToNow, format } from "date-fns";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { Badge } from "@/components/marketing_ui/badge";
+import { DataTable } from "@/components/marketing_ui/data-table";
 import { 
   DropdownMenu, 
   DropdownMenuTrigger, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuSeparator 
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal
 } from "@/components/marketing_ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
@@ -54,7 +59,7 @@ export function StorageFilesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
-  // Active file for the right preview pane
+  const [viewMode, setViewMode] = useState<'columns' | 'list'>('columns');
   const [activeFile, setActiveFile] = useState<any | null>(null);
 
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
@@ -240,14 +245,49 @@ export function StorageFilesPage() {
             >
               <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-9 w-9 bg-background shadow-sm"
-              title="Toggle sidebar"
-            >
-              <Columns size={16} />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9 bg-background shadow-sm"
+                  title="View options"
+                >
+                  {viewMode === 'columns' ? <Columns size={16} /> : <List size={16} />}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 shadow-xl">
+                <DropdownMenuItem onClick={() => setViewMode('columns')} className="justify-between">
+                  As columns
+                  {viewMode === 'columns' && <Check size={16} className="text-emerald-500" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setViewMode('list')} className="justify-between">
+                  As list
+                  {viewMode === 'list' && <Check size={16} className="text-emerald-500" />}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Sort by</DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem>Name</DropdownMenuItem>
+                      <DropdownMenuItem>Size</DropdownMenuItem>
+                      <DropdownMenuItem>Type</DropdownMenuItem>
+                      <DropdownMenuItem>Last Modified</DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Sort order</DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem>Ascending</DropdownMenuItem>
+                      <DropdownMenuItem>Descending</DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <div className="h-5 w-px bg-border mx-1.5"></div>
             
@@ -268,184 +308,304 @@ export function StorageFilesPage() {
           </div>
         </div>
 
-        {/* 3. Split Pane Area */}
-        <div className="flex flex-1 overflow-hidden bg-background">
+        {/* 3. Content Area (Split Pane OR List View) */}
+        <div className="flex flex-1 overflow-hidden bg-background relative">
           
-          {/* Left Pane: File List */}
-          <div className="w-[320px] shrink-0 border-r border-border flex flex-col">
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
-              {isLoading ? (
-                <div className="p-4 text-sm text-muted-foreground text-center">Loading...</div>
-              ) : items.length === 0 ? (
-                <div className="p-8 text-sm text-muted-foreground text-center flex flex-col items-center">
-                  <Folder className="h-8 w-8 mb-2 opacity-20" />
-                  This folder is empty.
-                </div>
-              ) : (
-                items.map((item, idx) => {
-                  if (item.isUpDir) {
-                    return (
-                      <div 
-                        key="up"
-                        onClick={() => {
-                          const parts = prefix.split("/").filter(Boolean);
-                          parts.pop();
-                          const newPrefix = parts.length > 0 ? parts.join("/") + "/" : "";
-                          handleFolderClick(newPrefix);
-                        }}
-                        className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-sm text-foreground transition-colors"
-                      >
-                        <div className="w-4 h-4 shrink-0"></div>
-                        <Folder size={16} className="text-muted-foreground shrink-0" />
-                        <span className="font-medium">..</span>
-                      </div>
-                    );
-                  }
-
-                  const isSelected = selectedKeys.has(item.key);
-                  const isActive = activeFile?.key === item.key;
-
-                  return (
-                    <div 
-                      key={item.key}
-                      onClick={() => {
-                        if (item.isFolder) {
-                          handleFolderClick(item.key);
-                        } else {
-                          setActiveFile(item);
-                        }
-                      }}
-                      className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer text-sm group transition-colors ${isActive || isSelected ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div onClick={(e) => { e.stopPropagation(); toggleSelection(e, item.key); }} className="shrink-0">
-                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40 group-hover:border-foreground/40'}`}>
-                            {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          {viewMode === 'columns' ? (
+            <>
+              {/* Left Pane: File List */}
+              <div className="w-[320px] shrink-0 border-r border-border flex flex-col">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
+                  {isLoading ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center">Loading...</div>
+                  ) : items.length === 0 ? (
+                    <div className="p-8 text-sm text-muted-foreground text-center flex flex-col items-center">
+                      <Folder className="h-8 w-8 mb-2 opacity-20" />
+                      This folder is empty.
+                    </div>
+                  ) : (
+                    items.map((item, idx) => {
+                      if (item.isUpDir) {
+                        return (
+                          <div 
+                            key="up"
+                            onClick={() => {
+                              const parts = prefix.split("/").filter(Boolean);
+                              parts.pop();
+                              const newPrefix = parts.length > 0 ? parts.join("/") + "/" : "";
+                              handleFolderClick(newPrefix);
+                            }}
+                            className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer text-sm text-foreground transition-colors"
+                          >
+                            <div className="w-4 h-4 shrink-0"></div>
+                            <Folder size={16} className="text-muted-foreground shrink-0" />
+                            <span className="font-medium">..</span>
                           </div>
-                        </div>
-                        
-                        {item.isFolder ? <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" /> : getFileIcon(item.type)}
-                        <span className="truncate selection:bg-transparent">{item.name}</span>
-                      </div>
+                        );
+                      }
 
-                      {!item.isFolder && (
-                        <div className="opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      const isSelected = selectedKeys.has(item.key);
+                      const isActive = activeFile?.key === item.key;
+
+                      return (
+                        <div 
+                          key={item.key}
+                          onClick={() => {
+                            if (item.isFolder) {
+                              handleFolderClick(item.key);
+                            } else {
+                              setActiveFile(item);
+                            }
+                          }}
+                          className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer text-sm group transition-colors ${isActive || isSelected ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                        >
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div onClick={(e) => { e.stopPropagation(); toggleSelection(e, item.key); }} className="shrink-0">
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40 group-hover:border-foreground/40'}`}>
+                                {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                              </div>
+                            </div>
+                            
+                            {item.isFolder ? <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" /> : getFileIcon(item.type)}
+                            <span className="truncate selection:bg-transparent">{item.name}</span>
+                          </div>
+
+                          {!item.isFolder && (
+                            <div className="opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded hover:bg-background shadow-sm text-muted-foreground">
+                                    <MoreHorizontal size={14} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 shadow-xl">
+                                  <DropdownMenuItem onClick={() => copyToClipboard(item.cdnUrl, "CDN Link")}>
+                                    <LinkIcon className="mr-2 h-4 w-4" /> Copy URL
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownload(item.key)}>
+                                    <Download className="mr-2 h-4 w-4" /> Download
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setFileToDelete(item.key)}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                
+                {/* Bottom Actions if files selected */}
+                {selectedKeys.size > 0 && (
+                  <div className="p-3 bg-muted/30 border-t border-border flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-medium">{selectedKeys.size} selected</span>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setSelectedKeys(new Set())}>Clear</Button>
+                      <Button variant="destructive" size="sm" className="h-7 text-xs px-2" onClick={() => setIsBulkDeleteModalOpen(true)}>Delete</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Pane: File Preview */}
+              <div className="flex-1 flex flex-col bg-muted/10 relative">
+                {activeFile ? (
+                  <div className="flex flex-col h-full">
+                    {/* Preview Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        {getFileIcon(activeFile.type)}
+                        <h3 className="font-medium text-sm truncate">{activeFile.name}</h3>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <Button variant="outline" size="sm" className="h-8 bg-background shadow-sm" onClick={() => copyToClipboard(activeFile.cdnUrl, "CDN URL")}>
+                          <LinkIcon className="mr-2 h-3 w-3" /> Copy URL
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-8 bg-background shadow-sm" onClick={() => handleDownload(activeFile.key)}>
+                          <Download className="mr-2 h-3 w-3" /> Download
+                        </Button>
+                        <div className="w-px h-5 bg-border mx-1"></div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" onClick={() => setActiveFile(null)}>
+                          <X size={16} />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Preview Content Area */}
+                    <div className="flex-1 overflow-auto p-8 flex flex-col items-center justify-center relative">
+                      <div className="absolute inset-0 bg-grid-white/10 dark:bg-grid-black/10 bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-10 pointer-events-none" />
+                      
+                      {activeFile.type.startsWith("image/") ? (
+                        <img src={activeFile.cdnUrl} alt={activeFile.name} className="max-w-full max-h-[500px] object-contain rounded-md shadow-lg border border-border/50 bg-background" />
+                      ) : activeFile.type.startsWith("video/") ? (
+                        <video src={activeFile.cdnUrl} controls className="max-w-full max-h-[500px] rounded-md shadow-lg border border-border/50 bg-background" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-12 border border-border border-dashed rounded-xl bg-card max-w-md w-full shadow-sm z-10">
+                          <File size={48} className="text-muted-foreground mb-4 opacity-50" />
+                          <h4 className="text-lg font-medium mb-1 text-center">No Preview Available</h4>
+                          <p className="text-sm text-muted-foreground text-center mb-6">
+                            Preview is not supported for {activeFile.type || "this file format"}.
+                          </p>
+                          <Button onClick={() => handleDownload(activeFile.key)} variant="outline" className="bg-background">
+                            <Download className="mr-2 h-4 w-4" /> Download File
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Details Sidebar/Footer style */}
+                    <div className="p-4 bg-card border-t border-border grid grid-cols-2 md:grid-cols-4 gap-4 text-sm shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.05)]">
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Added</div>
+                        <div className="font-mono text-xs">{activeFile.lastModified ? format(new Date(activeFile.lastModified), "dd MMM yyyy") : "-"}</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Type</div>
+                        <div className="font-mono text-xs truncate" title={activeFile.type}>{activeFile.type}</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Size</div>
+                        <div className="font-mono text-xs">{formatBytes(activeFile.size)}</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">ID</div>
+                        <div className="font-mono text-xs truncate" title={activeFile.key}>{activeFile.key.split("/").pop()}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+                    <div className="p-6 rounded-full bg-background border border-border shadow-sm mb-4">
+                      <File size={32} className="opacity-40" />
+                    </div>
+                    <p className="text-sm font-medium">Select a file</p>
+                    <p className="text-xs opacity-60 mt-1">File preview and details will appear here</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 w-full overflow-hidden flex flex-col p-4 bg-card">
+              <DataTable 
+                columns={[
+                  {
+                    key: "select",
+                    header: "",
+                    width: "w-10",
+                    render: (_: any, row: any) => {
+                      if (row.isFolder || row.isUpDir) return null;
+                      return (
+                        <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 rounded border-border bg-background"
+                            checked={selectedKeys.has(row.key)}
+                            onChange={(e) => toggleSelection(e as any, row.key)}
+                          />
+                        </div>
+                      );
+                    }
+                  },
+                  {
+                    key: "name",
+                    header: "Name",
+                    accent: true,
+                    render: (_: any, row: any) => (
+                      <div 
+                        className={`flex items-center gap-3 ${row.isFolder || row.isUpDir ? "cursor-pointer hover:underline font-medium" : ""}`}
+                        onClick={() => {
+                          if (row.isUpDir) {
+                            const parts = prefix.split("/").filter(Boolean);
+                            parts.pop();
+                            handleFolderClick(parts.length > 0 ? parts.join("/") + "/" : "");
+                          } else if (row.isFolder) {
+                            handleFolderClick(row.key);
+                          }
+                        }}
+                      >
+                        {row.isFolder || row.isUpDir ? <Folder size={18} className="text-yellow-500 fill-yellow-500/20" /> : getFileIcon(row.type)}
+                        <span className="truncate max-w-[200px] sm:max-w-[400px]">{row.name}</span>
+                      </div>
+                    )
+                  },
+                  {
+                    key: "size",
+                    header: "Size",
+                    render: (size: number | null) => size !== null ? formatBytes(size) : "-"
+                  },
+                  {
+                    key: "type",
+                    header: "Type",
+                    render: (type: string, row: any) => {
+                      if (row.isUpDir) return null;
+                      if (type === "Folder") return <Badge variant="neutral">Dir</Badge>;
+                      const fileExt = type.split("/").pop()?.toUpperCase() || "FILE";
+                      if (type.startsWith("image/")) return <Badge variant="info">{fileExt}</Badge>;
+                      if (type.startsWith("video/")) return <Badge variant="secondary">{fileExt}</Badge>;
+                      return <Badge variant="outline">{fileExt}</Badge>;
+                    }
+                  },
+                  {
+                    key: "lastModified",
+                    header: "Last Modified",
+                    render: (date: string | null) => date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : "-"
+                  },
+                  {
+                    key: "actions",
+                    header: "",
+                    width: "w-10",
+                    render: (_: any, row: any) => {
+                      if (row.isFolder || row.isUpDir) return null;
+                      return (
+                        <div onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded hover:bg-background shadow-sm text-muted-foreground">
-                                <MoreHorizontal size={14} />
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md">
+                                <MoreHorizontal size={16} />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 shadow-xl">
-                              <DropdownMenuItem onClick={() => copyToClipboard(item.cdnUrl, "CDN Link")}>
-                                <LinkIcon className="mr-2 h-4 w-4" /> Copy URL
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
+                                <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDownload(item.key)}>
+                              <DropdownMenuItem onClick={() => handleDownload(row.key)}>
                                 <Download className="mr-2 h-4 w-4" /> Download
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setFileToDelete(item.key)}>
+                              <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setFileToDelete(row.key)}>
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                      )}
-                    </div>
-                  );
-                })
+                      );
+                    }
+                  }
+                ]}
+                rows={items}
+                isLoading={isLoading}
+                emptyMessage="This folder is empty."
+              />
+              
+              {/* Sticky Bulk Action Bar for List View */}
+              {selectedKeys.size > 0 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card border border-border shadow-lg rounded-full px-6 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-5">
+                  <span className="text-sm font-medium">
+                    <span className="text-primary mr-1">{selectedKeys.size}</span> items selected
+                  </span>
+                  <div className="h-4 w-px bg-border"></div>
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedKeys(new Set())}>Cancel</Button>
+                  <Button size="sm" variant="destructive" onClick={() => setIsBulkDeleteModalOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
+                  </Button>
+                </div>
               )}
             </div>
-            
-            {/* Bottom Actions if files selected */}
-            {selectedKeys.size > 0 && (
-              <div className="p-3 bg-muted/30 border-t border-border flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">{selectedKeys.size} selected</span>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => setSelectedKeys(new Set())}>Clear</Button>
-                  <Button variant="destructive" size="sm" className="h-7 text-xs px-2" onClick={() => setIsBulkDeleteModalOpen(true)}>Delete</Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Pane: File Preview */}
-          <div className="flex-1 flex flex-col bg-muted/10 relative">
-            {activeFile ? (
-              <div className="flex flex-col h-full">
-                {/* Preview Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border bg-card">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {getFileIcon(activeFile.type)}
-                    <h3 className="font-medium text-sm truncate">{activeFile.name}</h3>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button variant="outline" size="sm" className="h-8 bg-background shadow-sm" onClick={() => copyToClipboard(activeFile.cdnUrl, "CDN URL")}>
-                      <LinkIcon className="mr-2 h-3 w-3" /> Copy URL
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8 bg-background shadow-sm" onClick={() => handleDownload(activeFile.key)}>
-                      <Download className="mr-2 h-3 w-3" /> Download
-                    </Button>
-                    <div className="w-px h-5 bg-border mx-1"></div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" onClick={() => setActiveFile(null)}>
-                      <X size={16} />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Preview Content Area */}
-                <div className="flex-1 overflow-auto p-8 flex flex-col items-center justify-center relative">
-                  {/* Subtle grid pattern background for preview area */}
-                  <div className="absolute inset-0 bg-grid-white/10 dark:bg-grid-black/10 bg-[length:16px_16px] [mask-image:linear-gradient(to_bottom,white,transparent)] opacity-10 pointer-events-none" />
-                  
-                  {activeFile.type.startsWith("image/") ? (
-                    <img src={activeFile.cdnUrl} alt={activeFile.name} className="max-w-full max-h-[500px] object-contain rounded-md shadow-lg border border-border/50 bg-background" />
-                  ) : activeFile.type.startsWith("video/") ? (
-                    <video src={activeFile.cdnUrl} controls className="max-w-full max-h-[500px] rounded-md shadow-lg border border-border/50 bg-background" />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12 border border-border border-dashed rounded-xl bg-card max-w-md w-full shadow-sm z-10">
-                      <File size={48} className="text-muted-foreground mb-4 opacity-50" />
-                      <h4 className="text-lg font-medium mb-1 text-center">No Preview Available</h4>
-                      <p className="text-sm text-muted-foreground text-center mb-6">
-                        Preview is not supported for {activeFile.type || "this file format"}.
-                      </p>
-                      <Button onClick={() => handleDownload(activeFile.key)} variant="outline" className="bg-background">
-                        <Download className="mr-2 h-4 w-4" /> Download File
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* File Details Sidebar/Footer style */}
-                <div className="p-4 bg-card border-t border-border grid grid-cols-2 md:grid-cols-4 gap-4 text-sm shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.05)]">
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Added</div>
-                    <div className="font-mono text-xs">{activeFile.lastModified ? format(new Date(activeFile.lastModified), "dd MMM yyyy") : "-"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Type</div>
-                    <div className="font-mono text-xs truncate" title={activeFile.type}>{activeFile.type}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Size</div>
-                    <div className="font-mono text-xs">{formatBytes(activeFile.size)}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">ID</div>
-                    <div className="font-mono text-xs truncate" title={activeFile.key}>{activeFile.key.split("/").pop()}</div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-                <div className="p-6 rounded-full bg-background border border-border shadow-sm mb-4">
-                  <File size={32} className="opacity-40" />
-                </div>
-                <p className="text-sm font-medium">Select a file</p>
-                <p className="text-xs opacity-60 mt-1">File preview and details will appear here</p>
-              </div>
-            )}
-          </div>
+          )}
 
         </div>
       </div>
