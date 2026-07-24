@@ -400,36 +400,36 @@ export function StorageFilesPage() {
 
     setUploadingFiles(prev => [...prev, ...newUploads]);
     
-    newUploads.forEach(upload => {
-      uploadFileMutation.mutate({
-        file: upload.file,
-        prefix: upload.prefix,
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
+    newUploads.forEach(async (upload) => {
+      try {
+        await uploadFileMutation.mutateAsync({
+          file: upload.file,
+          prefix: upload.prefix,
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
+            }
           }
-        }
-      }, {
-        onSuccess: () => {
-          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
-          setTimeout(() => {
-            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-          }, 2000);
-          refetch();
-        },
-        onError: () => {
-          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
-          setTimeout(() => {
-            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
-          }, 4000);
-        }
-      });
+        });
+        
+        // onSuccess
+        setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
+        setTimeout(() => {
+          setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+        }, 2000);
+        refetch();
+      } catch (error) {
+        // onError
+        setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
+        setTimeout(() => {
+          setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+        }, 5000);
+      }
     });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    
+    // Clear input
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleNavigateToFolder = () => {
