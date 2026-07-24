@@ -200,6 +200,7 @@ const StorageColumn = ({
               <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
             )}
             <input 
+              id="inline-create-folder-input"
               type="text"
               autoFocus
               disabled={isCreatingFolderPending}
@@ -208,20 +209,39 @@ const StorageColumn = ({
               className="flex-1 bg-background border border-primary text-sm px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary h-6"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
+                  e.preventDefault();
                   handleCreateFolder(e.currentTarget.value);
                 } else if (e.key === 'Escape') {
+                  e.preventDefault();
                   setIsCreatingFolder(false);
                 }
               }}
               onBlur={(e) => {
-                if (isCreatingFolderPending) return;
-                if (e.target.value.trim() && e.target.value !== "Untitled folder") {
-                  handleCreateFolder(e.target.value);
-                } else {
-                  setIsCreatingFolder(false);
-                }
+                // Delay onBlur slightly so the Save button click can register
+                setTimeout(() => {
+                  if (isCreatingFolderPending) return;
+                  if (e.target.value.trim() && e.target.value !== "Untitled folder") {
+                    handleCreateFolder(e.target.value);
+                  } else {
+                    setIsCreatingFolder(false);
+                  }
+                }, 150);
               }}
             />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 shrink-0 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+              disabled={isCreatingFolderPending}
+              onClick={() => {
+                const inputElement = document.getElementById("inline-create-folder-input") as HTMLInputElement;
+                if (inputElement) {
+                  handleCreateFolder(inputElement.value);
+                }
+              }}
+            >
+              <Check size={14} />
+            </Button>
           </div>
         )}
 
@@ -822,6 +842,12 @@ export function StorageFilesPage() {
             <Input
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !renameObjectMutation.isPending && newFileName.trim() && newFileName !== fileToRename?.name) {
+                  e.preventDefault();
+                  handleRenameFile();
+                }
+              }}
               autoFocus
             />
           </div>
