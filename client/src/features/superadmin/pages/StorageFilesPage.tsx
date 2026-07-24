@@ -158,6 +158,8 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete, onRename }: { activeFi
 
 const StorageColumn = ({
   prefix,
+  items,
+  isLoading,
   isLastColumn,
   selectedChildKey,
   selectedKeys,
@@ -171,11 +173,6 @@ const StorageColumn = ({
   uploadingFiles,
   handleUploadClick,
   setFileToDelete,
-}: any) => {
-  const { data, isLoading } = useStorageObjects(prefix);
-  
-  const items = [
-    ...(data?.folders || []).map((folder: any) => ({
       isFolder: true,
       key: folder.prefix,
       name: folder.name,
@@ -301,10 +298,13 @@ const StorageColumn = ({
             return (
               <div 
                 key={item.key}
-                onClick={() => item.isFolder ? onSelectFolder(item.key) : onSelectFile(item)}
+                onClick={() => {
+                  if (fileToRename?.key === item.key) return; // Prevent navigation while renaming
+                  item.isFolder ? onSelectFolder(item.key) : onSelectFile(item);
+                }}
                 className={`flex items-center justify-between p-2 px-3 rounded-md cursor-pointer text-sm group ${isActive ? 'bg-accent text-accent-foreground font-medium' : 'hover:bg-muted/50'}`}
               >
-                <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex items-center gap-3 overflow-hidden flex-1">
                   <div onClick={(e) => { e.stopPropagation(); toggleSelection(e, item.key); }} className="shrink-0">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40 group-hover:border-foreground/40'}`}>
                       {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
@@ -312,7 +312,29 @@ const StorageColumn = ({
                   </div>
                   
                   {item.isFolder ? <Folder size={18} className="text-yellow-500 fill-yellow-500/20 shrink-0" /> : getFileIcon(item.type)}
-                  <span className="truncate selection:bg-transparent">{item.name}</span>
+                  
+                  {fileToRename?.key === item.key ? (
+                    <div className="flex items-center flex-1 min-w-0 max-w-full" onClick={e => e.stopPropagation()}>
+                      <Input
+                        className="h-7 text-sm py-0 px-2 rounded-[4px] bg-background border-primary min-w-[50px] w-full"
+                        autoFocus
+                        value={newFileName}
+                        onChange={e => setNewFileName(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') handleRenameFile();
+                          if (e.key === 'Escape') setFileToRename(null);
+                        }}
+                        disabled={isRenamingPending}
+                      />
+                      {!item.isFolder && item.name.lastIndexOf('.') > 0 && (
+                        <span className="text-muted-foreground ml-0.5 shrink-0">
+                          {item.name.substring(item.name.lastIndexOf('.'))}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="truncate selection:bg-transparent">{item.name}</span>
+                  )}
                 </div>
 
                 <div className="opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -406,8 +428,12 @@ export function StorageFilesPage() {
     }, 500);
 
     const handleRenameFileEvent = (e: any) => {
-      setFileToRename({ key: e.detail.key, name: e.detail.name });
-      setNewFileName(e.detail.name);
+      const { key, name } = e.detail;
+      const isFolder = key.endsWith('/');
+      const lastDotIndex = !isFolder && name.lastIndexOf('.') > 0 ? name.lastIndexOf('.') : -1;
+      const baseName = lastDotIndex > 0 ? name.substring(0, lastDotIndex) : name;
+      setFileToRename({ key, name });
+      setNewFileName(baseName);
     };
 
     const handleDeleteFileEvent = (e: any) => {
@@ -611,13 +637,23 @@ export function StorageFilesPage() {
   };
 
   const handleRenameFile = () => {
-    if (!fileToRename || !newFileName.trim()) return;
-    if (fileToRename.name === newFileName.trim()) {
+    if (renameObjectMutation.isPending) return;
+    if (!fileToRename || !newFileName.trim()) {
+      if (!newFileName.trim()) setFileToRename(null);
+      return;
+    }
+
+    const isFolder = fileToRename.key.endsWith('/');
+    const lastDotIndex = !isFolder && fileToRename.name.lastIndexOf('.') > 0 ? fileToRename.name.lastIndexOf('.') : -1;
+    const extension = lastDotIndex > 0 ? fileToRename.name.substring(lastDotIndex) : "";
+    const finalName = newFileName.trim() + extension;
+
+    if (fileToRename.name === finalName) {
       setFileToRename(null);
       return;
     }
 
-    const newKey = fileToRename.key.substring(0, fileToRename.key.lastIndexOf('/') + 1) + newFileName.trim();
+    const newKey = fileToRename.key.substring(0, fileToRename.key.lastIndexOf('/') + 1) + finalName;
     renameObjectMutation.mutate({ sourceKey: fileToRename.key, destinationKey: newKey }, {
       onSuccess: () => {
         setFileToRename(null);
@@ -792,9 +828,14 @@ export function StorageFilesPage() {
                   setCreatingFolderIn={setCreatingFolderIn}
                   isCreatingFolderPending={createFolderMutation.isPending}
                   handleCreateFolder={handleCreateFolder}
-                  uploadingFiles={uploadingFiles}
                   handleUploadClick={handleUploadClick}
                   setFileToDelete={setFileToDelete}
+                  fileToRename={fileToRename}
+                  setFileToRename={setFileToRename}
+                  newFileName={newFileName}
+                  setNewFileName={setNewFileName}
+                  handleRenameFile={handleRenameFile}
+                  isRenamingPending={renameObjectMutation.isPending}
                 />
               ))}
 
@@ -805,8 +846,11 @@ export function StorageFilesPage() {
                   onClose={() => setActiveFile(null)} 
                   onDelete={() => setFileToDelete(activeFile?.key)}
                   onRename={() => {
+                    const isFolder = activeFile.key.endsWith('/');
+                    const lastDotIndex = !isFolder && activeFile.name.lastIndexOf('.') > 0 ? activeFile.name.lastIndexOf('.') : -1;
+                    const baseName = lastDotIndex > 0 ? activeFile.name.substring(0, lastDotIndex) : activeFile.name;
                     setFileToRename({ key: activeFile.key, name: activeFile.name });
-                    setNewFileName(activeFile.name);
+                    setNewFileName(baseName);
                   }}
                 />
               </div>
@@ -835,23 +879,48 @@ export function StorageFilesPage() {
                     key: "name",
                     header: "Name",
                     accent: true,
-                    render: (_: any, row: any) => (
-                      <div
-                        className={`flex items-center gap-3 ${row.isFolder || row.isUpDir ? "cursor-pointer hover:underline font-medium" : ""}`}
-                        onClick={() => {
-                          if (row.isUpDir) {
-                            // legacy list view up dir
-                          } else if (row.isFolder) {
-                            setOpenFolders([row.key]);
-                          } else {
-                            setActiveFile(row);
-                          }
-                        }}
-                      >
-                        {getFileIcon(row.type)}
-                        <span>{row.name}</span>
-                      </div>
-                    )
+                    render: (_: any, row: any) => {
+                      const isRenaming = fileToRename?.key === row.key;
+                      return (
+                        <div
+                          className={`flex items-center gap-3 ${row.isFolder || row.isUpDir ? "cursor-pointer hover:underline font-medium" : ""}`}
+                          onClick={() => {
+                            if (isRenaming) return;
+                            if (row.isUpDir) {
+                              // legacy list view up dir
+                            } else if (row.isFolder) {
+                              setOpenFolders([row.key]);
+                            } else {
+                              setActiveFile(row);
+                            }
+                          }}
+                        >
+                          {getFileIcon(row.type)}
+                          {isRenaming ? (
+                            <div className="flex items-center flex-1 min-w-0 max-w-[300px]" onClick={e => e.stopPropagation()}>
+                              <Input
+                                className="h-7 text-sm py-0 px-2 rounded-[4px] bg-background border-primary w-full"
+                                autoFocus
+                                value={newFileName}
+                                onChange={e => setNewFileName(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleRenameFile();
+                                  if (e.key === 'Escape') setFileToRename(null);
+                                }}
+                                disabled={renameObjectMutation.isPending}
+                              />
+                              {!row.isFolder && row.name.lastIndexOf('.') > 0 && (
+                                <span className="text-muted-foreground ml-0.5 shrink-0">
+                                  {row.name.substring(row.name.lastIndexOf('.'))}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span>{row.name}</span>
+                          )}
+                        </div>
+                      );
+                    }
                   },
                   {
                     key: "size",
@@ -977,33 +1046,7 @@ export function StorageFilesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      <Dialog open={!!fileToRename} onOpenChange={(open) => !open && setFileToRename(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename File</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !renameObjectMutation.isPending && newFileName.trim() && newFileName !== fileToRename?.name) {
-                  e.preventDefault();
-                  handleRenameFile();
-                }
-              }}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setFileToRename(null)}>Cancel</Button>
-            <Button onClick={handleRenameFile} disabled={renameObjectMutation.isPending || !newFileName.trim() || newFileName === fileToRename?.name}>
-              {renameObjectMutation.isPending && <Spinner className="mr-2" />}
-              {renameObjectMutation.isPending ? "Renaming..." : "Rename"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Rename Dialog Removed - Using Inline Editing */}
 
       <DangerConfirmDialog
         open={!!fileToDelete}
