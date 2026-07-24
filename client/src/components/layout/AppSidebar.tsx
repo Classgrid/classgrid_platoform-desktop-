@@ -116,7 +116,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       <SidebarContent className="overflow-hidden relative p-0">
         {/* Sliding Carousel Container */}
         <div 
-          className="absolute inset-0 flex transition-transform duration-150 ease-out"
+          className="absolute inset-0 flex transition-transform duration-300 ease-in-out"
           style={{ transform: showStorageMenu ? 'translateX(-100%)' : 'translateX(0)' }}
         >
           {/* ==========================================
