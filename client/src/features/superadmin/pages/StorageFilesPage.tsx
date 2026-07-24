@@ -92,7 +92,7 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
         </div>
         
         {/* Details */}
-        <div className="space-y-4">
+        <div className="space-y-4 border border-border/60 bg-muted/20 rounded-xl p-4">
           <div>
             <h3 className="font-semibold text-base break-all">{activeFile.name}</h3>
             <p className="text-sm text-muted-foreground">{activeFile.type || "Unknown"} - {formatBytes(activeFile.size || 0)}</p>
@@ -641,7 +641,7 @@ export function StorageFilesPage() {
               ))}
 
               {/* RIGHT SIDE PREVIEW PANE OR EMPTY SPACE */}
-              <div className="flex-1 bg-background flex justify-end relative">
+              <div className="flex-1 bg-background flex relative">
                 <FilePreviewPane activeFile={activeFile} onClose={() => setActiveFile(null)} onDelete={() => setFileToDelete(activeFile?.key)} />
               </div>
             </>
