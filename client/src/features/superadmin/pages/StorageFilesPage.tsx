@@ -453,8 +453,12 @@ export function StorageFilesPage() {
     }, 500);
 
     const handleRenameFileEvent = (e: any) => {
-      setFileToRename({ key: e.detail.key, name: e.detail.name });
-      setNewFileName(e.detail.name);
+      const { key, name } = e.detail;
+      const isFolder = key.endsWith('/');
+      const lastDotIndex = !isFolder && name.lastIndexOf('.') > 0 ? name.lastIndexOf('.') : -1;
+      const baseName = lastDotIndex > 0 ? name.substring(0, lastDotIndex) : name;
+      setFileToRename({ key, name });
+      setNewFileName(baseName);
     };
 
     const handleMoveFileEvent = (e: any) => {
@@ -1129,30 +1133,6 @@ export function StorageFilesPage() {
         </Dialog>
       
       {/* Rename Dialog Removed - Using Inline Editing */}
-      <Dialog open={!!fileToRename} onOpenChange={(open) => !open && setFileToRename(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rename {fileToRename?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">New Name</p>
-              <Input
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                autoFocus
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setFileToRename(null)}>Cancel</Button>
-            <Button onClick={handleRenameFile} disabled={renameObjectMutation.isPending || !newFileName.trim() || newFileName === fileToRename?.name}>
-              {renameObjectMutation.isPending && <Spinner className="mr-2" />}
-              {renameObjectMutation.isPending ? "Renaming..." : "Rename"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Move File Modal */}
       <Dialog open={!!fileToMove} onOpenChange={(open) => !open && setFileToMove(null)}>
