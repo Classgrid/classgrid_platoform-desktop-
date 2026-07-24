@@ -161,6 +161,7 @@ const StorageColumn = ({
   handleCreateFolder,
   uploadingFiles,
   handleUploadClick,
+  setFileToDelete,
 }: any) => {
   const { data, isLoading } = useStorageObjects(prefix);
   
@@ -260,13 +261,9 @@ const StorageColumn = ({
               >
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div onClick={(e) => { e.stopPropagation(); toggleSelection(e, item.key); }} className="shrink-0">
-                  <div className="opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-border bg-background"
-                      checked={isSelected}
-                      onChange={(e) => toggleSelection(e, item.key)}
-                    />
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40 group-hover:border-foreground/40'}`}>
+                      {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                    </div>
                   </div>
                   
                   {item.isFolder ? <Folder size={18} className="text-yellow-500 fill-yellow-500/20 shrink-0" /> : getFileIcon(item.type)}
@@ -274,33 +271,33 @@ const StorageColumn = ({
                 </div>
 
                 <div className="opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        {!item.isFolder && (
-                          <>
-                            <DropdownMenuItem onClick={() => {
-                              navigator.clipboard.writeText(item.cdnUrl);
-                              toast.success("CDN Link copied to clipboard");
-                            }}>
-                              <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
-                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => {
-                          const event = new CustomEvent('delete-file', { detail: item.key });
-                          window.dispatchEvent(event);
-                        }}>
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {!item.isFolder && (
+                        <>
+                          <DropdownMenuItem onClick={() => {
+                            navigator.clipboard.writeText(item.cdnUrl);
+                            toast.success("CDN Link copied to clipboard");
+                          }}>
+                            <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
+                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => {
+                        const event = new CustomEvent('delete-file', { detail: item.key });
+                        window.dispatchEvent(event);
+                      }}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
 
                 {item.isFolder && (
                   <ChevronRight size={14} className={`shrink-0 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`} />
@@ -639,6 +636,7 @@ export function StorageFilesPage() {
                   handleCreateFolder={handleCreateFolder}
                   uploadingFiles={uploadingFiles}
                   handleUploadClick={handleUploadClick}
+                  setFileToDelete={setFileToDelete}
                 />
               ))}
 
