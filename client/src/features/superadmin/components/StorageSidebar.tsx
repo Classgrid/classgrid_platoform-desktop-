@@ -50,21 +50,13 @@ export function StorageSidebar({ role, user }: StorageSidebarProps) {
 
       <SidebarContent className="overflow-y-auto overflow-x-hidden pb-10">
         <SidebarGroup>
-          <div className="mx-4 my-2 group-data-[collapsible=icon]:hidden">
-            <SidebarMenuButton asChild className="h-10 text-muted-foreground hover:text-foreground">
-              <Link to="/superadmin/dashboard" className="flex items-center gap-2 w-full font-medium text-sm">
-                <ChevronLeft size={18} />
-                <span>Super Admin</span>
+          <div className="px-2 py-2 group-data-[collapsible=icon]:hidden">
+            <SidebarMenuButton asChild className="h-9 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md">
+              <Link to="/superadmin/dashboard" className="flex items-center gap-2 w-full font-medium text-[15px]">
+                <ChevronLeft size={16} />
+                <span>Storage</span>
               </Link>
             </SidebarMenuButton>
-            
-            <div className="mt-4 mb-2 px-2">
-              <h2 className="text-xl font-bold flex items-center gap-2 text-foreground">
-                <Database className="w-5 h-5 text-primary" />
-                Storage
-              </h2>
-              <p className="text-xs text-muted-foreground mt-1 leading-snug">Manage AWS S3 Bucket Files & Assets</p>
-            </div>
           </div>
 
           <SidebarGroupContent>
