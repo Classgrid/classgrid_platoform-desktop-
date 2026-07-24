@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { 
   Folder, FileText, Image as ImageIcon, Video, FileArchive, 
   File, UploadCloud, FolderPlus, MoreHorizontal, Download, 
-  Trash2, Edit2, Link as LinkIcon, ChevronRight, Search 
+  Trash2, Edit2, Link as LinkIcon, ChevronRight, Search, RefreshCw, Columns
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -120,6 +120,17 @@ export function StorageFilesPage() {
     });
   };
 
+  const handleRenameSelection = () => {
+    if (selectedKeys.size === 1) {
+      const key = Array.from(selectedKeys)[0];
+      const file = data?.files?.find(f => f.key === key);
+      if (file) {
+        setFileToRename({ key: file.key, name: file.name });
+        setNewFileName(file.name);
+      }
+    }
+  };
+
   const handleRenameFile = () => {
     if (!fileToRename || !newFileName.trim()) return;
     if (fileToRename.name === newFileName.trim()) {
@@ -127,7 +138,6 @@ export function StorageFilesPage() {
       return;
     }
     
-    // Construct new key
     const newKey = prefix + newFileName.trim();
     renameObjectMutation.mutate({ sourceKey: fileToRename.key, destinationKey: newKey }, {
       onSuccess: () => {
@@ -315,35 +325,73 @@ export function StorageFilesPage() {
   const prefixParts = prefix.split("/").filter(Boolean);
 
   return (
-    <div className="flex flex-col h-full bg-background p-6 lg:p-8 max-w-7xl mx-auto w-full">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Storage Management</h1>
-          <p className="text-muted-foreground mt-1">
-            Direct access to AWS S3 bucket for Super Admins.
-          </p>
+    <div className="flex flex-col h-full bg-background w-full">
+      {/* Supabase-style sleek toolbar */}
+      <div className="flex items-center justify-between border-b border-border p-3 bg-background">
+        <div className="relative w-[300px]">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder={`Search in ${prefix ? prefix : 'root directory'}...`} 
+            className="pl-9 h-9 bg-card border-border rounded-md text-sm" 
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
         </div>
+        
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setIsFolderModalOpen(true)}>
-            <FolderPlus className="mr-2 h-4 w-4" /> New Folder
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-9 w-9 bg-transparent border-border" 
+            disabled={selectedKeys.size !== 1} 
+            onClick={handleRenameSelection}
+          >
+            <Edit2 size={15} />
           </Button>
-          <Button onClick={handleUploadClick}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-9 w-9 bg-transparent border-border" 
+            onClick={() => refetch()}
+          >
+            <RefreshCw size={15} className={isLoading ? "animate-spin" : ""} />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-9 w-9 bg-transparent border-border"
+          >
+            <Columns size={15} />
+          </Button>
+          
+          <div className="h-5 w-px bg-border mx-1"></div>
+          
+          <Button 
+            variant="outline" 
+            className="h-9 bg-transparent border-border text-sm font-medium" 
+            onClick={() => setIsFolderModalOpen(true)}
+          >
+            <FolderPlus className="mr-2 h-4 w-4" /> Create folder
+          </Button>
+          <Button 
+            className="h-9 bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-none text-sm font-medium" 
+            onClick={handleUploadClick}
+          >
             <UploadCloud className="mr-2 h-4 w-4" /> 
-            Upload File
+            Upload files
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4 bg-card border border-border p-3 rounded-lg">
+      <div className="flex items-center gap-2 px-4 py-2 bg-muted/20 border-b border-border text-sm">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink 
-                className="cursor-pointer flex items-center gap-1"
+                className="cursor-pointer font-medium"
                 onClick={() => handleBreadcrumbClick(-1)}
               >
-                <Folder size={16} />
-                <span>root</span>
+                classgrid-storage
               </BreadcrumbLink>
             </BreadcrumbItem>
             {prefixParts.map((part, index) => (
@@ -365,16 +413,6 @@ export function StorageFilesPage() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-
-        <div className="relative w-full md:w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search files..." 
-            className="pl-9 bg-background h-9" 
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-        </div>
       </div>
 
       <div className="flex-1 overflow-auto relative">
