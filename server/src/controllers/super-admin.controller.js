@@ -1189,7 +1189,7 @@ export const cleanLogs = async (req, res) => {
         const util = await import("util");
         const execPromise = util.promisify(exec);
 
-        const command = "pm2 flush && sudo journalctl --vacuum-size=100M";
+        const command = "pm2 flush && sudo journalctl --vacuum-size=100M && npm cache clean --force && sudo apt-get clean";
         
         const { stdout, stderr } = await execPromise(command);
         
