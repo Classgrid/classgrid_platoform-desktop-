@@ -764,6 +764,7 @@ export async function getPresignedUrl(req, res) {
             new GetObjectCommand({
                 Bucket: BUCKET_NAME,
                 Key: key,
+                ResponseContentDisposition: `attachment; filename="${path.posix.basename(key)}"`,
             }),
             { expiresIn: STORAGE_PRESIGNED_URL_EXPIRY_SECONDS },
         );
