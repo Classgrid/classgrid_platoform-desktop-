@@ -481,7 +481,6 @@ async function multipartUpload({ key, buffer, contentType }) {
         Bucket: BUCKET_NAME,
         Key: key,
         ContentType: contentType,
-        ACL: "public-read",
     }));
 
     const uploadId = createdUpload.UploadId;
@@ -646,7 +645,6 @@ export async function uploadFile(req, res) {
                 Body: req.file.buffer,
                 ContentType: contentType,
                 ContentLength: req.file.size,
-                ACL: "public-read",
             }));
         }
 
@@ -793,7 +791,6 @@ export async function createFolder(req, res) {
             Body: Buffer.alloc(0),
             ContentLength: 0,
             ContentType: "application/x-directory",
-            ACL: "public-read",
         }));
 
         invalidateStorageAnalyticsCache();
@@ -869,7 +866,6 @@ export async function renameObject(req, res) {
             Bucket: BUCKET_NAME,
             CopySource: encodeCopySource(sourceKey),
             Key: destinationKey,
-            ACL: "public-read",
         }));
         invalidateStorageAnalyticsCache();
 
