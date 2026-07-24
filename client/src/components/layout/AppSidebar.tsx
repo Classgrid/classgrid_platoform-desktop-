@@ -45,13 +45,13 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   // Scroll active item into view when sliding back to the main menu
   useEffect(() => {
     if (!showStorageMenu) {
-      // Slight delay to ensure it runs during/after the slide transition starts
-      setTimeout(() => {
+      // Run on next frame
+      requestAnimationFrame(() => {
         const activeEl = document.getElementById("active-main-menu-item");
         if (activeEl) {
-          activeEl.scrollIntoView({ block: "center", behavior: "smooth" });
+          activeEl.scrollIntoView({ block: "center", behavior: "auto" });
         }
-      }, 100);
+      });
     }
   }, [showStorageMenu]);
 
@@ -116,7 +116,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
       <SidebarContent className="overflow-hidden relative p-0">
         {/* Sliding Carousel Container */}
         <div 
-          className="absolute inset-0 flex transition-transform duration-300 ease-in-out"
+          className="absolute inset-0 flex transition-transform duration-150 ease-out"
           style={{ transform: showStorageMenu ? 'translateX(-100%)' : 'translateX(0)' }}
         >
           {/* ==========================================
