@@ -68,7 +68,7 @@ export interface UploadingFile {
 const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, onClose: () => void, onDelete: () => void }) => {
   if (!activeFile) return null;
   return (
-    <div className="w-[320px] sm:w-[350px] shrink-0 border-r border-border bg-card flex flex-col h-full animate-in slide-in-from-right-2">
+    <div className="w-[320px] sm:w-[350px] shrink-0 border-l border-border bg-card flex flex-col h-full animate-in slide-in-from-right-2">
       <div className="p-3 border-b border-border flex items-center justify-between">
         <span className="font-semibold text-sm">File Preview</span>
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
@@ -99,7 +99,7 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
           
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Added on</p>
-            <p className="text-sm">{activeFile.createdAt ? new Date(activeFile.createdAt).toLocaleString() : "-"}</p>
+            <p className="text-sm">{(activeFile.createdAt || activeFile.lastModified) ? new Date(activeFile.createdAt || activeFile.lastModified).toLocaleString() : "-"}</p>
           </div>
           
           <div className="space-y-1">
@@ -141,6 +141,7 @@ const StorageColumn = ({
   setIsCreatingFolder,
   handleCreateFolder,
   uploadingFiles,
+  handleUploadClick,
 }: any) => {
   const { data, isLoading } = useStorageObjects(prefix);
   
@@ -202,6 +203,9 @@ const StorageColumn = ({
           <div className="p-8 text-center text-muted-foreground flex flex-col items-center gap-3">
             <Folder className="h-10 w-10 opacity-20" />
             <span className="text-sm">This folder is empty.</span>
+            <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={handleUploadClick}>
+              <UploadCloud className="mr-2 h-3.5 w-3.5" /> Upload files
+            </Button>
           </div>
         ) : (
           <>
@@ -357,8 +361,7 @@ export function StorageFilesPage() {
       setIsCreatingFolder(false);
       return;
     }
-    const newKey = currentPrefix + folderName.trim() + "/";
-    createFolderMutation.mutate(newKey, {
+    createFolderMutation.mutate({ folderName: folderName.trim(), prefix: currentPrefix }, {
       onSuccess: () => {
         setIsCreatingFolder(false);
       }
@@ -552,6 +555,7 @@ export function StorageFilesPage() {
                   setIsCreatingFolder={setIsCreatingFolder}
                   handleCreateFolder={handleCreateFolder}
                   uploadingFiles={uploadingFiles}
+                  handleUploadClick={handleUploadClick}
                 />
               ))}
 
