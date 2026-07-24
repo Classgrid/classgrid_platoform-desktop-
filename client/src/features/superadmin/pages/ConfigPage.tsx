@@ -235,7 +235,8 @@ export function ConfigPage() {
     : "border-border bg-card";
 
   return (
-    <div className="flex flex-col gap-6 w-full mx-auto pb-12">
+    <>
+      <div className="flex flex-col gap-6 w-full mx-auto pb-12">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
@@ -452,6 +453,6 @@ export function ConfigPage() {
           }
         ]}
       />
-    </div>
+    </>
   );
 }
