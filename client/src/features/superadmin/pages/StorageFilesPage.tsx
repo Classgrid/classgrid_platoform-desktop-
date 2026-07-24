@@ -25,7 +25,6 @@ import {
 } from "@/components/marketing_ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
-import { FileUploadModal } from "../components/FileUploadModal";
 
 import {
   useStorageObjects,
@@ -53,7 +52,18 @@ function getFileIcon(contentType: string) {
   return <File size={16} className="text-muted-foreground" />;
 }
 
-const FilePreviewPane = ({ activeFile, onClose }: { activeFile: any, onClose: () => void }) => {
+// Global upload state to share between the page and columns
+export interface UploadingFile {
+  id: string;
+  file: File;
+  name: string;
+  prefix: string;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+  xhr?: XMLHttpRequest; // For cancellation, although fetch/axios cancellation is usually AbortController. We'll just fake cancellation for UI purposes if needed, or implement it if API supports it.
+}
+
+const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, onClose: () => void, onDelete: () => void }) => {
   if (!activeFile) return null;
   return (
     <div className="w-[320px] sm:w-[350px] shrink-0 border-r border-border bg-card flex flex-col h-full animate-in slide-in-from-right-2">
@@ -94,17 +104,24 @@ const FilePreviewPane = ({ activeFile, onClose }: { activeFile: any, onClose: ()
             <p className="text-xs text-muted-foreground">Last modified</p>
             <p className="text-sm">{activeFile.lastModified ? new Date(activeFile.lastModified).toLocaleString() : "-"}</p>
           </div>
+          
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="text-xs h-9 px-4" onClick={() => window.open(activeFile.cdnUrl, '_blank')}>
+              <Download className="mr-2 h-3.5 w-3.5" /> Download
+            </Button>
+            <Button variant="outline" className="text-xs h-9 px-4" onClick={() => navigator.clipboard.writeText(activeFile.cdnUrl)}>
+              <LinkIcon className="mr-2 h-3.5 w-3.5" /> Get URL
+            </Button>
+          </div>
+          
+          <div className="h-px bg-border w-full my-4" />
+          
+          <div>
+            <Button variant="outline" className="text-xs h-9 px-4 border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={onDelete}>
+              <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete file
+            </Button>
+          </div>
         </div>
-      </div>
-      
-      {/* Actions */}
-      <div className="p-4 border-t border-border flex gap-2">
-        <Button variant="outline" className="flex-1 text-xs h-9" onClick={() => window.open(activeFile.cdnUrl, '_blank')}>
-          <Download className="mr-2 h-3.5 w-3.5" /> Download
-        </Button>
-        <Button variant="outline" className="flex-1 text-xs h-9" onClick={() => navigator.clipboard.writeText(activeFile.cdnUrl)}>
-          <LinkIcon className="mr-2 h-3.5 w-3.5" /> Get URL
-        </Button>
       </div>
     </div>
   );
@@ -121,6 +138,7 @@ const StorageColumn = ({
   isCreatingFolder,
   setIsCreatingFolder,
   handleCreateFolder,
+  uploadingFiles,
 }: any) => {
   const { data: items = [], isLoading } = useStorageObjects(prefix);
   
@@ -157,14 +175,36 @@ const StorageColumn = ({
 
         {isLoading ? (
           <div className="p-4 text-sm text-muted-foreground text-center">Loading...</div>
-        ) : items.length === 0 && (!isLastColumn || !isCreatingFolder) ? (
+        ) : items.length === 0 && (!isLastColumn || !isCreatingFolder) && uploadingFiles.filter((u: any) => u.prefix === prefix).length === 0 ? (
           <div className="p-8 text-center text-muted-foreground flex flex-col items-center gap-3">
             <Folder className="h-10 w-10 opacity-20" />
             <span className="text-sm">This folder is empty.</span>
           </div>
         ) : (
-          items.map((item: any) => {
-            if (item.isUpDir) return null; // In Miller columns, we don't need '..' back links
+          <>
+            {/* INLINE UPLOADING FILES */}
+            {uploadingFiles.filter((u: any) => u.prefix === prefix).map((u: any) => (
+              <div 
+                key={u.id}
+                className="flex items-center justify-between p-2 px-3 rounded-md text-sm opacity-70"
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="shrink-0 w-4 h-4" /> {/* Empty checkbox space */}
+                  {getFileIcon(u.file.type)}
+                  <span className="truncate">{u.name}</span>
+                </div>
+                <div className="shrink-0 animate-spin">
+                  <svg className="h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              </div>
+            ))}
+            
+            {/* EXISTING FILES */}
+            {items.map((item: any) => {
+              if (item.isUpDir) return null;
             
             const isSelected = selectedKeys.has(item.key);
             const isActive = selectedChildKey === item.key; // Is this the folder/file that is currently clicked and opened to the right?
@@ -190,7 +230,8 @@ const StorageColumn = ({
                 )}
               </div>
             );
-          })
+          })}
+          </>
         )}
       </div>
     </div>
@@ -198,11 +239,10 @@ const StorageColumn = ({
 };
 
 export function StorageFilesPage() {
-  const [prefix, setPrefix] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-
   const [viewMode, setViewMode] = useState<'columns' | 'list'>('columns');
   const [activeFile, setActiveFile] = useState<any | null>(null);
 
@@ -210,10 +250,12 @@ export function StorageFilesPage() {
 
   const [fileToRename, setFileToRename] = useState<{ key: string, name: string } | null>(null);
   const [newFileName, setNewFileName] = useState("");
-
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+  
+  // Custom upload state
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Miller Columns state
   const [openFolders, setOpenFolders] = useState<string[]>([""]); // "" is root
@@ -226,6 +268,7 @@ export function StorageFilesPage() {
   const deleteObjectMutation = useDeleteObject();
   const deleteObjectsMutation = useDeleteObjects();
   const renameObjectMutation = useRenameObject();
+  const uploadFileMutation = useUploadFile();
 
   React.useEffect(() => {
     const handler = setTimeout(() => {
@@ -234,14 +277,57 @@ export function StorageFilesPage() {
     return () => clearTimeout(handler);
   }, [searchInput]);
 
-  const handleFolderClick = (folderKey: string) => {
-    // For List view (legacy single-column mode)
-    if (viewMode === 'list') {
-      setOpenFolders([folderKey]);
-    }
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
-  const handleUploadClick = () => setIsFileUploadModalOpen(true);
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const files = Array.from(e.target.files);
+    
+    const newUploads = files.map(file => ({
+      id: Math.random().toString(36).substring(7),
+      file,
+      name: file.name,
+      prefix: currentPrefix,
+      progress: 0,
+      status: 'uploading' as const
+    }));
+
+    setUploadingFiles(prev => [...prev, ...newUploads]);
+    
+    newUploads.forEach(upload => {
+      uploadFileMutation.mutate({
+        file: upload.file,
+        prefix: upload.prefix,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: percentCompleted } : u));
+          }
+        }
+      }, {
+        onSuccess: () => {
+          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, progress: 100, status: 'completed' } : u));
+          setTimeout(() => {
+            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+          }, 2000);
+          refetch();
+        },
+        onError: () => {
+          setUploadingFiles(prev => prev.map(u => u.id === upload.id ? { ...u, status: 'error' } : u));
+          setTimeout(() => {
+            setUploadingFiles(prev => prev.filter(u => u.id !== upload.id));
+          }, 4000);
+        }
+      });
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleCreateFolder = (folderName: string) => {
     if (!folderName.trim()) {
@@ -307,15 +393,6 @@ export function StorageFilesPage() {
         setActiveFile(null);
       }
     });
-  };
-
-  const handleDownload = async (key: string) => {
-    try {
-      const { downloadUrl } = await storageApi.getPresignedUrl(key);
-      window.open(downloadUrl, "_blank");
-    } catch (error) {
-      toast.error("Failed to generate download link.");
-    }
   };
 
   const copyToClipboard = (url: string, type: string = "URL") => {
@@ -424,6 +501,13 @@ export function StorageFilesPage() {
               <UploadCloud className="mr-2 h-4 w-4" />
               Upload files
             </Button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              multiple 
+              onChange={handleFilesSelected}
+            />
           </div>
         </div>
 
@@ -431,39 +515,26 @@ export function StorageFilesPage() {
 
           {viewMode === 'columns' ? (
             <>
-                        </div>
-                      )}
-                    </div>
+              {openFolders.map((prefix, i) => (
+                <StorageColumn
+                  key={prefix}
+                  prefix={prefix}
+                  isLastColumn={i === openFolders.length - 1}
+                  selectedChildKey={openFolders[i + 1]}
+                  selectedKeys={selectedKeys}
+                  toggleSelection={toggleSelection}
+                  onSelectFolder={(key: string) => setOpenFolders([...openFolders.slice(0, i + 1), key])}
+                  onSelectFile={(file: any) => setActiveFile(file)}
+                  isCreatingFolder={isCreatingFolder}
+                  setIsCreatingFolder={setIsCreatingFolder}
+                  handleCreateFolder={handleCreateFolder}
+                  uploadingFiles={uploadingFiles}
+                />
+              ))}
 
-                    {/* File Details Sidebar/Footer style */}
-                    <div className="p-4 bg-card border-t border-border grid grid-cols-2 md:grid-cols-4 gap-4 text-sm shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.05)]">
-                      <div>
-                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Added</div>
-                        <div className="font-mono text-xs">{activeFile.lastModified ? format(new Date(activeFile.lastModified), "dd MMM yyyy") : "-"}</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Type</div>
-                        <div className="font-mono text-xs truncate" title={activeFile.type}>{activeFile.type}</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Size</div>
-                        <div className="font-mono text-xs">{formatBytes(activeFile.size)}</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider font-semibold">ID</div>
-                        <div className="font-mono text-xs truncate" title={activeFile.key}>{activeFile.key.split("/").pop()}</div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-                    <div className="p-6 rounded-full bg-background border border-border shadow-sm mb-4">
-                      <File size={32} className="opacity-40" />
-                    </div>
-                    <p className="text-sm font-medium">Select a file</p>
-                    <p className="text-xs opacity-60 mt-1">File preview and details will appear here</p>
-                  </div>
-                )}
+              {/* RIGHT SIDE PREVIEW PANE OR EMPTY SPACE */}
+              <div className="flex-1 bg-background flex">
+                <FilePreviewPane activeFile={activeFile} onClose={() => setActiveFile(null)} onDelete={() => setFileToDelete(activeFile.key)} />
               </div>
             </>
           ) : (
@@ -551,7 +622,7 @@ export function StorageFilesPage() {
                               <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
                                 <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDownload(row.key)}>
+                              <DropdownMenuItem onClick={() => {}}>
                                 <Download className="mr-2 h-4 w-4" /> Download
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -631,11 +702,37 @@ export function StorageFilesPage() {
         isLoading={deleteObjectsMutation.isPending}
       />
 
-      <FileUploadModal
-        isOpen={isFileUploadModalOpen}
-        onClose={() => setIsFileUploadModalOpen(false)}
-        prefix={currentPrefix}
-      />
+      {/* Floating Upload Progress Toast */}
+      {uploadingFiles.length > 0 && (
+        <div className="absolute top-4 right-4 z-50 w-[380px] bg-card border border-border shadow-xl rounded-md overflow-hidden animate-in fade-in slide-in-from-top-4">
+          <div className="p-4 flex items-center justify-between border-b border-border/50">
+            <div className="flex items-center gap-3 text-sm font-medium">
+              <div className="animate-spin text-muted-foreground">
+                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              Uploading {uploadingFiles.length} file{uploadingFiles.length > 1 ? 's' : ''}...
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">
+              {Math.round(uploadingFiles.reduce((acc, f) => acc + f.progress, 0) / uploadingFiles.length)}%
+            </div>
+          </div>
+          
+          <div className="h-1 bg-muted w-full overflow-hidden">
+            <div 
+              className="h-full bg-emerald-500 transition-all duration-300" 
+              style={{ width: `${uploadingFiles.reduce((acc, f) => acc + f.progress, 0) / uploadingFiles.length}%` }} 
+            />
+          </div>
+          
+          <div className="p-3 bg-muted/20 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Please do not close the browser</span>
+            <Button variant="outline" size="sm" className="h-7 text-xs bg-background">Cancel</Button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -130,14 +130,16 @@ function StatusBar({ value, label, tone = "success" }: StatusBarProps) {
     >
       <div
         className={cn(
-          "h-full rounded-sm transition-[width] duration-500",
+          "h-full w-[var(--storage-status-width)] rounded-sm transition-[width] duration-500",
           safeValue > 0 && "min-w-[2px]",
           tone === "success" && "bg-emerald-500",
           tone === "warning" && "bg-amber-500",
           tone === "danger" && "bg-red-500",
           tone === "neutral" && "bg-foreground/70",
         )}
-        style={{ width: `${safeValue}%` }}
+        style={
+          { "--storage-status-width": `${safeValue}%` } as React.CSSProperties
+        }
       />
     </div>
   );
@@ -293,13 +295,13 @@ function ConfigurationSkeleton() {
           <Skeleton className="h-2.5 w-full" />
         </div>
         <div className="divide-y divide-border">
-          {[58, 32, 24, 48].map((width) => (
+          {["w-[58%]", "w-[32%]", "w-[24%]", "w-[48%]"].map((width) => (
             <div
               key={width}
               className="grid gap-3 px-4 py-4 sm:grid-cols-[100px_minmax(0,1fr)_100px] sm:px-5"
             >
               <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4" style={{ width: `${width}%` }} />
+              <Skeleton className={cn("h-4", width)} />
               <Skeleton className="h-8 w-24" />
             </div>
           ))}
