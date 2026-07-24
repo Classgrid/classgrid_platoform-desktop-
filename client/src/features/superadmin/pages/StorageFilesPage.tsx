@@ -159,6 +159,7 @@ const StorageColumn = ({
   onSelectFile,
   isCreatingFolder,
   setIsCreatingFolder,
+  isCreatingFolderPending,
   handleCreateFolder,
   uploadingFiles,
   handleUploadClick,
@@ -193,10 +194,15 @@ const StorageColumn = ({
         {isLastColumn && isCreatingFolder && (
           <div className="flex items-center gap-3 p-2 px-3 border-b border-border bg-primary/5">
             <div className="shrink-0 w-4 h-4" />
-            <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
+            {isCreatingFolderPending ? (
+              <Spinner className="text-yellow-500 shrink-0 h-4 w-4" />
+            ) : (
+              <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
+            )}
             <input 
               type="text"
               autoFocus
+              disabled={isCreatingFolderPending}
               defaultValue="Untitled folder"
               onFocus={(e) => e.target.select()}
               className="flex-1 bg-background border border-primary text-sm px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary h-6"
@@ -208,6 +214,7 @@ const StorageColumn = ({
                 }
               }}
               onBlur={(e) => {
+                if (isCreatingFolderPending) return;
                 if (e.target.value.trim() && e.target.value !== "Untitled folder") {
                   handleCreateFolder(e.target.value);
                 } else {
@@ -429,13 +436,16 @@ export function StorageFilesPage() {
   };
 
   const handleCreateFolder = (folderName: string) => {
+    if (createFolderMutation.isPending) return;
     if (!folderName.trim()) {
       setIsCreatingFolder(false);
       return;
     }
     createFolderMutation.mutate({ folderName: folderName.trim(), prefix: currentPrefix }, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        await refetch();
         setIsCreatingFolder(false);
+        toast.success("Folder created");
       }
     });
   };
@@ -624,6 +634,7 @@ export function StorageFilesPage() {
                   onSelectFile={(file: any) => setActiveFile(file)}
                   isCreatingFolder={isCreatingFolder}
                   setIsCreatingFolder={setIsCreatingFolder}
+                  isCreatingFolderPending={createFolderMutation.isPending}
                   handleCreateFolder={handleCreateFolder}
                   uploadingFiles={uploadingFiles}
                   handleUploadClick={handleUploadClick}
