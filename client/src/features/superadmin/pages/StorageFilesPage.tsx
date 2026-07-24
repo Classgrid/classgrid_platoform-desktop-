@@ -37,6 +37,7 @@ import {
   useRenameObject
 } from "../queries/useStorage";
 import { storageApi } from "../services/storageApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return '0 Bytes';
@@ -194,16 +195,10 @@ const StorageColumn = ({
         {isLastColumn && isCreatingFolder && (
           <div className="flex items-center gap-3 p-2 px-3 border-b border-border bg-primary/5">
             <div className="shrink-0 w-4 h-4" />
-            {isCreatingFolderPending ? (
-              <Spinner className="text-yellow-500 shrink-0 h-4 w-4" />
-            ) : (
-              <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
-            )}
+            <Folder size={16} className="text-yellow-500 fill-yellow-500/20 shrink-0" />
             <input 
-              id="inline-create-folder-input"
               type="text"
               autoFocus
-              disabled={isCreatingFolderPending}
               defaultValue="Untitled folder"
               onFocus={(e) => e.target.select()}
               className="flex-1 bg-background border border-primary text-sm px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary h-6"
@@ -217,15 +212,11 @@ const StorageColumn = ({
                 }
               }}
               onBlur={(e) => {
-                // Delay onBlur slightly so the Save button click can register
-                setTimeout(() => {
-                  if (isCreatingFolderPending) return;
-                  if (e.target.value.trim() && e.target.value !== "Untitled folder") {
-                    handleCreateFolder(e.target.value);
-                  } else {
-                    setIsCreatingFolder(false);
-                  }
-                }, 150);
+                if (e.target.value.trim() && e.target.value !== "Untitled folder") {
+                  handleCreateFolder(e.target.value);
+                } else {
+                  setIsCreatingFolder(false);
+                }
               }}
             />
             <Button
@@ -368,6 +359,7 @@ export function StorageFilesPage() {
   // The effective prefix is the last opened folder
   const currentPrefix = openFolders[openFolders.length - 1];
 
+  const queryClient = useQueryClient();
   const { data, isLoading, isFetching, refetch } = useStorageObjects(currentPrefix, debouncedSearch);
   const createFolderMutation = useCreateFolder();
   const deleteObjectMutation = useDeleteObject();
@@ -457,15 +449,37 @@ export function StorageFilesPage() {
 
   const handleCreateFolder = (folderName: string) => {
     if (createFolderMutation.isPending) return;
-    if (!folderName.trim()) {
+    const newFolderName = folderName.trim();
+    if (!newFolderName) {
       setIsCreatingFolder(false);
       return;
     }
-    createFolderMutation.mutate({ folderName: folderName.trim(), prefix: currentPrefix }, {
-      onSuccess: async () => {
-        await refetch();
-        setIsCreatingFolder(false);
+
+    const newPrefix = `${currentPrefix}${newFolderName}/`;
+
+    // Instantly hide the input
+    setIsCreatingFolder(false);
+
+    // Optimistically update the cache to show the folder instantly
+    queryClient.setQueryData(["storage-objects", currentPrefix, debouncedSearch], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        folders: [
+          ...oldData.folders,
+          { name: newFolderName, prefix: newPrefix }
+        ].sort((a: any, b: any) => a.name.localeCompare(b.name))
+      };
+    });
+
+    createFolderMutation.mutate({ folderName: newFolderName, prefix: currentPrefix }, {
+      onSuccess: () => {
+        refetch();
         toast.success("Folder created");
+      },
+      onError: () => {
+        refetch();
+        toast.error("Failed to create folder");
       }
     });
   };
