@@ -168,6 +168,7 @@ const StorageColumn = ({
   setCreatingFolderIn,
   isCreatingFolderPending,
   handleCreateFolder,
+  uploadingFiles,
   handleUploadClick,
   setFileToDelete,
   fileToRename,
@@ -903,6 +904,7 @@ export function StorageFilesPage() {
                   setCreatingFolderIn={setCreatingFolderIn}
                   isCreatingFolderPending={createFolderMutation.isPending}
                   handleCreateFolder={handleCreateFolder}
+                  uploadingFiles={uploadingFiles}
                   handleUploadClick={handleUploadClick}
                   setFileToDelete={setFileToDelete}
                   fileToRename={fileToRename}
