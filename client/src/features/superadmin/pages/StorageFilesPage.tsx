@@ -699,7 +699,25 @@ export function StorageFilesPage() {
                             <DropdownMenuItem onClick={() => copyToClipboard(row.cdnUrl, "CDN Link")}>
                               <LinkIcon className="mr-2 h-4 w-4" /> Copy CDN Link
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {}}>
+                            <DropdownMenuItem onClick={async () => {
+                              try {
+                                toast.loading("Starting download...", { id: "downloading" });
+                                const response = await fetch(row.cdnUrl);
+                                const blob = await response.blob();
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = blobUrl;
+                                link.download = row.name;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(blobUrl);
+                                toast.success("Download complete", { id: "downloading" });
+                              } catch (e) {
+                                toast.dismiss("downloading");
+                                window.open(row.cdnUrl, '_blank');
+                              }
+                            }}>
                               <Download className="mr-2 h-4 w-4" /> Download
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
