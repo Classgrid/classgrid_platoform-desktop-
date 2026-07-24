@@ -249,21 +249,26 @@ const StorageColumn = ({
         ) : (
           <>
             {/* INLINE UPLOADING FILES */}
-            {uploadingFiles.filter((u: any) => u.prefix === prefix).map((u: any) => (
-              <div 
-                key={u.id}
-                className="flex items-center justify-between p-2 px-3 rounded-md text-sm opacity-70"
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="shrink-0 w-4 h-4" /> {/* Empty checkbox space */}
-                  {getFileIcon(u.file.type)}
-                  <span className="truncate">{u.name}</span>
+            {uploadingFiles.filter((u: any) => u.prefix === prefix).map((u: any) => {
+              // If it's completed and already fetched into the list, don't show the inline duplicate
+              if (u.status === 'completed' && items.some((item: any) => item.name === u.name)) return null;
+              
+              return (
+                <div 
+                  key={u.id}
+                  className="flex items-center justify-between p-2 px-3 rounded-md text-sm opacity-70"
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="shrink-0 w-4 h-4" /> {/* Empty checkbox space */}
+                    {getFileIcon(u.file.type)}
+                    <span className="truncate">{u.name}</span>
+                  </div>
+                  <div className="shrink-0 flex items-center justify-center">
+                    <Spinner className="text-muted-foreground" />
+                  </div>
                 </div>
-                <div className="shrink-0 flex items-center justify-center">
-                  <Spinner className="text-muted-foreground" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
             
             {/* EXISTING FILES */}
             {items.map((item: any) => {
