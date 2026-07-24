@@ -34,7 +34,8 @@ import {
   useCreateFolder,
   useDeleteObject,
   useDeleteObjects,
-  useRenameObject
+  useRenameObject,
+  storageKeys
 } from "../queries/useStorage";
 import { storageApi } from "../services/storageApi";
 import { useQueryClient } from "@tanstack/react-query";
@@ -466,7 +467,7 @@ export function StorageFilesPage() {
     setIsCreatingFolder(false);
 
     // Optimistically update the cache to show the folder instantly
-    queryClient.setQueryData(["storage-objects", currentPrefix, debouncedSearch], (oldData: any) => {
+    queryClient.setQueryData(storageKeys.list(currentPrefix, debouncedSearch), (oldData: any) => {
       if (!oldData) return oldData;
       return {
         ...oldData,
