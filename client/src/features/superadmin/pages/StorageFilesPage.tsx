@@ -111,7 +111,10 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
             <Button variant="outline" className="text-xs h-9 px-4" onClick={() => window.open(activeFile.cdnUrl, '_blank')}>
               <Download className="mr-2 h-3.5 w-3.5" /> Download
             </Button>
-            <Button variant="outline" className="text-xs h-9 px-4" onClick={() => navigator.clipboard.writeText(activeFile.cdnUrl)}>
+            <Button variant="outline" className="text-xs h-9 px-4" onClick={() => {
+              navigator.clipboard.writeText(activeFile.cdnUrl);
+              toast.success("URL copied to clipboard");
+            }}>
               <LinkIcon className="mr-2 h-3.5 w-3.5" /> Get URL
             </Button>
           </div>
