@@ -44,11 +44,13 @@ function formatBytes(bytes: number) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-function getFileIcon(contentType: string) {
-  if (contentType.startsWith("image/")) return <ImageIcon size={16} className="text-muted-foreground" />;
-  if (contentType.startsWith("video/")) return <Video size={16} className="text-muted-foreground" />;
-  if (contentType.includes("pdf") || contentType.includes("document") || contentType.startsWith("text/")) return <FileText size={16} className="text-muted-foreground" />;
-  if (contentType.includes("zip") || contentType.includes("tar") || contentType.includes("compressed")) return <FileArchive size={16} className="text-muted-foreground" />;
+function getFileIcon(type?: string) {
+  if (!type) return <File size={16} className="text-muted-foreground" />;
+  if (type === "Folder") return <Folder size={16} className="text-yellow-500 fill-yellow-500/20" />;
+  if (type.startsWith("image/")) return <ImageIcon size={16} className="text-blue-500" />;
+  if (type.startsWith("video/")) return <Video size={16} className="text-purple-500" />;
+  if (type.includes("pdf")) return <FileText size={16} className="text-red-500" />;
+  if (type.includes("zip") || type.includes("tar") || type.includes("rar")) return <FileArchive size={16} className="text-orange-500" />;
   return <File size={16} className="text-muted-foreground" />;
 }
 
@@ -76,9 +78,9 @@ const FilePreviewPane = ({ activeFile, onClose, onDelete }: { activeFile: any, o
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
         {/* Preview Box */}
         <div className="w-full aspect-square bg-muted/30 rounded-lg border border-border flex items-center justify-center overflow-hidden">
-          {activeFile.type.startsWith("image/") ? (
+          {activeFile.type?.startsWith("image/") ? (
             <img src={activeFile.cdnUrl} alt={activeFile.name} className="max-w-full max-h-full object-contain" />
-          ) : activeFile.type.startsWith("video/") ? (
+          ) : activeFile.type?.startsWith("video/") ? (
             <video src={activeFile.cdnUrl} controls className="max-w-full max-h-full" />
           ) : (
             <div className="flex flex-col items-center justify-center text-muted-foreground">
@@ -614,9 +616,9 @@ export function StorageFilesPage() {
                     render: (type: string, row: any) => {
                       if (row.isUpDir) return null;
                       if (type === "Folder") return <Badge variant="neutral">Dir</Badge>;
-                      const fileExt = type.split("/").pop()?.toUpperCase() || "FILE";
-                      if (type.startsWith("image/")) return <Badge variant="info">{fileExt}</Badge>;
-                      if (type.startsWith("video/")) return <Badge variant="secondary">{fileExt}</Badge>;
+                      const fileExt = type?.split("/").pop()?.toUpperCase() || "FILE";
+                      if (type?.startsWith("image/")) return <Badge variant="info">{fileExt}</Badge>;
+                      if (type?.startsWith("video/")) return <Badge variant="secondary">{fileExt}</Badge>;
                       return <Badge variant="outline">{fileExt}</Badge>;
                     }
                   },
