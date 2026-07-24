@@ -1179,3 +1179,45 @@ export const deleteDemoLead = async (req, res) => {
         return res.status(500).json({ success: false, message: "Failed to delete demo lead" });
     }
 };
+
+// ══════════════════════════════════════════════════════════════
+//  14. SERVER MAINTENANCE — Clean Logs
+// ══════════════════════════════════════════════════════════════
+export const cleanLogs = async (req, res) => {
+    try {
+        const { exec } = await import("child_process");
+        const util = await import("util");
+        const execPromise = util.promisify(exec);
+
+        const command = "pm2 flush && sudo journalctl --vacuum-size=100M";
+        
+        const { stdout, stderr } = await execPromise(command);
+        
+        // Log the action
+        const SystemLog = (await import("../models/SystemLog.js")).default;
+        await SystemLog.create({
+            level: "warn",
+            message: "Server logs cleaned by Super Admin",
+            context: "Maintenance",
+            metadata: {
+                timestamp: new Date(),
+                superAdminId: req.user._id,
+                output: stdout.substring(0, 500)
+            }
+        });
+
+        res.json({
+            success: true,
+            message: "Logs cleaned successfully",
+            output: stdout,
+            errors: stderr
+        });
+    } catch (err) {
+        console.error("[SuperAdmin] cleanLogs error:", err.message);
+        res.status(500).json({ 
+            success: false, 
+            message: "Failed to clean logs",
+            error: err.message
+        });
+    }
+};

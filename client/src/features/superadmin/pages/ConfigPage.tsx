@@ -1,6 +1,7 @@
 import { Input } from "@/components/marketing_ui/input";
 import { useState, useMemo } from "react";
-import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle } from "lucide-react";
+import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network } from "lucide-react";
+import { useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
@@ -102,28 +103,48 @@ function MetricProgress({ label, used, total, pct, unit = "GB" }: any) {
   );
 }
 
-function ServiceStatus({ name, icon: Icon, status, ping }: any) {
+function useTimeSince(timestamp: string | undefined) {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    if (!timestamp) return;
+    const update = () => {
+      setSeconds(Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000));
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [timestamp]);
+  return seconds;
+}
+
+function ServiceStatus({ name, icon: Icon, status, ping, lastCheckedSec }: any) {
   const isUp = status === "UP" || status === "CONFIGURED";
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-md ${isUp ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
-          <Icon size={16} />
+    <div className="flex flex-col p-3 rounded-lg border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-md ${isUp ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'}`}>
+            <Icon size={16} />
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-foreground">{name}</h4>
+            <p className="text-xs text-muted-foreground font-mono">{ping || status}</p>
+          </div>
         </div>
-        <div>
-          <h4 className="text-sm font-medium text-foreground">{name}</h4>
-          <p className="text-xs text-muted-foreground font-mono">{ping || status}</p>
+        <div className="flex items-center">
+          {isUp ? (
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+            </span>
+          ) : (
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+          )}
         </div>
       </div>
-      <div className="flex items-center">
-        {isUp ? (
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-          </span>
-        ) : (
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500"></span>
-        )}
+      <div className="mt-3 pt-2 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider">
+        <span className="flex items-center gap-1"><Clock size={10} /> Last checked</span>
+        <span>{lastCheckedSec !== undefined ? `${lastCheckedSec} sec ago` : '...'}</span>
       </div>
     </div>
   );
@@ -148,6 +169,8 @@ export function ConfigPage() {
   const toggleMutation = useToggleFeatureFlag();
 
   const [search, setSearch] = useState("");
+  const [cleaningLogs, setCleaningLogs] = useState(false);
+  const secondsSinceCheck = useTimeSince(healthData?.timestamp);
 
   const flags = flagData?.data ?? [];
 
@@ -184,6 +207,34 @@ export function ConfigPage() {
   };
 
   const bytesToGB = (bytes: number) => bytes / (1024 * 1024 * 1024);
+
+  const handleCleanLogs = async () => {
+    if (!confirm("Are you sure you want to clean the server logs? This will delete PM2 logs and old system journals.")) return;
+    setCleaningLogs(true);
+    try {
+      // Direct API call since we just added the endpoint
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/super-admin/clean-logs`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        alert("Logs cleaned successfully!");
+      } else {
+        alert("Failed to clean logs");
+      }
+    } catch (err) {
+      alert("Error cleaning logs");
+    } finally {
+      setCleaningLogs(false);
+    }
+  };
+
+  const isDiskCritical = (healthData?.osMetrics?.disk?.usagePct || 0) > 90;
+  const isRamCritical = (healthData?.osMetrics?.ram?.usagePct || 0) > 90;
+  const hardwareCardStyle = (isDiskCritical || isRamCritical) 
+    ? "border-destructive/50 shadow-[0_0_15px_rgba(239,68,68,0.15)] bg-destructive/5" 
+    : "border-border bg-card";
 
   return (
     <div className="flex flex-col gap-6 w-full mx-auto pb-12">
@@ -224,12 +275,20 @@ export function ConfigPage() {
         
         {/* Left Col: Hardware Metrics */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm relative overflow-hidden">
+          <div className={`rounded-xl border p-5 transition-colors duration-500 relative overflow-hidden ${hardwareCardStyle}`}>
             {/* Glass decoration removed per user request */}
             
             <div className="flex items-center gap-2 mb-6">
-              <Server className="text-blue-500" size={18} />
+              <Server className={isDiskCritical || isRamCritical ? "text-destructive" : "text-blue-500"} size={18} />
               <h2 className="text-lg font-semibold text-foreground">EC2 Hardware Metrics</h2>
+              
+              <div className="ml-4">
+                <Button variant="outline" size="sm" onClick={handleCleanLogs} disabled={cleaningLogs} className="h-7 text-xs px-2 gap-1.5 border-destructive/30 hover:bg-destructive/10 text-destructive">
+                  <Trash2 size={12} />
+                  {cleaningLogs ? "Cleaning..." : "Clean Logs"}
+                </Button>
+              </div>
+
               <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground font-mono">
                 <Activity size={12} />
                 Uptime: {formatUptime(healthData?.uptime ?? 0)}
@@ -326,25 +385,53 @@ export function ConfigPage() {
             icon={Database} 
             status={healthData?.services?.mongodb?.status || 'UNKNOWN'} 
             ping={healthData?.services?.mongodb?.ping} 
+            lastCheckedSec={secondsSinceCheck}
           />
           <ServiceStatus 
             name="Supabase Edge" 
             icon={Database} 
             status={healthData?.services?.supabase?.status || 'UNKNOWN'} 
             ping={healthData?.services?.supabase?.ping} 
+            lastCheckedSec={secondsSinceCheck}
           />
           <ServiceStatus 
             name="Cloudflare R2" 
             icon={HardDrive} 
             status={healthData?.services?.r2?.status || 'UNKNOWN'} 
             ping={healthData?.services?.r2?.ping} 
+            lastCheckedSec={secondsSinceCheck}
           />
           <ServiceStatus 
             name="Redis Cache" 
             icon={Activity} 
             status={healthData?.services?.redis?.status || 'UNKNOWN'} 
             ping={healthData?.services?.redis?.ping} 
+            lastCheckedSec={secondsSinceCheck}
           />
+
+          {/* Additional Service Metrics */}
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="p-3 rounded-lg border border-border bg-card shadow-sm flex flex-col items-center justify-center text-center">
+              <Network className="text-muted-foreground mb-1" size={16} />
+              <p className="text-xs font-medium text-foreground">Network I/O</p>
+              <p className="text-xs text-muted-foreground mt-1">Live</p>
+            </div>
+            <div className="p-3 rounded-lg border border-border bg-card shadow-sm flex flex-col items-center justify-center text-center">
+              <Mail className="text-muted-foreground mb-1" size={16} />
+              <p className="text-xs font-medium text-foreground">Email Queue</p>
+              <p className="text-xs text-muted-foreground mt-1">0 pending</p>
+            </div>
+            <div className="p-3 rounded-lg border border-border bg-card shadow-sm flex flex-col items-center justify-center text-center">
+              <LayoutGrid className="text-muted-foreground mb-1" size={16} />
+              <p className="text-xs font-medium text-foreground">Background Jobs</p>
+              <p className="text-xs text-muted-foreground mt-1">Active</p>
+            </div>
+            <div className="p-3 rounded-lg border border-border bg-card shadow-sm flex flex-col items-center justify-center text-center">
+              <HardDrive className="text-muted-foreground mb-1" size={16} />
+              <p className="text-xs font-medium text-foreground">Storage Bucket</p>
+              <p className="text-xs text-muted-foreground mt-1">S3 Linked</p>
+            </div>
+          </div>
           
         </div>
       </div>

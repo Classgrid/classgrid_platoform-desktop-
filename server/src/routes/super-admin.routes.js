@@ -357,6 +357,10 @@ router.post("/impersonate/:userId", impersonateUser);
 // -- 7. ERROR LOG VIEWER
 router.get("/error-logs", getErrorLogs);
 
+// -- 7b. SERVER MAINTENANCE
+import { cleanLogs } from "../controllers/super-admin.controller.js";
+router.post("/clean-logs", cleanLogs);
+
 // -- 8. ORG SUBSCRIPTION MANAGEMENT
 router.get("/subscription/:orgId", getOrgSubscription);
 router.put("/subscription/:orgId", updateOrgSubscription);
