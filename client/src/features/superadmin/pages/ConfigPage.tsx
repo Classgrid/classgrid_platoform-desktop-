@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import { Input } from "@/components/marketing_ui/input";
+import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network } from "lucide-react";
 import { useEffect } from "react";
@@ -210,13 +211,13 @@ export function ConfigPage() {
   const bytesToGB = (bytes: number) => bytes / (1024 * 1024 * 1024);
 
   const handleCleanLogs = async () => {
-    if (!confirm("Are you sure you want to clean the server logs? This will delete PM2 logs and old system journals.")) return;
+    if (!window.confirm("Are you sure you want to clean the server logs? This will delete PM2 logs and old system journals.")) return;
     setCleaningLogs(true);
     try {
       await apiClient.post("/api/super-admin/clean-logs");
-      alert("Logs cleaned successfully!");
+      toast.success("Logs cleaned successfully!");
     } catch (err) {
-      alert("Error cleaning logs");
+      toast.error("Error cleaning logs");
     } finally {
       setCleaningLogs(false);
     }
