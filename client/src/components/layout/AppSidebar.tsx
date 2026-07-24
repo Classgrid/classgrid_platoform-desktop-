@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, HardDrive, FileBarChart, Settings } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { getLoginPathForPath } from "@/features/auth/auth-helpers";
 import {
   Sidebar,
@@ -39,7 +38,18 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const config = dashboardConfigs.find(c => c.role === role);
 
-  const isStorageMode = location.pathname.startsWith("/superadmin/storage");
+  // Local state to track if we are showing the storage menu pane.
+  // Defaults to true if we load directly into a storage route.
+  const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
+
+  // Auto-open storage menu if navigating to a storage route from outside
+  useEffect(() => {
+    if (location.pathname.startsWith("/superadmin/storage")) {
+      setShowStorageMenu(true);
+    } else {
+      setShowStorageMenu(false);
+    }
+  }, [location.pathname]);
 
   const storageNavItems = [
     { label: "Files", to: "/superadmin/storage/files", icon: HardDrive },
@@ -79,46 +89,40 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
     })
   }));
 
-  // Removed renderRestOfSuperAdmin as user requested to NOT show other global items in Storage mode
-
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
-      <SidebarHeader className={isStorageMode ? "gap-1 p-2 pb-0" : ""}>
+      <SidebarHeader className={showStorageMenu ? "gap-1 p-2 pb-0" : ""}>
         <div className="flex items-center w-full group-data-[collapsible=icon]:justify-center">
           <SidebarSwitcher user={user ?? null} />
         </div>
-        <div className={isStorageMode ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
+        <div className={showStorageMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
           <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className={isStorageMode ? "overflow-y-auto overflow-x-hidden pb-10 pt-0" : "overflow-y-auto overflow-x-hidden pb-10"}>
-        <AnimatePresence mode="wait">
-          {isStorageMode ? (
-            <motion.div
-              key="storage-menu"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -20, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex flex-col gap-0 min-h-full w-full"
-            >
-              <div className="group-data-[collapsible=icon]:hidden px-1 pb-1 -mt-1 mx-1">
-                <SidebarMenuButton asChild className="h-9 text-muted-foreground hover:text-foreground cursor-pointer rounded-md">
-                  <a onClick={(e) => { e.preventDefault(); navigate(-1); }} className="flex items-center w-full font-medium text-[15px]">
-                    <ChevronLeft size={16} className="mr-2" />
-                    <span>Storage</span>
-                  </a>
-                </SidebarMenuButton>
-              </div>
-
-              <SidebarGroup className="pt-1">
+      <SidebarContent className="overflow-hidden relative p-0">
+        {/* Sliding Carousel Container */}
+        <div 
+          className="absolute inset-0 flex transition-transform duration-300 ease-in-out"
+          style={{ transform: showStorageMenu ? 'translateX(-100%)' : 'translateX(0)' }}
+        >
+          {/* ==========================================
+              PANE 1: MAIN MENU
+              ========================================== */}
+          <div className="w-full h-full shrink-0 overflow-y-auto pb-10 no-scrollbar">
+            {sectionsWithBadges.map((section, index) => (
+              <SidebarGroup key={section.label || index}>
+                {index > 0 && (
+                  <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
+                )}
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {storageNavItems.map((item) => {
+                    {section.items.map((item) => {
+                      // Make sure "Storage" highlights actively if we are anywhere in /superadmin/storage
                       const isActive =
                         location.pathname === item.to ||
-                        (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
+                        (item.to !== "/" && location.pathname.startsWith(item.to + "/")) ||
+                        (item.label === "Storage" && location.pathname.startsWith("/superadmin/storage"));
 
                       return (
                         <SidebarMenuItem key={item.label}>
@@ -126,14 +130,47 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                             isActive={isActive}
                             tooltip={item.label}
                             className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
+                            onClick={() => {
+                              if (item.label === "Storage") {
+                                setShowStorageMenu(true);
+                              }
+                            }}
                             asChild
                           >
-                            <Link to={item.to} className="flex items-center gap-3 w-full justify-between">
-                              <div className="flex items-center gap-3">
-                                <item.icon size={20} />
-                                <span className="truncate">{item.label}</span>
+                            {item.label === "Log out" ? (
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  const loginPath = getLoginPathForPath(location.pathname);
+                                  navigate(\`/logout?redirectTo=\${encodeURIComponent(loginPath)}\`);
+                                }}
+                                className="flex items-center gap-3 w-full justify-between cursor-pointer"
+                              >
+                                <div className="flex items-center gap-3">
+                                  {item.icon && <item.icon size={20} />}
+                                  <span className="truncate">{item.label}</span>
+                                </div>
                               </div>
-                            </Link>
+                            ) : (
+                              <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between">
+                                <div className="flex items-center gap-3">
+                                  {item.icon && <item.icon size={20} />}
+                                  <span className="truncate">{item.label}</span>
+                                </div>
+                                <div className="flex items-center ml-auto gap-2">
+                                  {item.badge && (
+                                    <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                  {item.hasNestedNav && (
+                                    <ChevronRight size={16} className="text-muted-foreground" />
+                                  )}
+                                </div>
+                              </Link>
+                            )}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -141,80 +178,69 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="main-menu"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -20, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex flex-col min-h-full w-full"
-            >
-              {sectionsWithBadges.map((section, index) => (
-                <SidebarGroup key={section.label || index}>
-                  {index > 0 && (
-                    <div className="mx-4 my-2 h-px bg-border group-data-[collapsible=icon]:mx-2 group-data-[collapsible=icon]:my-1" />
-                  )}
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {section.items.map((item) => {
-                        const isActive =
-                          location.pathname === item.to ||
-                          (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
+            ))}
+            {sectionsWithBadges.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                No matching items found.
+              </div>
+            )}
+          </div>
 
-                        return (
-                          <SidebarMenuItem key={item.label}>
-                            <SidebarMenuButton
-                              isActive={isActive}
-                              tooltip={item.label}
-                              render={
-                                item.label === "Log out" ? (
-                                  <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      const loginPath = getLoginPathForPath(location.pathname);
-                                      navigate(\`/logout?redirectTo=\${encodeURIComponent(loginPath)}\`);
-                                    }}
-                                    className="flex items-center gap-3 w-full justify-between cursor-pointer"
-                                  />
-                                ) : (
-                                  <Link to={item.to || "#"} className="flex items-center gap-3 w-full justify-between" />
-                                )
-                              }
-                            >
-                              <div className="flex items-center gap-3">
-                                {item.icon && <item.icon size={20} />}
-                                <span className="truncate">{item.label}</span>
-                              </div>
-                              <div className="flex items-center ml-auto gap-2">
-                                {item.badge && (
-                                  <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center">
-                                    {item.badge}
-                                  </span>
-                                )}
-                                {item.hasNestedNav && (
-                                  <ChevronRight size={16} className="text-muted-foreground" />
-                                )}
-                              </div>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        );
-                      })}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
-              {sectionsWithBadges.length === 0 && (
-                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No matching items found.
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* ==========================================
+              PANE 2: STORAGE MENU
+              ========================================== */}
+          <div className="w-full h-full shrink-0 overflow-y-auto pb-10 pt-0 no-scrollbar">
+            <div className="group-data-[collapsible=icon]:hidden px-1 pb-1 -mt-1 mx-1">
+              <SidebarMenuButton 
+                asChild 
+                className="h-9 text-muted-foreground hover:text-foreground cursor-pointer rounded-md"
+              >
+                <a 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setShowStorageMenu(false); 
+                    // We DO NOT navigate away. We just slide back to main menu.
+                  }} 
+                  className="flex items-center w-full font-medium text-[15px]"
+                >
+                  <ChevronLeft size={16} className="mr-2" />
+                  <span>Storage</span>
+                </a>
+              </SidebarMenuButton>
+            </div>
+
+            <SidebarGroup className="pt-1">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {storageNavItems.map((item) => {
+                    const isActive =
+                      location.pathname === item.to ||
+                      (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
+
+                    return (
+                      <SidebarMenuItem key={item.label}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={item.label}
+                          className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
+                          asChild
+                        >
+                          <Link to={item.to} className="flex items-center gap-3 w-full justify-between">
+                            <div className="flex items-center gap-3">
+                              <item.icon size={20} />
+                              <span className="truncate">{item.label}</span>
+                            </div>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </div>
+
+        </div>
       </SidebarContent>
 
       {user && <SidebarFooterUser role={role} user={user} />}
