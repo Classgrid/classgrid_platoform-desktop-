@@ -477,6 +477,11 @@ export const organizationControlCenterApi = {
       .delete(`/api/super-admin/orgs/${orgId}`)
       .then((response) => response.data),
 
+  getHierarchyAudit: (orgId: string) =>
+    apiClient
+      .get(`/api/super-admin/orgs/${orgId}/hierarchy-audit`)
+      .then((response) => response.data),
+
   updateOrganizationConfig: (orgId: string, data: { featureFlags?: Record<string, boolean>; billing?: any; limits?: any }) =>
     apiClient
       .put(`/api/super-admin/org/${orgId}/config`, data)

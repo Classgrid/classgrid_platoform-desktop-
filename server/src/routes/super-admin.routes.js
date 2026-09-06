@@ -2589,4 +2589,10 @@ router.put("/orgs/:id/status", isAuthenticated, requireRole("super_admin"), upda
 // =================================================
 router.put("/orgs/:id/onboarding", isAuthenticated, requireRole("super_admin"), updateOrganizationOnboarding);
 
+// =================================================
+// SUPER ADMIN DATA AUDIT ROUTES
+// =================================================
+import { getOrgHierarchyAudit } from "../controllers/super-admin.controller.js";
+router.get("/orgs/:id/hierarchy-audit", isAuthenticated, requireRole("super_admin"), getOrgHierarchyAudit);
+
 export default router;

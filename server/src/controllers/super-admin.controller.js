@@ -1536,3 +1536,31 @@ export const updateOrganizationOnboarding = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+export const getOrgHierarchyAudit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const AcademicHierarchy = (await import("../models/AcademicHierarchy.js")).default;
+        const Classroom = (await import("../models/Classroom.js")).default;
+        const OrgSubject = (await import("../models/OrgSubject.js")).default;
+
+        const org = await Organization.findById(id).lean();
+        if (!org) return res.status(404).json({ success: false, message: "Organization not found" });
+
+        const nodes = await AcademicHierarchy.find({ organization_id: id }).sort({ sort_order: 1, name: 1 }).lean();
+        const classrooms = await Classroom.find({ organization_id: id }).lean();
+        const subjects = await OrgSubject.find({ organization_id: id }).lean();
+
+        return res.json({
+            success: true,
+            data: {
+                nodes,
+                classrooms,
+                subjects
+            }
+        });
+    } catch (err) {
+        console.error("[getOrgHierarchyAudit] Error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch hierarchy audit" });
+    }
+};

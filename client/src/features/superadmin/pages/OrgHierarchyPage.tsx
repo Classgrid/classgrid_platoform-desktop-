@@ -1,0 +1,244 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft, GraduationCap, Users, LayoutDashboard, Layers, Activity } from "lucide-react";
+import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/marketing_ui/table";
+import { toast } from "sonner";
+import { organizationControlCenterApi } from "../services/organizationControlCenterApi";
+
+interface HierarchyNode {
+  _id: string;
+  name: string;
+  code: string;
+  type?: string;
+  is_active: boolean;
+  parent_id: string | null;
+  sort_order: number;
+}
+
+interface Classroom {
+  _id: string;
+  name: string;
+  is_active: boolean;
+  hierarchy_node_id: string;
+}
+
+interface OrgSubject {
+  _id: string;
+  name: string;
+  code: string;
+  credits?: number;
+  is_active: boolean;
+}
+
+interface HierarchyAuditData {
+  nodes: HierarchyNode[];
+  classrooms: Classroom[];
+  subjects: OrgSubject[];
+}
+
+export function OrgHierarchyPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<HierarchyAuditData | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!id) return;
+      try {
+        const response = await organizationControlCenterApi.getHierarchyAudit(id);
+        setData(response.data);
+      } catch (err: any) {
+        console.error("Failed to fetch hierarchy data:", err);
+        toast.error("Failed to load hierarchy data from backend.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="max-w-md mx-auto mt-12">
+        <CardContent className="pt-6 text-center flex flex-col items-center gap-4">
+          <h2 className="text-lg font-semibold">Failed to load data</h2>
+          <Button onClick={() => navigate(-1)} variant="outline">
+            Go Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { nodes, classrooms, subjects } = data;
+  const rootNodes = nodes.filter(n => !n.parent_id);
+  const activeClassrooms = classrooms.filter(c => c.is_active).length;
+  const activeSubjects = subjects.filter(s => s.is_active).length;
+
+  return (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="h-8 w-8 p-0">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Layers className="h-6 w-6 text-primary" />
+            Academic Hierarchy Audit
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Live read-only view of the organization's actual academic structure and curriculum.
+          </p>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Layers className="h-4 w-4" />
+              Total Nodes
+            </div>
+            <div className="text-2xl font-bold">{nodes.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Classrooms
+            </div>
+            <div className="text-2xl font-bold">{classrooms.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">{activeClassrooms} active</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <GraduationCap className="h-4 w-4" />
+              Subjects
+            </div>
+            <div className="text-2xl font-bold">{subjects.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">{activeSubjects} active</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Activity className="h-4 w-4" />
+              Status
+            </div>
+            <div className="mt-2">
+              {nodes.length > 0 ? (
+                <Badge variant="success">Configured</Badge>
+              ) : (
+                <Badge variant="warning">Not Configured</Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Hierarchy Tree Visual */}
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="border-b bg-muted/50 pb-4 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Layers className="h-4 w-4" />
+              Root Departments / Programs
+            </CardTitle>
+            <Badge variant="neutral">{rootNodes.length} Roots</Badge>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 overflow-y-auto max-h-[400px]">
+            {rootNodes.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rootNodes.map((node) => (
+                    <TableRow key={node._id}>
+                      <TableCell className="font-medium">{node.name}</TableCell>
+                      <TableCell>{node.code}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant={node.is_active ? "success" : "neutral"}>
+                          {node.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="p-8 text-center text-muted-foreground text-sm">
+                No hierarchy configured.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Classes List */}
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="border-b bg-muted/50 pb-4 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Actual Classrooms
+            </CardTitle>
+            <Badge variant="neutral">{classrooms.length} Total</Badge>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 overflow-y-auto max-h-[400px]">
+            {classrooms.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {classrooms.map((cls) => (
+                    <TableRow key={cls._id}>
+                      <TableCell className="font-medium">{cls.name}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant={cls.is_active ? "success" : "neutral"}>
+                          {cls.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="p-8 text-center text-muted-foreground text-sm">
+                No classrooms exist in the database.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

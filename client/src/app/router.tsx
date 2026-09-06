@@ -270,6 +270,7 @@ export function AppRouter() {
           <Route path="/superadmin/orgs" element={<OrganizationsPage />} />
           <Route path="/superadmin/domains" element={<CustomDomainsPage />} />
           <Route path="/superadmin/detail/:orgId" element={<OrgDetailsPage />} />
+          <Route path="/superadmin/detail/:id/hierarchy" element={<OrgHierarchyPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />
           <Route path="/superadmin/leads/:id" element={<LeadDetailsPage />} />
           {/* NEW BILLING ROUTES */}
