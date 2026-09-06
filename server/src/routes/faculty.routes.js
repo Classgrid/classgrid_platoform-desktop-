@@ -37,6 +37,7 @@ import express from 'express';
 import { isAuthenticated, requireOrganization } from '../middleware/auth.middleware.js';
 import { attachInstitutionProfile } from '../middleware/institution-profile.middleware.js';
 import { getFacultyDashboardData } from '../controllers/faculty-dashboard.controller.js';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -96,8 +97,9 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
 
     for (const f of faculty) {
       try {
-        if (!f.name || !f.email) {
-          results.errors.push({ email: f.email, reason: 'Name and email are required.' });
+        const fullName = f.name ? f.name.trim() : `${f.first_name || ''} ${f.last_name || ''}`.trim();
+        if (!fullName || !f.email) {
+          results.errors.push({ email: f.email, reason: 'Name (or First/Last name) and email are required.' });
           results.skipped++;
           continue;
         }
@@ -114,11 +116,12 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
         }
 
         await User.create({
-          name: f.name.trim(),
+          name: fullName,
           email: f.email.toLowerCase().trim(),
           password: hashedPass,
           role: 'faculty',
           organization_id: orgId,
+          phone: f.phone || f.phone_number || null,
           department: f.department || null,
           designation: f.designation || null,
           profile_completed: false,
