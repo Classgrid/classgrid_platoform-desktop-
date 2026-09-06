@@ -2564,7 +2564,6 @@ export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminNa
   <div class="box" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
     <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">${statusLabel}</p>
     <ul style="margin-top: 0; margin-bottom: 0;">
-      <li><strong>Status:</strong> <span style="text-transform: capitalize;">${meetingStatus || 'Pending'}</span></li>
       <li><strong>Date:</strong> ${meetingScheduledAt ? formatDate(meetingScheduledAt) : 'Not Scheduled'}</li>
       <li><strong>Provider:</strong> ${meetingProvider || 'N/A'}</li>
       <li><strong>Link:</strong> ${meetingUrl ? `<a href="${meetingUrl}">${meetingUrl}</a>` : 'N/A'}</li>
@@ -2609,7 +2608,6 @@ export const getDemoLeadAssignedPlainText = ({ assigneeName, institutionName, ad
   const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details:' : 'Meeting Details:';
   const meetingText = `
 ${statusLabel}
-- Status: ${meetingStatus || 'Pending'}
 - Date: ${meetingScheduledAt ? formatDate(meetingScheduledAt) : 'Not Scheduled'}
 - Provider: ${meetingProvider || 'N/A'}
 - Link: ${meetingUrl || 'N/A'}
