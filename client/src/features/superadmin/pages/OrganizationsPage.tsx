@@ -323,8 +323,9 @@ export function OrganizationsPage() {
             </ResponsiveSelect>
           </div>
         </SuperadminFilterBar>
+      </div>
 
-        {isError ? (
+      {isError ? (
           <div className="p-4 m-4 rounded-md border bg-red-100 text-red-800 border-red-200">
             <span className="font-semibold block mb-1">Backend request failed</span>
             <p className="text-sm mb-3">
@@ -336,13 +337,14 @@ export function OrganizationsPage() {
           </div>
         ) : null}
 
+      <div className="w-full relative z-0">
         <DataTable
           columns={columns}
           rows={filteredOrgs}
           isLoading={isLoading}
           emptyMessage={allOrgs.length ? "No organizations match your search." : "No organizations found."}
         />
-      </SectionPanel>
+      </div>
     </div>
   );
 }
