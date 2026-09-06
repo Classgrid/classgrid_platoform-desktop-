@@ -100,7 +100,6 @@ import type {
   TicketStatus,
   TicketPriority,
 } from "../services/superAdminApi";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -770,7 +769,7 @@ export function SupportTicketsPage() {
         {/* Header - Actions only */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4">
           <div className="flex items-center gap-2">
-            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+            
           </div>
         </div>
 
@@ -1102,11 +1101,7 @@ export function SupportTicketsPage() {
         >
           {statusLabel(selectedTicket.status)}
         </span>
-        <RefreshButton
-          onClick={() => refetch()}
-          isFetching={isFetching}
-          className="ml-auto rounded-full border-none bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-        />
+        
       </div>
 
       {/* 2-Column Grid */}

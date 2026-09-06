@@ -44,7 +44,6 @@ import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { Badge } from "@/components/marketing_ui/badge";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { apiClient } from "@/lib/apiClient";
 import { getSocket } from "@/lib/socketClient";
@@ -415,7 +414,7 @@ export function TeamPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Members</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage team members and invitations</p>
         </div>
-        <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+        
       </div>
 
       {/* Invite Members Card (Vercel Style) */}

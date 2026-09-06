@@ -52,7 +52,6 @@ import {
   DialogDescription, DialogFooter,
 } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const fetchFlags = () =>
@@ -207,7 +206,7 @@ export function FeatureFlagsPage() {
         description="Global kill switches for platform features. Disable features instantly across all organizations."
         actions={
           <div >
-            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+            
             <Button variant="outline" onClick={() => setNewFlagOpen(true)}>
               <Plus size={14} /> New Flag
             </Button>

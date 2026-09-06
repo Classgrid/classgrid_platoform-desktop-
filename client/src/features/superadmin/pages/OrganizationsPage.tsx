@@ -55,7 +55,6 @@ import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
 import { formatDate } from "@/utils/dateUtils";
 
 import { dashboardApi, type SuperAdminOrganization } from "../services/superAdminApi";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Status: All" },

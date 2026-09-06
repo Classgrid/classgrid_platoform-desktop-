@@ -50,7 +50,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/a
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 export function GdprPage() {
@@ -136,7 +135,7 @@ export function GdprPage() {
       <PageHeader
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
-        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
+        actions={}
       />
       <div >
         <AlertTriangle size={18}  />

@@ -44,7 +44,6 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { IndianRupee, TrendingUp, TrendingDown, RefreshCw, Users, CreditCard } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 function formatCurrency(amount: number) {
@@ -133,7 +132,7 @@ export function RevenuePage() {
         title="Platform Revenue"
         description="Monitor Monthly Recurring Revenue (MRR), total platform income, and subscription status."
         actions={
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh Data" />
+          
         }
       />
 

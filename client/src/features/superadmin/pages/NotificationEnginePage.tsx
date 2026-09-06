@@ -48,7 +48,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const AUDIENCE_OPTIONS = [
@@ -100,7 +99,7 @@ export function NotificationEnginePage() {
         description="Broadcast instant alerts, schedule communications, and control all platform-wide notifications."
         actions={
           <div >
-            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+            
             <Button variant="outline" onClick={() => setScheduleOpen(true)}><Clock size={14} /> Schedule</Button>
             <Button onClick={() => setBroadcastOpen(true)}><Zap size={14} /> Instant Broadcast</Button>
           </div>

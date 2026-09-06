@@ -48,7 +48,6 @@ import { useAllUsers, useSuspendUser, useReactivateUser, useImpersonateUser } fr
 import { LogIn } from "lucide-react";
 import type { SuperAdminUser } from "../services/superAdminApi";
 import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 // ── columns ───────────────────────────────────────────────────────────────────
@@ -224,7 +223,7 @@ export function UsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+          
         </div>
       </div>
 

@@ -64,7 +64,6 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/marketing_ui/dialog";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 import {
   useStorageObjects,
@@ -1189,14 +1188,7 @@ export function StorageFilesPage() {
             >
               <Edit2 size={16} />
             </Button>
-            <RefreshButton
-              isFetching={isFetching || isLoading}
-              onClick={() => refetch()}
-              label={null}
-              size="icon"
-              className="h-9 w-9 bg-background shadow-sm"
-              title="Refresh"
-            />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

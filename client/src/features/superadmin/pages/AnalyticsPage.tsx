@@ -37,7 +37,6 @@ import { BarChart3, TrendingUp, Users, RefreshCw } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { useDashboardAnalytics } from "../queries/useAnalytics";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 export function AnalyticsPage() {
@@ -64,7 +63,7 @@ export function AnalyticsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh Data" />
+          
         </div>
       </div>
 

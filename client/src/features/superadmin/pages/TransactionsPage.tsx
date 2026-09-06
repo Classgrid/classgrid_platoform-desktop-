@@ -49,7 +49,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { PageHeader } from "@/components/layout/PageHeader";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const INR = (n: number) =>
@@ -181,7 +180,7 @@ export function TransactionsPage() {
         description="All platform billing payments, refunds, and manual adjustments. Full financial history."
         actions={
           <div >
-            <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+            
             <Button onClick={() => setManualOpen(true)}><Plus size={14} /> Record Payment</Button>
           </div>
         }

@@ -57,7 +57,6 @@ import {
   dashboardApi, billingApi,
   type SuperAdminOrganization, type OrgSubscription,
 } from "../services/superAdminApi";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 // ── status badge variant helper ────────────────────────────────────────────────
@@ -209,7 +208,7 @@ export function BillingPage() {
         title="Plans & Billing"
         description="Manage organization subscriptions, quotas, and platform access."
         actions={
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+          
         }
       />
 

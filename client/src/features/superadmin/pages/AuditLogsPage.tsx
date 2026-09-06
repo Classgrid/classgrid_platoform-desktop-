@@ -41,7 +41,6 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/marketing_ui/select";
 import { format } from "date-fns";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/marketing_ui/tooltip";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/marketing_ui/dropdown-menu";
 import { Download, FileJson, Link } from "lucide-react";
 
@@ -257,28 +256,29 @@ export function AuditLogsPage() {
         <div className="flex flex-col flex-1 min-h-0 bg-background">
 
           {/* Unified Toolbar */}
-          <div className="flex-none flex items-center justify-between p-2 px-4 bg-card border-b border-border">
-
-            {/* Left Side: Filters and Search */}
-            <div className="flex items-center gap-2 overflow-x-auto p-1 -ml-1">
-              <Select
-                value={category}
-                onValueChange={(val) => { setCategory(val); setTraceId(""); }}
-              >
-                <SelectTrigger className="w-[140px] uppercase text-xs font-medium bg-background border-transparent hover:border-border transition-colors h-7 shadow-sm">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
+          <div className="w-full relative z-50 mb-2 px-4 pt-4 border-b border-border bg-card pb-4">
+            <SuperadminFilterBar
+              searchQuery={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search logs..."
+            >
+              {/* Category */}
+              <div className="w-[140px]">
+                <ResponsiveSelect
+                  className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-xs font-medium uppercase"
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); setTraceId(""); }}
+                >
                   {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
-                    <SelectItem key={cat} value={cat} className="uppercase text-xs font-medium">
+                    <option key={cat} value={cat}>
                       {cat}
-                    </SelectItem>
+                    </option>
                   ))}
-                </SelectContent>
-              </Select>
+                </ResponsiveSelect>
+              </div>
 
               {traceId && (
-                <div className="flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 rounded-md text-xs font-mono font-medium whitespace-nowrap ml-1">
+                <div className="flex items-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 px-3 py-1 h-9 rounded-md text-xs font-mono font-medium whitespace-nowrap ml-1 shrink-0">
                   <span title={traceId}>Trace: {traceId.substring(0, 8)}...</span>
                   <button
                     onClick={() => navigator.clipboard.writeText(traceId)}
@@ -293,93 +293,78 @@ export function AuditLogsPage() {
                 </div>
               )}
 
-              <div className="w-px h-4 bg-border mx-2"></div>
+              {/* Spacer so the right side actions push to right on wide screens if needed, otherwise just gap */}
+              <div className="hidden xl:block flex-1" />
 
-              <div className="relative w-64">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search logs..."
-                  className="w-full bg-background border border-border rounded-md py-1 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors h-7 shadow-sm"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+              {/* Right Side Actions */}
+              <div className="flex items-center gap-2 shrink-0 h-9 bg-card px-2 rounded-md border border-border shadow-sm">
+                <IconButton icon={Expand} label="Expand View" className="h-7 w-7 border-none shadow-none" onClick={handleExpand} />
+
+                <div className="w-px h-4 bg-border mx-1"></div>
+
+                {/* Live Button */}
+                <button
+                  onClick={toggleLive}
+                  className={`flex items-center justify-center gap-2 px-3 h-7 rounded-md text-xs font-medium transition-colors ${isLive
+                    ? "bg-blue-500/10 text-blue-500"
+                    : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    }`}
+                >
+                  {isLive ? (
+                    <>
+                      <span className="relative flex h-2 w-2 mr-1">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      </span>
+                      Live
+                    </>
+                  ) : (
+                    <>
+                      <Play size={12} className="mr-1" />
+                      Live
+                    </>
+                  )}
+                </button>
+
+                {/* Refresh Button */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" sideOffset={4}>
+                      Refresh logs
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Share / Export Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-7 w-7 flex items-center justify-center rounded-md bg-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors focus:outline-none">
+                      <Upload size={14} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleCopyVisible} className="cursor-pointer text-xs">
+                      <Copy className="mr-2 h-4 w-4" />
+                      <span>Copy visible logs</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer text-xs">
+                      <Download className="mr-2 h-4 w-4" />
+                      <span>Export to CSV</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportJSON} className="cursor-pointer text-xs">
+                      <FileJson className="mr-2 h-4 w-4" />
+                      <span>Export to JSON</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </div>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center gap-2 shrink-0 ml-4">
-              <IconButton icon={Expand} label="Expand View" className="h-7 w-7" onClick={handleExpand} />
-
-              <div className="w-px h-4 bg-border mx-1"></div>
-
-              {/* Live Button */}
-              <button
-                onClick={toggleLive}
-                className={`flex items-center justify-center gap-2 px-3 h-7 rounded-md text-xs font-medium transition-colors border ${isLive
-                  ? "bg-blue-500/10 border-blue-500/20 text-blue-500 shadow-inner"
-                  : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 shadow-sm"
-                  }`}
-              >
-                {isLive ? (
-                  <>
-                    <span className="relative flex h-2 w-2 mr-1">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                    </span>
-                    Live
-                  </>
-                ) : (
-                  <>
-                    <Play size={12} className="mr-1" />
-                    Live
-                  </>
-                )}
-              </button>
-
-              {/* Refresh Button */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <RefreshButton
-                        isFetching={isFetching && !isLive}
-                        onClick={() => refetch()}
-                        label={null}
-                        className="h-7 w-7 p-0 flex items-center justify-center bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-md transition-colors shadow-sm"
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" sideOffset={4}>
-                    Refresh logs
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {/* Share / Export Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="h-7 w-7 flex items-center justify-center rounded-md border bg-background border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shadow-sm focus:outline-none">
-                    <Upload size={14} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleCopyVisible} className="cursor-pointer text-xs">
-                    <Copy className="mr-2 h-4 w-4" />
-                    <span>Copy visible logs</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer text-xs">
-                    <Download className="mr-2 h-4 w-4" />
-                    <span>Export to CSV</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportJSON} className="cursor-pointer text-xs">
-                    <FileJson className="mr-2 h-4 w-4" />
-                    <span>Export to JSON</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            </SuperadminFilterBar>
           </div>
 
           {/* Table Area */}

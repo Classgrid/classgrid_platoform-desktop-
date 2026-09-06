@@ -70,7 +70,6 @@ import {
   useUpdateSubscriberPreferences,
 } from "../queries/useSubscribers";
 import type { BlogSubscriber } from "../services/superAdminApi";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const STATUS_OPTIONS = [
@@ -356,7 +355,7 @@ export function SubscribersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching || isMutating} />
+          
         </div>
       </div>
 

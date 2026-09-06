@@ -43,7 +43,6 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 import { useAuditData } from "../queries/useAudit";
 import { apiClient } from "@/lib/apiClient";
 import { format } from "date-fns";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchChatAuditLogs } from "@/features/chat/services/chatApi";
 import { Button } from "@/components/marketing_ui/button";

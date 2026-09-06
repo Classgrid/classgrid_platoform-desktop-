@@ -51,7 +51,6 @@ import { CodeCopyDialog } from "@/components/marketing_ui/code-copy-dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const renderDomainStatus = (domainObj: any) => {
@@ -264,7 +263,7 @@ export function CustomDomainsPage() {
           <Button variant="outline" onClick={() => setShowCloudflareModal(true)}>
             <Settings size={14} className="mr-2 text-primary" /> Cloudflare CORS
           </Button>
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+          
         </div>
       </div>
 

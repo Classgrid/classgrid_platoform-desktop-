@@ -45,7 +45,6 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 
 import { formatDate, formatTime } from "@/utils/dateUtils";
 import { apiClient } from "@/lib/apiClient";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 import { Button } from "@/components/marketing_ui/button";
 
 
@@ -319,7 +318,7 @@ export function ActivityLogPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} label="Refresh" />
+          
         </div>
       </div>
 

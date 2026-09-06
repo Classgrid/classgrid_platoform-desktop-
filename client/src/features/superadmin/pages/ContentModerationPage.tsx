@@ -51,7 +51,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const SEVERITY_COLOR: Record<string, string> = {
@@ -186,7 +185,7 @@ export function ContentModerationPage() {
       <PageHeader
         title="Content Moderation"
         description="Review and resolve user-reported content across the platform. Take action on flagged posts, messages, and profiles."
-        actions={<RefreshButton onClick={() => refetch()} isFetching={isFetching} />}
+        actions={}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

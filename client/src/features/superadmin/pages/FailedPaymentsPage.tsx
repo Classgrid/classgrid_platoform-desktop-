@@ -47,7 +47,6 @@ import { DataTable } from "@/components/marketing_ui/data-table";
 
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
 
 
 const INR = (n: number) =>
@@ -166,7 +165,7 @@ export function FailedPaymentsPage() {
         title="Failed Payments"
         description="All platform billing payments that failed or were not completed. Investigate and follow up with organizations."
         actions={
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
+          
         }
       />
 
