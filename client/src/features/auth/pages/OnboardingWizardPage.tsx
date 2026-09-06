@@ -409,7 +409,7 @@ export function OnboardingWizardPage() {
       setOrgPhoneOtpSent(true);
       showAlert("OTP sent successfully to " + orgPhone);
     } catch (err: any) {
-      showAlert(err.message || "Failed to send OTP. Please try again.");
+      showAlert(err.response?.data?.message || err.message || "Failed to send OTP. Please try again.");
     } finally {
       setIsSendingPhoneOtp(false);
     }
