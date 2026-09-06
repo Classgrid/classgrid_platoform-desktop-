@@ -34,82 +34,14 @@
  */
 
 import { apiClient } from "@/lib/apiClient";
-import { Input } from "@/components/marketing_ui/input";
 import { toast } from "sonner";
-import { useState, useMemo, useEffect } from "react";
-import { Server, Activity, Database, Shield, Power, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Server, Activity, Database, HardDrive, Cpu, Cloud, AlertTriangle, Clock, Trash2, Mail, LayoutGrid, Network, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
-import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
-import { DataTable } from "@/components/marketing_ui/data-table";
 import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
-import { useSystemHealth, useFeatureFlags, useToggleFeatureFlag } from "../queries/useConfig";
-import type { FeatureFlag } from "../services/superAdminApi";
-
-// ── columns ───────────────────────────────────────────────────────────────────
-
-function buildFlagColumns(
-  onToggle: (key: string, current: boolean) => void,
-  toggling: boolean
-): ColumnDef<FeatureFlag>[] {
-  return [
-    {
-      accessorKey: "key",
-      header: "Feature Key",
-      size: 180,
-      cell: ({ getValue }) => <span className="font-mono text-xs">{getValue<string>()}</span>,
-    },
-    {
-      accessorKey: "module",
-      header: "Module",
-      size: 130,
-      cell: ({ getValue }) => (
-        <Badge variant="neutral" className="bg-secondary text-secondary-foreground border-border">{getValue<string>()}</Badge>
-      ),
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-      size: 250,
-      cell: ({ getValue }) => <span className="text-muted-foreground text-sm">{getValue<string>()}</span>,
-    },
-    {
-      accessorKey: "isEnabled",
-      header: "Status",
-      size: 100,
-      cell: ({ getValue }) => {
-        const isEnabled = getValue<boolean>();
-        return isEnabled ? (
-          <Badge variant="success" dot className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
-        ) : (
-          <Badge variant="danger" className="bg-destructive/10 text-destructive border-destructive/20">Disabled</Badge>
-        );
-      },
-    },
-    {
-      id: "actions",
-      header: "Kill Switch",
-      size: 120,
-      cell: ({ row }) => {
-        const flag = row.original;
-        return (
-          <Button
-            variant={flag.isEnabled ? "destructive" : "outline"}
-            size="sm"
-            disabled={toggling}
-            onClick={() => onToggle(flag.key, flag.isEnabled)}
-            className={`w-full gap-2`}
-          >
-            <Power size={14} />
-            {flag.isEnabled ? "Disable" : "Enable"}
-          </Button>
-        );
-      },
-    },
-  ];
-}
+import { useSystemHealth } from "../queries/useConfig";
 
 // ── helper components ─────────────────────────────────────────────────────────
 
@@ -204,31 +136,10 @@ function InfoChip({ label, value, highlight, wide }: { label: string; value: str
 export function ConfigPage() {
   const queryClient = useQueryClient();
   const { data: healthData, isLoading: healthLoading } = useSystemHealth();
-  const { data: flagData, isLoading: flagsLoading } = useFeatureFlags();
-  const toggleMutation = useToggleFeatureFlag();
 
-  const [search, setSearch] = useState("");
   const [cleaningLogs, setCleaningLogs] = useState(false);
   const [isCleanLogsDialogOpen, setIsCleanLogsDialogOpen] = useState(false);
   const secondsSinceCheck = useTimeSince(healthData?.timestamp);
-
-  const flags = flagData?.data ?? [];
-
-  const filteredFlags = useMemo(() => {
-    if (!search.trim()) return flags;
-    const q = search.toLowerCase();
-    return flags.filter(
-      (f) =>
-        f.key.toLowerCase().includes(q) ||
-        f.description.toLowerCase().includes(q) ||
-        f.module.toLowerCase().includes(q)
-    );
-  }, [flags, search]);
-
-  const columns = useMemo(
-    () => buildFlagColumns((key, current) => toggleMutation.mutate({ key, isEnabled: !current }), toggleMutation.isPending),
-    [toggleMutation]
-  );
 
   const formatUptime = (seconds: number) => {
     if (!seconds) return "0s";
@@ -386,27 +297,6 @@ export function ConfigPage() {
             )}
           </div>
 
-          {/* Feature Flags Table */}
-          <SectionPanel
-            title="Feature Flags"
-            description="Global kill switches. Changes propagate instantly to all tenants."
-            noPadding
-            actions={
-              <Input
-                placeholder="Search flags..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-9 w-64"
-              />
-            }
-          >
-            <DataTable
-              columns={columns}
-              data={filteredFlags}
-              pageSize={15}
-              emptyMessage={flagsLoading ? "Loading flags…" : "No feature flags found."}
-            />
-          </SectionPanel>
         </div>
 
         {/* Right Col: Infrastructure Matrix */}
