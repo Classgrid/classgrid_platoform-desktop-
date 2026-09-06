@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/marketing
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Badge } from "@/components/marketing_ui/badge";
 import { apiClient } from "@/lib/apiClient";
+import { toast } from "sonner";
+import { Progress, ProgressTrack, ProgressIndicator } from "@/components/marketing_ui/progress";
 
 export function FacultyImportPage() {
   const [activeTab, setActiveTab] = useState("all-faculty");
@@ -14,10 +16,27 @@ export function FacultyImportPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<{ created: number; skipped: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isUploading) {
+      setUploadProgress(0);
+      interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) return 90;
+          return prev + 10;
+        });
+      }, 500);
+    } else {
+      setUploadProgress(100);
+    }
+    return () => clearInterval(interval);
+  }, [isUploading]);
 
   const fetchFaculty = async () => {
     try {
@@ -68,13 +87,18 @@ export function FacultyImportPage() {
         throw new Error("No valid faculty members found in CSV.");
       }
 
-      const response = await apiClient.post("/api/faculty/batch-import", { faculty: facultyToImport });
+      const response = await apiClient.post("/api/faculty/batch-import", { faculty: facultyToImport }, {
+        timeout: 10 * 60 * 1000 // 10 minutes timeout for massive imports
+      });
       setResults({ created: response.data.created, skipped: response.data.skipped });
       setIsDone(true);
+      toast.success(`Successfully imported ${response.data.created} faculty members!`);
       fetchFaculty(); // Refresh the list
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || err.message || "Failed to process CSV file.");
+      const errMsg = err.response?.data?.message || err.message || "Failed to process CSV file.";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -198,8 +222,20 @@ export function FacultyImportPage() {
                       <Upload className="h-8 w-8 text-muted-foreground mb-4" />
                       <p className="text-sm font-medium mb-1">Click to browse or drag and drop</p>
                       <p className="text-xs text-muted-foreground mb-4">CSV files only</p>
+                      
+                      {isUploading && (
+                        <div className="w-full max-w-xs mb-4">
+                          <Progress value={uploadProgress} className="w-full h-2">
+                            <ProgressTrack>
+                              <ProgressIndicator />
+                            </ProgressTrack>
+                          </Progress>
+                          <p className="text-xs text-muted-foreground mt-2 text-center">Processing... {uploadProgress}%</p>
+                        </div>
+                      )}
+
                       <Button disabled={isUploading}>
-                        {isUploading ? "Processing..." : "Select File"}
+                        {isUploading ? "Uploading Data..." : "Select File"}
                       </Button>
                     </div>
                   </CardContent>
