@@ -117,11 +117,14 @@ export function OrganizationsPage() {
     }
 
     if (orgTypeFilter) {
-      result = result.filter((org) => org.orgType === orgTypeFilter || org.structureType === orgTypeFilter);
+      result = result.filter((org) => 
+        org.orgType?.toLowerCase() === orgTypeFilter.toLowerCase() || 
+        org.structureType?.toLowerCase() === orgTypeFilter.toLowerCase()
+      );
     }
 
     if (statusFilter) {
-      result = result.filter((org) => org.status === statusFilter);
+      result = result.filter((org) => org.status?.toLowerCase() === statusFilter.toLowerCase());
     }
 
     if (dateFrom) {
