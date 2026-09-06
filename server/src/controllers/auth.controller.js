@@ -833,7 +833,7 @@ export const activateAdmin = async (req, res) => {
             if (orgEmail) {
                 const cleanEmail = orgEmail.toLowerCase().trim();
                 const orgExists = await Organization.findOne({ invoice_email: cleanEmail, _id: { $ne: user.organization_id } });
-                const userExists = await User.findOne({ email: cleanEmail });
+                const userExists = await User.findOne({ email: cleanEmail, _id: { $ne: user._id } });
                 if (orgExists || userExists) {
                     return res.status(409).json({ message: "The organization email provided is already registered with another account." });
                 }
@@ -846,7 +846,7 @@ export const activateAdmin = async (req, res) => {
                     $or: [{ invoice_phone: cleanPhone }, { contactNumber: cleanPhone }],
                     _id: { $ne: user.organization_id }
                 });
-                const userExists = await User.findOne({ phoneNumber: cleanPhone });
+                const userExists = await User.findOne({ phoneNumber: cleanPhone, _id: { $ne: user._id } });
                 if (orgExists || userExists) {
                     return res.status(409).json({ message: "The organization phone number provided is already registered with another account." });
                 }
