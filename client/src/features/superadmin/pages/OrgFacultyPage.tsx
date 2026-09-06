@@ -1,0 +1,190 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft, Users, ShieldAlert, GraduationCap, Clock } from "lucide-react";
+import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/marketing_ui/table";
+import { toast } from "sonner";
+import { organizationControlCenterApi } from "../services/organizationControlCenterApi";
+import { formatDateTime } from "../components/org-details/formatters";
+
+interface FacultyMember {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  lastLoginAt?: string;
+  createdAt: string;
+}
+
+interface FacultyAuditData {
+  faculty: FacultyMember[];
+}
+
+export function OrgFacultyPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<FacultyAuditData | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!id) return;
+      try {
+        const response = await organizationControlCenterApi.getFacultyAudit(id);
+        setData(response.data);
+      } catch (err: any) {
+        console.error("Failed to fetch faculty data:", err);
+        toast.error("Failed to load faculty data from backend.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="max-w-md mx-auto mt-12">
+        <CardContent className="pt-6 text-center flex flex-col items-center gap-4">
+          <h2 className="text-lg font-semibold">Failed to load data</h2>
+          <Button onClick={() => navigate(-1)} variant="outline">
+            Go Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { faculty } = data;
+  const activeFaculty = faculty.filter(f => f.status === "active").length;
+  const orgAdmins = faculty.filter(f => f.role === "org_admin").length;
+  const teachers = faculty.filter(f => f.role === "teacher").length;
+
+  return (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="h-8 w-8 p-0">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" />
+            Faculty & Staff Audit
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Live read-only view of the organization's imported faculty and admin users.
+          </p>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Users className="h-4 w-4" />
+              Total Staff
+            </div>
+            <div className="text-2xl font-bold">{faculty.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <ShieldAlert className="h-4 w-4" />
+              Org Admins
+            </div>
+            <div className="text-2xl font-bold">{orgAdmins}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <GraduationCap className="h-4 w-4" />
+              Teachers
+            </div>
+            <div className="text-2xl font-bold">{teachers}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Activity className="h-4 w-4" />
+              Active Status
+            </div>
+            <div className="text-2xl font-bold">{activeFaculty} <span className="text-sm font-normal text-muted-foreground">active</span></div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <Card className="flex flex-col h-full overflow-hidden">
+        <CardHeader className="border-b bg-muted/50 pb-4">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Registered Faculty & Staff
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {faculty.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {faculty.map((user) => (
+                  <TableRow key={user._id}>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === "org_admin" ? "warning" : "info"}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : "Never"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={user.status === "active" ? "success" : "neutral"}>
+                        {user.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground text-sm">
+              No faculty or staff found for this organization.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
