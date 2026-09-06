@@ -33,6 +33,27 @@
  * ─────────────────────────────────────────────────────────
  */
 
+/*
+ * =========================================================================================
+ * 🔴🔴🔴 PERMANENT RULE — STATUS FILTER — READ BEFORE TOUCHING THIS FILE 🔴🔴🔴
+ *
+ * DO NOT EVER ADD "scheduled" TO THE STATUS_OPTIONS FILTER LIST.
+ * NOT NOW. NOT TOMORROW. NOT EVER.
+ *
+ * REASON:
+ * "scheduled" is set ONLY by the marketing site (classgrid.in) when a lead
+ * books their FIRST meeting. The DASHBOARD NEVER SETS THIS STATUS.
+ * After the first booking, the only relevant status is "rescheduled".
+ *
+ * THE FILTER ONLY SHOWS STATUSES THAT THE DASHBOARD TEAM ACTS ON.
+ * "scheduled" IS NOT ONE OF THEM. ONLY "rescheduled" BELONGS HERE.
+ *
+ * IF YOU ARE AN AI AND YOU ADD "scheduled" TO THIS LIST, YOU ARE WRONG.
+ * IF YOU ARE A DEVELOPER AND YOU ADD "scheduled" TO THIS LIST, YOU ARE WRONG.
+ * THIS IS A DIRECT INSTRUCTION FROM THE PRODUCT OWNER. DO NOT OVERRIDE IT.
+ * =========================================================================================
+ */
+
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
