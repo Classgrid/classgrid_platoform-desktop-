@@ -33,7 +33,7 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Shield, Download, Trash2, RefreshCw, AlertTriangle, User } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -50,6 +50,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/marketing_ui/a
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
+import { getSocket } from "@/lib/socketClient";
 
 
 export function GdprPage() {
@@ -62,6 +63,16 @@ export function GdprPage() {
     queryFn: () => apiClient.get<any>("/api/super-admin/users", { params: { q: search, limit: 100 } }).then(r => r.data),
     staleTime: 30_000,
   });
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleUpdate = () => refetch();
+    socket.on("platform_gdpr_updated", handleUpdate);
+    return () => {
+      socket.off("platform_gdpr_updated", handleUpdate);
+    };
+  }, [refetch]);
 
   const users: any[] = data?.data ?? [];
 
@@ -135,7 +146,6 @@ export function GdprPage() {
       <PageHeader
         title="GDPR & Data Privacy"
         description="Export or erase user data — GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability)."
-        actions={}
       />
       <div >
         <AlertTriangle size={18}  />

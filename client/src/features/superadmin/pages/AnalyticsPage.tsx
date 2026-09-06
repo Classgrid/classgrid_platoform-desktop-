@@ -33,15 +33,29 @@
  * ─────────────────────────────────────────────────────────
  */
 
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { BarChart3, TrendingUp, Users, RefreshCw } from "lucide-react";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { useDashboardAnalytics } from "../queries/useAnalytics";
+import { getSocket } from "@/lib/socketClient";
 
 
 export function AnalyticsPage() {
+  const qc = useQueryClient();
   const { data, isLoading, isError, refetch, isFetching } = useDashboardAnalytics();
   const analytics = data?.data;
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleUpdate = () => qc.invalidateQueries({ queryKey: ["super-admin", "dashboard-analytics"] });
+    socket.on("platform_analytics_updated", handleUpdate);
+    return () => {
+      socket.off("platform_analytics_updated", handleUpdate);
+    };
+  }, [qc]);
 
   // Derive some placeholder metrics if the API structure is partially missing,
   // but strictly use real API data where available.

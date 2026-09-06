@@ -33,7 +33,7 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Power, Plus, Shield, Zap, AlertTriangle, RefreshCw, ChevronDown } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -52,6 +52,7 @@ import {
   DialogDescription, DialogFooter,
 } from "@/components/marketing_ui/dialog";
 import { apiClient } from "@/lib/apiClient";
+import { getSocket } from "@/lib/socketClient";
 
 
 const fetchFlags = () =>
@@ -82,6 +83,16 @@ export function FeatureFlagsPage() {
     queryKey: ["feature-flags"],
     queryFn: fetchFlags,
   });
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleUpdate = () => qc.invalidateQueries({ queryKey: ["feature-flags"] });
+    socket.on("platform_feature_flags_updated", handleUpdate);
+    return () => {
+      socket.off("platform_feature_flags_updated", handleUpdate);
+    };
+  }, [qc]);
 
   const toggleMut = useMutation({
     mutationFn: toggleFlag,

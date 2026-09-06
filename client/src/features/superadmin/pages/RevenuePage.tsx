@@ -33,8 +33,8 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { dashboardApi } from "../services/superAdminApi";
 
 
@@ -44,6 +44,7 @@ import { Badge } from "@/components/marketing_ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { IndianRupee, TrendingUp, TrendingDown, RefreshCw, Users, CreditCard } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { getSocket } from "@/lib/socketClient";
 
 
 function formatCurrency(amount: number) {
@@ -55,11 +56,22 @@ function formatCurrency(amount: number) {
 }
 
 export function RevenuePage() {
+  const qc = useQueryClient();
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["superadmin-platform-revenue"],
     queryFn: dashboardApi.getPlatformRevenue,
     staleTime: 60_000, // 1 min
   });
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleUpdate = () => qc.invalidateQueries({ queryKey: ["superadmin-platform-revenue"] });
+    socket.on("platform_transactions_updated", handleUpdate);
+    return () => {
+      socket.off("platform_transactions_updated", handleUpdate);
+    };
+  }, [qc]);
 
   const revenueData = data?.data || {
     mrr: 0,

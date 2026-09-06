@@ -34,7 +34,7 @@
  */
 
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IndianRupee, RefreshCw, Plus, RotateCcw, CheckCircle2, XCircle, Clock, AlertTriangle, Building2 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -49,6 +49,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { PageHeader } from "@/components/layout/PageHeader";
 import { apiClient } from "@/lib/apiClient";
 import { formatDate } from "@/utils/dateUtils";
+import { getSocket } from "@/lib/socketClient";
 
 
 const INR = (n: number) =>
@@ -90,6 +91,16 @@ export function TransactionsPage() {
     queryFn: () => fetchTransactions(statusFilter, typeFilter),
     staleTime: 30_000,
   });
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const handleUpdate = () => qc.invalidateQueries({ queryKey: ["platform-transactions"] });
+    socket.on("platform_transactions_updated", handleUpdate);
+    return () => {
+      socket.off("platform_transactions_updated", handleUpdate);
+    };
+  }, [qc]);
   const { data: orgsData } = useQuery({ queryKey: ["sa-orgs-list"], queryFn: fetchAllOrgs });
 
   const txns: any[] = data?.data ?? [];
