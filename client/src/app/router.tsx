@@ -319,7 +319,8 @@ export function AppRouter() {
           <Route path="/superadmin/subscribers/:email" element={<SubscriberDetailsPage />} />
           
 
-          <Route path="/superadmin/*" element={<ComingSoonPage />} />
+          <Route path="/superadmin/organizations" element={<Navigate to="/superadmin/orgs" replace />} />
+          <Route path="/superadmin/*" element={<Navigate to="/superadmin/dashboard" replace />} />
         </Route>
 
         {/* VERCEL STYLE SUPER ADMIN STORAGE SHELL */}
