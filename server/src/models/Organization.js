@@ -205,7 +205,7 @@ const organizationSchema = new mongoose.Schema(
         owner_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
+            required: false, // Made false because organizations are provisioned BEFORE the pending admin is fully activated
         },
         ownerName: { type: String, default: "" },
         ownerEmail: { type: String, default: "" },
