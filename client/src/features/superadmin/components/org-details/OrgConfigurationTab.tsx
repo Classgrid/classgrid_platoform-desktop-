@@ -200,9 +200,10 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         description="Every organization feature flag currently returned by the backend."
         icon={<SlidersHorizontal className="h-5 w-5" aria-hidden="true" />}
         action={<EditModulesModal profile={profile} orgId={profile?._id as string} />}
+        className="xl:col-span-2"
       >
         {featureFlags.length > 0 ? (
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {featureFlags.map(([key, value]) => (
               <div key={key} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
                 <span className="text-sm">{humanizeKey(key)}</span>
