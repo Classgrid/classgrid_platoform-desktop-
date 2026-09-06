@@ -73,6 +73,8 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
   const admissionConfig = profile?.admission_config;
   const colors = profile?.branding?.theme_colors;
 
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
 
