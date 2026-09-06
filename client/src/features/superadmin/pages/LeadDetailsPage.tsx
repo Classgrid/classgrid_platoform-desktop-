@@ -919,9 +919,8 @@ export function LeadDetailsPage() {
             </div>
           ) : (
             <div
-              className="text-sm text-foreground prose prose-sm dark:prose-invert max-w-none cursor-text hover:bg-muted/10 p-3 -mx-3 rounded-xl transition-colors min-h-[100px] border border-transparent hover:border-border/50"
-              onClick={() => setIsEditingMeetingNotes(true)}
-              dangerouslySetInnerHTML={{ __html: lead.meetingNotes || '<span class="text-muted-foreground italic">No meeting notes added. Click to edit.</span>' }}
+              className="text-sm text-foreground prose prose-sm dark:prose-invert max-w-none p-3 -mx-3 rounded-xl transition-colors min-h-[100px] border border-transparent"
+              dangerouslySetInnerHTML={{ __html: lead.meetingNotes || '<span class="text-muted-foreground italic">No meeting notes added.</span>' }}
             />
           )}
         </div>
@@ -949,9 +948,8 @@ export function LeadDetailsPage() {
             </div>
           ) : (
             <div
-              className="text-sm text-foreground prose prose-sm dark:prose-invert max-w-none cursor-text hover:bg-muted/10 p-3 -mx-3 rounded-xl transition-colors min-h-[100px] border border-transparent hover:border-border/50"
-              onClick={() => setIsEditingDemoReview(true)}
-              dangerouslySetInnerHTML={{ __html: lead.demoReview || '<span class="text-muted-foreground italic">No review added. Click to edit.</span>' }}
+              className="text-sm text-foreground prose prose-sm dark:prose-invert max-w-none p-3 -mx-3 rounded-xl transition-colors min-h-[100px] border border-transparent"
+              dangerouslySetInnerHTML={{ __html: lead.demoReview || '<span class="text-muted-foreground italic">No review added.</span>' }}
             />
           )}
         </div>
