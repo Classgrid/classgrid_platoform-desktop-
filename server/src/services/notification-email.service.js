@@ -793,6 +793,7 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
             meetingScheduledAt: demoRequest.meetingScheduledAt || null,
             meetingProvider: demoRequest.meetingProvider || '',
             meetingUrl: demoRequest.meetingUrl || '',
+            meetingStatus: demoRequest.meetingStatus || 'pending',
             dashboardUrl,
             leadId: demoRequest._id.toString()
         };
@@ -803,7 +804,7 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
             fromEmail: fromEmail,
             fromName: fromName,
             replyTo: fromEmail, // Set reply-to to the assigner's email so replies go to them
-            subject: `New Lead Assigned: ${templateData.institutionName} | Classgrid`,
+            subject: `You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
             html: getDemoLeadAssignedHtml(templateData),
             text: getDemoLeadAssignedPlainText(templateData)
         });
@@ -814,7 +815,7 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
                 to: superAdminEmail,
                 fromEmail: fromEmail,
                 fromName: fromName,
-                subject: `[CC] New Lead Assigned: ${templateData.institutionName} | Classgrid`,
+                subject: `[CC] You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
                 html: getDemoLeadAssignedHtml({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' }),
                 text: getDemoLeadAssignedPlainText({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' })
             });

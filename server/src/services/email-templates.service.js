@@ -2549,7 +2549,7 @@ export const getErpRoleRejectedHtml = (recipientName, roleTitle, orgName, reject
 };
 
 // ------------- DEMO LEAD ASSIGNED -------------
-export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminName, adminEmail, city, dashboardUrl, leadId, meetingScheduledAt, meetingProvider, meetingUrl }) => {
+export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminName, adminEmail, city, dashboardUrl, leadId, meetingScheduledAt, meetingProvider, meetingUrl, meetingStatus }) => {
   const formatDate = (date) => {
     const d = date ? new Date(date) : new Date();
     return d.toLocaleString("en-IN", {
@@ -2560,12 +2560,13 @@ export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminNa
   };
 
   let meetingHtml = '';
-  if (meetingScheduledAt) {
+  if (meetingScheduledAt || meetingStatus === 'scheduled' || meetingStatus === 'rescheduled') {
+      const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details' : 'Meeting Details';
       meetingHtml = `
       <div class="box" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
-        <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">Meeting Details</p>
+        <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">${statusLabel}</p>
         <ul style="margin-top: 0; margin-bottom: 0;">
-          <li><strong>Date:</strong> ${formatDate(meetingScheduledAt)}</li>
+          ${meetingScheduledAt ? `<li><strong>Date:</strong> ${formatDate(meetingScheduledAt)}</li>` : ''}
           <li><strong>Provider:</strong> ${meetingProvider || 'Other'}</li>
           ${meetingUrl ? `<li><strong>Link:</strong> <a href="${meetingUrl}">${meetingUrl}</a></li>` : ''}
         </ul>
@@ -2575,7 +2576,7 @@ export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminNa
 
   const content = `
     <p>Hi ${assigneeName},</p>
-    <p>You have been assigned a new Demo Lead on Classgrid.</p>
+    <p>You have been assigned to handle this Demo Lead on Classgrid.</p>
     
     <div class="box" style="margin-bottom: 16px; border-left: 3px solid #10b981;">
       <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">Lead Details</p>
@@ -2593,11 +2594,11 @@ export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminNa
   `;
   return baseTemplate({
     content,
-    title: `New Lead Assigned: ${institutionName}`
+    title: `You have been Assigned to Lead: ${institutionName}`
   });
 };
 
-export const getDemoLeadAssignedPlainText = ({ assigneeName, institutionName, adminName, adminEmail, city, dashboardUrl, leadId, meetingScheduledAt, meetingProvider, meetingUrl }) => {
+export const getDemoLeadAssignedPlainText = ({ assigneeName, institutionName, adminName, adminEmail, city, dashboardUrl, leadId, meetingScheduledAt, meetingProvider, meetingUrl, meetingStatus }) => {
   const formatDate = (date) => {
     const d = date ? new Date(date) : new Date();
     return d.toLocaleString("en-IN", {
@@ -2608,10 +2609,11 @@ export const getDemoLeadAssignedPlainText = ({ assigneeName, institutionName, ad
   };
 
   let meetingText = '';
-  if (meetingScheduledAt) {
+  if (meetingScheduledAt || meetingStatus === 'scheduled' || meetingStatus === 'rescheduled') {
+      const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details:' : 'Meeting Details:';
       meetingText = `
-Meeting Details:
-- Date: ${formatDate(meetingScheduledAt)}
+${statusLabel}
+${meetingScheduledAt ? `- Date: ${formatDate(meetingScheduledAt)}` : ''}
 - Provider: ${meetingProvider || 'Other'}
 ${meetingUrl ? `- Link: ${meetingUrl}` : ''}
 `;
@@ -2619,7 +2621,7 @@ ${meetingUrl ? `- Link: ${meetingUrl}` : ''}
 
   return `Hi ${assigneeName},
 
-You have been assigned a new Demo Lead on Classgrid.
+You have been assigned to handle this Demo Lead on Classgrid.
 
 Lead Details:
 - Institution: ${institutionName}
