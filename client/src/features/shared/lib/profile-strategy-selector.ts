@@ -113,45 +113,7 @@ export const SEED_UNIVERSITIES = [
 ];
 
 export const MASTER_PROFILE_SECTION_POOL = {
-  onboarding_organization_details: {
-    key: "onboarding_organization_details",
-    label: "Organization Details",
-    icon: "Building2",
-    fields: [
-      { key: "organization.legal_name", label: "Organization Legal Name", type: "text", required: true },
-      { key: "organization.type", label: "Organization Type", type: "text", readonly: true, required: true },
-      { key: "organization.short_name", label: "Organization Short Name / Slug", type: "text", required: true },
-      { key: "organization.affiliation_number", label: "Registration / Affiliation Number", type: "text" },
-      { key: "organization.board", label: "Board / Affiliation", type: "dropdown", options: ["CBSE", "ICSE", "State Board", "IB", "IGCSE", "University", "None"] },
-      { key: "organization.address", label: "Organization Address", type: "textarea", required: true },
-      { key: "organization.state", label: "State", type: "dropdown", options: INDIA_STATES, required: true },
-      { key: "organization.district", label: "District / City", type: "dropdown", options: INDIA_DISTRICTS, required: true },
-      { key: "organization.taluka", label: "Taluka", type: "dropdown", options: INDIA_TALUKAS },
-      { key: "organization.city", label: "City", type: "text", required: true },
-      { key: "organization.pin_code", label: "PIN Code", type: "text", required: true },
-      { key: "organization.website", label: "Website", type: "text" },
-    ],
-  },
-  onboarding_personal_details: {
-    key: "onboarding_personal_details",
-    label: "Admin Basic Identity",
-    icon: "User",
-    fields: [
-      { key: "identity.first_name", label: "First Name", type: "text", required: true },
-      { key: "identity.last_name", label: "Last Name", type: "text", required: true },
-      { key: "identity.designation", label: "Designation", type: "text" },
-      { key: "identity.department", label: "Department", type: "text" },
-    ],
-  },
-  onboarding_contact_details: {
-    key: "onboarding_contact_details",
-    label: "Official Contact Info",
-    icon: "Phone",
-    fields: [
-      { key: "contact.personal_email", label: "Primary Email", type: "text", required: true, sensitive: true },
-      { key: "contact.mobile_number", label: "Mobile Number", type: "text", required: true, sensitive: true },
-    ],
-  },
+
   organization_details: {
     key: "organization_details",
     label: "Organization Details",
@@ -980,7 +942,7 @@ export const ROLE_PROFILE_CONFIGS = {
     academic_placement_fields: null,
   },
   org_admin: {
-    sections: ["onboarding_organization_details", "onboarding_personal_details", "onboarding_contact_details"],
+    sections: [],
     academic_placement_fields: null,
   },
   department_admin: {
@@ -1016,11 +978,11 @@ export const ROLE_PROFILE_CONFIGS = {
     academic_placement_fields: null,
   },
   principal: {
-    sections: ["onboarding_organization_details", "onboarding_personal_details", "onboarding_contact_details"],
+    sections: [],
     academic_placement_fields: null,
   },
   vice_principal: {
-    sections: ["onboarding_organization_details", "onboarding_personal_details", "onboarding_contact_details"],
+    sections: [],
     academic_placement_fields: null,
   },
   super_admin: {

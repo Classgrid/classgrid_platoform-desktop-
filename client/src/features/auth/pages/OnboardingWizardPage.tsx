@@ -1122,6 +1122,23 @@ export function OnboardingWizardPage() {
         return;
       }
     }
+    
+    if (currentStepData.type === "dynamic") {
+      const section = dynamicSections.find(s => s.key === currentStepData.id);
+      if (section && section.fields) {
+        for (const field of section.fields) {
+          if (field.dependsOn) {
+            const parentKey = field.dependsOn.field.split('.').pop()!;
+            if (formData[section.key]?.[parentKey] !== field.dependsOn.value) continue;
+          }
+          const val = formData[section.key]?.[field.key];
+          if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) {
+            showAlert(`Please fill out the "${field.label}" field to continue.`);
+            return;
+          }
+        }
+      }
+    }
 
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
@@ -2456,7 +2473,7 @@ export function OnboardingWizardPage() {
                                   {field.type !== 'image' && (
                                     <label className="text-xs font-semibold text-foreground flex items-center gap-2">
                                       {field.label}
-                                      {field.required && <span className="text-danger">*</span>}
+                                      <span className="text-danger">*</span>
                                     </label>
                                   )}
 
@@ -2526,8 +2543,8 @@ export function OnboardingWizardPage() {
                           <CheckCircle2 className="size-8" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">Ready to Submit?</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Please review your organization and personal details below.
+                        <p className="text-danger font-semibold text-sm">
+                          ⚠️ Please click 'Back' to review all steps. Ensure every single step is completely filled out before submitting.
                         </p>
                       </div>
 
