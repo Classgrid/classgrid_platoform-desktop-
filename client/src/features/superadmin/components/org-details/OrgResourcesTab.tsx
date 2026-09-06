@@ -88,7 +88,7 @@ function formatMeterUsage(meter: OrganizationResourceMeter): string {
 
   if (unit === "bytes") return formatBytes(value);
   if (unit === "inr") return formatCurrency(value);
-  if (value === null || value === undefined) return "Unavailable";
+  if (value === null || value === undefined) return "Not Configured";
 
   return `${formatNumber(value)} ${meter.unit || ""}`.trim();
 }
@@ -140,35 +140,35 @@ export function OrgResourcesTab({
           value={formatBytes(storageBytes)}
           detail="Supabase notes-files bucket only; broader cloud storage is still outside the tracked meter."
           icon={<HardDrive className="h-5 w-5" aria-hidden="true" />}
-          quality={storageBytes === undefined ? "unavailable" : "partial"}
+          quality={storageBytes === undefined ? "Not Configured" : "partial"}
         />
         <OrgMetricCard
           title="Legacy stored files"
           value={formatNumber(fileCount)}
           detail="Files found below the organization student-notes prefix."
           icon={<Server className="h-5 w-5" aria-hidden="true" />}
-          quality={fileCount === undefined ? "unavailable" : "partial"}
+          quality={fileCount === undefined ? "Not Configured" : "partial"}
         />
         <OrgMetricCard
           title="Tracked DB records"
           value={formatNumber(trackedRecordCount)}
           detail="Organization-scoped counts across tracked academic, support, and content models."
           icon={<Database className="h-5 w-5" aria-hidden="true" />}
-          quality={trackedRecordCount === undefined ? "unavailable" : "actual"}
+          quality={trackedRecordCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Email jobs"
           value={formatNumber(emailCount)}
           detail="Email jobs associated with the organization or its users."
           icon={<Mail className="h-5 w-5" aria-hidden="true" />}
-          quality={emailCount === undefined ? "unavailable" : "actual"}
+          quality={emailCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Support tickets"
           value={formatNumber(supportCount)}
           detail="Live support volume linked to this organization."
           icon={<LifeBuoy className="h-5 w-5" aria-hidden="true" />}
-          quality={supportCount === undefined ? "unavailable" : "actual"}
+          quality={supportCount === undefined ? "Not Configured" : "actual"}
         />
       </section>
 
@@ -186,7 +186,7 @@ export function OrgResourcesTab({
             label="Configured providers"
             value={
               resourceMeterSummary?.totals?.configuredProviders === undefined || resourceMeterSummary?.totals?.totalProviders === undefined
-                ? "Unavailable"
+                ? "Not Configured"
                 : `${formatNumber(resourceMeterSummary.totals.configuredProviders)} / ${formatNumber(resourceMeterSummary.totals.totalProviders)}`
             }
           />

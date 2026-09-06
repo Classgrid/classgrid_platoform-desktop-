@@ -97,7 +97,7 @@ function LimitMeter({ label, used, limit }: LimitMeterProps) {
       <div className="flex items-center justify-between gap-4 text-sm">
         <span className="font-medium">{label}</span>
         <span className="tabular-nums text-muted-foreground">
-          {hasMeter ? `${formatNumber(used)} / ${formatNumber(limit)}` : "Unavailable"}
+          {hasMeter ? `${formatNumber(used)} / ${formatNumber(limit)}` : "Not Configured"}
         </span>
       </div>
       {percentage === undefined ? (
@@ -233,7 +233,7 @@ export function OrgBillingTab({
               label="Payment status"
               value={
                 subscription?.isPaid === undefined ? (
-                  "Unavailable"
+                  "Not Configured"
                 ) : (
                   <Badge variant={subscription.isPaid ? "success" : "warning"}>
                     {subscription.isPaid ? "Paid" : "Unpaid"}
@@ -245,11 +245,11 @@ export function OrgBillingTab({
             <OrgDataRow label="Storage rate per GB" value={formatCurrency(billing?.pricePerGB)} />
             <OrgDataRow
               label="Included storage"
-              value={legacyUsage?.storage?.includedGb === undefined ? "Unavailable" : `${formatNumber(legacyUsage.storage.includedGb)} GB`}
+              value={legacyUsage?.storage?.includedGb === undefined ? "Not Configured" : `${formatNumber(legacyUsage.storage.includedGb)} GB`}
             />
             <OrgDataRow
               label="Tracked billable storage"
-              value={legacyUsage?.storage?.billableGb === undefined ? "Unavailable" : `${formatNumber(legacyUsage.storage.billableGb)} GB`}
+              value={legacyUsage?.storage?.billableGb === undefined ? "Not Configured" : `${formatNumber(legacyUsage.storage.billableGb)} GB`}
             />
             <OrgDataRow label="Configured payment method" value={humanizeKey(profile?.paymentMethod)} />
           </dl>

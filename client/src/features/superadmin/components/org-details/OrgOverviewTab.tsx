@@ -89,42 +89,42 @@ export function OrgOverviewTab({
           value={formatNumber(studentCount)}
           detail="Organization-scoped user records returned by the live backend."
           icon={<GraduationCap className="h-5 w-5" aria-hidden="true" />}
-          quality={studentCount === undefined ? "unavailable" : "actual"}
+          quality={studentCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Faculty"
           value={formatNumber(facultyCount)}
           detail="Faculty and teacher totals from organization usage and insight endpoints."
           icon={<Users className="h-5 w-5" aria-hidden="true" />}
-          quality={facultyCount === undefined ? "unavailable" : "actual"}
+          quality={facultyCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Administrators"
           value={formatNumber(adminCount)}
           detail="Active elevated-access accounts returned for this organization."
           icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />}
-          quality={adminCount === undefined ? "unavailable" : "actual"}
+          quality={adminCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Classrooms"
           value={formatNumber(classroomCount)}
           detail="Organization classrooms returned by the insight and detail endpoints."
           icon={<BookOpen className="h-5 w-5" aria-hidden="true" />}
-          quality={classroomCount === undefined ? "unavailable" : "actual"}
+          quality={classroomCount === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Registered users"
           value={formatNumber(totalUsers)}
           detail="All user records currently linked to this organization."
           icon={<Building2 className="h-5 w-5" aria-hidden="true" />}
-          quality={totalUsers === undefined ? "unavailable" : "actual"}
+          quality={totalUsers === undefined ? "Not Configured" : "actual"}
         />
         <OrgMetricCard
           title="Email jobs"
           value={formatNumber(emailCount)}
           detail="Organization-filtered email jobs; delivery cost is not yet returned."
           icon={<Mail className="h-5 w-5" aria-hidden="true" />}
-          quality={emailCount === undefined ? "unavailable" : "actual"}
+          quality={emailCount === undefined ? "Not Configured" : "actual"}
         />
       </section>
 
@@ -135,7 +135,7 @@ export function OrgOverviewTab({
           icon={<Building2 className="h-5 w-5" aria-hidden="true" />}
         >
           <dl>
-            <OrgDataRow label="Organization ID" value={profile?._id ?? detail?._id ?? "Unavailable"} />
+            <OrgDataRow label="Organization ID" value={profile?._id ?? detail?._id ?? "Not Configured"} />
             <OrgDataRow 
               label="Subdomain" 
               value={profile?.subdomain ? (
@@ -148,20 +148,20 @@ export function OrgOverviewTab({
                   {profile.subdomain}.classgrid.in
                   <ExternalLink className="h-3 w-3" />
                 </a>
-              ) : "Unavailable"} 
+              ) : "Not Configured"} 
             />
             <OrgDataRow label="Institution type" value={humanizeKey(profile?.org_type ?? detail?.org_type)} />
             <OrgDataRow label="Structure type" value={humanizeKey(profile?.structure_type ?? detail?.structure_type)} />
             <OrgDataRow label="Division mode" value={humanizeKey(profile?.division_mode)} />
-            <OrgDataRow label="Address" value={profile?.address ?? detail?.address ?? "Unavailable"} />
-            <OrgDataRow label="City" value={profile?.city ?? detail?.city ?? "Unavailable"} />
-            <OrgDataRow label="District" value={profile?.district ?? detail?.district ?? "Unavailable"} />
-            <OrgDataRow label="Taluka" value={profile?.taluka ?? detail?.taluka ?? "Unavailable"} />
-            <OrgDataRow label="State" value={profile?.state ?? detail?.state ?? "Unavailable"} />
-            <OrgDataRow label="Pincode" value={profile?.pincode ?? detail?.pincode ?? "Unavailable"} />
-            <OrgDataRow label="Website" value={profile?.website ?? detail?.website ?? "Unavailable"} />
-            <OrgDataRow label="Registration number" value={profile?.registration_number ?? detail?.registration_number ?? "Unavailable"} />
-            <OrgDataRow label="Affiliation" value={profile?.affiliation ?? "Unavailable"} />
+            <OrgDataRow label="Address" value={profile?.address ?? detail?.address ?? "Not Configured"} />
+            <OrgDataRow label="City" value={profile?.city ?? detail?.city ?? "Not Configured"} />
+            <OrgDataRow label="District" value={profile?.district ?? detail?.district ?? "Not Configured"} />
+            <OrgDataRow label="Taluka" value={profile?.taluka ?? detail?.taluka ?? "Not Configured"} />
+            <OrgDataRow label="State" value={profile?.state ?? detail?.state ?? "Not Configured"} />
+            <OrgDataRow label="Pincode" value={profile?.pincode ?? detail?.pincode ?? "Not Configured"} />
+            <OrgDataRow label="Website" value={profile?.website ?? detail?.website ?? "Not Configured"} />
+            <OrgDataRow label="Registration number" value={profile?.registration_number ?? detail?.registration_number ?? "Not Configured"} />
+            <OrgDataRow label="Affiliation" value={profile?.affiliation ?? "Not Configured"} />
             <OrgDataRow label="Created" value={formatDate(profile?.createdAt ?? detail?.createdAt)} />
             <OrgDataRow label="Demo expires" value={formatDate(profile?.demoExpiresAt)} />
           </dl>
@@ -173,17 +173,17 @@ export function OrgOverviewTab({
           icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />}
         >
           <dl>
-            <OrgDataRow label="Owner" value={profile?.ownerName ?? owner?.name ?? detail?.ownerName ?? "Unavailable"} />
-            <OrgDataRow label="Owner email" value={profile?.ownerEmail ?? owner?.email ?? detail?.ownerEmail ?? "Unavailable"} />
-            <OrgDataRow label="Contact number" value={profile?.contactNumber ?? owner?.phoneNumber ?? "Unavailable"} />
-            <OrgDataRow label="Designation" value={profile?.designation ?? "Unavailable"} />
+            <OrgDataRow label="Owner" value={profile?.ownerName ?? owner?.name ?? detail?.ownerName ?? "Not Configured"} />
+            <OrgDataRow label="Owner email" value={profile?.ownerEmail ?? owner?.email ?? detail?.ownerEmail ?? "Not Configured"} />
+            <OrgDataRow label="Contact number" value={profile?.contactNumber ?? owner?.phoneNumber ?? "Not Configured"} />
+            <OrgDataRow label="Designation" value={profile?.designation ?? "Not Configured"} />
             <OrgDataRow
               label="Plan"
               value={
                 detail?.subscription?.plan ? (
                   <Badge variant="info">{humanizeKey(detail.subscription.plan)}</Badge>
                 ) : (
-                  "Unavailable"
+                  "Not Configured"
                 )
               }
             />
@@ -191,7 +191,7 @@ export function OrgOverviewTab({
               label="Billing state"
               value={
                 detail?.subscription?.isPaid === undefined ? (
-                  "Unavailable"
+                  "Not Configured"
                 ) : (
                   <Badge variant={detail.subscription.isPaid ? "success" : "warning"}>
                     {detail.subscription.isPaid ? "Paid" : "Unpaid"}

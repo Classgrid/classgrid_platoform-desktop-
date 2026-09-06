@@ -75,9 +75,9 @@ function AdminCard({ admin }: { admin: OrganizationAdmin }) {
         </div>
       </div>
       <dl className="mt-4">
-        <OrgDataRow label="Department" value={admin.department ?? "Unavailable"} />
-        <OrgDataRow label="Designation" value={admin.designation ?? "Unavailable"} />
-        <OrgDataRow label="Phone" value={admin.phoneNumber ?? "Unavailable"} />
+        <OrgDataRow label="Department" value={admin.department ?? "Not Configured"} />
+        <OrgDataRow label="Designation" value={admin.designation ?? "Not Configured"} />
+        <OrgDataRow label="Phone" value={admin.phoneNumber ?? "Not Configured"} />
       </dl>
     </article>
   );
@@ -113,7 +113,7 @@ export function OrgAccessTab({ profile }: OrgAccessTabProps) {
           icon={<Globe2 className="h-5 w-5" aria-hidden="true" />}
         >
           <dl>
-            <OrgDataRow label="Subdomain slug" value={profile?.subdomain ?? "Unavailable"} />
+            <OrgDataRow label="Subdomain slug" value={profile?.subdomain ?? "Not Configured"} />
             <OrgDataRow
               label="Custom domain"
               value={
@@ -128,14 +128,14 @@ export function OrgAccessTab({ profile }: OrgAccessTabProps) {
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 ) : (
-                  "Unavailable"
+                  "Not Configured"
                 )
               }
             />
             <OrgDataRow label="Domain status" value={humanizeKey(customDomain?.status)} />
-            <OrgDataRow label="TXT verified" value={customDomain?.txt_verified === undefined ? "Unavailable" : customDomain.txt_verified ? "Yes" : "No"} />
-            <OrgDataRow label="CNAME verified" value={customDomain?.cname_verified === undefined ? "Unavailable" : customDomain.cname_verified ? "Yes" : "No"} />
-            <OrgDataRow label="TLS provisioned" value={customDomain?.ssl_provisioned === undefined ? "Unavailable" : customDomain.ssl_provisioned ? "Yes" : "No"} />
+            <OrgDataRow label="TXT verified" value={customDomain?.txt_verified === undefined ? "Not Configured" : customDomain.txt_verified ? "Yes" : "No"} />
+            <OrgDataRow label="CNAME verified" value={customDomain?.cname_verified === undefined ? "Not Configured" : customDomain.cname_verified ? "Yes" : "No"} />
+            <OrgDataRow label="TLS provisioned" value={customDomain?.ssl_provisioned === undefined ? "Not Configured" : customDomain.ssl_provisioned ? "Yes" : "No"} />
             <OrgDataRow label="Verified at" value={formatDateTime(customDomain?.verified_at)} />
           </dl>
         </OrgSectionCard>
@@ -146,12 +146,12 @@ export function OrgAccessTab({ profile }: OrgAccessTabProps) {
           icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />}
         >
           <dl>
-            <OrgDataRow label="Owner" value={profile?.ownerName ?? owner?.name ?? "Unavailable"} />
-            <OrgDataRow label="Owner email" value={profile?.ownerEmail ?? owner?.email ?? "Unavailable"} />
-            <OrgDataRow label="Allowed email domains" value={profile?.allowed_domains?.length ? profile.allowed_domains.join(", ") : "Unavailable"} />
-            <OrgDataRow label="Faculty organization code" value={profile?.organizationCode ? "Configured — hidden" : "Unavailable"} />
-            <OrgDataRow label="Student honor code" value={profile?.honorCode ? "Configured — hidden" : "Unavailable"} />
-            <OrgDataRow label="Legacy private code" value={profile?.private_code ? "Configured — hidden" : "Unavailable"} />
+            <OrgDataRow label="Owner" value={profile?.ownerName ?? owner?.name ?? "Not Configured"} />
+            <OrgDataRow label="Owner email" value={profile?.ownerEmail ?? owner?.email ?? "Not Configured"} />
+            <OrgDataRow label="Allowed email domains" value={profile?.allowed_domains?.length ? profile.allowed_domains.join(", ") : "Not Configured"} />
+            <OrgDataRow label="Faculty organization code" value={profile?.organizationCode ? "Configured — hidden" : "Not Configured"} />
+            <OrgDataRow label="Student honor code" value={profile?.honorCode ? "Configured — hidden" : "Not Configured"} />
+            <OrgDataRow label="Legacy private code" value={profile?.private_code ? "Configured — hidden" : "Not Configured"} />
           </dl>
         </OrgSectionCard>
       </div>

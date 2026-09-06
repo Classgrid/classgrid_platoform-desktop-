@@ -169,7 +169,7 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
           <OrgDataRow label="Current stage" value={humanizeKey(onboarding?.current_stage)} />
           <OrgDataRow
             label="Completed steps"
-            value={onboardingSteps.length > 0 ? `${completedSteps} / ${onboardingSteps.length}` : "Unavailable"}
+            value={onboardingSteps.length > 0 ? `${completedSteps} / ${onboardingSteps.length}` : "Not Configured"}
           />
           <OrgDataRow label="Last synchronized" value={formatDateTime(onboarding?.last_synced_at)} />
           <OrgDataRow label="Completed at" value={formatDateTime(onboarding?.completed_at)} />
@@ -223,12 +223,12 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         icon={<Settings2 className="h-5 w-5" aria-hidden="true" />}
       >
         <dl>
-          <OrgDataRow label="Identifier label" value={academicConfig?.identifierLabel ?? profile?.rollNumberLabel ?? "Unavailable"} />
+          <OrgDataRow label="Identifier label" value={academicConfig?.identifierLabel ?? profile?.rollNumberLabel ?? "Not Configured"} />
           <OrgDataRow label="Identifier required" value={formatBoolean(academicConfig?.prnRequired)} />
           <OrgDataRow label="Identifier locked" value={formatBoolean(academicConfig?.prnLocked)} />
-          <OrgDataRow label="Batches" value={academicConfig?.batches?.length ? academicConfig.batches.join(", ") : "Unavailable"} />
-          <OrgDataRow label="Branches" value={academicConfig?.branches?.length ? academicConfig.branches.join(", ") : "Unavailable"} />
-          <OrgDataRow label="ID card fields" value={academicConfig?.idCardFields?.length ? academicConfig.idCardFields.map(humanizeKey).join(", ") : "Unavailable"} />
+          <OrgDataRow label="Batches" value={academicConfig?.batches?.length ? academicConfig.batches.join(", ") : "Not Configured"} />
+          <OrgDataRow label="Branches" value={academicConfig?.branches?.length ? academicConfig.branches.join(", ") : "Not Configured"} />
+          <OrgDataRow label="ID card fields" value={academicConfig?.idCardFields?.length ? academicConfig.idCardFields.map(humanizeKey).join(", ") : "Not Configured"} />
         </dl>
       </OrgSectionCard>
 
@@ -257,11 +257,11 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
       >
         <div className="grid gap-6 lg:grid-cols-2">
           <dl>
-            <OrgDataRow label="Font" value={profile?.branding?.font_preference ?? "Unavailable"} />
-            <OrgDataRow label="Tagline" value={profile?.branding?.tagline ?? "Unavailable"} />
-            <OrgDataRow label="Logo" value={profile?.logo_url ? "Configured" : "Unavailable"} />
-            <OrgDataRow label="Favicon" value={profile?.favicon_url ? "Configured" : "Unavailable"} />
-            <OrgDataRow label="Campus image" value={profile?.campus_photo_url ? "Configured" : "Unavailable"} />
+            <OrgDataRow label="Font" value={profile?.branding?.font_preference ?? "Not Configured"} />
+            <OrgDataRow label="Tagline" value={profile?.branding?.tagline ?? "Not Configured"} />
+            <OrgDataRow label="Logo" value={profile?.logo_url ? "Configured" : "Not Configured"} />
+            <OrgDataRow label="Favicon" value={profile?.favicon_url ? "Configured" : "Not Configured"} />
+            <OrgDataRow label="Campus image" value={profile?.campus_photo_url ? "Configured" : "Not Configured"} />
           </dl>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {Object.entries(colors ?? {}).map(([name, color]) => (
