@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, IndianRupee, Calendar, Layers, Activity, FileText } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
@@ -36,6 +36,8 @@ interface FeesAuditData {
 export function OrgFeesPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const orgName = location.state?.orgName || "Organization";
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<FeesAuditData | null>(null);
 

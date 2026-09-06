@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, FileSpreadsheet, Send, ShieldCheck, Activity, Users } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
@@ -37,6 +37,8 @@ interface AdmissionsAuditData {
 export function OrgAdmissionsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const orgName = location.state?.orgName || "Organization";
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<AdmissionsAuditData | null>(null);
 
