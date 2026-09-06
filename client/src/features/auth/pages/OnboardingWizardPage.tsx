@@ -1705,7 +1705,7 @@ export function OnboardingWizardPage() {
                               <ResponsiveSelect
                                 className="w-full h-10 rounded-lg border-input bg-background"
                                 value={
-                                  showCustomDesignation || (formData["personal_details"]?.["designation"] !== "" && !JOB_TITLE_OPTIONS.includes(formData["personal_details"]?.["designation"] || ""))
+                                  showCustomDesignation || (!!formData["personal_details"]?.["designation"] && !JOB_TITLE_OPTIONS.includes(formData["personal_details"]?.["designation"]))
                                     ? "Other (Please specify)"
                                     : (formData["personal_details"]?.["designation"] || "")
                                 }
@@ -1725,7 +1725,7 @@ export function OnboardingWizardPage() {
                                 ))}
                               </ResponsiveSelect>
                               
-                              {(showCustomDesignation || (formData["personal_details"]?.["designation"] !== "" && !JOB_TITLE_OPTIONS.includes(formData["personal_details"]?.["designation"] || ""))) && (
+                              {(showCustomDesignation || (!!formData["personal_details"]?.["designation"] && !JOB_TITLE_OPTIONS.includes(formData["personal_details"]?.["designation"]))) && (
                                 <Input
                                   placeholder="Type your custom designation..."
                                   className="h-10 mt-3 border-primary/40 focus-visible:ring-primary/20 transition-all shadow-sm"
