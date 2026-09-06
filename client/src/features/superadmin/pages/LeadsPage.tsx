@@ -141,7 +141,7 @@ export function LeadsPage() {
       endOfDay.setHours(23, 59, 59, 999);
       
       result = result.filter((lead) => {
-        const cDate = lead.meetingScheduledAt ? new Date(lead.meetingScheduledAt) : null;
+        const cDate = lead.createdAt ? new Date(lead.createdAt) : null;
         if (!cDate) return false;
         return cDate >= startOfDay && cDate <= endOfDay;
       });
