@@ -70,7 +70,7 @@ export function RequireAuth() {
                       (new URLSearchParams(window.location.search).has("sso_token") || 
                        new URLSearchParams(window.location.search).has("token"));
                       
-  if (isLoading || (hasSsoToken && isFetching) || isFinalizing) {
+  if (isFinalizing) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center">
@@ -79,6 +79,10 @@ export function RequireAuth() {
         </div>
       </div>
     );
+  }
+
+  if (isLoading || (hasSsoToken && isFetching)) {
+    return null;
   }
 
   if (!user) {
