@@ -103,7 +103,7 @@ export function LeadDetailsPage() {
     }
   }
   const assignedAdminObj = typeof lead?.assignedTo === 'object' ? lead.assignedTo : null;
-  const assignedAdmin = superAdmins.find((a: any) => a._id === currentAssignedId) || assignedAdminObj;
+  const assignedAdmin = superAdmins.find((a: any) => String(a._id) === String(currentAssignedId)) || assignedAdminObj;
   const setBreadcrumbs = useBreadcrumbStore((state) => state.setBreadcrumbs);
 
   useEffect(() => {
@@ -758,6 +758,8 @@ export function LeadDetailsPage() {
                           <><span className="h-2 w-2 rounded-full bg-purple-500" /><span className="font-medium text-purple-500">Rescheduled</span></>
                         ) : lead.meetingStatus === "missed" ? (
                           <><span className="h-2 w-2 rounded-full bg-orange-500" /><span className="font-medium text-orange-500">Missed</span></>
+                        ) : lead.meetingStatus === "closed" ? (
+                          <><span className="h-2 w-2 rounded-full bg-gray-500" /><span className="font-medium text-gray-500">Closed</span></>
                         ) : (
                           <><span className={`h-2 w-2 rounded-full ${lead.assignedTo ? 'bg-blue-500' : 'bg-yellow-500'}`} /><span className={`font-medium ${lead.assignedTo ? 'text-blue-500' : 'text-yellow-500'}`}>{lead.assignedTo ? 'Contacted' : 'Pending'}</span></>
                         )}
@@ -776,6 +778,7 @@ export function LeadDetailsPage() {
                       <SelectItem value="cancelled"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /><span className="font-medium text-red-500">Cancelled</span></div></SelectItem>
                       <SelectItem value="rescheduled"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-purple-500" /><span className="font-medium text-purple-500">Rescheduled</span></div></SelectItem>
                       <SelectItem value="missed"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-orange-500" /><span className="font-medium text-orange-500">Missed</span></div></SelectItem>
+                      <SelectItem value="closed"><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-gray-500" /><span className="font-medium text-gray-500">Closed</span></div></SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
