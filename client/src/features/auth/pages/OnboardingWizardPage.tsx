@@ -680,7 +680,7 @@ export function OnboardingWizardPage() {
       setOrgEmailOtpTimer(30);
       toast.success("OTP sent to organization email!");
     } catch (e: any) {
-      toast.error(e.message || "Failed to send OTP");
+      toast.error(e.response?.data?.message || e.message || "Failed to send OTP");
     }
   };
 
@@ -742,7 +742,7 @@ export function OnboardingWizardPage() {
       setPhoneOtpTimer(30);
       toast.success("OTP sent to your phone!");
     } catch (e: any) {
-      toast.error(e.message || "Failed to send OTP");
+      toast.error(e.response?.data?.message || e.message || "Failed to send OTP");
     } finally {
       setIsSendingPhoneOtp(false);
     }
