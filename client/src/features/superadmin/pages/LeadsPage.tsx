@@ -80,6 +80,7 @@ export function LeadsPage() {
   const [orgTypeFilter, setOrgTypeFilter] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateType, setDateType] = useState<"createdAt" | "meetingScheduledAt">("createdAt");
 
   useEffect(() => {
     const socket = getSocket();
@@ -141,7 +142,7 @@ export function LeadsPage() {
       endOfDay.setHours(23, 59, 59, 999);
       
       result = result.filter((lead) => {
-        const cDate = lead.createdAt ? new Date(lead.createdAt) : null;
+        const cDate = lead[dateType] ? new Date(lead[dateType] as string | Date) : null;
         if (!cDate) return false;
         return cDate >= startOfDay && cDate <= endOfDay;
       });
@@ -157,7 +158,7 @@ export function LeadsPage() {
       );
     }
     return result;
-  }, [leads, search, statusFilter, orgTypeFilter, assigneeFilter, dateFrom]);
+  }, [leads, search, statusFilter, orgTypeFilter, assigneeFilter, dateFrom, dateType]);
 
   const handleAssign = (id: string) => {
     setAssigningId(id);
@@ -213,6 +214,18 @@ export function LeadsPage() {
                   {type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " ")}
                 </option>
               ))}
+            </ResponsiveSelect>
+          </div>
+
+          {/* Date Type */}
+          <div className="w-[120px]">
+            <ResponsiveSelect
+              className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-sm"
+              value={dateType}
+              onChange={(e) => setDateType(e.target.value as any)}
+            >
+              <option value="createdAt">Date: Created</option>
+              <option value="meetingScheduledAt">Date: Scheduled</option>
             </ResponsiveSelect>
           </div>
 
