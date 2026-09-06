@@ -2527,7 +2527,7 @@ router.patch("/leads/:id/notes", async (req, res) => {
         // Check if isOrganizationVetted was just set to true by Nikhil
         if (isOrganizationVetted === true && oldLead && !oldLead.isOrganizationVetted) {
             try {
-                if (lead.assignedTo && req.user?.email === "nikhil.shinde@classgrid.in") {
+                if (lead.assignedTo && req.user?.email?.toLowerCase() === "nikhil.shinde@classgrid.in") {
                     const { sendVettingApprovedNotification } = await import("../services/notification-email.service.js");
                     await sendVettingApprovedNotification({
                         demoRequest: lead,

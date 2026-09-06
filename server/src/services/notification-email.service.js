@@ -790,10 +790,10 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
             adminName: demoRequest.adminName || 'Admin',
             adminEmail: demoRequest.adminEmail || '',
             city: demoRequest.city || '',
-            meetingScheduledAt: demoRequest.meetingScheduledAt || null,
-            meetingProvider: demoRequest.meetingProvider || '',
+            meetingScheduledAt: demoRequest.meetingScheduledAt || demoRequest.scheduledAt || null,
+            meetingProvider: demoRequest.meetingProvider || demoRequest.provider || '',
             meetingUrl: demoRequest.meetingUrl || '',
-            meetingStatus: demoRequest.meetingStatus || 'pending',
+            meetingStatus: demoRequest.meetingStatus || (demoRequest.status === 'demo_scheduled' ? 'scheduled' : 'pending'),
             dashboardUrl,
             leadId: demoRequest._id.toString()
         };

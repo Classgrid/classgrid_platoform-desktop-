@@ -760,29 +760,25 @@ export function LeadDetailsPage() {
 
             {/* Vetted Checkbox Card */}
             <div 
-              className={`bg-card border rounded-2xl p-4 transition-colors flex items-start gap-4 shadow-sm relative overflow-hidden ${
-                updateNotesMutation.isPending || requestVettingMutation.isPending || lead.meetingStatus !== 'completed'
-                  ? 'border-muted opacity-70 cursor-not-allowed' 
-                  : 'border-emerald-500/20 hover:border-emerald-500/50 cursor-pointer'
+              className={`p-4 rounded-xl border flex items-start gap-3 transition-colors ${
+                (lead.meetingStatus !== 'completed' || lead.isOrganizationVetted)
+                ? 'border-muted opacity-70 cursor-not-allowed' 
+                : 'border-emerald-500/20 hover:border-emerald-500/50 cursor-pointer'
               }`}
               onClick={() => {
-                if (updateNotesMutation.isPending || requestVettingMutation.isPending || lead.meetingStatus !== 'completed') {
+                if (updateNotesMutation.isPending || requestVettingMutation.isPending || lead.meetingStatus !== 'completed' || lead.isOrganizationVetted) {
                   if (lead.meetingStatus !== 'completed') {
                     toast.error("Meeting must be 'Completed' first.");
+                  } else if (lead.isOrganizationVetted) {
+                    toast.error("Already vetted. Cannot be undone.");
                   }
                   return;
                 }
                 
                 // Only Nikhil can actually check/uncheck it
                 if (user?.email?.toLowerCase() === 'nikhil.shinde@classgrid.in') {
-                  const newVetted = !lead.isOrganizationVetted;
-                  updateNotesMutation.mutate({ id: lead._id, payload: { isOrganizationVetted: newVetted } });
-                  
-                  if (newVetted) {
-                    toast.success("Organization vetted & approved");
-                  } else {
-                    toast.success("Organization vetting reset");
-                  }
+                  updateNotesMutation.mutate({ id: lead._id, payload: { isOrganizationVetted: true } });
+                  toast.success("Organization vetted & approved");
                 } else {
                   // Anyone else requesting approval
                   if (lead.isOrganizationVetted) {
@@ -796,7 +792,7 @@ export function LeadDetailsPage() {
               <Checkbox 
                 checked={lead.isOrganizationVetted || false} 
                 className="mt-1 shrink-0" 
-                disabled={lead.meetingStatus !== 'completed'}
+                disabled={lead.meetingStatus !== 'completed' || lead.isOrganizationVetted}
               />
               <div>
                 <p className="text-sm font-bold text-foreground">Organization Vetted & Approved</p>
