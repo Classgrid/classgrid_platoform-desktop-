@@ -127,7 +127,7 @@ export function LeadsPage() {
     }
     
     if (orgTypeFilter) {
-      result = result.filter(l => l.orgType === orgTypeFilter);
+      result = result.filter(l => l.orgType?.toLowerCase() === orgTypeFilter.toLowerCase());
     }
     
     if (assigneeFilter) {
