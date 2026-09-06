@@ -244,17 +244,6 @@ export function LeadsPage() {
             </ResponsiveSelect>
           </div>
 
-          {/* Date Type */}
-          <div className="w-[120px]">
-            <ResponsiveSelect
-              className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-sm"
-              value={dateType}
-              onChange={(e) => setDateType(e.target.value as any)}
-            >
-              <option value="createdAt">Date: Created</option>
-              <option value="meetingScheduledAt">Date: Scheduled</option>
-            </ResponsiveSelect>
-          </div>
 
           {/* Date picker */}
           <div className="w-[180px] max-w-[180px] overflow-hidden relative">
@@ -265,6 +254,8 @@ export function LeadsPage() {
               popDirection="down"
               showTime={false}
               className="h-9 w-full pr-8"
+              dateType={dateType}
+              onDateTypeChange={setDateType}
             />
             {dateFrom && (
               <button
