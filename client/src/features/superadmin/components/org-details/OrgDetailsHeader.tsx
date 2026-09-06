@@ -33,7 +33,11 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { Building2, ExternalLink, RefreshCw } from "lucide-react";
+import { Building2, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Button } from "@/components/marketing_ui/button";
+
+import { Building2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Button } from "@/components/marketing_ui/button";
 
@@ -46,15 +50,11 @@ import { humanizeKey } from "./formatters";
 interface OrgDetailsHeaderProps {
   profile?: OrganizationFullProfile;
   detail?: OrganizationDetailSnapshot;
-  isRefreshing: boolean;
-  onRefresh: () => void;
 }
 
 export function OrgDetailsHeader({
   profile,
   detail,
-  isRefreshing,
-  onRefresh,
 }: OrgDetailsHeaderProps) {
   const name = profile?.name ?? detail?.name ?? "Organization";
   const logoUrl = profile?.logo_url ?? detail?.logo_url;
@@ -104,22 +104,6 @@ export function OrgDetailsHeader({
               ) : null}
             </div>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-              aria-hidden="true"
-            />
-            {isRefreshing ? "Refreshing" : "Refresh live data"}
-          </Button>
         </div>
       </div>
     </header>

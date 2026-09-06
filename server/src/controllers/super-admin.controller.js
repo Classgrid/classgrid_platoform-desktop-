@@ -911,6 +911,11 @@ export const updateOrgSubscription = async (req, res) => {
             { upsert: true, returnDocument: 'after' }
         );
 
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("superadmin:org_updated", { orgId });
+        }
+
         res.json({
             success: true,
             message: `Org ${orgId} subscription updated to "${normalizedPlan}"`,
@@ -1462,6 +1467,11 @@ export const updateOrganizationStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Organization not found' });
         }
 
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("superadmin:org_updated", { orgId: id });
+        }
+
         res.json({ success: true, message: 'Organization status updated successfully', organization: org });
     } catch (err) {
         console.error('[SuperAdmin] updateOrganizationStatus error:', err.message);
@@ -1501,6 +1511,11 @@ export const updateOrganizationOnboarding = async (req, res) => {
         if (updated) {
             org.onboarding_progress.last_synced_at = new Date();
             await org.save();
+        }
+
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("superadmin:org_updated", { orgId: id });
         }
 
         res.json({ success: true, message: 'Onboarding progress updated', data: org.onboarding_progress });

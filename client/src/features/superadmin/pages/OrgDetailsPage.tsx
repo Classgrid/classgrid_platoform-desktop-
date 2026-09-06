@@ -33,9 +33,10 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Activity, AlertCircle, CreditCard, Database, Rocket, Settings2, ShieldCheck } from "lucide-react";
 import { useParams, useLocation } from "react-router-dom";
+import { getSocket } from "@/lib/socketClient";
 
 import {
   Alert,
@@ -108,6 +109,22 @@ export function OrgDetailsPage() {
     );
   }
 
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    
+    const handleUpdate = (data: { orgId: string }) => {
+      if (data?.orgId === orgId) {
+        void controlCenter.refetchAll();
+      }
+    };
+    
+    socket.on("superadmin:org_updated", handleUpdate);
+    return () => {
+      socket.off("superadmin:org_updated", handleUpdate);
+    };
+  }, [orgId, controlCenter]);
+
   return (
     <main className="mx-auto w-full max-w-[1500px] space-y-6 p-4 pb-12 sm:p-6 lg:p-8">
       <PageBreadcrumbs items={breadcrumbItems} />
@@ -127,8 +144,6 @@ export function OrgDetailsPage() {
           <OrgDetailsHeader
             profile={controlCenter.profile}
             detail={controlCenter.detail}
-            isRefreshing={controlCenter.isRefreshing}
-            onRefresh={() => void controlCenter.refetchAll()}
           />
 
           {controlCenter.errorSources.length > 0 ? (
