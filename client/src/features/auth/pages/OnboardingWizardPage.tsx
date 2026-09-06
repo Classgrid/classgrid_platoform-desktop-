@@ -1175,9 +1175,9 @@ export function OnboardingWizardPage() {
         }
         setIsCompleted(true);
         setShowConfetti(true);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        showAlert("Failed to save password or complete setup. Your link may have expired.");
+        showAlert(err.response?.data?.message || err.message || "Failed to complete setup. Please check your details and try again.");
       } finally {
         setIsSubmitting(false);
       }
@@ -2550,8 +2550,8 @@ export function OnboardingWizardPage() {
                           <CheckCircle2 className="size-8" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">Ready to Submit?</h3>
-                        <p className="text-danger font-semibold text-sm">
-                          ⚠️ Please click 'Back' to review all steps. Ensure every single step is completely filled out before submitting.
+                        <p className="text-muted-foreground text-sm">
+                          All onboarding steps are complete and valid. You can now submit your profile to launch your digital campus!
                         </p>
                       </div>
 
