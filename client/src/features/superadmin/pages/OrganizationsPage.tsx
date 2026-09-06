@@ -229,16 +229,7 @@ export function OrganizationsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-3 w-full relative z-20">
-        <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
-        <Button asChild>
-          <Link to="/superadmin/onboard">
-            <Plus className="size-4 mr-2" />
-            Onboard New Org
-          </Link>
-        </Button>
-      </div>
+
 
       {/* Search & Filters */}
       <div className="w-full relative z-10">
