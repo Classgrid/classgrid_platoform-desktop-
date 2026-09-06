@@ -97,6 +97,8 @@ import { NotificationEnginePage } from "@/features/superadmin/pages/Notification
 import { OrganizationsPage } from "@/features/superadmin/pages/OrganizationsPage";
 
 import { OrgDetailsPage } from "@/features/superadmin/pages/OrgDetailsPage";
+import { OrgHierarchyPage } from "@/features/superadmin/pages/OrgHierarchyPage";
+import { OrgFacultyPage } from "@/features/superadmin/pages/OrgFacultyPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import SandboxProfilePage from "@/features/shared/pages/SandboxProfilePage";
@@ -271,6 +273,7 @@ export function AppRouter() {
           <Route path="/superadmin/domains" element={<CustomDomainsPage />} />
           <Route path="/superadmin/detail/:orgId" element={<OrgDetailsPage />} />
           <Route path="/superadmin/detail/:id/hierarchy" element={<OrgHierarchyPage />} />
+          <Route path="/superadmin/detail/:id/staff" element={<OrgFacultyPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />
           <Route path="/superadmin/leads/:id" element={<LeadDetailsPage />} />
           {/* NEW BILLING ROUTES */}
