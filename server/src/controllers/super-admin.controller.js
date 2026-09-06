@@ -837,11 +837,23 @@ export const getOrganizationDetail = async (req, res) => {
             { upsert: true, returnDocument: 'after' }
         );
 
+        const adminsListRaw = await User.find({ organization_id: id, role: { $in: ADMIN_ROLES } })
+            .select("name email role department phoneNumber status")
+            .lean();
+
+        const adminsList = adminsListRaw.map(admin => ({
+            ...admin,
+            designation: (admin.role === "org_admin" || admin._id.toString() === org.owner_id?.toString()) 
+                ? org.designation 
+                : undefined
+        }));
+
         res.json({
             success: true,
             data: {
                 ...org,
                 owner,
+                adminsList,
                 usage: {
                     ...usage.toObject(),
                     totalClasses,
