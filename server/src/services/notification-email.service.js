@@ -862,11 +862,15 @@ export async function sendVettingApprovalRequestNotification({ demoRequest, requ
         console.error("[EmailNotification] sendVettingApprovalRequestNotification error:", err.message);
     }
 }
-export async function sendVettingApprovedNotification({ demoRequest, assignee }) {
+export async function sendVettingApprovedNotification({ demoRequest, assignee, approver }) {
     try {
         const { getVettingApprovedHtml } = await import("./email-templates.service.js");
         const { sendEmail } = await import("./aws-ses.service.js");
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL?.trim() || "support@classgrid.in";
+        
+        const fromEmail = approver?.email || superAdminEmail;
+        const fromName = approver?.name ? `${approver.name} (Classgrid Vetting)` : "Classgrid Vetting";
+
         const html = getVettingApprovedHtml({
             assigneeName: assignee.name,
             institutionName: demoRequest.institutionName,
@@ -875,11 +879,11 @@ export async function sendVettingApprovedNotification({ demoRequest, assignee })
         });
         await sendEmail({
             to: assignee.email,
-            fromEmail: superAdminEmail,
-            fromName: "Classgrid Vetting (Nikhil Shinde)",
+            fromEmail: fromEmail,
+            fromName: fromName,
             subject: `[Approved] Sandbox Vetting for ${demoRequest.institutionName}`,
             html,
-            replyTo: superAdminEmail
+            replyTo: fromEmail
         });
     } catch (err) {
         console.error("[EmailNotification] sendVettingApprovedNotification error:", err.message);

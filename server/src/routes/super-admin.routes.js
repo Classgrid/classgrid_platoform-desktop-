@@ -2531,7 +2531,8 @@ router.patch("/leads/:id/notes", async (req, res) => {
                     const { sendVettingApprovedNotification } = await import("../services/notification-email.service.js");
                     await sendVettingApprovedNotification({
                         demoRequest: lead,
-                        assignee: lead.assignedTo
+                        assignee: lead.assignedTo,
+                        approver: req.user
                     });
                 }
             } catch (e) {

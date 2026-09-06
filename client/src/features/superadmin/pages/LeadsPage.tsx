@@ -57,6 +57,19 @@ import { LeadTable } from "../components/LeadTable";
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+const STATUS_OPTIONS = [
+  { value: "", label: "Status: All" },
+  { value: "pending", label: "Pending", color: "bg-yellow-500" },
+  { value: "contacted", label: "Contacted", color: "bg-blue-500" },
+  { value: "scheduled", label: "Scheduled", color: "bg-blue-500" },
+  { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
+  { value: "completed", label: "Completed", color: "bg-emerald-500" },
+  { value: "missed", label: "Missed", color: "bg-orange-500" },
+  { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
+  { value: "provisioned", label: "Provisioned", color: "bg-emerald-500" },
+  { value: "closed", label: "Closed", color: "bg-gray-500" },
+];
+
 export function LeadsPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch, isFetching } = useLeads();
@@ -108,7 +121,20 @@ export function LeadsPage() {
     let result = leads;
 
     if (statusFilter) {
-      result = result.filter(l => l.status === statusFilter);
+      result = result.filter(l => {
+        let derived = "pending";
+        if (l.status === "converted") derived = "provisioned";
+        else if (l.status === "closed") derived = "closed";
+        else {
+          const ms = l.meetingStatus || "pending";
+          if (ms === "pending") {
+            derived = l.assignedTo ? "contacted" : "pending";
+          } else {
+            derived = ms; // scheduled, rescheduled, missed, completed, cancelled
+          }
+        }
+        return derived === statusFilter;
+      });
     }
     
     if (orgTypeFilter) {
@@ -230,14 +256,11 @@ export function LeadsPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">Status: All</option>
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="demo_scheduled">Demo Scheduled</option>
-              <option value="demo_completed">Demo Completed</option>
-              <option value="demo_no_show">No Show</option>
-              <option value="converted">Provisioned</option>
-              <option value="lost">Lost</option>
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value} data-color={o.color}>
+                  {o.label}
+                </option>
+              ))}
             </ResponsiveSelect>
           </div>
         </SuperadminFilterBar>
