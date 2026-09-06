@@ -157,6 +157,38 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
 
 
       <OrgSectionCard
+        title="Setup & Onboarding"
+        description="Detailed configuration milestones and data imports."
+        icon={<CheckCircle2 className="h-5 w-5" aria-hidden="true" />}
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {[
+            { id: "hierarchy", label: "Academic Hierarchy", desc: "View departments, classes, & subjects" },
+            { id: "staff", label: "Staff Imported", desc: "View registered teachers & roles" },
+            { id: "students", label: "Students Imported", desc: "View enrolled student records" },
+            { id: "fees", label: "Fee Structure Configured", desc: "View ledgers and installments" },
+            { id: "admission", label: "Admission Configured", desc: "View portal & form settings" }
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => window.open(`/superadmin/detail/${profile?._id}/${item.id}`, "_blank")}
+              className="group flex flex-col items-start gap-1 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/50 hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <div className="flex w-full items-center justify-between">
+                <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {item.label}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  View Details
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground mt-1">{item.desc}</span>
+            </button>
+          ))}
+        </div>
+      </OrgSectionCard>
+
+      <OrgSectionCard
         title="Feature flags"
         description="Every organization feature flag currently returned by the backend."
         icon={<SlidersHorizontal className="h-5 w-5" aria-hidden="true" />}
