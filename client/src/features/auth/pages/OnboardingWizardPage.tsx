@@ -957,7 +957,18 @@ export function OnboardingWizardPage() {
 
   const isOrgAdmin = effectiveRole === "org_admin";
 
-  const dynamicSections = strategy.sections || [];
+  const dynamicSections = (strategy.sections || []).filter(sec => {
+    // Remove onboarding-specific org/admin/contact sections — they duplicate fixed steps
+    if (sec.key === "organization_details" || sec.key === "onboarding_organization_details") return false;
+    if (sec.key === "admin_basic_identity" || sec.key === "onboarding_personal_details") return false;
+    if (sec.key === "official_contact_info" || sec.key === "onboarding_contact_details") return false;
+    // Skip the bloated basic profile and contact details for ALL users during onboarding
+    // to prevent asking for Name, Email, and Phone multiple times.
+    // They are already collected in fixed steps (Verification, Personal details).
+    // Optional demographic data can be filled in later in profile settings.
+    if (sec.key === "personal_details" || sec.key === "contact_details") return false;
+    return true;
+  });
 
   // Create one step per dynamic section
   const steps: any[] = [
@@ -2540,7 +2551,7 @@ export function OnboardingWizardPage() {
                           </div>
                           <div>
                             <span className="text-muted-foreground block text-xs mb-1">Portal Subdomain</span>
-                            <span className="font-semibold font-mono text-xs">{formData["org_identity"]?.["slug"] || "N/A"}.classgrid.in</span>
+                            <span className="font-semibold font-mono text-xs">{formData["org_identity"]?.["subdomain"] || "N/A"}.classgrid.in</span>
                           </div>
                         </div>
                       </div>
@@ -2554,7 +2565,7 @@ export function OnboardingWizardPage() {
                           className="mt-1 h-5 w-5 rounded border-primary text-primary focus:ring-primary bg-background cursor-pointer"
                         />
                         <label htmlFor="terms-checkbox" className="text-sm text-foreground leading-relaxed cursor-pointer select-none">
-                          I confirm that all details provided are accurate and official. I agree to the <a href="https://classgrid.in/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="https://classgrid.in/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
+                          I confirm that all details provided are accurate and official. I agree to the <a href="/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
                         </label>
                       </div>
                     </div>
