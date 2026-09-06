@@ -164,7 +164,7 @@ router.get("/auth-branding", async (req, res) => {
       return res.status(404).json({ success: false, message: "Organization not found." });
     }
 
-    if (org.status !== "active") {
+    if (org.status !== "active" && org.status !== "sandbox") {
       return res.status(403).json({
         success: false,
         message: "This institution portal is currently unavailable.",
