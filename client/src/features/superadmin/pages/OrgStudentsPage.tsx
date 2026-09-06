@@ -1,0 +1,214 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft, GraduationCap, Users, Clock, Activity, ScrollText } from "lucide-react";
+import { Button } from "@/components/marketing_ui/button";
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Badge } from "@/components/marketing_ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/marketing_ui/table";
+import { toast } from "sonner";
+import { organizationControlCenterApi } from "../services/organizationControlCenterApi";
+import { formatDateTime } from "../components/org-details/formatters";
+
+interface StudentProfile {
+  prn?: string;
+  batch?: string;
+  branch?: string;
+}
+
+interface StudentMember {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  lastLoginAt?: string;
+  createdAt: string;
+  profile?: {
+    student?: StudentProfile;
+  };
+}
+
+interface StudentsAuditData {
+  students: StudentMember[];
+}
+
+export function OrgStudentsPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<StudentsAuditData | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!id) return;
+      try {
+        const response = await organizationControlCenterApi.getStudentsAudit(id);
+        setData(response.data);
+      } catch (err: any) {
+        console.error("Failed to fetch students data:", err);
+        toast.error("Failed to load students data from backend.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="max-w-md mx-auto mt-12">
+        <CardContent className="pt-6 text-center flex flex-col items-center gap-4">
+          <h2 className="text-lg font-semibold">Failed to load data</h2>
+          <Button onClick={() => navigate(-1)} variant="outline">
+            Go Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { students } = data;
+  const activeStudents = students.filter(s => s.status === "active").length;
+  
+  // Calculate batch distribution
+  const batchCounts: Record<string, number> = {};
+  students.forEach(s => {
+    const batch = s.profile?.student?.batch || "Unassigned";
+    batchCounts[batch] = (batchCounts[batch] || 0) + 1;
+  });
+
+  return (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="h-8 w-8 p-0">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            Students Audit
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Live read-only view of the organization's imported students. (Limited to 1000 records)
+          </p>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Users className="h-4 w-4" />
+              Total Students
+            </div>
+            <div className="text-2xl font-bold">{students.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <Activity className="h-4 w-4" />
+              Active Status
+            </div>
+            <div className="text-2xl font-bold">{activeStudents} <span className="text-sm font-normal text-muted-foreground">active</span></div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+              <ScrollText className="h-4 w-4" />
+              Batches (Grades/Years)
+            </div>
+            <div className="text-2xl font-bold">{Object.keys(batchCounts).length}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-[1fr_300px]">
+        {/* Main Content: Student Table */}
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="border-b bg-muted/50 pb-4">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              Registered Students
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 overflow-y-auto max-h-[600px]">
+            {students.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>PRN / Roll No</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Batch / Branch</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {students.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell className="font-mono text-xs">{user.profile?.student?.prn || "-"}</TableCell>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 text-xs">
+                          <span className="font-medium">{user.profile?.student?.batch || "N/A"}</span>
+                          <span className="text-muted-foreground">{user.profile?.student?.branch || ""}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant={user.status === "active" ? "success" : "neutral"}>
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="p-8 text-center text-muted-foreground text-sm">
+                No students found for this organization.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Sidebar: Batch Distribution */}
+        <Card className="h-fit">
+          <CardHeader className="border-b bg-muted/50 pb-4">
+            <CardTitle className="text-base font-semibold">Distribution</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {Object.entries(batchCounts).sort((a, b) => b[1] - a[1]).map(([batch, count]) => (
+                <div key={batch} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{batch}</span>
+                  <Badge variant="neutral">{count}</Badge>
+                </div>
+              ))}
+              {Object.keys(batchCounts).length === 0 && (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  No batch data available
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

@@ -1564,3 +1564,50 @@ export const getOrgHierarchyAudit = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to fetch hierarchy audit" });
     }
 };
+
+export const getOrgFacultyAudit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const User = (await import("../models/User.js")).default;
+
+        const org = await Organization.findById(id).lean();
+        if (!org) return res.status(404).json({ success: false, message: "Organization not found" });
+
+        const faculty = await User.find({ 
+            organization_id: id, 
+            role: { $in: ["teacher", "org_admin", "staff", "accountant", "receptionist", "librarian"] } 
+        }).select("name email role status lastLoginAt createdAt").sort({ createdAt: -1 }).lean();
+
+        return res.json({
+            success: true,
+            data: { faculty }
+        });
+    } catch (err) {
+        console.error("[getOrgFacultyAudit] Error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch faculty audit" });
+    }
+};
+export const getOrgStudentsAudit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const User = (await import("../models/User.js")).default;
+
+        const org = await Organization.findById(id).lean();
+        if (!org) return res.status(404).json({ success: false, message: "Organization not found" });
+
+        const students = await User.find({ 
+            organization_id: id, 
+            role: "student"
+        }).select("name email role status lastLoginAt createdAt profile.student.prn profile.student.batch profile.student.branch").sort({ createdAt: -1 }).limit(1000).lean();
+
+        return res.json({
+            success: true,
+            data: { students }
+        });
+    } catch (err) {
+        console.error("[getOrgStudentsAudit] Error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch students audit" });
+    }
+};

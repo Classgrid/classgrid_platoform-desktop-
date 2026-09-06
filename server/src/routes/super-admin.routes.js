@@ -2592,7 +2592,9 @@ router.put("/orgs/:id/onboarding", isAuthenticated, requireRole("super_admin"), 
 // =================================================
 // SUPER ADMIN DATA AUDIT ROUTES
 // =================================================
-import { getOrgHierarchyAudit } from "../controllers/super-admin.controller.js";
+import { getOrgHierarchyAudit, getOrgFacultyAudit, getOrgStudentsAudit } from "../controllers/super-admin.controller.js";
 router.get("/orgs/:id/hierarchy-audit", isAuthenticated, requireRole("super_admin"), getOrgHierarchyAudit);
+router.get("/orgs/:id/faculty-audit", isAuthenticated, requireRole("super_admin"), getOrgFacultyAudit);
+router.get("/orgs/:id/students-audit", isAuthenticated, requireRole("super_admin"), getOrgStudentsAudit);
 
 export default router;
