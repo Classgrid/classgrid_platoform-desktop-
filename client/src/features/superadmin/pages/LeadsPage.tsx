@@ -44,6 +44,10 @@ import { SectionPanel } from "@/components/marketing_ui/SectionPanel";
 import { StatCard } from "@/components/marketing_ui/StatCard";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
+import { SuperadminFilterBar } from "../components/SuperadminFilterBar";
+import { ResponsiveSelect } from "@/components/marketing_ui/responsive-select";
+import { NikhilTimeCalendar } from "@/components/marketing_ui/nikhil_time_calendar";
+import { X } from "lucide-react";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { useLeads, useAssignLead } from "../queries/useLeads";
 import type { Lead } from "../services/superAdminApi";
@@ -60,6 +64,11 @@ export function LeadsPage() {
 
   const [search, setSearch] = useState("");
   const [assigningId, setAssigningId] = useState<string | null>(null);
+
+  const [statusFilter, setStatusFilter] = useState("");
+  const [orgTypeFilter, setOrgTypeFilter] = useState("");
+  const [assigneeFilter, setAssigneeFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
 
   useEffect(() => {
     const socket = getSocket();
@@ -85,16 +94,55 @@ export function LeadsPage() {
     return { total, unassigned, demoScheduled, converted };
   }, [leads]);
 
+  const assignees = useMemo(() => {
+    const map = new Map<string, any>();
+    leads.forEach(lead => {
+      if (lead.assignedTo && lead.assignedTo._id) {
+        map.set(lead.assignedTo._id, lead.assignedTo);
+      }
+    });
+    return Array.from(map.values());
+  }, [leads]);
+
   const filtered = useMemo(() => {
-    if (!search.trim()) return leads;
-    const q = search.toLowerCase();
-    return leads.filter(l =>
-      l.institutionName?.toLowerCase().includes(q) ||
-      l.adminEmail?.toLowerCase().includes(q) ||
-      l.adminName?.toLowerCase().includes(q) ||
-      l.city?.toLowerCase().includes(q)
-    );
-  }, [leads, search]);
+    let result = leads;
+
+    if (statusFilter) {
+      result = result.filter(l => l.status === statusFilter);
+    }
+    
+    if (orgTypeFilter) {
+      result = result.filter(l => l.orgType === orgTypeFilter);
+    }
+    
+    if (assigneeFilter) {
+      result = result.filter(l => l.assignedTo?._id === assigneeFilter);
+    }
+    
+    if (dateFrom) {
+      const startOfDay = new Date(dateFrom);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(dateFrom);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      result = result.filter((lead) => {
+        const cDate = lead.meetingScheduledAt ? new Date(lead.meetingScheduledAt) : null;
+        if (!cDate) return false;
+        return cDate >= startOfDay && cDate <= endOfDay;
+      });
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(l =>
+        l.institutionName?.toLowerCase().includes(q) ||
+        l.adminEmail?.toLowerCase().includes(q) ||
+        l.adminName?.toLowerCase().includes(q) ||
+        l.city?.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [leads, search, statusFilter, orgTypeFilter, assigneeFilter, dateFrom]);
 
   const handleAssign = (id: string) => {
     setAssigningId(id);
@@ -114,14 +162,85 @@ export function LeadsPage() {
 
 
 
-      {/* Search Filter */}
-      <div className="flex items-center gap-2 mb-4">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search institution, contact, city…"
-          className="flex h-9 w-full sm:w-[300px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
+      {/* Search & Filters */}
+      <div className="mb-4">
+        <SuperadminFilterBar
+          searchQuery={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search institution, contact, city…"
+        >
+          {/* Assignee */}
+          <div className="w-[150px]">
+            <ResponsiveSelect
+              className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-sm"
+              value={assigneeFilter}
+              onChange={(e) => setAssigneeFilter(e.target.value)}
+            >
+              <option value="">Assigned: All</option>
+              {assignees.map((user: any) => (
+                <option key={user._id} value={user._id}>
+                  {user.name}
+                </option>
+              ))}
+            </ResponsiveSelect>
+          </div>
+
+          {/* Org Type */}
+          <div className="w-[150px]">
+            <ResponsiveSelect
+              className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-sm"
+              value={orgTypeFilter}
+              onChange={(e) => setOrgTypeFilter(e.target.value)}
+            >
+              <option value="">Org Type: All</option>
+              {["school", "junior_college", "engineering", "coaching", "diploma", "other"].map((type) => (
+                <option key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " ")}
+                </option>
+              ))}
+            </ResponsiveSelect>
+          </div>
+
+          {/* Date picker */}
+          <div className="w-[180px] max-w-[180px] overflow-hidden relative">
+            <NikhilTimeCalendar
+              value={dateFrom}
+              onChange={setDateFrom}
+              placeholder="Select Date"
+              popDirection="down"
+              showTime={false}
+              className="h-9 w-full pr-8"
+            />
+            {dateFrom && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setDateFrom(undefined); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 p-0.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-accent bg-background"
+                title="Clear date"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Status */}
+          <div className="w-[150px]">
+            <ResponsiveSelect
+              className="flex h-9 w-full items-center rounded-md border border-border bg-transparent px-3 py-1 shadow-sm hover:bg-accent/50 transition-colors text-sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">Status: All</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="demo_scheduled">Demo Scheduled</option>
+              <option value="demo_completed">Demo Completed</option>
+              <option value="demo_no_show">No Show</option>
+              <option value="converted">Provisioned</option>
+              <option value="lost">Lost</option>
+            </ResponsiveSelect>
+          </div>
+        </SuperadminFilterBar>
       </div>
 
       {/* Leads List */}
