@@ -50,7 +50,7 @@ export function SuperadminFilterBar({
   children,
 }: SuperadminFilterBarProps) {
   return (
-    <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 mb-6">
+    <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
       {/* Search Input */}
       <div className="relative w-full xl:w-[240px] shrink-0">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
