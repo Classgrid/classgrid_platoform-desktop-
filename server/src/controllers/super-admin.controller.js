@@ -354,6 +354,11 @@ export const upsertFeatureFlag = async (req, res) => {
             { upsert: true, returnDocument: 'after' }
         );
 
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("platform_feature_flags_updated");
+        }
+
         res.json({ success: true, message: `Feature flag "${key}" updated`, flag });
     } catch (err) {
         console.error("[SuperAdmin] Feature flag error:", err.message);
@@ -370,6 +375,11 @@ export const toggleFeatureFlag = async (req, res) => {
         flag.isEnabled = !flag.isEnabled;
         flag.lastModifiedBy = req.user._id;
         await flag.save();
+
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("platform_feature_flags_updated");
+        }
 
         res.json({
             success: true,
