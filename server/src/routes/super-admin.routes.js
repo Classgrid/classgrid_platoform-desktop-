@@ -2527,12 +2527,12 @@ router.patch("/leads/:id/notes", async (req, res) => {
                 const assignee = await mongoose.model('User').findById(assignedTo).select('name email');
                 if (assignee) {
                     const { sendDemoLeadAssignedNotification } = await import("../services/notification-email.service.js");
-                    await sendDemoLeadAssignedNotification({
+                    sendDemoLeadAssignedNotification({
                         demoRequest: lead,
                         assignee: assignee,
                         assigner: req.user,
                         notifySuperAdmin: true
-                    });
+                    }).catch(e => console.error("Assignment email async error:", e.message));
                 }
             } catch (e) {
                 console.error("Failed to send manual assignment notification:", e.message);
@@ -2542,13 +2542,16 @@ router.patch("/leads/:id/notes", async (req, res) => {
         // Check if isOrganizationVetted was just set to true by Nikhil
         if (isOrganizationVetted === true && oldLead && !oldLead.isOrganizationVetted) {
             try {
-                if (lead.assignedTo && req.user?.email?.toLowerCase() === "nikhil.shinde@classgrid.in") {
+                // If Nikhil is approving his OWN assigned lead, do not send the email
+                const isSelfApprove = lead.assignedTo && req.user?._id?.toString() === lead.assignedTo._id?.toString();
+                
+                if (lead.assignedTo && req.user?.email?.toLowerCase() === "nikhil.shinde@classgrid.in" && !isSelfApprove) {
                     const { sendVettingApprovedNotification } = await import("../services/notification-email.service.js");
-                    await sendVettingApprovedNotification({
+                    sendVettingApprovedNotification({
                         demoRequest: lead,
                         assignee: lead.assignedTo,
                         approver: req.user
-                    });
+                    }).catch(e => console.error("Vetting email async error:", e.message));
                 }
             } catch (e) {
                 console.error("Failed to send vetting approved notification:", e.message);
