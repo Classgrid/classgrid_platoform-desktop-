@@ -98,10 +98,10 @@ const organizationSchema = new mongoose.Schema(
         },
         custom_domain: {
             domain: { type: String, default: null },
-            status: { 
-                type: String, 
-                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"], 
-                default: "pending_verification" 
+            status: {
+                type: String,
+                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"],
+                default: "pending_verification"
             },
             verification_token: { type: String, default: null },
             txt_verified: { type: Boolean, default: false },
@@ -114,10 +114,10 @@ const organizationSchema = new mongoose.Schema(
         },
         erp_domain: {
             domain: { type: String, default: null },
-            status: { 
-                type: String, 
-                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"], 
-                default: "pending_verification" 
+            status: {
+                type: String,
+                enum: ["pending_verification", "verified_with_conflicts", "verified", "active", "failed"],
+                default: "pending_verification"
             },
             verification_token: { type: String, default: null },
             txt_verified: { type: Boolean, default: false },
@@ -396,7 +396,7 @@ const organizationSchema = new mongoose.Schema(
             enrollment_config: {
                 editable_until: { type: Date, default: null } // Lock applications after this date
             },
-            
+
             // Edge Case 7: Multi-Round Admission (Non-CET)
             admission_round: {
                 current_round: { type: Number, default: 1 },
@@ -425,10 +425,10 @@ const organizationSchema = new mongoose.Schema(
             // 2. ⚖️ Tie-Breaking Rules (When % is same)
             tie_breaker_rules: [{
                 priority: { type: Number, required: true }, // 1, 2, 3
-                criteria: { 
-                    type: String, 
-                    enum: ["math_marks", "science_marks", "english_marks", "date_of_birth"], 
-                    required: true 
+                criteria: {
+                    type: String,
+                    enum: ["math_marks", "science_marks", "english_marks", "date_of_birth"],
+                    required: true
                 },
                 order: { type: String, enum: ["desc", "asc"], default: "desc" } // Desc = higher marks win, Asc = older dob wins
             }],
@@ -448,13 +448,13 @@ const organizationSchema = new mongoose.Schema(
                 require_admin_document_verification: { type: Boolean, default: false },
 
                 // E.g., Engineering CET flow = "post_allotment_pre_fee", Standard Colloge = "post_fee"
-                prn_generation: { 
-                    type: String, 
-                    enum: ["post_allotment_pre_fee", "post_fee_payment"], 
-                    default: "post_fee_payment" 
+                prn_generation: {
+                    type: String,
+                    enum: ["post_allotment_pre_fee", "post_fee_payment"],
+                    default: "post_fee_payment"
                 },
                 login_credential_dispatch: {
-                    type: String, 
+                    type: String,
                     enum: ["with_allotment_email", "post_fee_payment"],
                     default: "post_fee_payment"
                 }
@@ -490,10 +490,10 @@ const organizationSchema = new mongoose.Schema(
                 custom_fields: [{
                     field_key: { type: String, required: true },        // e.g. "transport_route"
                     field_label: { type: String, required: true },      // e.g. "Preferred Bus Route"
-                    field_type: { 
-                        type: String, 
-                        enum: ["text", "number", "date", "dropdown", "boolean", "file"], 
-                        required: true 
+                    field_type: {
+                        type: String,
+                        enum: ["text", "number", "date", "dropdown", "boolean", "file"],
+                        required: true
                     },
                     options: [{ type: String }],                        // For dropdown options
                     is_required: { type: Boolean, default: false },
@@ -622,14 +622,14 @@ const organizationSchema = new mongoose.Schema(
         },
         // 🏫 Affiliation — e.g. "Savitribai Phule Pune University", "Mumbai University"
         affiliation: {
-    type: String,
-    default: "",
-  },
-  registration_number: {
-    type: String,
-    trim: true,
-    default: "",
-  },
+            type: String,
+            default: "",
+        },
+        registration_number: {
+            type: String,
+            trim: true,
+            default: "",
+        },
         // 💰 Per-Org Razorpay Keys — for STUDENT FEE PAYMENTS (money goes to college)
         // Separate from platform subscription keys (razorpayCustomerId etc)
         fees_razorpay_key_id: {

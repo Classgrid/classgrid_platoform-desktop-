@@ -33,15 +33,36 @@
  * ─────────────────────────────────────────────────────────
  */
 
+import React, { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { getLoginPathForPath, getRedirectPath, isInstitutionAdminRole } from "../auth-helpers";
 import { useCurrentUser } from "../queries/useCurrentUser";
 import { PresenceProvider } from "@/features/chat/context/PresenceContext";
+import { apiClient } from "@/lib/apiClient";
 
 export function RequireAuth() {
   const location = useLocation();
   const { data: user, isLoading, isFetching } = useCurrentUser();
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const path = location.pathname;
+
+  useEffect(() => {
+    if (user?.isProvisional && !isFinalizing && path.includes("/admin/dashboard")) {
+      setIsFinalizing(true);
+      apiClient.post("/api/auth/finalize-onboarding", { token: localStorage.getItem("token") })
+        .then(res => {
+          if (res.data?.token) {
+            localStorage.setItem("token", res.data.token);
+          }
+          window.location.reload();
+        })
+        .catch(err => {
+          console.error("Failed to finalize onboarding", err);
+          window.location.href = "/admin/login";
+        });
+    }
+  }, [user, path, isFinalizing]);
 
   // If there's an SSO token in the URL, we must wait for the fetch to complete 
   // even if React Query has a cached 'null' user from a previous session.
@@ -49,8 +70,15 @@ export function RequireAuth() {
                       (new URLSearchParams(window.location.search).has("sso_token") || 
                        new URLSearchParams(window.location.search).has("token"));
                       
-  if (isLoading || (hasSsoToken && isFetching)) {
-    return null;
+  if (isLoading || (hasSsoToken && isFetching) || isFinalizing) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground text-sm font-medium">Finalizing your account setup...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {

@@ -70,6 +70,7 @@ router.post("/signup-complete", authController.completeSignup);
 router.post("/check-admin-status", authController.checkAdminStatus);
 router.post("/validate-activation-token", authController.validateActivationToken);
 router.post("/activate-admin", authController.activateAdmin);
+router.post("/finalize-onboarding", authController.finalizeOnboarding);
 router.post("/resend-activation", authController.resendActivation);
 router.post("/manual-activation-link", authController.resolveManualActivationLink);
 

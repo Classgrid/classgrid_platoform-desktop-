@@ -75,6 +75,23 @@ export const isAuthenticated = async (req, res, next) => {
         const { default: SystemSettings } = await import("../models/SystemSettings.js");
         const settings = await SystemSettings.findOne();
 
+        if (decoded.isProvisional) {
+            // Strictly limit what endpoints a provisional token can access.
+            // Basically just /api/auth/me 
+            if (req.originalUrl !== "/api/auth/me") {
+                return res.status(403).json({ message: "Provisional tokens cannot access this endpoint." });
+            }
+            req.user = {
+                _id: decoded.id,
+                role: decoded.role,
+                organization_id: decoded.orgId,
+                email: decoded.email,
+                isProvisional: true
+            };
+            req.effectiveOrganizationId = decoded.orgId;
+            return next();
+        }
+
         if (decoded.impersonation) {
             // ── IMPERSONATION MODE ──
             // Single DB fetch: only load the user being acted as

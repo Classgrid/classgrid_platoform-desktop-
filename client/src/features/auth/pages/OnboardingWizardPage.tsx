@@ -1147,6 +1147,73 @@ export function OnboardingWizardPage() {
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      // --- GLOBAL VALIDATION ---
+      const welcomeStepIndex = steps.findIndex(s => s.id === "welcome");
+      if (welcomeStepIndex !== -1 && !adminName.trim()) {
+        setCurrentStep(welcomeStepIndex);
+        showAlert("Please enter your name to continue.");
+        return;
+      }
+      if (!password || !isStrongPassword || !isPasswordMatch) {
+        setCurrentStep(passwordStepIndex);
+        showAlert("Please enter a valid, matching, strong password to continue.");
+        return;
+      }
+      const contactStepIndex = steps.findIndex(s => s.id === "contact_verification");
+      if (contactStepIndex !== -1 && (!isEmailVerified || !isPhoneVerified)) {
+        setCurrentStep(contactStepIndex);
+        showAlert("Please verify both your email and phone number to continue.");
+        return;
+      }
+      const personalStepIndex = steps.findIndex(s => s.id === "personal_details");
+      if (personalStepIndex !== -1) {
+        const pd = formData["personal_details"] || {};
+        const pFirstName = pd.first_name || (fetchedName ? fetchedName.split(" ")[0] : "");
+        const pLastName = pd.last_name || (fetchedName && fetchedName.split(" ").length > 1 ? fetchedName.split(" ").slice(1).join(" ") : "");
+        if (!pFirstName.trim() || !pLastName.trim()) {
+          setCurrentStep(personalStepIndex);
+          showAlert("First Name and Last Name are required.");
+          return;
+        }
+        if (!username || !usernameAvailable) {
+          setCurrentStep(personalStepIndex);
+          showAlert("A valid and available username is required.");
+          return;
+        }
+      }
+      const orgVerStepIndex = steps.findIndex(s => s.id === "org_verification");
+      if (orgVerStepIndex !== -1 && (!isOrgEmailVerified || !isOrgPhoneVerified)) {
+        setCurrentStep(orgVerStepIndex);
+        showAlert("Please verify both the official organization contact email and phone number.");
+        return;
+      }
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].type === "dynamic") {
+          const section = dynamicSections.find(s => s.key === steps[i].id);
+          if (section && section.fields) {
+            for (const field of section.fields) {
+              if (field.dependsOn) {
+                const parentKey = field.dependsOn.field.split('.').pop()!;
+                if (formData[section.key]?.[parentKey] !== field.dependsOn.value) continue;
+              }
+              const val = formData[section.key]?.[field.key];
+              if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) {
+                setCurrentStep(i);
+                showAlert(`Please fill out the "${field.label}" field to continue.`);
+                return;
+              }
+            }
+          }
+        }
+      }
+      if (!acceptedTerms) {
+        const reviewStepIndex = steps.findIndex(s => s.id === "review_submit");
+        setCurrentStep(reviewStepIndex !== -1 ? reviewStepIndex : steps.length - 1);
+        showAlert("Please accept the Terms of Service and Privacy Policy to continue.");
+        return;
+      }
+      // --- END GLOBAL VALIDATION ---
+
       console.log("FINAL SUBMITTED PROFILE DATA:", formData);
       setIsSubmitting(true);
       try {
@@ -2589,7 +2656,7 @@ export function OnboardingWizardPage() {
                           className="mt-1 h-5 w-5 rounded border-primary text-primary focus:ring-primary bg-background cursor-pointer"
                         />
                         <label htmlFor="terms-checkbox" className="text-sm text-foreground leading-relaxed cursor-pointer select-none">
-                          I confirm that all details provided are accurate and official. I agree to the <a href="https://classgrid.in/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="https://classgrid.in/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
+                          I confirm that all details provided are accurate and official. I agree to the <a href="https://classgrid.in/legal/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="https://classgrid.in/legal/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
                         </label>
                       </div>
                     </div>
