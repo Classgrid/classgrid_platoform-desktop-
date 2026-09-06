@@ -240,20 +240,6 @@ export function OrganizationsPage() {
                 <Plus className="size-4" />
                 Onboard New Org
               </Link>
-            </Button>
-          </>
-        }
-      />
-
-      <SectionPanel
-        title="Organizations"
-        description="Search, inspect, and manage provisioned institutions."
-        noPadding
-      >
-        <SuperadminFilterBar
-          searchQuery={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search name, owner, plan..."
         >
           {/* Org Name */}
           <div className="w-[150px]">
