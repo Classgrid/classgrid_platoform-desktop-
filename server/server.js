@@ -88,9 +88,13 @@ process.on("unhandledRejection", (reason, promise) => {
 // 🚀  Start Server (Native Socket.io via Redis Adapter)
 // ─────────────────────────────────────────────────────────
 import { initSocket } from "./src/services/socket.service.js";
+import { initLeadStream } from "./src/services/lead-stream.service.js";
 
 // Initialize socket on our HTTP server
 initSocket(server);
+
+// Initialize MongoDB Change Streams for real-time updates
+initLeadStream();
 
 server.listen(PORT, () => {
   console.log(`🔥 Server running at http://localhost:${PORT} (Socket.io Native)`);

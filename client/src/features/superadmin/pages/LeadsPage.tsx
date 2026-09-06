@@ -33,7 +33,7 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ClipboardList, CheckCircle, CalendarClock,
@@ -47,7 +47,7 @@ import { Input } from "@/components/marketing_ui/input";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { useLeads, useAssignLead } from "../queries/useLeads";
 import type { Lead } from "../services/superAdminApi";
-import { RefreshButton } from "@/components/marketing_ui/refresh-button";
+import { getSocket } from "@/lib/socketClient";
 
 import { LeadTable } from "../components/LeadTable";
 
@@ -60,6 +60,20 @@ export function LeadsPage() {
 
   const [search, setSearch] = useState("");
   const [assigningId, setAssigningId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    // Listen for DemoRequest changes emitted by our MongoDB change stream
+    socket.on("superadmin:leads_updated", () => {
+      refetch();
+    });
+
+    return () => {
+      socket.off("superadmin:leads_updated");
+    };
+  }, [refetch]);
 
   const leads = data?.leads ?? [];
 
@@ -103,9 +117,6 @@ export function LeadsPage() {
           <p className="text-sm text-muted-foreground">
             Manage inbound demo requests. Click any row to read details and provision.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <RefreshButton onClick={() => refetch()} isFetching={isFetching} />
         </div>
       </div>
 

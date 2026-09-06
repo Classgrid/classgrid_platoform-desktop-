@@ -58,10 +58,11 @@ import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 import { toast } from "sonner";
 import { SandboxProvisioningWizard } from "../components/SandboxProvisioningWizard";
 import RichReplyEditor from "@/app/support/components/RichReplyEditor";
+import { getSocket } from "@/lib/socketClient";
 
 export function LeadDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading } = useLeads();
+  const { data, isLoading, refetch } = useLeads();
   const { data: usersData } = useAllUsers();
   const { data: user } = useCurrentUser();
   const scheduleMutation = useScheduleMeeting();
@@ -114,6 +115,19 @@ export function LeadDetailsPage() {
     }
     return () => setBreadcrumbs([]);
   }, [setBreadcrumbs, lead, id]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.on("superadmin:leads_updated", () => {
+      refetch();
+    });
+
+    return () => {
+      socket.off("superadmin:leads_updated");
+    };
+  }, [refetch]);
 
   useEffect(() => {
     const meetDate = lead?.meetingScheduledAt || lead?.scheduledAt;
