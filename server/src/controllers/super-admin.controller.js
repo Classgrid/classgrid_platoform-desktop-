@@ -1339,6 +1339,49 @@ export const regenerateLeadActivation = async (req, res) => {
         const ONBOARDING_URL = process.env.NODE_ENV === "production" ? "https://onboard.classgrid.in" : "http://onboard.localhost:5173";
         const activationLink = `${ONBOARDING_URL}/?token=${credentials.rawActivationToken}`;
 
+        // Send activation email to admin
+        try {
+            const { sendEmail } = await import("../services/aws-ses.service.js");
+            const { getConsolidatedApprovalEmailHtml, getConsolidatedApprovalEmailPlainText } = await import("../services/email-templates.service.js");
+
+            const activationDate = new Date();
+            const expiryDate = org.demoExpiresAt || new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
+            const allocatedDashboards = lead.allocatedDashboards || [];
+
+            await sendEmail({
+                to: org.pending_admin.email,
+                subject: "Activate Your Classgrid Admin Account",
+                fromName: "Nikhil Shinde | Classgrid CEO",
+                fromEmail: "nikhil.shinde@classgrid.in",
+                html: getConsolidatedApprovalEmailHtml({
+                    adminName: org.pending_admin.name || lead.adminName,
+                    orgName: org.name,
+                    subdomain: org.subdomain,
+                    activationLink,
+                    activationCode: credentials.activationCode,
+                    activationDate,
+                    expiryDate,
+                    sandboxDuration: 31,
+                    allocatedDashboards,
+                }),
+                text: getConsolidatedApprovalEmailPlainText({
+                    adminName: org.pending_admin.name || lead.adminName,
+                    orgName: org.name,
+                    subdomain: org.subdomain,
+                    activationLink,
+                    activationCode: credentials.activationCode,
+                    activationDate,
+                    expiryDate,
+                    sandboxDuration: 31,
+                    allocatedDashboards,
+                }),
+                organizationId: org._id,
+            });
+        } catch (emailErr) {
+            console.error("[SuperAdmin] regenerateLeadActivation email error:", emailErr.message);
+            // Don't fail the whole request if email fails — still return the link
+        }
+
         res.json({
             success: true,
             activation: {
