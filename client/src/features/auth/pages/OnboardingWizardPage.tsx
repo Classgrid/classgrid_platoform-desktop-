@@ -1663,7 +1663,7 @@ export function OnboardingWizardPage() {
                               <Input
                                 placeholder="e.g. John"
                                 className="h-10"
-                                value={formData["personal_details"]?.["first_name"] || (fetchedName ? fetchedName.split(" ")[0] : "")}
+                                value={formData["personal_details"]?.["first_name"] ?? (fetchedName ? fetchedName.split(" ")[0] : "")}
                                 onChange={(e) => handleFieldChange("personal_details", "first_name", e.target.value)}
                               />
                             </div>
@@ -1672,7 +1672,7 @@ export function OnboardingWizardPage() {
                               <Input
                                 placeholder="e.g. Doe"
                                 className="h-10"
-                                value={formData["personal_details"]?.["last_name"] || (fetchedName && fetchedName.split(" ").length > 1 ? fetchedName.split(" ").slice(1).join(" ") : "")}
+                                value={formData["personal_details"]?.["last_name"] ?? (fetchedName && fetchedName.split(" ").length > 1 ? fetchedName.split(" ").slice(1).join(" ") : "")}
                                 onChange={(e) => handleFieldChange("personal_details", "last_name", e.target.value)}
                               />
                             </div>
