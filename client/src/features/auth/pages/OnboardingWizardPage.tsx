@@ -390,7 +390,8 @@ export function OnboardingWizardPage() {
 
   // Phone Verification Handlers
   const handleSendOrgPhoneOtp = async () => {
-    if (!orgPhone || orgPhone.length < 10) {
+    const phoneRegex = /^[0-9+\-\s()]+$/;
+    if (!orgPhone || orgPhone.length < 8 || !phoneRegex.test(orgPhone)) {
       showAlert("Please enter a valid official org phone number.");
       return;
     }
@@ -569,7 +570,7 @@ export function OnboardingWizardPage() {
   const cityOptions = useMemo(() => getCitiesForState(selectedState, selectedDistrict), [selectedState, selectedDistrict]);
 
   const boardOptions = useMemo(() => {
-    const defaultBoards = ['CBSE', 'ICSE', 'State Board', 'IB (International Baccalaureate)', 'IGCSE / Cambridge', 'None'];
+    const defaultBoards: string[] = [];
     const erpList = ((erpData as any).erpboardlist || [])
       .map((item: any) => (typeof item === 'object' ? (item.name || item.board) : item))
       .filter(Boolean);
@@ -577,7 +578,7 @@ export function OnboardingWizardPage() {
   }, []);
 
   const universityOptions = useMemo(() => {
-    const defaultUnis = ['Not Applicable'];
+    const defaultUnis: string[] = [];
     const erpList = ((erpData as any).erpuniversitylist || [])
       .map((item: any) => (typeof item === 'object' ? (item.name || item.university) : item))
       .filter(Boolean);
@@ -852,8 +853,8 @@ export function OnboardingWizardPage() {
                   district: (currentOrg.district && currentOrg.district !== "") ? currentOrg.district : (res.district || ""),
                   taluka: (currentOrg.taluka && currentOrg.taluka !== "") ? currentOrg.taluka : (res.taluka || ""),
                   website: (currentOrg.website && currentOrg.website !== "") ? currentOrg.website : (res.website || ""),
-                  board: currentOrg.board || "CBSE",
-                  university: currentOrg.university || "Not Applicable",
+                  board: currentOrg.board || "",
+                  university: currentOrg.university || "",
                 }
               };
             });
@@ -2049,33 +2050,35 @@ export function OnboardingWizardPage() {
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-semibold block mb-1.5">Board & Affiliation</label>
+                            <label className="text-sm font-semibold block mb-1.5">Board & Affiliation <span className="text-danger">*</span></label>
                             <ResponsiveSelect
                               className="w-full h-10 rounded-lg border-input bg-background"
-                              value={formData["org_details"]?.["board"] || "CBSE"}
+                              value={formData["org_details"]?.["board"] || ""}
                               onChange={(e) => handleFieldChange("org_details", "board", e.target.value)}
-                              fieldState={formData["org_details"]?.["board"] && formData["org_details"]?.["board"] !== "CBSE" ? "normal" : "default"}
+                              fieldState={formData["org_details"]?.["board"] ? "normal" : "default"}
                             >
+                              <option value="" disabled>Select Board</option>
                               {boardOptions.map((boardName: string) => (
                                 <option key={boardName} value={boardName}>{boardName}</option>
                               ))}
                             </ResponsiveSelect>
                           </div>
                           <div>
-                            <label className="text-sm font-semibold block mb-1.5">Affiliated University</label>
+                            <label className="text-sm font-semibold block mb-1.5">Affiliated University <span className="text-danger">*</span></label>
                             <ResponsiveSelect
                               className="w-full h-10 rounded-lg border-input bg-background"
-                              value={formData["org_details"]?.["university"] || "Not Applicable"}
+                              value={formData["org_details"]?.["university"] || ""}
                               onChange={(e) => handleFieldChange("org_details", "university", e.target.value)}
-                              fieldState={formData["org_details"]?.["university"] && formData["org_details"]?.["university"] !== "Not Applicable" ? "normal" : "default"}
+                              fieldState={formData["org_details"]?.["university"] ? "normal" : "default"}
                             >
+                              <option value="" disabled>Select University</option>
                               {universityOptions.map((uniName: string) => (
                                 <option key={uniName} value={uniName}>{uniName}</option>
                               ))}
                             </ResponsiveSelect>
                           </div>
                           <div>
-                            <label className="text-sm font-semibold block mb-1.5">Affiliation Registration Number</label>
+                            <label className="text-sm font-semibold block mb-1.5">Affiliation Registration Number <span className="text-danger">*</span></label>
                             <Input
                               value={formData["org_details"]?.["affiliation_number"] || ""}
                               onChange={(e) => handleFieldChange("org_details", "affiliation_number", e.target.value)}
@@ -2083,7 +2086,7 @@ export function OnboardingWizardPage() {
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-semibold block mb-1.5">Organization Short Name Code</label>
+                            <label className="text-sm font-semibold block mb-1.5">Organization Short Name Code <span className="text-danger">*</span></label>
                             <Input
                               value={formData["org_details"]?.["short_name"] || ""}
                               onChange={(e) => handleFieldChange("org_details", "short_name", e.target.value)}
@@ -2281,13 +2284,14 @@ export function OnboardingWizardPage() {
                             <div className="bg-secondary/30 p-6 rounded-2xl border border-border/80 space-y-4">
                               <label className="text-sm font-bold text-foreground flex items-center gap-2">
                                 <Smartphone className="size-4 text-primary" />
-                                <span>Official Organization Phone or Landline <span className="text-danger">*</span></span>
+                                <span>Official Organization Phone <span className="text-danger">*</span></span>
                               </label>
 
                               <div className="grid md:grid-cols-2 gap-6 items-start">
                                 <div>
                                   <div className="flex gap-2">
                                     <Input
+                                      type="tel"
                                       value={orgPhone}
                                       onChange={(e) => {
                                         setOrgPhone(e.target.value);
