@@ -848,53 +848,6 @@ export const getOrganizationDetail = async (req, res) => {
                 : undefined
         }));
 
-        // Provide dummy payload for sandbox organizations if data is missing, so Super Admin dashboard looks fully fleshed out
-        if (!org.academic_config || Object.keys(org.academic_config).length === 0) {
-            org.academic_config = {
-                identifierLabel: "PRN",
-                prnRequired: true,
-                prnLocked: false,
-                batches: ["2023-2027", "2024-2028"],
-                branches: ["Computer Engineering", "Information Technology", "Mechanical Engineering"],
-                idCardFields: ["prn", "blood_group", "dob", "emergency_contact"],
-            };
-        }
-        
-        if (!org.domain_verification || Object.keys(org.domain_verification).length === 0) {
-            org.domain_verification = {
-                customDomain: org.custom_domain || `portal.${org.subdomain || 'demo'}.edu.in`,
-                txtVerified: true,
-                cnameVerified: true,
-                tlsProvisioned: true,
-                verifiedAt: new Date().toISOString(),
-                status: "verified"
-            };
-            if (!org.custom_domain) org.custom_domain = `portal.${org.subdomain || 'demo'}.edu.in`;
-        }
-
-        if (!org.branding || Object.keys(org.branding).length === 0) {
-            org.branding = {
-                font_preference: "Inter",
-                tagline: "Empowering Next Generation Learning",
-                theme_colors: { primary: "#4a90f5", secondary: "#8b6fff", accent: "#f43f5e" }
-            };
-            if (!org.logo_url) org.logo_url = "https://classgrid.in/logo.png";
-            if (!org.favicon_url) org.favicon_url = "https://classgrid.in/favicon.ico";
-            if (!org.campus_photo_url) org.campus_photo_url = "https://classgrid.in/campus.jpg";
-        }
-
-        if (!org.admission_config || Object.keys(org.admission_config).length === 0) {
-            org.admission_config = {
-                student_facing_portal: { is_active: false },
-                merit_list: { published: false },
-                application_fee: { is_paid_process: false, amount: 0 },
-                maximum_applications_per_student: 1,
-                seat_matrix_policy: { enabled: true },
-                waitlist_and_deadlines: { waitlist_enabled: true, auto_promote_waitlist: false },
-                workflow_execution: { prn_generation: "post_fee_payment" }
-            };
-        }
-
         res.json({
             success: true,
             data: {
