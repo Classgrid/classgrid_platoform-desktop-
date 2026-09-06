@@ -165,27 +165,27 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         icon={<Settings2 className="h-5 w-5" aria-hidden="true" />}
       >
         <div className="flex flex-wrap gap-3 mt-4">
-          <Button variant="secondary" className="cursor-pointer" asChild>
+          <Button variant="outline" className="cursor-pointer" asChild>
             <Link to={`/superadmin/detail/${profile?._id}/hierarchy`}>
               View Academic Hierarchy
             </Link>
           </Button>
-          <Button variant="secondary" className="cursor-pointer" asChild>
+          <Button variant="outline" className="cursor-pointer" asChild>
             <Link to={`/superadmin/detail/${profile?._id}/staff`}>
               View Faculty Imported
             </Link>
           </Button>
-          <Button variant="secondary" className="cursor-pointer" asChild>
+          <Button variant="outline" className="cursor-pointer" asChild>
             <Link to={`/superadmin/detail/${profile?._id}/students`}>
               View Students Imported
             </Link>
           </Button>
-          <Button variant="secondary" className="cursor-pointer" asChild>
+          <Button variant="outline" className="cursor-pointer" asChild>
             <Link to={`/superadmin/detail/${profile?._id}/fees`}>
               View Fee Structure
             </Link>
           </Button>
-          <Button variant="secondary" className="cursor-pointer" asChild>
+          <Button variant="outline" className="cursor-pointer" asChild>
             <Link to={`/superadmin/detail/${profile?._id}/admission`}>
               View Admission Form
             </Link>

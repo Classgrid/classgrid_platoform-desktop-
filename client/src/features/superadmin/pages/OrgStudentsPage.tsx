@@ -99,9 +99,7 @@ export function OrgStudentsPage() {
       {/* Header */}
       <div className="flex flex-col gap-1">
         <div className="text-sm font-medium text-muted-foreground mb-1">
-          <Link to={`/superadmin/detail/${id}`} className="hover:text-foreground transition-colors cursor-pointer">
-            Super Admin Dashboard
-          </Link>
+          <Link to={`/superadmin/detail/${id}`} className="hover:text-foreground transition-colors cursor-pointer">Back to Organization</Link>
           <span className="mx-2 text-muted-foreground/50">/</span>
           <span className="text-foreground">Students Audit</span>
         </div>
