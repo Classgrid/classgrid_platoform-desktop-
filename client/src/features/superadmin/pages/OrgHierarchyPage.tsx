@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, GraduationCap, Users, LayoutDashboard, Layers, Activity } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
-import { Spinner } from "@/components/marketing_ui/spinner";
+import { Skeleton } from "@/components/marketing_ui/skeleton";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/marketing_ui/table";
@@ -64,8 +64,15 @@ export function OrgHierarchyPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
-        <Spinner size="lg" />
+      <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+        <Skeleton className="h-20 w-full rounded-xl" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+        </div>
+        <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
     );
   }
@@ -91,10 +98,14 @@ export function OrgHierarchyPage() {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="h-8 w-8 p-0">
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
+      <div className="flex flex-col gap-1">
+        <div className="text-sm font-medium text-muted-foreground mb-1">
+          <Link to={`/superadmin/detail/${id}`} className="hover:text-foreground transition-colors cursor-pointer">
+            Super Admin Dashboard
+          </Link>
+          <span className="mx-2 text-muted-foreground/50">/</span>
+          <span className="text-foreground">Academic Hierarchy Audit</span>
+        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Layers className="h-6 w-6 text-primary" />
