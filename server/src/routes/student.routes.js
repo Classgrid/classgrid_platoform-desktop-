@@ -582,8 +582,9 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
 
     for (const s of students) {
       try {
-        if (!s.name || !s.email) {
-          results.errors.push({ email: s.email, reason: 'Name and email are required.' });
+        const fullName = s.name ? s.name.trim() : `${s.first_name || ''} ${s.last_name || ''}`.trim();
+        if (!fullName || !s.email) {
+          results.errors.push({ email: s.email, reason: 'Name (or First/Last name) and email are required.' });
           results.skipped++;
           continue;
         }
@@ -611,11 +612,12 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
         const hashedPass = await bcryptModule.default.hash('classgrid@123', 10);
 
         user = await User.create({
-          name: s.name.trim(),
+          name: fullName,
           email: s.email.toLowerCase().trim(),
           password: hashedPass,
           role: 'student',
           organization_id: orgId,
+          phone: s.phone || s.phone_number || null,
           prn: s.prn?.trim().toUpperCase() || null,
           branch: s.branch || null,
           batch: s.batch || null,
