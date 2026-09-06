@@ -33,7 +33,8 @@
  * ─────────────────────────────────────────────────────────
  */
 
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { CheckCircle2, Palette, Settings2, SlidersHorizontal, Edit2, Zap, Trash2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { organizationControlCenterApi } from "../../services/organizationControlCenterApi";
@@ -108,12 +109,12 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2 items-start">
+    <div className="flex flex-col gap-6">
       <OrgSectionCard
         title="Business Lifecycle & Billing"
         description="Manage the sandbox expiry, active production status, and deletion."
         icon={<ShieldAlert className="h-5 w-5" aria-hidden="true" />}
-        className="xl:col-span-2 border-primary/20 bg-primary/5"
+        className="border-primary/20 bg-primary/5"
       >
         <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
           <dl className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
@@ -155,51 +156,41 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         </div>
       </OrgSectionCard>
 
-
-      <OrgSectionCard
+      <div className="grid gap-6 xl:grid-cols-2 items-start">
+        {/* Left Column Group */}
+        <div className="flex flex-col gap-6 w-full">
+          <OrgSectionCard
         title="Configuration Data & Deep Dives"
         description="View live, detailed data for this organization's core modules."
         icon={<Settings2 className="h-5 w-5" aria-hidden="true" />}
       >
         <div className="flex flex-wrap gap-3 mt-4">
-          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/hierarchy`, "_blank")}>
-            View Academic Hierarchy
+          <Button variant="secondary" className="cursor-pointer" asChild>
+            <Link to={`/superadmin/detail/${profile?._id}/hierarchy`}>
+              View Academic Hierarchy
+            </Link>
           </Button>
-          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/staff`, "_blank")}>
-            View Faculty Imported
+          <Button variant="secondary" className="cursor-pointer" asChild>
+            <Link to={`/superadmin/detail/${profile?._id}/staff`}>
+              View Faculty Imported
+            </Link>
           </Button>
-          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/students`, "_blank")}>
-            View Students Imported
+          <Button variant="secondary" className="cursor-pointer" asChild>
+            <Link to={`/superadmin/detail/${profile?._id}/students`}>
+              View Students Imported
+            </Link>
           </Button>
-          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/fees`, "_blank")}>
-            View Fee Structure
+          <Button variant="secondary" className="cursor-pointer" asChild>
+            <Link to={`/superadmin/detail/${profile?._id}/fees`}>
+              View Fee Structure
+            </Link>
           </Button>
-          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/admission`, "_blank")}>
-            View Admission Form
+          <Button variant="secondary" className="cursor-pointer" asChild>
+            <Link to={`/superadmin/detail/${profile?._id}/admission`}>
+              View Admission Form
+            </Link>
           </Button>
         </div>
-      </OrgSectionCard>
-
-      <OrgSectionCard
-        title="Feature flags"
-        description="Every organization feature flag currently returned by the backend."
-        icon={<SlidersHorizontal className="h-5 w-5" aria-hidden="true" />}
-        action={<EditModulesModal profile={profile} orgId={profile?._id as string} />}
-      >
-        {featureFlags.length > 0 ? (
-          <div className="grid gap-2 sm:grid-cols-2">
-            {featureFlags.map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 shadow-sm transition-all hover:bg-muted/40">
-                <span className="text-sm font-medium text-foreground truncate min-w-0 flex-1" title={humanizeKey(key)}>{humanizeKey(key)}</span>
-                <Badge variant={value ? "success" : "neutral"} className="shrink-0 text-[11px] px-2 py-0.5 font-semibold tracking-wide">
-                  {formatBoolean(value)}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Feature flags are unavailable from the backend response.</p>
-        )}
       </OrgSectionCard>
 
       <OrgSectionCard
@@ -233,12 +224,38 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
           <OrgDataRow label="PRN generation" value={humanizeKey(admissionConfig?.workflow_execution?.prn_generation)} />
         </dl>
       </OrgSectionCard>
+      </div>
+
+      {/* Right Column Group */}
+      <div className="flex flex-col gap-6 w-full">
+        <OrgSectionCard
+        title="Feature flags"
+        description="Every organization feature flag currently returned by the backend."
+        icon={<SlidersHorizontal className="h-5 w-5" aria-hidden="true" />}
+        action={<EditModulesModal profile={profile} orgId={profile?._id as string} />}
+      >
+        {featureFlags.length > 0 ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {featureFlags.map(([key, value]) => (
+              <div key={key} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 shadow-sm transition-all hover:bg-muted/40">
+                <span className="text-sm font-medium text-foreground truncate min-w-0 flex-1" title={humanizeKey(key)}>{humanizeKey(key)}</span>
+                <Badge variant={value ? "success" : "neutral"} className="shrink-0 text-[11px] px-2 py-0.5 font-semibold tracking-wide">
+                  {formatBoolean(value)}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Feature flags are unavailable from the backend response.</p>
+        )}
+      </OrgSectionCard>
+      </div>
+      </div>
 
       <OrgSectionCard
         title="Branding"
         description="Visual settings returned by the organization record."
         icon={<Palette className="h-5 w-5" aria-hidden="true" />}
-        className="xl:col-span-2"
       >
         <div className="grid gap-6 lg:grid-cols-2">
           <dl>
