@@ -263,7 +263,7 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
           sandboxDuration: 31,
           allocatedDashboards,
         }),
-        userId: admin._id,
+        userId: actorUserId || null, // No admin user created yet during provisioning
         organizationId: organization._id,
       });
     } catch (emailError) {
@@ -275,12 +275,12 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
     await trackOnboardingEvent({
       organizationId: organization._id,
       demoRequestId: lead._id,
-      userId: actorUserId || admin._id,
+      userId: actorUserId || null,
       eventType: "lead_provisioned",
       stage: "provisioned",
       actorRole: "super_admin",
       metadata: {
-        adminEmail: admin.email,
+        adminEmail: provisioned.admin.email,
         plan,
         warnings,
       },
@@ -289,7 +289,7 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
     return {
       demoRequestId: lead._id,
       organization,
-      admin,
+      admin: provisioned.admin, // {name, email, phone} — no User _id yet
       subscription: provisioned.subscription,
       warnings,
       activation: {
