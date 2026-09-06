@@ -578,6 +578,8 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
     }
 
     const sb = getChatSb();
+    const bcryptModule = await import('bcryptjs');
+    const hashedPass = await bcryptModule.default.hash('classgrid@123', 10);
     const results = { created: 0, skipped: 0, errors: [] };
 
     for (const s of students) {
@@ -608,8 +610,6 @@ router.post('/batch-import', isAuthenticated, async (req, res) => {
         }
 
         // Create new user in MongoDB
-        const bcryptModule = await import('bcryptjs');
-        const hashedPass = await bcryptModule.default.hash('classgrid@123', 10);
 
         user = await User.create({
           name: fullName,

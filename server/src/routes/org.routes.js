@@ -460,7 +460,7 @@ router.post("/invite-staff", isAuthenticated, requireRole("org_admin"), async (r
         const activationToken = crypto.randomBytes(32).toString('hex');
         const activationExpiry = new Date(Date.now() + 7 * 60 * 60 * 1000); // 7 hours — single-use
         newUser.activationToken = activationToken;
-        newUser.activationTokenExpiry = activationExpiry;
+        newUser.activationTokenExpires = activationExpiry;
         newUser.activationUsedAt = null; // Ensure single-use tracking is clear
         await newUser.save();
 
@@ -858,7 +858,7 @@ router.post("/members/:userId/resend", isAuthenticated, requireRole("org_admin")
         // Regenerate 7-hour single-use activation token
         const activationToken = crypto.randomBytes(32).toString('hex');
         user.activationToken = activationToken;
-        user.activationTokenExpiry = new Date(Date.now() + 7 * 60 * 60 * 1000); // 7 hours
+        user.activationTokenExpires = new Date(Date.now() + 7 * 60 * 60 * 1000); // 7 hours
         user.activationUsedAt = null; // Reset single-use tracker
         await user.save();
 
@@ -1546,7 +1546,7 @@ router.post("/resend-invite", isAuthenticated, requireRole("org_admin"), async (
         // Regenerate 7-hour single-use activation token
         const activationToken = crypto.randomBytes(32).toString('hex');
         user.activationToken = activationToken;
-        user.activationTokenExpiry = new Date(Date.now() + 7 * 60 * 60 * 1000); // 7 hours
+        user.activationTokenExpires = new Date(Date.now() + 7 * 60 * 60 * 1000); // 7 hours
         user.activationUsedAt = null; // Reset single-use tracker
         await user.save();
 

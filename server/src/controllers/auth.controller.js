@@ -1819,8 +1819,10 @@ export const verifyResetToken = async (req, res) => {
         
         const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
         const user = await User.findOne({
-            resetPasswordToken: hashedToken,
-            resetPasswordExpires: { $gt: Date.now() }
+            $or: [
+                { resetPasswordToken: hashedToken, resetPasswordExpires: { $gt: Date.now() } },
+                { activationToken: token, activationTokenExpires: { $gt: Date.now() }, activationUsedAt: null }
+            ]
         });
         
         if (!user) {
@@ -1853,8 +1855,10 @@ export const resetPassword = async (req, res) => {
 
         const user = await User.findOneAndUpdate(
             {
-                resetPasswordToken: hashedToken,
-                resetPasswordExpires: { $gt: Date.now() }
+                $or: [
+                    { resetPasswordToken: hashedToken, resetPasswordExpires: { $gt: Date.now() } },
+                    { activationToken: token, activationTokenExpires: { $gt: Date.now() }, activationUsedAt: null }
+                ]
             },
             {
                 $set: {
@@ -1866,7 +1870,10 @@ export const resetPassword = async (req, res) => {
                 },
                 $unset: {
                     resetPasswordToken: "",
-                    resetPasswordExpires: ""
+                    resetPasswordExpires: "",
+                    activationToken: "",
+                    activationTokenExpires: "",
+                    activationUsedAt: ""
                 },
                 $addToSet: {
                     linkedProviders: "manual"
