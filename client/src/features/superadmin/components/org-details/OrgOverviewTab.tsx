@@ -135,6 +135,7 @@ export function OrgOverviewTab({
         >
           <dl>
             <OrgDataRow label="Organization ID" value={profile?._id ?? detail?._id ?? "Unavailable"} />
+            <OrgDataRow label="Subdomain" value={profile?.subdomain ? `${profile.subdomain}.classgrid.in` : "Unavailable"} />
             <OrgDataRow label="Institution type" value={humanizeKey(profile?.org_type ?? detail?.org_type)} />
             <OrgDataRow label="Structure type" value={humanizeKey(profile?.structure_type ?? detail?.structure_type)} />
             <OrgDataRow label="Division mode" value={humanizeKey(profile?.division_mode)} />
