@@ -147,7 +147,7 @@ export function OrganizationsPage() {
     }
 
     return result;
-  }, [allOrgs, search, orgTypeFilter, dateFrom]);
+  }, [allOrgs, search, orgTypeFilter, dateFrom, statusFilter, orgNameFilter]);
 
   const stats = useMemo(() => {
     const totalUsers = allOrgs.reduce((sum, org) => sum + (org.userCount ?? 0), 0);
