@@ -166,27 +166,27 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
       >
         <div className="flex flex-wrap gap-3 mt-4">
           <Button variant="outline" className="cursor-pointer" asChild>
-            <Link to={`/superadmin/detail/${profile?._id}/hierarchy`}>
+            <Link to={`/superadmin/detail/${profile?._id}/hierarchy`} state={{ orgName: profile?.name }}>
               View Academic Hierarchy
             </Link>
           </Button>
           <Button variant="outline" className="cursor-pointer" asChild>
-            <Link to={`/superadmin/detail/${profile?._id}/staff`}>
+            <Link to={`/superadmin/detail/${profile?._id}/staff`} state={{ orgName: profile?.name }}>
               View Faculty Imported
             </Link>
           </Button>
           <Button variant="outline" className="cursor-pointer" asChild>
-            <Link to={`/superadmin/detail/${profile?._id}/students`}>
+            <Link to={`/superadmin/detail/${profile?._id}/students`} state={{ orgName: profile?.name }}>
               View Students Imported
             </Link>
           </Button>
           <Button variant="outline" className="cursor-pointer" asChild>
-            <Link to={`/superadmin/detail/${profile?._id}/fees`}>
+            <Link to={`/superadmin/detail/${profile?._id}/fees`} state={{ orgName: profile?.name }}>
               View Fee Structure
             </Link>
           </Button>
           <Button variant="outline" className="cursor-pointer" asChild>
-            <Link to={`/superadmin/detail/${profile?._id}/admission`}>
+            <Link to={`/superadmin/detail/${profile?._id}/admission`} state={{ orgName: profile?.name }}>
               View Admission Form
             </Link>
           </Button>
