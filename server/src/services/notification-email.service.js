@@ -780,9 +780,13 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL?.trim() || 'support@classgrid.in';
         const dashboardUrl = 'https://superadmin.classgrid.in';
 
-        // The "From" is the person who assigned it, or fallback to default
-        const fromEmail = assigner?.email || superAdminEmail;
+        // The "From" is the person who assigned it
+        const fromEmail = assigner?.email;
         const fromName = assigner?.name ? `${assigner.name} (Classgrid)` : "Classgrid Platform";
+
+        if (!fromEmail) {
+            console.warn("[EmailNotification] Assigner email missing! Falling back to superAdminEmail, but this should not happen.");
+        }
 
         const templateData = {
             assigneeName: assignee.name || 'Admin',
@@ -801,9 +805,9 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
         // Send direct to Assignee via SES
         await sendEmail({
             to: assignee.email,
-            fromEmail: fromEmail,
+            fromEmail: fromEmail || superAdminEmail,
             fromName: fromName,
-            replyTo: fromEmail, // Set reply-to to the assigner's email so replies go to them
+            replyTo: assigner?.email || assignee.email, // STRICTLY the assigner, never support.
             subject: `You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
             html: getDemoLeadAssignedHtml(templateData),
             text: getDemoLeadAssignedPlainText(templateData)
@@ -813,8 +817,9 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
         if (notifySuperAdmin && superAdminEmail.toLowerCase() !== assignee.email.toLowerCase()) {
             await sendEmail({
                 to: superAdminEmail,
-                fromEmail: fromEmail,
+                fromEmail: fromEmail || superAdminEmail,
                 fromName: fromName,
+                replyTo: assigner?.email || assignee.email,
                 subject: `[CC] You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
                 html: getDemoLeadAssignedHtml({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' }),
                 text: getDemoLeadAssignedPlainText({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' })
