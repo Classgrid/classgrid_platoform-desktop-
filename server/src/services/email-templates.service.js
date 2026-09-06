@@ -2559,20 +2559,18 @@ export const getDemoLeadAssignedHtml = ({ assigneeName, institutionName, adminNa
     });
   };
 
-  let meetingHtml = '';
-  if (meetingScheduledAt || meetingStatus === 'scheduled' || meetingStatus === 'rescheduled') {
-      const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details' : 'Meeting Details';
-      meetingHtml = `
-      <div class="box" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
-        <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">${statusLabel}</p>
-        <ul style="margin-top: 0; margin-bottom: 0;">
-          ${meetingScheduledAt ? `<li><strong>Date:</strong> ${formatDate(meetingScheduledAt)}</li>` : ''}
-          <li><strong>Provider:</strong> ${meetingProvider || 'Other'}</li>
-          ${meetingUrl ? `<li><strong>Link:</strong> <a href="${meetingUrl}">${meetingUrl}</a></li>` : ''}
-        </ul>
-      </div>
-      `;
-  }
+  const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details' : 'Meeting Details';
+  const meetingHtml = `
+  <div class="box" style="margin-bottom: 24px; border-left: 3px solid #3b82f6;">
+    <p style="margin-bottom: 8px; font-weight: 600; color: #111111;">${statusLabel}</p>
+    <ul style="margin-top: 0; margin-bottom: 0;">
+      <li><strong>Status:</strong> <span style="text-transform: capitalize;">${meetingStatus || 'Pending'}</span></li>
+      <li><strong>Date:</strong> ${meetingScheduledAt ? formatDate(meetingScheduledAt) : 'Not Scheduled'}</li>
+      <li><strong>Provider:</strong> ${meetingProvider || 'N/A'}</li>
+      <li><strong>Link:</strong> ${meetingUrl ? `<a href="${meetingUrl}">${meetingUrl}</a>` : 'N/A'}</li>
+    </ul>
+  </div>
+  `;
 
   const content = `
     <p>Hi ${assigneeName},</p>
@@ -2608,16 +2606,14 @@ export const getDemoLeadAssignedPlainText = ({ assigneeName, institutionName, ad
     });
   };
 
-  let meetingText = '';
-  if (meetingScheduledAt || meetingStatus === 'scheduled' || meetingStatus === 'rescheduled') {
-      const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details:' : 'Meeting Details:';
-      meetingText = `
+  const statusLabel = meetingStatus === 'rescheduled' ? 'Rescheduled Meeting Details:' : 'Meeting Details:';
+  const meetingText = `
 ${statusLabel}
-${meetingScheduledAt ? `- Date: ${formatDate(meetingScheduledAt)}` : ''}
-- Provider: ${meetingProvider || 'Other'}
-${meetingUrl ? `- Link: ${meetingUrl}` : ''}
+- Status: ${meetingStatus || 'Pending'}
+- Date: ${meetingScheduledAt ? formatDate(meetingScheduledAt) : 'Not Scheduled'}
+- Provider: ${meetingProvider || 'N/A'}
+- Link: ${meetingUrl || 'N/A'}
 `;
-  }
 
   return `Hi ${assigneeName},
 
