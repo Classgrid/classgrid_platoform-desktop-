@@ -591,23 +591,36 @@ export const validateActivationToken = async (req, res) => {
             }
         }
 
-        if (!user.mustResetPassword) {
+        if (!user.isPendingAdmin && !user.mustResetPassword) {
             return res.status(400).json({ message: "This account has already been activated. Please sign in." });
         }
 
         let orgData = null;
-        if (user.organization_id) {
-            const Organization = (await import("../models/Organization.js")).default;
-            orgData = await Organization.findById(user.organization_id).select("org_type structure_type subdomain name address city state district taluka website social_links billing_settings").lean();
+        let responsePayload = {
+            valid: true,
+            mode: token ? "link" : "code"
+        };
+
+        if (user.isPendingAdmin) {
+            const org = user.org;
+            orgData = org;
+            responsePayload.email = org.pending_admin.email;
+            responsePayload.name = org.pending_admin.name;
+            responsePayload.role = "org_admin";
+            responsePayload.phone = org.pending_admin.phone || "";
+        } else {
+            if (user.organization_id) {
+                const Organization = (await import("../models/Organization.js")).default;
+                orgData = await Organization.findById(user.organization_id).select("org_type structure_type subdomain name address city state district taluka website social_links billing_settings").lean();
+            }
+            responsePayload.email = user.email;
+            responsePayload.name = user.name;
+            responsePayload.role = user.role;
+            responsePayload.phone = user.phoneNumber || user.phone || "";
         }
 
-        return res.status(200).json({ 
-            valid: true, 
-            mode: token ? "link" : "code",
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            phone: user.phoneNumber || user.phone || "",
+        return res.status(200).json({
+            ...responsePayload,
             orgType: orgData?.org_type || "school",
             structureType: orgData?.structure_type || "school",
             subdomain: orgData?.subdomain || null,
