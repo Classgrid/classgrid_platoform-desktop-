@@ -42,7 +42,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     key: "wizard_completed",
     label: "Onboarding Wizard Completed",
-    description: "Admin finished the 13-screen wizard on onboard.classgrid.in and set their password.",
+    description: "Admin finished the multi-step wizard on onboard.classgrid.in and set their password.",
     icon: <Shield className="size-4" />,
     phase: 1,
     isComplete: (p) => !!p.branding_configured || p.current_stage !== "admin_activation_pending",
