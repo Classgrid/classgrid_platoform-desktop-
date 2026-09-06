@@ -39,6 +39,7 @@ import { Shield, Trash2, Plus, MoreHorizontal, Search, XCircle, X, BadgeCheck } 
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/marketing_ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/marketing_ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/marketing_ui/tooltip";
 import { DataTable } from "@/components/marketing_ui/data-table";
 import { Button } from "@/components/marketing_ui/button";
 import { Input } from "@/components/marketing_ui/input";
@@ -292,8 +293,22 @@ export function TeamPage() {
             </div>
           )}
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-sm truncate">{row.name}</span>
-            <span className="text-muted-foreground text-xs truncate">{row.email}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-medium text-sm truncate cursor-help max-w-[200px] block">{row.name}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start">
+                <p>{row.name}</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground text-xs truncate cursor-help max-w-[200px] block">{row.email}</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start">
+                <p>{row.email}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       )

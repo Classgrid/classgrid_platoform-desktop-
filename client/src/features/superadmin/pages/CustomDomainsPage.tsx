@@ -251,28 +251,6 @@ export function CustomDomainsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Platform Domains</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage and verify custom domains mapped by organizations.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowRecaptchaModal(true)}>
-            <ShieldAlert size={14} className="mr-2 text-primary" /> reCAPTCHA Domains
-          </Button>
-          <Button variant="outline" onClick={() => setShowCloudflareModal(true)}>
-            <Settings size={14} className="mr-2 text-primary" /> Cloudflare CORS
-          </Button>
-          
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard title="Total Domain Requests" value={orgs.length} icon={<Globe size={15} />} />
-        <StatCard title="Verified & Active" value={totalVerified} icon={<CheckCircle size={15} />} />
-        <StatCard title="Pending DNS Setup" value={totalPending} icon={<ShieldAlert size={15} />} />
-      </div>
-
       <div >
         <SectionPanel title="Domain Registry" description={`Showing ${orgs.length} registered custom domains`} noPadding>
           <DataTable 
