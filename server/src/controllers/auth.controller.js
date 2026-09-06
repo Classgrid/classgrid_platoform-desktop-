@@ -648,20 +648,32 @@ export const activateAdmin = async (req, res) => {
 
         if (lookupResult && lookupResult.isPendingAdmin) {
             orgPending = lookupResult.org;
-            // DYNAMICALLY CREATE THE USER NOW
+            // DYNAMICALLY CREATE OR UPDATE THE USER NOW
             const User = (await import("../models/User.js")).default;
-            user = new User({
-                email: orgPending.pending_admin.email,
-                name: orgPending.pending_admin.name,
-                phoneNumber: orgPending.pending_admin.phone,
-                role: "org_admin",
-                organization_id: orgPending._id,
-                mustResetPassword: true,
-                status: "active",
-                authProvider: "manual",
-                linkedProviders: ["manual"],
-                isEmailVerified: true
-            });
+            const existingUser = await User.findOne({ email: orgPending.pending_admin.email.toLowerCase().trim() });
+            
+            if (existingUser) {
+                user = existingUser;
+                user.name = orgPending.pending_admin.name || user.name;
+                user.phoneNumber = orgPending.pending_admin.phone || user.phoneNumber;
+                user.role = "org_admin";
+                user.organization_id = orgPending._id;
+                user.mustResetPassword = true;
+                user.status = "active";
+            } else {
+                user = new User({
+                    email: orgPending.pending_admin.email,
+                    name: orgPending.pending_admin.name,
+                    phoneNumber: orgPending.pending_admin.phone,
+                    role: "org_admin",
+                    organization_id: orgPending._id,
+                    mustResetPassword: true,
+                    status: "active",
+                    authProvider: "manual",
+                    linkedProviders: ["manual"],
+                    isEmailVerified: true
+                });
+            }
         } else {
             user = lookupResult;
         }
