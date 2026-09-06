@@ -212,6 +212,16 @@ const organizationSchema = new mongoose.Schema(
         contactNumber: { type: String, default: "" },
         website: { type: String, default: "" },
         designation: { type: String, default: "" },
+        // 🔐 Pending Admin — stores admin info during provisioning, BEFORE the admin activates their account
+        pending_admin: {
+            name: { type: String, default: "" },
+            email: { type: String, default: "" },
+            phone: { type: String, default: "" },
+            activationToken: { type: String, default: "" },
+            activationTokenExpires: { type: Date, default: null },
+            activationCodeHash: { type: String, default: "" },
+            activationCodeExpires: { type: Date, default: null },
+        },
         razorpayCustomerId: {
 
             type: String,
