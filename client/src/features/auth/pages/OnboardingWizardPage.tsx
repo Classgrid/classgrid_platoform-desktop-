@@ -956,6 +956,7 @@ export function OnboardingWizardPage() {
 
   const dynamicSections = (strategy.sections || []).filter(sec => {
     if (sec.key === "organization_details") return false;
+    if (sec.key === "admin_basic_identity" || sec.key === "official_contact_info") return false;
     // Skip the bloated basic profile and contact details for ALL users during onboarding
     // to prevent asking for Name, Email, and Phone multiple times.
     // They are already collected in fixed steps (Verification, Personal details).
