@@ -60,6 +60,8 @@ import { LeadTable } from "../components/LeadTable";
 const STATUS_OPTIONS = [
   { value: "", label: "Status: All" },
   { value: "pending", label: "Pending", color: "bg-yellow-500" },
+  { value: "contacted", label: "Contacted", color: "bg-blue-500" },
+  { value: "scheduled", label: "Scheduled", color: "bg-blue-500" },
   { value: "completed", label: "Completed", color: "bg-green-500" },
   { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
   { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
@@ -121,9 +123,23 @@ export function LeadsPage() {
 
     if (statusFilter) {
       result = result.filter(l => {
+        // Provisioned = status is "converted"
         if (statusFilter === "provisioned") return l.status === "converted";
+        // Closed uses the top-level status field
+        if (statusFilter === "closed") return l.status === "closed";
+        // All others: compute the displayed badge the same way LeadTable does
+        if (l.status === "converted" || l.status === "closed") return false;
         const ms = l.meetingStatus || "pending";
-        return ms === statusFilter && l.status !== "converted";
+        if (statusFilter === "contacted") {
+          // "Contacted" = meetingStatus is pending AND has an assignee
+          return ms === "pending" && !!l.assignedTo;
+        }
+        if (statusFilter === "pending") {
+          // "Pending" = meetingStatus is pending AND no assignee
+          return ms === "pending" && !l.assignedTo;
+        }
+        // scheduled, completed, cancelled, rescheduled, missed map 1:1 to meetingStatus
+        return ms === statusFilter;
       });
     }
     
