@@ -178,7 +178,7 @@ export function LeadsPage() {
 
 
       {/* Search & Filters */}
-      <div className="w-full">
+      <div className="mb-4">
         <SuperadminFilterBar
           searchQuery={search}
           onSearchChange={setSearch}
@@ -256,7 +256,7 @@ export function LeadsPage() {
       </div>
 
       {/* Leads List */}
-      <div className="w-full">
+      <div className="mt-4">
         <LeadTable 
           leads={filtered} 
           isLoading={isLoading} 
