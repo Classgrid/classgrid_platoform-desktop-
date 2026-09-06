@@ -63,7 +63,7 @@ function normalizeHost(value) {
 }
 
 function isClassgridFrontendHost(host) {
-    return host === "classgrid.in" || /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.classgrid\.in$/.test(host);
+    return host === "classgrid.in" || /^[a-z0-9-]{1,63}\.classgrid\.in$/.test(host);
 }
 
 async function resolveAllowedHost(value) {
