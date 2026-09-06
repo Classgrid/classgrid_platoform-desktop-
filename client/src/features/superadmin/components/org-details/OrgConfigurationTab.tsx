@@ -166,7 +166,7 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
             View Academic Hierarchy
           </Button>
           <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/staff`, "_blank")}>
-            View Staff Imported
+            View Faculty Imported
           </Button>
           <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/students`, "_blank")}>
             View Students Imported
