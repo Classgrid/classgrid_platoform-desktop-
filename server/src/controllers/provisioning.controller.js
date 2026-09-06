@@ -54,6 +54,9 @@ export const handleManualProvisioning = async (req, res) => {
 
         const result = await provisionDemoOrg(admin, organization);
 
+        const io = req.app.get("io");
+        if (io) io.emit("platform_analytics_updated");
+
         res.status(201).json({
             message: "Tenant provisioned successfully",
             data: result
@@ -85,6 +88,9 @@ export const handleSelfServiceDemo = async (req, res) => {
             ...organization,
             org_type: organization.org_type || 'school'
         });
+
+        const io = req.app.get("io");
+        if (io) io.emit("platform_analytics_updated");
 
         res.status(201).json({
             message: "Demo institution created. Redirecting to your portal...",

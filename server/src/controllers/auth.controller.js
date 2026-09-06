@@ -1490,6 +1490,9 @@ export const completeSignup = async (req, res) => {
         // Delete verification doc
         await Verification.deleteOne({ _id: updatedVerification._id });
 
+        const io = req.app.get("io");
+        if (io) io.emit("platform_analytics_updated");
+
         // Send Welcome Email
         await sendWelcomeEmail(user, "manual");
 

@@ -1989,6 +1989,11 @@ router.post("/transactions", async (req, res) => {
             newExpiresAt: newExpiresAt || null,
         });
 
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("platform_transactions_updated");
+        }
+
         res.json({ success: true, message: "Transaction recorded.", data: txn });
     } catch (err) {
         console.error("[SuperAdmin] record transaction error:", err.message);
@@ -2025,6 +2030,11 @@ router.post("/transactions/:id/refund", async (req, res) => {
             refundReason: reason,
             note: `Refund for transaction ${req.params.id}`,
         });
+
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("platform_transactions_updated");
+        }
 
         res.json({ success: true, message: "Refund issued.", data: refund });
     } catch (err) {
@@ -2199,6 +2209,11 @@ router.post("/gdpr/erase/:userId", async (req, res) => {
             metadata: { anonymizedEmail }, rollbackStatus: "none",
             ip: req.ip, userAgent: req.headers["user-agent"] ?? "",
         }).catch(e => console.error("[AuditLog] gdpr_erase write failed:", e.message));
+
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("platform_gdpr_updated");
+        }
 
         res.json({ success: true, message: `User data erased. Email replaced with ${anonymizedEmail}.` });
     } catch (err) {

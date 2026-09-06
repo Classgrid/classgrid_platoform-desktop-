@@ -180,7 +180,6 @@ export function AuditPage() {
               />
             </div>
           </div>
-          <RefreshButton onClick={() => { refetch(); refetchChatLogs(); }} isFetching={isFetching || isChatLogsLoading} label="Refresh" />
           <Button variant="outline" onClick={handleExportCSV} disabled={isExporting || isLoading}>
             <Download size={14} className="mr-2" />
             CSV Export

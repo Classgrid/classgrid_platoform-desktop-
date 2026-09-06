@@ -143,9 +143,7 @@ export function DashboardHomePage() {
         <PageHeader 
           title="Super Admin Overview" 
           description="Manage all organizations and platform metrics."
-        >
-          <RefreshButton onClick={() => { refetch(); refetchOrgs(); }} isFetching={isFetching || orgsFetching} />
-        </PageHeader>
+        />
 
         {isError && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 mb-6 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive">
