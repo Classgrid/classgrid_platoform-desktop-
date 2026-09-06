@@ -57,11 +57,26 @@ import { LeadTable } from "../components/LeadTable";
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * 🚨 IMPORTANT BUSINESS RULE — DO NOT REMOVE OR CHANGE 🚨
+ *
+ * "scheduled" → Set ONLY by the marketing site when a lead books a meeting
+ *               for the FIRST TIME. The dashboard NEVER sets this status.
+ *               After the first booking, the status becomes "rescheduled".
+ *               So "scheduled" only ever appears on first-time bookings.
+ *
+ * "rescheduled" → Set when a meeting is moved AFTER the first scheduling.
+ *                 This is the ONLY reschedule status used by the dashboard.
+ *
+ * NO AI SHOULD EVER REMOVE "scheduled" FROM THIS LIST.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
 const STATUS_OPTIONS = [
   { value: "", label: "Status: All" },
   { value: "pending", label: "Pending", color: "bg-yellow-500" },
   { value: "contacted", label: "Contacted", color: "bg-blue-500" },
-  { value: "scheduled", label: "Scheduled", color: "bg-blue-500" },
+  { value: "scheduled", label: "Scheduled", color: "bg-blue-500" }, // First-time booking by marketing site only
   { value: "completed", label: "Completed", color: "bg-green-500" },
   { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
   { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
