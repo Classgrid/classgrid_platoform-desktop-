@@ -1611,3 +1611,52 @@ export const getOrgStudentsAudit = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to fetch students audit" });
     }
 };
+export const getOrgFeesAudit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const FeeStructure = (await import("../models/FeeStructure.js")).default;
+
+        const org = await Organization.findById(id).lean();
+        if (!org) return res.status(404).json({ success: false, message: "Organization not found" });
+
+        const fees = await FeeStructure.find({ organization_id: id })
+            .populate("hierarchy_id", "name code")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.json({
+            success: true,
+            data: { fees }
+        });
+    } catch (err) {
+        console.error("[getOrgFeesAudit] Error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch fees audit" });
+    }
+};
+export const getOrgAdmissionsAudit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Organization = (await import("../models/Organization.js")).default;
+        const AdmissionConfig = (await import("../models/AdmissionConfig.js")).default;
+        const AdmissionApplication = (await import("../models/AdmissionApplication.js")).default;
+
+        const org = await Organization.findById(id).lean();
+        if (!org) return res.status(404).json({ success: false, message: "Organization not found" });
+
+        const configs = await AdmissionConfig.find({ organization_id: id })
+            .populate("academic_year_id", "name")
+            .populate("hierarchy_nodes", "name")
+            .lean();
+
+        const applicationsCount = await AdmissionApplication.countDocuments({ organization_id: id });
+
+        return res.json({
+            success: true,
+            data: { configs, applicationsCount }
+        });
+    } catch (err) {
+        console.error("[getOrgAdmissionsAudit] Error:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch admissions audit" });
+    }
+};

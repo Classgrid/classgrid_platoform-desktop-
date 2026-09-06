@@ -492,6 +492,16 @@ export const organizationControlCenterApi = {
       .get(`/api/super-admin/orgs/${orgId}/students-audit`)
       .then((response) => response.data),
 
+  getFeesAudit: (orgId: string) =>
+    apiClient
+      .get(`/api/super-admin/orgs/${orgId}/fees-audit`)
+      .then((response) => response.data),
+
+  getAdmissionsAudit: (orgId: string) =>
+    apiClient
+      .get(`/api/super-admin/orgs/${orgId}/admissions-audit`)
+      .then((response) => response.data),
+
   updateOrganizationConfig: (orgId: string, data: { featureFlags?: Record<string, boolean>; billing?: any; limits?: any }) =>
     apiClient
       .put(`/api/super-admin/org/${orgId}/config`, data)

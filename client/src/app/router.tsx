@@ -100,6 +100,8 @@ import { OrgDetailsPage } from "@/features/superadmin/pages/OrgDetailsPage";
 import { OrgHierarchyPage } from "@/features/superadmin/pages/OrgHierarchyPage";
 import { OrgFacultyPage } from "@/features/superadmin/pages/OrgFacultyPage";
 import { OrgStudentsPage } from "@/features/superadmin/pages/OrgStudentsPage";
+import { OrgFeesPage } from "@/features/superadmin/pages/OrgFeesPage";
+import { OrgAdmissionsPage } from "@/features/superadmin/pages/OrgAdmissionsPage";
 import { PlatformAnnouncementsPage } from "@/features/superadmin/pages/PlatformAnnouncementsPage";
 import { SharedProfilePage } from "@/features/shared/pages/SharedProfilePage";
 import SandboxProfilePage from "@/features/shared/pages/SandboxProfilePage";
@@ -276,6 +278,8 @@ export function AppRouter() {
           <Route path="/superadmin/detail/:id/hierarchy" element={<OrgHierarchyPage />} />
           <Route path="/superadmin/detail/:id/staff" element={<OrgFacultyPage />} />
           <Route path="/superadmin/detail/:id/students" element={<OrgStudentsPage />} />
+          <Route path="/superadmin/detail/:id/fees" element={<OrgFeesPage />} />
+          <Route path="/superadmin/detail/:id/admission" element={<OrgAdmissionsPage />} />
           <Route path="/superadmin/leads" element={<LeadsPage />} />
           <Route path="/superadmin/leads/:id" element={<LeadDetailsPage />} />
           {/* NEW BILLING ROUTES */}
