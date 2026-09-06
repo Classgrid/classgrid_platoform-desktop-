@@ -38,8 +38,10 @@ import { CheckCircle2, Palette, Settings2, SlidersHorizontal, Edit2, Zap, Trash2
 import { toast } from "sonner";
 import { organizationControlCenterApi } from "../../services/organizationControlCenterApi";
 import { Button } from "@/components/marketing_ui/button";
-
+import { Spinner } from "@/components/marketing_ui/spinner";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/marketing_ui/dialog";
 import { Badge } from "@/components/marketing_ui/badge";
+import { Input } from "@/components/marketing_ui/input";
 
 import type { OrganizationFullProfile } from "../../services/organizationControlCenterApi";
 import {
@@ -71,8 +73,8 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
   const admissionConfig = profile?.admission_config;
   const colors = profile?.branding?.theme_colors;
 
-  const [isUpgrading, setIsUpgrading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
 
   const handleUpgrade = async () => {
     if (!profile?._id) return;
@@ -90,11 +92,9 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!profile?._id) return;
-    if (!window.confirm("CRITICAL WARNING: Are you sure you want to completely delete this organization? This cannot be undone!")) return;
-    if (!window.confirm("Are you absolutely sure? Type 'yes' below to confirm.") === false) return; // Basic double check
-
+    
     setIsDeleting(true);
     try {
       await organizationControlCenterApi.deleteOrganization(profile._id);
@@ -102,7 +102,6 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
       setTimeout(() => window.location.href = "/superadmin/leads", 1500);
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to delete organization.");
-    } finally {
       setIsDeleting(false);
     }
   };
@@ -143,7 +142,7 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
               </Button>
             )}
             <Button 
-              onClick={handleDelete} 
+              onClick={() => setIsDeleteDialogOpen(true)} 
               disabled={isDeleting}
               variant="destructive"
               className="w-full"
@@ -278,6 +277,53 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
           </div>
         </div>
       </OrgSectionCard>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => !open && !isDeleting && setIsDeleteDialogOpen(false)}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogTitle className="text-danger flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5" /> Delete Organization
+          </DialogTitle>
+          <DialogDescription>
+            CRITICAL WARNING: Are you sure you want to completely delete <strong>{profile?.name}</strong>?
+            This will permanently erase all students, faculty, data, and subscriptions. This action cannot be undone.
+          </DialogDescription>
+          
+          <div className="flex flex-col gap-3 mt-4">
+            <p className="text-sm font-medium">Type "delete" to confirm:</p>
+            <Input 
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              placeholder="delete"
+              className="h-10"
+              disabled={isDeleting}
+            />
+
+            <Button 
+              variant="destructive" 
+              className="w-full mt-2"
+              onClick={confirmDelete}
+              disabled={deleteConfirmationText !== "delete" || isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Spinner size="sm" className="mr-2" /> Deleting...
+                </>
+              ) : (
+                "Permanently Delete"
+              )}
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              className="w-full"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
