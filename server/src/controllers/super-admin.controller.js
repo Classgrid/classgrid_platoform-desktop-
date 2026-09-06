@@ -1410,6 +1410,7 @@ export const deleteOrganization = async (req, res) => {
         const Organization = (await import("../models/Organization.js")).default;
         const OrgSubscription = (await import("../models/OrgSubscription.js")).default;
         const User = (await import("../models/User.js")).default;
+        const UserProfile = (await import("../models/UserProfile.js")).default;
         const DemoRequest = (await import("../models/DemoRequest.js")).default;
 
         const org = await Organization.findById(id);
@@ -1421,15 +1422,13 @@ export const deleteOrganization = async (req, res) => {
         // To be safe, we will just delete users whose organization_id matches. 
         // In a real production system, we'd probably anonymize, but for sandbox deletion, hard delete is fine.
         await User.deleteMany({ organization_id: id });
+        await UserProfile.deleteMany({ organization_id: id });
 
         // 2. Delete the subscription
         await OrgSubscription.deleteOne({ organization_id: id });
 
-        // 3. Clear the provisioned reference from any associated DemoRequest
-        await DemoRequest.updateMany(
-            { provisionedOrganizationId: id },
-            { $set: { provisionedOrganizationId: null, conversionStatus: 'deleted' } }
-        );
+        // 3. Delete any associated DemoRequest so the user can reuse their email/phone for a new demo
+        await DemoRequest.deleteMany({ provisionedOrganizationId: id });
 
         // 4. Delete the organization
         await Organization.findByIdAndDelete(id);
