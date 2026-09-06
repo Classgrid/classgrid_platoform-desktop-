@@ -162,19 +162,19 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         icon={<Settings2 className="h-5 w-5" aria-hidden="true" />}
       >
         <div className="flex flex-wrap gap-3 mt-4">
-          <Button variant="outline" onClick={() => window.open(`/superadmin/detail/${profile?._id}/hierarchy`, "_blank")}>
+          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/hierarchy`, "_blank")}>
             View Academic Hierarchy
           </Button>
-          <Button variant="outline" onClick={() => window.open(`/superadmin/detail/${profile?._id}/staff`, "_blank")}>
+          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/staff`, "_blank")}>
             View Staff Imported
           </Button>
-          <Button variant="outline" onClick={() => window.open(`/superadmin/detail/${profile?._id}/students`, "_blank")}>
+          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/students`, "_blank")}>
             View Students Imported
           </Button>
-          <Button variant="outline" onClick={() => window.open(`/superadmin/detail/${profile?._id}/fees`, "_blank")}>
+          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/fees`, "_blank")}>
             View Fee Structure
           </Button>
-          <Button variant="outline" onClick={() => window.open(`/superadmin/detail/${profile?._id}/admission`, "_blank")}>
+          <Button variant="secondary" onClick={() => window.open(`/superadmin/detail/${profile?._id}/admission`, "_blank")}>
             View Admission Form
           </Button>
         </div>
