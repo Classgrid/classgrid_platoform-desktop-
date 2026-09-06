@@ -59,14 +59,14 @@ import { LeadTable } from "../components/LeadTable";
 
 /*
  * ─────────────────────────────────────────────────────────────────────────────
- * 🚨 IMPORTANT BUSINESS RULE — DO NOT CHANGE 🚨
+ * 🚨 STRICT RULE — DO NOT ADD "scheduled" TO THIS LIST. EVER. 🚨
  *
- * "scheduled" → Set ONLY by the marketing site on first-time booking.
- *               NOT shown in this filter because only "rescheduled" is
- *               relevant for the dashboard team.
+ * "scheduled" is set ONLY by the marketing site on first-time booking.
+ * It is NEVER used by the dashboard and must NEVER appear as a filter option.
+ * After the first booking, the status becomes "rescheduled" — use that instead.
  *
- * "rescheduled" → Set when a meeting is moved AFTER the first scheduling.
- *                 This is the ONLY reschedule status used by the dashboard.
+ * ANY AI OR DEVELOPER WHO ADDS "scheduled" TO THIS LIST IS WRONG.
+ * ONLY "rescheduled" belongs here. Not "scheduled". Never "scheduled".
  * ─────────────────────────────────────────────────────────────────────────────
  */
 const STATUS_OPTIONS = [
