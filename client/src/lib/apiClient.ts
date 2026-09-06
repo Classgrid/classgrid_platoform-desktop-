@@ -45,7 +45,7 @@ export const API_BASE_URL =
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 second timeout to prevent infinite hanging
+  timeout: 30000, // 30 second timeout to prevent infinite hanging while accommodating EC2 cold starts
   adapter: isMockApiEnabled ? mockApiAdapter : undefined,
   withCredentials: true // required for cookie-based Passport sessions
 });

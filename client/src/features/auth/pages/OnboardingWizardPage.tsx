@@ -862,7 +862,7 @@ export function OnboardingWizardPage() {
         .catch((err) => {
           console.error("Token validation failed:", err);
           setIsTokenValid(false);
-          setTokenError("Failed to validate link. It might be expired or invalid.");
+          setTokenError(err?.message || "Failed to validate link. It might be expired or invalid.");
         })
         .finally(() => {
           setIsInitializing(false);
@@ -1165,7 +1165,7 @@ export function OnboardingWizardPage() {
     }
   };
 
-  if (isBuildingWorkspace || (isInitializing && currentStep !== 0)) {
+  if (isBuildingWorkspace || isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0a]">
         <div className="flex flex-col items-center justify-center space-y-4">
