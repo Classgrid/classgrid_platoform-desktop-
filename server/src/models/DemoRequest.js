@@ -141,7 +141,7 @@ const demoRequestSchema = new mongoose.Schema(
     // Legacy / Internal fields
     meetingStatus: {
       type: String,
-      enum: ["pending", "scheduled", "completed", "cancelled", "rescheduled", "missed"],
+      enum: ["pending", "scheduled", "completed", "cancelled", "rescheduled", "missed", "closed"],
       default: "pending",
     },
     meetingProvider: { type: String, default: "", trim: true },

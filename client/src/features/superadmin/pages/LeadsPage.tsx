@@ -60,10 +60,11 @@ import { LeadTable } from "../components/LeadTable";
 const STATUS_OPTIONS = [
   { value: "", label: "Status: All" },
   { value: "pending", label: "Pending", color: "bg-yellow-500" },
-  { value: "completed", label: "Completed", color: "bg-emerald-500" },
+  { value: "completed", label: "Completed", color: "bg-green-500" },
   { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
   { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
   { value: "missed", label: "Missed", color: "bg-orange-500" },
+  { value: "closed", label: "Closed", color: "bg-gray-500" },
   { value: "provisioned", label: "Provisioned", color: "bg-emerald-500" },
 ];
 
