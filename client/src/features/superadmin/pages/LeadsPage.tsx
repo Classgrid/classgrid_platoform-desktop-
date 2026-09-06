@@ -61,6 +61,7 @@ const STATUS_OPTIONS = [
   { value: "", label: "Status: All" },
   { value: "pending", label: "Pending", color: "bg-yellow-500" },
   { value: "contacted", label: "Contacted", color: "bg-blue-500" },
+  { value: "scheduled", label: "Scheduled", color: "bg-blue-500" },
   { value: "completed", label: "Completed", color: "bg-green-500" },
   { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
   { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
