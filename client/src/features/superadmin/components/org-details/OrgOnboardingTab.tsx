@@ -55,7 +55,6 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     icon: <LayoutDashboard className="size-4" />,
     phase: 2,
     isComplete: (p) => !!p.first_login_completed,
-    notBuiltYet: true,
   }
 ];
 

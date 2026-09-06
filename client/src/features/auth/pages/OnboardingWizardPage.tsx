@@ -2361,7 +2361,6 @@ export function OnboardingWizardPage() {
                                   <div className="flex gap-2">
                                     <Input
                                       type="tel"
-                                      placeholder="e.g. 919876543210"
                                       value={orgPhone}
                                       onChange={(e) => {
                                         setOrgPhone(e.target.value);

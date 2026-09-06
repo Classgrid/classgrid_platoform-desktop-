@@ -94,8 +94,6 @@ export function RequireAuth() {
     }
   }
 
-  const path = location.pathname;
-
   const isPasswordSetupRoute = path === "/required-password-reset";
   const isOrganizationSetupRoute = path === "/enter-org-code";
   const needsPasswordReset = user?.mustResetPassword === true;
