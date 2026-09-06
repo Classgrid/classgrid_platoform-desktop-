@@ -1000,6 +1000,7 @@ export const assignLead = async (req, res) => {
             await sendDemoLeadAssignedNotification({
                 demoRequest: lead,
                 assignee: req.user,
+                assigner: req.user,
                 notifySuperAdmin: true
             });
         } catch (e) {
