@@ -90,7 +90,7 @@ export function OrgSectionCard({
               ) : null}
             </div>
           </div>
-          {action}
+          {action ? <div className="shrink-0">{action}</div> : null}
         </div>
       </CardHeader>
       <CardContent className="pt-6">{children}</CardContent>
