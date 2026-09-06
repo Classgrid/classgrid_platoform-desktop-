@@ -407,6 +407,7 @@ export function OnboardingWizardPage() {
     try {
       await sendOnboardingOtp({ target: orgPhone, type: "phone" });
       setOrgPhoneOtpSent(true);
+      setOrgPhoneOtpTimer(30);
       showAlert("OTP sent successfully to " + orgPhone);
     } catch (err: any) {
       showAlert(err.response?.data?.message || err.message || "Failed to send OTP. Please try again.");
@@ -481,6 +482,7 @@ export function OnboardingWizardPage() {
   const [emailOtpTimer, setEmailOtpTimer] = useState(0);
   const [phoneOtpTimer, setPhoneOtpTimer] = useState(0);
   const [orgEmailOtpTimer, setOrgEmailOtpTimer] = useState(0);
+  const [orgPhoneOtpTimer, setOrgPhoneOtpTimer] = useState(0);
 
   // Derived Dropdown Data (from india-locations.json & full_erp_data.json)
   const stateOptions = useMemo(() => {
@@ -651,15 +653,16 @@ export function OnboardingWizardPage() {
   // Timer Effect
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (emailOtpTimer > 0 || phoneOtpTimer > 0 || orgEmailOtpTimer > 0) {
+    if (emailOtpTimer > 0 || phoneOtpTimer > 0 || orgEmailOtpTimer > 0 || orgPhoneOtpTimer > 0) {
       interval = setInterval(() => {
         setEmailOtpTimer(prev => (prev > 0 ? prev - 1 : 0));
         setPhoneOtpTimer(prev => (prev > 0 ? prev - 1 : 0));
         setOrgEmailOtpTimer(prev => (prev > 0 ? prev - 1 : 0));
+        setOrgPhoneOtpTimer(prev => (prev > 0 ? prev - 1 : 0));
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [emailOtpTimer, phoneOtpTimer, orgEmailOtpTimer]);
+  }, [emailOtpTimer, phoneOtpTimer, orgEmailOtpTimer, orgPhoneOtpTimer]);
 
   const [alertState, setAlertState] = useState({ open: false, title: "", message: "" });
   const showAlert = (message: string, title: string = "Notice") => { setAlertState({ open: true, title, message }); };
@@ -2283,9 +2286,9 @@ export function OnboardingWizardPage() {
                                         variant="outline"
                                         className="h-12 px-6 text-sm font-semibold rounded-xl shrink-0"
                                         onClick={handleSendOrgPhoneOtp}
-                                        disabled={orgPhoneOtpSent || isSendingPhoneOtp || isSamePhone}
+                                        disabled={(orgPhoneOtpSent && orgPhoneOtpTimer > 0) || isSendingPhoneOtp || isSamePhone}
                                       >
-                                        {isSendingPhoneOtp ? "Sending..." : orgPhoneOtpSent ? "Sent" : "Send OTP"}
+                                        {isSendingPhoneOtp ? "Sending..." : orgPhoneOtpTimer > 0 ? `Resend (${orgPhoneOtpTimer}s)` : orgPhoneOtpSent ? "Resend" : "Send OTP"}
                                       </Button>
                                     )}
                                   </div>
