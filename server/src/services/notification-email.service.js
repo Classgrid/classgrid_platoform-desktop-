@@ -780,9 +780,10 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL?.trim() || 'support@classgrid.in';
         const dashboardUrl = 'https://superadmin.classgrid.in';
 
-        // The "From" is the person who assigned it, or fallback to default
-        const fromEmail = assigner?.email || superAdminEmail;
-        const fromName = assigner?.name ? `${assigner.name} (Classgrid)` : "Classgrid Platform";
+        // Always send FROM the system email (support/no-reply) to avoid SES verification errors
+        const fromEmail = superAdminEmail;
+        const fromName = "Classgrid Admin System";
+        const replyToEmail = assigner?.email || superAdminEmail;
 
         const templateData = {
             assigneeName: assignee.name || 'Admin',
@@ -803,7 +804,7 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
             to: assignee.email,
             fromEmail: fromEmail,
             fromName: fromName,
-            replyTo: fromEmail, // Set reply-to to the assigner's email so replies go to them
+            replyTo: replyToEmail, // Set reply-to to the assigner's email so replies go to them
             subject: `You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
             html: getDemoLeadAssignedHtml(templateData),
             text: getDemoLeadAssignedPlainText(templateData)
@@ -815,6 +816,7 @@ export async function sendDemoLeadAssignedNotification({ demoRequest, assignee, 
                 to: superAdminEmail,
                 fromEmail: fromEmail,
                 fromName: fromName,
+                replyTo: replyToEmail,
                 subject: `[CC] You have been Assigned to Lead: ${templateData.institutionName} | Classgrid`,
                 html: getDemoLeadAssignedHtml({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' }),
                 text: getDemoLeadAssignedPlainText({ ...templateData, assigneeName: 'Super Admin (' + assignee.name + ' was assigned)' })
