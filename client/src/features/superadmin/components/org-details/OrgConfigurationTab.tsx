@@ -39,9 +39,9 @@ import { toast } from "sonner";
 import { organizationControlCenterApi } from "../../services/organizationControlCenterApi";
 import { Button } from "@/components/marketing_ui/button";
 import { Spinner } from "@/components/marketing_ui/spinner";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/marketing_ui/dialog";
 import { Badge } from "@/components/marketing_ui/badge";
 import { Input } from "@/components/marketing_ui/input";
+import { DangerConfirmDialog } from "@/components/marketing_ui/danger-confirm-dialog";
 
 import type { OrganizationFullProfile } from "../../services/organizationControlCenterApi";
 import {
@@ -76,7 +76,6 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
 
   const handleUpgrade = async () => {
     if (!profile?._id) return;
@@ -280,52 +279,32 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         </div>
       </OrgSectionCard>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => !open && !isDeleting && setIsDeleteDialogOpen(false)}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogTitle className="text-danger flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5" /> Delete Organization
-          </DialogTitle>
-          <DialogDescription>
-            CRITICAL WARNING: Are you sure you want to completely delete <strong>{profile?.name}</strong>?
-            This will permanently erase all students, faculty, data, and subscriptions. This action cannot be undone.
-          </DialogDescription>
-          
-          <div className="flex flex-col gap-3 mt-4">
-            <p className="text-sm font-medium">Type "delete" to confirm:</p>
-            <Input 
-              value={deleteConfirmationText}
-              onChange={(e) => setDeleteConfirmationText(e.target.value)}
-              placeholder="delete"
-              className="h-10"
-              disabled={isDeleting}
-            />
-
-            <Button 
-              variant="destructive" 
-              className="w-full mt-2"
-              onClick={confirmDelete}
-              disabled={deleteConfirmationText !== "delete" || isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Spinner size="sm" className="mr-2" /> Deleting...
-                </>
-              ) : (
-                "Permanently Delete"
-              )}
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              className="w-full"
-              onClick={() => setIsDeleteDialogOpen(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DangerConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => !isDeleting && setIsDeleteDialogOpen(open)}
+        title="Delete Organization"
+        description={<>CRITICAL WARNING: Are you sure you want to completely delete <strong>{profile?.name}</strong>? This will permanently erase all students, faculty, data, and subscriptions.</>}
+        warningMessage="This action is irreversible. All data across every department will be permanently lost and cannot be recovered."
+        confirmationSteps={[
+          {
+            label: "To confirm, type the organization name",
+            value: profile?.name || "",
+          },
+          ...(profile?.subdomain ? [{
+            label: "Type the subdomain to finalize",
+            value: profile.subdomain,
+          }] : []),
+          {
+            label: "To confirm, type",
+            value: "delete",
+          },
+        ]}
+        actionLabel="Permanently Delete"
+        cancelLabel="Cancel"
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+        variant="danger"
+      />
     </div>
   );
 }
