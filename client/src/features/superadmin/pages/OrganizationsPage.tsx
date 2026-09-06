@@ -232,7 +232,7 @@ export function OrganizationsPage() {
 
 
       {/* Search & Filters */}
-      <div className="w-full relative z-10">
+      <div className="w-full relative z-50">
         <SuperadminFilterBar
           searchQuery={search}
           onSearchChange={setSearch}

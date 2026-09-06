@@ -178,7 +178,7 @@ export function LeadsPage() {
 
 
       {/* Search & Filters */}
-      <div className="w-full -mb-6 relative z-10">
+      <div className="w-full -mb-6 relative z-50">
         <SuperadminFilterBar
           searchQuery={search}
           onSearchChange={setSearch}
