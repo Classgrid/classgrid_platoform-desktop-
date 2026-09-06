@@ -36,7 +36,7 @@ export function StudentImportPage() {
   }, []);
 
   const handleDownloadTemplate = () => {
-    const csvContent = "first_name,last_name,email,phone_number\nJohn,Doe,john@example.com,9876543210";
+    const csvContent = "\uFEFFfirst_name,last_name,email,phone_number\nJohn,Doe,john@example.com,9876543210";
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
