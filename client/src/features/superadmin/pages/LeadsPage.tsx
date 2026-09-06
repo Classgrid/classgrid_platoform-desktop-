@@ -64,6 +64,7 @@ const STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelled", color: "bg-red-500" },
   { value: "rescheduled", label: "Rescheduled", color: "bg-purple-500" },
   { value: "missed", label: "Missed", color: "bg-orange-500" },
+  { value: "provisioned", label: "Provisioned", color: "bg-emerald-500" },
 ];
 
 export function LeadsPage() {
@@ -118,8 +119,9 @@ export function LeadsPage() {
 
     if (statusFilter) {
       result = result.filter(l => {
+        if (statusFilter === "provisioned") return l.status === "converted";
         const ms = l.meetingStatus || "pending";
-        return ms === statusFilter;
+        return ms === statusFilter && l.status !== "converted";
       });
     }
     
