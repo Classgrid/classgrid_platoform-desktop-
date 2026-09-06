@@ -10,7 +10,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { ChevronLeft, GraduationCap, Users, LayoutDashboard, Layers, Activity } from "lucide-react";
 import { Button } from "@/components/marketing_ui/button";
 import { Skeleton } from "@/components/marketing_ui/skeleton";
