@@ -155,45 +155,6 @@ export function OrgConfigurationTab({ profile }: OrgConfigurationTabProps) {
         </div>
       </OrgSectionCard>
 
-      <OrgSectionCard
-        title="Onboarding progress"
-        description="Live organization onboarding fields, including all boolean steps returned by the backend."
-        icon={<CheckCircle2 className="h-5 w-5" aria-hidden="true" />}
-        action={
-          <Button variant="outline" size="sm" onClick={() => setIsEditOnboardingOpen(true)}>
-            <Edit2 className="mr-2 h-4 w-4" /> Edit Steps
-          </Button>
-        }
-      >
-        <dl>
-          <OrgDataRow label="Current stage" value={humanizeKey(onboarding?.current_stage)} />
-          <OrgDataRow
-            label="Completed steps"
-            value={onboardingSteps.length > 0 ? `${completedSteps} / ${onboardingSteps.length}` : "Not Configured"}
-          />
-          <OrgDataRow label="Last synchronized" value={formatDateTime(onboarding?.last_synced_at)} />
-          <OrgDataRow label="Completed at" value={formatDateTime(onboarding?.completed_at)} />
-        </dl>
-        {onboardingSteps.length > 0 ? (
-          <div className="mt-5 grid gap-2 sm:grid-cols-2">
-            {onboardingSteps.map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 shadow-sm transition-all hover:bg-muted/40">
-                <span className="text-sm font-medium text-foreground truncate min-w-0 flex-1" title={humanizeKey(key)}>{humanizeKey(key)}</span>
-                <Badge variant={value ? "success" : "neutral"} className="shrink-0 text-[11px] px-2 py-0.5 font-semibold tracking-wide">
-                  {value ? "Complete" : "Pending"}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </OrgSectionCard>
-
-      <EditOnboardingModal
-        isOpen={isEditOnboardingOpen}
-        onClose={() => setIsEditOnboardingOpen(false)}
-        orgId={profile?._id as string}
-        currentOnboarding={onboarding || {}}
-      />
 
       <OrgSectionCard
         title="Feature flags"
