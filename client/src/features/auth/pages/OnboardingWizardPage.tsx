@@ -1360,7 +1360,7 @@ export function OnboardingWizardPage() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight"
             >
-              Hey, {adminName ? adminName.split(' ')[0] : 'Admin'}
+              {(adminName || fetchedName) ? `Hey, ${(adminName || fetchedName).split(' ')[0]}` : 'Welcome to Classgrid'}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
