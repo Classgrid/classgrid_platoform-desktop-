@@ -40,6 +40,7 @@ import {
   Mail,
   ShieldCheck,
   Users,
+  ExternalLink,
 } from "lucide-react";
 
 import { Badge } from "@/components/marketing_ui/badge";
@@ -135,7 +136,20 @@ export function OrgOverviewTab({
         >
           <dl>
             <OrgDataRow label="Organization ID" value={profile?._id ?? detail?._id ?? "Unavailable"} />
-            <OrgDataRow label="Subdomain" value={profile?.subdomain ? `${profile.subdomain}.classgrid.in` : "Unavailable"} />
+            <OrgDataRow 
+              label="Subdomain" 
+              value={profile?.subdomain ? (
+                <a 
+                  href={`https://${profile.subdomain}.classgrid.in`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline flex items-center gap-1.5"
+                >
+                  {profile.subdomain}.classgrid.in
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : "Unavailable"} 
+            />
             <OrgDataRow label="Institution type" value={humanizeKey(profile?.org_type ?? detail?.org_type)} />
             <OrgDataRow label="Structure type" value={humanizeKey(profile?.structure_type ?? detail?.structure_type)} />
             <OrgDataRow label="Division mode" value={humanizeKey(profile?.division_mode)} />
