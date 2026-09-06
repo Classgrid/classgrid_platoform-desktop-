@@ -817,7 +817,9 @@ export const getOrganizationDetail = async (req, res) => {
             getLegacyNotesStorageUsage(id)
         ]);
 
-        const owner = await User.findById(org.owner_id).select("name email phone phoneNumber").lean();
+        const owner = org.owner_id 
+            ? await User.findById(org.owner_id).select("name email phone phoneNumber").lean() 
+            : null;
 
         const usage = await OrganizationUsage.findOneAndUpdate(
             { orgId: id },
