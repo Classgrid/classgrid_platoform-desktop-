@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
 jobs:
