@@ -88,7 +88,7 @@ export function FacultyImportPage() {
       }
 
       const response = await apiClient.post("/api/faculty/batch-import", { faculty: facultyToImport }, {
-        timeout: 10 * 60 * 1000 // 10 minutes timeout for massive imports
+        timeout: 20 * 60 * 1000 // 20 minutes timeout for massive imports
       });
       setResults({ created: response.data.created, skipped: response.data.skipped });
       setIsDone(true);
