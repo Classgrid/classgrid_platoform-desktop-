@@ -1,3 +1,14 @@
+/**
+ * ==============================================================================
+ * 🚨 AI AGENT WARNING: BREADCRUMB POLICY 🚨
+ * ==============================================================================
+ * NEVER hardcode "Super Admin Dashboard /" as a breadcrumb on any deep dive page.
+ * Deep dive pages or sub-pages MUST accurately reflect the actual parent pages 
+ * they were opened from (e.g., Organizations / [Name] / Configuration / ...).
+ * DO NOT use generic dashboard text for breadcrumbs.
+ * ==============================================================================
+ */
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/marketing_ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/marketing_ui/dialog";
