@@ -390,9 +390,11 @@ export function OnboardingWizardPage() {
 
   // Phone Verification Handlers
   const handleSendOrgPhoneOtp = async () => {
-    const phoneRegex = /^[0-9+\-\s()]+$/;
-    if (!orgPhone || orgPhone.length < 8 || !phoneRegex.test(orgPhone)) {
-      showAlert("Please enter a valid official org phone number.");
+    // Accepts 10 digits, or +91/91 followed by 10 digits
+    const phoneRegex = /^(?:\+91|91)?\d{10}$/;
+    const cleanPhone = orgPhone.replace(/[\s-]/g, '');
+    if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
+      showAlert("Please enter a valid 10-digit mobile number (e.g. 919876543210).");
       return;
     }
 
@@ -2292,6 +2294,7 @@ export function OnboardingWizardPage() {
                                   <div className="flex gap-2">
                                     <Input
                                       type="tel"
+                                      placeholder="e.g. 919876543210"
                                       value={orgPhone}
                                       onChange={(e) => {
                                         setOrgPhone(e.target.value);
