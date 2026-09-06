@@ -955,8 +955,10 @@ export function OnboardingWizardPage() {
   const isOrgAdmin = effectiveRole === "org_admin";
 
   const dynamicSections = (strategy.sections || []).filter(sec => {
-    if (sec.key === "organization_details") return false;
-    if (sec.key === "admin_basic_identity" || sec.key === "official_contact_info") return false;
+    // Remove onboarding-specific org/admin/contact sections — they duplicate fixed steps
+    if (sec.key === "organization_details" || sec.key === "onboarding_organization_details") return false;
+    if (sec.key === "admin_basic_identity" || sec.key === "onboarding_personal_details") return false;
+    if (sec.key === "official_contact_info" || sec.key === "onboarding_contact_details") return false;
     // Skip the bloated basic profile and contact details for ALL users during onboarding
     // to prevent asking for Name, Email, and Phone multiple times.
     // They are already collected in fixed steps (Verification, Personal details).
