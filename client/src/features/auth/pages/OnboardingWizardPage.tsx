@@ -390,11 +390,11 @@ export function OnboardingWizardPage() {
 
   // Phone Verification Handlers
   const handleSendOrgPhoneOtp = async () => {
-    // Accepts 10 digits, or +91/91 followed by 10 digits
-    const phoneRegex = /^(?:\+91|91)?\d{10}$/;
-    const cleanPhone = orgPhone.replace(/[\s-]/g, '');
+    // Strictly requires 91 followed by 10 digits (12 digits total)
+    const phoneRegex = /^91\d{10}$/;
+    const cleanPhone = orgPhone.replace(/[\s-+]/g, '');
     if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
-      showAlert("Please enter a valid 10-digit mobile number (e.g. 919876543210).");
+      showAlert("Please enter a valid Indian number starting with 91 (e.g. 919876543210).");
       return;
     }
 
