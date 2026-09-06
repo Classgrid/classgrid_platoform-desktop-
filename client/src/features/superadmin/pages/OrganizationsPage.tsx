@@ -117,7 +117,7 @@ export function OrganizationsPage() {
     }
 
     if (orgTypeFilter) {
-      result = result.filter((org) => 
+      result = result.filter((org: any) => 
         org.orgType?.toLowerCase() === orgTypeFilter.toLowerCase() || 
         org.structureType?.toLowerCase() === orgTypeFilter.toLowerCase()
       );
