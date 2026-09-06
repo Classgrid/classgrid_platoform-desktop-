@@ -2656,7 +2656,7 @@ export function OnboardingWizardPage() {
                           className="mt-1 h-5 w-5 rounded border-primary text-primary focus:ring-primary bg-background cursor-pointer"
                         />
                         <label htmlFor="terms-checkbox" className="text-sm text-foreground leading-relaxed cursor-pointer select-none">
-                          I confirm that all details provided are accurate and official. I agree to the <a href="https://classgrid.in/legal/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="https://classgrid.in/legal/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
+                          I confirm that all details provided are accurate and official. I agree to the <a href="https://classgrid.in/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</a> and <a href="https://classgrid.in/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</a>, and understand that the Organization Type is permanently locked upon submission.
                         </label>
                       </div>
                     </div>
