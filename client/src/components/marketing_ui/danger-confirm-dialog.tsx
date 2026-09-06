@@ -148,9 +148,11 @@ export function DangerConfirmDialog({
         });
     }, []);
 
-    // Check if a step is completed (value matches exactly)
+    // Check if a step is completed (value matches case-insensitively)
     const isStepComplete = (index: number) => {
-        return stepValues[index]?.trim() === confirmationSteps[index]?.value;
+        const typedValue = stepValues[index]?.trim().toLowerCase() || "";
+        const expectedValue = confirmationSteps[index]?.value?.trim().toLowerCase() || "";
+        return typedValue === expectedValue;
     };
 
     // Check if all steps are completed
