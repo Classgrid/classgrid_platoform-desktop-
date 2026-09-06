@@ -185,22 +185,37 @@ const generateActivationCredentials = () => {
 };
 
 const findPendingUserByActivation = async ({ token, email, activationCode }) => {
+    const Organization = (await import("../models/Organization.js")).default;
     if (token) {
         const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+        const org = await Organization.findOne({
+            "pending_admin.activationToken": hashedToken,
+            "pending_admin.activationTokenExpires": { $gt: new Date() },
+        });
+        if (org) return { isPendingAdmin: true, org };
+
+        // Fallback for older users that might still have it on the User object
         return User.findOne({
             activationToken: hashedToken,
             activationTokenExpires: { $gt: new Date() },
-            activationUsedAt: null, // Single-use: reject if already consumed
+            activationUsedAt: null,
         }).select("+password");
     }
 
     if (email && activationCode) {
         const activationCodeHash = crypto.createHash("sha256").update(String(activationCode).trim()).digest("hex");
+        const org = await Organization.findOne({
+            "pending_admin.email": String(email).toLowerCase().trim(),
+            "pending_admin.activationCodeHash": activationCodeHash,
+            "pending_admin.activationCodeExpires": { $gt: new Date() },
+        });
+        if (org) return { isPendingAdmin: true, org };
+
         return User.findOne({
             email: String(email).toLowerCase().trim(),
             activationCodeHash,
             activationCodeExpires: { $gt: new Date() },
-            activationUsedAt: null, // Single-use: reject if already consumed
+            activationUsedAt: null,
         }).select("+password");
     }
 
@@ -627,7 +642,29 @@ export const activateAdmin = async (req, res) => {
         }
 
         // --- 1. Lookup user by token ---
-        const user = await findPendingUserByActivation({ token, email, activationCode });
+        const lookupResult = await findPendingUserByActivation({ token, email, activationCode });
+        let user = null;
+        let orgPending = null;
+
+        if (lookupResult && lookupResult.isPendingAdmin) {
+            orgPending = lookupResult.org;
+            // DYNAMICALLY CREATE THE USER NOW
+            const User = (await import("../models/User.js")).default;
+            user = new User({
+                email: orgPending.pending_admin.email,
+                name: orgPending.pending_admin.name,
+                phoneNumber: orgPending.pending_admin.phone,
+                role: "org_admin",
+                organization_id: orgPending._id,
+                mustResetPassword: true,
+                status: "active",
+                authProvider: "manual",
+                linkedProviders: ["manual"],
+                isEmailVerified: true
+            });
+        } else {
+            user = lookupResult;
+        }
 
         if (!user) {
             // Detect specific failure reason for better UX
@@ -665,21 +702,23 @@ export const activateAdmin = async (req, res) => {
 
         // --- 3.5 Check and update subdomain if requested ---
         let finalSubdomain = null;
-        if (user.organization_id && subdomain) {
+        const targetOrgId = orgPending ? orgPending._id : user.organization_id;
+
+        if (targetOrgId && subdomain) {
             const cleanSubdomain = String(subdomain).toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
             if (cleanSubdomain && cleanSubdomain.length >= 3) {
                 const Organization = (await import("../models/Organization.js")).default;
                 const existing = await Organization.findOne({ subdomain: cleanSubdomain, _id: { $ne: user.organization_id } });
                 if (!existing) {
-                    await Organization.findByIdAndUpdate(user.organization_id, { $set: { subdomain: cleanSubdomain } });
+                    await Organization.findByIdAndUpdate(targetOrgId, { $set: { subdomain: cleanSubdomain } });
                     finalSubdomain = cleanSubdomain;
                 }
             }
         }
 
-        if (user.organization_id && !finalSubdomain) {
+        if (targetOrgId && !finalSubdomain) {
             const Organization = (await import("../models/Organization.js")).default;
-            const org = await Organization.findById(user.organization_id).select("subdomain").lean();
+            const org = await Organization.findById(targetOrgId).select("subdomain").lean();
             finalSubdomain = org?.subdomain;
         }
 
@@ -731,6 +770,16 @@ export const activateAdmin = async (req, res) => {
         if (user.status === "pending") user.status = "active";
         user.lastLoginAt = new Date();
         await user.save();
+
+        if (orgPending) {
+            // Clean up the pending_admin fields and link the new owner
+            orgPending.pending_admin.activationToken = null;
+            orgPending.pending_admin.activationTokenExpires = null;
+            orgPending.pending_admin.activationCodeHash = null;
+            orgPending.pending_admin.activationCodeExpires = null;
+            orgPending.owner_id = user._id;
+            await orgPending.save();
+        }
 
         if (user.organization_id) {
             const Organization = (await import("../models/Organization.js")).default;
@@ -2512,7 +2561,7 @@ export const sendOnboardingOtp = async (req, res) => {
         if (type === "email") {
             const cleanEmail = target.toLowerCase().trim();
             const orgExists = await Organization.findOne({ invoice_email: cleanEmail });
-            const userExists = await User.findOne({ email: cleanEmail });
+            const userExists = await User.findOne({ email: cleanEmail, mustResetPassword: { $ne: true } });
             if (orgExists || userExists) {
                 conflict = true;
                 conflictMessage = "This email is already registered with an existing organization or user.";
@@ -2522,7 +2571,7 @@ export const sendOnboardingOtp = async (req, res) => {
             const orgExists = await Organization.findOne({ 
                 $or: [{ invoice_phone: cleanPhone }, { contactNumber: cleanPhone }] 
             });
-            const userExists = await User.findOne({ phoneNumber: cleanPhone });
+            const userExists = await User.findOne({ phoneNumber: cleanPhone, mustResetPassword: { $ne: true } });
             if (orgExists || userExists) {
                 conflict = true;
                 conflictMessage = "This phone number is already registered with an existing organization or user.";

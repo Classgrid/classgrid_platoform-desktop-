@@ -45,6 +45,26 @@ import { sendEmail } from '../services/aws-ses.service.js';
 const router = express.Router();
 
 // ======================================================
+// GET /api/student/org-students
+// Fetches all students for the admin's organization
+// ======================================================
+router.get('/org-students', isAuthenticated, async (req, res) => {
+  if (req.user.role !== 'org_admin') {
+    return res.status(403).json({ message: 'Only org admins can view all students.' });
+  }
+  try {
+    const students = await User.find({
+      organization_id: req.user.organization_id,
+      role: 'student'
+    }).select('name email studentData profilePicture status').sort({ createdAt: -1 }).lean();
+    res.json({ students });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch students' });
+  }
+});
+
+// ======================================================
 // POST /api/student/send-onboarding-otp
 // Sends a 6-digit OTP to the student's email for onboarding verification
 // ======================================================

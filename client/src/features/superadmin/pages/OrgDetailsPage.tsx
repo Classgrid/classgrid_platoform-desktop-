@@ -34,7 +34,7 @@
  */
 
 import { useMemo } from "react";
-import { Activity, AlertCircle, CreditCard, Database, Settings2, ShieldCheck } from "lucide-react";
+import { Activity, AlertCircle, CreditCard, Database, Rocket, Settings2, ShieldCheck } from "lucide-react";
 import { useParams, useLocation } from "react-router-dom";
 
 import {
@@ -57,6 +57,7 @@ import { OrgConfigurationTab } from "../components/org-details/OrgConfigurationT
 import { OrgDetailsHeader } from "../components/org-details/OrgDetailsHeader";
 import { OrgOverviewTab } from "../components/org-details/OrgOverviewTab";
 import { OrgResourcesTab } from "../components/org-details/OrgResourcesTab";
+import { OrgOnboardingTab } from "../components/org-details/OrgOnboardingTab";
 import { useOrganizationControlCenter } from "../queries/useOrganizationControlCenter";
 
 const tabTriggerClassName =
@@ -147,8 +148,10 @@ export function OrgDetailsPage() {
                   <Database aria-hidden="true" />
                   Overview
                 </TabsTrigger>
-                
-                
+                <TabsTrigger value="onboarding" className={tabTriggerClassName}>
+                  <Rocket aria-hidden="true" />
+                  Onboarding
+                </TabsTrigger>
                 <TabsTrigger value="configuration" className={tabTriggerClassName}>
                   <Settings2 aria-hidden="true" />
                   Configuration
@@ -169,9 +172,10 @@ export function OrgDetailsPage() {
               />
             </TabsContent>
 
-            
+            <TabsContent value="onboarding">
+              <OrgOnboardingTab profile={controlCenter.profile} />
+            </TabsContent>
 
-            
 
             <TabsContent value="configuration">
               <OrgConfigurationTab profile={controlCenter.profile} />

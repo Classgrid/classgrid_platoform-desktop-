@@ -1315,23 +1315,24 @@ export const regenerateLeadActivation = async (req, res) => {
     try {
         const { id } = req.params;
         const lead = await DemoRequest.findById(id);
-        if (!lead || !lead.provisionedAdminId) {
+        if (!lead || !lead.provisionedOrganizationId) {
             return res.status(404).json({ success: false, message: "Lead not found or not yet provisioned" });
         }
 
-        const admin = await User.findById(lead.provisionedAdminId);
-        if (!admin) {
-            return res.status(404).json({ success: false, message: "Provisioned admin not found" });
+        const Organization = (await import("../models/Organization.js")).default;
+        const org = await Organization.findById(lead.provisionedOrganizationId);
+        if (!org || !org.pending_admin) {
+            return res.status(404).json({ success: false, message: "Provisioned organization or pending admin not found" });
         }
 
         const { generateActivationCredentials } = await import("../services/lead-conversion.service.js");
         const credentials = generateActivationCredentials();
 
-        admin.activationToken = credentials.hashedActivationToken;
-        admin.activationTokenExpires = credentials.expiresAt;
-        admin.activationCodeHash = credentials.activationCodeHash;
-        admin.activationCodeExpires = credentials.expiresAt;
-        await admin.save();
+        org.pending_admin.activationToken = credentials.hashedActivationToken;
+        org.pending_admin.activationTokenExpires = credentials.expiresAt;
+        org.pending_admin.activationCodeHash = credentials.activationCodeHash;
+        org.pending_admin.activationCodeExpires = credentials.expiresAt;
+        await org.save();
 
         const ONBOARDING_URL = process.env.NODE_ENV === "production" ? "https://onboard.classgrid.in" : "http://onboard.localhost:5173";
         const activationLink = `${ONBOARDING_URL}/?token=${credentials.rawActivationToken}`;

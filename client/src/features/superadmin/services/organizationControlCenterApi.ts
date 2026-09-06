@@ -88,6 +88,8 @@ export interface OrganizationOnboardingProgress {
   fee_structure_configured?: boolean;
   admission_form_configured?: boolean;
   first_login_completed?: boolean;
+  domains_configured?: boolean;
+  admins_invited?: boolean;
   current_stage?: string;
   last_synced_at?: string | null;
   completed_at?: string | null;

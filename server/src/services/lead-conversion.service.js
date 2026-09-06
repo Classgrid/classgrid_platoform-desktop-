@@ -199,11 +199,10 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
       features: allocatedModules,
     });
 
-    const organization = provisioned.organization;
-    const admin = await User.findById(provisioned.admin._id);
+    const organization = await mongoose.model("Organization").findById(provisioned.organization._id);
 
-    if (!admin) {
-      const error = new Error("Provisioned admin account not found.");
+    if (!organization || !organization.pending_admin) {
+      const error = new Error("Provisioned organization or pending admin not found.");
       error.statusCode = 500;
       throw error;
     }
@@ -211,14 +210,11 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
     // Generate single-use activation link for provisioned principal/admin account.
     const credentials = generateActivationCredentials();
 
-    admin.activationToken = credentials.hashedActivationToken;
-    admin.activationTokenExpires = credentials.expiresAt;
-    admin.activationCodeHash = credentials.activationCodeHash;
-    admin.activationCodeExpires = credentials.expiresAt;
-    admin.mustResetPassword = true;
-    admin.isEmailVerified = true;
-    admin.status = "active";
-    await admin.save();
+    organization.pending_admin.activationToken = credentials.hashedActivationToken;
+    organization.pending_admin.activationTokenExpires = credentials.expiresAt;
+    organization.pending_admin.activationCodeHash = credentials.activationCodeHash;
+    organization.pending_admin.activationCodeExpires = credentials.expiresAt;
+    await organization.save();
 
     const ONBOARDING_URL = process.env.NODE_ENV === "production" ? "https://onboard.classgrid.in" : "http://onboard.localhost:5173";
     const activationLink = `${ONBOARDING_URL}/?token=${credentials.rawActivationToken}`;
@@ -233,7 +229,7 @@ export async function approveLeadAndProvision(demoRequestId, options = {}, actor
     lead.convertedAt = new Date();
     lead.convertedBy = actorUserId || null;
     lead.provisionedOrganizationId = organization._id;
-    lead.provisionedAdminId = admin._id;
+    lead.provisionedAdminId = null;
     lead.conversionStatus = "provisioned";
     lead.lifecycleStage = "provisioned";
     lead.conversionCompletedAt = new Date();

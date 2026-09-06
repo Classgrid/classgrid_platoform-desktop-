@@ -57,6 +57,9 @@ import { OrgAdminDashboard } from "@/features/org-admin/components/OrgAdminDashb
 import { UsagePage } from "@/features/org-admin/pages/UsagePage";
 import { BillingPage as OrgAdminBillingPage } from "@/features/org-admin/pages/BillingPage";
 import { MembersPage } from "@/features/org-admin/pages/MembersPage";
+import { AcademicSetupPage } from "@/features/org-admin/pages/AcademicSetupPage";
+import { StudentImportPage } from "@/features/org-admin/pages/StudentImportPage";
+import { FacultyImportPage } from "@/features/org-admin/pages/FacultyImportPage";
 import { LeadsPage } from "@/features/superadmin/pages/LeadsPage";
 import { LeadDetailsPage } from "@/features/superadmin/pages/LeadDetailsPage";
 import { SupportTicketsPage } from "@/features/superadmin/pages/SupportTicketsPage";
@@ -339,6 +342,10 @@ export function AppRouter() {
           <Route path="/org/admin/usage" element={<UsagePage />} />
           <Route path="/org/admin/billing" element={<OrgAdminBillingPage />} />
           <Route path="/org/admin/members" element={<MembersPage />} />
+          <Route path="/org/admin/academic-setup" element={<AcademicSetupPage />} />
+          <Route path="/org/admin/academics" element={<AcademicSetupPage />} />
+          <Route path="/org/students" element={<StudentImportPage />} />
+          <Route path="/org/faculty" element={<FacultyImportPage />} />
           <Route path="/org/classrooms" element={<ClassroomsPage />} />
           <Route path="/org/admin/*" element={<ComingSoonPage />} />
           <Route path="/org/*" element={<ComingSoonPage />} />

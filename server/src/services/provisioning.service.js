@@ -143,32 +143,9 @@ export const provisionDemoOrg = async (adminData, orgData, options = {}) => {
         const { organizationCode, honorCode } = await generateUniqueDualCodes(Organization);
         const privateCode = await generateUniqueLegacyPrivateCode();
 
-        let rootAdmin = await User.findOne({ email: String(adminData.email || "").toLowerCase().trim() }).session(session);
-
-        if (!rootAdmin) {
-            rootAdmin = new User({
-                name: adminData.name,
-                email: String(adminData.email || "").toLowerCase().trim(),
-                role: "org_admin",
-                phoneNumber: adminData.phone_number || adminData.phoneNumber || "",
-                status: "active",
-                mustResetPassword: true,
-                isEmailVerified: true,
-                authProvider: "manual",
-                linkedProviders: ["manual"],
-            });
-            await rootAdmin.save({ session });
-        } else {
-            // If the user already belongs to an organization, we will transfer them to this new sandbox
-            // by overwriting their organization_id later in the process.
-            rootAdmin.name = adminData.name || rootAdmin.name;
-            rootAdmin.role = "org_admin";
-            rootAdmin.status = "active";
-            rootAdmin.phoneNumber = adminData.phone_number || adminData.phoneNumber || rootAdmin.phoneNumber || "";
-            rootAdmin.mustResetPassword = true;
-            rootAdmin.isEmailVerified = true;
-            await rootAdmin.save({ session });
-        }
+        const adminEmail = String(adminData.email || "").toLowerCase().trim();
+        const adminPhone = adminData.phone_number || adminData.phoneNumber || "";
+        const adminName = adminData.name || "";
 
         const city = String(orgData.city || "").trim();
         const state = String(orgData.state || "").trim();
@@ -185,12 +162,18 @@ export const provisionDemoOrg = async (adminData, orgData, options = {}) => {
             state: orgData.state || "",
             district: orgData.district || "",
             taluka: orgData.taluka || "",
-            owner_id: rootAdmin._id,
-            ownerName: adminData.name || "",
-            ownerEmail: String(adminData.email || "").toLowerCase().trim(),
-            contactNumber: adminData.phone_number || adminData.phoneNumber || "",
+            owner_id: null,
+            ownerName: adminName,
+            ownerEmail: adminEmail,
+            contactNumber: adminPhone,
             website: orgData.website || "",
             designation: orgData.designation || "",
+            pending_admin: {
+                name: adminName,
+                email: adminEmail,
+                phone: adminPhone,
+                activationToken: "", // Will be set by controller
+            },
             private_code: privateCode,
             organizationCode,
             honorCode,
@@ -243,16 +226,15 @@ export const provisionDemoOrg = async (adminData, orgData, options = {}) => {
 
         await subscription.save({ session });
 
-        rootAdmin.organization_id = newOrg._id;
-        await rootAdmin.save({ session });
-
+        // Do NOT create the User here or attach organization_id yet. 
+        // This stops ghost users from being created during provisioning.
         await session.commitTransaction();
         session.endSession();
 
         return {
             organization: newOrg,
             subscription,
-            admin: rootAdmin,
+            admin: { name: adminName, email: adminEmail, phone: adminPhone },
         };
     } catch (error) {
         await session.abortTransaction();

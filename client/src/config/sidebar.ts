@@ -258,7 +258,7 @@ export const dashboardConfigs: DashboardConfig[] = [
         label: "SETTINGS & SETUP",
         items: [
           { label: "Members", to: "/org/admin/members", icon: Users },
-          { label: "Academic Setup", to: "/org/admin/academics", icon: Settings }
+          { label: "Academic Setup", to: "/org/admin/academic-setup", icon: Settings }
         ]
       }
     ],
