@@ -2058,9 +2058,13 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                 >
                   <div className="pl-1">
                     <div className="flex items-center gap-2 text-base text-muted-foreground">
-                      <span className="font-medium animate-[shimmer_2s_linear_infinite] bg-[length:200%_100%] bg-clip-text text-transparent bg-[linear-gradient(110deg,#94a3b8,45%,#0f172a,55%,#94a3b8)] dark:bg-[linear-gradient(110deg,#475569,45%,#ffffff,55%,#475569)]">
+                      <motion.span 
+                        className="font-medium bg-[length:200%_100%] bg-clip-text text-transparent bg-[linear-gradient(110deg,#94a3b8,45%,#0f172a,55%,#94a3b8)] dark:bg-[linear-gradient(110deg,#475569,45%,#ffffff,55%,#475569)]"
+                        animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      >
                         {thinkingLabel}
-                      </span>
+                      </motion.span>
                       {(thinkingLabel === "Searching the web" || thinkingLabel === "Reading webpage" || thinkingLabel === "Reading image" || thinkingLabel === "Reading document") ? (
                         <SearchingSpinner reducedMotion={Boolean(prefersReducedMotion)} />
                       ) : (
