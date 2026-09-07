@@ -1,84 +1,17 @@
-/*
- * =========================================================================================
- * STRICT SECURITY POLICY:
- * NO ONE CAN EVER CHANGE THE ORGANIZATION TYPE FROM THE FRONTEND OR BACKEND.
- * NEVER ADD A DROPDOWN OR OPTION TO CHANGE IT ANYWHERE IN THE CODEBASE.
- * NO MEANS NO. THIS IS A FIXED PLATFORM RULE.
- * =========================================================================================
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 CRITICAL AI AND SYSTEM RULES 🚨
- * 1. NEVER DELETE ANY ENVIRONMENT VARIABLES.
- * 2. LOCALHOST TESTING IS STRICTLY BANNED. NO AI WILL EVER TRY TO WORK LOCALLY.
- * 3. THIS REPO IS PRODUCTION-FIRST. DO NOT TOUCH OR REMOVE KEYS.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 NAMING CONVENTION RULE 🚨
- * 1. "CLASSGRID PLATFORM" is strictly the REPO NAME.
- * 2. "CLASSGRID ERP" is the actual PRODUCT NAME.
- * 3. NEVER use "Classgrid Platform" anywhere in the frontend UI or user-facing text.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 HOSTING & ARCHITECTURE RULE 🚨
- * 1. BACKEND IS HOSTED ON AWS EC2 AT API.CLASSGRID.IN
- * 2. FRONTEND IS HOSTED ON VERCEL
- * ─────────────────────────────────────────────────────────
- */
-
-import React from "react";
-import { Users, UserX, Briefcase, FileSignature } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { StatCard } from "@/components/marketing_ui/StatCard";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
-import { DataTable } from "@/components/marketing_ui/data-table";
-
-const hrColumns = [
-  { accessorKey: "employee", header: "Employee" },
-  { accessorKey: "department", header: "Department" },
-  { accessorKey: "role", header: "Role" },
-  { accessorKey: "status", header: "Status" },
-];
-
-const hrData = [
-  { id: "1", employee: "Dr. A. K. Singh", department: "Computer Science", role: "HOD", status: "Active" },
-  { id: "2", employee: "Mrs. S. Gupta", department: "Administration", role: "Clerk", status: "On Leave" },
-  { id: "3", employee: "Mr. R. Kumar", department: "Maintenance", role: "Staff", status: "Active" },
-];
+import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 export function HrDashboardPage() {
   return (
-    <DashboardLayout role="HR_MENU">
-      <PageHeader 
-        title="HR & Payroll Overview" 
-        description="Manage employees, leaves, and recruitment." 
+    <div className="flex flex-col w-full h-full relative bg-background">
+      <AskAiPanel 
+        open={true} 
+        onOpenChange={() => {}} 
+        variant="full-page"
+        pageContext={{
+          path: "/dept/hr/dashboard",
+          title: "HR Agent"
+        }}
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Employees" value="342" icon={Users} trend="4 new hires" trendDirection="up" />
-        <StatCard title="On Leave Today" value="12" icon={UserX} trend="Normal" trendDirection="neutral" />
-        <StatCard title="Open Positions" value="8" icon={Briefcase} trend="Actively recruiting" trendDirection="neutral" />
-        <StatCard title="Pending Appraisals" value="24" icon={FileSignature} trend="Action required" trendDirection="neutral" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Staff Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable columns={hrColumns} data={hrData} />
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

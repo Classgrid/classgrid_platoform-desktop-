@@ -1789,8 +1789,6 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   const panelHeader = (
     <div className={cn("flex items-center justify-between px-4 py-4", variant !== "full-page" && "border-b border-border")}>
       <div className="flex items-center gap-2">
-        <Bot className="h-4 w-4 text-emerald-500" />
-        <p className="text-sm font-semibold text-foreground">Ask AI</p>
       </div>
       <div className="flex items-center gap-1">
         {variant !== "full-page" && messages.length > 0 && (
@@ -2306,15 +2304,28 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       {variant === "full-page" ? (
         <div className="w-full h-full bg-background flex flex-row">
           <div className="flex-1 relative flex flex-col h-full">
-            <div
-              ref={chatScrollRef}
-              className="flex-1 overflow-y-auto overscroll-contain scroll-smooth"
-            >
-              {panelChat}
-            </div>
-            <div className="shrink-0 bg-background pt-2 pb-6 px-4 md:px-8 max-w-4xl w-full mx-auto">
-              {panelInput}
-            </div>
+            {emptyState ? (
+              /* ── Empty state: input centered vertically ── */
+              <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8">
+                <div className="max-w-[52rem] w-full">
+                  {panelChat}
+                  {panelInput}
+                </div>
+              </div>
+            ) : (
+              /* ── Active conversation: messages scroll, input pinned at bottom ── */
+              <>
+                <div
+                  ref={chatScrollRef}
+                  className="flex-1 overflow-y-auto overscroll-contain scroll-smooth"
+                >
+                  {panelChat}
+                </div>
+                <div className="shrink-0 bg-background pt-2 pb-6 px-4 md:px-8 max-w-4xl w-full mx-auto">
+                  {panelInput}
+                </div>
+              </>
+            )}
           </div>
           {/* Right-side TOC showing user questions */}
           {tocItems.length > 0 && <ScrollSpyTOC tocItems={tocItems} activeSection={activeSection} />}

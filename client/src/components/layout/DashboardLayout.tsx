@@ -171,7 +171,7 @@ function DashboardSwitcher({ mainRole, additionalRoles }: { mainRole: string; ad
 
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
   const location = useLocation();
-  const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website") || location.pathname.includes("/storage/files");
+  const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website") || location.pathname.includes("/storage/files") || location.pathname.includes("/dashboard");
   const isNoPadding = location.pathname.includes("/storage/notes");
   const { items, showBreadcrumbs } = useBreadcrumbStore();
   const dashboardRole = normalizeDashboardRole(role, location.pathname);

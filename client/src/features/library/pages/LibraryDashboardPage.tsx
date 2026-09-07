@@ -1,84 +1,17 @@
-/*
- * =========================================================================================
- * STRICT SECURITY POLICY:
- * NO ONE CAN EVER CHANGE THE ORGANIZATION TYPE FROM THE FRONTEND OR BACKEND.
- * NEVER ADD A DROPDOWN OR OPTION TO CHANGE IT ANYWHERE IN THE CODEBASE.
- * NO MEANS NO. THIS IS A FIXED PLATFORM RULE.
- * =========================================================================================
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 CRITICAL AI AND SYSTEM RULES 🚨
- * 1. NEVER DELETE ANY ENVIRONMENT VARIABLES.
- * 2. LOCALHOST TESTING IS STRICTLY BANNED. NO AI WILL EVER TRY TO WORK LOCALLY.
- * 3. THIS REPO IS PRODUCTION-FIRST. DO NOT TOUCH OR REMOVE KEYS.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 NAMING CONVENTION RULE 🚨
- * 1. "CLASSGRID PLATFORM" is strictly the REPO NAME.
- * 2. "CLASSGRID ERP" is the actual PRODUCT NAME.
- * 3. NEVER use "Classgrid Platform" anywhere in the frontend UI or user-facing text.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 HOSTING & ARCHITECTURE RULE 🚨
- * 1. BACKEND IS HOSTED ON AWS EC2 AT API.CLASSGRID.IN
- * 2. FRONTEND IS HOSTED ON VERCEL
- * ─────────────────────────────────────────────────────────
- */
-
-import React from "react";
-import { Book, CheckSquare, Clock, ArrowDownToLine } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { StatCard } from "@/components/marketing_ui/StatCard";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
-import { DataTable } from "@/components/marketing_ui/data-table";
-
-const booksColumns = [
-  { accessorKey: "title", header: "Title" },
-  { accessorKey: "borrower", header: "Borrower" },
-  { accessorKey: "status", header: "Status" },
-  { accessorKey: "dueDate", header: "Due Date" },
-];
-
-const booksData = [
-  { id: "1", title: "Introduction to Algorithms", borrower: "Rahul Sharma", status: "Issued", dueDate: "Tomorrow" },
-  { id: "2", title: "Clean Code", borrower: "Priya Patel", status: "Overdue", dueDate: "2 days ago" },
-  { id: "3", title: "Design Patterns", borrower: "Library", status: "Available", dueDate: "-" },
-];
+import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 export function LibraryDashboardPage() {
   return (
-    <DashboardLayout role="LIBRARY_MENU">
-      <PageHeader 
-        title="Library Overview" 
-        description="Manage books, inventory, and circulations." 
+    <div className="flex flex-col w-full h-full relative bg-background">
+      <AskAiPanel 
+        open={true} 
+        onOpenChange={() => {}} 
+        variant="full-page"
+        pageContext={{
+          path: "/dept/library/dashboard",
+          title: "Library Agent"
+        }}
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Books" value="15,420" icon={Book} trend="245 new this month" trendDirection="up" />
-        <StatCard title="Issued Books" value="1,204" icon={CheckSquare} trend="8% of inventory" trendDirection="neutral" />
-        <StatCard title="Overdue" value="84" icon={Clock} trend="Action required" trendDirection="down" />
-        <StatCard title="New Arrivals" value="45" icon={ArrowDownToLine} trend="This week" trendDirection="up" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Circulations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable columns={booksColumns} data={booksData} />
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
