@@ -8,16 +8,6 @@ export function GlobalAiPanel() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    const handleOpen = () => setOpen(true);
-    window.addEventListener("agent:new-chat", handleOpen);
-    window.addEventListener("agent:load-chat", handleOpen);
-    return () => {
-      window.removeEventListener("agent:new-chat", handleOpen);
-      window.removeEventListener("agent:load-chat", handleOpen);
-    };
-  }, []);
-
   // The AI floating button is available across all dashboard pages
   // Removed isOverviewPage check to allow AI access anywhere.
 

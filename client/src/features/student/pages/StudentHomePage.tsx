@@ -1,9 +1,9 @@
-import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
+// import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 export function StudentHomePage() {
   return (
     <div className="flex flex-col w-full h-full relative bg-background">
-      <AskAiPanel 
+      {/* <AskAiPanel 
         open={true} 
         onOpenChange={() => {}} 
         variant="full-page"
@@ -11,7 +11,7 @@ export function StudentHomePage() {
           path: "/student/dashboard",
           title: "Student Agent"
         }}
-      />
+      /> */}
     </div>
   );
 }

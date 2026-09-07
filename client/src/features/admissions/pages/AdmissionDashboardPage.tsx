@@ -1,9 +1,9 @@
-import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
+// import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 export function AdmissionDashboardPage() {
   return (
     <div className="flex flex-col w-full h-full relative bg-background">
-      <AskAiPanel 
+      {/* <AskAiPanel 
         open={true} 
         onOpenChange={() => {}} 
         variant="full-page"
@@ -11,7 +11,7 @@ export function AdmissionDashboardPage() {
           path: "/dept/admissions/dashboard",
           title: "Admissions Agent"
         }}
-      />
+      /> */}
     </div>
   );
 }
