@@ -201,6 +201,18 @@ function suggestedQuestionsForPage(pageContext?: PageContext) {
     ];
   }
 
+  // If we are in the ERP dashboard, do not show marketing questions
+  if (
+    path.includes("/superadmin") || 
+    path.includes("dashboard") || 
+    path.includes("/student") || 
+    path.includes("/org-admin") || 
+    path.includes("/faculty") ||
+    path.includes("/admin")
+  ) {
+    return [];
+  }
+
   return SUGGESTED_QUESTIONS;
 }
 
@@ -1382,6 +1394,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   useEffect(() => {
     const handleNewChat = () => {
       handleClearChat();
+      onOpenChange?.(true);
     };
 
     const handleLoadChat = (e: any) => {
@@ -1390,6 +1403,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         // Here we can load the specific chat session
         // For now, we simulate switching to it
         setSessionId(sessionId);
+        onOpenChange?.(true);
         const endpoint = typeof import.meta !== "undefined" && import.meta.env
           ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + `/api/ai/sessions/${sessionId}/messages`
           : `/api/ai/sessions/${sessionId}/messages`;
@@ -1412,7 +1426,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       window.removeEventListener("agent:new-chat", handleNewChat);
       window.removeEventListener("agent:load-chat", handleLoadChat);
     };
-  }, [handleClearChat]);
+  }, [handleClearChat, onOpenChange]);
 
   // Follow along during typing animation via a gentle interval
   // instead of reacting to every message state change (which fights user scroll)
