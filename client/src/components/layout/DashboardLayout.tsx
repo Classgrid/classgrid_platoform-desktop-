@@ -44,7 +44,7 @@ import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 import { ChevronDown, LayoutDashboard } from "lucide-react";
 
 import { AppSidebar } from "./AppSidebar";
-import { AgentFloatingButton } from "../ai/AgentFloatingButton";
+import { GlobalAiPanel } from "@/components/ai/GlobalAiPanel";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { getAccessibleDashboards } from "@/lib/dashboardRoleMap";
@@ -243,7 +243,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
             </main>
           </div>
         </SidebarInset>
-        <AgentFloatingButton />
+        <GlobalAiPanel />
       </SidebarProvider>
     </TooltipProvider>
   );
