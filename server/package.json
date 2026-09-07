@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "cd ../packages/classgrid-ai-sdk && npm install --legacy-peer-deps && npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
