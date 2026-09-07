@@ -1917,21 +1917,6 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                 ) : null}
               </p>
             </div>
-
-            <div className="space-y-2">
-              {suggestedQuestions.map((question) => (
-                <Button
-                  key={question}
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start rounded-2xl border-border bg-card/40 px-4 py-3 text-left text-sm text-muted-foreground hover:text-foreground"
-                  onClick={() => void askQuestion(question)}
-                >
-                  <Sparkles className="mr-2 h-4 w-4 text-muted-foreground" />
-                  {question}
-                </Button>
-              ))}
-            </div>
           </>
         ) : (
           <>
