@@ -191,8 +191,7 @@ export function DashboardHomePage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* ... existing recent orgs, pending leads, quick actions ... */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Card>
               <CardHeader className="flex flex-row items-start sm:items-center justify-between">
@@ -278,24 +277,6 @@ export function DashboardHomePage() {
             </Card>
           </div>
         </div>
-
-        {/* --- INLINE AI CHAT SECTION --- */}
-        <div className="w-full h-[600px] border border-border rounded-xl overflow-hidden shadow-sm bg-background mt-6">
-          <AskAiPanel 
-            open={true} 
-            onOpenChange={() => {}} 
-            variant="in-flow"
-            pageContext={{
-              path: "/superadmin/dashboard",
-              title: "Super Admin Overview",
-              summary: "Super Admin dashboard showing all organizations, users, and platform metrics.",
-              totalOrganizations: overview?.totalOrganizations ?? orgs.length,
-              totalUsers: overview?.totalUsers ?? liveUserCount,
-              pendingLeads
-            }}
-          />
-        </div>
       </div>
-    </>
   );
 }
