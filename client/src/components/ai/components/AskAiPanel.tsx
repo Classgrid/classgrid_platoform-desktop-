@@ -1342,7 +1342,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     return () => {
       element.removeEventListener("scroll", handleScroll);
     };
-  }, [open]);
+  }, [open, emptyState]);
 
   // Auto-scroll when a new message is added or thinking state changes
   useEffect(() => {
