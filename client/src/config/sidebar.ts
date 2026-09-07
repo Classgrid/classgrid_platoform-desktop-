@@ -105,6 +105,22 @@ export const dashboardConfigs: DashboardConfig[] = [
   {
     role: "super_admin",
     logo: "Classgrid",
+    brandIcon: Zap,
+    subtitle: "Super Admin",
+    mobileMode: "desktop-only",
+    sections: [
+      {
+        label: "OVERVIEW",
+        items: [
+          { label: "Agent", to: "/superadmin/dashboard", icon: Bot },
+          { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart }
+        ]
+      },
+      {
+        label: "ORGANIZATIONS",
+        items: [
+          { label: "All Organizations", to: "/superadmin/orgs", icon: Building2 },
+          { label: "Demo Leads", to: "/superadmin/leads", icon: ClipboardList },
         ]
       },
       {
