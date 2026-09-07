@@ -20,16 +20,21 @@ export const streamAskAi = async (req, res) => {
         }
         messages.unshift({ role: "system", content: SYSTEM_PROMPT });
 
-        // 3. Initialize the real LLM Client from the Classgrid SDK using the API key in the environment
+        // 3. Initialize the real LLM Client from the Classgrid SDK using the fallback hierarchy
         const client = createLLMClient({
             providers: [
                 {
                     name: "gemini",
                     url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
-                    apiKey: process.env.AI_API_KEY || "",
+                    apiKey: process.env.GEMINI_API_KEY || "",
                     model: "gemini-3.5-flash"
                 },
-                // (Other providers can be added identically to your SDK)
+                {
+                    name: "mistral",
+                    url: "https://api.mistral.ai/v1/chat/completions",
+                    apiKey: process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY_2 || "",
+                    model: "mistral-small-latest"
+                }
             ],
             verbose: true,
             maxToolDepth: 5,
