@@ -154,7 +154,11 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
           <SidebarSwitcher user={user ?? null} />
         </div>
         <div className={showStorageMenu || showAgentMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
-          <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SidebarSearch 
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            placeholder={showAgentMenu ? "Search chat history..." : "Search..."}
+          />
         </div>
       </SidebarHeader>
 
