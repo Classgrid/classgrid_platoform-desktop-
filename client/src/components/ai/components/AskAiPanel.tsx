@@ -1841,7 +1841,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   );
 
   const panelChat = (
-    <div ref={variant !== "full-page" ? chatScrollRef : undefined} className={cn("overscroll-contain [scrollbar-width:thin]", variant === "full-page" ? "w-full" : "flex-1 min-h-0 overflow-y-auto")}>
+    <div ref={variant !== "full-page" ? chatScrollRef : undefined} className={cn("overscroll-contain [scrollbar-width:thin] [scrollbar-gutter:stable]", variant === "full-page" ? "w-full" : "flex-1 min-h-0 overflow-y-auto")}>
       <div className={cn("flex flex-col gap-4 px-4 py-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
         {emptyState ? (
           <>
@@ -2313,7 +2313,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
               <>
                 <div
                   ref={chatScrollRef}
-                  className="flex-1 overflow-y-auto overscroll-contain scroll-smooth"
+                  className="flex-1 overflow-y-auto overscroll-contain scroll-smooth [scrollbar-gutter:stable]"
                 >
                   {panelChat}
                 </div>

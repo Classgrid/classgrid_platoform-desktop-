@@ -40,7 +40,7 @@ import {
     chatWithSyllabus, 
     getMyPersona 
 } from "../controllers/ai.controller.js";
-import { streamAskAi } from "../controllers/ai-chat.controller.js";
+import { streamAskAi, getChatSessions, getChatSessionMessages, uploadChatImage } from "../controllers/ai-chat.controller.js";
 
 const router = express.Router();
 
@@ -61,5 +61,12 @@ router.get("/my-persona", isAuthenticated, getMyPersona);
 
 // Global AI Panel SSE Chat
 router.post("/ask", isAuthenticated, streamAskAi);
+
+// Chat History & Sessions
+router.get("/sessions", isAuthenticated, getChatSessions);
+router.get("/sessions/:id/messages", isAuthenticated, getChatSessionMessages);
+
+// R2 Image Upload for Chat
+router.post("/upload", isAuthenticated, uploadChatImage);
 
 export default router;

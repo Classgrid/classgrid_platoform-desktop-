@@ -1,4 +1,11 @@
 import { createLLMClient } from "@classgrid/ai/core";
+import { getPresignedUploadUrl } from "../config/r2Client.js";
+import { 
+    createSession, 
+    saveMessage, 
+    getSessions, 
+    getSessionMessages 
+} from "../services/ai-chat.service.js";
 // The system prompt was originally in ./prompt, we will define it here or import it if needed.
 const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. 
 
@@ -17,10 +24,31 @@ export const streamAskAi = async (req, res) => {
     try {
         const body = req.body || {};
         
-        // 2. Construct messages
         const messages = body.history || [];
+        
+        let sessionId = body.sessionId;
+        const isIncognito = body.isIncognito || false;
+        
+        // 2a. If not incognito and no session exists, create one
+        if (!isIncognito && !sessionId && body.question) {
+            const title = body.question.length > 50 ? body.question.substring(0, 47) + "..." : body.question;
+            const session = await createSession(body.userEmail || 'unknown@classgrid.in', title, false);
+            if (session) sessionId = session.id;
+        }
+
+        // 2b. If not incognito, save the user message to DB immediately
+        if (!isIncognito && sessionId && body.question) {
+            await saveMessage(sessionId, "user", body.question, body.fileUrls || []);
+        }
+
         if (body.question) {
-            messages.push({ role: "user", content: body.question });
+            // Include image URLs in the SDK's expected format if needed
+            // Currently, simple string content is supported by the AI core, but if they had fileUrls, we append them as context.
+            let content = body.question;
+            if (body.fileUrls && body.fileUrls.length > 0) {
+                content += "\n\nAttached Files:\n" + body.fileUrls.join('\n');
+            }
+            messages.push({ role: "user", content });
         }
         
         let dynamicSystemPrompt = SYSTEM_PROMPT;
@@ -128,11 +156,20 @@ export const streamAskAi = async (req, res) => {
             }
         });
 
+        // 5. Send back the sessionId if it was created
+        if (sessionId) {
+            res.write(`data: ${JSON.stringify({ type: "session_info", sessionId })}\n\n`);
+        }
+
         if (!answer) {
             res.write(`data: ${JSON.stringify({ type: "answer", answer: "Failed to get an answer from the AI." })}\n\n`);
         } else if (answer === "[RATE_LIMITED]") {
             res.write(`data: ${JSON.stringify({ type: "answer", answer: "I'm currently experiencing high traffic and cannot process your request right now." })}\n\n`);
         } else {
+            // Save Assistant response
+            if (!isIncognito && sessionId) {
+                await saveMessage(sessionId, "assistant", answer, []);
+            }
             res.write(`data: ${JSON.stringify({ type: "answer", answer })}\n\n`);
         }
 
@@ -144,5 +181,42 @@ export const streamAskAi = async (req, res) => {
     }
 };
 
-// Trigger redeploy for env update
-// GitHub Action Force Trigger
+export const getChatSessions = async (req, res) => {
+    try {
+        const email = req.user?.email; // Assumes isAuthenticated populates req.user
+        if (!email) return res.status(401).json({ error: "Unauthorized" });
+
+        const sessions = await getSessions(email);
+        res.json({ sessions });
+    } catch (e) {
+        console.error("Error getting sessions:", e);
+        res.status(500).json({ error: "Failed to load chat sessions" });
+    }
+};
+
+export const getChatSessionMessages = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const messages = await getSessionMessages(id);
+        res.json({ messages });
+    } catch (e) {
+        console.error("Error getting session messages:", e);
+        res.status(500).json({ error: "Failed to load messages" });
+    }
+};
+
+export const uploadChatImage = async (req, res) => {
+    try {
+        const { fileName, mimeType } = req.body;
+        if (!fileName || !mimeType) {
+            return res.status(400).json({ error: "fileName and mimeType required" });
+        }
+        
+        // Use R2 presigned URL generator for secure direct browser upload
+        const result = await getPresignedUploadUrl(fileName, mimeType, 3600, `ai-chat-uploads/${Date.now()}-${fileName}`);
+        res.json(result);
+    } catch (e) {
+        console.error("Error generating presigned URL for AI chat:", e);
+        res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+};

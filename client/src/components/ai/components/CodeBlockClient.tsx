@@ -50,7 +50,7 @@ export function CodeBlockClient({ rawCode, html, language = 'javascript' }: { ra
             </span>
           )}
         </div>
-        
+
         <button
           onClick={onCopy}
           className="flex items-center gap-1.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md text-xs text-zinc-400 hover:text-white hover:bg-white/5"
@@ -61,9 +61,9 @@ export function CodeBlockClient({ rawCode, html, language = 'javascript' }: { ra
       </div>
 
       {/* Code Content */}
-      <div 
-        className="relative overflow-auto max-h-[32rem] text-sm code-block-wrapper custom-scrollbar [&>pre]:!bg-transparent [&>pre]:!m-0" 
-        dangerouslySetInnerHTML={{ __html: html }} 
+      <div
+        className="relative overflow-auto max-h-[32rem] text-sm code-block-wrapper custom-scrollbar [&>pre]:!bg-transparent [&>pre]:!m-0"
+        dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
   );
