@@ -698,7 +698,7 @@ const AssistantMessageContent = memo(({ content, isTyping }: { content: string, 
                   <TableHeader>
                     <TableRow>
                       {block.headers.map((h, i) => (
-                        <TableHead key={i} className="font-semibold text-slate-900 dark:text-white">
+                        <TableHead key={i} className={cn("font-semibold text-slate-900 dark:text-white", i < block.headers.length - 1 && "border-r")}>
                           {renderInlineText(h)}
                         </TableHead>
                       ))}
@@ -708,7 +708,7 @@ const AssistantMessageContent = memo(({ content, isTyping }: { content: string, 
                     {block.rows.map((row, rIndex) => (
                       <TableRow key={rIndex}>
                         {row.map((cell, cIndex) => (
-                          <TableCell key={cIndex} className="text-muted-foreground">
+                          <TableCell key={cIndex} className={cn("text-muted-foreground", cIndex < row.length - 1 && "border-r")}>
                             {renderInlineText(cell)}
                           </TableCell>
                         ))}
