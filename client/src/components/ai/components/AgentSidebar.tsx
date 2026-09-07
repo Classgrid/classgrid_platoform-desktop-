@@ -10,7 +10,7 @@ interface ChatSession {
   created_at: string;
 }
 
-export function AgentNestedMenu() {
+export function AgentNestedMenu({ searchQuery = "" }: { searchQuery?: string }) {
   const [sessions, setSessions] = React.useState<ChatSession[]>([]);
   const [loading, setLoading] = React.useState(false);
 
@@ -29,14 +29,19 @@ export function AgentNestedMenu() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Filter sessions based on searchQuery
+  const filteredSessions = sessions.filter(s => 
+    s.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const today = new Date();
   const isToday = (dateString: string) => {
     const d = new Date(dateString);
     return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   };
   
-  const todaySessions = sessions.filter(s => isToday(s.created_at));
-  const previousSessions = sessions.filter(s => !isToday(s.created_at));
+  const todaySessions = filteredSessions.filter(s => isToday(s.created_at));
+  const previousSessions = filteredSessions.filter(s => !isToday(s.created_at));
 
   const handleNewChat = () => {
     window.dispatchEvent(new Event("agent:new-chat"));
@@ -51,19 +56,11 @@ export function AgentNestedMenu() {
       <div className="px-2 pb-3 mb-3 border-b border-border/50">
         <Button 
           onClick={handleNewChat}
-          className="w-full justify-start gap-2 h-9 px-3 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 mb-3"
+          className="w-full justify-start gap-2 h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/90 border-none mb-1 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span className="font-medium text-sm">New Chat</span>
         </Button>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search history..."
-            className="w-full h-8 pl-8 bg-background/50 border-border/50 text-xs focus-visible:ring-1"
-          />
-        </div>
       </div>
 
       <SidebarGroupContent>
