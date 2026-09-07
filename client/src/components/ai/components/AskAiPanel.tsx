@@ -1,5 +1,6 @@
 
-import { useEffect, useMemo, useRef, useState, useCallback, memo } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, memo, useContext } from "react";
+import { SidebarContext } from "@/components/marketing_ui/sidebar";
 import hljs from "highlight.js";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -795,6 +796,8 @@ const AssistantMessageContent = memo(({ content, isTyping }: { content: string, 
 
 export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow", initialMessages, autoFocus = true }: AskAiPanelProps) {
   const { data: session } = useSession();
+  const sidebarContext = useContext(SidebarContext);
+  const isSidebarCollapsed = sidebarContext?.state === "collapsed";
   const prefersReducedMotion = useReducedMotion();
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
   const [input, setInput] = useState("");
@@ -1837,7 +1840,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
   const panelChat = (
     <div ref={variant !== "full-page" ? chatScrollRef : undefined} className={cn("overscroll-contain [scrollbar-width:thin]", variant === "full-page" ? "w-full" : "flex-1 min-h-0 overflow-y-auto")}>
-      <div className={cn("flex flex-col gap-4 px-4 py-4", variant === "full-page" && "max-w-[52rem] mx-auto w-full pb-52")}>
+      <div className={cn("flex flex-col gap-4 px-4 py-4", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
         {emptyState ? (
           <>
             <div className="rounded-2xl border border-border bg-card px-4 py-3">
