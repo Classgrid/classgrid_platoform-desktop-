@@ -45,6 +45,7 @@ import { ChevronDown, LayoutDashboard } from "lucide-react";
 
 import { AppSidebar } from "./AppSidebar";
 import { AgentFloatingButton } from "../ai/AgentFloatingButton";
+import { AskAiPanel } from "../ai/components/AskAiPanel";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { getAccessibleDashboards } from "@/lib/dashboardRoleMap";
@@ -182,12 +183,26 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
   const mainRole: string = currentUser?.role ?? "";
   const additionalRoles: string[] = currentUser?.additional_roles ?? [];
 
+  // Global Agent Panel state
+  const [isAgentOpen, setIsAgentOpen] = useState(false);
+
+  useEffect(() => {
+    const openPanel = () => setIsAgentOpen(true);
+    window.addEventListener("agent:new-chat", openPanel);
+    window.addEventListener("agent:load-chat", openPanel);
+    return () => {
+      window.removeEventListener("agent:new-chat", openPanel);
+      window.removeEventListener("agent:load-chat", openPanel);
+    };
+  }, []);
+
   return (
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar role={dashboardRole} user={sidebarUser} />
         <SidebarInset className="bg-background m-0 p-0 flex flex-col h-screen overflow-hidden">
-          <div className={`flex-1 min-h-0 flex flex-col overflow-hidden relative ${(isFullBleed || isNoPadding) ? "bg-background border-l border-border" : "bg-card border-l border-border"}`}>
+          <div className="flex w-full h-full">
+            <div className={`flex-1 min-h-0 flex flex-col overflow-hidden relative ${(isFullBleed || isNoPadding) ? "bg-background border-l border-border" : "bg-card border-l border-border"}`}>
             {!isFullBleed && showBreadcrumbs && (
               <header className="flex h-14 shrink-0 items-center justify-center border-b border-border/50 px-4 bg-background/80 backdrop-blur-md sticky top-0 z-50 relative">
                 {/* Left: trigger */}
@@ -242,6 +257,19 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
               )}
               {children}
             </main>
+          </div>
+          {/* GLOBAL AGENT PANEL - Only rendered on non-home pages */}
+          {!isFullBleed && (
+            <AskAiPanel
+              open={isAgentOpen}
+              onOpenChange={setIsAgentOpen}
+              variant="in-flow"
+              pageContext={{
+                path: location.pathname,
+                title: resolveDashboardPageTitle(location.pathname)
+              }}
+            />
+          )}
           </div>
         </SidebarInset>
       </SidebarProvider>
