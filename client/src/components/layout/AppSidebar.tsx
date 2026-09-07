@@ -157,7 +157,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
           <SidebarSearch 
             searchQuery={searchQuery} 
             setSearchQuery={setSearchQuery} 
-            placeholder={showAgentMenu ? "Search chat history..." : "Search..."}
+            placeholder={showAgentMenu ? "Search chat history" : "Search..."}
           />
         </div>
       </SidebarHeader>
