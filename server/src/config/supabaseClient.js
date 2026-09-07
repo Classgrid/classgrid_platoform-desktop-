@@ -38,21 +38,6 @@ import dotenv from "dotenv";
 import WebSocket from "ws";
 
 dotenv.config();
-
-// ─────────────────────────────────────────────────────────
-// PRIMARY SUPABASE CLIENT (SINGLE SOURCE OF TRUTH)
-// All modules MUST use this. No more inline createClient().
-// Project: bumxgscngzjadyozdpce.supabase.co
-// ─────────────────────────────────────────────────────────
-const CHAT_URL = process.env.SUPABASE_CHAT_URL;
-const CHAT_KEY = process.env.SUPABASE_CHAT_KEY;
-
-let _primaryClient = null;
-
-/**
- * Returns the centralized Supabase client.
- * Lazy singleton — created on first call, reused thereafter.
- *
  * PgBouncer Compatibility (Production/Staging):
  * When using Supabase's PgBouncer (port 6543), the client must be configured
  * with `db.schema` set explicitly and connection pooling awareness.
