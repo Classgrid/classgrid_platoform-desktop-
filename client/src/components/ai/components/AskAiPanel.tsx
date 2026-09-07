@@ -1853,7 +1853,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                   className="w-full justify-start rounded-2xl border-border bg-card/40 px-4 py-3 text-left text-sm text-muted-foreground hover:text-foreground"
                   onClick={() => void askQuestion(question)}
                 >
-                  <Sparkles className="mr-2 h-4 w-4 text-emerald-500" />
+                  <Sparkles className="mr-2 h-4 w-4 text-muted-foreground" />
                   {question}
                 </Button>
               ))}
@@ -2267,7 +2267,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
               ) : (
                 <Button
                   type="submit"
-                  variant="primary"
+                  variant="ghost"
                   size="icon"
                   disabled={!canSubmit}
                   className="h-8 w-8 shrink-0 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-sm"
