@@ -1962,9 +1962,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
           <>
             {/* PostHog-style centered greeting with logo & suggestion chips */}
             <div className="flex flex-col items-center justify-center py-16 gap-5 select-none">
-              {/* Classgrid Logo */}
+              {/* Classgrid Logo — same size as PostHog */}
               <div className="flex items-center gap-2">
-                <Sparkles className="h-8 w-8 text-emerald-500" />
+                <img src="/logo.png" alt="Classgrid" className="h-12 w-12 object-contain" />
               </div>
 
               {/* Greeting */}
