@@ -216,6 +216,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                 if (item.label === "Storage") {
                                   setShowStorageMenu(true);
                                 } else if (item.label === "Agent") {
+                                  e.preventDefault();
                                   setShowAgentMenu(true);
                                   if (item.to) navigate(item.to);
                                 }
@@ -243,6 +244,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                     className="flex items-center gap-3 w-full justify-between"
                                     onClick={(e) => {
                                       if (item.label === "Agent") {
+                                        e.preventDefault();
                                         setShowAgentMenu(true);
                                         if (item.to) navigate(item.to);
                                       } else if (item.hasNestedNav) {
