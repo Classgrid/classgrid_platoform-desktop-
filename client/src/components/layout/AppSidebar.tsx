@@ -297,7 +297,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                 </SidebarGroupContent>
               </SidebarGroup>
             ) : showAgentMenu ? (
-              <AgentNestedMenu />
+              <AgentNestedMenu searchQuery={searchQuery} />
             ) : null
           }
         />
