@@ -2419,80 +2419,80 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                     </p>
                     <div className="flex flex-wrap justify-center gap-2">
                       {(() => {
-                        const path = window.location.pathname;
+                        const role = user?.role?.toLowerCase() || "";
                         let chips: { icon: string; label: string }[] = [];
 
-                        if (path.startsWith("/superadmin")) {
+                        if (role === "super_admin" || role === "superadmin" || role === "platform_owner") {
                           chips = [
                             { icon: "📊", label: "Analytics" },
                             { icon: "🏫", label: "Organizations" },
                             { icon: "💰", label: "Revenue" },
                             { icon: "📋", label: "Leads" },
                           ];
-                        } else if (path.startsWith("/org")) {
+                        } else if (role === "org_admin" || role === "admin" || role === "principal" || role === "director") {
                           chips = [
                             { icon: "👥", label: "Students" },
                             { icon: "👨‍🏫", label: "Faculty" },
                             { icon: "💳", label: "Fees" },
                             { icon: "📅", label: "Attendance" },
                           ];
-                        } else if (path.startsWith("/dept/admissions")) {
+                        } else if (role.includes("admission")) {
                           chips = [
                             { icon: "📋", label: "Applications" },
                             { icon: "🏅", label: "Merit Lists" },
                             { icon: "📂", label: "Documents" },
                             { icon: "✅", label: "Enrollment" },
                           ];
-                        } else if (path.startsWith("/dept/fees")) {
+                        } else if (role.includes("fee") || role === "fee_manager") {
                           chips = [
                             { icon: "💰", label: "Payments" },
                             { icon: "⚠️", label: "Defaulters" },
                             { icon: "📊", label: "Fee Structure" },
                             { icon: "📋", label: "Reports" },
                           ];
-                        } else if (path.startsWith("/dept/exams")) {
+                        } else if (role.includes("exam") || role === "exam_controller") {
                           chips = [
                             { icon: "📝", label: "Exams" },
                             { icon: "📊", label: "Results" },
                             { icon: "🎯", label: "Grading" },
                             { icon: "📅", label: "Schedule" },
                           ];
-                        } else if (path.startsWith("/dept/library")) {
+                        } else if (role.includes("library") || role === "librarian") {
                           chips = [
                             { icon: "📚", label: "Books" },
                             { icon: "📖", label: "Issued" },
                             { icon: "⏰", label: "Overdue" },
                             { icon: "🗂️", label: "Catalog" },
                           ];
-                        } else if (path.startsWith("/dept/attendance")) {
+                        } else if (role.includes("attendance")) {
                           chips = [
                             { icon: "📋", label: "Today's Attendance" },
                             { icon: "📊", label: "Reports" },
                             { icon: "🔔", label: "Alerts" },
                             { icon: "📈", label: "Trends" },
                           ];
-                        } else if (path.startsWith("/dept/hr")) {
+                        } else if (role.includes("hr") || role === "hr_manager") {
                           chips = [
                             { icon: "👥", label: "Staff" },
                             { icon: "💰", label: "Payroll" },
                             { icon: "📅", label: "Leave" },
                             { icon: "📋", label: "Recruitment" },
                           ];
-                        } else if (path.startsWith("/dept/hostel")) {
+                        } else if (role.includes("hostel") || role.includes("transport")) {
                           chips = [
                             { icon: "🏠", label: "Rooms" },
                             { icon: "👥", label: "Residents" },
                             { icon: "📝", label: "Complaints" },
                             { icon: "🍽️", label: "Mess" },
                           ];
-                        } else if (path.startsWith("/faculty")) {
+                        } else if (role === "faculty" || role === "teacher" || role === "hod" || role === "vice_principal") {
                           chips = [
                             { icon: "📚", label: "My Classes" },
                             { icon: "📋", label: "Attendance" },
                             { icon: "📊", label: "Results" },
                             { icon: "📅", label: "Timetable" },
                           ];
-                        } else if (path.startsWith("/student")) {
+                        } else if (role === "student") {
                           chips = [
                             { icon: "💳", label: "My Fees" },
                             { icon: "📋", label: "Attendance" },
