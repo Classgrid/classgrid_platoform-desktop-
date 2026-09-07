@@ -3,7 +3,8 @@ import { createLLMClient } from "@classgrid/ai/core";
 const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. 
 
 IMPORTANT FORMATTING RULES:
-When creating markdown tables, you MUST keep column text extremely concise. Never create excessively wide tables. Summarize long explanations into bullet points outside the table instead of stuffing paragraphs into table cells.`;
+When creating markdown tables, you MUST use html line breaks (<br>) inside table cells if the text is long. This prevents the table from becoming excessively wide and forcing the user to scroll horizontally. 
+CRITICAL: ONLY use <br> tags INSIDE table cells. Do NOT use <br> tags anywhere else in your response.`;
 
 export const streamAskAi = async (req, res) => {
     // 1. Setup Server-Sent Events (SSE) headers for Express
