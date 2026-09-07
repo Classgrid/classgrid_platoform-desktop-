@@ -21,6 +21,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { toast } from "sonner";
 import { organizationControlCenterApi } from "../services/organizationControlCenterApi";
 import { formatDateTime } from "../components/org-details/formatters";
+import { PageBreadcrumbs } from "@/components/layout/PageBreadcrumbs";
 
 interface FeeStructureNode {
   _id: string;
@@ -104,15 +105,18 @@ export function OrgFeesPage() {
     totalRevenuePotential += fee.base_amount + (fee.base_amount * (fee.tax_percentage / 100));
   });
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Fee Structure Audit" }
+  ], [id, orgName]);
+
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+      <PageBreadcrumbs items={breadcrumbItems} />
+      
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-muted-foreground mb-1">
-          <Link to={`/superadmin/detail/${id}`} className="hover:text-foreground transition-colors cursor-pointer">Back to Organization</Link>
-          <span className="mx-2 text-muted-foreground/50">/</span>
-          <span className="text-foreground">Fee Structure Audit</span>
-        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <IndianRupee className="h-6 w-6 text-primary" />

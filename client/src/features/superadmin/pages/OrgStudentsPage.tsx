@@ -21,6 +21,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { toast } from "sonner";
 import { organizationControlCenterApi } from "../services/organizationControlCenterApi";
 import { formatDateTime } from "../components/org-details/formatters";
+import { PageBreadcrumbs } from "@/components/layout/PageBreadcrumbs";
 
 interface StudentProfile {
   prn?: string;
