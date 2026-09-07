@@ -201,24 +201,12 @@ function suggestedQuestionsForPage(pageContext?: PageContext) {
     ];
   }
 
-  // If we are in the ERP dashboard, do not show marketing questions
-  if (
-    path.includes("/superadmin") || 
-    path.includes("dashboard") || 
-    path.includes("/student") || 
-    path.includes("/org-admin") || 
-    path.includes("/faculty") ||
-    path.includes("/admin")
-  ) {
-    return [];
-  }
-
   return SUGGESTED_QUESTIONS;
 }
 
 const panelTransition = {
-  duration: 0.15,
-  ease: "easeOut",
+  duration: 0.36,
+  ease: [0.22, 1, 0.36, 1],
 } as const;
 
 const SECTION_ICON_RULES: Array<{ match: RegExp; icon: LucideIcon }> = [
@@ -1116,7 +1104,31 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setAttachedFiles(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  // Local storage persistence removed per user request: "always show new chat for every time logout and login and even browser dashboard closes"
+  // Load chat history and session ID from local storage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("classgrid_ai_chat_history");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Force typing to false for loaded messages so they don't get stuck
+        setMessages(parsed.map((m: any) => ({ ...m, typing: false })));
+      }
+      const savedSessionId = localStorage.getItem("classgrid_ai_session_id");
+      if (savedSessionId) {
+        setSessionId(savedSessionId);
+      }
+    } catch (_) { }
+  }, []);
+
+  // Save chat history and session ID to local storage whenever they update
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("classgrid_ai_chat_history", JSON.stringify(messages));
+    }
+    if (sessionId) {
+      localStorage.setItem("classgrid_ai_session_id", sessionId);
+    }
+  }, [messages, sessionId]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [isTerminated, setIsTerminated] = useState(false);
@@ -1152,7 +1164,25 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   const [userContext, setUserContext] = useState<any>(null);
 
   // Fetch contextual user data on mount if session exists
-  // Removing /api/user/ai-context fetch as it doesn't exist on backend and pollutes logs
+  useEffect(() => {
+    if (session?.user?.email) {
+      const endpoint = typeof import.meta !== "undefined" && import.meta.env
+        ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/user/ai-context"
+        : "/api/user/ai-context";
+        
+      fetch(endpoint)
+        .then((res) => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+        })
+        .then((data) => {
+          if (data?.userContext) {
+            setUserContext(data.userContext);
+          }
+        })
+        .catch((err) => console.error("Failed to fetch user context", err));
+    }
+  }, [session]);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const isGenerating = submitting || thinking || (messages[messages.length - 1]?.typing === true);
@@ -1370,16 +1400,14 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   useEffect(() => {
     const handleNewChat = () => {
       handleClearChat();
-      onOpenChange?.(true);
     };
 
     const handleLoadChat = (e: any) => {
       const sessionId = e.detail?.sessionId;
       if (sessionId) {
-        // Provide INSTANT visual feedback by clearing the screen
-        setMessages([]);
+        // Here we can load the specific chat session
+        // For now, we simulate switching to it
         setSessionId(sessionId);
-        onOpenChange?.(true);
         const endpoint = typeof import.meta !== "undefined" && import.meta.env
           ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + `/api/ai/sessions/${sessionId}/messages`
           : `/api/ai/sessions/${sessionId}/messages`;
@@ -1402,7 +1430,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       window.removeEventListener("agent:new-chat", handleNewChat);
       window.removeEventListener("agent:load-chat", handleLoadChat);
     };
-  }, [handleClearChat, onOpenChange]);
+  }, [handleClearChat]);
 
   // Follow along during typing animation via a gentle interval
   // instead of reacting to every message state change (which fights user scroll)
@@ -1544,9 +1572,6 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setThinking(true);
     setThinkingLabel("Thinking");
     userScrolledUpRef.current = false; // Reset scroll lock for new question
-    
-    // Auto-open agent sidebar when a message is sent
-    window.dispatchEvent(new Event("agent:open-menu"));
 
     const uploadedAttachments: AiAttachment[] = filesToUpload;
 
