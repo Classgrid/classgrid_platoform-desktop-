@@ -1915,9 +1915,6 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                     Hi, {session.user.name.split(" ")[0]} 👋
                   </span>
                 ) : null}
-                {pageContext?.title
-                  ? `Ask about ${pageContext.title}, Classgrid features, pricing, demos, or support.`
-                  : "Ask anything about Classgrid features, pricing, website capabilities, demo process, or support."}
               </p>
             </div>
 
