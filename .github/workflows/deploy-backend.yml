@@ -42,7 +42,9 @@ jobs:
             # Go into server folder, install new packages, and restart PM2
             cd server
             echo "$PRODUCTION_ENV" > .env
-            npm install --omit=dev
+            npm cache clean --force
+            rm -rf node_modules package-lock.json
+            npm install
             
             # FREE UP RAM & ADD SWAP SPACE TO PREVENT OUT-OF-MEMORY CRASHES
             sudo fallocate -l 2G /swapfile || true
