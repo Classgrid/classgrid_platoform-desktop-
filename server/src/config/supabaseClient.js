@@ -44,8 +44,8 @@ dotenv.config();
 // All modules MUST use this. No more inline createClient().
 // Project: bumxgscngzjadyozdpce.supabase.co
 // ─────────────────────────────────────────────────────────
-const CHAT_URL = process.env.SUPABASE_CHAT_URL;
-const CHAT_KEY = process.env.SUPABASE_CHAT_KEY;
+const CHAT_URL = process.env.SUPABASE_CHAT_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const CHAT_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_CHAT_KEY;
 
 let _primaryClient = null;
 
