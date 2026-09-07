@@ -230,15 +230,8 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                   </BreadcrumbList>
                 </Breadcrumb>
 
-                {/* Right: Dashboard Switcher & AI Toggle */}
+                {/* Right: Dashboard Switcher */}
                 <div className="absolute right-4 flex items-center gap-2">
-                  <button 
-                    onClick={() => setAiOpen(true)}
-                    className="flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-sm font-medium transition-colors"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span className="hidden sm:inline">Ask AI</span>
-                  </button>
                   <DashboardSwitcher mainRole={mainRole} additionalRoles={additionalRoles} />
                 </div>
               </header>
