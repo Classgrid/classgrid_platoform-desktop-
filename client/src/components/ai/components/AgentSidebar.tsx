@@ -10,20 +10,8 @@ import { useSidebar } from "@/components/marketing_ui/sidebar";
 interface ChatSession {
   id: string;
   title: string;
-  date: string;
-  isToday?: boolean;
+  created_at: string;
 }
-
-// Mock data until Supabase is connected
-const MOCK_SESSIONS: ChatSession[] = [
-  { id: "1", title: "How to configure S3 storage?", date: "2 mins ago", isToday: true },
-  { id: "2", title: "Explain Kubernetes pods", date: "1 hour ago", isToday: true },
-  { id: "3", title: "Debug React infinite loop", date: "3 hours ago", isToday: true },
-  { id: "4", title: "Postgres index optimization", date: "Yesterday" },
-  { id: "5", title: "Setup Vercel deployment", date: "Yesterday" },
-  { id: "6", title: "Stripe webhook integration", date: "Oct 24, 2023" },
-  { id: "7", title: "Tailwind CSS grid layout", date: "Oct 23, 2023" },
-];
 
 interface AgentSidebarProps {
   isOpen: boolean;
@@ -33,6 +21,36 @@ interface AgentSidebarProps {
 export function AgentSidebar({ isOpen, onClose }: AgentSidebarProps) {
   const { state } = useSidebar();
   const isSidebarCollapsed = state === "collapsed";
+  
+  const [sessions, setSessions] = React.useState<ChatSession[]>([]);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setLoading(true);
+      const endpoint = typeof import.meta !== "undefined" && import.meta.env
+        ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/sessions"
+        : "/api/ai/sessions";
+        
+      fetch(endpoint, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.sessions) setSessions(data.sessions);
+        })
+        .catch(err => console.error("Failed to load sessions", err))
+        .finally(() => setLoading(false));
+    }
+  }, [isOpen]);
+
+  // Group sessions by Today vs Previous
+  const today = new Date();
+  const isToday = (dateString: string) => {
+    const d = new Date(dateString);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+  };
+  
+  const todaySessions = sessions.filter(s => isToday(s.created_at));
+  const previousSessions = sessions.filter(s => !isToday(s.created_at));
   
   // Width logic: if main sidebar is expanded (256px), we position it next to it or over it.
   // We'll mimic the sliding nested menu by overlaying it exactly where the main sidebar's content is,
@@ -86,7 +104,9 @@ export function AgentSidebar({ isOpen, onClose }: AgentSidebarProps) {
                   Today
                 </h4>
                 <div className="space-y-0.5">
-                  {MOCK_SESSIONS.filter(s => s.isToday).map((session) => (
+                  {loading && <div className="px-2 text-xs text-muted-foreground py-2">Loading...</div>}
+                  {!loading && todaySessions.length === 0 && <div className="px-2 text-xs text-muted-foreground py-2">No chats today</div>}
+                  {todaySessions.map((session) => (
                     <Button
                       key={session.id}
                       variant="ghost"
@@ -106,7 +126,8 @@ export function AgentSidebar({ isOpen, onClose }: AgentSidebarProps) {
                   Previous
                 </h4>
                 <div className="space-y-0.5">
-                  {MOCK_SESSIONS.filter(s => !s.isToday).map((session) => (
+                  {!loading && previousSessions.length === 0 && <div className="px-2 text-xs text-muted-foreground py-2">No previous chats</div>}
+                  {previousSessions.map((session) => (
                     <Button
                       key={session.id}
                       variant="ghost"
@@ -115,7 +136,7 @@ export function AgentSidebar({ isOpen, onClose }: AgentSidebarProps) {
                       <MessageSquare className="w-4 h-4 shrink-0 opacity-70 group-hover:opacity-100" />
                       <div className="flex flex-col min-w-0 overflow-hidden">
                         <span className="truncate leading-tight">{session.title}</span>
-                        <span className="text-[10px] opacity-70">{session.date}</span>
+                        <span className="text-[10px] opacity-70">{new Date(session.created_at).toLocaleDateString()}</span>
                       </div>
                     </Button>
                   ))}

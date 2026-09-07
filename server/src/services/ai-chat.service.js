@@ -22,6 +22,27 @@ export async function createSession(userEmail, title, isIncognito = false) {
 }
 
 /**
+ * Updates the title of an existing AI chat session.
+ */
+export async function updateSessionTitle(sessionId, title) {
+    if (!sessionId) return null;
+
+    const { data, error } = await primarySupabaseClient
+        .from('ai_chat_sessions')
+        .update({ title })
+        .eq('id', sessionId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Error updating AI chat session title:", error);
+        throw error;
+    }
+
+    return data;
+}
+
+/**
  * Saves a message to an existing chat session.
  */
 export async function saveMessage(sessionId, role, content, fileUrls = []) {

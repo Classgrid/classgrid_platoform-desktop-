@@ -73,9 +73,21 @@ function usePostHog(): any {
   return { capture: () => { } };
 }
 
-// Stub: file upload server actions (SDK consumers provide their own endpoint)
-async function getPresignedUrlForAskAiFile(_name: string, _type: string, _size: number): Promise<any> {
-  return { uploadUrl: "mock", publicUrl: "mock" };
+// Fetch real presigned URL for R2 uploads
+async function getPresignedUrlForAskAiFile(name: string, type: string, size: number): Promise<any> {
+  try {
+    const endpoint = typeof import.meta !== "undefined" && import.meta.env
+      ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/upload"
+      : "/api/ai/upload";
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileName: name, mimeType: type })
+    });
+    return await res.json();
+  } catch (err) {
+    return { error: "Network error getting upload URL" };
+  }
 }
 async function checkAiUploadRateLimit(_count: number): Promise<{ allowed: boolean; reason?: string }> {
   return { allowed: true };
@@ -859,6 +871,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
   const [thinkingLabel, setThinkingLabel] = useState("Thinking");
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isIncognito, setIsIncognito] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
   const [lastSentDocsPath, setLastSentDocsPath] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -1637,6 +1650,8 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
           subdomain: typeof window !== "undefined" ? window.location.hostname : undefined,
           userContext: userContext,
           sessionId: sessionId ?? undefined,
+          isIncognito: isIncognito,
+          fileUrls: uploadedAttachments.length > 0 ? uploadedAttachments.map(a => a.url) : [],
           attachments: uploadedAttachments.length > 0 ? uploadedAttachments.map(a => ({ url: a.url, name: a.name, mimeType: a.mimeType })) : undefined,
           history: messages
             .filter((m) => m.role === "user" || m.role === "assistant")
@@ -1700,6 +1715,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                           event.label === "analyzing" ? "Analyzing results" :
                             "Thinking"
                 );
+              } else if (event.type === "session_info" && event.sessionId) {
+                setSessionId(event.sessionId);
+                localStorage.setItem("classgrid_ai_session_id", event.sessionId);
               } else if (event.type === "answer") {
                 finalPayload = event;
               } else if (event.type === "thought") {

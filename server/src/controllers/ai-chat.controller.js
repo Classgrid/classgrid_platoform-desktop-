@@ -1,10 +1,11 @@
 import { createLLMClient } from "@classgrid/ai/core";
 import { getPresignedUploadUrl } from "../config/r2Client.js";
-import { 
+import {
     createSession, 
     saveMessage, 
     getSessions, 
-    getSessionMessages 
+    getSessionMessages,
+    updateSessionTitle
 } from "../services/ai-chat.service.js";
 // The system prompt was originally in ./prompt, we will define it here or import it if needed.
 const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. 
@@ -12,6 +13,41 @@ const SYSTEM_PROMPT = `You are the Classgrid AI Assistant.
 IMPORTANT FORMATTING RULES:
 When creating markdown tables, you MUST use html line breaks (<br>) inside table cells if the text is long. This prevents the table from becoming excessively wide and forcing the user to scroll horizontally. 
 CRITICAL: ONLY use <br> tags INSIDE table cells. Do NOT use <br> tags anywhere else in your response.`;
+
+async function generateSessionTitle(sessionId, question) {
+    try {
+        const client = createLLMClient({
+            providers: [
+                {
+                    name: "gemini",
+                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+                    apiKey: process.env.GEMINI_API_KEY || "",
+                    model: "gemini-3.5-flash"
+                },
+                {
+                    name: "groq",
+                    url: "https://api.groq.com/openai/v1/chat/completions",
+                    apiKey: process.env.GROQ_API_KEY || "",
+                    model: "gpt-oss-20b"
+                }
+            ]
+        });
+        const answer = await client.generate({
+            messages: [
+                { role: "system", content: "You are a title generator. Generate a very short 3-5 word title for the user's message. Output ONLY the raw words, without quotes or punctuation." },
+                { role: "user", content: question }
+            ]
+        });
+        if (answer && !answer.includes("[RATE_LIMITED]")) {
+            const cleanTitle = answer.trim().replace(/^["']|["']$/g, '');
+            if (cleanTitle.length > 0) {
+                await updateSessionTitle(sessionId, cleanTitle);
+            }
+        }
+    } catch (err) {
+        console.error("Error generating session title:", err);
+    }
+}
 
 export const streamAskAi = async (req, res) => {
     // 1. Setup Server-Sent Events (SSE) headers for Express
@@ -33,7 +69,13 @@ export const streamAskAi = async (req, res) => {
         if (!isIncognito && !sessionId && body.question) {
             const title = body.question.length > 50 ? body.question.substring(0, 47) + "..." : body.question;
             const session = await createSession(body.userEmail || 'unknown@classgrid.in', title, false);
-            if (session) sessionId = session.id;
+            if (session) {
+                sessionId = session.id;
+                // Generate a real title in the background
+                if (body.question.length > 10) {
+                    generateSessionTitle(sessionId, body.question).catch(console.error);
+                }
+            }
         }
 
         // 2b. If not incognito, save the user message to DB immediately
