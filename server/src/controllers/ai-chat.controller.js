@@ -78,9 +78,7 @@ export const streamAskAi = async (req, res) => {
             if (session) {
                 sessionId = session.id;
                 // Generate a real title in the background
-                if (body.question.length > 10) {
-                    generateSessionTitle(sessionId, body.question).catch(console.error);
-                }
+                generateSessionTitle(sessionId, body.question).catch(console.error);
             }
         }
 
