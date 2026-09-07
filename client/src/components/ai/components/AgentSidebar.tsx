@@ -43,12 +43,24 @@ export function AgentNestedMenu({ searchQuery = "" }: { searchQuery?: string }) 
   const todaySessions = filteredSessions.filter(s => isToday(s.created_at));
   const previousSessions = filteredSessions.filter(s => !isToday(s.created_at));
 
+  const navigate = window.location.pathname.startsWith("/superadmin") ? "/superadmin/dashboard" : "/org/admin/dashboard";
+
   const handleNewChat = () => {
-    window.dispatchEvent(new Event("agent:new-chat"));
+    if (!window.location.pathname.endsWith("/dashboard")) {
+      window.location.href = navigate; // Force navigation to the full-page agent
+    }
+    setTimeout(() => {
+      window.dispatchEvent(new Event("agent:new-chat"));
+    }, 100);
   };
 
   const handleLoadChat = (sessionId: string) => {
-    window.dispatchEvent(new CustomEvent("agent:load-chat", { detail: { sessionId } }));
+    if (!window.location.pathname.endsWith("/dashboard")) {
+      window.location.href = navigate;
+    }
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("agent:load-chat", { detail: { sessionId } }));
+    }, 100);
   };
 
   return (
