@@ -101,6 +101,16 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
     }
   }, [location.pathname]);
 
+  // Listen for agent:open-menu to auto-open Agent sidebar section
+  useEffect(() => {
+    const handleOpenAgentMenu = () => {
+      setShowAgentMenu(true);
+      setShowStorageMenu(false);
+    };
+    window.addEventListener("agent:open-menu", handleOpenAgentMenu);
+    return () => window.removeEventListener("agent:open-menu", handleOpenAgentMenu);
+  }, []);
+
   const storageNavItems = [
     { label: "Files", to: "/superadmin/storage/files", icon: HardDrive },
     { label: "Analytics", to: "/superadmin/storage/analytics", icon: FileBarChart },

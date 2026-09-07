@@ -1116,31 +1116,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setAttachedFiles(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  // Load chat history and session ID from local storage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("classgrid_ai_chat_history");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Force typing to false for loaded messages so they don't get stuck
-        setMessages(parsed.map((m: any) => ({ ...m, typing: false })));
-      }
-      const savedSessionId = localStorage.getItem("classgrid_ai_session_id");
-      if (savedSessionId) {
-        setSessionId(savedSessionId);
-      }
-    } catch (_) { }
-  }, []);
-
-  // Save chat history and session ID to local storage whenever they update
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem("classgrid_ai_chat_history", JSON.stringify(messages));
-    }
-    if (sessionId) {
-      localStorage.setItem("classgrid_ai_session_id", sessionId);
-    }
-  }, [messages, sessionId]);
+  // Local storage persistence removed per user request: "always show new chat for every time logout and login and even browser dashboard closes"
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [isTerminated, setIsTerminated] = useState(false);
@@ -1568,6 +1544,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setThinking(true);
     setThinkingLabel("Thinking");
     userScrolledUpRef.current = false; // Reset scroll lock for new question
+    
+    // Auto-open agent sidebar when a message is sent
+    window.dispatchEvent(new Event("agent:open-menu"));
 
     const uploadedAttachments: AiAttachment[] = filesToUpload;
 
