@@ -112,7 +112,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Agent", to: "/superadmin/dashboard", icon: Bot },
           { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart }
         ]
       },
@@ -190,7 +189,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Agent", to: "/org/dashboard", icon: Bot },
           { label: "Usage", to: "/org/admin/usage", icon: Activity },
           { label: "Billing", to: "/org/admin/billing", icon: CreditCard },
           { label: "Announcements", to: "/org/announcements", icon: Megaphone }
@@ -248,7 +246,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "AI & TOOLS",
         items: [
-          { label: "Classgrid AI", to: "/org/ai", icon: Bot },
           { label: "Analytics", to: "/org/analytics", icon: FileBarChart },
           { label: "College Website", to: "/org/website", icon: Globe },
           { label: "Certificates", to: "/org/certificates", icon: FileText }
@@ -283,7 +280,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ADMISSIONS",
         items: [
-          { label: "Agent", to: "/dept/admissions/dashboard", icon: Bot },
           { label: "All Applications", to: "/dept/admissions/applications", icon: ClipboardList },
           { label: "New Application", to: "/dept/admissions/new", icon: Plus },
           { label: "Document Verification", to: "/dept/admissions/documents", icon: FileText },
@@ -340,7 +336,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "FEES",
         items: [
-          { label: "Agent", to: "/dept/fees/dashboard", icon: Bot },
           { label: "Collect Payment", to: "/dept/fees/collect", icon: CreditCard },
           { label: "All Transactions", to: "/dept/fees/transactions", icon: FileBarChart },
           { label: "Defaulters List", to: "/dept/fees/defaulters", icon: AlertTriangle },
@@ -389,7 +384,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "EXAMS",
         items: [
-          { label: "Agent", to: "/dept/exams/dashboard", icon: Bot },
           { label: "Exam Schedule", to: "/dept/exams/schedule", icon: Calendar },
           { label: "Create Exam", to: "/dept/exams/create", icon: Plus },
           { label: "Online Exams", to: "/dept/exams/online", icon: Globe },
@@ -445,7 +439,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "LIBRARY",
         items: [
-          { label: "Agent", to: "/dept/library/dashboard", icon: Bot },
           { label: "All Books", to: "/dept/library/books", icon: BookOpen },
           { label: "Add Book", to: "/dept/library/add", icon: Plus },
           { label: "Search Catalog", to: "/dept/library/search", icon: Search }
@@ -499,7 +492,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ATTENDANCE",
         items: [
-          { label: "Agent", to: "/dept/attendance/dashboard", icon: Bot },
           { label: "Mark Attendance", to: "/dept/attendance/mark", icon: CheckSquare },
           { label: "Daily Report", to: "/dept/attendance/daily", icon: FileText },
           { label: "Monthly Report", to: "/dept/attendance/monthly", icon: Calendar }
@@ -545,7 +537,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "STAFF",
         items: [
-          { label: "Agent", to: "/dept/hr/dashboard", icon: Bot },
           { label: "All Staff", to: "/dept/hr/staff", icon: Users },
           { label: "Add Staff", to: "/dept/hr/add-staff", icon: Plus },
           { label: "Departments", to: "/dept/hr/departments", icon: Building2 },
@@ -592,7 +583,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "HOSTEL",
         items: [
-          { label: "Agent", to: "/dept/hostel/dashboard", icon: Bot },
           { label: "Room Allocation", to: "/dept/hostel/rooms", icon: Home },
           { label: "Residents", to: "/dept/hostel/residents", icon: Users },
           { label: "Complaints", to: "/dept/hostel/complaints", icon: MessageSquare },
@@ -646,7 +636,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "TOOLS",
         items: [
-          { label: "Classgrid AI", to: "/classgrid-ai", icon: Bot },
           { label: "Google Drive", to: "/drive", icon: Briefcase },
           { label: "Virtual ID", to: "/virtual-id", icon: User },
           { label: "Website CMS", to: "/faculty/website", icon: Globe }
@@ -655,7 +644,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         items: [
           { label: "Requests", to: "/join-requests", icon: Users, badge: 5 },
-          { label: "What's New", to: "/whats-new", icon: Sparkles },
           { label: "Organization", to: "/organization", icon: Building2 },
           { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare },
           { label: "Marketplace", to: "/marketplace", icon: CreditCard },
@@ -697,7 +685,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "TOOLS",
         items: [
-          { label: "Classgrid AI", to: "/classgrid-ai", icon: Bot },
           { label: "Virtual ID", to: "/virtual-id", icon: User },
           { label: "Marketplace", to: "/marketplace", icon: CreditCard }
         ]
@@ -705,7 +692,6 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         items: [
           { label: "My Requests", to: "/my-requests", icon: ClipboardList },
-          { label: "What's New", to: "/whats-new", icon: Sparkles },
           { label: "Organization", to: "/organization", icon: Building2 },
           { label: "Platform Feedback", to: "/platform-feedback", icon: MessageSquare },
           { label: "Audit", to: "/audit", icon: Shield }
