@@ -1633,6 +1633,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
           question: apiQuestion,
           userName: session?.user?.name ?? undefined,
           userEmail: session?.user?.email ?? undefined,
+          userRole: session?.user?.role ?? undefined,
           userContext: userContext,
           sessionId: sessionId ?? undefined,
           attachments: uploadedAttachments.length > 0 ? uploadedAttachments.map(a => ({ url: a.url, name: a.name, mimeType: a.mimeType })) : undefined,

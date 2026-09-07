@@ -22,7 +22,15 @@ export const streamAskAi = async (req, res) => {
         if (body.question) {
             messages.push({ role: "user", content: body.question });
         }
-        messages.unshift({ role: "system", content: SYSTEM_PROMPT });
+        
+        let dynamicSystemPrompt = SYSTEM_PROMPT;
+        if (body.userName || body.userEmail || body.userRole) {
+            dynamicSystemPrompt += `\n\n--- USER CONTEXT ---\nYou are currently speaking to ${body.userName || "a user"}.`;
+            if (body.userEmail) dynamicSystemPrompt += `\nTheir Email: ${body.userEmail}`;
+            if (body.userRole) dynamicSystemPrompt += `\nTheir Role: ${body.userRole}`;
+        }
+        
+        messages.unshift({ role: "system", content: dynamicSystemPrompt });
 
         // 3. Initialize the real LLM Client from the Classgrid SDK using the fallback hierarchy
         const client = createLLMClient({
