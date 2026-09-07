@@ -13,10 +13,26 @@
  * 1. NEVER DELETE ANY ENVIRONMENT VARIABLES.
  * 2. LOCALHOST TESTING IS STRICTLY BANNED. NO AI WILL EVER TRY TO WORK LOCALLY.
  * 3. THIS REPO IS PRODUCTION-FIRST. DO NOT TOUCH OR REMOVE KEYS.
- * 4. NEVER ADD A FLOATING AI PANEL OR SIDE AI PANEL ANYWHERE IN THIS CODEBASE.
- * 5. THE USER EXPLICITLY BANNED FLOATING/SIDE AI. WE ONLY USE FULL SCREEN AI.
- * 6. DO NOT ADD <GlobalAiPanel /> OR ANY SIMILAR COMPONENT.
- * ─────────────────────────────────────────────────────────
+ * 4. NEVER ADD A FLOATING AI PANEL ANYWHERE IN THIS CODEBASE.
+ * =========================================================================================
+ * STRICT SECURITY POLICY & FINAL WARNING:
+ * NO AI, NO HUMAN, NO GOD WILL EVER AGAIN ADD SPARKLES, ADD A SIDEBAR, OR ADD ANY KIND OF 
+ * FLOATING AI TO THIS CODEBASE. WE ONLY USE FULL SCREEN CHAT GPT-LIKE AI.
+ * =========================================================================================
+ * 
+ * CORRECT DESIGN DRAWING (AS REQUESTED):
+ * 
+ * +---------------------------------------------------+
+ * |  Main Sidebar |          What do you want to know?|
+ * |  (NO AGENT    |                                   |
+ * |   MENU HERE)  |          [  Input Box  ]          |
+ * |               |                                   |
+ * |               |                                   |
+ * |               |   <-- NO FLOATING SPARKLES HERE   |
+ * +---------------------------------------------------+
+ * 
+ * THIS IS THE ONLY ALLOWED DESIGN. DO NOT DEVIATE.
+ * =========================================================================================
  */
 
 /*
