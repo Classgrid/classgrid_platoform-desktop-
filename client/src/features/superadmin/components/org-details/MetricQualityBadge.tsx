@@ -59,9 +59,9 @@ interface MetricQualityBadgeProps {
 }
 
 export function MetricQualityBadge({ quality }: MetricQualityBadgeProps) {
-  const config = qualityConfig[quality];
+  const config = qualityConfig[quality as keyof typeof qualityConfig] ?? { label: quality || "Unknown", variant: "neutral" };
   return (
-    <Badge variant={config.variant} className="whitespace-nowrap">
+    <Badge variant={config.variant as any} className="whitespace-nowrap">
       {config.label}
     </Badge>
   );
