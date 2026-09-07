@@ -25,7 +25,7 @@ export function ScrollSpyTOC({ tocItems, activeSection }: ScrollSpyTOCProps) {
         {/* "On this page" dropdown label */}
         <div className="group relative inline-flex items-center gap-2 mb-4 text-[13px] font-semibold text-slate-900 dark:text-muted-foreground cursor-pointer p-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
           <List className="w-4 h-4" />
-          <div className="absolute top-full right-0 mt-2 w-56 max-h-[300px] overflow-y-auto overscroll-contain rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[999] p-2 text-left">
+          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-2 w-56 max-h-[300px] overflow-y-auto overscroll-contain rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[999] p-2 text-left">
             {tocItems.map(item => (
               <a key={`dropdown-${item.id}`} href={`#${item.id}`} className={cn(
                 "block px-2 py-1.5 text-[13px] rounded hover:bg-slate-100 dark:hover:bg-white/5",
