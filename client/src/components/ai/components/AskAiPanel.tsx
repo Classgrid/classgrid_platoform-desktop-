@@ -82,6 +82,7 @@ async function getPresignedUrlForAskAiFile(name: string, type: string, size: num
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ fileName: name, mimeType: type })
     });
     return await res.json();
@@ -1165,8 +1166,15 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   // Fetch contextual user data on mount if session exists
   useEffect(() => {
     if (session?.user?.email) {
-      fetch("/api/user/ai-context")
-        .then((res) => res.json())
+      const endpoint = typeof import.meta !== "undefined" && import.meta.env
+        ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/user/ai-context"
+        : "/api/user/ai-context";
+        
+      fetch(endpoint)
+        .then((res) => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+        })
         .then((data) => {
           if (data?.userContext) {
             setUserContext(data.userContext);
@@ -1387,6 +1395,42 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       setTimeout(() => { isAutoScrollingRef.current = false; }, 200);
     });
   }, [messages.length, thinking, open]);
+
+  // Event listeners for Sidebar actions
+  useEffect(() => {
+    const handleNewChat = () => {
+      handleClearChat();
+    };
+
+    const handleLoadChat = (e: any) => {
+      const sessionId = e.detail?.sessionId;
+      if (sessionId) {
+        // Here we can load the specific chat session
+        // For now, we simulate switching to it
+        setSessionId(sessionId);
+        const endpoint = typeof import.meta !== "undefined" && import.meta.env
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + `/api/ai/sessions/${sessionId}/messages`
+          : `/api/ai/sessions/${sessionId}/messages`;
+          
+        fetch(endpoint, { credentials: "include" })
+          .then(res => res.json())
+          .then(data => {
+            if (data.messages) {
+              setMessages(data.messages);
+            }
+          })
+          .catch(err => console.error("Failed to load messages", err));
+      }
+    };
+
+    window.addEventListener("agent:new-chat", handleNewChat);
+    window.addEventListener("agent:load-chat", handleLoadChat);
+
+    return () => {
+      window.removeEventListener("agent:new-chat", handleNewChat);
+      window.removeEventListener("agent:load-chat", handleLoadChat);
+    };
+  }, [handleClearChat]);
 
   // Follow along during typing animation via a gentle interval
   // instead of reacting to every message state change (which fights user scroll)

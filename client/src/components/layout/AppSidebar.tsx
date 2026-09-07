@@ -68,6 +68,7 @@ import { SidebarSearch } from "./SidebarSearch";
 import { SlidingSidebar } from "./SlidingSidebar";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
+import { AgentNestedMenu } from "@/components/ai/components/AgentSidebar";
 
 interface AppSidebarProps {
   role: DashboardRole;
@@ -89,6 +90,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   // Local state to track if we are showing the storage menu pane.
   // Defaults to true if we load directly into a storage route.
   const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
+  const [showAgentMenu, setShowAgentMenu] = useState(false);
 
   // Auto-open storage menu if navigating to a storage route from outside
   useEffect(() => {
@@ -140,20 +142,20 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
-      <SidebarHeader className={showStorageMenu ? "gap-1 p-2 pb-0" : ""}>
+      <SidebarHeader className={showStorageMenu || showAgentMenu ? "gap-1 p-2 pb-0" : ""}>
         <div className="flex items-center w-full group-data-[collapsible=icon]:justify-center">
           <SidebarSwitcher user={user ?? null} />
         </div>
-        <div className={showStorageMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
+        <div className={showStorageMenu || showAgentMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
           <SidebarSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       </SidebarHeader>
 
       <SidebarContent className="p-0">
         <SlidingSidebar
-          showNested={showStorageMenu}
-          onBack={() => setShowStorageMenu(false)}
-          nestedTitle="Storage"
+          showNested={showStorageMenu || showAgentMenu}
+          onBack={() => { setShowStorageMenu(false); setShowAgentMenu(false); }}
+          nestedTitle={showStorageMenu ? "Storage" : showAgentMenu ? "Agent" : ""}
           mainMenu={
             <>
               {sectionsWithBadges.map((section, index) => (
@@ -180,9 +182,12 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                               isActive={isActive}
                               tooltip={item.label}
                               className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
-                              onClick={() => {
+                              onClick={(e) => {
                                 if (item.label === "Storage") {
                                   setShowStorageMenu(true);
+                                } else if (item.label === "Agent") {
+                                  e.preventDefault();
+                                  setShowAgentMenu(true);
                                 }
                               }}
                               render={
@@ -207,7 +212,10 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                     to={item.to || "#"} 
                                     className="flex items-center gap-3 w-full justify-between"
                                     onClick={(e) => {
-                                      if (item.hasNestedNav) {
+                                      if (item.label === "Agent") {
+                                        e.preventDefault();
+                                        setShowAgentMenu(true);
+                                      } else if (item.hasNestedNav) {
                                         e.preventDefault();
                                         setShowStorageMenu(true);
                                       }
@@ -251,35 +259,39 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
             </>
           }
           nestedMenu={
-            <SidebarGroup className="pt-1">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {storageNavItems.map((item) => {
-                    const isActive =
-                      location.pathname === item.to ||
-                      (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
+            showStorageMenu ? (
+              <SidebarGroup className="pt-1">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {storageNavItems.map((item) => {
+                      const isActive =
+                        location.pathname === item.to ||
+                        (item.to !== "/" && location.pathname.startsWith(item.to + "/"));
 
-                    return (
-                      <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton
-                          isActive={isActive}
-                          tooltip={item.label}
-                          className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
-                          render={
-                            <Link to={item.to} className="flex items-center gap-3 w-full justify-between">
-                              <div className="flex items-center gap-3">
-                                <item.icon size={20} />
-                                <span className="truncate">{item.label}</span>
-                              </div>
-                            </Link>
-                          }
-                        />
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+                      return (
+                        <SidebarMenuItem key={item.label}>
+                          <SidebarMenuButton
+                            isActive={isActive}
+                            tooltip={item.label}
+                            className={isActive ? "font-semibold bg-secondary text-secondary-foreground" : ""}
+                            render={
+                              <Link to={item.to} className="flex items-center gap-3 w-full justify-between">
+                                <div className="flex items-center gap-3">
+                                  <item.icon size={20} />
+                                  <span className="truncate">{item.label}</span>
+                                </div>
+                              </Link>
+                            }
+                          />
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ) : showAgentMenu ? (
+              <AgentNestedMenu />
+            ) : null
           }
         />
       </SidebarContent>

@@ -44,7 +44,7 @@ import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
 import { ChevronDown, LayoutDashboard } from "lucide-react";
 
 import { AppSidebar } from "./AppSidebar";
-import { AgentSidebar } from "@/components/ai/components/AgentSidebar";
+import { AgentFloatingButton } from "../ai/AgentFloatingButton";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { getAccessibleDashboards } from "@/lib/dashboardRoleMap";
@@ -179,24 +179,6 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
   const { data: currentUser } = useCurrentUser();
   const sidebarUser = user ?? currentUser ?? undefined;
   
-  const [isAgentSidebarOpen, setIsAgentSidebarOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleAgentClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest('a');
-      if (link && link.textContent?.includes('Agent') && (link.getAttribute('href')?.includes('dashboard') || link.getAttribute('href') === '#')) {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsAgentSidebarOpen(true);
-      }
-    };
-    
-    // Use capture phase to intercept before React Router handles it
-    document.addEventListener('click', handleAgentClick, true);
-    return () => document.removeEventListener('click', handleAgentClick, true);
-  }, []);
-
   const mainRole: string = currentUser?.role ?? "";
   const additionalRoles: string[] = currentUser?.additional_roles ?? [];
 
@@ -204,7 +186,6 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar role={dashboardRole} user={sidebarUser} />
-        <AgentSidebar isOpen={isAgentSidebarOpen} onClose={() => setIsAgentSidebarOpen(false)} />
         <SidebarInset className="bg-background m-0 p-0 flex flex-col h-screen overflow-hidden">
           <div className={`flex-1 min-h-0 flex flex-col overflow-hidden relative ${(isFullBleed || isNoPadding) ? "bg-background border-l border-border" : "bg-card border-l border-border"}`}>
             {!isFullBleed && showBreadcrumbs && (
