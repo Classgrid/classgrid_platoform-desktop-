@@ -46,6 +46,14 @@ export const initLeadStream = () => {
             return;
         }
 
+        if (mongoose.connection.readyState !== 1) {
+            console.log("[LeadStream] Waiting for MongoDB connection before initializing stream...");
+            mongoose.connection.once('open', () => {
+                initLeadStream();
+            });
+            return;
+        }
+
         console.log("[LeadStream] Initializing MongoDB Change Stream for DemoRequest...");
 
         // Watch for changes on the DemoRequest collection
