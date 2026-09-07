@@ -1202,6 +1202,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ question: "__ban_check__" }),
         });
         if (res.status === 403) {
@@ -1564,6 +1565,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             question: `Create a 3 to 5 word summary title for this message. Output ONLY the raw words, no quotes, no preambles: ${displayQuestion}`,
             history: [{ role: "system", content: "You are a title generator. Output only a short title, without quotes." }]
@@ -1622,6 +1624,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         signal: controller.signal,
         body: JSON.stringify({
           question: apiQuestion,
