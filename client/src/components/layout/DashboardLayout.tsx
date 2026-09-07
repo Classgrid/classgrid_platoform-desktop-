@@ -228,7 +228,6 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                   </BreadcrumbList>
                 </Breadcrumb>
 
-                {/* Right: Dashboard Switcher — only if user has multiple dashboards */}
                 <div className="absolute right-4 flex items-center">
                   <DashboardSwitcher mainRole={mainRole} additionalRoles={additionalRoles} />
                 </div>
@@ -244,6 +243,7 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
             </main>
           </div>
         </SidebarInset>
+        <AgentFloatingButton />
       </SidebarProvider>
     </TooltipProvider>
   );
