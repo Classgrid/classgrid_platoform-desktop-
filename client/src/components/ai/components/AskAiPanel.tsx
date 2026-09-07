@@ -1882,6 +1882,18 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       <div className={cn("flex flex-col gap-4 px-4 py-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
         {emptyState ? (
           <>
+            <div className="rounded-2xl border border-border bg-card px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                {session?.user?.name ? (
+                  <span className="mb-1 block font-medium text-foreground">
+                    Hi, {session.user.name.split(" ")[0]} 👋
+                  </span>
+                ) : null}
+                {pageContext?.title
+                  ? `Ask about ${pageContext.title}, Classgrid features, pricing, demos, or support.`
+                  : "Ask anything about Classgrid features, pricing, website capabilities, demo process, or support."}
+              </p>
+            </div>
 
             <div className="space-y-2">
               {suggestedQuestions.map((question) => (
