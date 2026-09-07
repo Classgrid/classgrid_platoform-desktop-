@@ -1,6 +1,6 @@
-import { createLLMClient } from "@classgrid/ai/core";
-// The system prompt was originally in ./prompt, we will define it here or import it if needed.
-const SYSTEM_PROMPT = `You are the Classgrid AI Assistant... (I will keep it simple for now or read from your config)`;
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. Help the user with their questions.`;
 
 export const streamAskAi = async (req, res) => {
     // 1. Setup Server-Sent Events (SSE) headers for Express
@@ -12,95 +12,28 @@ export const streamAskAi = async (req, res) => {
 
     try {
         const body = req.body || {};
+        const question = body.question || "";
         
-        // 2. Construct messages
-        const messages = body.history || [];
-        if (body.question) {
-            messages.push({ role: "user", content: body.question });
+        if (!process.env.AI_API_KEY) {
+            res.write(`data: ${JSON.stringify({ type: "answer", answer: "AI API Key is not configured." })}\n\n`);
+            return res.end();
         }
-        messages.unshift({ role: "system", content: SYSTEM_PROMPT });
 
-        // 3. Initialize the real LLM Client from the Classgrid SDK using the API key in the environment
-        const client = createLLMClient({
-            providers: [
-                {
-                    name: "gemini",
-                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
-                    apiKey: process.env.AI_API_KEY || "",
-                    model: "gemini-3.5-flash"
-                },
-                // (Other providers can be added identically to your SDK)
-            ],
-            verbose: true,
-            maxToolDepth: 5,
-            defaultMaxTokens: 2000,
-            tools: [
-                {
-                    type: "function",
-                    function: {
-                        name: "search_web",
-                        description: "Search the live web for competitor analysis, news, or external facts.",
-                        parameters: {
-                            type: "object",
-                            properties: {
-                                query: { type: "string", description: "The search query (e.g. 'Teachmint features and pricing')" }
-                            },
-                            required: ["query"]
-                        }
-                    }
-                }
-            ],
-            toolHandlers: {
-                search_web: async (args) => {
-                    const tavilyKey = process.env.TAVILY_API_KEY?.trim();
-                    if (!tavilyKey) return "Search failed because TAVILY_API_KEY is missing.";
-                    try {
-                        const tavilyRes = await fetch("https://api.tavily.com/search", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                api_key: tavilyKey,
-                                query: args.query,
-                                search_depth: "basic",
-                                include_answer: true,
-                                max_results: 5
-                            })
-                        });
-                        const searchData = await tavilyRes.json();
-                        if (searchData.answer) {
-                            const sourceUrls = (searchData.results || []).map(r => `- ${r.title}: ${r.url}`).join('\n');
-                            return `${searchData.answer}\n\nSource URLs:\n${sourceUrls}`;
-                        } else if (searchData.results && searchData.results.length > 0) {
-                            return searchData.results.map(r => `${r.title} (${r.url})\n${r.content}`).join('\n\n');
-                        } else {
-                            return "No search results found.";
-                        }
-                    } catch (e) {
-                        return "Web Search failed: " + e;
-                    }
-                }
-            }
-        });
+        res.write(`data: ${JSON.stringify({ type: "status", label: "thinking" })}\n\n`);
 
-        // 4. Run the Client and pass SSE writes inside the callbacks
-        const answer = await client.generate({
-            messages,
-            onStatus: (status) => {
-                const mappedLabel = status === "search web" ? "searching" : status;
-                res.write(`data: ${JSON.stringify({ type: "status", label: mappedLabel })}\n\n`);
-            },
-            onThought: (thought) => {
-                res.write(`data: ${JSON.stringify({ type: "thought", thought })}\n\n`);
-            }
-        });
+        const genAI = new GoogleGenerativeAI(process.env.AI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: SYSTEM_PROMPT });
 
-        if (!answer) {
-            res.write(`data: ${JSON.stringify({ type: "answer", answer: "Failed to get an answer from the AI." })}\n\n`);
-        } else if (answer === "[RATE_LIMITED]") {
-            res.write(`data: ${JSON.stringify({ type: "answer", answer: "I'm currently experiencing high traffic and cannot process your request right now." })}\n\n`);
-        } else {
-            res.write(`data: ${JSON.stringify({ type: "answer", answer })}\n\n`);
+        const result = await model.generateContentStream(question);
+
+        let fullText = "";
+        for await (const chunk of result.stream) {
+            const chunkText = chunk.text();
+            fullText += chunkText;
+            // You can stream chunks if the client supports it, but for now we just build the answer
         }
+
+        res.write(`data: ${JSON.stringify({ type: "answer", answer: fullText })}\n\n`);
 
     } catch (err) {
         console.error("API Route Error:", err);

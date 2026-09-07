@@ -8,6 +8,27 @@ export function GlobalAiPanel() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
+  // ONLY show on overview pages!
+  const isOverviewPage = 
+    location.pathname === "/superadmin/dashboard" ||
+    location.pathname === "/org/dashboard" ||
+    location.pathname === "/dept/admissions/dashboard" ||
+    location.pathname === "/dept/fees/dashboard" ||
+    location.pathname === "/dept/exams/dashboard" ||
+    location.pathname === "/dept/library/dashboard" ||
+    location.pathname === "/dept/attendance/dashboard" ||
+    location.pathname === "/dept/hr/dashboard" ||
+    location.pathname === "/dept/hostel/dashboard" ||
+    location.pathname === "/faculty" ||
+    location.pathname === "/student" ||
+    location.pathname === "/classrooms" ||
+    // sometimes it's exactly the root
+    location.pathname.endsWith("/dashboard");
+
+  if (!isOverviewPage) {
+    return null; // DO NOT show on Audit Logs, Leads, etc.
+  }
+
   // Create simple page context based on route
   const getPageContext = () => {
     return {
