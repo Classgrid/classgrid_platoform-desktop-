@@ -1127,7 +1127,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       localStorage.removeItem("classgrid_ai_chat_history");
       localStorage.removeItem("classgrid_ai_session_id");
       localStorage.removeItem("askAiDraftContext");
-      
+
       // Focus input
       setTimeout(() => {
         const input = document.getElementById("ai-chat-input");
@@ -1138,10 +1138,10 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     const handleLoadChat = async (e: any) => {
       const id = e.detail?.sessionId;
       if (!id) return;
-      
+
       setMessages([]);
       setSessionId(id);
-      
+
       try {
         const res = await fetch(`/api/ai/sessions/${id}`);
         if (res.ok) {
@@ -1161,7 +1161,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
     window.addEventListener("agent:new-chat", handleNewChat);
     window.addEventListener("agent:load-chat", handleLoadChat);
-    
+
     return () => {
       window.removeEventListener("agent:new-chat", handleNewChat);
       window.removeEventListener("agent:load-chat", handleLoadChat);
@@ -1217,7 +1217,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       const endpoint = typeof import.meta !== "undefined" && import.meta.env
         ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/user/ai-context"
         : "/api/user/ai-context";
-        
+
       fetch(endpoint)
         .then((res) => {
           if (!res.ok) throw new Error("Network response was not ok");
@@ -1459,7 +1459,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         const endpoint = typeof import.meta !== "undefined" && import.meta.env
           ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + `/api/ai/sessions/${sessionId}/messages`
           : `/api/ai/sessions/${sessionId}/messages`;
-          
+
         fetch(endpoint, { credentials: "include" })
           .then(res => res.json())
           .then(data => {
@@ -2406,14 +2406,93 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         <div className="w-full h-full bg-background flex flex-row">
           <div className="flex-1 relative flex flex-col h-full">
             {emptyState ? (
-              /* ── Empty state: input centered vertically with suggestion chips ── */
+              /* ── PostHog-style: everything in one centered block ── */
               <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8">
-                <div className="max-w-[52rem] w-full">
-                  {panelChat}
-                  {panelInput}
+                <div className="max-w-[52rem] w-full flex flex-col items-center gap-6">
 
-                  {/* PostHog-style suggestion chips */}
-                  <div className="mt-4 flex flex-col items-center gap-3">
+                  {/* Logo */}
+                  <img src="/logo.png" alt="Classgrid" className="h-12 w-12 object-contain" />
+
+                  {/* Greeting */}
+                  <div className="text-center space-y-1.5">
+                    <h2 className="text-xl font-semibold text-foreground tracking-tight">
+                      What do you want to know today?
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Your AI-powered ERP assistant
+                    </p>
+                  </div>
+
+                  {/* Inline input form — not using panelInput */}
+                  <div className="w-full max-w-[640px]">
+                    {isTerminated ? (
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-medium text-red-500">
+                        <p>This conversation has been terminated.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-2">
+                        <div className="relative w-full shadow-sm rounded-2xl border border-border bg-background focus-within:border-black/80 dark:focus-within:border-white/50 focus-within:ring-1 focus-within:ring-black/80 dark:focus-within:ring-white/50 transition-colors">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept={ACCEPTED_FILE_TYPES}
+                            onChange={handleFileSelect}
+                            className="hidden"
+                          />
+                          <textarea
+                            id="ask-ai-input"
+                            name="askAiQuestion"
+                            data-no-ring="true"
+                            suppressHydrationWarning
+                            ref={inputRef as any}
+                            value={input}
+                            onChange={(event) => setInput(event.target.value)}
+                            onPaste={handlePaste}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                if (canSubmit) void askQuestion(input);
+                              }
+                            }}
+                            placeholder="Ask a question..."
+                            autoComplete="off"
+                            className="min-h-[90px] max-h-[240px] w-full resize-none bg-transparent pb-12 pr-14 pl-4 pt-4 rounded-2xl text-sm text-foreground focus:outline-none overflow-y-auto [scrollbar-width:thin] leading-relaxed transition-colors"
+                          />
+
+                          {/* Bottom left: paperclip */}
+                          <div className="absolute bottom-3 left-4">
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={attachedFiles.length >= 6}
+                              className="h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 disabled:opacity-30 transition-all cursor-pointer"
+                              title={attachedFiles.length >= 6 ? "Max 6 files" : "Attach file (max 35MB)"}
+                            >
+                              <Paperclip className="h-4 w-4 -rotate-45" />
+                            </button>
+                          </div>
+
+                          {/* Bottom right: send */}
+                          <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                            <Button
+                              type="submit"
+                              variant="ghost"
+                              size="icon"
+                              disabled={!canSubmit}
+                              className="h-8 w-8 shrink-0 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-sm"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                              <span className="sr-only">Send question</span>
+                            </Button>
+                          </div>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+
+                  {/* Suggestion chips */}
+                  <div className="flex flex-col items-center gap-3 mt-2">
                     <p className="text-xs text-muted-foreground font-medium tracking-wide">
                       Try Classgrid AI for...
                     </p>
@@ -2528,6 +2607,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                       })()}
                     </div>
                   </div>
+
                 </div>
               </div>
             ) : (
