@@ -34,6 +34,7 @@
  */
 
 import { useLocation } from "react-router-dom";
+import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 
@@ -44,6 +45,22 @@ type GenericPageProps = {
 export function GenericPage({ title }: GenericPageProps) {
   const location = useLocation();
   const resolvedTitle = title ?? resolveDashboardPageTitle(location.pathname);
+
+  if (resolvedTitle === "Classgrid AI") {
+    return (
+      <div className="flex flex-col w-full h-full relative bg-background">
+        <AskAiPanel 
+          open={true} 
+          onOpenChange={() => {}} 
+          variant="full-page"
+          pageContext={{
+            path: location.pathname,
+            title: resolvedTitle
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 w-full h-full p-4 sm:p-6 lg:p-8">
