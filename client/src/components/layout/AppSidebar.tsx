@@ -101,6 +101,13 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
     }
   }, [location.pathname]);
 
+  // Auto-open Agent menu when first question is sent
+  useEffect(() => {
+    const handleAutoOpen = () => setShowAgentMenu(true);
+    window.addEventListener("agent:auto-open-sidebar", handleAutoOpen);
+    return () => window.removeEventListener("agent:auto-open-sidebar", handleAutoOpen);
+  }, []);
+
   const storageNavItems = [
     { label: "Files", to: "/superadmin/storage/files", icon: HardDrive },
     { label: "Analytics", to: "/superadmin/storage/analytics", icon: FileBarChart },

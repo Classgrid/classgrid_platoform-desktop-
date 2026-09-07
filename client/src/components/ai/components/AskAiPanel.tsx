@@ -1104,20 +1104,16 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setAttachedFiles(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  // Load chat history and session ID from local storage on mount
+  // Always start a fresh new chat on every page load / new tab
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("classgrid_ai_chat_history");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Force typing to false for loaded messages so they don't get stuck
-        setMessages(parsed.map((m: any) => ({ ...m, typing: false })));
-      }
-      const savedSessionId = localStorage.getItem("classgrid_ai_session_id");
-      if (savedSessionId) {
-        setSessionId(savedSessionId);
-      }
-    } catch (_) { }
+    setMessages([]);
+    setSessionId(null);
+    setInput("");
+    setAttachedFiles([]);
+    setLastSentDocsPath(null);
+    localStorage.removeItem("classgrid_ai_chat_history");
+    localStorage.removeItem("classgrid_ai_session_id");
+    localStorage.removeItem("askAiDraftContext");
   }, []);
 
   // Save chat history and session ID to local storage whenever they update
@@ -1614,6 +1610,11 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     ];
 
     setMessages(nextMessages);
+
+    // Auto-open the Agent sidebar when the user sends their first question
+    if (messages.length === 0) {
+      window.dispatchEvent(new Event("agent:auto-open-sidebar"));
+    }
 
     // BACKGROUND SUMMARY GENERATOR FOR TOC (Delayed to prevent rate limits)
     if (displayQuestion.length > 25) {

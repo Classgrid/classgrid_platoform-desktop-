@@ -1,9 +1,9 @@
 import { createLLMClient } from "@classgrid/ai/core";
 import { getPresignedUploadUrl } from "../config/r2Client.js";
 import {
-    createSession, 
-    saveMessage, 
-    getSessions, 
+    createSession,
+    saveMessage,
+    getSessions,
     getSessionMessages,
     updateSessionTitle
 } from "../services/ai-chat.service.js";
@@ -18,6 +18,12 @@ async function generateSessionTitle(sessionId, question) {
     try {
         const client = createLLMClient({
             providers: [
+                {
+                    name: "mistral",
+                    url: "https://api.mistral.ai/v1/chat/completions",
+                    apiKey: process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY_2 || "",
+                    model: "open-mistral-nemo"
+                },
                 {
                     name: "gemini",
                     url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
@@ -59,12 +65,12 @@ export const streamAskAi = async (req, res) => {
 
     try {
         const body = req.body || {};
-        
+
         const messages = body.history || [];
-        
+
         let sessionId = body.sessionId;
         const isIncognito = body.isIncognito || false;
-        
+
         // 2a. If not incognito and no session exists, create one
         if (!isIncognito && !sessionId && body.question) {
             const title = body.question.length > 50 ? body.question.substring(0, 47) + "..." : body.question;
@@ -92,7 +98,7 @@ export const streamAskAi = async (req, res) => {
             }
             messages.push({ role: "user", content });
         }
-        
+
         let dynamicSystemPrompt = SYSTEM_PROMPT;
         if (body.userName || body.userEmail || body.userRole || body.subdomain) {
             dynamicSystemPrompt += `\n\n--- USER CONTEXT ---\nYou are currently speaking to ${body.userName || "a user"}.`;
@@ -110,18 +116,12 @@ export const streamAskAi = async (req, res) => {
                 }
             }
         }
-        
+
         messages.unshift({ role: "system", content: dynamicSystemPrompt });
 
         // 3. Initialize the real LLM Client from the Classgrid SDK using the fallback hierarchy
         const client = createLLMClient({
             providers: [
-                {
-                    name: "gemini",
-                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
-                    apiKey: process.env.GEMINI_API_KEY || "",
-                    model: "gemini-3.5-flash"
-                },
                 {
                     name: "groq",
                     url: "https://api.groq.com/openai/v1/chat/completions",
@@ -133,6 +133,12 @@ export const streamAskAi = async (req, res) => {
                     url: "https://api.mistral.ai/v1/chat/completions",
                     apiKey: process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY_2 || "",
                     model: "open-mistral-nemo"
+                },
+                {
+                    name: "gemini",
+                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+                    apiKey: process.env.GEMINI_API_KEY || "",
+                    model: "gemini-3.5-flash"
                 }
             ],
             verbose: true,
@@ -253,7 +259,7 @@ export const uploadChatImage = async (req, res) => {
         if (!fileName || !mimeType) {
             return res.status(400).json({ error: "fileName and mimeType required" });
         }
-        
+
         // Use R2 presigned URL generator for secure direct browser upload
         const result = await getPresignedUploadUrl(fileName, mimeType, 3600, `ai-chat-uploads/${Date.now()}-${fileName}`);
         res.json(result);
