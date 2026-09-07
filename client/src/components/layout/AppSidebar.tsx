@@ -68,7 +68,7 @@ import { SidebarSearch } from "./SidebarSearch";
 import { SlidingSidebar } from "./SlidingSidebar";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
-import { AgentNestedMenu } from "@/components/ai/components/AgentSidebar";
+// Removed AgentNestedMenu import as it is no longer used
 
 interface AppSidebarProps {
   role: DashboardRole;
@@ -86,27 +86,16 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const config = dashboardConfigs.find(c => c.role === role);
-
   const agentItem = config?.sections.flatMap(s => s.items).find(i => i.label === "Agent");
-  const isAgentPage = agentItem ? location.pathname === agentItem.to : false;
 
   // Local state to track if we are showing the storage menu pane.
   // Defaults to true if we load directly into a storage route.
   const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
-  const [showAgentMenu, setShowAgentMenu] = useState(isAgentPage);
 
   // Auto-open menus based on route changes
   useEffect(() => {
     setShowStorageMenu(location.pathname.startsWith("/superadmin/storage"));
-    setShowAgentMenu(agentItem ? location.pathname === agentItem.to : false);
-  }, [location.pathname, agentItem]);
-
-  // Auto-open Agent menu when first question is sent
-  useEffect(() => {
-    const handleAutoOpen = () => setShowAgentMenu(true);
-    window.addEventListener("agent:auto-open-sidebar", handleAutoOpen);
-    return () => window.removeEventListener("agent:auto-open-sidebar", handleAutoOpen);
-  }, []);
+  }, [location.pathname]);
 
   const storageNavItems = [
     { label: "Files", to: "/superadmin/storage/files", icon: HardDrive },
@@ -149,24 +138,24 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="!bg-background !border-r-0">
-      <SidebarHeader className={showStorageMenu || showAgentMenu ? "gap-1 p-2 pb-0" : ""}>
+      <SidebarHeader className={showStorageMenu ? "gap-1 p-2 pb-0" : ""}>
         <div className="flex items-center w-full group-data-[collapsible=icon]:justify-center">
           <SidebarSwitcher user={user ?? null} />
         </div>
-        <div className={showStorageMenu || showAgentMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
+        <div className={showStorageMenu ? "group-data-[collapsible=icon]:hidden mb-1" : "group-data-[collapsible=icon]:hidden"}>
           <SidebarSearch 
             searchQuery={searchQuery} 
             setSearchQuery={setSearchQuery} 
-            placeholder={showAgentMenu ? "Search chat history" : "Search..."}
+            placeholder={"Search..."}
           />
         </div>
       </SidebarHeader>
 
       <SidebarContent className="p-0">
         <SlidingSidebar
-          showNested={showStorageMenu || showAgentMenu}
-          onBack={() => { setShowStorageMenu(false); setShowAgentMenu(false); }}
-          nestedTitle={showStorageMenu ? "Storage" : showAgentMenu ? "Agent" : ""}
+          showNested={showStorageMenu}
+          onBack={() => { setShowStorageMenu(false); }}
+          nestedTitle={showStorageMenu ? "Storage" : ""}
           mainMenu={
             <>
               {sectionsWithBadges.map((section, index) => (
@@ -196,9 +185,6 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                               onClick={(e) => {
                                 if (item.label === "Storage") {
                                   setShowStorageMenu(true);
-                                } else if (item.label === "Agent") {
-                                  e.preventDefault();
-                                  setShowAgentMenu(true);
                                 }
                               }}
                               render={
@@ -223,9 +209,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                     to={item.hasNestedNav ? "#" : (item.to || "#")} 
                                     className="flex items-center gap-3 w-full justify-between"
                                     onClick={(e) => {
-                                      if (item.label === "Agent") {
-                                        setShowAgentMenu(true);
-                                      } else if (item.hasNestedNav) {
+                                      if (item.hasNestedNav) {
                                         e.preventDefault();
                                         setShowStorageMenu(true);
                                       }
@@ -299,8 +283,6 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            ) : showAgentMenu ? (
-              <AgentNestedMenu searchQuery={searchQuery} />
             ) : null
           }
         />
