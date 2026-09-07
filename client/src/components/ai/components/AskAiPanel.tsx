@@ -2116,7 +2116,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">
-          <div className="relative w-[80%] mx-auto shadow-sm rounded-2xl border border-border bg-background focus-within:border-foreground/30 focus-within:ring-1 focus-within:ring-foreground/30 transition-colors">
+          <div className="relative w-[80%] mx-auto shadow-sm rounded-2xl border border-border bg-background focus-within:border-black/20 dark:focus-within:border-white/20 focus-within:ring-1 focus-within:ring-black/20 dark:focus-within:ring-white/20 transition-colors">
             {/* Hidden file input */}
             <input
               ref={fileInputRef}
