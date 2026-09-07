@@ -217,6 +217,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                   setShowStorageMenu(true);
                                 } else if (item.label === "Agent") {
                                   setShowAgentMenu(true);
+                                  if (item.to) navigate(item.to);
                                 }
                               }}
                               render={
@@ -243,6 +244,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                     onClick={(e) => {
                                       if (item.label === "Agent") {
                                         setShowAgentMenu(true);
+                                        if (item.to) navigate(item.to);
                                       } else if (item.hasNestedNav) {
                                         e.preventDefault();
                                         setShowStorageMenu(true);
