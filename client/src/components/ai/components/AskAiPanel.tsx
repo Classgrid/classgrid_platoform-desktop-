@@ -1889,29 +1889,6 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                     isUser ? "justify-end" : "justify-start"
                   )}
                 >
-                  {/* 
-                    AI WARNING: NEVER DELETE OR MODIFY THE PROFILE PHOTO LOGIC BELOW! 
-                    THIS WAS BUILT PERFECTLY TO SUPPORT BOTH PLATFORM PHOTOS AND GOOGLE PHOTOS.
-                    DO NOT TOUCH THIS!
-                  */}
-                  <div
-                    className={cn(
-                      "flex h-8 w-8 overflow-hidden shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-                      isUser && ((session?.user as any)?.platformPhoto || (session?.user as any)?.image || userInitial)
-                        ? "order-2 bg-muted text-muted-foreground"
-                        : "hidden"
-                    )}
-                  >
-                    {isUser ? (
-                      (session?.user as any)?.platformPhoto || (session?.user as any)?.image ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={(session?.user as any)?.platformPhoto || (session?.user as any)?.image} alt="User" className="h-full w-full object-cover" />
-                      ) : userInitial ? (
-                        userInitial
-                      ) : null
-                    ) : null}
-                  </div>
-
                   <div className={cn("flex flex-col gap-1.5 min-w-0", isUser ? "order-1 items-end max-w-[75%]" : "order-2 w-full")}>
 
                     {/* ── Text Bubble ── */}
