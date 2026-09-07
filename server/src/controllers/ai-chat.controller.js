@@ -24,10 +24,21 @@ export const streamAskAi = async (req, res) => {
         }
         
         let dynamicSystemPrompt = SYSTEM_PROMPT;
-        if (body.userName || body.userEmail || body.userRole) {
+        if (body.userName || body.userEmail || body.userRole || body.subdomain) {
             dynamicSystemPrompt += `\n\n--- USER CONTEXT ---\nYou are currently speaking to ${body.userName || "a user"}.`;
-            if (body.userEmail) dynamicSystemPrompt += `\nTheir Email: ${body.userEmail}`;
+            if (body.userEmail) {
+                dynamicSystemPrompt += `\nTheir Email: ${body.userEmail}`;
+                if (body.userEmail.endsWith("@classgrid.in")) {
+                    dynamicSystemPrompt += ` (SUPER ADMIN / PLATFORM OWNER)`;
+                }
+            }
             if (body.userRole) dynamicSystemPrompt += `\nTheir Role: ${body.userRole}`;
+            if (body.subdomain) {
+                dynamicSystemPrompt += `\nCurrent Dashboard Subdomain: ${body.subdomain}`;
+                if (body.subdomain !== "classgrid.in" && body.subdomain !== "superadmin.classgrid.in" && body.subdomain !== "localhost") {
+                    dynamicSystemPrompt += ` (This means they are using a school/organization's dashboard, not the super admin dashboard)`;
+                }
+            }
         }
         
         messages.unshift({ role: "system", content: dynamicSystemPrompt });

@@ -57,6 +57,8 @@ import { DocsImageViewer } from "./DocsImageViewer";
 import { ScrollSpyTOC } from "./TOC";
 
 // ─── SDK-local type definitions & stubs ───
+import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
+
 type PageContext = {
   path?: string;
   title?: string;
@@ -64,10 +66,7 @@ type PageContext = {
   [key: string]: any;
 };
 
-// Stub: useSession (SDK consumers may not have next-auth)
-function useSession(): { data: any } {
-  return { data: null };
-}
+
 
 // Stub: usePostHog (SDK consumers may not have posthog)
 function usePostHog(): any {
@@ -795,7 +794,8 @@ const AssistantMessageContent = memo(({ content, isTyping }: { content: string, 
 });
 
 export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow", initialMessages, autoFocus = true }: AskAiPanelProps) {
-  const { data: session } = useSession();
+  const { data: user } = useCurrentUser();
+  const session = user ? { user } : null;
   const sidebarContext = useContext(SidebarContext);
   const isSidebarCollapsed = sidebarContext?.state === "collapsed";
   const prefersReducedMotion = useReducedMotion();
@@ -1634,6 +1634,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
           userName: session?.user?.name ?? undefined,
           userEmail: session?.user?.email ?? undefined,
           userRole: session?.user?.role ?? undefined,
+          subdomain: typeof window !== "undefined" ? window.location.hostname : undefined,
           userContext: userContext,
           sessionId: sessionId ?? undefined,
           attachments: uploadedAttachments.length > 0 ? uploadedAttachments.map(a => ({ url: a.url, name: a.name, mimeType: a.mimeType })) : undefined,
