@@ -1196,7 +1196,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   useEffect(() => {
     async function checkBanStatus() {
       try {
-        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
+        const endpoint = typeof import.meta !== "undefined" && import.meta.env 
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
+          : "/api/ai/ask";
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1556,7 +1558,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     if (displayQuestion.length > 25) {
       setTimeout(() => {
         console.log("firing background summary fetch for message:", userMsgId);
-        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
+        const endpoint = typeof import.meta !== "undefined" && import.meta.env 
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
+          : "/api/ai/ask";
         fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1612,7 +1616,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     abortControllerRef.current = controller;
 
     try {
-      const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
+      const endpoint = typeof import.meta !== "undefined" && import.meta.env 
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
+          : "/api/ai/ask";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
