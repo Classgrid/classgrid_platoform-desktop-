@@ -34,7 +34,7 @@ async function generateSessionTitle(sessionId, question) {
                     name: "groq",
                     url: "https://api.groq.com/openai/v1/chat/completions",
                     apiKey: process.env.GROQ_API_KEY || "",
-                    model: "llama3-8b-8192"
+                    model: "openai/gpt-oss-20b"
                 }
             ]
         });
@@ -126,7 +126,7 @@ export const streamAskAi = async (req, res) => {
                     name: "groq",
                     url: "https://api.groq.com/openai/v1/chat/completions",
                     apiKey: process.env.GROQ_API_KEY || "",
-                    model: "llama3-8b-8192"
+                    model: "openai/gpt-oss-20b"
                 },
                 {
                     name: "mistral",
