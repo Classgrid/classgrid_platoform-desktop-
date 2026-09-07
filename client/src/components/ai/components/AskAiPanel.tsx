@@ -71,7 +71,7 @@ function useSession(): { data: any } {
 
 // Stub: usePostHog (SDK consumers may not have posthog)
 function usePostHog(): any {
-  return { capture: () => {} };
+  return { capture: () => { } };
 }
 
 // Stub: file upload server actions (SDK consumers provide their own endpoint)
@@ -81,7 +81,7 @@ async function getPresignedUrlForAskAiFile(_name: string, _type: string, _size: 
 async function checkAiUploadRateLimit(_count: number): Promise<{ allowed: boolean; reason?: string }> {
   return { allowed: true };
 }
-async function recordAiFilesSent(_count: number): Promise<void> {}
+async function recordAiFilesSent(_count: number): Promise<void> { }
 
 type AskAiPanelProps = {
   open: boolean;
@@ -824,7 +824,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
   useEffect(() => {
     if (tocItems.length === 0) return;
-    
+
     // Initially select the last item if none is selected
     if (!activeSection) {
       setActiveSection(tocItems[tocItems.length - 1].id);
@@ -1036,7 +1036,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
         // Upload directly to R2 via presigned URL
         if (!newFile.file) throw new Error("Missing file blob for upload");
-        
+
         if (result.uploadUrl === "mock") {
           // Simulate a network upload delay for the mock
           await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1199,8 +1199,8 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   useEffect(() => {
     async function checkBanStatus() {
       try {
-        const endpoint = typeof import.meta !== "undefined" && import.meta.env 
-          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
+        const endpoint = typeof import.meta !== "undefined" && import.meta.env
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask"
           : "/api/ai/ask";
         const res = await fetch(endpoint, {
           method: "POST",
@@ -1562,8 +1562,8 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     if (displayQuestion.length > 25) {
       setTimeout(() => {
         console.log("firing background summary fetch for message:", userMsgId);
-        const endpoint = typeof import.meta !== "undefined" && import.meta.env 
-          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
+        const endpoint = typeof import.meta !== "undefined" && import.meta.env
+          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask"
           : "/api/ai/ask";
         fetch(endpoint, {
           method: "POST",
@@ -1574,44 +1574,44 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
             history: [{ role: "system", content: "You are a title generator. Output only a short title, without quotes." }]
           })
         })
-        .then(async (res) => {
-           console.log("background summary fetch response status:", res.status);
-           const contentType = res.headers.get("content-type") || "";
-           if (contentType.includes("text/event-stream") && res.body) {
-             const reader = res.body.getReader();
-             const decoder = new TextDecoder();
-             let buffer = "";
-             let finalAnswer = "";
-             while (true) {
-               const { done, value } = await reader.read();
-               if (done) break;
-               buffer += decoder.decode(value, { stream: true });
-               const parts = buffer.split("\n\n");
-               buffer = parts.pop() || "";
-               for (const part of parts) {
-                 const dataMatch = part.match(/^data:\s*(.+)$/m);
-                 if (dataMatch) {
-                   try {
-                     const event = JSON.parse(dataMatch[1]);
-                     if (event.type === "answer") {
-                       finalAnswer = event.answer;
-                       console.log("background summary parsed final answer:", finalAnswer);
-                     }
-                   } catch (_) {}
-                 }
-               }
-             }
-             if (finalAnswer) {
-               console.log("updating state with tocSummary:", finalAnswer);
-               setMessages(prev => prev.map(m => m.id === userMsgId ? { ...m, tocSummary: finalAnswer.trim().replace(/^["']|["']$/g, '') } : m));
-             } else {
-               console.log("background summary finished but finalAnswer was empty");
-             }
-           } else {
-             console.log("background summary response was not event-stream", contentType);
-           }
-        })
-        .catch(err => console.error("background summary fetch failed:", err));
+          .then(async (res) => {
+            console.log("background summary fetch response status:", res.status);
+            const contentType = res.headers.get("content-type") || "";
+            if (contentType.includes("text/event-stream") && res.body) {
+              const reader = res.body.getReader();
+              const decoder = new TextDecoder();
+              let buffer = "";
+              let finalAnswer = "";
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const parts = buffer.split("\n\n");
+                buffer = parts.pop() || "";
+                for (const part of parts) {
+                  const dataMatch = part.match(/^data:\s*(.+)$/m);
+                  if (dataMatch) {
+                    try {
+                      const event = JSON.parse(dataMatch[1]);
+                      if (event.type === "answer") {
+                        finalAnswer = event.answer;
+                        console.log("background summary parsed final answer:", finalAnswer);
+                      }
+                    } catch (_) { }
+                  }
+                }
+              }
+              if (finalAnswer) {
+                console.log("updating state with tocSummary:", finalAnswer);
+                setMessages(prev => prev.map(m => m.id === userMsgId ? { ...m, tocSummary: finalAnswer.trim().replace(/^["']|["']$/g, '') } : m));
+              } else {
+                console.log("background summary finished but finalAnswer was empty");
+              }
+            } else {
+              console.log("background summary response was not event-stream", contentType);
+            }
+          })
+          .catch(err => console.error("background summary fetch failed:", err));
       }, 2000);
     }
 
@@ -1621,9 +1621,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     abortControllerRef.current = controller;
 
     try {
-      const endpoint = typeof import.meta !== "undefined" && import.meta.env 
-          ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask" 
-          : "/api/ai/ask";
+      const endpoint = typeof import.meta !== "undefined" && import.meta.env
+        ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/ai/ask"
+        : "/api/ai/ask";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1840,7 +1840,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
   const panelChat = (
     <div ref={variant !== "full-page" ? chatScrollRef : undefined} className={cn("overscroll-contain [scrollbar-width:thin]", variant === "full-page" ? "w-full" : "flex-1 min-h-0 overflow-y-auto")}>
-      <div className={cn("flex flex-col gap-4 px-4 py-4", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
+      <div className={cn("flex flex-col gap-4 px-4 py-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
         {emptyState ? (
           <>
             <div className="rounded-2xl border border-border bg-card px-4 py-3">
@@ -2061,7 +2061,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                 >
                   <div className="pl-1">
                     <div className="flex items-center gap-2 text-base text-muted-foreground">
-                      <motion.span 
+                      <motion.span
                         className="font-medium bg-[length:200%_100%] bg-clip-text text-transparent bg-[linear-gradient(110deg,#94a3b8,45%,#0f172a,55%,#94a3b8)] dark:bg-[linear-gradient(110deg,#475569,45%,#ffffff,55%,#475569)]"
                         animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -2112,191 +2112,191 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
 
       <div className={cn(variant === "full-page" && "relative max-w-[52rem] mx-auto w-full pointer-events-auto")}>
 
-      {isTerminated ? (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-medium text-red-500">
-          <p>This conversation has been terminated.</p>
-          {countdown && (
-            <p className="mt-1 text-xs text-red-400">
-              Access resumes in: <span className="font-mono font-bold">{countdown}</span>
-            </p>
-          )}
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <div className="relative w-[80%] mx-auto shadow-sm rounded-2xl border border-border bg-background focus-within:border-black/80 dark:focus-within:border-white/50 focus-within:ring-1 focus-within:ring-black/80 dark:focus-within:ring-white/50 transition-colors">
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept={ACCEPTED_FILE_TYPES}
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-
-            {pageContext?.path?.startsWith("/docs") && pageContext.path !== lastSentDocsPath && (
-              <div className="px-3 pt-3 pb-0">
-                <div className="group relative inline-flex items-center gap-2.5 rounded-[10px] border border-border/80 bg-muted/40 px-3 py-2 pr-8 shadow-sm max-w-[95%]">
-                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="flex flex-col min-w-0 overflow-hidden text-left gap-0.5">
-                    <span className="text-[12px] font-semibold text-foreground truncate leading-tight">
-                      {pageContext.title || "Introduction"}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground/80 truncate leading-tight">
-                      https://classgrid.in{pageContext.path}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setLastSentDocsPath(pageContext.path!)}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 focus:text-foreground"
-                    title="Remove page context"
-                  >
-                    <X className="h-3 w-3" />
-                    <span className="sr-only">Remove context</span>
-                  </button>
-                </div>
-              </div>
+        {isTerminated ? (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-medium text-red-500">
+            <p>This conversation has been terminated.</p>
+            {countdown && (
+              <p className="mt-1 text-xs text-red-400">
+                Access resumes in: <span className="font-mono font-bold">{countdown}</span>
+              </p>
             )}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-2">
+            <div className="relative w-[80%] mx-auto shadow-sm rounded-2xl border border-border bg-background focus-within:border-black/80 dark:focus-within:border-white/50 focus-within:ring-1 focus-within:ring-black/80 dark:focus-within:ring-white/50 transition-colors">
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={ACCEPTED_FILE_TYPES}
+                onChange={handleFileSelect}
+                className="hidden"
+              />
 
-            {/* Attached file chips */}
-            {attachedFiles.length > 0 && (
-              <div className="px-3 pt-3 pb-0 flex flex-wrap gap-1.5">
-                {attachedFiles.map((att) => {
-                  const Icon = getFileIcon(att.type);
-                  const isImage = att.type.startsWith("image/");
-                  return (
-                    <div
-                      key={att.id}
-                      className={cn(
-                        "group relative inline-flex items-center gap-2 rounded-[10px] border px-3 py-2 pr-8 shadow-sm max-w-[200px] transition-all",
-                        att.status === "error" ? "border-red-500/50 bg-red-500/10" : "border-border/80 bg-muted/40",
-                        att.status === "uploading" ? "opacity-70 animate-pulse" : "opacity-100"
-                      )}
+              {pageContext?.path?.startsWith("/docs") && pageContext.path !== lastSentDocsPath && (
+                <div className="px-3 pt-3 pb-0">
+                  <div className="group relative inline-flex items-center gap-2.5 rounded-[10px] border border-border/80 bg-muted/40 px-3 py-2 pr-8 shadow-sm max-w-[95%]">
+                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="flex flex-col min-w-0 overflow-hidden text-left gap-0.5">
+                      <span className="text-[12px] font-semibold text-foreground truncate leading-tight">
+                        {pageContext.title || "Introduction"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/80 truncate leading-tight">
+                        https://classgrid.in{pageContext.path}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setLastSentDocsPath(pageContext.path!)}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 focus:text-foreground"
+                      title="Remove page context"
                     >
-                      {isImage ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={att.url || (att.file ? URL.createObjectURL(att.file) : "")}
-                          alt={att.name}
-                          className="h-6 w-6 rounded object-cover shrink-0"
-                        />
-                      ) : (
-                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      )}
-                      <div className="flex flex-col min-w-0 overflow-hidden text-left gap-0">
-                        <span className="text-[11px] font-medium text-foreground truncate leading-tight">
-                          {att.name}
-                        </span>
-                        {att.status === "uploading" ? (
-                          <div className="h-1.5 w-full max-w-[80px] bg-muted-foreground/20 rounded-full overflow-hidden mt-1 mb-0.5">
-                            <motion.div
-                              initial={{ width: "0%" }}
-                              animate={{ width: "85%" }}
-                              transition={{ duration: 2.5, ease: "easeOut" }}
-                              className="h-full bg-emerald-500 rounded-full"
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground/70 leading-tight">
-                            {att.status === "error" ? "Failed" : formatFileSize(att.size)}
-                          </span>
-                        )}
-                      </div>
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove context</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                      {/* Allow previewing the file immediately after successful upload */}
-                      {att.status === "done" && att.url && (
+              {/* Attached file chips */}
+              {attachedFiles.length > 0 && (
+                <div className="px-3 pt-3 pb-0 flex flex-wrap gap-1.5">
+                  {attachedFiles.map((att) => {
+                    const Icon = getFileIcon(att.type);
+                    const isImage = att.type.startsWith("image/");
+                    return (
+                      <div
+                        key={att.id}
+                        className={cn(
+                          "group relative inline-flex items-center gap-2 rounded-[10px] border px-3 py-2 pr-8 shadow-sm max-w-[200px] transition-all",
+                          att.status === "error" ? "border-red-500/50 bg-red-500/10" : "border-border/80 bg-muted/40",
+                          att.status === "uploading" ? "opacity-70 animate-pulse" : "opacity-100"
+                        )}
+                      >
+                        {isImage ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={att.url || (att.file ? URL.createObjectURL(att.file) : "")}
+                            alt={att.name}
+                            className="h-6 w-6 rounded object-cover shrink-0"
+                          />
+                        ) : (
+                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <div className="flex flex-col min-w-0 overflow-hidden text-left gap-0">
+                          <span className="text-[11px] font-medium text-foreground truncate leading-tight">
+                            {att.name}
+                          </span>
+                          {att.status === "uploading" ? (
+                            <div className="h-1.5 w-full max-w-[80px] bg-muted-foreground/20 rounded-full overflow-hidden mt-1 mb-0.5">
+                              <motion.div
+                                initial={{ width: "0%" }}
+                                animate={{ width: "85%" }}
+                                transition={{ duration: 2.5, ease: "easeOut" }}
+                                className="h-full bg-emerald-500 rounded-full"
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/70 leading-tight">
+                              {att.status === "error" ? "Failed" : formatFileSize(att.size)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Allow previewing the file immediately after successful upload */}
+                        {att.status === "done" && att.url && (
+                          <button
+                            type="button"
+                            onClick={() => setPreviewFile({ name: att.name, src: att.url!, mimeType: att.type })}
+                            className="absolute inset-0 w-full h-full cursor-pointer z-0"
+                            title="Preview file"
+                          />
+                        )}
+
                         <button
                           type="button"
-                          onClick={() => setPreviewFile({ name: att.name, src: att.url!, mimeType: att.type })}
-                          className="absolute inset-0 w-full h-full cursor-pointer z-0"
-                          title="Preview file"
-                        />
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => removeAttachedFile(att.id)}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors z-10 cursor-pointer"
-                        title={`Remove ${att.name}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <textarea
-              id="ask-ai-input"
-              name="askAiQuestion"
-              data-no-ring="true"
-              suppressHydrationWarning
-              ref={inputRef as any}
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onPaste={handlePaste}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (canSubmit) void askQuestion(input);
-                }
-              }}
-              placeholder={attachedFiles.length > 0 ? "Add a message or send files..." : "Ask a question..."}
-              autoComplete="off"
-              className={cn(
-                "min-h-[90px] max-h-[240px] w-full resize-none bg-transparent pb-12 pr-14 text-sm text-foreground focus:outline-none overflow-y-auto [scrollbar-width:thin] leading-relaxed transition-colors",
-                (pageContext?.path?.startsWith("/docs") && !isGenerating) ? "pl-14" : "pl-4",
-                (pageContext?.path?.startsWith("/docs") || attachedFiles.length > 0) ? "pt-3" : "pt-4 rounded-2xl"
+                          onClick={() => removeAttachedFile(att.id)}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors z-10 cursor-pointer"
+                          title={`Remove ${att.name}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            />
 
-            {/* Bottom Left action bar: paperclip */}
-            {(pageContext?.path?.startsWith("/docs") || variant === "full-page") && !isGenerating && (
-              <div className="absolute bottom-3 left-4">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={attachedFiles.length >= 6}
-                  className="h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 disabled:opacity-30 transition-all cursor-pointer"
-                  title={attachedFiles.length >= 6 ? "Max 6 files" : "Attach file (max 35MB)"}
-                >
-                  <Paperclip className={cn("h-4 w-4 -rotate-45", isAnyFileUploading && "opacity-50")} />
-                </button>
-              </div>
-            )}
+              <textarea
+                id="ask-ai-input"
+                name="askAiQuestion"
+                data-no-ring="true"
+                suppressHydrationWarning
+                ref={inputRef as any}
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (canSubmit) void askQuestion(input);
+                  }
+                }}
+                placeholder={attachedFiles.length > 0 ? "Add a message or send files..." : "Ask a question..."}
+                autoComplete="off"
+                className={cn(
+                  "min-h-[90px] max-h-[240px] w-full resize-none bg-transparent pb-12 pr-14 text-sm text-foreground focus:outline-none overflow-y-auto [scrollbar-width:thin] leading-relaxed transition-colors",
+                  (pageContext?.path?.startsWith("/docs") && !isGenerating) ? "pl-14" : "pl-4",
+                  (pageContext?.path?.startsWith("/docs") || attachedFiles.length > 0) ? "pt-3" : "pt-4 rounded-2xl"
+                )}
+              />
 
-            {/* Bottom Right action bar: send/stop */}
-            <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-
-              {isGenerating ? (
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleStop}
-                  className="h-8 rounded-full bg-foreground text-background hover:bg-foreground/90 px-3 text-[11px] font-medium shadow-sm transition-all active:scale-95"
-                  title="Stop generating"
-                >
-                  <Square className="mr-1.5 h-3 w-3 fill-current opacity-80" />
-                  Stop
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  size="icon"
-                  disabled={!canSubmit}
-                  className="h-8 w-8 shrink-0 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-sm"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                  <span className="sr-only">Send question</span>
-                </Button>
+              {/* Bottom Left action bar: paperclip */}
+              {(pageContext?.path?.startsWith("/docs") || variant === "full-page") && !isGenerating && (
+                <div className="absolute bottom-3 left-4">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={attachedFiles.length >= 6}
+                    className="h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 disabled:opacity-30 transition-all cursor-pointer"
+                    title={attachedFiles.length >= 6 ? "Max 6 files" : "Attach file (max 35MB)"}
+                  >
+                    <Paperclip className={cn("h-4 w-4 -rotate-45", isAnyFileUploading && "opacity-50")} />
+                  </button>
+                </div>
               )}
+
+              {/* Bottom Right action bar: send/stop */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+
+                {isGenerating ? (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleStop}
+                    className="h-8 rounded-full bg-foreground text-background hover:bg-foreground/90 px-3 text-[11px] font-medium shadow-sm transition-all active:scale-95"
+                    title="Stop generating"
+                  >
+                    <Square className="mr-1.5 h-3 w-3 fill-current opacity-80" />
+                    Stop
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    size="icon"
+                    disabled={!canSubmit}
+                    className="h-8 w-8 shrink-0 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-sm"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                    <span className="sr-only">Send question</span>
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </form>
-      )}
+          </form>
+        )}
       </div>
 
     </div>
