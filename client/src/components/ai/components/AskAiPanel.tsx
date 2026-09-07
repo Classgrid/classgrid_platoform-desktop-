@@ -1376,8 +1376,8 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     const handleLoadChat = (e: any) => {
       const sessionId = e.detail?.sessionId;
       if (sessionId) {
-        // Here we can load the specific chat session
-        // For now, we simulate switching to it
+        // Provide INSTANT visual feedback by clearing the screen
+        setMessages([]);
         setSessionId(sessionId);
         onOpenChange?.(true);
         const endpoint = typeof import.meta !== "undefined" && import.meta.env
