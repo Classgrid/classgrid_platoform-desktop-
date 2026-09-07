@@ -54,6 +54,12 @@ export function OrgAdmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<AdmissionsAuditData | null>(null);
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Admissions Audit" }
+  ], [id, orgName]);
+
   useEffect(() => {
     async function loadData() {
       if (!id) return;
@@ -101,12 +107,6 @@ export function OrgAdmissionsPage() {
   const { configs, applicationsCount } = data;
   const activeConfigs = configs.filter(c => c.status === "active").length;
   
-  const breadcrumbItems = React.useMemo(() => [
-    { label: "Organizations", href: "/superadmin/orgs" },
-    { label: orgName, href: `/superadmin/detail/${id}` },
-    { label: "Admissions Audit" }
-  ], [id, orgName]);
-
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
       <PageBreadcrumbs items={breadcrumbItems} />

@@ -1196,7 +1196,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   useEffect(() => {
     async function checkBanStatus() {
       try {
-        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ask-ai";
+        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1556,7 +1556,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     if (displayQuestion.length > 25) {
       setTimeout(() => {
         console.log("firing background summary fetch for message:", userMsgId);
-        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ask-ai";
+        const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
         fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1612,7 +1612,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     abortControllerRef.current = controller;
 
     try {
-      const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ask-ai";
+      const endpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "/api/ai/ask";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

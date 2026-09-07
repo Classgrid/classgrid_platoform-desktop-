@@ -54,6 +54,12 @@ export function OrgStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<StudentsAuditData | null>(null);
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Students Audit" }
+  ], [id, orgName]);
+
   useEffect(() => {
     async function loadData() {
       if (!id) return;
@@ -110,13 +116,10 @@ export function OrgStudentsPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+      <PageBreadcrumbs items={breadcrumbItems} />
+      
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-muted-foreground mb-1">
-          <Link to={`/superadmin/detail/${id}`} className="hover:text-foreground transition-colors cursor-pointer">Back to Organization</Link>
-          <span className="mx-2 text-muted-foreground/50">/</span>
-          <span className="text-foreground">Students Audit</span>
-        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <GraduationCap className="h-6 w-6 text-primary" />

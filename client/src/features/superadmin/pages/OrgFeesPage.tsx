@@ -53,6 +53,12 @@ export function OrgFeesPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<FeesAuditData | null>(null);
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Fee Structure Audit" }
+  ], [id, orgName]);
+
   useEffect(() => {
     async function loadData() {
       if (!id) return;
@@ -104,12 +110,6 @@ export function OrgFeesPage() {
   fees.forEach(fee => {
     totalRevenuePotential += fee.base_amount + (fee.base_amount * (fee.tax_percentage / 100));
   });
-
-  const breadcrumbItems = React.useMemo(() => [
-    { label: "Organizations", href: "/superadmin/orgs" },
-    { label: orgName, href: `/superadmin/detail/${id}` },
-    { label: "Fee Structure Audit" }
-  ], [id, orgName]);
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">

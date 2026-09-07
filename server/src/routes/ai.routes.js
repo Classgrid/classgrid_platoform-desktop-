@@ -40,6 +40,7 @@ import {
     chatWithSyllabus, 
     getMyPersona 
 } from "../controllers/ai.controller.js";
+import { streamAskAi } from "../controllers/ai-chat.controller.js";
 
 const router = express.Router();
 
@@ -55,5 +56,10 @@ router.post("/syllabus-chat", isAuthenticated, chatWithSyllabus);
 
 // Get personalized AI insights
 router.get("/my-persona", isAuthenticated, getMyPersona);
+
+// ── GLOBAL AI ASSISTANT ────────────────────────────────────
+
+// Global AI Panel SSE Chat
+router.post("/ask", isAuthenticated, streamAskAi);
 
 export default router;

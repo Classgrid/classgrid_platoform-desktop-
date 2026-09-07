@@ -60,6 +60,12 @@ export function OrgHierarchyPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HierarchyAuditData | null>(null);
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Academic Hierarchy Audit" }
+  ], [id, orgName]);
+
   useEffect(() => {
     async function loadData() {
       if (!id) return;
@@ -108,12 +114,6 @@ export function OrgHierarchyPage() {
   const rootNodes = nodes.filter(n => !n.parent_id);
   const activeClassrooms = classrooms.filter(c => c.is_active).length;
   const activeSubjects = subjects.filter(s => s.is_active).length;
-
-  const breadcrumbItems = React.useMemo(() => [
-    { label: "Organizations", href: "/superadmin/orgs" },
-    { label: orgName, href: `/superadmin/detail/${id}` },
-    { label: "Academic Hierarchy Audit" }
-  ], [id, orgName]);
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">

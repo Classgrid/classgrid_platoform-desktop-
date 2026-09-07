@@ -45,6 +45,12 @@ export function OrgFacultyPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<FacultyAuditData | null>(null);
 
+  const breadcrumbItems = React.useMemo(() => [
+    { label: "Organizations", href: "/superadmin/orgs" },
+    { label: orgName, href: `/superadmin/detail/${id}` },
+    { label: "Faculty & Staff Audit" }
+  ], [id, orgName]);
+
   useEffect(() => {
     async function loadData() {
       if (!id) return;
@@ -93,12 +99,6 @@ export function OrgFacultyPage() {
   const activeFaculty = faculty.filter(f => f.status === "active").length;
   const orgAdmins = faculty.filter(f => f.role === "org_admin").length;
   const teachers = faculty.filter(f => f.role === "teacher").length;
-
-  const breadcrumbItems = React.useMemo(() => [
-    { label: "Organizations", href: "/superadmin/orgs" },
-    { label: orgName, href: `/superadmin/detail/${id}` },
-    { label: "Faculty & Staff Audit" }
-  ], [id, orgName]);
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
