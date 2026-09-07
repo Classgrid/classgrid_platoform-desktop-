@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback, memo } from "react";
-import hljs from "highlight";
+import hljs from "highlight.js";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUp,
