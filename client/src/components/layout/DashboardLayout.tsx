@@ -47,6 +47,8 @@ import { AppSidebar } from "./AppSidebar";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { getAccessibleDashboards } from "@/lib/dashboardRoleMap";
+import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
+import { Sparkles } from "lucide-react";
 
 import type { DashboardRole } from "@/layouts/types";
 
@@ -170,6 +172,7 @@ function DashboardSwitcher({ mainRole, additionalRoles }: { mainRole: string; ad
 }
 
 export function DashboardLayout({ children, role, user }: DashboardLayoutProps) {
+  const [aiOpen, setAiOpen] = useState(false);
   const location = useLocation();
   const isFullBleed = location.pathname.includes("/chat") || location.pathname.includes("/website") || location.pathname.includes("/storage/files");
   const isNoPadding = location.pathname.includes("/storage/notes");
@@ -227,8 +230,15 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
                   </BreadcrumbList>
                 </Breadcrumb>
 
-                {/* Right: Dashboard Switcher — only if user has multiple dashboards */}
-                <div className="absolute right-4 flex items-center">
+                {/* Right: Dashboard Switcher & AI Toggle */}
+                <div className="absolute right-4 flex items-center gap-2">
+                  <button 
+                    onClick={() => setAiOpen(true)}
+                    className="flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-sm font-medium transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span className="hidden sm:inline">Ask AI</span>
+                  </button>
                   <DashboardSwitcher mainRole={mainRole} additionalRoles={additionalRoles} />
                 </div>
               </header>
@@ -238,6 +248,17 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
             </main>
           </div>
         </SidebarInset>
+        
+        <AskAiPanel 
+          open={aiOpen} 
+          onOpenChange={setAiOpen} 
+          variant="overlay"
+          pageContext={{
+            path: location.pathname,
+            title: resolveDashboardPageTitle(location.pathname),
+            summary: "Dashboard view for " + dashboardRole
+          }}
+        />
       </SidebarProvider>
     </TooltipProvider>
   );
