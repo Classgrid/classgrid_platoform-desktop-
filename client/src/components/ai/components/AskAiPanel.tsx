@@ -1960,7 +1960,23 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       <div className={cn("flex flex-col gap-4 px-4 py-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]", variant === "full-page" && (isSidebarCollapsed ? "max-w-6xl" : "max-w-[52rem]"), variant === "full-page" && "mx-auto w-full pb-52")}>
         {emptyState ? (
           <>
-            {/* No greeting or suggestion text at all */}
+            {/* PostHog-style centered greeting with logo & suggestion chips */}
+            <div className="flex flex-col items-center justify-center py-16 gap-5 select-none">
+              {/* Classgrid Logo */}
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-8 w-8 text-emerald-500" />
+              </div>
+
+              {/* Greeting */}
+              <div className="text-center space-y-1.5">
+                <h2 className="text-xl font-semibold text-foreground tracking-tight">
+                  What do you want to know today?
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Your AI-powered ERP assistant
+                </p>
+              </div>
+            </div>
           </>
         ) : (
           <>
@@ -2390,11 +2406,128 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         <div className="w-full h-full bg-background flex flex-row">
           <div className="flex-1 relative flex flex-col h-full">
             {emptyState ? (
-              /* ── Empty state: input centered vertically ── */
+              /* ── Empty state: input centered vertically with suggestion chips ── */
               <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8">
                 <div className="max-w-[52rem] w-full">
                   {panelChat}
                   {panelInput}
+
+                  {/* PostHog-style suggestion chips */}
+                  <div className="mt-4 flex flex-col items-center gap-3">
+                    <p className="text-xs text-muted-foreground font-medium tracking-wide">
+                      Try Classgrid AI for...
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {(() => {
+                        const path = window.location.pathname;
+                        let chips: { icon: string; label: string }[] = [];
+
+                        if (path.startsWith("/superadmin")) {
+                          chips = [
+                            { icon: "📊", label: "Analytics" },
+                            { icon: "🏫", label: "Organizations" },
+                            { icon: "💰", label: "Revenue" },
+                            { icon: "📋", label: "Leads" },
+                          ];
+                        } else if (path.startsWith("/org")) {
+                          chips = [
+                            { icon: "👥", label: "Students" },
+                            { icon: "👨‍🏫", label: "Faculty" },
+                            { icon: "💳", label: "Fees" },
+                            { icon: "📅", label: "Attendance" },
+                          ];
+                        } else if (path.startsWith("/dept/admissions")) {
+                          chips = [
+                            { icon: "📋", label: "Applications" },
+                            { icon: "🏅", label: "Merit Lists" },
+                            { icon: "📂", label: "Documents" },
+                            { icon: "✅", label: "Enrollment" },
+                          ];
+                        } else if (path.startsWith("/dept/fees")) {
+                          chips = [
+                            { icon: "💰", label: "Payments" },
+                            { icon: "⚠️", label: "Defaulters" },
+                            { icon: "📊", label: "Fee Structure" },
+                            { icon: "📋", label: "Reports" },
+                          ];
+                        } else if (path.startsWith("/dept/exams")) {
+                          chips = [
+                            { icon: "📝", label: "Exams" },
+                            { icon: "📊", label: "Results" },
+                            { icon: "🎯", label: "Grading" },
+                            { icon: "📅", label: "Schedule" },
+                          ];
+                        } else if (path.startsWith("/dept/library")) {
+                          chips = [
+                            { icon: "📚", label: "Books" },
+                            { icon: "📖", label: "Issued" },
+                            { icon: "⏰", label: "Overdue" },
+                            { icon: "🗂️", label: "Catalog" },
+                          ];
+                        } else if (path.startsWith("/dept/attendance")) {
+                          chips = [
+                            { icon: "📋", label: "Today's Attendance" },
+                            { icon: "📊", label: "Reports" },
+                            { icon: "🔔", label: "Alerts" },
+                            { icon: "📈", label: "Trends" },
+                          ];
+                        } else if (path.startsWith("/dept/hr")) {
+                          chips = [
+                            { icon: "👥", label: "Staff" },
+                            { icon: "💰", label: "Payroll" },
+                            { icon: "📅", label: "Leave" },
+                            { icon: "📋", label: "Recruitment" },
+                          ];
+                        } else if (path.startsWith("/dept/hostel")) {
+                          chips = [
+                            { icon: "🏠", label: "Rooms" },
+                            { icon: "👥", label: "Residents" },
+                            { icon: "📝", label: "Complaints" },
+                            { icon: "🍽️", label: "Mess" },
+                          ];
+                        } else if (path.startsWith("/faculty")) {
+                          chips = [
+                            { icon: "📚", label: "My Classes" },
+                            { icon: "📋", label: "Attendance" },
+                            { icon: "📊", label: "Results" },
+                            { icon: "📅", label: "Timetable" },
+                          ];
+                        } else if (path.startsWith("/student")) {
+                          chips = [
+                            { icon: "💳", label: "My Fees" },
+                            { icon: "📋", label: "Attendance" },
+                            { icon: "📊", label: "Results" },
+                            { icon: "📅", label: "Timetable" },
+                          ];
+                        } else {
+                          chips = [
+                            { icon: "📊", label: "Analytics" },
+                            { icon: "👥", label: "Users" },
+                            { icon: "💬", label: "Help" },
+                            { icon: "📋", label: "Reports" },
+                          ];
+                        }
+
+                        return chips.map((chip) => (
+                          <button
+                            key={chip.label}
+                            type="button"
+                            onClick={() => {
+                              setInput(chip.label);
+                              setTimeout(() => {
+                                const el = document.getElementById("ask-ai-input") as HTMLTextAreaElement | null;
+                                if (el) el.focus();
+                              }, 50);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-border bg-card hover:bg-muted text-sm text-foreground font-medium transition-colors cursor-pointer shadow-sm hover:shadow-md"
+                          >
+                            <span>{chip.icon}</span>
+                            <span>{chip.label}</span>
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
