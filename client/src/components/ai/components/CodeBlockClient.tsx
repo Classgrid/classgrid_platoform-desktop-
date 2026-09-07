@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import 'highlight.js/styles/atom-one-dark.css';
 
 // Maps languages to short badges like Vercel does
 const LANG_BADGES: Record<string, string> = {
