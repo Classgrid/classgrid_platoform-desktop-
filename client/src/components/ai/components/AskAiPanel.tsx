@@ -217,8 +217,8 @@ function suggestedQuestionsForPage(pageContext?: PageContext) {
 }
 
 const panelTransition = {
-  duration: 0.36,
-  ease: [0.22, 1, 0.36, 1],
+  duration: 0.15,
+  ease: "easeOut",
 } as const;
 
 const SECTION_ICON_RULES: Array<{ match: RegExp; icon: LucideIcon }> = [

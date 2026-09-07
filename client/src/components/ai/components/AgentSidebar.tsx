@@ -56,7 +56,7 @@ export function AgentNestedMenu({ searchQuery = "" }: { searchQuery?: string }) 
       <div className="px-2 pb-3 mb-3 border-b border-border/50">
         <Button 
           onClick={handleNewChat}
-          className="w-full justify-start gap-2 h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/90 border-none mb-1 cursor-pointer"
+          className="w-full justify-start gap-2 h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/90 border-none mb-1 !cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span className="font-medium text-sm">New Chat</span>
@@ -77,7 +77,7 @@ export function AgentNestedMenu({ searchQuery = "" }: { searchQuery?: string }) 
                 onClick={() => handleLoadChat(session.id)}
                 className="h-auto py-1.5"
                 render={
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full cursor-pointer hover:text-foreground transition-colors">
                     <MessageSquare size={16} className="text-muted-foreground shrink-0" />
                     <span className="truncate">{session.title}</span>
                   </div>
@@ -99,7 +99,7 @@ export function AgentNestedMenu({ searchQuery = "" }: { searchQuery?: string }) 
                 onClick={() => handleLoadChat(session.id)}
                 className="h-auto py-1.5 text-muted-foreground hover:text-foreground"
                 render={
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full cursor-pointer hover:text-foreground transition-colors">
                     <MessageSquare size={16} className="shrink-0 opacity-70" />
                     <div className="flex flex-col min-w-0 overflow-hidden">
                       <span className="truncate leading-tight">{session.title}</span>
