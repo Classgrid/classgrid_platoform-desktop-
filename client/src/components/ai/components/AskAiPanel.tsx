@@ -1164,25 +1164,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
   const [userContext, setUserContext] = useState<any>(null);
 
   // Fetch contextual user data on mount if session exists
-  useEffect(() => {
-    if (session?.user?.email) {
-      const endpoint = typeof import.meta !== "undefined" && import.meta.env
-        ? (import.meta.env.VITE_API_URL || "https://api.classgrid.in") + "/api/user/ai-context"
-        : "/api/user/ai-context";
-        
-      fetch(endpoint)
-        .then((res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        })
-        .then((data) => {
-          if (data?.userContext) {
-            setUserContext(data.userContext);
-          }
-        })
-        .catch((err) => console.error("Failed to fetch user context", err));
-    }
-  }, [session]);
+  // Removing /api/user/ai-context fetch as it doesn't exist on backend and pollutes logs
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const isGenerating = submitting || thinking || (messages[messages.length - 1]?.typing === true);
