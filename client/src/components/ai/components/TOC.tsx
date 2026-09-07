@@ -37,7 +37,8 @@ export function ScrollSpyTOC({ tocItems, activeSection }: ScrollSpyTOCProps) {
           </div>
         </div>
 
-        {/* Scroll spy ticks */}
+        {/* Scroll spy ticks (Commented out because it causes layout cutting issues on large chats) */}
+        {/* 
         <div className="flex flex-col gap-1 items-end w-full max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-contain py-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {tocItems.map((item) => {
             const isActive = activeSection === item.id;
@@ -57,14 +58,14 @@ export function ScrollSpyTOC({ tocItems, activeSection }: ScrollSpyTOCProps) {
                       : "w-5 bg-slate-500 dark:bg-white/40 group-hover:w-7 group-hover:bg-slate-700 dark:group-hover:bg-white/60"
                   )}
                 />
-                {/* Hover Tooltip */}
                 <span className="absolute right-12 px-2 py-1 bg-slate-800 dark:bg-white text-white dark:text-black text-[11px] font-medium rounded opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap shadow-lg z-[999]">
                   {item.label}
                 </span>
               </a>
             );
           })}
-        </div>
+        </div> 
+        */}
       </div>
     </div>
   );
