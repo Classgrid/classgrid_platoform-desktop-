@@ -69,7 +69,8 @@
     "winston-daily-rotate-file": "^5.0.0",
     "winston-mongodb": "^7.0.1",
     "xlsx": "^0.18.5",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

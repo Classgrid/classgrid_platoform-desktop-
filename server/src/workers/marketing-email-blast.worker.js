@@ -39,6 +39,11 @@ import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 import mongoose from "mongoose";
 import fetch from "node-fetch";
+import WebSocket from "ws";
+
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
+}
 
 // Sanity Config
 const SANITY_PROJECT_ID = process.env.SANITY_PROJECT_ID || "a4wk6kp5";
