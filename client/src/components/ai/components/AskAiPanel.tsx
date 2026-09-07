@@ -2304,7 +2304,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
           FULL-PAGE: ChatGPT-style centered layout
           ══════════════════════════════════════════════════════════ */}
       {variant === "full-page" ? (
-        <div className="fixed inset-0 z-[100] bg-background flex flex-row">
+        <div className="w-full h-full bg-background flex flex-row">
           <div className="flex-1 relative flex flex-col h-full">
             <div
               ref={chatScrollRef}
