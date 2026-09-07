@@ -1,6 +1,9 @@
 import { createLLMClient } from "@classgrid/ai/core";
 // The system prompt was originally in ./prompt, we will define it here or import it if needed.
-const SYSTEM_PROMPT = `You are the Classgrid AI Assistant... (I will keep it simple for now or read from your config)`;
+const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. 
+
+IMPORTANT FORMATTING RULES:
+When creating markdown tables, keep column text concise. If a cell contains a lot of text, insert html line breaks (<br>) so the table doesn't get too wide and force the user to scroll horizontally. Never create excessively wide tables.`;
 
 export const streamAskAi = async (req, res) => {
     // 1. Setup Server-Sent Events (SSE) headers for Express
