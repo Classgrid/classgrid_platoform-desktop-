@@ -2224,6 +2224,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
             <textarea
               id="ask-ai-input"
               name="askAiQuestion"
+              data-no-ring="true"
               suppressHydrationWarning
               ref={inputRef as any}
               value={input}
