@@ -199,7 +199,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                               onClick={(e) => {
                                 if (item.label === "Storage") {
                                   setShowStorageMenu(true);
-                                
+                                }
                               }}
                               render={
                                 item.label === "Log out" ? (
@@ -223,9 +223,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                     to={item.hasNestedNav ? "#" : (item.to || "#")} 
                                     className="flex items-center gap-3 w-full justify-between"
                                     onClick={(e) => {
-                                      if (item.label === "Agent") {
-                                        setShowAgentMenu(true);
-                                      } else if (item.hasNestedNav) {
+                                      if (item.hasNestedNav) {
                                         e.preventDefault();
                                         setShowStorageMenu(true);
                                       }
