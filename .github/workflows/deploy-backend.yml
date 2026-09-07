@@ -39,19 +39,18 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # Go into server folder, install new packages, and restart PM2
-            cd server
-            echo "$PRODUCTION_ENV" > .env
-            npm cache clean --force
-            rm -rf node_modules package-lock.json
-            npm install
-            
-            # FREE UP RAM & ADD SWAP SPACE TO PREVENT OUT-OF-MEMORY CRASHES
+            # FREE UP RAM & ADD SWAP SPACE TO PREVENT OUT-OF-MEMORY CRASHES DURING NPM INSTALL
             sudo fallocate -l 2G /swapfile || true
             sudo chmod 600 /swapfile || true
             sudo mkswap /swapfile || true
             sudo swapon /swapfile || true
             sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' || true
+
+            cd server
+            echo "$PRODUCTION_ENV" > .env
+            npm cache clean --force
+            rm -rf node_modules package-lock.json
+            npm install --no-audit --no-fund
 
             # INSTALL REDIS IF MISSING
             if ! command -v redis-server &> /dev/null; then
