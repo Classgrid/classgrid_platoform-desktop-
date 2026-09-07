@@ -220,7 +220,7 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                   </div>
                                 ) : (
                                   <Link 
-                                    to={item.to || "#"} 
+                                    to={item.label === "Agent" || item.hasNestedNav ? "#" : (item.to || "#")} 
                                     className="flex items-center gap-3 w-full justify-between"
                                     onClick={(e) => {
                                       if (item.label === "Agent") {

@@ -1116,6 +1116,58 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     localStorage.removeItem("askAiDraftContext");
   }, []);
 
+  // Listen for external commands (like clicking "New Chat" or an old chat in the sidebar)
+  useEffect(() => {
+    const handleNewChat = () => {
+      setMessages([]);
+      setSessionId(null);
+      setInput("");
+      setAttachedFiles([]);
+      setLastSentDocsPath(null);
+      localStorage.removeItem("classgrid_ai_chat_history");
+      localStorage.removeItem("classgrid_ai_session_id");
+      localStorage.removeItem("askAiDraftContext");
+      
+      // Focus input
+      setTimeout(() => {
+        const input = document.getElementById("ai-chat-input");
+        if (input) input.focus();
+      }, 100);
+    };
+
+    const handleLoadChat = async (e: any) => {
+      const id = e.detail?.sessionId;
+      if (!id) return;
+      
+      setMessages([]);
+      setSessionId(id);
+      
+      try {
+        const res = await fetch(`/api/ai/sessions/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const loadedMessages = data.messages.map((m: any) => ({
+            role: m.role,
+            content: m.content
+          }));
+          setMessages(loadedMessages);
+          localStorage.setItem("classgrid_ai_chat_history", JSON.stringify(loadedMessages));
+          localStorage.setItem("classgrid_ai_session_id", id);
+        }
+      } catch (err) {
+        console.error("Failed to load chat", err);
+      }
+    };
+
+    window.addEventListener("agent:new-chat", handleNewChat);
+    window.addEventListener("agent:load-chat", handleLoadChat);
+    
+    return () => {
+      window.removeEventListener("agent:new-chat", handleNewChat);
+      window.removeEventListener("agent:load-chat", handleLoadChat);
+    };
+  }, []);
+
   // Save chat history and session ID to local storage whenever they update
   useEffect(() => {
     if (messages.length > 0) {
