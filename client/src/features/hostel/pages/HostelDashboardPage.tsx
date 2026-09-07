@@ -1,84 +1,16 @@
-/*
- * =========================================================================================
- * STRICT SECURITY POLICY:
- * NO ONE CAN EVER CHANGE THE ORGANIZATION TYPE FROM THE FRONTEND OR BACKEND.
- * NEVER ADD A DROPDOWN OR OPTION TO CHANGE IT ANYWHERE IN THE CODEBASE.
- * NO MEANS NO. THIS IS A FIXED PLATFORM RULE.
- * =========================================================================================
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 CRITICAL AI AND SYSTEM RULES 🚨
- * 1. NEVER DELETE ANY ENVIRONMENT VARIABLES.
- * 2. LOCALHOST TESTING IS STRICTLY BANNED. NO AI WILL EVER TRY TO WORK LOCALLY.
- * 3. THIS REPO IS PRODUCTION-FIRST. DO NOT TOUCH OR REMOVE KEYS.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 NAMING CONVENTION RULE 🚨
- * 1. "CLASSGRID PLATFORM" is strictly the REPO NAME.
- * 2. "CLASSGRID ERP" is the actual PRODUCT NAME.
- * 3. NEVER use "Classgrid Platform" anywhere in the frontend UI or user-facing text.
- * ─────────────────────────────────────────────────────────
- */
-
-/*
- * ─────────────────────────────────────────────────────────
- * 🚨 HOSTING & ARCHITECTURE RULE 🚨
- * 1. BACKEND IS HOSTED ON AWS EC2 AT API.CLASSGRID.IN
- * 2. FRONTEND IS HOSTED ON VERCEL
- * ─────────────────────────────────────────────────────────
- */
-
-import React from "react";
-import { Users, BedDouble, FileKey, AlertCircle } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { StatCard } from "@/components/marketing_ui/StatCard";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/marketing_ui/card";
-import { DataTable } from "@/components/marketing_ui/data-table";
-
-const hostelColumns = [
-  { accessorKey: "student", header: "Student" },
-  { accessorKey: "room", header: "Room No." },
-  { accessorKey: "status", header: "Status" },
-  { accessorKey: "contact", header: "Contact" },
-];
-
-const hostelData = [
-  { id: "1", student: "Aarav Patel", room: "A-101", status: "Present", contact: "+91 9876543210" },
-  { id: "2", student: "Riya Sharma", room: "B-205", status: "On Leave", contact: "+91 9876543211" },
-  { id: "3", student: "Dev Kumar", room: "A-302", status: "Present", contact: "+91 9876543212" },
-];
+import { AskAiPanel } from "@/components/ai/components/AskAiPanel";
 
 export function HostelDashboardPage() {
   return (
-    <DashboardLayout role="HOSTEL_MENU">
-      <PageHeader 
-        title="Hostel Overview" 
-        description="Manage residents, rooms, and daily operations." 
+    <div className="flex flex-col w-full h-[calc(100vh-theme(spacing.16))] relative bg-background">
+      <AskAiPanel 
+        open={true} 
+        onOpenChange={() => {}} 
+        variant="full-page"
+        pageContext={{
+          title: "HostelDashboardPage"
+        }}
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Residents" value="450" icon={Users} trend="95% capacity" trendDirection="up" />
-        <StatCard title="Available Beds" value="24" icon={BedDouble} trend="5% vacancy" trendDirection="neutral" />
-        <StatCard title="Pending Passes" value="12" icon={FileKey} trend="Needs approval" trendDirection="neutral" />
-        <StatCard title="Open Complaints" value="3" icon={AlertCircle} trend="Resolved 5 today" trendDirection="up" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Resident Directory</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable columns={hostelColumns} data={hostelData} />
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
