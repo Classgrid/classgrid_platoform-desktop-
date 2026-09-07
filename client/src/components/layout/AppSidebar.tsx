@@ -216,7 +216,6 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
                                 if (item.label === "Storage") {
                                   setShowStorageMenu(true);
                                 } else if (item.label === "Agent") {
-                                  e.preventDefault();
                                   setShowAgentMenu(true);
                                 }
                               }}
