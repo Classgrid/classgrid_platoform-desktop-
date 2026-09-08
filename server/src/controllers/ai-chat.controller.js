@@ -7,6 +7,7 @@ import {
     getSessionMessages,
     updateSessionTitle
 } from "../services/ai-chat.service.js";
+import { accessLogger } from "../config/logger.js";
 // The system prompt was originally in ./prompt, we will define it here or import it if needed.
 const SYSTEM_PROMPT = `You are the Classgrid AI Assistant. 
 
@@ -206,7 +207,10 @@ export const streamAskAi = async (req, res) => {
             onToken: (token) => {
                 if (!firstTokenTime) {
                     firstTokenTime = Date.now();
-                    console.log(`[AI Response] ⚡ Time to first token: ${firstTokenTime - requestStartTime}ms`);
+                    accessLogger.info("[AI Metrics] Time to first token", { 
+                        firstTokenTimeMs: firstTokenTime - requestStartTime,
+                        model: "gemini-3.5-flash"
+                    });
                 }
                 res.write(`data: ${JSON.stringify({ type: "token", token })}\n\n`);
             }
@@ -234,7 +238,10 @@ export const streamAskAi = async (req, res) => {
         res.write(`data: ${JSON.stringify({ type: "answer", answer: "An error occurred while calling the AI." })}\n\n`);
     } finally {
         const totalTime = Date.now() - requestStartTime;
-        console.log(`[AI Response] ⏱️ Total execution time: ${totalTime}ms`);
+        accessLogger.info("[AI Metrics] Total execution time", { 
+            totalExecutionTimeMs: totalTime,
+            model: "gemini-3.5-flash"
+        });
         res.end();
     }
 };
