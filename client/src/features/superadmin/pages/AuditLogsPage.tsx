@@ -283,7 +283,7 @@ export function AuditLogsPage() {
                   value={category}
                   onChange={(e) => { setCategory(e.target.value); setTraceId(""); }}
                 >
-                  {["all", "errors", "warnings", "api", "socket", "cron", "email queue"].map((cat) => (
+                  {["all", "errors", "warnings", "api", "socket", "cron", "email queue", "ai agent"].map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>

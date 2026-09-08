@@ -713,6 +713,13 @@ export const getErrorLogs = async (req, res) => {
                 query.$or = [{ "context": { $regex: /socket/i } }, { "meta.context": { $regex: /socket/i } }];
             } else if (cat === "email queue") {
                 query.$or = [{ "context": { $regex: /email/i } }, { "meta.context": { $regex: /email/i } }];
+            } else if (cat === "ai agent") {
+                query.$or = [
+                    { "context": { $regex: /llm/i } }, 
+                    { "meta.context": { $regex: /llm/i } }, 
+                    { "message": { $regex: /\[llm/i } }, 
+                    { "meta.message": { $regex: /\[llm/i } }
+                ];
             }
         }
 
