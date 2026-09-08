@@ -459,6 +459,7 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
 
     try {
       await redis.del(`user:profile:${req.user._id}`);
+      await redis.del(`user:profile:v2:${req.user._id}`);
     } catch (e) {
       console.warn("Redis del failed for user profile:", e.message);
     }
