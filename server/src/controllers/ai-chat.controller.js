@@ -56,6 +56,9 @@ async function generateSessionTitle(sessionId, question) {
 }
 
 export const streamAskAi = async (req, res) => {
+    const requestStartTime = Date.now();
+    let firstTokenTime = null;
+
     // 1. Setup Server-Sent Events (SSE) headers for Express
     res.writeHead(200, {
         "Content-Type": "text/event-stream",
@@ -201,6 +204,10 @@ export const streamAskAi = async (req, res) => {
                 res.write(`data: ${JSON.stringify({ type: "thought", thought })}\n\n`);
             },
             onToken: (token) => {
+                if (!firstTokenTime) {
+                    firstTokenTime = Date.now();
+                    console.log(`[AI Response] ⚡ Time to first token: ${firstTokenTime - requestStartTime}ms`);
+                }
                 res.write(`data: ${JSON.stringify({ type: "token", token })}\n\n`);
             }
         });
@@ -226,6 +233,8 @@ export const streamAskAi = async (req, res) => {
         console.error("API Route Error:", err);
         res.write(`data: ${JSON.stringify({ type: "answer", answer: "An error occurred while calling the AI." })}\n\n`);
     } finally {
+        const totalTime = Date.now() - requestStartTime;
+        console.log(`[AI Response] ⏱️ Total execution time: ${totalTime}ms`);
         res.end();
     }
 };

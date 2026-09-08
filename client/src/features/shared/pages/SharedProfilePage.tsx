@@ -224,7 +224,7 @@ export function SharedProfilePage({ publicUser, groupData, mode = "user", onClos
     mutationFn: (updates: Partial<ProfileData>) => apiClient.put("/api/user/update", updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["global-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["auth-user"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
       setIsDirty(false);
     },
   });
