@@ -1106,8 +1106,24 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setAttachedFiles(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  // Always start a fresh new chat on every page load / new tab
+  // Restore active chat on page reload, or start fresh if none exists
   useEffect(() => {
+    const savedSessionId = localStorage.getItem("classgrid_ai_session_id");
+    const savedHistory = localStorage.getItem("classgrid_ai_chat_history");
+
+    if (savedSessionId && savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+          setSessionId(savedSessionId);
+          setMessages(parsedHistory);
+          return;
+        }
+      } catch (e) {
+        // ignore parse error and fall through to fresh start
+      }
+    }
+
     setMessages([]);
     setSessionId(null);
     setInput("");
