@@ -1,18 +1,21 @@
 const fs = require('fs');
+const file = 'client/src/components/ai/components/AskAiPanel.tsx';
+let content = fs.readFileSync(file, 'utf8');
 
-// 1. Clean sidebar.ts
-let sidebarContent = fs.readFileSync('client/src/config/sidebar.ts', 'utf8');
-// Remove { label: "Agent", ... } and { label: "Classgrid AI", ... } and { label: "What's New", ... }
-sidebarContent = sidebarContent.replace(/\s*\{\s*label:\s*"(Agent|Classgrid AI|What's New)".*?\},?/g, '');
-fs.writeFileSync('client/src/config/sidebar.ts', sidebarContent);
+const target =             const highlightedLines = highlighted.split("\\n");
+            const lineRows = highlightedLines.map((line, i) =>
+              \<div class="flex w-max min-w-full"><span class="sticky left-0 z-10 shrink-0 w-14 pr-4 text-right select-none text-slate-400 bg-[#fafbfc] border-r border-slate-200 dark:text-zinc-600 dark:bg-[#111113] dark:border-white/5">\</span><span class="px-4 whitespace-pre">\</span></div>\
+            ).join("");
+            const finalHtml = \<pre class="text-[13px] py-4 !m-0 flex flex-col"><code class="font-mono hljs">\</code></pre>\;;
 
-// 2. Clean AppSidebar.tsx
-let appSidebarContent = fs.readFileSync('client/src/components/layout/AppSidebar.tsx', 'utf8');
-appSidebarContent = appSidebarContent.replace(/import \{ AgentNestedMenu \} from "@\/components\/ai\/components\/AgentSidebar";/, '');
-appSidebarContent = appSidebarContent.replace(/const agentItem = config\?\.sections\.flatMap\(s => s\.items\)\.find\(i => i\.label === "Agent"\);/g, 'const agentItem = null;');
-appSidebarContent = appSidebarContent.replace(/const \[showAgentMenu, setShowAgentMenu\] = useState\(isAgentPage\);/g, 'const showAgentMenu = false; const setShowAgentMenu = () => {};');
-appSidebarContent = appSidebarContent.replace(/<AgentNestedMenu searchQuery=\{searchQuery\} \/>/g, 'null');
-appSidebarContent = appSidebarContent.replace(/} else if \(item\.label === "Agent"\) \{\s*e\.preventDefault\(\);\s*setShowAgentMenu\(true\);\s*}/g, '');
-fs.writeFileSync('client/src/components/layout/AppSidebar.tsx', appSidebarContent);
+const replacement =             // Build line-numbered HTML (COMMENTED OUT FOR AI CHAT UI)
+            /*
+            const highlightedLines = highlighted.split("\\n");
+            const lineRows = highlightedLines.map((line, i) =>
+              \<div class="flex w-max min-w-full"><span class="sticky left-0 z-10 shrink-0 w-14 pr-4 text-right select-none text-slate-400 bg-[#fafbfc] border-r border-slate-200 dark:text-zinc-600 dark:bg-[#111113] dark:border-white/5">\</span><span class="px-4 whitespace-pre">\</span></div>\
+            ).join("");
+            */
+            const finalHtml = \<pre class="text-[13px] py-4 px-4 !m-0 flex flex-col"><code class="font-mono hljs">\</code></pre>\;;
 
-console.log("Cleanup done!");
+content = content.replace(target, replacement);
+fs.writeFileSync(file, content);
