@@ -190,7 +190,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Agent", to: "/org/dashboard", icon: Bot },
+          { label: "Agent", to: "/org/admin/dashboard", icon: Bot },
           { label: "Usage", to: "/org/admin/usage", icon: Activity },
           { label: "Billing", to: "/org/admin/billing", icon: CreditCard },
           { label: "Announcements", to: "/org/announcements", icon: Megaphone }

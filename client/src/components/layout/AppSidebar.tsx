@@ -112,12 +112,12 @@ export function AppSidebar({ role, user }: AppSidebarProps) {
   // Local state to track if we are showing the storage menu pane.
   // Defaults to true if we load directly into a storage route.
   const [showStorageMenu, setShowStorageMenu] = useState(location.pathname.startsWith("/superadmin/storage"));
-  const [showAgentMenu, setShowAgentMenu] = useState(isAgentPage);
+  const [showAgentMenu, setShowAgentMenu] = useState(false);
 
   // Auto-open menus based on route changes
   useEffect(() => {
     setShowStorageMenu(location.pathname.startsWith("/superadmin/storage"));
-    setShowAgentMenu(agentItem ? location.pathname === agentItem.to : false);
+    // Don't auto-open Agent menu on route change — only open via user click or first message
   }, [location.pathname, agentItem]);
 
   // Auto-open Agent menu when first question is sent

@@ -17,7 +17,7 @@
 │     Super Admin              │  Subtitle
 │                              │
 │  ─ OVERVIEW ─────────────── │
-│  📊 Overview                │  /superadmin/dashboard
+│  🤖 Agent (Classgrid AI)    │  /superadmin/ai
 │  📈 Analytics                │  /superadmin/analytics
 │  🔔 Alerts                  │  /superadmin/alerts
 │                              │
@@ -92,7 +92,7 @@
 │  └──────────────────────────┘│
 │                              │
 │  ─ OVERVIEW ─────────────── │
-│  📊 Overview                │  /org/dashboard
+│  🤖 Agent (Classgrid AI)    │  /org/ai
 │  📢 Announcements           │  /org/announcements
 │                              │
 │  ─ ACADEMICS ─────────────  │
@@ -186,7 +186,7 @@
 │     Admission Dept           │
 │                              │
 │  ─ ADMISSIONS ────────────  │
-│  📊 Overview                │  /dept/admissions/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/admissions/ai
 │  📋 All Applications        │  /dept/admissions/applications
 │  📝 New Application         │  /dept/admissions/new
 │  📂 Document Verification   │  /dept/admissions/documents
@@ -253,7 +253,7 @@
 │     Fees & Accounts          │
 │                              │
 │  ─ FEES ──────────────────  │
-│  📊 Overview                │  /dept/fees/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/fees/ai
 │  💳 Collect Payment         │  /dept/fees/collect
 │  📋 All Transactions        │  /dept/fees/transactions
 │  ⚠️ Defaulters List         │  /dept/fees/defaulters
@@ -315,7 +315,7 @@
 │     Examination Cell         │
 │                              │
 │  ─ EXAMS ─────────────────  │
-│  📊 Overview                │  /dept/exams/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/exams/ai
 │  📅 Exam Schedule            │  /dept/exams/schedule
 │  📝 Create Exam              │  /dept/exams/create
 │  📋 Online Exams             │  /dept/exams/online
@@ -381,7 +381,7 @@
 │     Library                  │
 │                              │
 │  ─ LIBRARY ───────────────  │
-│  📊 Overview                │  /dept/library/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/library/ai
 │  📚 All Books                │  /dept/library/books
 │  ➕ Add Book                 │  /dept/library/add
 │  🔍 Search Catalog           │  /dept/library/search
@@ -445,7 +445,7 @@
 │     Attendance               │
 │                              │
 │  ─ ATTENDANCE ────────────  │
-│  📊 Overview                │  /dept/attendance/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/attendance/ai
 │  ✅ Mark Attendance          │  /dept/attendance/mark
 │  📋 Daily Report             │  /dept/attendance/daily
 │  📅 Monthly Report           │  /dept/attendance/monthly
@@ -504,7 +504,7 @@
 │     HR & Payroll             │
 │                              │
 │  ─ STAFF ─────────────────  │
-│  📊 Overview                │  /dept/hr/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/hr/ai
 │  👥 All Staff                │  /dept/hr/staff
 │  ➕ Add Staff                │  /dept/hr/add-staff
 │  📋 Departments              │  /dept/hr/departments
@@ -564,7 +564,7 @@
 │     Hostel & Transport       │
 │                              │
 │  ─ HOSTEL ────────────────  │
-│  📊 Overview                │  /dept/hostel/dashboard
+│  🤖 Agent (Classgrid AI)    │  /dept/hostel/ai
 │  🛏️ Room Allocation         │  /dept/hostel/rooms
 │  👥 Residents                │  /dept/hostel/residents
 │  📋 Complaints               │  /dept/hostel/complaints

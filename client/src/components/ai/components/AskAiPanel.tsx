@@ -1106,12 +1106,17 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     setAttachedFiles(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  // Restore active chat on page reload, or start fresh if none exists
+  // Restore active chat on page reload, or start fresh if user changed
   useEffect(() => {
+    const currentEmail = session?.user?.email || "";
+    const storedEmail = localStorage.getItem("classgrid_ai_user_email") || "";
     const savedSessionId = localStorage.getItem("classgrid_ai_session_id");
     const savedHistory = localStorage.getItem("classgrid_ai_chat_history");
 
-    if (savedSessionId && savedHistory) {
+    // If the user changed (logout + login as different user), clear old chat
+    const userChanged = currentEmail && storedEmail && currentEmail !== storedEmail;
+
+    if (!userChanged && savedSessionId && savedHistory) {
       try {
         const parsedHistory = JSON.parse(savedHistory);
         if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
@@ -1124,6 +1129,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
       }
     }
 
+    // Fresh start — clear everything
     setMessages([]);
     setSessionId(null);
     setInput("");
@@ -1132,6 +1138,9 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
     localStorage.removeItem("classgrid_ai_chat_history");
     localStorage.removeItem("classgrid_ai_session_id");
     localStorage.removeItem("askAiDraftContext");
+    if (currentEmail) {
+      localStorage.setItem("classgrid_ai_user_email", currentEmail);
+    }
   }, []);
 
   // Listen for external commands (like clicking "New Chat" or an old chat in the sidebar)
