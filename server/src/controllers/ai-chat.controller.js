@@ -121,10 +121,10 @@ export const streamAskAi = async (req, res) => {
         const client = createLLMClient({
             providers: [
                 {
-                    name: "groq",
-                    url: "https://api.groq.com/openai/v1/chat/completions",
-                    apiKey: process.env.GROQ_API_KEY || "",
-                    model: "openai/gpt-oss-20b"
+                    name: "gemini",
+                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+                    apiKey: process.env.GEMINI_API_KEY || "",
+                    model: "gemini-3.5-flash"
                 },
                 {
                     name: "mistral",
@@ -133,10 +133,10 @@ export const streamAskAi = async (req, res) => {
                     model: "open-mistral-nemo"
                 },
                 {
-                    name: "gemini",
-                    url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
-                    apiKey: process.env.GEMINI_API_KEY || "",
-                    model: "gemini-3.5-flash"
+                    name: "groq",
+                    url: "https://api.groq.com/openai/v1/chat/completions",
+                    apiKey: process.env.GROQ_API_KEY || "",
+                    model: "openai/gpt-oss-20b"
                 }
             ],
             verbose: true,
