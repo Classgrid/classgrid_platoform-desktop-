@@ -460,8 +460,14 @@ router.put("/update", isAuthenticated, attachInstitutionProfile({ required: fals
     try {
       await redis.del(`user:profile:${req.user._id}`);
       await redis.del(`user:profile:v2:${req.user._id}`);
+      
+      const { getIO } = await import("../services/socket.service.js");
+      const io = getIO();
+      if (io) {
+        io.to(`user:${req.user._id}`).emit("user_profile_updated");
+      }
     } catch (e) {
-      console.warn("Redis del failed for user profile:", e.message);
+      console.warn("Redis del or socket emit failed for user profile:", e.message);
     }
 
     if (!user) {

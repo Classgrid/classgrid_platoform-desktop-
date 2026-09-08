@@ -50,6 +50,8 @@ import { AppSidebar } from "./AppSidebar";
 import { resolveDashboardPageTitle } from "@/config/sidebar";
 import { useCurrentUser } from "@/features/auth/queries/useCurrentUser";
 import { getAccessibleDashboards } from "@/lib/dashboardRoleMap";
+import { getSocket } from "@/lib/socketClient";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type { DashboardRole } from "@/layouts/types";
 
@@ -183,6 +185,24 @@ export function DashboardLayout({ children, role, user }: DashboardLayoutProps) 
   
   const mainRole: string = currentUser?.role ?? "";
   const additionalRoles: string[] = currentUser?.additional_roles ?? [];
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleProfileUpdated = () => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["global-profile"] });
+    };
+
+    socket.on("user_profile_updated", handleProfileUpdated);
+
+    return () => {
+      socket.off("user_profile_updated", handleProfileUpdated);
+    };
+  }, [queryClient]);
 
   return (
     <TooltipProvider>
