@@ -199,6 +199,9 @@ export const streamAskAi = async (req, res) => {
             },
             onThought: (thought) => {
                 res.write(`data: ${JSON.stringify({ type: "thought", thought })}\n\n`);
+            },
+            onToken: (token) => {
+                res.write(`data: ${JSON.stringify({ type: "token", token })}\n\n`);
             }
         });
 

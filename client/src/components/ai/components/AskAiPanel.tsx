@@ -1790,6 +1790,7 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
         let buffer = "";
         let finalPayload: any = null;
         let streamError: string | null = null;
+        let hasReceivedTokens = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -1819,6 +1820,21 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                 localStorage.setItem("classgrid_ai_session_id", event.sessionId);
               } else if (event.type === "answer") {
                 finalPayload = event;
+              } else if (event.type === "token") {
+                hasReceivedTokens = true;
+                setThinking(false);
+                setMessages((prev) => {
+                  let lastMsg = prev[prev.length - 1];
+                  let targetPrev = prev;
+                  if (!lastMsg || lastMsg.role !== "assistant") {
+                    lastMsg = { id: createMessageId("assistant"), role: "assistant", content: "", createdAt: Date.now() };
+                    targetPrev = [...prev, lastMsg];
+                  }
+                  return [
+                    ...targetPrev.slice(0, -1),
+                    { ...lastMsg, content: (lastMsg.content || "") + (event.token || "") }
+                  ];
+                });
               } else if (event.type === "thought") {
                 setMessages((prev) => {
                   let lastMsg = prev[prev.length - 1];
@@ -1860,8 +1876,22 @@ export function AskAiPanel({ open, onOpenChange, pageContext, variant = "in-flow
                 : "I can help you with Classgrid features, pricing, or setup. What would you like to explore?";
 
           setThinking(false);
-          await wait(prefersReducedMotion ? 0 : 100);
-          await typeAssistantResponse(answer);
+          
+          if (hasReceivedTokens) {
+            // Already streamed in real-time, just ensure final state is exactly correct
+            setMessages((prev) => {
+              const lastMsg = prev[prev.length - 1];
+              if (!lastMsg || lastMsg.role !== "assistant") return prev;
+              return [
+                ...prev.slice(0, -1),
+                { ...lastMsg, content: answer }
+              ];
+            });
+          } else {
+            // Non-streamed response (tool calls, error fallbacks), so type it out
+            await wait(prefersReducedMotion ? 0 : 100);
+            await typeAssistantResponse(answer);
+          }
         } else {
           throw new Error("Unable to answer right now. Please try again.");
         }
