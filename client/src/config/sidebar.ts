@@ -60,7 +60,7 @@ import {
   Download, FileBarChart, FileText, Flag, Globe, GraduationCap, HelpCircle,
   Home, IndianRupee, LayoutDashboard, LogOut, Mail, MessageSquare, Megaphone,
   Plus, RotateCcw, Search, Settings, Shield, Sparkles, Target, Ticket, Trash2,
-  User, UserPlus, Users, UtensilsCrossed, Activity, Zap, Power, Compass
+  User, UserPlus, Users, UtensilsCrossed, Activity, Zap, Power, Compass, Play
 } from "lucide-react";
 
 import type { DashboardConfig, DashboardMenuItem, DashboardRole, SidebarItem } from "@/layouts/types";
@@ -112,7 +112,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Agent", to: "/superadmin/dashboard" },
+          { label: "Agent", to: "/superadmin/dashboard", icon: Play },
           { label: "Analytics", to: "/superadmin/analytics", icon: FileBarChart }
         ]
       },
@@ -190,7 +190,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "OVERVIEW",
         items: [
-          { label: "Agent", to: "/org/admin/dashboard" },
+          { label: "Agent", to: "/org/admin/dashboard", icon: Play },
           { label: "Usage", to: "/org/admin/usage", icon: Activity },
           { label: "Billing", to: "/org/admin/billing", icon: CreditCard },
           { label: "Announcements", to: "/org/announcements", icon: Megaphone }
@@ -283,7 +283,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ADMISSIONS",
         items: [
-          { label: "Agent", to: "/dept/admissions/dashboard" },
+          { label: "Agent", to: "/dept/admissions/dashboard", icon: Play },
           { label: "All Applications", to: "/dept/admissions/applications", icon: ClipboardList },
           { label: "New Application", to: "/dept/admissions/new", icon: Plus },
           { label: "Document Verification", to: "/dept/admissions/documents", icon: FileText },
@@ -340,7 +340,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "FEES",
         items: [
-          { label: "Agent", to: "/dept/fees/dashboard" },
+          { label: "Agent", to: "/dept/fees/dashboard", icon: Play },
           { label: "Collect Payment", to: "/dept/fees/collect", icon: CreditCard },
           { label: "All Transactions", to: "/dept/fees/transactions", icon: FileBarChart },
           { label: "Defaulters List", to: "/dept/fees/defaulters", icon: AlertTriangle },
@@ -389,7 +389,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "EXAMS",
         items: [
-          { label: "Agent", to: "/dept/exams/dashboard" },
+          { label: "Agent", to: "/dept/exams/dashboard", icon: Play },
           { label: "Exam Schedule", to: "/dept/exams/schedule", icon: Calendar },
           { label: "Create Exam", to: "/dept/exams/create", icon: Plus },
           { label: "Online Exams", to: "/dept/exams/online", icon: Globe },
@@ -445,7 +445,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "LIBRARY",
         items: [
-          { label: "Agent", to: "/dept/library/dashboard" },
+          { label: "Agent", to: "/dept/library/dashboard", icon: Play },
           { label: "All Books", to: "/dept/library/books", icon: BookOpen },
           { label: "Add Book", to: "/dept/library/add", icon: Plus },
           { label: "Search Catalog", to: "/dept/library/search", icon: Search }
@@ -499,7 +499,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "ATTENDANCE",
         items: [
-          { label: "Agent", to: "/dept/attendance/dashboard" },
+          { label: "Agent", to: "/dept/attendance/dashboard", icon: Play },
           { label: "Mark Attendance", to: "/dept/attendance/mark", icon: CheckSquare },
           { label: "Daily Report", to: "/dept/attendance/daily", icon: FileText },
           { label: "Monthly Report", to: "/dept/attendance/monthly", icon: Calendar }
@@ -545,7 +545,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "STAFF",
         items: [
-          { label: "Agent", to: "/dept/hr/dashboard" },
+          { label: "Agent", to: "/dept/hr/dashboard", icon: Play },
           { label: "All Staff", to: "/dept/hr/staff", icon: Users },
           { label: "Add Staff", to: "/dept/hr/add-staff", icon: Plus },
           { label: "Departments", to: "/dept/hr/departments", icon: Building2 },
@@ -592,7 +592,7 @@ export const dashboardConfigs: DashboardConfig[] = [
       {
         label: "HOSTEL",
         items: [
-          { label: "Agent", to: "/dept/hostel/dashboard" },
+          { label: "Agent", to: "/dept/hostel/dashboard", icon: Play },
           { label: "Room Allocation", to: "/dept/hostel/rooms", icon: Home },
           { label: "Residents", to: "/dept/hostel/residents", icon: Users },
           { label: "Complaints", to: "/dept/hostel/complaints", icon: MessageSquare },
